@@ -1,0 +1,35 @@
+test_popn_data <- function(popn) {
+ 
+  colnames <- names(popn)
+  
+}
+
+test_mortality_data <- function(mortality) {
+  
+  mortality <- read_rds("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Inputs/2017 base/constant inputs/ons_asmr_curves.rds") %>%
+    filter(str_detect(gss_code, "^E09")) %>%
+    rename(value = death_rate)
+  
+  mortality <- lapply(2017:2050, function (x) mutate(mortality, year = x)) %>% bind_rows()
+  
+}
+
+test_fertility_data <- function(fertility) {
+  
+  fertility <- read_rds("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Inputs/2017 base/constant inputs/smoothed_ons_asfr_curves.rds") %>%
+    filter(str_detect(gss_code, "^E09")) %>%
+    rename(value = fertility_rate)
+  
+  fertility <- lapply(2017:2050, function (x) mutate(fertility, year = x)) %>% bind_rows()
+  # test that fertility has the correct years
+  # test that fertility has the correct column names. 
+  
+}
+
+test_development_data <- function(development) {
+  
+  load("Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/housing data/2016 SHLAA.Rdata")
+  development <- borough_dev %>% rename(value = new_homes)
+  rm(ward_dev, msoa_dev, borough_dev)
+  
+}
