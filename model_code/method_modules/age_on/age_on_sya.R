@@ -1,6 +1,6 @@
 library(dplyr)
 
-age_on <- function(popn) {
+age_on_sya <- function(popn) {
   
   aged_popn <- popn %>%
     mutate(year = year + 1, age = age + 1) %>%

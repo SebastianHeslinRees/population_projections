@@ -1,6 +1,6 @@
 library(dplyr)
 
-calc_deaths <- function(popn, mortality) {
+deaths_from_popn_mort <- function(popn, mortality) {
   
   deaths <- left_join(popn, mortality, by = c("gss_code", "sex", "age", "year")) %>%
     rename(popn = value.x, mortality = value.y) %>%

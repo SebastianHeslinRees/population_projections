@@ -1,6 +1,6 @@
 library(dplyr)
 
-calc_births <- function(aged_popn, fertility) {
+births_from_popn_fert <- function(aged_popn, fertility) {
   
   # calculate total births from age specific fertility rates and population
   births <- left_join(aged_popn, fertility, by = c("gss_code", "sex", "age", "year")) %>%

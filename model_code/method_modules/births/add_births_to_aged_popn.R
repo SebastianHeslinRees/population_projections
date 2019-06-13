@@ -1,6 +1,6 @@
 library(dplyr)
 
-add_births <- function(aged_popn, births) {
+add_births_to_aged_popn <- function(aged_popn, births) {
   
   # add the births to a df that looks like the original popn df
   age_0_popn <- aged_popn %>% filter(age == 1) %>%

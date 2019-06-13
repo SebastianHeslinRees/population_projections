@@ -1,6 +1,6 @@
 library(dplyr)
 
-calc_housing_popn <- function(development, ahs) {
+simple_popn_from_dev <- function(development, ahs) {
   
   housing_popn <- development %>% 
     mutate(value = value * ahs)
