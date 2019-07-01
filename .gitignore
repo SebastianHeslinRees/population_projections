@@ -2,7 +2,6 @@
 #	https://github.com/github/gitignore/blob/master/R.gitignore
 #	https://github.com/elsewhencode/project-guidelines/blob/master/.gitignore
 
-
 .Rproj.user
 .Rhistory
 .RData
