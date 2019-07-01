@@ -1,10 +1,11 @@
 ---
 title: "Development Workflow and Best Practices"
 output:
-  html_document:
+  html_document: 
+    keep_md: yes
     self_contained: no
-    toc: true
-    toc_float: true
+    toc: yes
+    toc_float: yes
 ---
 
 This document covers our workflow and procedures for making changes to the `2019_development` repo. It's designed to give us the simplest system that allows version control, multiple collaborators, code review and reproducibility.

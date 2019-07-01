@@ -2,6 +2,7 @@
 title: "How to Use this Repository"
 output:
   html_document:
+    keep_md: yes
     self_contained: no
     toc: true
     toc_float: true
