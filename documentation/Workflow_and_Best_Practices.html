@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Development Workflow and Best Practices</title>
+
+<script src="Workflow_and_Best_Practices_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="Workflow_and_Best_Practices_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="Workflow_and_Best_Practices_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="Workflow_and_Best_Practices_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="Workflow_and_Best_Practices_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="Workflow_and_Best_Practices_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="Workflow_and_Best_Practices_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="Workflow_and_Best_Practices_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="Workflow_and_Best_Practices_files/navigation-1.1/tabsets.js"></script>
+<link href="Workflow_and_Best_Practices_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="Workflow_and_Best_Practices_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Development Workflow and Best Practices</h1>
+
+</div>
+
+
+<p>This document covers our workflow and procedures for making changes to the <code>2019_development</code> repo. It’s designed to give us the simplest system that allows version control, multiple collaborators, code review and reproducibility.</p>
+<p>The document assumes you have basic familiarity with R, Git and (the hard one) Microsoft Teams, and that you’ve got <a href="https://gitforwindows.org/">Git Bash</a>, <a href="https://www.r-project.org/">R</a> and <a href="https://www.rstudio.com/">RStudio</a> installed.</p>
+<div id="set-up-the-repository-locally" class="section level1">
+<h1>Set up the repository locally</h1>
+<p>You can’t keep any changes that you make to the repository on the Q:/ drive. Every time someone pushes an update to the code the folders monitored by Git (code and documentation) are overwritten. This means that you can run the models from the Q:/ drive, but not make lasting changes to the code.</p>
+<p>More technically: the repository on the Q:/ drive is a bare repository (with no code) in the <code>2019_development.git</code> folder, and it’s set up with a Git hook that (over)writes the repository at <code>2019_development</code> whenever a new commit is pushed.</p>
+<p>So you need to have a local copy to make any changes. In Git Bash and run</p>
+<pre><code>git clone &quot;Q:\Teams\D&amp;PA\Demography\Projections\2019_development.git&quot; &quot;M:/Path/to/local/directory&quot;</code></pre>
+<p>you can then navigate to the local directory and work with the code there.</p>
+</div>
+<div id="workflow" class="section level1">
+<h1>Workflow</h1>
+<p>We’re using a <a href="https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow">Feature Branch Workflow</a>, where all development work is done on branches, and the <code>master</code> branch is never modified directly.</p>
+<p>If you’re only going to take away one thing from this document it needs to be <strong>NEVER MAKE CHANGES TO THE MASTER BRANCH DIRECTLY</strong>.</p>
+<p>Instead, this is how your workflow should go. The description here is long, but most steps are usually quick.</p>
+<div id="start-a-new-branch" class="section level3">
+<h3>1: Start a new branch</h3>
+<pre><code>git checkout -b name-of-your-feature-branch</code></pre>
+<p>creates a new branch. As a rule, you should only implement one feature per branch (e.g. functions for a new births model, unit tests for the scripts that generate housing projections, a bugfix, a report). Name the branch with your initials (optional) and something informative about what it’ll do - e.g. this document’s first commit by Chris Fairless is on the branch <code>cf-setup-documentation</code>.</p>
+</div>
+<div id="implement-a-feature" class="section level3">
+<h3>2: Implement a feature</h3>
+<p>Make regular commits to keep track of your work. Whenever you do a thing, commit with a message - a one line summary of what it does followed by a more detailed explanation if necessary.</p>
+<p>Note: if you just want to update or add to the previous commit, you can use</p>
+<pre><code>git commit --amend</code></pre>
+<p>to combine things with the previous commit and edit the commit message.</p>
+<p>When you’ve finished the feature, or you want to make your work so far available to everyone else, move on to the next step.</p>
+</div>
+<div id="optional-interactive-rebase" class="section level3">
+<h3>3: (Optional) Interactive rebase</h3>
+<p>If you’re not familiar with rebasing, <a href="https://www.atlassian.com/git/tutorials/rewriting-history/git-rebase">this article</a> gives an introduction.</p>
+<p>When you’re ready to push your branch, it’s polite to neaten up your commit history to combine commits that together form a larger change (e.g. fixes to earlier commits, or one big change split across several smaller ones) and make it easier to follow the project’s history.</p>
+<p>Note that <em>you should never rebase commits that have been already pushed to the shared repository</em> - even if they haven’t yet been merged with another branch. This is because the rebase creates a new commit history which is no longer compatible with the version in the repository. It’s better to have a messy history than an incompatible one, becuse you’ll never need to force an overwrite.</p>
+<p>To rebase interactively with <code>master</code> use</p>
+<pre><code>git rebase -i master</code></pre>
+<p>Here you can choose which commits you want to keep, which you want to combine together (squash or fixup), and which you want to reword to better describe the combined product. Git will then combine the commits, prompting you when it needs additonal input. If you’re not sure what to do, or it runs into trouble, you can always stop with <code>git rebase --abort</code></p>
+<p>If part of your branch history has already been pushed, you may need to replace <code>master</code> in the above command with e.g. <code>HEAD~3</code> for the last three commits, or <code>26c182cf801b4b449127d3e7d43050befa1b014a</code> to refer to everything since that particular commit.</p>
+</div>
+<div id="bring-things-up-to-date-with-the-shared-repository" class="section level3">
+<h3>4: Bring things up to date with the shared repository</h3>
+<p>Other people may have made edits to the central repository since you started work on your branch, and that means the <code>master</code> you branched from is different from the <code>master</code> you want to merge with.</p>
+<p>You can check if this is the case by running</p>
+<pre><code>git fetch --dry-run</code></pre>
+<p>If no changes are reported to the <code>master</code> branch you can skip to the next step.</p>
+<p>Otherwise you can run</p>
+<pre><code>git checkout master
+git pull
+git checkout name-of-your-feature-branch
+git merge master</code></pre>
+<p>This merges the updated <code>master</code> branch into your feature branch (and leaves <code>master</code> unchanged). Git will attempt to replay the new edits on top of your branch. If it encounters any conflicts you will be asked to fix them before you can continue. This gives you the chance to fix any conflicts before you push your code for review. Remember you can always abort a merge with <code>git merge --abort</code>.</p>
+<p>If you’re spending a long time working on a single branch, it’s a good idea to do this every now and again, in case someone else has been working on the same code (or there’s helpful new code).</p>
+<p>You’re now ready to share your work!</p>
+</div>
+<div id="push-to-the-shared-repository" class="section level3">
+<h3>5: Push to the shared repository</h3>
+<pre><code>git push -u origin name-of-your-feature-branch</code></pre>
+<p>This uploads your branch to the shared repository. The -u flag makes it a tracked branch, so if someone else pushes commits to it, <code>git pull</code> will update your local version.</p>
+</div>
+<div id="request-a-code-review" class="section level3">
+<h3>6: Request a code review</h3>
+<p>We’re not doing full GitHub pull requests at the moment. Instead, send a message to the Microsoft Teams <a href="https://teams.microsoft.com/_#/conversations/Pull%20requests?threadId=19:2f451d422008462f94d1db898422eaf3@thread.skype&amp;ctx=channel">Pull request</a> channel.</p>
+<p>This will give everyone the chance to check out and review your work. People can suggest changes or edits, or can make further commits.</p>
+<p>If someone asks you to review their code, you can make a local copy of the branch with</p>
+<pre><code>git pull origin/name-of-their-feature-branch</code></pre>
+<p>or just work in the remote repository (remember that changes will get overwritten). There are a number of ways to inspect changes in code, the Git GUI app packaged with with Git Bash is one of them.</p>
+<p>Once everyone is satisfied with the changes, it’s finally possible to merge the feature into <code>master</code>.</p>
+</div>
+<div id="merge-into-master-and-push" class="section level3">
+<h3>7: Merge into <code>master</code> and push</h3>
+<p>There are a bunch of commands here, but this is the safest way to merge and push, in case something unexpected has changed.</p>
+<p>First, get the latest versions of all the branches and check for any conflicts by re-merging master into the feature branch:</p>
+<pre><code>git checkout master
+git pull            # get latest versions of master and your feature branch
+git checkout name-of-your-feature-branch
+git merge master</code></pre>
+<p>Resolve any conflicts as required. If there are big changes it may need to go back for review.</p>
+<p>Merge the feature branch back into master:</p>
+<pre><code>git checkout master
+git merge name-of-your-feature-branch</code></pre>
+<p>You can now delete the feature branch, since its full history is part of <code>master</code> and there’s no reason to clutter the repository with an extra copy.</p>
+<pre><code>git branch -d name-of-your-feature-branch</code></pre>
+<p>And finally, you can push the new <code>master</code> branch</p>
+<pre><code>git push</code></pre>
+</div>
+</div>
+<div id="project-best-practices" class="section level1">
+<h1>Project best practices</h1>
+<p>We’ll update this list as we go along! But to start with:</p>
+<ul>
+<li>Try to write everything as functions. Keep functions and the code that executes them separate</li>
+<li>Settings are a kind of data - don’t include them in code. Put all options and settings into a config file</li>
+<li>Don’t hard-code file paths
+<ul>
+<li>Store them as variables in a config file</li>
+<li>Use <code>here()</code> to build paths to locations within the repository</li>
+</ul></li>
+<li>Try to build in checks to your functions to validate input and make sure that everything is behaving as expected. The <code>assertthat()</code> function is your friend. If you find yourself making similar checks several times, split them into a separate module for everyone to use</li>
+<li>If you change a function that more than one model or module depends on, let people know in the pull request so that they can fix dependencies. Try not to make breaking changes!</li>
+<li>Don’t use <code>require()</code></li>
+<li>Remove feature branches after you merge them</li>
+</ul>
+<div id="optional-extras" class="section level3">
+<h3>Optional extras</h3>
+<p>These are things we may want to consider doing later on</p>
+<ul>
+<li>Document your functions with <code>roxygen2</code> syntax, explained <a href="http://r-pkgs.had.co.nz/man.html">here</a>.</li>
+<li>Don’t use <code>rm(list=ls())</code></li>
+<li>Don’t use <code>library()</code> when you only need to make a couple of function calls - use <code>packagename::function()</code> instead, which doesn’t load the full package. This reduces the likelihood of conflicts between package namespaces</li>
+<li>Build file paths with the <code>path()</code> function, which means they’ll work on both Windows and Linux</li>
+</ul>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
