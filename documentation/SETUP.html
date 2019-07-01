@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>How to Use this Repository</title>
+
+<script src="SETUP_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="SETUP_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="SETUP_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="SETUP_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="SETUP_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="SETUP_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="SETUP_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="SETUP_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="SETUP_files/navigation-1.1/tabsets.js"></script>
+<link href="SETUP_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="SETUP_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">How to Use this Repository</h1>
+
+</div>
+
+
+<p>The <code>2019_development</code> repository contains all the code for the new generation of GLA population models. The resulting product will be an ecosystem of different population cohort models, each built with a similar framework, combining reusable modules and input with model-specific code.</p>
+<div id="setting-up" class="section level1">
+<h1>Setting up</h1>
+<p>You will need your own local copy of this repository to do anything beyond running the models. If you’re reading this on the GLA Q:/ drive, any changes you make to the code will be overwritten the next time someone pushes a new version.</p>
+<div id="for-running-models-only" class="section level3">
+<h3>For running models only</h3>
+<p>If you’re only running models, it’s still recommended to follow the instructions here and run things locally. However if you don’t use git, or need results quickly, you can set up and execute scripts in the <code>model_runs</code> folder without them being overwritten. See the relevant model documentation on how to do this.</p>
+</div>
+<div id="for-development" class="section level3">
+<h3>For development</h3>
+<p>If you want to run models locally or make any changes to the code, you’ll need to clone the repository.</p>
+<p>On the Q:/ drive everything is stored in a bare (uneditable) repository at <code>Q:\Teams\D&amp;PA\Demography\Projections\2019_development.git</code> with a Git hook to recreate it at <code>Q:\Teams\D&amp;PA\Demography\Projections\2019_development</code> after each push.</p>
+<p>To make a local copy of the repository, open up Git Bash and run</p>
+<pre><code>git clone &quot;Q:\Teams\D&amp;PA\Demography\Projections\2019_development.git&quot; &quot;M:/Path/to/local/directory&quot;</code></pre>
+<p>you can then navigate to the local directory and work with the code there. <em>Do not make changes to the master branch!</em> If you’re doing any development work, start a new branch with</p>
+<pre><code>git checkout -b name-of-the-new-branch</code></pre>
+<p>This can then be merged later after it has been reviewed.</p>
+<p>Please read the <em>Development Workflow and Best Practices</em> document in this folder before starting development, as this describes how we’re going to implement good version control, code review and not-stepping-on-each-others’-toes.</p>
+</div>
+</div>
+<div id="repository-structure" class="section level1">
+<h1>Repository Structure</h1>
+<p>The repository is split up in (what we hope is) a reasonably logical way. Code is separate from data which is separate from the scripts to set up and run models.</p>
+<p>Many folders aren’t part of the Git repository - these are mostly folders containing data that can be recreated using the scripts here.</p>
+<div id="folder-structure" class="section level3">
+<h3>Folder structure</h3>
+<ul>
+<li><code>documentation</code>: source code and output for all high-level documentation.</li>
+<li><code>input_data</code>: data for model input. Once things have got going everything in this folder will be generated by scripts within the <code>input_data_scripts</code> folder (so that everything is reproducible). Don’t modify files here directly. Ignored by Git.</li>
+<li><code>input_data_scripts</code>: scripts used to convert and process raw data to create whatever is needed for input to the models. Eventually these scripts will read only from the Demography database.</li>
+<li><code>model_code</code>: the models themselves. The folder is split into
+<ul>
+<li><code>model_functions</code>: this is where all functions governing births, deaths, migration, ageing and various internal model checks are stored</li>
+<li><code>models</code>: each model that is built will have a folder here, containing functions to read in data, execute the model from start to finish and produce QA materials, a template configuration file, and a script to run the model</li>
+<li><code>output_automatic_QA</code>: a family of functions that will take the output of some models and run common checks and make reports with common plots</li>
+</ul></li>
+<li><code>model_runs</code>: for each model, scripts and configuration files that can be edited and executed to run the model. Ignored by Git</li>
+<li><code>notebooks_and_analysis</code>: a scrappy workspace for data exploration on your own machine. Ignored by Git</li>
+<li><code>outputs</code>: location for model outputs. Ignored by Git. Don’t modify files here directly.</li>
+</ul>
+</div>
+<div id="r-project-structure-and-git" class="section level3">
+<h3>R project structure and Git</h3>
+<p>The whole of <code>2019_development</code> is a single R project and a single Git repository.</p>
+<p>When pointing to files and folders in the project, always use the <code>here()</code> function, which is initialised in the project root directory.</p>
+<p>Further down the line we may want to change this and split off separate parts of the project as individual packages, but for now, it will work as a single large ecosystem. That means, try not to duplicate function names, just in case.</p>
+<p><strong>TODO</strong>: set up <code>renv</code> to manage package versions</p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.6.0 (2019-04-26)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 7 x64 (build 7601) Service Pack 1
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United Kingdom.1252 
+## [2] LC_CTYPE=English_United Kingdom.1252   
+## [3] LC_MONETARY=English_United Kingdom.1252
+## [4] LC_NUMERIC=C                           
+## [5] LC_TIME=English_United Kingdom.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_3.6.0  magrittr_1.5    tools_3.6.0     htmltools_0.3.6
+##  [5] yaml_2.2.0      Rcpp_1.0.1      stringi_1.4.3   rmarkdown_1.13 
+##  [9] knitr_1.23      stringr_1.4.0   xfun_0.6        digest_0.6.18  
+## [13] evaluate_0.13</code></pre>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
