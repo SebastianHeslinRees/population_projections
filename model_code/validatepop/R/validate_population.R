@@ -132,17 +132,14 @@ validate_population <- function( population,
     # convert aggregation levels to factors
     comparison_pop[colname_comparison] <- lapply(comparison_pop[colname_comparison], as.factor)
 
-    #browser()
-
     # rename columns in comparison table
-    #TODO this is clumsy and someone could neaten it up
     if(!is.null(names(colname_comparison))) {
-      ix <- names(colname_comparison) != "" # columns to rename
-      colname_comparison <- colname_comparison[ix]
-      for(i in 1:length(colname_comparison)) {
-        ix <- which(names(comparison_pop) == colname_comparison[i])
-        names(comparison_pop)[ix] <- names(colname_comparison)[i]
-      }
+      colname_comparison <- setNames(colname_comparison, ifelse(names(colname_comparison)=="",
+                                                                colname_comparison,
+                                                                names(colname_comparison)))
+      ix <- match(colname_comparison, names(comparison_pop))
+      names(comparison_pop)[ix] <- names(colname_comparison)
+
       assert_that(!any(duplicated(names(comparison_pop))),
                   msg="Renaming columns in the comparison data frame in validate_population resulted in duplicate column names. This occurs when a column in pop2 isn't an aggregation level but has the same name as an aggregation level in pop1") # check no duplicate names
       assert_that(all(colname_aggregation %in% names(comparison_pop)))
