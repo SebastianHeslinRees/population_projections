@@ -1,0 +1,20 @@
+Package: births.null
+Type: Package
+Title: Return zero births for a population
+Version: 0.1.0
+Author: Chris Fairless
+Maintainer: Chris Fairless <christopher.fairless@london.gov.uk>
+Description: A 'null' births function. This is to be used as a placeholder function
+    in population development work for testing model frameworks, and as a jumping-off
+    point for building more complex births functions
+License: Currently internal to the GLA: contact the Maintainer if you think you need permissions!
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    dplyr,
+    magrittr,
+    assertthat
+Suggests: 
+    testthat,
+    validatepop
+RoxygenNote: 6.1.1
