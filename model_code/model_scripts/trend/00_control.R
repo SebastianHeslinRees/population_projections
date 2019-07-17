@@ -1,4 +1,4 @@
-run_trend_model <- function(start_yr, n_proj_yr, popn_mye_path, outputs_dir) {
+run_trend_model <- function(config_list) {
 # input args:
   # start_year (start_year = 2018)
   # popn file path (popn_mye_path ="input_data/mye/2018/population_ons_2019-07-05.rds")
@@ -14,6 +14,8 @@ run_trend_model <- function(start_yr, n_proj_yr, popn_mye_path, outputs_dir) {
   source("model_code/model_scripts/trend/02_core.R")
   source("model_code/model_scripts/trend/03_output.R")
   
+  # set the variables from the config file
+  list2env(config_list, environment())
   
   ## get the input data
   

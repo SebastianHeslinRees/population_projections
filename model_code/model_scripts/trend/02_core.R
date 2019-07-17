@@ -20,7 +20,7 @@ trend_core <- function(popn_mye, n_proj_yr) {
     
     
     next_yr_popn <- aged_popn
-    proj_popn <- bind_rows(proj_popn, next_yr_popn)
+    proj_popn <- rbind(proj_popn, next_yr_popn)
     
     curr_yr_popn <- next_yr_popn
     
