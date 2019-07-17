@@ -5,13 +5,13 @@
 \title{Check one population is contained within another}
 \usage{
 validate_join_population(pop1, pop2,
-  colnames_common_aggregation = intersect(names(pop1), names(pop2)),
+  cols_common_aggregation = intersect(names(pop1), names(pop2)),
   pop1_is_subset = TRUE, many2one = TRUE, one2many = TRUE)
 }
 \arguments{
 \item{pop1, pop2}{Data frames.}
 
-\item{colnames_common_aggregation}{A character vector. Names of columns for
+\item{cols_common_aggregation}{A character vector. Names of columns for
 data aggregation common to both input data frames (e.g. age, ward). If
 columns don't have the same name, use a named character vector (e.g.
 \code{"WARD"="WARD11CD"}). Defaults to column names shared between the

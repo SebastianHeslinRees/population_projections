@@ -26,8 +26,8 @@ library(magrittr)
 pop <- expand.grid(age = 0:10, geog = c("a","b","c","d"), sex = c("m","f"), count = 100)
 
 validate_population(pop,
-                    colname_aggregation = c("age", "geog", "sex"),
-                    colname_data = "count",
+                    col_aggregation = c("age", "geog", "sex"),
+                    col_data = "count",
                     check_negative_values = TRUE)
 ```
 
@@ -37,16 +37,16 @@ pop2 <- dplyr::mutate(pop, class = "a") %>%
   dplyr::rename(gss = geog, count2 = count)
 
 validate_population(pop,
-                    colname_aggregation = c("age", "geog", "sex"),
+                    col_aggregation = c("age", "geog", "sex"),
                     comparison_pop = pop2,
-                    colname_comparison = c("age", "geog" = "gss", "sex"))
+                    col_comparison = c("age", "geog" = "gss", "sex"))
 ```
 
 Check that the two data frames can be joined together, then do the join, then validate:
 ```r
 pop_join <- pop %>%
   validate_join_population(pop2,
-                           colnames_common_aggregation = c("age","geog"="gss", "sex")) %>%
+                           cols_common_aggregation = c("age","geog"="gss", "sex")) %>%
   dplyr::left_join(pop2, by = c("age","geog"="gss", "sex")) %>%
-  validate_population(colname_aggregation = c("age","geog", "sex"))
+  validate_population(col_aggregation = c("age","geog", "sex"))
 ```

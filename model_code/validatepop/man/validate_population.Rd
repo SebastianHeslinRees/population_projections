@@ -4,22 +4,22 @@
 \alias{validate_population}
 \title{Validate a population dataset}
 \usage{
-validate_population(population, colname_aggregation = c("area", "age",
-  "sex"), colname_data = NA, test_completeness = TRUE,
+validate_population(population, col_aggregation = c("gss_code", "age",
+  "sex"), col_data = NA, test_completeness = TRUE,
   check_negative_values = TRUE, comparison_pop = NA,
-  colname_comparison = colname_aggregation)
+  col_comparison = col_aggregation)
 }
 \arguments{
 \item{population}{A data frame containing population data.}
 
-\item{colname_aggregation}{A string or character vector giving column names
+\item{col_aggregation}{A string or character vector giving column names
 for levels of data aggregations: e.g. geographic area, age/age band, sex.
 It will be checked that these behave as a primary key. If there is more
 than one geography column (e.g. ward code, ward name, or ward code borough
 code) include only the highest resolution and only one column. Default
-value is columns for "area", "age", "sex".}
+value is columns for "gss_code", "age", "sex".}
 
-\item{colname_data}{A string of character vector giving column names for data
+\item{col_data}{A string of character vector giving column names for data
 (e.g. count, birth rate). Columns given will be checked for missing and
 negative values. Any columns not named in the input are currently ignored.
 Default value is NA.}
@@ -27,7 +27,7 @@ Default value is NA.}
 \item{test_completeness}{Logical. Run test to make sure all combinations of
 aggregation variables are present. The test will fail when lower geographic
 resolutions are present, so make sure these are not passed to or turn off
-\code{colname_aggregation}. Default TRUE.}
+\code{col_aggregation}. Default TRUE.}
 
 \item{check_negative_values}{Logical value requesting data are checked for
 negative values. Defaults to TRUE.}
@@ -36,10 +36,10 @@ negative values. Defaults to TRUE.}
 levels of the population being tested (e.g. an initial population), so that
 they can be checked to match. Default to NA.}
 
-\item{colname_comparison}{A character vector giving the names of the
+\item{col_comparison}{A character vector giving the names of the
 aggregation levels in the comparison population. If names are different
 between frames, provide a named character vector, as you would with by=c()
-in a join. Defaults to the value of \code{colname_aggregation}, accepts NA.}
+in a join. Defaults to the value of \code{col_aggregation}, accepts NA.}
 }
 \value{
 The input population, unchanged. Return is invisible, so the function
