@@ -21,7 +21,7 @@
 #' \code{validate_population} for that.
 #'
 #' @param pop1,pop2 Data frames.
-#' @param colnames_common_aggregation A character vector. Names of columns for
+#' @param cols_common_aggregation A character vector. Names of columns for
 #'   data aggregation common to both input data frames (e.g. age, ward). If
 #'   columns don't have the same name, use a named character vector (e.g.
 #'   \code{"WARD"="WARD11CD"}). Defaults to column names shared between the
@@ -47,27 +47,27 @@
 
 validate_join_population <- function(pop1,
                                      pop2,
-                                     colnames_common_aggregation = intersect(names(pop1),names(pop2)),
+                                     cols_common_aggregation = intersect(names(pop1),names(pop2)),
                                      pop1_is_subset = TRUE,
                                      many2one = TRUE,
                                      one2many = TRUE) {
 
-  validate_join_population_inputs(pop1, pop2, colnames_common_aggregation, pop1_is_subset, many2one, one2many)
+  validate_join_population_inputs(pop1, pop2, cols_common_aggregation, pop1_is_subset, many2one, one2many)
 
-  colnames_common_aggregation <- convert_to_named_vector(colnames_common_aggregation)
+  cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
 
   # swap names and values for joining from pop2 to pop1
-  colnames_common_aggregation_reverse <- names(colnames_common_aggregation)
-  names(colnames_common_aggregation_reverse) <- colnames_common_aggregation
+  cols_common_aggregation_reverse <- names(cols_common_aggregation)
+  names(cols_common_aggregation_reverse) <- cols_common_aggregation
 
 
   # cut down to only the columns we're interested in
-  test_pop1 <- pop1[names(colnames_common_aggregation)]
-  test_pop2 <- pop2[colnames_common_aggregation]
+  test_pop1 <- pop1[names(cols_common_aggregation)]
+  test_pop2 <- pop2[cols_common_aggregation]
   # convert aggregation columns to factors with common levels
-  for(i in 1:length(colnames_common_aggregation)) {
-    var1 <- names(colnames_common_aggregation)[i]
-    var2 <- colnames_common_aggregation[i]
+  for(i in 1:length(cols_common_aggregation)) {
+    var1 <- names(cols_common_aggregation)[i]
+    var2 <- cols_common_aggregation[i]
     agg_levels <- sort(union(test_pop1[[var1]], test_pop2[[var2]]))
     test_pop1[var1] <- factor(test_pop1[[var1]], levels=agg_levels)
     test_pop2[var2] <- factor(test_pop2[[var2]], levels=agg_levels)
@@ -76,14 +76,14 @@ validate_join_population <- function(pop1,
 
   assert_that(ncol(test_pop1) == ncol(test_pop2))
   # CHECK every level in pop1 maps to a level in pop2
-  n_missing_levels <- nrow(test_pop1) - nrow(dplyr::semi_join(test_pop1, test_pop2, by=colnames_common_aggregation))
+  n_missing_levels <- nrow(test_pop1) - nrow(dplyr::semi_join(test_pop1, test_pop2, by=cols_common_aggregation))
   assert_that(n_missing_levels == 0,
              msg = paste("validate_join_population couldn't match", n_missing_levels,
                          "levels from the source to the target data frame"))
 
   # CHECK (optional) every level in pop2 also maps to a level in pop1
   if(!pop1_is_subset) {
-    n_missing_levels <- nrow(test_pop2) - nrow(dplyr::semi_join(test_pop2, test_pop1, by=colnames_common_aggregation_reverse))
+    n_missing_levels <- nrow(test_pop2) - nrow(dplyr::semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse))
     assert_that(n_missing_levels == 0,
                msg = paste("validate_join_population couldn't match all levels between inputs.",
                            n_missing_levels,"are present in the second data frame that aren't mapped to from the first",
@@ -92,14 +92,14 @@ validate_join_population <- function(pop1,
 
   # CHECK (optional) every level in pop2 matches at most one level in pop1
   if(!many2one) {
-    pop2_trim_to_pop1 <- semi_join(test_pop2, test_pop1, by=colnames_common_aggregation_reverse )
-    assert_that(nrow(pop2_trim_to_pop1) == nrow(dplyr::left_join(pop2_trim_to_pop1, test_pop1, by=colnames_common_aggregation_reverse)),
+    pop2_trim_to_pop1 <- semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
+    assert_that(nrow(pop2_trim_to_pop1) == nrow(dplyr::left_join(pop2_trim_to_pop1, test_pop1, by=cols_common_aggregation_reverse)),
                 msg = "validate_join_population detected several levels in the first population dataset matching to a single level in the second. If this is ok set many2one = TRUE")
   }
 
   # CHECK (optional) every level in pop1 matches to exactly one level in pop2
   if(!one2many) {
-    assert_that(nrow(test_pop1) == nrow(dplyr::left_join(test_pop1, test_pop2, by=colnames_common_aggregation)),
+    assert_that(nrow(test_pop1) == nrow(dplyr::left_join(test_pop1, test_pop2, by=cols_common_aggregation)),
                 msg = "validate_join_population detected levels in the first population dataset with several matches in the second. If this is ok set one2many = TRUE")
   }
 
@@ -113,7 +113,7 @@ validate_join_population <- function(pop1,
 # Type match the inputs to validate_join_population and check named columns are present
 validate_join_population_inputs <-function(pop1,
                                            pop2,
-                                           colnames_common_aggregation,
+                                           cols_common_aggregation,
                                            pop1_is_subset,
                                            many2one,
                                            one2many) {
@@ -122,11 +122,11 @@ validate_join_population_inputs <-function(pop1,
   assert_that(is.data.frame(pop1),
               is.data.frame(pop2),
               msg="validate_overlapping_populations needs data frames as inputs for pop1 and pop2")
-  assert_that(is.character(colnames_common_aggregation),
+  assert_that(is.character(cols_common_aggregation),
               msg="validate_overlapping_populations needs a character vector of common aggregation column names as input")
-  assert_that(length(colnames_common_aggregation) > 0,
+  assert_that(length(cols_common_aggregation) > 0,
               msg="validate_overlapping_populations was given a zero-length vector of common column names to compare")
-  assert_that(!any(is.na(colnames_common_aggregation)),
+  assert_that(!any(is.na(cols_common_aggregation)),
               msg="validate_overlapping_populations can't handle missing in common aggreagation column names")
   assert_that(is.logical(pop1_is_subset),
               msg="validate_overlapping_populations needs a logical value for pop1_is_subset input parameter")
@@ -142,25 +142,25 @@ validate_join_population_inputs <-function(pop1,
     warning("An empty data frame was passed to validate_overlapping_populations as parameter pop2")
   }
 
-  colnames_common_aggregation <- convert_to_named_vector(colnames_common_aggregation)
+  cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
 
   # Check all expected columns are present
-  assert_that(all(names(colnames_common_aggregation) %in% names(pop1)),
+  assert_that(all(names(cols_common_aggregation) %in% names(pop1)),
               msg=paste(c("validate_overlapping_populations couldn't find all expected column names in the input for the pop1 parameter.",
-                          "\nExpected:",names(colnames_common_aggregation),
+                          "\nExpected:",names(cols_common_aggregation),
                           "\nNames of input data frame:",names(pop1)),
                         collapse = " "))
-  assert_that(all(colnames_common_aggregation %in% names(pop2)),
+  assert_that(all(cols_common_aggregation %in% names(pop2)),
               msg=paste(c("validate_overlapping_populations couldn't find all expected column names in the input for the pop2 parameter.",
-                          "\nExpected:",colnames_common_aggregation,
+                          "\nExpected:",cols_common_aggregation,
                           "\nNames of input data frame:",names(pop2)),
                         collapse = " "))
 
   # Check no missing values
-  if(any(is.na(pop1[,names(colnames_common_aggregation)]))) {
+  if(any(is.na(pop1[,names(cols_common_aggregation)]))) {
     warning("validate_overlapping_populations was given NA values in the aggregation levels of pop1")
   }
-  if(any(is.na(pop2[,colnames_common_aggregation]))) {
+  if(any(is.na(pop2[,cols_common_aggregation]))) {
     warning("validate_overlapping_populations was given NA values in the aggregation levels of pop2")
   }
 
