@@ -14,14 +14,16 @@ run_trend_model <- function(config_list) {
   source("model_code/model_scripts/trend/02_core.R")
   source("model_code/model_scripts/trend/03_output.R")
   
-  # set the variables from the config file
-  list2env(config_list, environment())
+  # check that the config_list contains expected variables 
+  # TODO: change this to look for a config template file
+  expected_config <- c("start_yr", "n_proj_yr", "popn_mye_path", "outputs_dir")
+  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
+  
   
   ## get the input data
-  
-  popn_mye <- get_popn_mye(popn_mye_path) %>%
-    filter(year <= start_yr)
   # TODO: test that start year is in the mye
+  popn_mye <- get_popn_mye(config_list$popn_mye_path) %>%
+    filter(year <= config_list$start_yr)
   
   # ## prepare the core inputs
   # # this strings together 'building blocks' which can be swapped out and replaced to change the model
@@ -79,10 +81,10 @@ run_trend_model <- function(config_list) {
   # domestic migration rates matrix
   
   ## run the core
-  projection <- trend_core(popn_mye, n_proj_yr)
+  projection <- trend_core(popn_mye, config_list$n_proj_yr)
   
   ## write the output data
-  output_projection(projection, outputs_dir)
+  output_projection(projection, config_list$outputs_dir)
   
   ## output the QA
   
