@@ -105,8 +105,8 @@ validate_population <- function( population,
   }
 
   # CHECK: no duplicates in input aggregation levels
+  n_duplicates <- sum(duplicated(test_population[col_aggregation]))
   if(test_unique) {
-    n_duplicates <- sum(duplicated(test_population[,col_aggregation]))
     assert_that(n_duplicates == 0,
                 msg=paste("validate_population found", n_duplicates, "duplicated aggregation levels.",
                           "Call with test_unique = FALSE if this is permitted"))
@@ -114,8 +114,9 @@ validate_population <- function( population,
 
   # CHECK: all combinations of aggregation levels are present (optional)
   if(test_complete) {
-    population_completed <- tidyr::complete( test_population, !!!dplyr::syms(col_aggregation))
-    n_missing_levels <- nrow(population_completed) - nrow(test_population)
+    aggregation_level_counts <- sapply(col_aggregation, function(x) length(unique(test_population[[x]])))
+    n_combinations <- prod(aggregation_level_counts)
+    n_missing_levels <- n_combinations - nrow(test_population) + n_duplicates
     assert_that(n_missing_levels == 0,
                 msg=paste("validate_population found", n_missing_levels, "missing aggregation levels.",
                           "Call with test_complete = FALSE if this is permitted"))

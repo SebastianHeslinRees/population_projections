@@ -7,8 +7,8 @@ library(validatepop)
 pop_test1 <- data.frame( area=c("a","b","c","d"), stringsAsFactors = FALSE)
 pop_test1_partial <- dplyr::filter(pop_test1, area!="a")
 
-pop_test2 <- dplyr::mutate(pop_test1, age = 0:3)
-pop_test2 <- as.data.frame( tidyr::complete(pop_test2, age, area) )
+pop_test2 <- expand.grid( area=c("a","b","c","d"), age = 0:3, stringsAsFactors = FALSE)
+
 pop_test2_partial <- dplyr::filter(pop_test2, area!="a")
 
 pop_test3 <- dplyr::mutate(pop_test2, count = 10000)
