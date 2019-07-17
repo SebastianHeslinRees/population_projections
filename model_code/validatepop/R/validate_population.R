@@ -99,7 +99,7 @@ validate_population <- function( population,
     for(col in col_data) {
       # Warning otherwise
       if(any(is.na(test_population[[col]]))) {
-        warning(paste0("validate_population found missing values in the",col,"column"))
+        warning(paste("validate_population found missing values in the",col,"column"))
       }
     }
   }
@@ -119,7 +119,8 @@ validate_population <- function( population,
     n_missing_levels <- n_combinations - nrow(test_population) + n_duplicates
     assert_that(n_missing_levels == 0,
                 msg=paste("validate_population found", n_missing_levels, "missing aggregation levels.",
-                          "Call with test_complete = FALSE if this is permitted"))
+                          "\nIf this is a large number, check that the col_aggregation parameter only includes one geographic variable, as the test checks for all permutations of all varaibles.",
+                          "\nCall with test_complete = FALSE if this is permitted"))
   }
 
   # CHECK: no negative counts in the data (optional)
