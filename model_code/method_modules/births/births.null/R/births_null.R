@@ -6,9 +6,11 @@
 #'
 #' @param pop A data frame containing population data
 #' @param col_aggregation A string giving the names of columns to which the
-#'   output births will be aggregated to. Default \code{c("gss_code","sex")}
+#'   output births will be aggregated to. Default \code{c("gss_code","sex", "age")}
 #' @param const Numeric. Number of births to return per geography. Defaults to
 #'   zero, but can be set to any positive number
+#' @param col_age A string giving the name of the age column, if it exists in
+#'   the input, or if it needs to be created for the output
 #'
 #' @return A data frame of births with one row for each distinct value of the
 #'   \code{col_aggregation} columns, a column named births with value
@@ -19,9 +21,13 @@
 #'
 #' @export
 #'
-births_null <- function(pop, col_aggregation = c("gss_code", "sex"), const = 0) {
+births_null <- function(pop,
+                        col_aggregation = c("gss_code", "sex", "age"),
+                        count = "value",
+                        const = 0,
+                        col_age = "age") {
 
-  validate_births_input(pop, col_aggregation, const)
+  validate_births_input(pop, col_aggregation, const, col_age)
   col_aggregation <- col_aggregation[ col_aggregation != "age"] # validate_births_input warns if this is necessary
 
   births <- dplyr::group_by_at(pop, .vars = col_aggregation) %>%
@@ -39,7 +45,7 @@ births_null <- function(pop, col_aggregation = c("gss_code", "sex"), const = 0) 
 # ---------------------------------------------------------------------------
 
 # Check the function input is valid
-validate_births_input <- function(pop, col_aggregation, const) {
+validate_births_input <- function(pop, col_aggregation, const, col_age) {
 
   assert_that(is.data.frame(pop),
               msg = "births_null needs a data frame as input")
@@ -49,6 +55,8 @@ validate_births_input <- function(pop, col_aggregation, const) {
               msg = "births_null needs a single numeric value as the const parameter")
   assert_that(const >= 0,
               msg = "births_null needs a positive value of the const parameter")
+  assert_that(is.string(col_age),
+              msg = "births_null needs a string as the col_age parameter")
   assert_that(all(col_aggregation %in% names(pop)),
               msg = paste(c("births_null was given column name(s) not present in the input population data",
                             "\nColumn names provided:",col_aggregation,
@@ -59,11 +67,7 @@ validate_births_input <- function(pop, col_aggregation, const) {
     validatepop::validate_population(pop,
                                      col_aggregation = col_aggregation,
                                      test_complete = TRUE,
-                                     test_unique = FALSE)
-  }
-
-  if("age" %in% col_aggregation) {
-    warning("births_null won't use age as an aggregation level, as the column must is added to the output with value zero")
+                                     test_unique = TRUE)
   }
 
   if(nrow(pop) == 0) {
@@ -78,7 +82,7 @@ validate_births_input <- function(pop, col_aggregation, const) {
 
 
 # Check the function output isn't doing anything unexpected
-validate_births_output <- function(pop, col_aggregation, births) {
+validate_births_output <- function(pop, col_aggregation, births, col_age) {
 
   assert_that(all(col_aggregation %in% names(births)))
 
@@ -95,16 +99,4 @@ validate_births_output <- function(pop, col_aggregation, births) {
                                           many2one = TRUE,
                                           one2many = FALSE)
   }
-}
-
-
-
-# Detect and warn when a factor has unused levels
-warn_unused_factor_levels <- function(pop) {
-  for(x in names(pop)) {
-    if(is.factor(pop[[x]]) && length(setdiff(levels(pop[[x]]), pop[[x]])) != 0 ) {
-      warning(paste("births_null found unused factor levels in the input's", x, "column"))
-    }
-  }
-  invisible(TRUE)
 }

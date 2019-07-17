@@ -1,70 +1,101 @@
-context("births_null")
-library(births.null)
+context("deaths_null")
+library(deaths.null)
 library(testthat)
 
-pop <- expand.grid( age=20:23, area=c("a","b","c"), sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
+pop <- data.frame( area=c("a","b","c"), count = 100, stringsAsFactors = FALSE)
+pop2 <- expand.grid( age=20:23, area=c("a","b","c"), sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
 
-pop_out_by_area <- expand.grid( area=c("a","b","c"), births = 0, age = 0, stringsAsFactors = FALSE)
-pop_out_by_area_and_sex <- expand.grid( area=c("a","b","c"), sex=c("f","m"), births = 0, age = 0, stringsAsFactors = FALSE)
+deaths  <- dplyr::mutate(pop,  deaths = 0)
+deaths2 <- dplyr::mutate(pop2, deaths = 0)
+
 
 
 #--------------------------------------------------------------
 
-test_that("births_null creates the expected output", {
-  expect_equal(births_null(pop, colname_aggregation = "area"), pop_out_by_area)
-  expect_equal(births_null(pop, colname_aggregation = c("area","sex")), pop_out_by_area_and_sex)
+test_that("deaths_null creates the expected output", {
+  expect_equal(deaths_null(pop, col_aggregation = "area", count = "count"), deaths)
+  expect_equal(deaths_null(pop2, col_aggregation = c("area","age","sex"), count = "count"), deaths2)
 })
 
-test_that("births_null handles factors, tibbles and groups", {
+test_that("deaths_null handles additional, unused input columns", {
+  pop_in <- mutate(pop, filler = "fill")  # fillers gonna fill
+  expect_equal(deaths_null(pop_in, col_aggregation = "area", count = "count"), deaths)
+})
+
+test_that("deaths_null handles factors, tibbles and groups", {
   pop_in <- dplyr::mutate(pop, area=as.factor(area))
-  pop_out <- dplyr::mutate(pop_out_by_area, area=as.factor(area))
-  expect_equal(births_null(pop_in, colname_aggregation = "area"), pop_out)
+  deaths_out <- dplyr::mutate(deaths, area=as.factor(area))
+  expect_equal(deaths_null(pop_in, col_aggregation = "area", count = "count"), deaths_out)
 
   pop_in <-  dplyr::as_tibble(pop_in)
-  pop_out <- dplyr::as_tibble(pop_out)
-  expect_equal(births_null(pop_in, colname_aggregation = "area"), pop_out)
+  deaths_out <- dplyr::as_tibble(deaths_out)
+  expect_equal(deaths_null(pop_in, col_aggregation = "area", count = "count"), deaths_out)
 
   pop_in <-  dplyr::group_by(pop_in, area)
-  pop_out <- dplyr::group_by(pop_out, area)
-  expect_equal(births_null(pop_in, colname_aggregation = "area"), pop_out)
+  deaths_out <- dplyr::group_by(deaths_out, area)
+  expect_equal(deaths_null(pop_in, col_aggregation = "area", count = "count"), deaths_out)
 })
 
-test_that("births_null warns when factor levels don't match the input", {
+test_that("deaths_null warns when factor levels don't match the input", {
   pop_in  <- dplyr::mutate(pop, area=factor(area, levels = c("a","b","c","d")))
-  pop_out <- dplyr::mutate(pop_out_by_area, area=factor(area, levels = c("a","b","c","d")))
-  expect_warning( temp <- births_null(pop_in, colname_aggregation = "area") )
-  expect_equal(temp, pop_out)
+  deaths_out <- dplyr::mutate(deaths, area=factor(area, levels = c("a","b","c","d")))
+  expect_warning( temp <- deaths_null(pop_in, col_aggregation = "area", count = "count") )
+  expect_equal(temp, deaths_out)
 })
 
-test_that("births_null warns with an empty input", {
+test_that("deaths_null warns with an empty input", {
   pop_in <- pop[NULL,]
-  pop_out <- pop_out_by_area[NULL,]
-  expect_warning( temp <- births_null(pop_in, colname_aggregation = "area") )
-  expect_equal(temp, pop_out)
+  deaths_out <- deaths[NULL,]
+  expect_warning( temp <- deaths_null(pop_in, col_aggregation = "area", count = "count") )
+  expect_equal(temp, deaths_out)
 })
 
-test_that("births_null throws an error with missing aggregation values", {
+test_that("deaths_null warns when the input already has a deaths column and throws an error when it's an aggregation level", {
+  pop_in <- dplyr::mutate(deaths = 20)
+  expect_warning( temp <- deaths_null(pop_in, col_aggregation = "area", count = "count") )
+  expect_equal(temp, deaths_out)
+  expect_error(deaths_null(pop_in, col_aggregation = c("area","deaths"), count = "count") )
+})
+
+test_that("deaths_null throws an error with missing aggregation values", {
   pop_in <- pop
   pop_in$area[1] <- NA
-  expect_error(births_null(pop_in, colname_aggregation = "area"))
+  expect_error(deaths_null(pop_in, col_aggregation = "area", count = "count"))
+})
+
+test_that("deaths_null throws an error with duplicate aggregation values", {
+  pop_in <- rbind(pop, pop)
+  expect_error(deaths_null(pop_in, col_aggregation = "area", count = "count"))
+})
+
+test_that("deaths_null still writes rows when deaths are zero", {
+  TRUE # by design
+})
+
+test_that("deaths_null throws an error or (requested) warning when the result would create a negative population", {
+  expect_error(deaths_null(pop, col_aggregation = "area", count = "value", const = -1000))
+  expect_warning( temp <- deaths_null(pop, col_aggregation = "area",
+                                      count = "value", const = -1000,
+                                      error_negative_pop = FALSE))
+  expect_equal(temp, deaths)
 })
 
 
-# These tests are specific to births_null
-test_that("births_null can give custom birth numbers per geography", {
-  pop_out <- dplyr::mutate(pop_out_by_area, births = 1000)
-  expect_equal(births_null(pop, colname_aggregation = "area", const = 0), pop_out_by_area)
-  expect_equal(births_null(pop, colname_aggregation = "area", const = 1000), pop_out)
+
+# These tests are specific to deaths_null
+test_that("deaths_null can give custom numbers per aggregation level", {
+  deaths_out <- dplyr::mutate(deaths, deaths = 1000)
+  expect_equal(deaths_null(pop, col_aggregation = "area", count = "count", const = 0), deaths)
+  expect_equal(deaths_null(pop, col_aggregation = "area", count = "count", const = 1000), deaths_out)
 })
 
-test_that("births_null hates negative birth rates", {
-  expect_error(births_null(pop, colname_aggregation = "area", const = -1))
+test_that("deaths_null hates negative death rates", {
+  expect_error(deaths_null(pop, col_aggregation = "area", count = "count", const = -1))
 })
 
-test_that("births_null warns if it is asked to aggregate over age", {
-  expect_warning( temp <- births_null(pop, colname_aggregation = c("area", "age")) )
-  expect_equal(temp, pop_out_by_area)
-})
+
+
+
 
 # Other tests in more complex functions might include
 # - trying out different fertility rates (zero, negative...)
