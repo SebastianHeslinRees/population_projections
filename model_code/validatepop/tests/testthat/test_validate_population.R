@@ -6,8 +6,7 @@ library(validatepop)
 # Set up valid population data frame with default column names
 pop_test1 <- data.frame( area=c("a","b","c","d"), stringsAsFactors = FALSE)
 
-pop_test2 <- dplyr::mutate(pop_test1, age = 0:3)
-pop_test2 <- as.data.frame( tidyr::complete(pop_test2, age, area) )
+pop_test2 <- expand.grid( area=c("a","b","c","d"), age = 0:3, stringsAsFactors = FALSE)
 
 pop_test3 <- dplyr::mutate(pop_test2, count = 10000)
 
@@ -113,12 +112,23 @@ test_that("validate_population warns when 'data' and 'aggregation' columns overl
 
 test_that("validate_population spots missing aggregation levels", {
   expect_invisible(
-    validate_population(pop_test2[-1,], col_aggregation = c("area","age"), col_data = NA, test_completeness = FALSE))
+    validate_population(pop_test2[-1,], col_aggregation = c("area","age"), col_data = NA, test_complete = FALSE))
 
   expect_error(
-    validate_population(pop_test2[-1,], col_aggregation = c("area","age"), col_data = NA, test_completeness = TRUE),
-    "validate_population found 1 missing aggregation levels")
+    validate_population(pop_test2[-1,], col_aggregation = c("area","age"), col_data = NA, test_complete = TRUE))
 })
+
+
+test_that("validate_population spots duplicate aggregation levels", {
+  pop_in <- rbind(pop_test2, pop_test2)
+
+  expect_invisible(
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = NA, test_unique = FALSE))
+
+  expect_error(
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = NA, test_unique = TRUE))
+})
+
 
 test_that("validate_population ignores (but warns for) unused factor levels", {
   pop_in <- data.frame( area=factor(c("a","b"), levels=c("a","b","c")))

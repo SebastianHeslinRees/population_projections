@@ -16,29 +16,31 @@
 #' problem.
 #'
 #' @param population A data frame containing population data.
-#' @param col_aggregation A string or character vector giving column names
-#'   for levels of data aggregations: e.g. geographic area, age/age band, sex.
-#'   It will be checked that these behave as a primary key. If there is more
-#'   than one geography column (e.g. ward code, ward name, or ward code borough
-#'   code) include only the highest resolution and only one column. Default
-#'   value is columns for "gss_code", "age", "sex".
+#' @param col_aggregation A string or character vector giving column names for
+#'   levels of data aggregations: e.g. geographic area, age/age band, sex. It
+#'   will be checked that these behave as a primary key. If there is more than
+#'   one geography column (e.g. ward code, ward name, or ward code borough code)
+#'   include only the highest resolution and only one column. Default value is
+#'   columns for "gss_code", "age", "sex".
 #' @param col_data A string of character vector giving column names for data
 #'   (e.g. count, birth rate). Columns given will be checked for missing and
 #'   negative values. Any columns not named in the input are currently ignored.
 #'   Default value is NA.
-#' @param test_completeness Logical. Run test to make sure all combinations of
-#'   aggregation variables are present. The test will fail when lower geographic
-#'   resolutions are present, so make sure these are not passed to or turn off
+#' @param test_complete Logical. Check all combinations of aggregation variables
+#'   are present. The test will fail when lower geographic resolutions are
+#'   present (e.g. borough and LSOA), so make sure these are not passed to
 #'   \code{col_aggregation}. Default TRUE.
+#' @param test_unique Logical. Check there are no duplicate combinations of any
+#'   of the given aggregation levels. Default TRUE.
 #' @param check_negative_values Logical value requesting data are checked for
 #'   negative values. Defaults to TRUE.
 #' @param comparison_pop Optional. A data frame containing all aggregation
 #'   levels of the population being tested (e.g. an initial population), so that
 #'   they can be checked to match. Default to NA.
-#' @param col_comparison A character vector giving the names of the
-#'   aggregation levels in the comparison population. If names are different
-#'   between frames, provide a named character vector, as you would with by=c()
-#'   in a join. Defaults to the value of \code{col_aggregation}, accepts NA.
+#' @param col_comparison A character vector giving the names of the aggregation
+#'   levels in the comparison population. If names are different between frames,
+#'   provide a named character vector, as you would with by=c() in a join.
+#'   Defaults to the value of \code{col_aggregation}, accepts NA.
 #' @return The input population, unchanged. Return is invisible, so the function
 #'   can be called within a dplyr pipe or as a one-line validity test
 #'
@@ -52,13 +54,14 @@
 validate_population <- function( population,
                                  col_aggregation = c("gss_code", "age", "sex"),
                                  col_data = NA,
-                                 test_completeness = TRUE,
+                                 test_complete = TRUE,
+                                 test_unique = TRUE,
                                  check_negative_values = TRUE,
                                  comparison_pop = NA,
                                  col_comparison = col_aggregation) {
 
   # Check input parameters are legal and make sense
-  check_validate_pop_input(population, col_aggregation, col_data, test_completeness, check_negative_values, comparison_pop, col_comparison)
+  check_validate_pop_input(population, col_aggregation, col_data, test_complete, test_unique, check_negative_values, comparison_pop, col_comparison)
 
   # drop requested column names that don't exist (the above checks threw the necessary warnings)
   col_aggregation <- col_aggregation[ col_aggregation %in% names(population) ]
@@ -102,16 +105,20 @@ validate_population <- function( population,
   }
 
   # CHECK: no duplicates in input aggregation levels
-  n_duplicates <- sum(duplicated(test_population[,col_aggregation]))
-  assert_that(n_duplicates == 0,
-              msg=paste("validate_population found", n_duplicates, "duplicated aggregation levels"))
+  if(test_unique) {
+    n_duplicates <- sum(duplicated(test_population[,col_aggregation]))
+    assert_that(n_duplicates == 0,
+                msg=paste("validate_population found", n_duplicates, "duplicated aggregation levels.",
+                          "Call with test_unique = FALSE if this is permitted"))
+  }
 
   # CHECK: all combinations of aggregation levels are present (optional)
-  if(test_completeness) {
+  if(test_complete) {
     population_completed <- tidyr::complete( test_population, !!!dplyr::syms(col_aggregation))
     n_missing_levels <- nrow(population_completed) - nrow(test_population)
     assert_that(n_missing_levels == 0,
-                msg=paste("validate_population found", n_missing_levels, "missing aggregation levels"))
+                msg=paste("validate_population found", n_missing_levels, "missing aggregation levels.",
+                          "Call with test_complete = FALSE if this is permitted"))
   }
 
   # CHECK: no negative counts in the data (optional)
@@ -119,7 +126,8 @@ validate_population <- function( population,
     for(col in col_data) {
       test_col <- as.character(test_population[[col]]) # convert from factor
       assert_that( all( test_col >= 0),
-                   msg=paste("validate_population found negative values in column",col))
+                   msg=paste("validate_population found negative values in column",col,
+                             "- call with check_negative_values = FALSE if this is permitted."))
     }
   }
 
@@ -176,7 +184,8 @@ validate_population <- function( population,
 check_validate_pop_input <- function(population,
                                      col_aggregation,
                                      col_data,
-                                     test_completeness,
+                                     test_complete,
+                                     test_unique,
                                      check_negative_values,
                                      comparison_pop,
                                      col_comparison) {
@@ -188,8 +197,8 @@ check_validate_pop_input <- function(population,
               msg="validate_population requires a vector of column names for input parameter col_aggregation")
   assert_that(identical(col_data, NA) | is.character(col_data),
               msg="validate_population needs NA or a vector of column names for input parameter col_data")
-  assert_that(is.logical(test_completeness),
-              msg="validate_population requires a logical value for input parameter test_completeness")
+  assert_that(is.logical(test_complete),
+              msg="validate_population requires a logical value for input parameter test_complete")
   assert_that(identical(comparison_pop, NA) | is.data.frame(comparison_pop),
               msg="validate_population requires NA or a data frame for input parameter comparison_pop")
   assert_that(is.logical(check_negative_values),
