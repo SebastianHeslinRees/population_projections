@@ -60,8 +60,12 @@ validate_population <- function( population,
                                  comparison_pop = NA,
                                  col_comparison = col_aggregation) {
 
+  ptm <- proc.time()
+
   # Check input parameters are legal and make sense
   check_validate_pop_input(population, col_aggregation, col_data, test_complete, test_unique, check_negative_values, comparison_pop, col_comparison)
+
+  print(paste("done input validation:")); print(proc.time() - ptm)
 
   # drop requested column names that don't exist (the above checks threw the necessary warnings)
   col_aggregation <- col_aggregation[ col_aggregation %in% names(population) ]
@@ -87,12 +91,16 @@ validate_population <- function( population,
   # convert aggregation levels to factors
   test_population[col_aggregation] <- lapply(test_population[col_aggregation], as.factor)
 
+  print(paste("done unused factors:")); print(proc.time() - ptm)
+
   # CHECK: aggregation levels have no missing values
   for(col in col_aggregation) {
     # Error if missing aggregation vars
     assert_that( !any(is.na(test_population[[col]])),
                  msg=paste("Aggregation column", col, "contains missing values"))
   }
+
+  print(paste("done missing agg levels:")); print(proc.time() - ptm)
 
   # CHECK: warn if data columns have missing values
   if(length(col_data)!=0) {
@@ -104,13 +112,18 @@ validate_population <- function( population,
     }
   }
 
+  print(paste("done mising data:")); print(proc.time() - ptm)
+
   # CHECK: no duplicates in input aggregation levels
-  n_duplicates <- sum(duplicated(test_population[col_aggregation]))
+  #n_duplicates <- sum(duplicated(test_population[col_aggregation]))
+  n_duplicates <- nrow(test_population) - data.table::uniqueN(data.table::as.data.table(test_population[col_aggregation]))
   if(test_unique) {
     assert_that(n_duplicates == 0,
                 msg=paste("validate_population found", n_duplicates, "duplicated aggregation levels.",
                           "Call with test_unique = FALSE if this is permitted"))
   }
+
+  print(paste("done agg duplicates:")); print(proc.time() - ptm)
 
   # CHECK: all combinations of aggregation levels are present (optional)
   if(test_complete) {
@@ -122,6 +135,8 @@ validate_population <- function( population,
                           "\nIf this is a large number, check that the col_aggregation parameter only includes one geographic variable, as the test checks for all permutations of all varaibles.",
                           "\nCall with test_complete = FALSE if this is permitted"))
   }
+
+  print(paste("done agg complete:")); print(proc.time() - ptm)
 
   # CHECK: no negative counts in the data (optional)
   if(check_negative_values & length(col_data)!=0) {
@@ -168,6 +183,8 @@ validate_population <- function( population,
     }
 
   }
+
+  print(paste("done template comparison:")); print(proc.time() - ptm)
 
   #TODO valiate 'protected' column names
 
