@@ -21,13 +21,20 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
     aged_popn <- curr_yr_popn %>%
       age_on() 
     
-    # TODO check how the mortality should join to popn (how to match the years)
-    deaths <- calc_deaths(popn = curr_yr_popn, mortality = filter(mortality, year == my_year - 1))
+    # aged on population is used due to definitions of MYE to ensure the correct denominator
+    # population in population at 30th June
+    # change rates are for changes that occured in the 12 months up to 30th June
+    # age is the age the cohort is at 30th June
+    deaths <- calc_deaths(popn = aged_popn, mortality = filter(mortality, year == my_year))
     
     # TODO validate joins
-    next_yr_popn <- aged_popn %>% left_join(deaths, by = names(deaths)[names(deaths)!= "value"])
+    next_yr_popn <- aged_popn %>% 
+      left_join(rename(deaths, deaths = value), by = names(deaths)[names(deaths)!= "value"]) %>%
+      mutate(value = value - deaths) %>%
+      select(-deaths)
+      
     proj_popn <- rbind(proj_popn, next_yr_popn)
-    
+
     curr_yr_popn <- next_yr_popn
     
   }
