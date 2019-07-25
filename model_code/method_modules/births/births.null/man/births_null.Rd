@@ -5,16 +5,22 @@
 \title{Template births function that returns a fixed number of births (default zero)
 for each aggregation level, and sets their age to zero}
 \usage{
-births_null(pop, col_aggregation = c("gss_code", "sex"), const = 0)
+births_null(pop, col_aggregation = c("gss_code", "sex", "age"),
+  const = 0, col_age = "age")
 }
 \arguments{
 \item{pop}{A data frame containing population data}
 
 \item{col_aggregation}{A string giving the names of columns to which the
-output births will be aggregated to. Default \code{c("gss_code","sex")}}
+output births will be aggregated to. Default \code{c("gss_code","sex",
+"age")}}
 
 \item{const}{Numeric. Number of births to return per geography. Defaults to
 zero, but can be set to any positive number}
+
+\item{col_age}{A string giving the name of the age column, if it exists in
+the input, or if it needs to be created for the output. It needn't be an
+aggregation level.}
 }
 \value{
 A data frame of births with one row for each distinct value of the

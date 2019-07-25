@@ -6,7 +6,7 @@ Author: Chris Fairless
 Maintainer: Chris Fairless <christopher.fairless@london.gov.uk>
 Description: A 'null' births function. This is to be used as a placeholder function
     in population development work for testing model frameworks, and as a jumping-off
-    point for building more complex births functions
+    point for building more complex births functions.
 License: Currently internal to the GLA: contact the Maintainer if you think you need permissions!
 Encoding: UTF-8
 LazyData: true

@@ -18,8 +18,9 @@
 #'   \code{col_aggregation} columns, a column named deaths with value
 #'   \code{const} and a column named age with value 0.
 #'
-#' @importFrom assertthat assert_that
+#' @import assertthat
 #' @importFrom magrittr %>%
+#' @importFrom stats complete.cases
 #'
 #' @export
 #'
@@ -30,20 +31,20 @@ deaths_null <- function(pop,
                         error_negative_pop = TRUE) {
 
   validate_deaths_input(pop, col_aggregation, count, const, error_negative_pop)
-
+  col_aggregation <- names(pop)[ names(pop) %in% col_aggregation] # order to match input ordering, remove duplicates
 
   # Calculate deaths
   deaths <- dplyr::mutate(pop, deaths = const)
 
   # Check for negative population
-  ix_negative <- deaths[[deaths]] > deaths[[count]]
+  ix_negative <- deaths[["deaths"]] > deaths[[count]]
   if(any(ix_negative) & error_negative_pop) {
     stop(paste("deaths_null created more deaths than population in", sum(ix_negative), "rows"))
   }
   if(any(ix_negative) & !error_negative_pop) {
     warning(paste("deaths_null created more deaths than population in", sum(ix_negative), "rows.",
                   "Adjusting deaths to prevent negative population"))
-    deaths[ix_negative, deaths] <- deaths[ix_negative, count]
+    deaths[ix_negative, "deaths"] <- deaths[ix_negative, count]
   }
 
   # Select the columns we want to output
@@ -66,8 +67,8 @@ validate_deaths_input <- function(pop, col_aggregation, count, const, error_nega
               msg = "deaths_null needs a data frame as input")
   assert_that(is.character(col_aggregation),
               msg = "deaths_null needs a string or character vector as the col_aggregation parameter")
-  assert_that(is.string(col_aggregation),
-              msg = "deaths_null needs a string as the col_aggregation parameter")
+  assert_that(is.string(count),
+              msg = "deaths_null needs a string as the count parameter")
   assert_that(is.numeric(const) && length(const) == 1,
               msg = "deaths_null needs a single numeric value as the const parameter")
   assert_that(const >= 0,
@@ -77,16 +78,20 @@ validate_deaths_input <- function(pop, col_aggregation, count, const, error_nega
   assert_that(!count %in% col_aggregation,
               msg = "deaths_null was given a population count column that is also a named aggregation column")
   assert_that(!"deaths" %in% col_aggregation,
-              msg = "deaths_null can't handle an aggregation column called also deaths. If this is really important to you, update the function to give a custom name to the output deaths column.")
+              msg = "deaths_null can't handle an aggregation column called also deaths. If this is really important to you, update the function to give a customisable name to the output deaths column.")
   if("deaths" %in% names(pop)) {
-    warning("deaths is already a column name in the input to deaths_null. The output will contain the calculated deaths instead")
+    warning("deaths is already a column name in the input to deaths_null. The output will contain the calculated deaths instead and this will probably muck up subsequent joins or binds!!")
+  }
+  if(any(duplicated(col_aggregation))) {
+    warning("duplicated column names were provided to births_null: these will be removed")
+    col_aggregation <- unique(col_aggregation)
   }
 
 
   if(requireNamespace("validatepop", quietly=TRUE)) {
     validatepop::validate_population(pop,
                                      col_aggregation = col_aggregation,
-                                     colname_data = count,
+                                     col_data = count,
                                      test_complete = TRUE,
                                      test_unique = TRUE,
                                      check_negative_values = TRUE)
@@ -104,7 +109,7 @@ validate_deaths_input <- function(pop, col_aggregation, count, const, error_nega
 
 
 # Check the function output isn't doing anything unexpected
-validate_deaths_output <- function(pop, col_aggregation, count, deaths, error_negative_pop) {
+validate_deaths_output <- function(pop, col_aggregation, count, error_negative_pop, deaths) {
 
   assert_that(all(col_aggregation %in% names(deaths)))
 

@@ -12,3 +12,9 @@ LazyData: true
 Suggests: 
     testthat,
     validatepop
+Imports: 
+    assertthat,
+    magrittr,
+    dplyr,
+    stats
+RoxygenNote: 6.1.1

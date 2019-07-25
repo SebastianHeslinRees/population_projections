@@ -144,9 +144,9 @@ validate_population <- function( population,
 
     # rename columns in comparison table
     if(!is.null(names(col_comparison))) {
-      col_comparison <- setNames(col_comparison, ifelse(names(col_comparison)=="",
-                                                                col_comparison,
-                                                                names(col_comparison)))
+      names(col_comparison) <- ifelse(names(col_comparison)=="",
+                                      col_comparison,
+                                      names(col_comparison))
       ix <- match(col_comparison, names(comparison_pop))
       names(comparison_pop)[ix] <- names(col_comparison)
 

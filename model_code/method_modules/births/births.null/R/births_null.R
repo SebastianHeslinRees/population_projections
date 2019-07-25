@@ -6,32 +6,35 @@
 #'
 #' @param pop A data frame containing population data
 #' @param col_aggregation A string giving the names of columns to which the
-#'   output births will be aggregated to. Default \code{c("gss_code","sex", "age")}
+#'   output births will be aggregated to. Default \code{c("gss_code","sex",
+#'   "age")}
 #' @param const Numeric. Number of births to return per geography. Defaults to
 #'   zero, but can be set to any positive number
 #' @param col_age A string giving the name of the age column, if it exists in
-#'   the input, or if it needs to be created for the output
+#'   the input, or if it needs to be created for the output. It needn't be an
+#'   aggregation level.
 #'
 #' @return A data frame of births with one row for each distinct value of the
 #'   \code{col_aggregation} columns, a column named births with value
 #'   \code{const} and a column named age with value 0.
 #'
-#' @importFrom assertthat assert_that
+#' @import assertthat
 #' @importFrom magrittr %>%
+#' @importFrom stats complete.cases
 #'
 #' @export
 #'
 births_null <- function(pop,
                         col_aggregation = c("gss_code", "sex", "age"),
-                        count = "value",
                         const = 0,
                         col_age = "age") {
 
   validate_births_input(pop, col_aggregation, const, col_age)
   col_aggregation <- col_aggregation[ col_aggregation != "age"] # validate_births_input warns if this is necessary
+  col_aggregation <- names(pop)[ names(pop) %in% col_aggregation ] # reorder to match column ordering in pop
 
   births <- dplyr::group_by_at(pop, .vars = col_aggregation) %>%
-    dplyr::summarise(births = const, age = 0) %>%
+    dplyr::summarise(births = const, {{col_age}} := 0) %>%
     dplyr::ungroup()
 
   validate_births_output(pop, col_aggregation, births)
@@ -62,6 +65,15 @@ validate_births_input <- function(pop, col_aggregation, const, col_age) {
                             "\nColumn names provided:",col_aggregation,
                             "\nColumn names of input population:",names(pop)),
                           collapse=" "))
+  assert_that(!"births" %in% col_aggregation,
+              msg = "births cannot currently be used as an aggregation column in births_null: the name is reserved for output. If this is really important to you, update the function to give a customisable name to the output births column.")
+  if("births" %in% names(pop)) {
+    warning("births is a column name in the input to births_null: the output births column will contain calculated births and will probably mess with any binds or joins!!")
+  }
+  if(any(duplicated(col_aggregation))) {
+    warning("duplicated column names were provided to births_null: these will be removed")
+    col_aggregation <- unique(col_aggregation)
+  }
 
   if(requireNamespace("validatepop", quietly=TRUE)) {
     validatepop::validate_population(pop,
