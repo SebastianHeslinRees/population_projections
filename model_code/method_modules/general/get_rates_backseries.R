@@ -17,16 +17,17 @@ get_rates_backseries <- function(coc_mye_path, popn_mye_path) {
   
   # TODO validate popn
   
-  coc <- readRDS(coc_mye_path)
+  coc <- readRDS(coc_mye_path) %>%
+    rename(coc = value)
   # TODO validate coc
   
   # TODO validate join
   # TODO be more specific about the join? Yes, pass in the expected col names into the function
   # TODO split the rates calculation out into a separate function
-  
+  # TODO check the methodological decision to set value to 0 if popn is 0
   rates <- suppressMessages(left_join(coc, popn) %>%
-    mutate(value = value/popn) %>%
-    select(-popn))
+    mutate(value = coc/popn, value = ifelse(popn == 0, 0, value)) %>%
+    select(-popn, -coc))
   
   # TODO validate rates
   

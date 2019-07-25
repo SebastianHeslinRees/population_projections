@@ -5,7 +5,7 @@ deaths_from_popn_mort <- function(popn, mortality) {
   library(dplyr)
   
   # TODO: is the next line in the validate join already?
-  if (!identical(names(popn), names(mortality))) stop("mortality and popn dfs don't have matching names")
+  if (!identical(sort(names(popn)), sort(names(mortality)))) stop("mortality and popn dfs don't have matching names")
 
   popn <- popn %>% rename(popn = value)
   

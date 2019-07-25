@@ -17,7 +17,7 @@ run_trend_model <- function(config_list) {
   
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
-  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "outputs_dir", "mortality_fns")
+  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "outputs_dir", "mortality_fns", "timestamp")
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   
@@ -58,8 +58,14 @@ run_trend_model <- function(config_list) {
   projection <- trend_core(popn_mye, mortality, config_list$n_proj_yr)
   
   ## write the output data
-  output_projection(projection, config_list$outputs_dir)
+  output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
   
   ## output the QA
+  # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
+  rmarkdown::render("model_code/qa/population_qa.Rmd", output_file = paste0("population_qa",config_list$timestamp,".html"),
+                    params = list(popn_proj_fp = paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds")))
   
+  # move the QA output. Output is not writtedn here directly because of compications in referencing the gif file from pandoc notebook. See https://github.com/rstudio/rmarkdown/issues/587#issuecomment-168437646
+  file.rename(paste0("model_code/qa/population_qa",config_list$timestamp,".html"), paste0(config_list$outputs_dir,"/population_qa",config_list$timestamp,".html")) %>% invisible()
+  file.remove("model_code/qa/ldn_age_by_yr.gif") %>% invisible()
 }

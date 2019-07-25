@@ -39,6 +39,6 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
     
   }
   
-  return(list(proj_popn = proj_popn))
+  return(list(population = proj_popn))
   
 }
