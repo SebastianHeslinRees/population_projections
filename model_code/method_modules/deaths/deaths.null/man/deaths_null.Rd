@@ -5,7 +5,7 @@
 \title{Template deaths function that returns a fixed number of deaths (default zero)
 for each aggregation level.}
 \usage{
-deaths_null(pop, col_aggregation = c("gss_code", "sex"),
+deaths_null(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
   count = "value", const = 0, error_negative_pop = TRUE)
 }
 \arguments{

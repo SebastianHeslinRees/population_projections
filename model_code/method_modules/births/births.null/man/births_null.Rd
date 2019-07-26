@@ -5,7 +5,7 @@
 \title{Template births function that returns a fixed number of births (default zero)
 for each aggregation level, and sets their age to zero}
 \usage{
-births_null(pop, col_aggregation = c("gss_code", "sex", "age"),
+births_null(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
   const = 0, col_age = "age")
 }
 \arguments{
@@ -25,7 +25,7 @@ aggregation level.}
 \value{
 A data frame of births with one row for each distinct value of the
   \code{col_aggregation} columns, a column named births with value
-  \code{const} and a column named age with value 0.
+  \code{const} and a column named \code{col_age} with value 0.
 }
 \description{
 This is designed to be used as a placeholder births function during model
