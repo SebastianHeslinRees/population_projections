@@ -1,0 +1,61 @@
+---
+title: "Population QA"
+params:
+  popn_proj_fp: outputs/model/year/population_file.rds
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, echo = FALSE}
+
+#knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gganimate)
+#library(transformr)
+```
+
+```{r, echo=FALSE, message = FALSE}
+popn_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$popn_proj_fp))
+```
+# Total london population by year
+```{r, echo=FALSE, message = FALSE}
+popn_proj_ldn <- filter(popn_proj, grepl("^E09", gss_code))
+ldn_by_yr <- popn_proj_ldn %>%
+  group_by(year) %>%
+  summarise(value = sum(value)) %>%
+  as.data.frame() %>%
+  ggplot(aes(year, value)) +
+  geom_line() 
+
+ldn_by_yr
+
+```
+
+# Population of London age structure over projection years
+```{r, echo=FALSE, message = FALSE, results = 'hide'}
+popn_proj_ldn <- filter(popn_proj, grepl("^E09", gss_code))
+ldn_age_by_yr <- popn_proj_ldn %>%
+  group_by(year, age) %>%
+  summarise(value = sum(value)) %>%
+  ggplot(aes(age, value, colour = as.character(year))) +
+  scale_colour_manual(values = c(rep("black", length(min(popn_proj_ldn$year):2018)), rep("red", length(2019:max(popn_proj_ldn$year))))) +
+  geom_point() +
+  theme(legend.position = "none")
+
+anim <- ldn_age_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+  ggtitle('{closest_state}')
+anim_save("ldn_age_by_yr.gif", anim)
+
+```
+
+![](ldn_age_by_yr.gif)
+```{r, echo = FALSE}
+#file.remove("ldn_age_by_yr.gif")
+```
+
+
