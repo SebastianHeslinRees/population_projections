@@ -25,7 +25,7 @@
 #' @export
 #'
 deaths_null <- function(pop,
-                        col_aggregation = c("gss_code", "sex"),
+                        col_aggregation = c("year", "gss_code", "age", "sex"),
                         count="value",
                         const = 0,
                         error_negative_pop = TRUE) {

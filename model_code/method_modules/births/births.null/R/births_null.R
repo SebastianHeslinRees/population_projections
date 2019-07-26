@@ -25,7 +25,7 @@
 #' @export
 #'
 births_null <- function(pop,
-                        col_aggregation = c("gss_code", "sex", "age"),
+                        col_aggregation = c("year", "gss_code", "age", "sex"),
                         const = 0,
                         col_age = "age") {
 
