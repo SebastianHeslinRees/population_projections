@@ -58,6 +58,13 @@ test_that("deaths_null warns with an empty input", {
   expect_equal(temp, deaths_out, check.attributes=FALSE)
 })
 
+test_that("deaths_null deals with non-standard column names", {
+  pop_in     <- dplyr::rename(pop2,    xage = age, xarea = area, xsex = sex)
+  deaths_out <- dplyr::rename(deaths2, xage = age, xarea = area, xsex = sex)
+  # TODO find out whether data frame attributes matter and whether it matters that they're different here
+  expect_equal(deaths_null(pop_in, col_aggregation = c("xage", "xarea", "xsex"), count = "count"), deaths_out, check.attributes = FALSE)
+})
+
 test_that("deaths_null warns when the input already has a deaths column and throws an error when it's an aggregation level", {
   pop_in <- dplyr::mutate(pop, deaths = 20)
   expect_warning( temp <- deaths_null(pop_in, col_aggregation = "area", count = "count") )

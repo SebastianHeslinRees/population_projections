@@ -16,7 +16,7 @@
 #'
 #' @return A data frame of births with one row for each distinct value of the
 #'   \code{col_aggregation} columns, a column named births with value
-#'   \code{const} and a column named age with value 0.
+#'   \code{const} and a column named \code{col_age} with value 0.
 #'
 #' @import assertthat
 #' @importFrom magrittr %>%
@@ -30,14 +30,14 @@ births_null <- function(pop,
                         col_age = "age") {
 
   validate_births_input(pop, col_aggregation, const, col_age)
-  col_aggregation <- col_aggregation[ col_aggregation != "age"] # validate_births_input warns if this is necessary
+  col_aggregation <- col_aggregation[ col_aggregation != col_age] # validate_births_input warns if this is necessary
   col_aggregation <- names(pop)[ names(pop) %in% col_aggregation ] # reorder to match column ordering in pop
 
   births <- dplyr::group_by_at(pop, .vars = col_aggregation) %>%
     dplyr::summarise(births = const, {{col_age}} := 0) %>%
     dplyr::ungroup()
 
-  validate_births_output(pop, col_aggregation, births)
+  validate_births_output(pop, col_aggregation, births, col_age)
 
   births
 }
@@ -99,7 +99,7 @@ validate_births_output <- function(pop, col_aggregation, births, col_age) {
   assert_that(all(col_aggregation %in% names(births)))
 
   assert_that("births" %in% names(births))
-  assert_that("age" %in% names(births))
+  assert_that(col_age %in% names(births))
 
   assert_that(all(complete.cases(births)))
 

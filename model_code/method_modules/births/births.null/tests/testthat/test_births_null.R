@@ -58,6 +58,12 @@ test_that("births_null throws an error with missing aggregation values", {
   expect_error(births_null(pop_in, col_aggregation = "area"))
 })
 
+test_that("births_null deals with non-standard column names", {
+  pop_in  <- dplyr::rename(pop2,    xage = age, xarea = area, xsex = sex)
+  pop_out <- dplyr::rename(births2, xage = age, xarea = area, xsex = sex)
+  expect_equal(births_null(pop_in, col_aggregation = c("xarea", "xage", "xsex"), col_age = "xage"), pop_out)
+})
+
 test_that("births_null warns when the input already has a births column and throws an error when it's an aggregation level", {
   pop_in <- dplyr::mutate(pop, births = 20)
   expect_warning( temp <- births_null(pop_in, col_aggregation = "area") )
