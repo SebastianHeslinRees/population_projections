@@ -1,5 +1,5 @@
 context("deaths_null")
-library(deaths.null)
+library(deaths)
 library(testthat)
 
 pop <- data.frame( area=c("a","b","c"), count = 100, stringsAsFactors = FALSE)
