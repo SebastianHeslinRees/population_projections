@@ -86,7 +86,7 @@ test_that("validate_join_population can map column names to each other", {
 
 
 test_that("validate_join_population handles (potentially differing) factors and tibbles", {
-  pop_in <- dplyr::mutate(pop, age=as.factor(age), area=as.factor(area))
+  pop_in <- dplyr::mutate(pop_test2, age=as.factor(age), area=as.factor(area))
   expect_invisible(
     validate_join_population(pop_in, pop_in, cols_common_aggregation = c("area","age")))
   expect_invisible(
@@ -127,4 +127,15 @@ test_that("validate_join_population throws an error when it can't find common co
 
   expect_error(
     validate_join_population(pop_test2, pop_test2, cols_common_aggregation=c("area","ABSENT")))
+})
+
+test_that("validate_join_population warns when there are common columns it's *not* joining on", {
+  expect_warning(
+    validate_join_population(pop_test2, pop_test2, cols_common_aggregation="area"))
+
+  pop_in <- dplyr::rename(pop_test2, "xarea" = "area")
+  pop_in$area <- "fill"
+  expect_warning(
+    validate_join_population(pop_test2, pop_in, cols_common_aggregation = c("area"="xarea"))
+  )
 })
