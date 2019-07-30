@@ -9,7 +9,7 @@ assign_function <- function(filepath) {
   function_file <- function_file[!grepl("^\\s*#",function_file)]
   
   function_defs <- function_file[grepl("(-\\s.*|-)function\\(",function_file)]
-  if (length(function_defs) > 1) warning("load_function() expects only one function in the file being loaded.  More than one function call has been found in the file - this is only OK if they are nested so that there is only one containing function")
+  if (length(function_defs) > 1) warning("assign_function() expects only one function to be defined in the file being loaded.  More than one function definition has been found in the file - this is only OK if they are nested so that there is only one containing function")
   
   last_line <- tail(function_file,1) # should end in } with only whitespace or #asdfasdf afterwards
   
