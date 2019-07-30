@@ -16,9 +16,9 @@ level per year)}
 
 \item{col_aggregation}{A string or character vector giving the names of
 columns to which the output deaths will be aggregated to. If names differ
-between input data frames use a named character vector, e.g.
-\code{c("popn_age"="mortality_age")}. Default \code{c("year", "gss_code",
-"age", "sex")}}
+between input data frames, use a named character vector, e.g.
+\code{c("popn_age"="mortality_age")}. Can contain columns that are not in
+\code{mortality}. Default \code{c("year", "gss_code", "age", "sex")}}
 
 \item{col_count}{String. Name of column in \code{popn} containing population
 counts. Default "value"}
