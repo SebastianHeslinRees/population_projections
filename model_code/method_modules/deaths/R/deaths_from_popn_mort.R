@@ -27,7 +27,6 @@
 #'
 #' @import assertthat
 #' @importFrom magrittr %>%
-#' @import rlang
 #'
 #' @export
 #'

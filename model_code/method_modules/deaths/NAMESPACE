@@ -3,6 +3,5 @@
 export(deaths_from_popn_mort)
 export(deaths_null)
 import(assertthat)
-import(rlang)
 importFrom(magrittr,"%>%")
 importFrom(stats,complete.cases)
