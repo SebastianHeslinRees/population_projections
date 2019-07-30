@@ -6,8 +6,8 @@
 #'
 #' @param pop A data frame containing population data
 #' @param col_aggregation A string giving the names of columns to which the
-#'   output deaths will be aggregated to. Default \code{c("gss_code", "age",
-#'   "sex")}
+#'   output deaths will be aggregated to. Default \code{c("year", "gss_code",
+#'   "age", "sex")}
 #' @param count String. Name of column with population counts. Default "value"
 #' @param const Numeric. Number of deaths to return per geography. Defaults to
 #'   zero, but can be set to any positive number
@@ -82,11 +82,11 @@ validate_deaths_input <- function(pop, col_aggregation, count, const, error_nega
   if("deaths" %in% names(pop)) {
     warning("deaths is already a column name in the input to deaths_null. The output will contain the calculated deaths instead and this will probably muck up subsequent joins or binds!!")
   }
+
   if(any(duplicated(col_aggregation))) {
-    warning("duplicated column names were provided to births_null: these will be removed")
+    warning("duplicated column names were provided to deaths_null: these will be removed")
     col_aggregation <- unique(col_aggregation)
   }
-
 
   if(requireNamespace("validatepop", quietly=TRUE)) {
     validatepop::validate_population(pop,

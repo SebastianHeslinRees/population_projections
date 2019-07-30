@@ -12,8 +12,8 @@ deaths_null(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
 \item{pop}{A data frame containing population data}
 
 \item{col_aggregation}{A string giving the names of columns to which the
-output deaths will be aggregated to. Default \code{c("gss_code", "age",
-"sex")}}
+output deaths will be aggregated to. Default \code{c("year", "gss_code",
+"age", "sex")}}
 
 \item{count}{String. Name of column with population counts. Default "value"}
 
