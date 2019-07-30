@@ -27,7 +27,8 @@ test_that("deaths_from_popn_mort creates the expected output", {
 
 test_that("deaths_from_popn_mort can work with mortality at a coarser resolution than the population", {
   expect_equal(deaths_from_popn_mort(pop2, mort, col_aggregation = c("age", "area", "sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"),
-               deaths2)
+               deaths2,
+               check.attributes=FALSE)
 })
 
 test_that("deaths_from_popn_mort fails when there's more than one death rate for each aggregation level", {
@@ -35,10 +36,12 @@ test_that("deaths_from_popn_mort fails when there's more than one death rate for
 })
 
 test_that("deaths_from_popn_mort doesn't care about the order of aggregation columns and throws errors if there are duplicates", {
-  expect_equal(deaths_from_popn_mort(pop2, col_aggregation = c("area","age","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"), deaths2, check.attributes=FALSE)
+  expect_equal(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area","age","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"),
+               deaths2,
+               check.attributes=FALSE)
 
-  expect_error(deaths_from_popn_mort(pop2, col_aggregation = c("area","age","sex","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
-  expect_error(deaths_from_popn_mort(pop2, col_aggregation = c("area"="area","area"="age","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
+  expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area","age","sex","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
+  expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area"="area","area"="age","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
 })
 
 test_that("deaths_from_popn_mort handles additional, unused input columns", {
@@ -93,7 +96,7 @@ test_that("deaths_from_popn_mort warns when factor levels don't match the input"
   deaths_out <- dplyr::mutate(deaths, area=factor(area, levels = c("a","b","c","d")))
 
   expect_warning( temp <- deaths_from_popn_mort(pop_in, mort, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths") )
-  expect_equal(temp, deaths_out, check.attributes=FALSE)
+  expect_equal(temp, deaths, check.attributes=FALSE) # due to differing factor levels, the output won't have a factor in the area column
 
   expect_warning( temp <- deaths_from_popn_mort(pop, mort_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths") )
   expect_equal(temp, deaths, check.attributes=FALSE)
@@ -107,14 +110,17 @@ test_that("deaths_from_popn_mort warns with an empty input", {
 })
 
 test_that("deaths_from_popn_mort handles mappings between column names in the population and mortality data frames", {
-  #TODO
+  pop_in <- dplyr::rename(pop2, xage=age, xsex=sex, xarea=area)
+  expect_equal(deaths_from_popn_mort(pop_in, mort2, col_aggregation = c("xage"="age","xarea"="area","xsex"="sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"),
+               deaths2,
+               check.attributes=FALSE)
 })
 
 test_that("deaths_from_popn_mort warns when the input already has a deaths column and throws an error when it's an aggregation level", {
   pop_in <- dplyr::mutate(pop, deaths = 50)
-  expect_warning( temp <- deaths_from_popn_mort(pop_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths") )
+  expect_warning(temp <- deaths_from_popn_mort(pop_in, mort, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths") )
   expect_equal(temp, deaths, check.attributes=FALSE)
-  expect_error(deaths_from_popn_mort(pop_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "area") )
+  expect_error(deaths_from_popn_mort(pop_in, mort, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "area") )
 })
 
 test_that("deaths_from_popn_mort handles important data column names duplicated between the population and mortality data", {
@@ -122,15 +128,15 @@ test_that("deaths_from_popn_mort handles important data column names duplicated 
   mort_in    <- dplyr::rename(mort, value = rate)
   deaths_out <- dplyr::rename(deaths, value = deaths)
 
-  expect_equal(deaths_from_popn_mort(pop_in, mort, col_aggregation = "area", col_count = "value", col_rate = "rate", col_deaths = "value"),
-               deaths_out,
-               check.attributes = FALSE)
+  expect_warning(temp <- deaths_from_popn_mort(pop_in, mort, col_aggregation = "area", col_count = "value", col_rate = "rate", col_deaths = "value"))
+  expect_equal(temp,  deaths_out, check.attributes = FALSE)
+
   expect_equal(deaths_from_popn_mort(pop, mort_in, col_aggregation = "area", col_count = "count", col_rate = "value", col_deaths = "value"),
                deaths_out,
                check.attributes = FALSE)
-  expect_equal(deaths_from_popn_mort(pop_in, mort_in, col_aggregation = "area", col_count = "value", col_rate = "value", col_deaths = "value"),
-               deaths_out,
-               check.attributes = FALSE)
+
+  expect_warning(temp <- deaths_from_popn_mort(pop_in, mort_in, col_aggregation = "area", col_count = "value", col_rate = "value", col_deaths = "value"))
+  expect_equal(temp, deaths_out, check.attributes = FALSE)
 })
 
 test_that("deaths_from_popn_mort handles unused columns in the inputs with column names from the other inputs", {
@@ -138,6 +144,11 @@ test_that("deaths_from_popn_mort handles unused columns in the inputs with colum
   mort_in <- dplyr::mutate(mort, count = 20)
 
   expect_equal(deaths_from_popn_mort(pop_in, mort_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths"),
+               deaths,
+               check.attributes = FALSE)
+
+  mort_in <- dplyr::mutate(mort, xarea = area) # creates identical area, xarea columns
+  expect_equal(deaths_from_popn_mort(pop, mort_in, col_aggregation = c("area"="xarea"), col_count = "count", col_rate = "rate", col_deaths = "deaths"),
                deaths,
                check.attributes = FALSE)
 })
@@ -154,16 +165,16 @@ test_that("deaths_from_popn_mort throws an error with explicit missing aggregati
 })
 
 test_that("deaths_from_popn_mort throws an error with implicit missing aggregation values", {
-  pop_in <- pop[-1,]
   mort_in <- mort[-1,]
-
-  expect_error(deaths_from_popn_mort(pop_in, mort, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths"))
   expect_error(deaths_from_popn_mort(pop, mort_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths"))
+
+  pop_in <- pop2[-1,]
+  expect_error(deaths_from_popn_mort(pop_in, mort2, col_aggregation = c("age","area","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
 })
 
 
 test_that("deaths_from_popn_mort throws an error with duplicate aggregation values", {
-  expect_error(deaths_from_popn_mort(pop2, col_aggregation = c("area","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
+  expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
 })
 
 test_that("deaths_from_popn_mort throws an error or (requested) warning when the rates would create a negative population or death rate", {
