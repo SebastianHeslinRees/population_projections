@@ -232,6 +232,10 @@ check_validate_pop_input <- function(population,
     col_data <- c()
   }
 
+  # stop if any input column names are duplicated
+  assert_that(!any(duplicated(names(population))),
+              msg="validate_population found duplicate column names in the input data frame")
+
   # warn if there's overlap between data and aggregation columns
   if(any(col_aggregation %in% col_data)) {
     col_overlap <- col_aggregation[ col_aggregation %in% col_data ]
