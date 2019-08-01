@@ -136,6 +136,6 @@ test_that("validate_join_population warns when there are common columns it's *no
   pop_in <- dplyr::rename(pop_test2, "xarea" = "area")
   pop_in$area <- "fill"
   expect_warning(
-    validate_join_population(pop_test2, pop_in, cols_common_aggregation = c("area"="xarea"))
+    validate_join_population(pop_test2, pop_in, cols_common_aggregation = c("area"="xarea", "age"))
   )
 })
