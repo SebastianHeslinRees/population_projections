@@ -48,7 +48,7 @@ deaths_null <- function(pop,
   }
 
   # Select the columns we want to output
-  deaths <- dplyr::select_at(deaths, .vars=c(col_aggregation, "deaths"))
+  deaths <- deaths[c(col_aggregation, "deaths")]
 
   validate_deaths_output(pop, col_aggregation, count, error_negative_pop, deaths)
 

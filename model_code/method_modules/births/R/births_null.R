@@ -103,10 +103,12 @@ validate_births_output <- function(pop, col_aggregation, births, col_age) {
 
   assert_that(all(complete.cases(births)))
 
+  validation_comparison_cols <- setdiff(col_aggregation, col_age)
+
   if(requireNamespace("validatepop", quietly = TRUE)) {
     validatepop::validate_join_population(pop,
-                                          births,
-                                          cols_common_aggregation = col_aggregation,
+                                          births[validation_comparison_cols],
+                                          cols_common_aggregation = validation_comparison_cols,
                                           pop1_is_subset = FALSE,
                                           many2one = TRUE,
                                           one2many = FALSE)

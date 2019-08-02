@@ -60,8 +60,8 @@ deaths_from_popn_mort <- function(popn,
   # Trim inputs to the columns we care about (reduces the chances of column name conflicts)
   popn_cols <- names(col_aggregation)
   mort_cols <- as.character(join_by)
-  popn <- dplyr::select(popn, {{popn_cols}}, {{col_count}})
-  mortality <- dplyr::select(mortality, {{mort_cols}}, {{col_rate}})
+  popn <- popn[c(popn_cols, col_count)]
+  mortality <- mortality[c(mort_cols, col_rate)]
 
   # Make sure the columns that are factors match
   mortality <- match_factors(popn, mortality, col_aggregation)
@@ -80,7 +80,10 @@ deaths_from_popn_mort <- function(popn,
 
   # Validate output
   # ---------------
-  validate_deaths_from_popn_mort_output(popn, col_aggregation, col_deaths, deaths )
+  validate_deaths_from_popn_mort_output(popn,
+                                        col_aggregation,
+                                        col_deaths,
+                                        deaths )
 
   return(deaths)
 }
@@ -118,6 +121,8 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
               msg = "duplicated population column names were provided to deaths_from_popn_mort")
   assert_that(!any(duplicated(col_aggregation)),
               msg = "duplicated mortality column names were provided to deaths_from_popn_mort")
+  assert_that(!col_rate %in% names(col_aggregation),
+              msg = "deaths_from_popn_mort can't have a col_rate that is also a named aggregation column in the input")
   assert_that(is.numeric(popn[[col_count]]),
               msg = paste("deaths_from_popn_mort needs a numeric column in the specified population count col:", col_count))
   assert_that(is.numeric(mortality[[col_rate]]),

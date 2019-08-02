@@ -82,9 +82,6 @@ test_that("deaths_null throws an error with duplicate aggregation values", {
   expect_error(deaths_null(pop2, col_aggregation = c("area","sex"), count = "count"))
 })
 
-test_that("deaths_null still writes rows when deaths are zero", {
-  TRUE # by design
-})
 
 test_that("deaths_null throws an error or (requested) warning when the result would create a negative population", {
   expect_error(deaths_null(pop, col_aggregation = "area", count = "count", const = 1000))
