@@ -56,3 +56,23 @@ ratio, and age set to zero.
 \details{
 Sex data (if used) must be provided as "m" and "f".
 }
+\examples{
+
+library(births)
+
+popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), count = 100)
+fert <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), rate = 0.01)
+
+pop_births <- births_from_popn_fert(popn,
+                                    fert,
+                                    colname_aggregation = c("year", "gss_code", "age", "sex"),
+                                    col_age = "age",
+                                    col_sex = "sex",
+                                    col_count = "count",
+                                    col_rate = "rate",
+                                    col_births = "births",
+                                    birthratio_m2f = 1.05)
+# equivalent to
+pop_births <- births_from_popn_fert(popn, fert)
+
+}

@@ -26,7 +26,23 @@
 #'   input \code{col_aggregation} column.
 #'
 #' @import assertthat
-#' @importFrom magrittr %>%
+#'
+#' @examples
+#'
+#' library(deaths)
+#'
+#' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100)
+#' mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
+#'
+#' deaths <- popn_apply_rate(popn,
+#'                           mortality,
+#'                           col_aggregation = c("year", "gss_code", "sex", "age"),
+#'                           col_count = "count",
+#'                           col_rate = "rate",
+#'                           col_deaths = "deaths")
+#'
+#' # Due to default parameter values, this is equivalent to
+#' count <- popn_apply_rate(popn, mortality)
 #'
 #' @export
 #'
@@ -46,44 +62,24 @@ deaths_from_popn_mort <- function(popn,
   validate_deaths_from_popn_mort_input(popn, mortality, col_aggregation, col_count, col_rate, col_deaths)
 
 
-  # Standardise data
-  # ----------------
-
-  # Reformat col_aggregation to a named vector mapping between popn columns and mortality columns
-  col_aggregation <- convert_to_named_vector(col_aggregation)
-  # and reorder it to match popn's column ordering
-  popn_cols_to_aggregate <- intersect( names(popn), names(col_aggregation) )
-  col_aggregation <- col_aggregation[ popn_cols_to_aggregate ]
-
-  join_by <- col_aggregation[col_aggregation %in% names(mortality)]  # this is a named character vector
-
-  # Trim inputs to the columns we care about (reduces the chances of column name conflicts)
-  popn_cols <- names(col_aggregation)
-  mort_cols <- as.character(join_by)
-  popn <- popn[c(popn_cols, col_count)]
-  mortality <- mortality[c(mort_cols, col_rate)]
-
-  # Make sure the columns that are factors match
-  mortality <- match_factors(popn, mortality, col_aggregation)
-
-  # Deal with the possibility of duplicate data column names
-  if(col_count == col_rate) {
-    col_count <- paste0(col_count, ".x")
-    col_rate  <- paste0(col_rate,  ".y")
-  }
-
   # Calculate deaths
   # ----------------
-  deaths <- left_join(popn, mortality, by = join_by) %>%
-    mutate(!!sym(col_deaths) := !!sym(col_count) * !!sym(col_rate) ) %>%
-    select(!!!syms(popn_cols), !!sym(col_deaths))
+  # This will deal with most checks on the input and output
+  deaths <- generalpop::popn_apply_rate(popn,
+                                        mortality,
+                                        col_aggregation,
+                                        col_count,
+                                        col_rate,
+                                        col_deaths)
 
   # Validate output
   # ---------------
-  validate_deaths_from_popn_mort_output(popn,
-                                        col_aggregation,
-                                        col_deaths,
-                                        deaths )
+
+  # All that's left is to make sure there are no deaths < 0 or which exceed the population
+  assert_that(!any(deaths[[col_deaths]] < 0),
+              msg = "deaths_from_popn_mort produced negative deaths")
+  assert_that(!any(popn[[col_count]] < popn[[col_deaths]]),
+              msg = "deaths_from_popn_mort produced more deaths than the population size")
 
   return(deaths)
 }
@@ -169,33 +165,6 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
 # -----------
 
 
-# Check the function output isn't doing anything unexpected
-
-validate_deaths_from_popn_mort_output <- function(popn, col_aggregation, col_deaths, deaths) {
-
-  col_aggregation <- convert_to_named_vector(col_aggregation)
-
-  assert_that(all(names(col_aggregation) %in% names(deaths)))
-
-  assert_that(col_deaths %in% names(deaths))
-
-  assert_that(all(stats::complete.cases(deaths)))
-
-  if(requireNamespace("validatepop", quietly = TRUE)) {
-    validatepop::validate_population(deaths,
-                                     col_aggregation = names(col_aggregation),
-                                     col_data = col_deaths,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE,
-                                     comparison_pop = popn)
-  }
-
-  invisible(TRUE)
-}
-
-
-
 
 # Function: convert character vector (unnamed or partially named) to one where every element is named
 # TODO split this out into the general or helper_functions package. it's used in validate_pop::validate_join_population as well, and will be in births
@@ -210,29 +179,4 @@ convert_to_named_vector <- function(vec) {
   }
 
   return(vec)
-}
-
-
-# Function: given source and target data frames with a column mapping, add or
-# remove factoring in the target to match the source
-match_factors <- function(dfsource, dftarget, col_mapping) {
-  for(i in  seq_along(col_mapping)) {
-    icol <- col_mapping[i]
-    if(is.factor(dfsource[[names(icol)]]) & !is.factor(dftarget[[icol]])) {
-      dftarget[[icol]] <- as.factor(dftarget[[icol]])
-    }
-
-    source_col <- dfsource[[names(icol)]]
-    target_col <- dftarget[[icol]]
-    if(!is.factor(source_col) & is.factor(target_col)) {
-      col_class <- class(source_col)
-      if(col_class == "numeric") {
-        dftarget[[names(icol)]] <- levels(target_col)[target_col] %>%
-          as.numeric()
-      } else {
-        dftarget[[names(icol)]] <- as.character(target_col)
-      }
-    }
-  }
-  return(dftarget)
 }

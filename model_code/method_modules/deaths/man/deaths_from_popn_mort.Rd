@@ -42,3 +42,21 @@ aggregation levels and a deaths count.
 If deaths would result in a negative population, an error will be thrown
 (default) or the deaths will be capped at the population count.
 }
+\examples{
+
+library(deaths)
+
+popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100)
+mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
+
+deaths <- popn_apply_rate(popn,
+                         mortality,
+                         col_aggregation = c("year", "gss_code", "sex", "age"),
+                         col_count = "count",
+                         col_rate = "rate",
+                         col_deaths = "deaths")
+
+# Due to default parameter values, this is equivalent to
+count <- popn_apply_rate(popn, rate)
+
+}

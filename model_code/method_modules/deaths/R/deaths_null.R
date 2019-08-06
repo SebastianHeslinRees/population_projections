@@ -19,7 +19,6 @@
 #'   \code{const} and a column named age with value 0.
 #'
 #' @import assertthat
-#' @importFrom magrittr %>%
 #' @importFrom stats complete.cases
 #'
 #' @export

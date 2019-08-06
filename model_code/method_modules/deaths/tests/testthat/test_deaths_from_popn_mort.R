@@ -38,7 +38,8 @@ test_that("deaths_from_popn_mort doesn't care about the order of aggregation col
                     deaths2)
 
   expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area","age","sex","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
-  expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area"="area","area"="age","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
+  expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area"="age","area","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
+  expect_error(deaths_from_popn_mort(pop2, mort2, col_aggregation = c("area"="age","age","sex"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
 })
 
 test_that("deaths_from_popn_mort handles additional, unused input columns", {
@@ -123,6 +124,9 @@ test_that("deaths_from_popn_mort handles important data column names duplicated 
 
   expect_warning(temp <- deaths_from_popn_mort(pop_in, mort_in, col_aggregation = "area", col_count = "value", col_rate = "value", col_deaths = "value"))
   expect_equivalent(temp, deaths_out)
+
+  pop_in <- dplyr::rename(pop, value = area)
+  expect_error(deaths_from_popn_mort(pop_in, mort_in, col_aggregation = c("value"="area"), col_count = "count", col_rate = "value", col_deaths = "deaths"))
 })
 
 test_that("deaths_from_popn_mort handles unused columns in the inputs with column names from the other inputs", {

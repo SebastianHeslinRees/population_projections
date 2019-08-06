@@ -31,3 +31,17 @@ A data frame of births with one row for each distinct value of the
 This is designed to be used as a placeholder births function during model
 testing and a template for other births functions, along with its tests.
 }
+\examples{
+
+library(births)
+pop <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), count = 100)
+
+pop_births <- births_null(pop,
+                          colname_aggregation = c("year", "gss_code", "age", "sex"),
+                          const = 0, col_age =
+                          "age")
+
+# equivalent to
+pop_births <- births_null(pop)
+
+}

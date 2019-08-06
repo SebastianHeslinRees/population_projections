@@ -72,7 +72,8 @@ test_that("births_from_popn_fert doesn't care about the order of aggregation col
                     births)
 
   expect_error(births_from_popn_fert(popn, fert, col_aggregation = c("year", "year", "gss_code", "age", "sex")))
-  expect_error(births_from_popn_fert(popn, fert, col_aggregation = c("year", "gss_code"="gss_code", "gss_code"="age", "sex")))
+  expect_error(births_from_popn_fert(popn, fert, col_aggregation = c("year", "gss_code", "gss_code"="age", "sex")))
+  expect_error(births_from_popn_fert(popn, fert, col_aggregation = c("year", "gss_code"="age", "age", "sex")))
 })
 
 

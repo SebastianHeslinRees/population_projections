@@ -13,7 +13,8 @@ LazyData: true
 Imports: 
     dplyr,
     magrittr,
-    assertthat
+    assertthat,
+    generalpop
 Suggests: 
     testthat,
     validatepop
