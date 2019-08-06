@@ -19,4 +19,5 @@ RoxygenNote: 6.1.1
 Imports: 
     assertthat,
     dplyr,
-    rlang
+    rlang,
+    data.table

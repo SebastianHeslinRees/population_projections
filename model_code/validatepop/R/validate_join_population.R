@@ -60,6 +60,21 @@ validate_join_population <- function(pop1,
   cols_common_aggregation_reverse <- names(cols_common_aggregation)
   names(cols_common_aggregation_reverse) <- cols_common_aggregation
 
+  # warn if there are duplicated column names that *aren't* being joined on
+  unjoined_pop1 <- setdiff(names(pop1), names(cols_common_aggregation))
+  unjoined_pop2 <- setdiff(names(pop2), cols_common_aggregation)
+
+  shared_unjoined_intersection <- intersect(unjoined_pop1, unjoined_pop2)
+  if(length(shared_unjoined_intersection) > 0) {
+    warning(paste("Inputs to validate_join_population both contained a", shared_unjoined_intersection,
+                  "column, but this was not specified as part of the join. A join output will contain these columns with .x and .y suffixes to the column"))
+  }
+  shared_unjoined_pop2  <- intersect(unjoined_pop2, names(cols_common_aggregation))
+  if(length(shared_unjoined_pop2) > 0) {
+    warning(paste("Inputs to validate_join_population are joining from column", shared_unjoined_pop2,
+                  "but this is (separately) a column in the pop2 input. Output will include this column with a .y suffix"))
+  }
+
 
   # cut down to only the columns we're interested in
   test_pop1 <- pop1[names(cols_common_aggregation)]

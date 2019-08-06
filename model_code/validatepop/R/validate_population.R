@@ -105,7 +105,8 @@ validate_population <- function( population,
   }
 
   # CHECK: no duplicates in input aggregation levels
-  n_duplicates <- sum(duplicated(test_population[col_aggregation]))
+  n_duplicates <- nrow(test_population) - data.table::uniqueN(data.table::as.data.table(test_population[col_aggregation]))
+  #n_duplicates <- sum(duplicated(test_population[col_aggregation]))   # r base equivalent
   if(test_unique) {
     assert_that(n_duplicates == 0,
                 msg=paste("validate_population found", n_duplicates, "duplicated aggregation levels.",
@@ -231,6 +232,10 @@ check_validate_pop_input <- function(population,
   if(identical(col_data, NA) | length(col_data)==0) {
     col_data <- c()
   }
+
+  # stop if any input column names are duplicated
+  assert_that(!any(duplicated(names(population))),
+              msg="validate_population found duplicate column names in the input data frame")
 
   # warn if there's overlap between data and aggregation columns
   if(any(col_aggregation %in% col_data)) {
