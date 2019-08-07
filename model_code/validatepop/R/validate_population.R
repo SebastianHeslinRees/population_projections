@@ -170,7 +170,7 @@ validate_population <- function( population,
 
   }
 
-  #TODO valiate 'protected' column names
+  #TODO valiate 'protected' column names - e.g. if there's a year/gss_code/sex column, check it looks right
 
   invisible(population)
 }

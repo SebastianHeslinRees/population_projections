@@ -141,8 +141,7 @@ test_that("popn_apply_rate handles unused columns in the inputs with column name
   popn_in <-  dplyr::mutate(popn, rate = 0.1)
   rate_in <- dplyr::mutate(rate, count = 20)
 
-  expect_warning(temp <- popn_apply_rate(popn_in, rate_in, col_aggregation = "gss_code"))
-  expect_equivalent(temp, output)
+  expect_equivalent(popn_apply_rate(popn_in, rate_in, col_aggregation = "gss_code"), output)
 
   rate_in <- dplyr::mutate(rate, xgss_code = gss_code) # creates identical gss_code, xgss_code columns
   expect_warning(temp <- popn_apply_rate(popn, rate_in, col_aggregation = c("gss_code"="xgss_code")))

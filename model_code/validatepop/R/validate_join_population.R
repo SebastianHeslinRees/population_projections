@@ -21,9 +21,9 @@
 #' \code{validate_population} for that.
 #'
 #' @param pop1,pop2 Data frames.
-#' @param cols_common_aggregation A character vector. Names of columns for
-#'   data aggregation common to both input data frames (e.g. age, ward). If
-#'   columns don't have the same name, use a named character vector (e.g.
+#' @param cols_common_aggregation A character vector. Names of columns for data
+#'   aggregation common to both input data frames (e.g. age, ward). If columns
+#'   don't have the same name, use a named character vector (e.g.
 #'   \code{"WARD"="WARD11CD"}). Defaults to column names shared between the
 #'   input data frames, but it's best not to use this in case the overlap it
 #'   finds is not what you expect.
@@ -39,6 +39,9 @@
 #' @param one2many Logical. Can one row in the first population map to several
 #'   in the second? Set to FALSE when testing a left join that expects the same
 #'   number of rows out. Default TRUE.
+#' @param warn_unused_shared_cols Logical. When TRUE a warning will be thrown
+#'   when the two input data frames share column names not in
+#'   \code{cols_common_aggregation}. Default TRUE.
 #'
 #' @return \code{pop1}, invisibly (stopping on failure).
 #'
@@ -50,9 +53,10 @@ validate_join_population <- function(pop1,
                                      cols_common_aggregation = intersect(names(pop1),names(pop2)),
                                      pop1_is_subset = TRUE,
                                      many2one = TRUE,
-                                     one2many = TRUE) {
+                                     one2many = TRUE,
+                                     warn_unused_shared_cols = TRUE) {
 
-  validate_join_population_inputs(pop1, pop2, cols_common_aggregation, pop1_is_subset, many2one, one2many)
+  validate_join_population_inputs(pop1, pop2, cols_common_aggregation, pop1_is_subset, many2one, one2many, warn_unused_shared_cols)
 
   cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
 
@@ -65,9 +69,10 @@ validate_join_population <- function(pop1,
   unjoined_pop2 <- setdiff(names(pop2), cols_common_aggregation)
 
   shared_unjoined_intersection <- intersect(unjoined_pop1, unjoined_pop2)
-  if(length(shared_unjoined_intersection) > 0) {
-    warning(paste("Inputs to validate_join_population both contained a", shared_unjoined_intersection,
-                  "column, but this was not specified as part of the join. A join output will contain these columns with .x and .y suffixes to the column"))
+  if(warn_unused_shared_cols & length(shared_unjoined_intersection) > 0) {
+    warning(paste(c("Inputs to validate_join_population both contained", shared_unjoined_intersection,
+                  "column(s), but they were not specified as part of the join.",
+                  "A join output will contain these columns with .x and .y suffixes to the column"), collapse=" "))
   }
   shared_unjoined_pop2  <- intersect(unjoined_pop2, names(cols_common_aggregation))
   if(length(shared_unjoined_pop2) > 0) {
@@ -131,7 +136,8 @@ validate_join_population_inputs <-function(pop1,
                                            cols_common_aggregation,
                                            pop1_is_subset,
                                            many2one,
-                                           one2many) {
+                                           one2many,
+                                           warn_unused_shared_cols) {
 
 
   assert_that(is.data.frame(pop1),
@@ -144,11 +150,13 @@ validate_join_population_inputs <-function(pop1,
   assert_that(!any(is.na(cols_common_aggregation)),
               msg="validate_overlapping_populations can't handle missing in common aggreagation column names")
   assert_that(is.logical(pop1_is_subset),
-              msg="validate_overlapping_populations needs a logical value for pop1_is_subset input parameter")
+              msg="validate_overlapping_populations needs a logical value for the pop1_is_subset input parameter")
   assert_that(is.logical(many2one),
-              msg="validate_overlapping_populations needs a logical value for many2one input parameter")
+              msg="validate_overlapping_populations needs a logical value for the many2one input parameter")
   assert_that(is.logical(one2many),
-              msg="validate_overlapping_populations needs a logical value for one2many input parameter")
+              msg="validate_overlapping_populations needs a logical value for the one2many input parameter")
+  assert_that(is.logical(warn_unused_shared_cols),
+              msg="validate_overlapping_populations needs a logical value for the warn_unused_shared_cols input parameter")
 
   if(nrow(pop1) == 0) {
     warning("An empty data frame was passed to validate_overlapping_populations as parameter pop1")

@@ -16,11 +16,11 @@
 #'   \code{c("popn_age"="mortality_age")}. Can contain columns that are not in
 #'   \code{mortality}. Default \code{c("year", "gss_code", "age", "sex")}
 #' @param col_count String. Name of column in \code{popn} containing population
-#'   counts. Default "value"
+#'   counts. Default "count"
 #' @param col_rate String. Name of column in \code{mortality} containing
-#'   mortality rates. Default "value"
+#'   mortality rates. Default "rate"
 #' @param col_deaths String. Name of column to write deaths to in the output.
-#'   Default "value"
+#'   Default "deaths"
 #'
 #' @return A data frame of deaths with one row for each distinct value of the
 #'   input \code{col_aggregation} column.
@@ -53,9 +53,9 @@
 deaths_from_popn_mort <- function(popn,
                                   mortality,
                                   col_aggregation = c("year", "gss_code", "sex", "age"),
-                                  col_count = "value",
-                                  col_rate = "value",
-                                  col_deaths = "value") {
+                                  col_count = "count",
+                                  col_rate = "rate",
+                                  col_deaths = "deaths") {
 
   # Validate input
   # --------------
@@ -123,7 +123,7 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
               msg = paste("deaths_from_popn_mort needs a numeric column in the specified population count col:", col_count))
   assert_that(is.numeric(mortality[[col_rate]]),
               msg = paste("deaths_from_popn_mort needs a numeric column in the specified mortality rate col:", col_rate))
-  assert_that(all(mortality[[col_rate]] >= 0 && mortality[[col_rate]] <= 1),
+  assert_that(all(mortality[[col_rate]] >= 0) && all(mortality[[col_rate]] <= 1),
               msg = "mortality rates in deaths_from_popn_mort must be between 0 and 1")
   assert_that(!col_deaths %in% names(col_aggregation),
               msg = paste("deaths_from_popn_mort can't handle a deaths column with the same name as one of the aggregation columns",
@@ -138,26 +138,8 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
   assert_that(length(join_by) > 0,
               msg = "deaths_from_popn_mort must share some aggregation column names with the input mortality, or a column mapping must be included in the col_aggregation parameter")
 
-  if(requireNamespace("validatepop", quietly=TRUE)) {
-    validatepop::validate_population(popn,
-                                     col_aggregation = names(col_aggregation),
-                                     col_data = col_count,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE)
-    validatepop::validate_population(mortality,
-                                     col_aggregation = join_by,
-                                     col_data = col_rate,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE)
-    validatepop::validate_join_population(popn,
-                                          mortality,
-                                          cols_common_aggregation = join_by,
-                                          pop1_is_subset = TRUE,
-                                          many2one = TRUE,
-                                          one2many = FALSE)
-  }
+
+  # Other checks (by the more expensive validatepop functions) are done within popn_apply_rates
 
   invisible(TRUE)
 }

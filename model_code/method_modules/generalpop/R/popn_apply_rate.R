@@ -181,7 +181,8 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
                                           cols_common_aggregation = join_by,
                                           pop1_is_subset = TRUE,
                                           many2one = TRUE,
-                                          one2many = FALSE)
+                                          one2many = FALSE,
+                                          warn_unused_shared_cols = FALSE)
   }
 
   invisible(TRUE)

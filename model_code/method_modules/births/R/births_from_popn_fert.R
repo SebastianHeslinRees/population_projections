@@ -262,27 +262,6 @@ validate_births_from_popn_input <- function(popn,
   assert_that(length(join_by) > 0,
               msg = "births_from_popn_fert must share some aggregation column names with the input fertility, or a column mapping must be included in the col_aggregation parameter")
 
-  # Validate inputs
-  if(requireNamespace("validatepop", quietly=TRUE)) {
-    validatepop::validate_population(popn,
-                                     col_aggregation = names(col_aggregation),
-                                     col_data = col_count,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE)
-    validatepop::validate_population(fertility,
-                                     col_aggregation = join_by,
-                                     col_data = col_rate,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE)
-    validatepop::validate_join_population(popn,
-                                          fertility,
-                                          cols_common_aggregation = join_by,
-                                          pop1_is_subset = TRUE,
-                                          many2one = TRUE,
-                                          one2many = FALSE)
-  }
 
   # Deal with the case that col_sex = NULL but sex is an input column
   if(is.null(col_sex) & "sex" %in% names(popn)) {
@@ -298,6 +277,7 @@ validate_births_from_popn_input <- function(popn,
     }
   }
 
+  # Other checks (by the more expensive validatepop functions) are done within popn_apply_rates
 
   invisible(TRUE)
 }
@@ -327,7 +307,8 @@ validate_births_from_popn_output <- function(births,
                                         cols_common_aggregation = validation_comparison_cols,
                                         pop1_is_subset = TRUE,
                                         many2one = TRUE,
-                                        one2many = FALSE)
+                                        one2many = FALSE,
+                                        warn_unused_shared_cols = TRUE)
 }
 
 # -------------------------------------------------------

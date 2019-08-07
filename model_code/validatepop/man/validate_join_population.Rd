@@ -6,14 +6,15 @@
 \usage{
 validate_join_population(pop1, pop2,
   cols_common_aggregation = intersect(names(pop1), names(pop2)),
-  pop1_is_subset = TRUE, many2one = TRUE, one2many = TRUE)
+  pop1_is_subset = TRUE, many2one = TRUE, one2many = TRUE,
+  warn_unused_shared_cols = TRUE)
 }
 \arguments{
 \item{pop1, pop2}{Data frames.}
 
-\item{cols_common_aggregation}{A character vector. Names of columns for
-data aggregation common to both input data frames (e.g. age, ward). If
-columns don't have the same name, use a named character vector (e.g.
+\item{cols_common_aggregation}{A character vector. Names of columns for data
+aggregation common to both input data frames (e.g. age, ward). If columns
+don't have the same name, use a named character vector (e.g.
 \code{"WARD"="WARD11CD"}). Defaults to column names shared between the
 input data frames, but it's best not to use this in case the overlap it
 finds is not what you expect.}
@@ -32,6 +33,10 @@ to MSOA data on MSOA11CD.}
 \item{one2many}{Logical. Can one row in the first population map to several
 in the second? Set to FALSE when testing a left join that expects the same
 number of rows out. Default TRUE.}
+
+\item{warn_unused_shared_cols}{Logical. When TRUE a warning will be thrown
+when the two input data frames share column names not in
+\code{cols_common_aggregation}. Default TRUE.}
 }
 \value{
 \code{pop1}, invisibly (stopping on failure).

@@ -133,8 +133,8 @@ test_that("deaths_from_popn_mort handles unused columns in the inputs with colum
   pop_in <-  dplyr::mutate(pop, rate = 0.1)
   mort_in <- dplyr::mutate(mort, count = 20)
 
-  expect_warning(temp <- deaths_from_popn_mort(pop_in, mort_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths"))
-  expect_equivalent(temp, deaths)
+  expect_equivalent(deaths_from_popn_mort(pop_in, mort_in, col_aggregation = "area", col_count = "count", col_rate = "rate", col_deaths = "deaths"),
+                    deaths)
 
   mort_in <- dplyr::mutate(mort, xarea = area) # creates identical area, xarea columns
   expect_warning(temp <- deaths_from_popn_mort(pop, mort_in, col_aggregation = c("area"="xarea"), col_count = "count", col_rate = "rate", col_deaths = "deaths"))
