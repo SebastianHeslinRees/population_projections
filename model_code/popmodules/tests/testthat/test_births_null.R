@@ -1,5 +1,5 @@
 context("births_null")
-library(births)
+library(popmodules)
 library(testthat)
 
 pop <- data.frame(area = c("a","b","c"), count = 100, stringsAsFactors = FALSE)

@@ -88,12 +88,10 @@ validate_births_input <- function(pop, col_aggregation, const, col_age) {
     col_aggregation <- unique(col_aggregation)
   }
 
-  if(requireNamespace("validatepop", quietly=TRUE)) {
-    validatepop::validate_population(pop,
-                                     col_aggregation = col_aggregation,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE)
-  }
+  validate_population(pop,
+                      col_aggregation = col_aggregation,
+                      test_complete = TRUE,
+                      test_unique = TRUE)
 
   if(nrow(pop) == 0) {
     warning("births_null was given an empty input table")
@@ -118,12 +116,10 @@ validate_births_output <- function(pop, col_aggregation, births, col_age) {
 
   validation_comparison_cols <- setdiff(col_aggregation, col_age)
 
-  if(requireNamespace("validatepop", quietly = TRUE)) {
-    validatepop::validate_join_population(pop,
-                                          births[validation_comparison_cols],
-                                          cols_common_aggregation = validation_comparison_cols,
-                                          pop1_is_subset = FALSE,
-                                          many2one = TRUE,
-                                          one2many = FALSE)
-  }
+  validate_join_population(pop,
+                           births[validation_comparison_cols],
+                           cols_common_aggregation = validation_comparison_cols,
+                           pop1_is_subset = FALSE,
+                           many2one = TRUE,
+                           one2many = FALSE)
 }

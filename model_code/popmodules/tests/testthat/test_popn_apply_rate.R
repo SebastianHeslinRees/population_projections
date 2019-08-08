@@ -1,5 +1,5 @@
 context("popn_apply_rate")
-library(generalpop)
+library(popmodules)
 library(testthat)
 
 popn <- data.frame( gss_code=c("a","b"), count = 100, stringsAsFactors = FALSE)

@@ -1,5 +1,5 @@
 context("births_from_popn_fert")
-library(births)
+library(popmodules)
 library(testthat)
 
 popn        <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), count = 205, stringsAsFactors = FALSE)
@@ -251,8 +251,8 @@ test_that("births_from_popn_fert can handle unused columns in the inputs that ha
   popn_in <- dplyr::mutate(popn, rate = 0.1)
   fert_in <- dplyr::mutate(fert, count = 20)
 
-  expect_warning(temp <- births_from_popn_fert(popn_in, fert_in))
-  expect_equivalent(temp, births)
+  expect_equivalent(births_from_popn_fert(popn_in, fert_in),
+                    births)
 
   fert_in <- dplyr::mutate(fert, xgss_code = gss_code) # creates identical gss_code, xgss_code columns
   expect_warning(temp <- births_from_popn_fert(popn, fert_in, col_aggregation = c("gss_code"="xgss_code", "year", "age", "sex")))

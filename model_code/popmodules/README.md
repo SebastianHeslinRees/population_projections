@@ -81,7 +81,7 @@ Several of the above modules share code, and so this is split into functions wit
 
 Let's create a dummy population for all these examples, and load the package:
 
-``` r
+```
 library(popmodules)
 
 popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), count = 100)
@@ -91,7 +91,7 @@ popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","
 
 Create null births:
 
-``` r
+```
 pop_births <- births_null(popn, colname_aggregation = c("gss_code", "sex", "age"), const = 0)
 
 # equivalent to
@@ -100,7 +100,7 @@ pop_births <- births_null(popn)
 
 Apply birth rates:
 
-``` r
+```
 library(births)
 
 fert <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), rate = 0.01)
@@ -122,7 +122,7 @@ pop_births <- births_from_popn_fert(popn, fert)
 
 Create null deatths:
 
-``` r
+```
 pop_deaths <- deaths_null(popn, colname_aggregation = c("gss_code", "sex", "age"), const = 0)
 
 # equivalent to
@@ -131,7 +131,7 @@ pop_deaths <- deaths_null(popn)
 
 Apply mortality rates:
 
-``` r
+```
 mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 
 deaths <- popn_apply_rate(popn,
@@ -162,7 +162,7 @@ count <- popn_apply_rate(popn, mortality)
 
 Check a population dataset is valid:
 
-```r
+```
 library(magrittr)
 
 validate_population(popn,
@@ -172,7 +172,7 @@ validate_population(popn,
 ```
 
 Compare against a template population to make sure aggregation levels match
-```r
+```
 validate_population(popn,
                     col_aggregation = c("year", "gss_code", "age", "sex"),
                     comparison_pop = fert,
@@ -180,7 +180,7 @@ validate_population(popn,
 ```
 
 Check that the two data frames can be joined together, then do the join, then validate:
-```r
+```
 popn_join <- popn %>%
   validate_join_population(fert,
                            cols_common_aggregation = c("year", "gss_code", "age", "sex")) %>%
@@ -193,8 +193,7 @@ popn_join <- popn %>%
 
 Apply a rate to a population:
 
-``` r
-
+```
 deaths <- popn_apply_rate(popn,
                           mortality,
                           col_aggregation = c("year", "gss_code", "sex", "age"),

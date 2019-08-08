@@ -87,14 +87,12 @@ validate_deaths_input <- function(pop, col_aggregation, count, const, error_nega
     col_aggregation <- unique(col_aggregation)
   }
 
-  if(requireNamespace("validatepop", quietly=TRUE)) {
-    validatepop::validate_population(pop,
-                                     col_aggregation = col_aggregation,
-                                     col_data = count,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE)
-  }
+  validate_population(pop,
+                      col_aggregation = col_aggregation,
+                      col_data = count,
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
 
   if(nrow(pop) == 0) {
     warning("deaths_null was given an empty input table")
@@ -116,13 +114,11 @@ validate_deaths_output <- function(pop, col_aggregation, count, error_negative_p
 
   assert_that(all(complete.cases(deaths)))
 
-  if(requireNamespace("validatepop", quietly = TRUE)) {
-    validatepop::validate_join_population(pop,
-                                          deaths,
-                                          cols_common_aggregation = col_aggregation,
-                                          pop1_is_subset = FALSE,
-                                          many2one = TRUE,
-                                          one2many = FALSE)
-  }
+  validate_join_population(pop,
+                           deaths,
+                           cols_common_aggregation = col_aggregation,
+                           pop1_is_subset = FALSE,
+                           many2one = TRUE,
+                           one2many = FALSE)
 
 }

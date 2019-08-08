@@ -1,5 +1,5 @@
 context("deaths_from_popn_mort")
-library(deaths)
+library(popmodules)
 library(testthat)
 
 pop <- data.frame( area=c("a","b","c"), count = 100, stringsAsFactors = FALSE)

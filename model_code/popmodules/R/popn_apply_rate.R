@@ -163,27 +163,25 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
   assert_that(length(join_by) > 0,
               msg = "popn_apply_rate must share some aggregation column names with the input popn_rate, or a column mapping must be included in the col_aggregation parameter")
 
-  if(requireNamespace("validatepop", quietly=TRUE)) {
-    validatepop::validate_population(popn,
-                                     col_aggregation = names(col_aggregation),
-                                     col_data = col_count,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = TRUE)
-    validatepop::validate_population(popn_rate,
-                                     col_aggregation = join_by,
-                                     col_data = col_rate,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = FALSE)
-    validatepop::validate_join_population(popn,
-                                          popn_rate,
-                                          cols_common_aggregation = join_by,
-                                          pop1_is_subset = TRUE,
-                                          many2one = TRUE,
-                                          one2many = FALSE,
-                                          warn_unused_shared_cols = FALSE)
-  }
+  validate_population(popn,
+                      col_aggregation = names(col_aggregation),
+                      col_data = col_count,
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
+  validate_population(popn_rate,
+                      col_aggregation = join_by,
+                      col_data = col_rate,
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = FALSE)
+  validate_join_population(popn,
+                      popn_rate,
+                      cols_common_aggregation = join_by,
+                      pop1_is_subset = TRUE,
+                      many2one = TRUE,
+                      one2many = FALSE,
+                      warn_unused_shared_cols = FALSE)
 
   invisible(TRUE)
 }
@@ -203,15 +201,13 @@ validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, outp
 
   assert_that(all(stats::complete.cases(output)))
 
-  if(requireNamespace("validatepop", quietly = TRUE)) {
-    validatepop::validate_population(output,
-                                     col_aggregation = names(col_aggregation),
-                                     col_data = col_out,
-                                     test_complete = TRUE,
-                                     test_unique = TRUE,
-                                     check_negative_values = FALSE,
-                                     comparison_pop = popn)
-  }
+  validate_population(output,
+                      col_aggregation = names(col_aggregation),
+                      col_data = col_out,
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = FALSE,
+                      comparison_pop = popn)
 
   invisible(TRUE)
 }

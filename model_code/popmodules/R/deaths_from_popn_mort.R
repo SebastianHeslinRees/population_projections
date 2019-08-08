@@ -65,12 +65,12 @@ deaths_from_popn_mort <- function(popn,
   # Calculate deaths
   # ----------------
   # This will deal with most checks on the input and output
-  deaths <- generalpop::popn_apply_rate(popn,
-                                        mortality,
-                                        col_aggregation,
-                                        col_count,
-                                        col_rate,
-                                        col_deaths)
+  deaths <- popn_apply_rate(popn,
+                            mortality,
+                            col_aggregation,
+                            col_count,
+                            col_rate,
+                            col_deaths)
 
   # Validate output
   # ---------------

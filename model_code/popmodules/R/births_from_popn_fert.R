@@ -112,12 +112,12 @@ births_from_popn_fert <- function(popn,
   # Apply rates and sum
   # -------------------
 
-  births <- generalpop::popn_apply_rate(popn,
-                                        fertility,
-                                        col_aggregation = col_aggregation,
-                                        col_count = col_count,
-                                        col_rate = col_rate,
-                                        col_out = col_births)
+  births <- popn_apply_rate(popn,
+                            fertility,
+                            col_aggregation = col_aggregation,
+                            col_count = col_count,
+                            col_rate = col_rate,
+                            col_out = col_births)
 
 
   total_births <- sum(births[[col_births]])
@@ -277,7 +277,7 @@ validate_births_from_popn_input <- function(popn,
     }
   }
 
-  # Other checks (by the more expensive validatepop functions) are done within popn_apply_rates
+  # Other checks (by the more expensive validate_* functions) are done within popn_apply_rates
 
   invisible(TRUE)
 }
@@ -296,25 +296,25 @@ validate_births_from_popn_output <- function(births,
   assert_that(setequal( output_names, names(births) ))
   aggregation_levels <- union(names(col_aggregation), c(col_age, col_sex))
 
-  validatepop::validate_population(births,
-                                   col_aggregation = aggregation_levels,
-                                   col_data = col_births)
+  validate_population(births,
+                      col_aggregation = aggregation_levels,
+                      col_data = col_births)
 
   # TODO: update validate_join_population so that pop1_is_subset can take a vector of columns that are subsets in pop1_is_subset
   validation_comparison_cols <- setdiff(names(col_aggregation), c(col_age, col_sex))
-  validatepop::validate_join_population(births,
-                                        unique(popn[validation_comparison_cols]),
-                                        cols_common_aggregation = validation_comparison_cols,
-                                        pop1_is_subset = TRUE,
-                                        many2one = TRUE,
-                                        one2many = FALSE,
-                                        warn_unused_shared_cols = TRUE)
+  validate_join_population(births,
+                           unique(popn[validation_comparison_cols]),
+                           cols_common_aggregation = validation_comparison_cols,
+                           pop1_is_subset = TRUE,
+                           many2one = TRUE,
+                           one2many = FALSE,
+                           warn_unused_shared_cols = TRUE)
 }
 
 # -------------------------------------------------------
 
 # Function: convert character vector (unnamed or partially named) to one where every element is named
-# TODO split this out into the general or helper_functions package. it's used in validate_pop::validate_join_population as well, and will be in births
+# TODO split this out into the general or helper_functions package. it's used in popmodules::validate_join_population as well, and will be in births
 convert_to_named_vector <- function(vec) {
   assert_that(is.vector(vec))
 

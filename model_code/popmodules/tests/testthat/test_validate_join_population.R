@@ -1,7 +1,7 @@
 
 context("validate_join_population")
 library(testthat)
-library(validatepop)
+library(popmodules)
 
 # Set up valid population data frame with default column names
 pop_test1 <- data.frame( area=c("a","b","c","d"), stringsAsFactors = FALSE)
