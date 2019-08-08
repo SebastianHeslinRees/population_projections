@@ -1,11 +1,11 @@
 # TODO make this take a list? 
 trend_core <- function(popn_mye, mortality, n_proj_yr) {
   library(dplyr)
-  source("model_code/helper_functions/assign_function.R")
+  source("model_code/popmodules/R/assign_function.R")
   
   # Load core functions
-  age_on <- assign_function("model_code/method_modules/age_on/age_on_sya.R")
-  calc_deaths <- deaths::deaths_from_popn_mort
+  age_on <- popmodules::age_on_sya
+  calc_deaths <- popmodules::deaths_from_popn_mort
   
   # set up projection
   # TODO pass first_proj_yr in via funtion

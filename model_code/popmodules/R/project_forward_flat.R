@@ -1,5 +1,13 @@
-# copies the hold year data into the projection years
-# returns a df containing the past years and the projection years
+#' Copy the hold year data into the projection years
+#' 
+#' @param df A data frame
+#' @param first_proj_yr The first year of the projection
+#' @param n_proj_yr The number of years being projected
+#' @param hold_yr The hold year
+#' 
+#' @return A data frame containing the past years and the projection years
+#' 
+#' @export
 
 project_forward_flat <- function(df, first_proj_yr, n_proj_yr, hold_yr) {
   # remove any data that is a projection year

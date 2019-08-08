@@ -1,7 +1,19 @@
-# divides a component of change by population to give a dataframe of rates
-# takes filepaths to the CoC and popn, and returns a rates df.
+#' Divide a component of change by population to give a data frame of rates
+#'
+#' takes filepaths to the CoC and popn, and returns a rates df
+#' 
+#' @param deaths_mye_path Path to deaths MYE
+#' @param popn_mye_path Path to poplation MYE
+#' @param births_mye_path Path to births MYE
+#' 
+#' @return A data frame containing death rates (in the "value" column)
+#' 
+#' @importFrom dplyr mutate filter rename select left_join
+#' @importFrom magrittr %>%
+#' 
+#' @export
 
-get_rates_backseries <- function(deaths_mye_path, popn_mye_path, births_mye_path) {
+get_mortality_backseries <- function(deaths_mye_path, popn_mye_path, births_mye_path) {
   library(dplyr)
   
   # population is aged on due to definitions of MYE to ensure the correct denominator
