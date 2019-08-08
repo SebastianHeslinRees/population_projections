@@ -14,21 +14,17 @@ get_mye_component <- function(filepath, max_yr) {
 
 evaluate_fns_list <- function(fns_args_list) {
   
-  # fns_args_list should contain a list of paths to functions and the arguments each function takes
+  # fns_args_list should contain a list of functions and the arguments each function takes
   # these should be in the order that they should be run and in the format:
   # each function should create or modify the same df, eg. mortality or fertility (called subject here)
   #
   # funs_args_list <- list(
-  #   list(fn = "filepath_to_function1", args = list(arg1_1, arg1_2, ....)),
-  #   list(fn = "filepath_to_function2", args = list(arg2_1, arg2_2, ....)),
+  #   list(fn = function1, args = list(arg1_1, arg1_2, ....)),
+  #   list(fn = function2, args = list(arg2_1, arg2_2, ....)),
   #   .....
   # )
   #
   
-  
-  # convert the function filepaths into the functions themselves
-  source("model_code/helper_functions/filepath2function.R")
-  fns_args_list <- lapply(fns_args_list, filepath2function, filepath_element = "fn")
   
   # run the functions in the chain to get the e.g. mortality rates
   

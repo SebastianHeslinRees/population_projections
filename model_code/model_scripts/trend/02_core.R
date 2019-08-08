@@ -1,8 +1,7 @@
 # TODO make this take a list? 
 trend_core <- function(popn_mye, mortality, n_proj_yr) {
   library(dplyr)
-  source("model_code/popmodules/R/assign_function.R")
-  
+
   # Load core functions
   age_on <- popmodules::age_on_sya
   calc_deaths <- popmodules::deaths_from_popn_mort
