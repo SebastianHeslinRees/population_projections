@@ -2,10 +2,21 @@ context("births_from_popn_fert")
 library(popmodules)
 library(testthat)
 
+# example inputs
 popn        <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), count = 205, stringsAsFactors = FALSE)
 popn_no_age <- expand.grid( year = 2000, gss_code=c("a","b"),            sex=c("f","m"), count = 410, stringsAsFactors = FALSE)
 popn_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21,                 count = 205, stringsAsFactors = FALSE)
 popn_no_age_sex <- expand.grid( year = 2000, gss_code=c("a","b"),                        count = 410, stringsAsFactors = FALSE)
+
+popn_detailed <- data.frame(
+  year = rep(c(2018, 2019), 5),
+  gss_code = rep(c("E01", "E02"), 5),
+  sex = rep(c("m", "f"), 5),
+  age = rep(c(0,1,2,3,4), 2))
+
+popn_detailed <- as.data.frame(tidyr::complete(popn_detailed, year, gss_code, sex, age))
+popn_detailed <- dplyr::mutate(popn_detailed, count = 1:40) 
+  
 
 fert <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), stringsAsFactors = FALSE)
 fert$rate <- ifelse(fert$sex == "f", 0.5, 0)
@@ -16,12 +27,28 @@ fert_no_age$rate <- ifelse(fert_no_age$sex == "f", 0.5, 0)
 fert_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, rate = 0.5, stringsAsFactors = FALSE)
 fert_no_age_sex <- expand.grid( year = 2000, gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
 
+fert_detailed <-
+  as.data.frame(dplyr::mutate(popn_detailed, rate = dplyr::case_when(
+    sex == "m" ~ 0,
+    age %in% c(0,1) ~ 0,
+    TRUE ~ 0.1
+  )))
+fert_detailed <- dplyr::select(fert_detailed, -count) 
+
+# outputs to match inputs above
 births <- expand.grid( year = 2000, gss_code=c("a","b"), age=0, sex=c("f","m"), stringsAsFactors = FALSE)
 births$births <- ifelse(births$sex == "f", 100, 105)
 births <- dplyr::arrange(births, year, gss_code, age, sex)
 
 births_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=0, births = 205, stringsAsFactors = FALSE)
 births_no_sex <- dplyr::arrange(births_no_sex, year, gss_code, age)
+
+births_detailed <- data.frame(year = c(2018, 2018, 2018, 2018, 2019, 2019, 2019, 2019), 
+                              gss_code = structure(c(1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L), .Label = c("E01", "E02"), class = "factor"), 
+                              sex = structure(c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L), .Label = c("f", "m"), class = "factor"), 
+                              age = c(0, 0, 0, 0, 0, 0, 0, 0), 
+                              births = c(0.585365853658537, 0.614634146341464, 2.04878048780488, 2.15121951219512, 3.51219512195122, 3.68780487804878, 4.97560975609756, 5.22439024390244)
+)
 
 # TESTING:
 
@@ -44,6 +71,10 @@ births_no_sex <- dplyr::arrange(births_no_sex, year, gss_code, age)
 test_that("births_from_popn_fert creates the expected output", {
   expect_equivalent(births_from_popn_fert(popn, fert),
                     births)
+})
+
+test_that("births_from_popn_fert creates expected output on more complex data", {
+  expect_equivalent(births_from_popn_fert(popn_detailed, fert_detailed), births_detailed)
 })
 
 test_that("births_from_popn_fert works when age and/or sex aren't supplied", {
@@ -77,7 +108,7 @@ test_that("births_from_popn_fert doesn't care about the order of aggregation col
 })
 
 
-test_that("births_from_popn_fert handles additional, unused input columns", {
+test_that("births_from_popn_fert ignores additional, unused input columns", {
   popn_in <- dplyr::mutate(popn, fillpop = "fill")  # fillers gonna fill
   fert_in <- dplyr::mutate(fert, fillfert = "fill")
   expect_equivalent(births_from_popn_fert(popn_in, fert_in),

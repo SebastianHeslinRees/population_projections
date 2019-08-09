@@ -136,10 +136,10 @@ births_from_popn_fert <- function(popn,
     prop_female <- 1 / (1 + birthratio_m2f)
 
     births_names <- names(births)
-    births <- tidyr::expand(births, !!!syms(births_names), !!sym(col_sex) := c("f","m")) %>%
+    births <- tidyr::expand(births, nesting(!!!syms(births_names)), !!sym(col_sex) := c("f","m")) %>%
       mutate( !!sym(col_births) := ifelse( !!sym(col_sex) == "m", !!sym(col_births) * prop_male, !!sym(col_births) * prop_female))
   }
-  assert_that(total_births == sum(births[[col_births]]))
+  assert_that(all.equal(total_births, sum(births[[col_births]])))
 
   births[[col_age]] <- 0
 
