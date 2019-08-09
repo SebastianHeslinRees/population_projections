@@ -39,6 +39,11 @@ run_trend_model <- function(config_list) {
     warning("Setting mortality rates > 1 to be 1")
     mortality$value <- sapply(mortality$value, function(x) min(x,1))
   }
+  if(any(mortality$value < 0)) {
+    warning("Setting mortality rates < 0 to be 0")
+    mortality$value <- sapply(mortality$value, function(x) max(x,0))
+  }
+  
   
   ## by here we need the inputs to the core. These are:
   
