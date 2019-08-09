@@ -141,7 +141,7 @@ test_that("births_from_popn_fert warns when factor levels don't match the input"
   births_out <- dplyr::mutate(births, gss_code=factor(gss_code, levels = c("a","b","c","d")))
 
   expect_warning( temp <- births_from_popn_fert(popn_in, fert) )
-  expect_equivalent(temp, births) # due to differing factor levels, the output won't have a factor in the gss_code column
+  expect_equivalent(temp, births_out)
 
   expect_warning( temp <- births_from_popn_fert(popn, fert_in))
   expect_equivalent(temp, births)

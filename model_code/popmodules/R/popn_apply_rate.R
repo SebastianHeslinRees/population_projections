@@ -234,6 +234,7 @@ convert_to_named_vector <- function(vec) {
 # Function: given source and target data frames with a column mapping, add or
 # remove factoring in the target to match the source
 match_factors <- function(dfsource, dftarget, col_mapping) {
+  col_mapping <- convert_to_named_vector(col_mapping)
   for(i in  seq_along(col_mapping)) {
     icol <- col_mapping[i]
     if(is.factor(dfsource[[names(icol)]]) & !is.factor(dftarget[[icol]])) {

@@ -107,6 +107,8 @@ births_from_popn_fert <- function(popn,
   # levels, and there is sex data in the fertility. The code will crash if
   # there's more than one kind of sex (due to ambiguous joining)
 
+  # Store a one-row data frame so we can recover factors later
+  popn_empty <- popn[1,]
 
 
   # Apply rates and sum
@@ -158,6 +160,9 @@ births_from_popn_fert <- function(popn,
   if(popn_is_tibble & !is.null(popn_groups)) {
     popn <- group_by(popn, !!!syms(popn_groups))
   }
+
+  # Recover columns that were factors
+  births <- match_factors(popn_empty, births, intersect(names(popn_empty), names(births)))
 
   validate_births_from_popn_output(births, popn, col_aggregation, col_age, col_sex, col_births)
 
@@ -330,3 +335,30 @@ convert_to_named_vector <- function(vec) {
 
 
 
+# ---------------------------------------------------
+
+# Function: given source and target data frames with a column mapping, add or
+# remove factoring in the target to match the source
+# TODO split this out into a helper function
+match_factors <- function(dfsource, dftarget, col_mapping) {
+  col_mapping <- convert_to_named_vector(col_mapping)
+  for(i in  seq_along(col_mapping)) {
+    icol <- col_mapping[i]
+    if(is.factor(dfsource[[names(icol)]]) & !is.factor(dftarget[[icol]])) {
+      dftarget[[icol]] <- as.factor(dftarget[[icol]])
+    }
+
+    source_col <- dfsource[[names(icol)]]
+    target_col <- dftarget[[icol]]
+    if(!is.factor(source_col) & is.factor(target_col)) {
+      col_class <- class(source_col)
+      if(col_class == "numeric") {
+        dftarget[[names(icol)]] <- levels(target_col)[target_col] %>%
+          as.numeric()
+      } else {
+        dftarget[[names(icol)]] <- as.character(target_col)
+      }
+    }
+  }
+  return(dftarget)
+}
