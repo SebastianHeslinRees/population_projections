@@ -3,7 +3,8 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
   library(dplyr)
 
   # Load core functions
-  age_on <- popmodules::age_on_sya
+  #age_on <- popmodules::age_on_sya
+  age_on <- popmodules::popn_age_on
   calc_deaths <- popmodules::deaths_from_popn_mort
   
   # set up projection

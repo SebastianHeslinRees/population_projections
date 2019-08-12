@@ -86,7 +86,7 @@ births_from_popn_fert <- function(popn,
 
   # Save some properties of the input so we can recreate it later
   popn_is_tibble <- "tbl" %in% class(popn)
-  popn_groups <- dplyr::groups(popn)
+  popn_groups <- dplyr::group_vars(popn)
 
   col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
 
