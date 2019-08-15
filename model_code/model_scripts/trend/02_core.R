@@ -28,7 +28,7 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
     deaths <- calc_deaths(popn = aged_popn,
                           mortality = filter(mortality, year == my_year),
                           col_count = "value",
-                          col_rate = "value")
+                          col_rate = "rate")
     
     # TODO validate joins
     next_yr_popn <- aged_popn %>% 

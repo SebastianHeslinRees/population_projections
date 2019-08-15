@@ -261,12 +261,13 @@ validate_popn_age_on_input <- function(popn,
   col_non_numeric <- union(col_aggregation, col_non_numeric)
   if(!identical(col_aggregation, col_non_numeric)) {
     col_agg_without_age <- setdiff(col_aggregation, col_age)
-    test_unique <- dplyr::group_by_at(popn, col_agg_without_age)
-    test_unique <- dplyr::select(test_unique, !!!syms(col_non_numeric), -!!sym(col_age))
-    unique_levels_agg <- nrow(dplyr::count(test_unique)) # number of aggregation levels
+    test_unique <- dplyr::group_by_at(popn, col_agg_without_age) %>%
+      dplyr::select(!!!syms(col_non_numeric), -!!sym(col_age))
+    
+    unique_levels_agg <- nrow(dplyr::summarise(test_unique)) # number of aggregation levels
 
     test_unique <- dplyr::group_by_all(test_unique)
-    unique_levels_all <- nrow(dplyr::count(test_unique))       # number of unique rows of data
+    unique_levels_all <- nrow(dplyr::summarise(test_unique))       # number of unique rows of data
 
     assert_that(unique_levels_agg == unique_levels_all,
                 msg = "popn_age_on: non-numeric, age-dependent data detected in input. The function can't deal with this.")
