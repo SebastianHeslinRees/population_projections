@@ -2,9 +2,12 @@
 title: "Population QA"
 params:
   popn_proj_fp: outputs/model/year/population_file.rds
+  deaths_proj_fp: outputs/model/year/deaths_file.rds
 output:
   html_document:
     df_print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, echo = FALSE}
@@ -20,7 +23,8 @@ library(gganimate)
 ```
 
 ```{r, echo=FALSE, message = FALSE}
-popn_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$popn_proj_fp))
+popn_proj <-   readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$popn_proj_fp))
+deaths_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$deaths_proj_fp))
 ```
 # Total london population by year
 ```{r, echo=FALSE, message = FALSE}
@@ -38,7 +42,6 @@ ldn_by_yr
 
 # Population of London age structure over projection years
 ```{r, echo=FALSE, message = FALSE, results = 'hide'}
-popn_proj_ldn <- filter(popn_proj, grepl("^E09", gss_code))
 ldn_age_by_yr <- popn_proj_ldn %>%
   group_by(year, age) %>%
   summarise(value = sum(value)) %>%
@@ -58,4 +61,31 @@ anim_save("ldn_age_by_yr.gif", anim)
 #file.remove("ldn_age_by_yr.gif")
 ```
 
+# Total london components of natural change by year
+```{r, echo=FALSE, message = FALSE}
+deaths_proj_ldn <- filter(detahs_proj, grepl("^E09", gss_code))
+deaths_by_yr <- detahs_proj_ldn %>%
+  group_by(year) %>%
+  summarise(deaths = sum(deaths)) %>%
+  as.data.frame() %>%
+  ggplot(aes(year, value)) +
+  geom_line() 
 
+deaths_by_yr
+```
+
+# Deaths age structure over projection years
+```{r, echo=FALSE, message = FALSE, results = 'hide'}
+death_age_by_yr <- death_proj_ldn %>%
+  group_by(year, age) %>%
+  summarise(deaths = sum(deaths)) %>%
+  ggplot(aes(age, deaths, colour = as.character(year))) +
+  scale_colour_manual(values = c(rep("black", length(min(popn_proj_ldn$year):2018)), rep("red", length(2019:max(popn_proj_ldn$year))))) +
+  geom_point() +
+  theme(legend.position = "none")
+
+anim <- deaths_age_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+  ggtitle('{closest_state}')
+anim_save("ldn_age_by_yr.gif", anim)
+
+```
