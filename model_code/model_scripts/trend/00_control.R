@@ -17,7 +17,7 @@ run_trend_model <- function(config_list) {
   
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
-  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "outputs_dir", "mortality_fns", "timestamp")
+  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "outputs_dir", "mortality_fns", "fertility_fns", "timestamp")
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   
@@ -28,11 +28,29 @@ run_trend_model <- function(config_list) {
   
   deaths_mye <- get_mye_component(filepath = config_list$de, 
                                 max_yr = config_list$first_proj_yr - 1)
-
+  
   
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
+  fertility <- evaluate_fns_list(config_list$fertility_fns)
+  
   mortality <- evaluate_fns_list(config_list$mortality_fns)
+  
+  
+  # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
+  fertility <- fertility %>% select(year, gss_code, age, sex, rate)
+  mortality <- mortality %>% select(year, gss_code, age, sex, rate)
+  
+  # TODO fix the fertility data so we don't have to do this
+  if(any(fertility$rate > 1)) {
+    warning("Setting mortality rates > 1 to be 1")
+    fertility$rate <- sapply(fertility$rate, function(x) min(x,1))
+  }
+  if(any(fertility$rate < 0)) {
+    warning("Setting mortality rates < 0 to be 0")
+    fertility$rate <- sapply(fertility$rate, function(x) max(x,0))
+  }
+  
   
   # TODO fix the mortality data so we don't have to do this
   if(any(mortality$value > 1)) {
@@ -64,7 +82,7 @@ run_trend_model <- function(config_list) {
   # domestic migration rates matrix
   
   ## run the core
-  projection <- trend_core(popn_mye, mortality, config_list$n_proj_yr)
+  projection <- trend_core(popn_mye, fertility, mortality, config_list$first_proj_yr, config_list$n_proj_yr)
   
   ## write the output data
   output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
