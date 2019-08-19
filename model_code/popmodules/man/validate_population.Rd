@@ -4,10 +4,10 @@
 \alias{validate_population}
 \title{Validate a population dataset}
 \usage{
-validate_population(population, col_aggregation = c("gss_code", "age",
-  "sex"), col_data = NA, test_complete = TRUE, test_unique = TRUE,
-  check_negative_values = TRUE, comparison_pop = NA,
-  col_comparison = col_aggregation)
+validate_population(population, col_aggregation = c("year", "gss_code",
+  "age", "sex"), col_data = NA, test_complete = TRUE,
+  test_unique = TRUE, check_negative_values = TRUE,
+  comparison_pop = NA, col_comparison = col_aggregation)
 }
 \arguments{
 \item{population}{A data frame containing population data.}

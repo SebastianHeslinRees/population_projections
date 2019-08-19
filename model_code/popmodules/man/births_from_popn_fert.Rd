@@ -54,13 +54,13 @@ aggregation levels, a births count split by a provided male:female births
 ratio, and age set to zero.
 }
 \details{
-Sex data (if used) must be provided as "m" and "f".
+Sex data (if used) must be provided as "male" and "female".
 }
 \examples{
 
 library(births)
 
-popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), count = 100)
+popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("female","male"), count = 100)
 fert <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), rate = 0.01)
 
 pop_births <- births_from_popn_fert(popn,

@@ -52,7 +52,7 @@
 # TODO: add an option to convert errors to warnings. Would anyone use that?
 
 validate_population <- function( population,
-                                 col_aggregation = c("gss_code", "age", "sex"),
+                                 col_aggregation = c("year", "gss_code", "age", "sex"),
                                  col_data = NA,
                                  test_complete = TRUE,
                                  test_unique = TRUE,
