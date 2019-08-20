@@ -1,13 +1,16 @@
 ---
 title: "Population QA"
 params:
+  qa_areas_of_interest: list("London")
   popn_proj_fp: outputs/model/year/population_file.rds
   deaths_proj_fp: outputs/model/year/deaths_file.rds
+  output_files_dir: outputs/model/year/population_qa_files/
 output:
   html_document:
     df_print: paged
+    self_contained: no
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, echo = FALSE}
@@ -25,67 +28,107 @@ library(gganimate)
 ```{r, echo=FALSE, message = FALSE}
 popn_proj <-   readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$popn_proj_fp))
 deaths_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$deaths_proj_fp))
+
+output_files_dir <- paste0(rprojroot::find_rstudio_root_file(),"/",params$output_files_dir)
+areas_of_interest <- params$qa_areas_of_interest
+#areas_of_interest <- list("London")
+
+# convert areas of interest to a named list
+if (is.null(names(areas_of_interest))) {
+  names(areas_of_interest) <- areas_of_interest
+} else {
+  missing_names <- names(areas_of_interest == "")
+  names(areas_of_interest)[missing_names] <- areas_of_interest[missing_names]
+}
+if("London" %in% areas_of_interest) {
+ i <- which(areas_of_interest == "London")
+ areas_of_interest[[i]] <- unique(grep("^E09", popn_proj$gss_code, value=TRUE))
+}
 ```
-# Total london population by year
+
+# Total population by year
+```{r, echo=FALSE, message = FALSE, results='asis'}
+for(loc in seq_along(areas_of_interest)) {
+  popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]])
+  loc_by_yr <- popn_proj_loc %>%
+    group_by(year) %>%
+    summarise(value = sum(value)) %>%
+    as.data.frame() %>%
+    ggplot(aes(year, value)) +
+      geom_line() +
+      ggtitle(paste("Total", names(areas_of_interest)[loc], "population by year"))
+
+  plot(loc_by_yr)
+}
+```
+
+# Population age structure over projection years
+```{r, echo=FALSE, message = FALSE, results='hide'}
+for(loc in seq_along(areas_of_interest)) {
+  popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]])
+  loc_age_by_yr <- popn_proj_loc %>%
+    group_by(year, age) %>%
+    summarise(value = sum(value)) %>%
+    ggplot(aes(age, value, colour = as.character(year))) +
+    scale_colour_manual(values = c(rep("black", length(min(popn_proj_loc$year):2018)),
+                                   rep("red", length(2019:max(popn_proj_loc$year))))) +
+    geom_point() +
+    theme(legend.position = "none")
+  
+  anim <- loc_age_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+    labs(title = paste(names(areas_of_interest)[loc], "age structure over projection years"),
+         subtitle = '{closest_state}')
+  anim_save(paste0(output_files_dir, "/loc_age_by_yr_",loc,".gif"), anim)
+}
+```
+
+```{r, echo=FALSE}
+gifs <- list.files(output_files_dir,"*loc_age_by_yr*", full.names = TRUE)
+knitr::include_graphics(gifs)
+```
+
+
+```{r, echo = FALSE, results='asis'}
+#file.remove("loc_age_by_yr.gif")
+```
+
+# Components of natural change by year
 ```{r, echo=FALSE, message = FALSE}
-popn_proj_ldn <- filter(popn_proj, grepl("^E09", gss_code))
-ldn_by_yr <- popn_proj_ldn %>%
-  group_by(year) %>%
-  summarise(value = sum(value)) %>%
-  as.data.frame() %>%
-  ggplot(aes(year, value)) +
-  geom_line() 
+for(loc in seq_along(areas_of_interest)) {
+  deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
+  loc_deaths_by_yr <- deaths_proj_loc %>%
+    group_by(year) %>%
+    summarise(deaths = sum(deaths)) %>%
+    as.data.frame() %>%
+    ggplot(aes(year, deaths)) +
+    geom_line() +
+    ggtitle(paste("Total", names(areas_of_interest)[loc], "deaths by year"))
 
-ldn_by_yr
-
-```
-
-# Population of London age structure over projection years
-```{r, echo=FALSE, message = FALSE, results = 'hide'}
-ldn_age_by_yr <- popn_proj_ldn %>%
-  group_by(year, age) %>%
-  summarise(value = sum(value)) %>%
-  ggplot(aes(age, value, colour = as.character(year))) +
-  scale_colour_manual(values = c(rep("black", length(min(popn_proj_ldn$year):2018)), rep("red", length(2019:max(popn_proj_ldn$year))))) +
-  geom_point() +
-  theme(legend.position = "none")
-
-anim <- ldn_age_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
-  ggtitle('{closest_state}')
-anim_save("ldn_age_by_yr.gif", anim)
-
-```
-
-![](ldn_age_by_yr.gif)
-```{r, echo = FALSE}
-#file.remove("ldn_age_by_yr.gif")
-```
-
-# Total london components of natural change by year
-```{r, echo=FALSE, message = FALSE}
-deaths_proj_ldn <- filter(detahs_proj, grepl("^E09", gss_code))
-deaths_by_yr <- detahs_proj_ldn %>%
-  group_by(year) %>%
-  summarise(deaths = sum(deaths)) %>%
-  as.data.frame() %>%
-  ggplot(aes(year, value)) +
-  geom_line() 
-
-deaths_by_yr
+  plot(loc_deaths_by_yr)
+}
 ```
 
 # Deaths age structure over projection years
 ```{r, echo=FALSE, message = FALSE, results = 'hide'}
-death_age_by_yr <- death_proj_ldn %>%
-  group_by(year, age) %>%
-  summarise(deaths = sum(deaths)) %>%
-  ggplot(aes(age, deaths, colour = as.character(year))) +
-  scale_colour_manual(values = c(rep("black", length(min(popn_proj_ldn$year):2018)), rep("red", length(2019:max(popn_proj_ldn$year))))) +
-  geom_point() +
-  theme(legend.position = "none")
+for(loc in seq_along(areas_of_interest)) {
+  deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
+  loc_deaths_by_yr <- deaths_proj_loc %>%
+    group_by(year, age) %>%
+    summarise(deaths = sum(deaths)) %>%
+    ggplot(aes(age, deaths, colour = as.character(year))) +
+    scale_colour_manual(values = c(rep("black", length(min(deaths_proj_loc$year):2018)),
+                                   rep("red", length(2019:max(deaths_proj_loc$year))))) +
+    geom_point() +
+    theme(legend.position = "none")
+  
+  anim <- loc_deaths_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+    labs(title = paste(names(areas_of_interest)[loc], "deaths age structure over projection years"),
+         subtitle = '{closest_state}')
+  anim_save(paste0(output_files_dir, "/loc_deaths_by_yr_",loc,".gif"), anim)
+}
+```
 
-anim <- deaths_age_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
-  ggtitle('{closest_state}')
-anim_save("ldn_age_by_yr.gif", anim)
-
+```{r, echo=FALSE}
+gifs <- list.files(output_files_dir,"*loc_deaths_by_yr*", full.names = TRUE)
+knitr::include_graphics(gifs)
 ```

@@ -17,7 +17,7 @@ run_trend_model <- function(config_list) {
   
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
-  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "outputs_dir", "mortality_fns", "timestamp")
+  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "outputs_dir", "mortality_fns", "qa_areas_of_interest", "timestamp")
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   
@@ -34,7 +34,17 @@ run_trend_model <- function(config_list) {
   # strings together 'building blocks' which can be swapped out and replaced in config file
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
-
+  # TODO fix the mortality data so we don't have to do this
+  if(any(mortality$value > 1)) {
+    warning("Setting mortality rates > 1 to be 1")
+    mortality$value <- sapply(mortality$value, function(x) min(x,1))
+  }
+  if(any(mortality$value < 0)) {
+    warning("Setting mortality rates < 0 to be 0")
+    mortality$value <- sapply(mortality$value, function(x) max(x,0))
+  }
+  
+  
   ## by here we need the inputs to the core. These are:
   
   # start year
@@ -63,10 +73,9 @@ run_trend_model <- function(config_list) {
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
   rmarkdown::render("model_code/qa/population_qa.Rmd",
                     output_file = paste0("population_qa",config_list$timestamp,".html"),
-                    params = list(popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
-                                  deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds")))
-  
-  # move the QA output. Output is not writtedn here directly because of compications in referencing the gif file from pandoc notebook. See https://github.com/rstudio/rmarkdown/issues/587#issuecomment-168437646
-  file.rename(paste0("model_code/qa/population_qa",config_list$timestamp,".html"), paste0(config_list$outputs_dir,"/population_qa",config_list$timestamp,".html")) %>% invisible()
-  file.remove("model_code/qa/ldn_age_by_yr.gif") %>% invisible()
+                    output_dir = config_list$outputs_dir,
+                    params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
+                                  popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
+                                  deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds"),
+                                  output_files_dir = paste0(config_list$outputs_dir,"population_qa",config_list$timestamp,"_files/")))
 }
