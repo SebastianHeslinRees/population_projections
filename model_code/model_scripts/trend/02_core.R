@@ -12,8 +12,8 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
   first_proj_yr <- max(popn_mye$year) + 1
   last_proj_yr <-  max(popn_mye$year) + n_proj_yr
   
-  proj_popn <- popn_mye
-  proj_deaths <- NULL
+  proj_popn <- list(popn_mye)
+  proj_deaths <- list()
   curr_yr_popn <- popn_mye %>% filter(year == max(popn_mye$year))
   
   # run projection
@@ -37,12 +37,15 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
       mutate(value = value - deaths) %>%
       select(-deaths)
       
-    proj_popn <- rbind(proj_popn, next_yr_popn)
-    proj_deaths <- rbind(proj_deaths, deaths)
+    proj_popn[[length(proj_popn)+1]] <- next_yr_popn
+    proj_deaths[[length(proj_deaths)+1]] <- deaths
 
     curr_yr_popn <- next_yr_popn
     
   }
+  
+  proj_popn   <- data.frame(data.table::rbindlist(proj_popn))
+  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths))
   
   return(list(population = proj_popn, deaths = proj_deaths))
   
