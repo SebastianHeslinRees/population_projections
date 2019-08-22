@@ -254,8 +254,8 @@ check_validate_pop_input <- function(population,
                                  col_aggregation = unname(col_comparison),
                                  col_data = NA,
                                  comparison_pop = NA),
-             error = function(e) stop(paste0("validate_population found an error in the comparison population it was given:\n",e)),
-             warning = function(w) warning(paste0("validate_population threw a warning when checking the given comparison population:\n",w)))
+             error = function(e) stop(paste0("validate_population found an error in the comparison population it was given:\n",e,"\n")),
+             warning = function(w) warning(paste0("validate_population threw a warning when checking the given comparison population:\n",w,"\n")))
   }
 
   invisible(TRUE)
