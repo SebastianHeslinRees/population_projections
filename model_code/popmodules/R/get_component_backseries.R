@@ -76,7 +76,7 @@ get_component_backseries <- function(component_mye_path,
       group_by_at(levels) %>%
       summarise() %>%
       nrow()
-    n_levels_component <- select_at(popn, levels) %>%
+    n_levels_component <- select_at(component, levels) %>%
       group_by_at(levels) %>%
       summarise() %>%
       nrow()
