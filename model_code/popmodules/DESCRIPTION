@@ -17,7 +17,9 @@ Imports:
     stats,
     rlang,
     data.table,
-    tidyr
+    tidyr,
+    plyr,
+    tibble
 Suggests: 
     testthat (>= 2.1.0)
 RoxygenNote: 6.1.1

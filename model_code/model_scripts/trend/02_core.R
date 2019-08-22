@@ -3,7 +3,8 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
   library(dplyr)
 
   # Load core functions
-  age_on <- popmodules::age_on_sya
+  #age_on <- popmodules::age_on_sya
+  age_on <- popmodules::popn_age_on
   calc_deaths <- popmodules::deaths_from_popn_mort
   
   # set up projection
@@ -12,6 +13,7 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
   last_proj_yr <-  max(popn_mye$year) + n_proj_yr
   
   proj_popn <- popn_mye
+  proj_deaths <- NULL
   curr_yr_popn <- popn_mye %>% filter(year == max(popn_mye$year))
   
   # run projection
@@ -27,7 +29,7 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
     deaths <- calc_deaths(popn = aged_popn,
                           mortality = filter(mortality, year == my_year),
                           col_count = "value",
-                          col_rate = "value")
+                          col_rate = "rate")
     
     # TODO validate joins
     next_yr_popn <- aged_popn %>% 
@@ -36,11 +38,12 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
       select(-deaths)
       
     proj_popn <- rbind(proj_popn, next_yr_popn)
+    proj_deaths <- rbind(proj_deaths, deaths)
 
     curr_yr_popn <- next_yr_popn
     
   }
   
-  return(list(population = proj_popn))
+  return(list(population = proj_popn, deaths = proj_deaths))
   
 }
