@@ -26,10 +26,9 @@ run_trend_model <- function(config_list) {
   popn_mye <- get_mye_component(filepath = config_list$popn_mye_path, 
                            max_yr = config_list$first_proj_yr - 1)
   
-  deaths_mye <- get_mye_component(filepath = config_list$de, 
+  deaths_mye <- get_mye_component(filepath = config_list$deaths_mye_path, 
                                 max_yr = config_list$first_proj_yr - 1)
 
-  
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
   mortality <- evaluate_fns_list(config_list$mortality_fns)
