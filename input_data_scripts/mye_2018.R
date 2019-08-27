@@ -21,7 +21,7 @@ domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-compone
 # interpolate points where deaths == -1
 # FIXME this is a clumsy way to do it but everything with grouping was taking a million years, and no 2018 data are missing
 deaths <- arrange(deaths, gss_code, age, sex, year)
-ix <- deaths$deats < 0
+ix <- deaths$deaths < 0
 deaths$deaths[ix] <- NA
 missing_deaths <- approx(x = 1:nrow(deaths), y = deaths$deaths, xout = (1:nrow(deaths))[ix])
 deaths$deaths[ix] <- missing_deaths$y
