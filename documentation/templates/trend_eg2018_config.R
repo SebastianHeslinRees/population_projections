@@ -8,7 +8,7 @@ births_mye_path <- "input_data/mye/2018/births_ons_2019-07-30.rds"
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
-  list(fn = popmodules::get_component_backseries, args = list(component_mye_path = deaths_mye_path, popn_mye_path = popn_mye_path, births_mye_path = births_mye_path)),
+  list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = deaths_mye_path, popn_mye_path = popn_mye_path, births_mye_path = births_mye_path)),
   list(fn = popmodules::project_forward_flat, args = list(first_proj_yr = first_proj_yr, n_proj_yr = n_proj_yr, hold_yr = (first_proj_yr - 2)))
 )
 

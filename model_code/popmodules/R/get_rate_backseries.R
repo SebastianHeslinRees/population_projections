@@ -32,7 +32,7 @@
 #'
 #' @export
 
-get_component_backseries <- function(component_mye_path,
+get_rate_backseries <- function(component_mye_path,
                                      popn_mye_path,
                                      births_mye_path,
                                      col_partial_match = NULL) {
@@ -72,8 +72,8 @@ get_component_backseries <- function(component_mye_path,
   popn <- filter(popn, year %in% common_years)
   component <- filter(component, year %in% common_years)
 
-  if(any(component[[component_name]] < 0)) {
-    warning(paste("get_component_backseries found negative counts in the components in", component_mye_path,
+  if(any(component$count < 0)) {
+    warning(paste("get_rate_backseries found negative counts in the components in", component_mye_path,
                   "- these will be set to zero"))
     component[[component_name]] <- ifelse(component[[component_name]] < 0, 0, component[[component_name]])
   }
@@ -90,7 +90,7 @@ get_component_backseries <- function(component_mye_path,
       summarise() %>%
       nrow()
     assert_that(n_levels_component == n_levels_popn,
-                msg = paste(c("get_component_backseries found differering aggregation levels in the populations at",
+                msg = paste(c("get_rate_backseries found differering aggregation levels in the populations at",
                               component_mye_path, "and", popn_mye_path, "when comparing on", levels), collapse=" "))
   }
 
@@ -110,11 +110,10 @@ get_component_backseries <- function(component_mye_path,
     mutate(rate = ifelse(popn == 0, 0, !!sym(component_name)/popn)) %>%
     select(-popn, -!!sym(component_name))
 
-
   # Set max rate to 1 (this is mostly for mortality purposes, but nothing we're dealing with should be > 1 right?)
   if(any(rates$rate > 1)) {
     n <- sum(rates$rate > 1)
-    warning(paste(c("get_component_backseries found", n, "rates > 1 - these will be set to 1.",
+    warning(paste(c("get_rate_backseries found", n, "rates > 1 - these will be set to 1.",
                     "\nInput was", component_mye_path, "and", popn_mye_path,
                     "\nLocations:", unique(rates[rates$rate > 1, "gss_name"])), collapse = " "))
     rates$rate[rates$rate > 1] <- 1
