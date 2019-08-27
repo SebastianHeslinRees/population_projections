@@ -24,13 +24,14 @@ config_list <- list(
   n_proj_yr = n_proj_yr,
   popn_mye_path = popn_mye_path,
   deaths_mye_path = deaths_mye_path,
+  births_mye_path = births_mye_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
-rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, outputs_dir, mortality_fns, fertility_fns, qa_areas_of_interest)
+rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, births_mye_path, outputs_dir, mortality_fns, fertility_fns, qa_areas_of_interest)
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")

@@ -1,5 +1,5 @@
 
-get_mye_component <- function(filepath, max_yr) {
+get_component <- function(filepath, max_yr) {
   component <- readRDS(filepath) %>%
     filter(year <= max_yr)
   
