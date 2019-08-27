@@ -28,13 +28,13 @@ trend_core <- function(popn_mye, mortality, n_proj_yr) {
     # age is the age the cohort is at 30th June
     deaths <- calc_deaths(popn = aged_popn,
                           mortality = filter(mortality, year == my_year),
-                          col_count = "value",
+                          col_popn = "popn",
                           col_rate = "rate")
     
     # TODO validate joins
     next_yr_popn <- aged_popn %>% 
       left_join(deaths, by = names(deaths)[names(deaths)!= "deaths"]) %>%
-      mutate(value = value - deaths) %>%
+      mutate(popn = popn - deaths) %>%
       select(-deaths)
       
     proj_popn <- rbind(proj_popn, next_yr_popn)
