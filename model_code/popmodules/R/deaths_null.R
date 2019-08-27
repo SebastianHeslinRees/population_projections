@@ -8,7 +8,7 @@
 #' @param col_aggregation A string giving the names of columns to which the
 #'   output deaths will be aggregated to. Default \code{c("year", "gss_code",
 #'   "age", "sex")}
-#' @param count String. Name of column with population counts. Default "value"
+#' @param count String. Name of column with population counts. Default "popn"
 #' @param const Numeric. Number of deaths to return per geography. Defaults to
 #'   zero, but can be set to any positive number
 #' @param error_negative_pop Logical. Throw error if deaths result in a negative
@@ -25,7 +25,7 @@
 #'
 deaths_null <- function(pop,
                         col_aggregation = c("year", "gss_code", "age", "sex"),
-                        count="value",
+                        count="popn",
                         const = 0,
                         error_negative_pop = TRUE) {
 

@@ -35,13 +35,13 @@ run_trend_model <- function(config_list) {
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
   # TODO fix the mortality data so we don't have to do this
-  if(any(mortality$value > 1)) {
+  if(any(mortality$rate > 1)) {
     warning("Setting mortality rates > 1 to be 1")
-    mortality$value <- sapply(mortality$value, function(x) min(x,1))
+    mortality$rate <- sapply(mortality$rate, function(x) min(x,1))
   }
-  if(any(mortality$value < 0)) {
+  if(any(mortality$rate < 0)) {
     warning("Setting mortality rates < 0 to be 0")
-    mortality$value <- sapply(mortality$value, function(x) max(x,0))
+    mortality$rate <- sapply(mortality$rate, function(x) max(x,0))
   }
   
   

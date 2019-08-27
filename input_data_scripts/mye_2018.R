@@ -7,24 +7,24 @@ mye_coc <- readRDS(coc_file) %>%
   mutate(geography = "LAD18", sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female"), year = as.integer(year)) %>%
   as.data.frame()
 
-births <- filter(mye_coc, component == "births") %>% select(-component)
-deaths <- filter(mye_coc, component == "deaths") %>% select(-component)
-population <- filter(mye_coc, component == "population") %>% select(-component)
-international_in <- filter(mye_coc, component == "interational_in") %>% select(-component)
-international_out <- filter(mye_coc, component == "international_out") %>% select(-component)
-international_net <- filter(mye_coc, component == "international_net") %>% select(-component)
-domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component)
-domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component)
-domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component)
+births <- filter(mye_coc, component == "births") %>% select(-component) %>% rename(births = value)
+deaths <- filter(mye_coc, component == "deaths") %>% select(-component) %>% rename(deaths = value)
+population <- filter(mye_coc, component == "population") %>% select(-component) %>% rename(popn = value)
+international_in <- filter(mye_coc, component == "international_in") %>% select(-component) %>% rename(int_in = value)
+international_out <- filter(mye_coc, component == "international_out") %>% select(-component) %>% rename(int_out = value)
+international_net <- filter(mye_coc, component == "international_net") %>% select(-component) %>% rename(int_net = value)
+domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component) %>% rename(dom_in = value)
+domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component) %>% rename(dom_out = value)
+domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component) %>% rename(dom_net = value)
 
 
 # interpolate points where deaths == -1
 # FIXME this is a clumsy way to do it but everything with grouping was taking a million years, and no 2018 data are missing
 deaths <- arrange(deaths, gss_code, age, sex, year)
-ix <- deaths$value < 0
-deaths$value[ix] <- NA
-missing_deaths <- approx(x = 1:nrow(deaths), y = deaths$value, xout = (1:nrow(deaths))[ix])
-deaths$value[ix] <- missing_deaths$y
+ix <- deaths$deats < 0
+deaths$deaths[ix] <- NA
+missing_deaths <- approx(x = 1:nrow(deaths), y = deaths$deaths, xout = (1:nrow(deaths))[ix])
+deaths$deaths[ix] <- missing_deaths$y
 deaths <- arrange(deaths, gss_code, year, sex, age)
 
 
