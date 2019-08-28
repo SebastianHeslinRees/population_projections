@@ -2,7 +2,7 @@
 #'
 #' Given a cohort population and a data frame of rates at the same or lower
 #' resolution, return a data table of the population's aggregation levels, and a
-#' count resulting from the rate applied to the population.
+#' component count resulting from the rate applied to the population.
 #'
 #' @param popn A data frame containing population data.
 #' @param popn_rate A data frame containing rates data per time step (usually
@@ -13,14 +13,14 @@
 #'   it can be at a lower resolution. If names differ between the two input data
 #'   frames, use a named character vector, e.g. \code{c("gss_code"="LSOA11CD")}.
 #'   Default \code{c("year", "gss_code", "age", "sex")}.
-#' @param col_count String. Name of column in \code{popn} containing population
-#'   counts. Default "count".
+#' @param col_popn String. Name of column in \code{popn} containing population
+#'   counts. Default "popn".
 #' @param col_rate String. Name of column in \code{popn_rate} containing rate
 #'   data. Default "rate".
-#' @param col_out String. Name of column for the output count (count*rate) in
-#'   the output. Default "value".
+#' @param col_out String. Name of column for the output component count (popn*rate) in
+#'   the output. Default "component".
 #'
-#' @return A data frame of counts calculated as input count * rate, with one row
+#' @return A data frame of component counts calculated as input popn * rate, with one row
 #'   for each distinct level of the input \code{col_aggregation} columns.
 #'
 #' @import assertthat
@@ -31,18 +31,18 @@
 #'
 #' library(generalpop)
 #'
-#' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100)
+#' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 #' rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 #'
-#' count <- popn_apply_rate(popn,
+#' component <- popn_apply_rate(popn,
 #'                          rate,
 #'                          col_aggregation = c("year", "gss_code", "sex", "age"),
-#'                          col_count = "count",
+#'                          col_popn = "popn",
 #'                          col_rate = "rate",
-#'                          col_out = "value")
+#'                          col_out = "component")
 #'
 #' # Due to default parameter values, this is equivalent to
-#' count <- popn_apply_rate(popn, rate)
+#' component <- popn_apply_rate(popn, rate)
 #'
 #' @export
 #'
@@ -57,13 +57,13 @@
 popn_apply_rate <- function(popn,
                             popn_rate,
                             col_aggregation = c("year", "gss_code", "sex", "age"),
-                            col_count = "count",
+                            col_popn = "popn",
                             col_rate = "rate",
-                            col_out = "value") {
+                            col_out = "component") {
 
   # Validate input
   # --------------
-  validate_popn_apply_rate_input(popn, popn_rate, col_aggregation, col_count, col_rate, col_out)
+  validate_popn_apply_rate_input(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out)
 
 
   # Standardise data
@@ -80,22 +80,22 @@ popn_apply_rate <- function(popn,
   # Trim inputs to the columns we care about (reduces the chances of column name conflicts)
   popn_cols <- names(col_aggregation)
   rate_cols <- as.character(join_by)
-  popn <- popn[c(popn_cols, col_count)]
+  popn <- popn[c(popn_cols, col_popn)]
   popn_rate <- popn_rate[c(rate_cols, col_rate)]
 
   # Make sure the columns that are factors match
   popn_rate <- match_factors(popn, popn_rate, col_aggregation)
 
   # Deal with the possibility of duplicate data column names
-  if(col_count == col_rate) {
-    col_count <- paste0(col_count, ".x")
+  if(col_popn == col_rate) {
+    col_popn <- paste0(col_popn, ".x")
     col_rate  <- paste0(col_rate,  ".y")
   }
 
   # Apply rates
   # ----------------
   output <- left_join(popn, popn_rate, by = join_by) %>%
-    mutate(!!sym(col_out) := !!sym(col_count) * !!sym(col_rate) ) %>%
+    mutate(!!sym(col_out) := !!sym(col_popn) * !!sym(col_rate) ) %>%
     select(!!!syms(popn_cols), !!sym(col_out))
 
   # Validate output
@@ -113,7 +113,7 @@ popn_apply_rate <- function(popn,
 
 
 # Check the function input is valid
-validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col_count, col_rate, col_out) {
+validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out) {
 
   # Type checking
   assert_that(is.data.frame(popn),
@@ -122,8 +122,8 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
               msg = "popn_apply_rate needs a data frame of popn_rate data")
   assert_that(is.character(col_aggregation),
               msg = "popn_apply_rate needs a string or character vector as the col_aggregation parameter")
-  assert_that(is.string(col_count),
-              msg = "popn_apply_rate needs a string as the col_count parameter")
+  assert_that(is.string(col_popn),
+              msg = "popn_apply_rate needs a string as the col_popn parameter")
   assert_that(is.string(col_rate),
               msg = "popn_apply_rate needs a string as the col_rate parameter")
   assert_that(is.string(col_out),
@@ -131,7 +131,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
 
   # Other checks
   col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and popn_rate aggregation levels
-  assert_that(!col_count %in% names(col_aggregation),
+  assert_that(!col_popn %in% names(col_aggregation),
               msg = "popn_apply_rate was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
               msg = "popn_apply_rate was given a rate column name that is also a named aggregation column")
@@ -143,8 +143,8 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
               msg = "duplicated popn_rate column names were provided to popn_apply_rate")
   assert_that(!col_rate %in% names(col_aggregation),
               msg = "popn_apply_rate can't have a col_rate that is also a named aggregation column in the input")
-  assert_that(is.numeric(popn[[col_count]]),
-              msg = paste("popn_apply_rate needs a numeric column in the specified population count col:", col_count))
+  assert_that(is.numeric(popn[[col_popn]]),
+              msg = paste("popn_apply_rate needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(popn_rate[[col_rate]]),
               msg = paste("popn_apply_rate needs a numeric column in the specified popn_rate rate col:", col_rate))
   assert_that(!col_out %in% names(col_aggregation),
@@ -165,7 +165,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
 
   validate_population(popn,
                       col_aggregation = names(col_aggregation),
-                      col_data = col_count,
+                      col_data = col_popn,
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE)

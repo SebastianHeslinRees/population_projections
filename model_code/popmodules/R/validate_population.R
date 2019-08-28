@@ -2,7 +2,7 @@
 #'
 #' Performs common checks to validate a population dataset. The dataset is
 #' expected to contain at least one 'aggregation' column (e.g. geography, age,
-#' sex), and optionally 'data' columns, (e.g. count, rate).
+#' sex), and optionally 'data' columns, (e.g. popn, rate).
 #'
 #' The function checks for missing values, duplicated aggregation levels, unused
 #' aggregation levels (optional), negative data values (optional), and validates
@@ -23,7 +23,7 @@
 #'   include only the highest resolution and only one column. Default value is
 #'   columns for "gss_code", "age", "sex".
 #' @param col_data A string of character vector giving column names for data
-#'   (e.g. count, birth rate). Columns given will be checked for missing and
+#'   (e.g. popn, birth rate). Columns given will be checked for missing and
 #'   negative values. Any columns not named in the input are currently ignored.
 #'   Default value is NA.
 #' @param test_complete Logical. Check all combinations of aggregation variables

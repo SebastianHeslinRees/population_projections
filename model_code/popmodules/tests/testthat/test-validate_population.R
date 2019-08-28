@@ -8,9 +8,9 @@ pop_test1 <- data.frame( area=c("a","b","c","d"), stringsAsFactors = FALSE)
 
 pop_test2 <- expand.grid( area=c("a","b","c","d"), age = 0:3, stringsAsFactors = FALSE)
 
-pop_test3 <- dplyr::mutate(pop_test2, count = 10000)
+pop_test3 <- dplyr::mutate(pop_test2, popn = 10000)
 
-pop <- dplyr::mutate(pop_test3, count2 = "fill")
+pop <- dplyr::mutate(pop_test3, popn2 = "fill")
 
 
 
@@ -18,29 +18,29 @@ pop <- dplyr::mutate(pop_test3, count2 = "fill")
 
 test_that("validate_population validates correct data frames and tibbles without modifying them", {
   expect_identical(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count"),
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn"),
     pop)
 
   pop_in <- dplyr::mutate(pop, age=as.factor(age), area=as.factor(area))
   expect_identical(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count"),
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn"),
     pop_in)
 
   pop_in <- dplyr::as_tibble(pop_in)
   expect_identical(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count"),
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn"),
     pop_in)
 
   pop_in <- dplyr::group_by(pop_in, area, age)
   expect_identical(
-    temp <- validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count"),
+    temp <- validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn"),
     pop_in)
 })
 
 
 test_that("validate_population warns with an empty data frame", {
   expect_warning(
-    temp <- validate_population(pop[NULL,], col_aggregation = c("area","age"), col_data = "count"))
+    temp <- validate_population(pop[NULL,], col_aggregation = c("area","age"), col_data = "popn"))
   expect_equal(temp, pop[NULL,])
 })
 
@@ -56,19 +56,19 @@ test_that("validate_population can deal with different numbers of data and aggre
     validate_population(pop_test2, col_aggregation = c("area","age"), col_data = NA))
 
   expect_invisible(
-    validate_population(pop_test3, col_aggregation = c("area","age"), col_data = "count"))
+    validate_population(pop_test3, col_aggregation = c("area","age"), col_data = "popn"))
 
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count"))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn"))
 
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = c("count","count2")))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = c("popn","popn2")))
 })
 
 
 test_that("validate_population preserves non-aggregation and non-data columns in output", {
   expect_equal(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count"),
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn"),
     pop)
 })
 
@@ -101,12 +101,12 @@ test_that("validate_population warns when 'data' and 'aggregation' columns overl
     "Column age in both aggregation and data columns provided to validate_population")
 
   expect_warning(
-    validate_population(pop_test3, col_aggregation = c("area","age"), col_data = c("age","count")),
+    validate_population(pop_test3, col_aggregation = c("area","age"), col_data = c("age","popn")),
     "Column age in both aggregation and data columns provided to validate_population")
 
   expect_warning(
-    validate_population(pop_test3, col_aggregation = c("area","age", "count"), col_data = c("age","count")),
-    "Column age in both aggregation and data columns provided to validate_population\nColumn count in both aggregation and data columns provided to validate_population")
+    validate_population(pop_test3, col_aggregation = c("area","age", "popn"), col_data = c("age","popn")),
+    "Column age in both aggregation and data columns provided to validate_population\nColumn popn in both aggregation and data columns provided to validate_population")
 })
 
 
@@ -146,13 +146,13 @@ test_that("validate_population checks validity of 'protected' data column names"
 
 
 test_that("validate_population spots negative counts", {
-  pop_in <- dplyr::mutate(pop, count=-1)
+  pop_in <- dplyr::mutate(pop, popn=-1)
   expect_invisible(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", check_negative_values = FALSE))
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", check_negative_values = FALSE))
 
   expect_error(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", check_negative_values = TRUE),
-    "validate_population found negative values in column count")
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", check_negative_values = TRUE),
+    "validate_population found negative values in column popn")
 })
 
 
@@ -160,15 +160,15 @@ test_that("validate_population spots negative counts", {
 
 test_that("validate_population validates against comparison data frames and tibbles", {
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop))
 
   pop_in <- dplyr::mutate(pop, age=as.factor(age), area=as.factor(area))
   expect_invisible(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
 
   pop_in <- dplyr::as_tibble(pop_in)
   expect_invisible(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
 })
 
 
@@ -216,38 +216,38 @@ test_that("validate_population can handle comparison populations with unused fac
 test_that("validate_population can handle comparison populations with the same information in different formats", {
   pop_in <- dplyr::mutate(pop, age=as.factor(age), area=as.factor(area))
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
   expect_invisible(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop))
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop))
 
   pop_in <- dplyr::as_tibble(pop_in)
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
   expect_invisible(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop))
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop))
 
   pop_in <- pop[ sample(1:nrow(pop), nrow(pop), replace=FALSE), ]
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
 
   pop_in <- pop[, sample(1:ncol(pop), ncol(pop), replace=FALSE)]
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
 
   pop_in <- dplyr::group_by(pop, area, age)
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop_in))
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop_in))
   expect_invisible(
-    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "count", comparison_pop = pop))
+    validate_population(pop_in, col_aggregation = c("area","age"), col_data = "popn", comparison_pop = pop))
 })
 
 test_that("validate_population can handle comparison populations with different column names to the input", {
   pop_in <- dplyr::rename(pop, new_age=age)
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count",
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn",
                         comparison_pop = pop, col_comparison = c("age","area")))
   expect_invisible(
-    validate_population(pop, col_aggregation = c("area","age"), col_data = "count",
+    validate_population(pop, col_aggregation = c("area","age"), col_data = "popn",
                         comparison_pop = pop_in, col_comparison = c("age"="new_age","area")))
 })
 

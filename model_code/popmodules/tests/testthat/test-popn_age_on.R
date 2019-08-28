@@ -3,15 +3,15 @@ library(popmodules)
 library(testthat)
 
 # Simple test population
-popn <- expand.grid( year = 2000, gss_code=c("a","b","c"), age=20:22, sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
+popn <- expand.grid( year = 2000, gss_code=c("a","b","c"), age=20:22, sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
 # Simple test population with an ordered factor for age
-popn_banded <- expand.grid( year = 2000, gss_code=c("a","b","c"), age=factor(c("x","y","z"), ordered=TRUE), sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
+popn_banded <- expand.grid( year = 2000, gss_code=c("a","b","c"), age=factor(c("x","y","z"), ordered=TRUE), sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
 
 # The same populations aged on
 aged <- expand.grid( year = 2001, gss_code=c("a","b","c"), age=21:22, sex=c("f","m"), stringsAsFactors = FALSE)
-aged$count <- ifelse(aged$age == 22, 200, 100)
+aged$popn <- ifelse(aged$age == 22, 200, 100)
 aged_banded <- expand.grid( year = 2001, gss_code=c("a","b","c"), age=factor(c("y","z"), ordered=TRUE), sex=c("f","m"), stringsAsFactors = FALSE)
-aged_banded$count <- ifelse(aged_banded$age == "z", 200, 100)
+aged_banded$popn <- ifelse(aged_banded$age == "z", 200, 100)
 
 arrange_popn <- function(popn) dplyr::arrange(popn, year, gss_code, age, sex)
 popn <- arrange_popn(popn)
@@ -114,8 +114,8 @@ test_that("popn_age_on throws an error with an empty input", {
 })
 
 test_that("popn_age_on works with multiple data columns, including text data", {
-  popn_in  <- dplyr::mutate(popn, count2 = count, fill="fill")
-  aged_out <- dplyr::mutate(aged, count2 = count, fill="fill")
+  popn_in  <- dplyr::mutate(popn, popn2 = popn, fill="fill")
+  aged_out <- dplyr::mutate(aged, popn2 = popn, fill="fill")
   expect_equivalent(popn_age_on(popn_in),
                     aged_out)
 })
@@ -135,14 +135,15 @@ test_that("popn_age_on preserves columns that aren't aggregation levels or data"
 })
 
 test_that("popn_age_on throws an error when it can't aggregate age-dependent, non-numeric properly", {
-  popn_in <- dplyr::mutate(popn, fill = letters[1:nrow(popn)])
+  n <- nrow(popn)
+  popn_in <- dplyr::mutate(popn, fill = letters[1:n])
   expect_error(popn_age_on(popn_in))
 })
 
 
 test_that("popn_age_on handles custom column names", {
-  popn_in  <- dplyr::rename(popn, xyear=year, xgss_code=gss_code, xage=age, xsex=sex, xcount=count)
-  aged_out <- dplyr::rename(aged, xyear=year, xgss_code=gss_code, xage=age, xsex=sex, xcount=count)
+  popn_in  <- dplyr::rename(popn, xyear=year, xgss_code=gss_code, xage=age, xsex=sex, xpopn=popn)
+  aged_out <- dplyr::rename(aged, xyear=year, xgss_code=gss_code, xage=age, xsex=sex, xpopn=popn)
   expect_equivalent(popn_age_on(popn_in, col_aggregation = c("xyear","xgss_code","xage","xsex"), col_age = "xage", col_year = "xyear"),
                     aged_out)
 })
@@ -164,7 +165,7 @@ test_that("popn_age_on throws an error with implicit missing aggregation values"
 })
 
 test_that("popn_age_on throws an error when there's only one age level in the input", {
-  popn_in <- expand.grid( year = 2000, gss_code=c("a","b","c"), age=20, sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
+  popn_in <- expand.grid( year = 2000, gss_code=c("a","b","c"), age=20, sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
   expect_error(popn_age_on(popn_in))
 })
 
