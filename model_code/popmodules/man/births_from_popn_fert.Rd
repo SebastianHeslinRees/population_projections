@@ -6,7 +6,7 @@
 \usage{
 births_from_popn_fert(popn, fertility, col_aggregation = c("year",
   "gss_code", "age", "sex"), col_age = "age", col_sex = "sex",
-  col_count = "count", col_rate = "rate", col_births = "births",
+  col_popn = "popn", col_rate = "rate", col_births = "births",
   birthratio_m2f = 1.05)
 }
 \arguments{
@@ -30,8 +30,8 @@ Default "age".}
 \item{col_sex}{String. Name for sex column in inputs (if present) and output.
 Set to NULL if you are not working with sex. Default "sex".}
 
-\item{col_count}{String. Name for population count column in \code{popn}.
-Default "count".}
+\item{col_popn}{String. Name for population count column in \code{popn}.
+Default "popn".}
 
 \item{col_rate}{String. Name for fertility rate column (per person per year)
 in \code{fertility}. Default "rate".}
@@ -60,7 +60,11 @@ Sex data (if used) must be provided as "male" and "female".
 
 library(births)
 
+<<<<<<< HEAD
 popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("female","male"), count = 100)
+=======
+popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), popn = 100)
+>>>>>>> master
 fert <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), rate = 0.01)
 
 pop_births <- births_from_popn_fert(popn,
@@ -68,7 +72,7 @@ pop_births <- births_from_popn_fert(popn,
                                     colname_aggregation = c("year", "gss_code", "age", "sex"),
                                     col_age = "age",
                                     col_sex = "sex",
-                                    col_count = "count",
+                                    col_popn = "popn",
                                     col_rate = "rate",
                                     col_births = "births",
                                     birthratio_m2f = 1.05)

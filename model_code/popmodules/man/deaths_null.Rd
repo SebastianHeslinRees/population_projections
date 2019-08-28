@@ -6,7 +6,7 @@
 for each aggregation level.}
 \usage{
 deaths_null(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
-  count = "value", const = 0, error_negative_pop = TRUE)
+  col_popn = "popn", const = 0, error_negative_pop = TRUE)
 }
 \arguments{
 \item{pop}{A data frame containing population data}
@@ -15,7 +15,7 @@ deaths_null(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
 output deaths will be aggregated to. Default \code{c("year", "gss_code",
 "age", "sex")}}
 
-\item{count}{String. Name of column with population counts. Default "value"}
+\item{col_popn}{String. Name of column with population counts. Default "popn"}
 
 \item{const}{Numeric. Number of deaths to return per geography. Defaults to
 zero, but can be set to any positive number}

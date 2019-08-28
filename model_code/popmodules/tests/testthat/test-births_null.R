@@ -2,8 +2,8 @@ context("births_null")
 library(popmodules)
 library(testthat)
 
-pop <- data.frame(area = c("a","b","c"), count = 100, stringsAsFactors = FALSE)
-pop2 <- expand.grid( age=20:23, area=c("a","b","c"), sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
+pop <- data.frame(area = c("a","b","c"), popn = 100, stringsAsFactors = FALSE)
+pop2 <- expand.grid( age=20:23, area=c("a","b","c"), sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
 
 births <- data.frame(area = c("a","b","c"), births = 0, age = 0, stringsAsFactors = FALSE)
 births2 <- expand.grid( area=c("a","b","c"), sex=c("f","m"), births = 0, age = 0, stringsAsFactors = FALSE)

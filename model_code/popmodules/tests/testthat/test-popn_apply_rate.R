@@ -2,14 +2,14 @@ context("popn_apply_rate")
 library(popmodules)
 library(testthat)
 
-popn <- data.frame( gss_code=c("a","b"), count = 100, stringsAsFactors = FALSE)
-popn2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100, stringsAsFactors = FALSE)
+popn <- data.frame( gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+popn2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
 
 rate <- data.frame( gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
 rate2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
 
-output  <- data.frame( gss_code=c("a","b"),  value = 50, stringsAsFactors = FALSE)
-output2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), value = 50, stringsAsFactors = FALSE)
+output  <- data.frame( gss_code=c("a","b"),  component = 50, stringsAsFactors = FALSE)
+output2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), component = 50, stringsAsFactors = FALSE)
 
 # -------------------------------------------------------------
 
@@ -17,9 +17,9 @@ output2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m")
 # popn_apply_rate <- function(popn,
 #                            popn_rate,
 #                            col_aggregation = c("year", "gss_code", "sex", "age"),
-#                            col_count = "count",
+#                            col_popn = "popn",
 #                            col_rate = "rate",
-#                            col_out = "value") {
+#                            col_out = "component") {
 
 #--------------------------------------------------------------
 # The tests here use expect_equivalent. This is expect_equal (i.e. objects must be the same) but doesn't compare object attributes
@@ -114,32 +114,32 @@ test_that("popn_apply_rate warns with an empty input", {
 
 
 test_that("popn_apply_rate warns when the input already has a col_out column and throws an error when it's an aggregation level", {
-  popn_in <- dplyr::mutate(popn, value = 50)
-  expect_warning(temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", col_out = "value") )
+  popn_in <- dplyr::mutate(popn, component = 50)
+  expect_warning(temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", col_out = "component") )
   expect_equivalent(temp, output)
   expect_error(popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", col_out = "gss_code") )
 })
 
 test_that("popn_apply_rate handles important data column names duplicated between the population and rates data", {
-  popn_in     <- dplyr::rename(popn, value = count)
-  rate_in    <- dplyr::rename(rate, value = rate)
+  popn_in     <- dplyr::rename(popn, component = popn)
+  rate_in    <- dplyr::rename(rate, component = rate)
 
-  expect_warning(temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", col_count = "value", col_rate = "rate", col_out = "value"))
+  expect_warning(temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", col_popn = "component", col_rate = "rate", col_out = "component"))
   expect_equivalent(temp,  output)
 
-  expect_equivalent(popn_apply_rate(popn, rate_in, col_aggregation = "gss_code", col_count = "count", col_rate = "value", col_out = "value"),
+  expect_equivalent(popn_apply_rate(popn, rate_in, col_aggregation = "gss_code", col_popn = "popn", col_rate = "component", col_out = "component"),
                     output)
 
-  expect_warning(temp <- popn_apply_rate(popn_in, rate_in, col_aggregation = "gss_code", col_count = "value", col_rate = "value", col_out = "value"))
+  expect_warning(temp <- popn_apply_rate(popn_in, rate_in, col_aggregation = "gss_code", col_popn = "component", col_rate = "component", col_out = "component"))
   expect_equivalent(temp, output)
 
-  popn_in <- dplyr::rename(popn, value = gss_code)
-  expect_error(popn_apply_rate(popn_in, rate_in, col_aggregation = c("value"="gss_code"), col_count = "count", col_rate = "value", col_out = "value"))
+  popn_in <- dplyr::rename(popn, component = gss_code)
+  expect_error(popn_apply_rate(popn_in, rate_in, col_aggregation = c("component"="gss_code"), col_popn = "popn", col_rate = "component", col_out = "component"))
 })
 
 test_that("popn_apply_rate handles unused columns in the inputs with column names from the other inputs", {
   popn_in <-  dplyr::mutate(popn, rate = 0.1)
-  rate_in <- dplyr::mutate(rate, count = 20)
+  rate_in <- dplyr::mutate(rate, popn = 20)
 
   expect_equivalent(popn_apply_rate(popn_in, rate_in, col_aggregation = "gss_code"), output)
 

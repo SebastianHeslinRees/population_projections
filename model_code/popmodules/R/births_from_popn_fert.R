@@ -22,8 +22,8 @@
 #'   Default "age".
 #' @param col_sex String. Name for sex column in inputs (if present) and output.
 #'   Set to NULL if you are not working with sex. Default "sex".
-#' @param col_count String. Name for population count column in \code{popn}.
-#'   Default "count".
+#' @param col_popn String. Name for population count column in \code{popn}.
+#'   Default "popn".
 #' @param col_rate String. Name for fertility rate column (per person per year)
 #'   in \code{fertility}. Default "rate".
 #' @param col_births String. Name for births column in output. Default "births".
@@ -42,7 +42,7 @@
 #'
 #' library(births)
 #'
-#' popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("female","male"), count = 100)
+#' popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), popn = 100)
 #' fert <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), rate = 0.01)
 #'
 #' pop_births <- births_from_popn_fert(popn,
@@ -50,7 +50,7 @@
 #'                                     colname_aggregation = c("year", "gss_code", "age", "sex"),
 #'                                     col_age = "age",
 #'                                     col_sex = "sex",
-#'                                     col_count = "count",
+#'                                     col_popn = "popn",
 #'                                     col_rate = "rate",
 #'                                     col_births = "births",
 #'                                     birthratio_m2f = 1.05)
@@ -64,7 +64,7 @@ births_from_popn_fert <- function(popn,
                                   col_aggregation = c("year", "gss_code", "age", "sex"),
                                   col_age = "age",
                                   col_sex = "sex",
-                                  col_count = "count",
+                                  col_popn = "popn",
                                   col_rate = "rate",
                                   col_births = "births",
                                   birthratio_m2f = 1.05) {
@@ -78,7 +78,7 @@ births_from_popn_fert <- function(popn,
     col_sex <- NULL
   }
 
-  validate_births_from_popn_input(popn, fertility, col_aggregation, col_age, col_sex, col_count, col_rate, col_births, birthratio_m2f)
+  validate_births_from_popn_input(popn, fertility, col_aggregation, col_age, col_sex, col_popn, col_rate, col_births, birthratio_m2f)
 
   # Standardise input
   # -----------------
@@ -117,7 +117,7 @@ births_from_popn_fert <- function(popn,
   births <- popn_apply_rate(popn,
                             fertility,
                             col_aggregation = col_aggregation,
-                            col_count = col_count,
+                            col_popn = col_popn,
                             col_rate = col_rate,
                             col_out = col_births)
 
@@ -178,7 +178,7 @@ validate_births_from_popn_input <- function(popn,
                                             col_aggregation,
                                             col_age,
                                             col_sex,
-                                            col_count,
+                                            col_popn,
                                             col_rate,
                                             col_births,
                                             birthratio_m2f) {
@@ -194,8 +194,8 @@ validate_births_from_popn_input <- function(popn,
               msg = "births_from_popn_fert needs a string as the col_age parameter")
   assert_that(is.null(col_sex) | is.string(col_sex),
               msg = "births_from_popn_fert needs a string as the col_sex parameter")
-  assert_that(is.string(col_count),
-              msg = "births_from_popn_fert needs a string as the col_count parameter")
+  assert_that(is.string(col_popn),
+              msg = "births_from_popn_fert needs a string as the col_popn parameter")
   assert_that(is.string(col_rate),
               msg = "births_from_popn_fert needs a string as the col_rate parameter")
   assert_that(is.string(col_births),
@@ -205,7 +205,7 @@ validate_births_from_popn_input <- function(popn,
 
   # Check for naming conflicts
   col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
-  assert_that(!col_count %in% names(col_aggregation),
+  assert_that(!col_popn %in% names(col_aggregation),
               msg = "births_from_popn_fert was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
               msg = "births_from_popn_fert was given a fertility rate column name that is also a named aggregation column")
@@ -225,11 +225,11 @@ validate_births_from_popn_input <- function(popn,
               msg = paste("births_from_popn_fert can't output births and age data with the same column names"))
   assert_that(is.null(col_sex) || col_births != col_sex,
               msg = paste("births_from_popn_fert can't output births and sex data with the same column names"))
-  assert_that(col_age != col_count,
-              msg = paste("births_from_popn_fert won't allow col_age to equal col_count.",
+  assert_that(col_age != col_popn,
+              msg = paste("births_from_popn_fert won't allow col_age to equal col_popn.",
                           "If you really care about this you could definitely adapt the code to handle it, but my advice is rename the columns."))
-  assert_that(is.null(col_sex) || col_count != col_sex,
-              msg = paste("births_from_popn_fert won't allow col_sex to equal col_count.",
+  assert_that(is.null(col_sex) || col_popn != col_sex,
+              msg = paste("births_from_popn_fert won't allow col_sex to equal col_popn.",
                           "If you really care about this you could definitely adapt the code to handle it, but my advice is rename the columns."))
 
   # Check columns contain the correct data
@@ -237,8 +237,8 @@ validate_births_from_popn_input <- function(popn,
               msg = "births_from_popn_fert was given a table with 0 rows of input")
   assert_that(is.null(col_sex) || all(popn[[col_sex]] %in% c("male", "female")),
               msg = paste("births_from_popn_fert needs values of 'm' or 'f' in the specified sex col:", col_sex))
-  assert_that(is.numeric(popn[[col_count]]),
-              msg = paste("births_from_popn_fert needs a numeric column in the specified population count col:", col_count))
+  assert_that(is.numeric(popn[[col_popn]]),
+              msg = paste("births_from_popn_fert needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(fertility[[col_rate]]),
               msg = paste("births_from_popn_fert needs a numeric column in the specified fertility rate col:", col_rate))
   assert_that(all(fertility[[col_rate]] >= 0 && fertility[[col_rate]] <= 2),

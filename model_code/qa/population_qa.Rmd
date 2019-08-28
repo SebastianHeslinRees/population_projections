@@ -52,9 +52,9 @@ for(loc in seq_along(areas_of_interest)) {
   popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]])
   loc_by_yr <- popn_proj_loc %>%
     group_by(year) %>%
-    summarise(value = sum(value)) %>%
+    summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
-    ggplot(aes(year, value)) +
+    ggplot(aes(year, popn)) +
       geom_line() +
       ggtitle(paste("Total", names(areas_of_interest)[loc], "population by year"))
 
@@ -68,8 +68,8 @@ for(loc in seq_along(areas_of_interest)) {
   popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]])
   loc_age_by_yr <- popn_proj_loc %>%
     group_by(year, age) %>%
-    summarise(value = sum(value)) %>%
-    ggplot(aes(age, value, colour = as.character(year))) +
+    summarise(popn = sum(popn)) %>%
+    ggplot(aes(age, popn, colour = as.character(year))) +
     scale_colour_manual(values = c(rep("black", length(min(popn_proj_loc$year):2018)),
                                    rep("red", length(2019:max(popn_proj_loc$year))))) +
     geom_point() +
