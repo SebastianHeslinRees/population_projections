@@ -8,7 +8,7 @@
 #' @param col_aggregation A string giving the names of columns to which the
 #'   output deaths will be aggregated to. Default \code{c("year", "gss_code",
 #'   "age", "sex")}
-#' @param pop_col String. Name of column with population counts. Default "popn"
+#' @param col_popn String. Name of column with population counts. Default "popn"
 #' @param const Numeric. Number of deaths to return per geography. Defaults to
 #'   zero, but can be set to any positive number
 #' @param error_negative_pop Logical. Throw error if deaths result in a negative
@@ -25,31 +25,31 @@
 #'
 deaths_null <- function(pop,
                         col_aggregation = c("year", "gss_code", "age", "sex"),
-                        pop_col="popn",
+                        col_popn="popn",
                         const = 0,
                         error_negative_pop = TRUE) {
 
-  validate_deaths_input(pop, col_aggregation, pop_col, const, error_negative_pop)
+  validate_deaths_input(pop, col_aggregation, col_popn, const, error_negative_pop)
   col_aggregation <- names(pop)[ names(pop) %in% col_aggregation] # order to match input ordering, remove duplicates
 
   # Calculate deaths
   deaths <- dplyr::mutate(pop, deaths = const)
 
   # Check for negative population
-  ix_negative <- deaths[["deaths"]] > deaths[[pop_col]]
+  ix_negative <- deaths[["deaths"]] > deaths[[col_popn]]
   if(any(ix_negative) & error_negative_pop) {
     stop(paste("deaths_null created more deaths than population in", sum(ix_negative), "rows"))
   }
   if(any(ix_negative) & !error_negative_pop) {
     warning(paste("deaths_null created more deaths than population in", sum(ix_negative), "rows.",
                   "Adjusting deaths to prevent negative population"))
-    deaths[ix_negative, "deaths"] <- deaths[ix_negative, pop_col]
+    deaths[ix_negative, "deaths"] <- deaths[ix_negative, col_popn]
   }
 
   # Select the columns we want to output
   deaths <- deaths[c(col_aggregation, "deaths")]
 
-  validate_deaths_output(pop, col_aggregation, pop_col, error_negative_pop, deaths)
+  validate_deaths_output(pop, col_aggregation, col_popn, error_negative_pop, deaths)
 
   deaths
 }
@@ -60,22 +60,22 @@ deaths_null <- function(pop,
 # ---------------------------------------------------------------------------
 
 # Check the function input is valid
-validate_deaths_input <- function(pop, col_aggregation, pop_col, const, error_negative_pop) {
+validate_deaths_input <- function(pop, col_aggregation, col_popn, const, error_negative_pop) {
 
   assert_that(is.data.frame(pop),
               msg = "deaths_null needs a data frame as input")
   assert_that(is.character(col_aggregation),
               msg = "deaths_null needs a string or character vector as the col_aggregation parameter")
-  assert_that(is.string(pop_col),
-              msg = "deaths_null needs a string as the pop_col parameter")
+  assert_that(is.string(col_popn),
+              msg = "deaths_null needs a string as the col_popn parameter")
   assert_that(is.numeric(const) && length(const) == 1,
               msg = "deaths_null needs a single numeric value as the const parameter")
   assert_that(const >= 0,
               msg = "deaths_null needs a positive value of the const parameter")
   assert_that(is.logical(error_negative_pop),
               msg = "deaths_null needs a TRUE/FALSE value for the error_negative_pop parameter")
-  assert_that(!pop_col %in% col_aggregation,
-              msg = "deaths_null was given a population pop_col column that is also a named aggregation column")
+  assert_that(!col_popn %in% col_aggregation,
+              msg = "deaths_null was given a population col_popn column that is also a named aggregation column")
   assert_that(!"deaths" %in% col_aggregation,
               msg = "deaths_null can't handle an aggregation column called also deaths. If this is really important to you, update the function to give a customisable name to the output deaths column.")
   if("deaths" %in% names(pop)) {
@@ -89,7 +89,7 @@ validate_deaths_input <- function(pop, col_aggregation, pop_col, const, error_ne
 
   validate_population(pop,
                       col_aggregation = col_aggregation,
-                      col_data = pop_col,
+                      col_data = col_popn,
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE)
@@ -106,7 +106,7 @@ validate_deaths_input <- function(pop, col_aggregation, pop_col, const, error_ne
 
 
 # Check the function output isn't doing anything unexpected
-validate_deaths_output <- function(pop, col_aggregation, pop_col, error_negative_pop, deaths) {
+validate_deaths_output <- function(pop, col_aggregation, col_popn, error_negative_pop, deaths) {
 
   assert_that(all(col_aggregation %in% names(deaths)))
 

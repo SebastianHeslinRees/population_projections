@@ -135,7 +135,8 @@ test_that("popn_age_on preserves columns that aren't aggregation levels or data"
 })
 
 test_that("popn_age_on throws an error when it can't aggregate age-dependent, non-numeric properly", {
-  popn_in <- dplyr::mutate(popn, fill = letters[1:nrow(popn)])
+  n <- nrow(popn)
+  popn_in <- dplyr::mutate(popn, fill = letters[1:n])
   expect_error(popn_age_on(popn_in))
 })
 
