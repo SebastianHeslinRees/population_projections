@@ -72,7 +72,7 @@ get_rate_backseries <- function(component_mye_path,
   popn <- filter(popn, year %in% common_years)
   component <- filter(component, year %in% common_years)
 
-  if(any(component$count < 0)) {
+  if(any(component[,component_name] < 0)) {
     warning(paste("get_rate_backseries found negative counts in the components in", component_mye_path,
                   "- these will be set to zero"))
     component[[component_name]] <- ifelse(component[[component_name]] < 0, 0, component[[component_name]])
@@ -105,7 +105,11 @@ get_rate_backseries <- function(component_mye_path,
 
   # TODO split the rates calculation out into a separate function
   # TODO check the methodological decision to set value to 0 if popn is 0
-  rates <- left_join(popn, component, by=c("gss_code","gss_name","geography","country","sex","age","year")) %>%
+
+  join_cols <- intersect(names(popn), names(component))
+  # TODO add these join cols to the log
+
+  rates <- left_join(popn, component, by=join_cols) %>%
     mutate(!!sym(component_name) := ifelse(is.na(!!sym(component_name)), 0, !!sym(component_name))) %>%
     mutate(rate = ifelse(popn == 0, 0, !!sym(component_name)/popn)) %>%
     select(-popn, -!!sym(component_name))
