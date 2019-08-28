@@ -5,7 +5,7 @@
 \title{Apply mortality rates to a population.}
 \usage{
 deaths_from_popn_mort(popn, mortality, col_aggregation = c("year",
-  "gss_code", "sex", "age"), col_count = "count", col_rate = "rate",
+  "gss_code", "sex", "age"), col_popn = "popn", col_rate = "rate",
   col_deaths = "deaths")
 }
 \arguments{
@@ -20,8 +20,8 @@ between input data frames, use a named character vector, e.g.
 \code{c("popn_age"="mortality_age")}. Can contain columns that are not in
 \code{mortality}. Default \code{c("year", "gss_code", "age", "sex")}}
 
-\item{col_count}{String. Name of column in \code{popn} containing population
-counts. Default "count"}
+\item{col_popn}{String. Name of column in \code{popn} containing population
+counts. Default "popn"}
 
 \item{col_rate}{String. Name of column in \code{mortality} containing
 mortality rates. Default "rate"}
@@ -46,17 +46,17 @@ If deaths would result in a negative population, an error will be thrown
 
 library(deaths)
 
-popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100)
+popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 
 deaths <- popn_apply_rate(popn,
                           mortality,
                           col_aggregation = c("year", "gss_code", "sex", "age"),
-                          col_count = "count",
+                          col_popn = "popn",
                           col_rate = "rate",
                           col_deaths = "deaths")
 
 # Due to default parameter values, this is equivalent to
-count <- popn_apply_rate(popn, mortality)
+deaths <- popn_apply_rate(popn, mortality)
 
 }

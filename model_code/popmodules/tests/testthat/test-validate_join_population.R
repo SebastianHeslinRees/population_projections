@@ -11,9 +11,9 @@ pop_test2 <- expand.grid( area=c("a","b","c","d"), age = 0:3, stringsAsFactors =
 
 pop_test2_partial <- dplyr::filter(pop_test2, area!="a")
 
-pop_test3 <- dplyr::mutate(pop_test2, count = 10000)
+pop_test3 <- dplyr::mutate(pop_test2, popn = 10000)
 
-pop <- dplyr::mutate(pop_test3, count2 = "fill")
+pop <- dplyr::mutate(pop_test3, popn2 = "fill")
 
 
 

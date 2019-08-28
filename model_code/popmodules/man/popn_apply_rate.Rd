@@ -5,8 +5,8 @@
 \title{Apply rates to a population.}
 \usage{
 popn_apply_rate(popn, popn_rate, col_aggregation = c("year", "gss_code",
-  "sex", "age"), col_count = "count", col_rate = "rate",
-  col_out = "value")
+  "sex", "age"), col_popn = "popn", col_rate = "rate",
+  col_out = "component")
 }
 \arguments{
 \item{popn}{A data frame containing population data.}
@@ -21,39 +21,39 @@ it can be at a lower resolution. If names differ between the two input data
 frames, use a named character vector, e.g. \code{c("gss_code"="LSOA11CD")}.
 Default \code{c("year", "gss_code", "age", "sex")}.}
 
-\item{col_count}{String. Name of column in \code{popn} containing population
-counts. Default "count".}
+\item{col_popn}{String. Name of column in \code{popn} containing population
+counts. Default "popn".}
 
 \item{col_rate}{String. Name of column in \code{popn_rate} containing rate
 data. Default "rate".}
 
-\item{col_out}{String. Name of column for the output count (count*rate) in
-the output. Default "value".}
+\item{col_out}{String. Name of column for the output component count (popn*rate) in
+the output. Default "component".}
 }
 \value{
-A data frame of counts calculated as input count * rate, with one row
+A data frame of component counts calculated as input popn * rate, with one row
   for each distinct level of the input \code{col_aggregation} columns.
 }
 \description{
 Given a cohort population and a data frame of rates at the same or lower
 resolution, return a data table of the population's aggregation levels, and a
-count resulting from the rate applied to the population.
+component count resulting from the rate applied to the population.
 }
 \examples{
 
 library(generalpop)
 
-popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100)
+popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 
-count <- popn_apply_rate(popn,
+component <- popn_apply_rate(popn,
                          rate,
                          col_aggregation = c("year", "gss_code", "sex", "age"),
-                         col_count = "count",
+                         col_popn = "popn",
                          col_rate = "rate",
-                         col_out = "value")
+                         col_out = "component")
 
 # Due to default parameter values, this is equivalent to
-count <- popn_apply_rate(popn, rate)
+component <- popn_apply_rate(popn, rate)
 
 }

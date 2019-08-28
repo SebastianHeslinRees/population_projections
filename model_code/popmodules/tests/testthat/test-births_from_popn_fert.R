@@ -3,10 +3,10 @@ library(popmodules)
 library(testthat)
 
 # example inputs
-popn        <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), count = 205, stringsAsFactors = FALSE)
-popn_no_age <- expand.grid( year = 2000, gss_code=c("a","b"),            sex=c("f","m"), count = 410, stringsAsFactors = FALSE)
-popn_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21,                 count = 205, stringsAsFactors = FALSE)
-popn_no_age_sex <- expand.grid( year = 2000, gss_code=c("a","b"),                        count = 410, stringsAsFactors = FALSE)
+popn        <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), popn = 205, stringsAsFactors = FALSE)
+popn_no_age <- expand.grid( year = 2000, gss_code=c("a","b"),            sex=c("f","m"), popn = 410, stringsAsFactors = FALSE)
+popn_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21,                 popn = 205, stringsAsFactors = FALSE)
+popn_no_age_sex <- expand.grid( year = 2000, gss_code=c("a","b"),                        popn = 410, stringsAsFactors = FALSE)
 
 popn_detailed <- data.frame(
   year = rep(c(2018, 2019), 5),
@@ -15,8 +15,8 @@ popn_detailed <- data.frame(
   age = rep(c(0,1,2,3,4), 2))
 
 popn_detailed <- as.data.frame(tidyr::complete(popn_detailed, year, gss_code, sex, age))
-popn_detailed <- dplyr::mutate(popn_detailed, count = 1:40) 
-  
+popn_detailed <- dplyr::mutate(popn_detailed, popn = 1:40)
+
 
 fert <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), stringsAsFactors = FALSE)
 fert$rate <- ifelse(fert$sex == "f", 0.5, 0)
@@ -33,7 +33,7 @@ fert_detailed <-
     age %in% c(0,1) ~ 0,
     TRUE ~ 0.1
   )))
-fert_detailed <- dplyr::select(fert_detailed, -count) 
+fert_detailed <- dplyr::select(fert_detailed, -popn)
 
 # outputs to match inputs above
 births <- expand.grid( year = 2000, gss_code=c("a","b"), age=0, sex=c("f","m"), stringsAsFactors = FALSE)
@@ -43,10 +43,10 @@ births <- dplyr::arrange(births, year, gss_code, age, sex)
 births_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=0, births = 205, stringsAsFactors = FALSE)
 births_no_sex <- dplyr::arrange(births_no_sex, year, gss_code, age)
 
-births_detailed <- data.frame(year = c(2018, 2018, 2018, 2018, 2019, 2019, 2019, 2019), 
-                              gss_code = structure(c(1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L), .Label = c("E01", "E02"), class = "factor"), 
-                              sex = structure(c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L), .Label = c("f", "m"), class = "factor"), 
-                              age = c(0, 0, 0, 0, 0, 0, 0, 0), 
+births_detailed <- data.frame(year = c(2018, 2018, 2018, 2018, 2019, 2019, 2019, 2019),
+                              gss_code = structure(c(1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L), .Label = c("E01", "E02"), class = "factor"),
+                              sex = structure(c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L), .Label = c("f", "m"), class = "factor"),
+                              age = c(0, 0, 0, 0, 0, 0, 0, 0),
                               births = c(0.585365853658537, 0.614634146341464, 2.04878048780488, 2.15121951219512, 3.51219512195122, 3.68780487804878, 4.97560975609756, 5.22439024390244)
 )
 
@@ -57,7 +57,7 @@ births_detailed <- data.frame(year = c(2018, 2018, 2018, 2018, 2019, 2019, 2019,
 #                                   col_aggregation = c("year", "gss_code", "age", "sex"),
 #                                   col_age = "age",
 #                                   col_sex = "sex",
-#                                   col_count = "count",
+#                                   col_popn = "popn",
 #                                   col_rate = "rate",
 #                                   col_births = "births",
 #                                   birthrate_m2f = 1.05)
@@ -230,34 +230,34 @@ test_that("births_from_popn_fert warns when the input has an age or sex column w
 
 test_that("births_from_popn_fert handles important data column names duplicated between the population and fertility data", {
 
-  #  1: Different combinations of count/rate/births all set to "value"
-  popn_in    <- dplyr::rename(popn, value = count)
+  #  1: Different combinations of popn/rate/births all set to "value"
+  popn_in    <- dplyr::rename(popn, value = popn)
   fert_in    <- dplyr::rename(fert, value = rate)
   births_out <- dplyr::rename(births, value = births)
 
-  expect_warning(temp <- births_from_popn_fert(popn_in, fert, col_count = "value", col_births = "value"))
+  expect_warning(temp <- births_from_popn_fert(popn_in, fert, col_popn = "value", col_births = "value"))
   expect_equivalent(temp, births_out)
 
   expect_equivalent(births_from_popn_fert(popn, fert_in, col_rate = "value", col_births = "value"),
                     births_out)
 
-  expect_warning(temp <- births_from_popn_fert(popn_in, fert_in, col_count = "value", col_rate = "value", col_births = "value"))
+  expect_warning(temp <- births_from_popn_fert(popn_in, fert_in, col_popn = "value", col_rate = "value", col_births = "value"))
   expect_equivalent(temp, births_out)
 
-  #  2: Different combinations of count/age/births all set to "value"
+  #  2: Different combinations of popn/age/births all set to "value"
   popn_in    <- dplyr::rename(popn, value = age)
 
   expect_error(births_from_popn_fert(popn_in, fert, col_age = "value", col_births = "value", col_aggregation = c("year", "gss_code", "value"="age", "sex")))
   expect_error(births_from_popn_fert(popn_no_age, fert_no_age, col_age = "value", col_births = "value", col_aggregation = c("year", "gss_code", "sex")))
-  expect_error(births_from_popn_fert(popn_in, fert, col_age = "value", col_count = "value", col_aggregation = c("year", "gss_code", "value"="age", "sex")))
+  expect_error(births_from_popn_fert(popn_in, fert, col_age = "value", col_popn = "value", col_aggregation = c("year", "gss_code", "value"="age", "sex")))
   expect_error(births_from_popn_fert(popn_in, fert_in, col_age = "value", col_rate = "value", col_aggregation = c("year", "gss_code", "value"="age", "sex")))
 
-  #  3: Different combinations of count/age/sex all set to "value"
+  #  3: Different combinations of popn/age/sex all set to "value"
   popn_in    <- dplyr::rename(popn, value = sex)
 
   expect_error(births_from_popn_fert(popn_in, fert, col_sex = "value", col_births = "value", col_aggregation = c("year", "gss_code", "age", "value"="sex")))
   expect_error(births_from_popn_fert(popn_no_sex, fert_no_sex, col_sex = "value", col_births = "value", col_aggregation = c("year", "gss_code", "sex")))
-  expect_error(births_from_popn_fert(popn_in, fert, col_sex = "value", col_count = "value", col_aggregation = c("year", "gss_code", "age", "value"="sex")))
+  expect_error(births_from_popn_fert(popn_in, fert, col_sex = "value", col_popn = "value", col_aggregation = c("year", "gss_code", "age", "value"="sex")))
   expect_error(births_from_popn_fert(popn_in, fert_in, col_sex = "value", col_rate = "value", col_aggregation = c("year", "gss_code", "age", "value"="sex")))
 
   #  4: But it works when age/sex columns aren't created until the end
@@ -280,7 +280,7 @@ test_that("births_from_popn_fert handles important data column names duplicated 
 
 test_that("births_from_popn_fert can handle unused columns in the inputs that have names from the other inputs", {
   popn_in <- dplyr::mutate(popn, rate = 0.1)
-  fert_in <- dplyr::mutate(fert, count = 20)
+  fert_in <- dplyr::mutate(fert, popn = 20)
 
   expect_equivalent(births_from_popn_fert(popn_in, fert_in),
                     births)

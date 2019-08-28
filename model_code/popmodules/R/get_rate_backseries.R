@@ -37,6 +37,9 @@ get_rate_backseries <- function(component_mye_path,
                                      births_mye_path,
                                      col_partial_match = NULL) {
 
+  # List valid names of population components
+  component_names <- c("births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in", "dom_out", "dom_net")
+
   # population is aged on due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
   # changes are changes that occured in the 12 months up to 30th June
@@ -51,22 +54,28 @@ get_rate_backseries <- function(component_mye_path,
 
   common_years <- intersect(popn[["year"]], births[["year"]])
 
-  popn <- rbind(births, popn) %>%
-    rename(popn = value) %>%
+  popn <- rename(births, popn = births) %>%
+    rbind(popn) %>%
     filter(year %in% common_years) %>%
     popmodules::validate_population(col_data = "popn")
 
-  component <- readRDS(component_mye_path) %>%
-    rename(count = value)
+  component <- readRDS(component_mye_path)
+
+  component_name <- intersect(names(component), component_names)
+  assert_that(length(component_name) == 1,
+              msg = paste(c("get_rate_backseries couldn't find a unique column for the component in the file",
+                            component_mye_path,
+                            "\nColumn names:", names(component),
+                            "\nComponent names searched for:", component_names), collapse=" "))
 
   common_years <- intersect(common_years, component[["year"]])
   popn <- filter(popn, year %in% common_years)
   component <- filter(component, year %in% common_years)
 
-  if(any(component$count < 0)) {
+  if(any(component[,component_name] < 0)) {
     warning(paste("get_rate_backseries found negative counts in the components in", component_mye_path,
                   "- these will be set to zero"))
-    component$count[component$count < 0] <- 0
+    component[[component_name]] <- ifelse(component[[component_name]] < 0, 0, component[[component_name]])
   }
 
   # If there are missing levels expected in the component data, check all *other* levels are complete and match
@@ -86,7 +95,7 @@ get_rate_backseries <- function(component_mye_path,
   }
 
   # validate the component population and check levels match popn for the join
-  popmodules::validate_population(component, col_data = "count")
+  popmodules::validate_population(component, col_data = component_name)
   popmodules::validate_join_population(component, popn,
                                        cols_common_aggregation = c("year","gss_code", "age", "sex"),
                                        pop1_is_subset = !is.null(col_partial_match),
@@ -96,11 +105,14 @@ get_rate_backseries <- function(component_mye_path,
 
   # TODO split the rates calculation out into a separate function
   # TODO check the methodological decision to set value to 0 if popn is 0
-  rates <- left_join(popn, component, by=c("gss_code","gss_name","geography","country","sex","age","year")) %>%
-    mutate(count = ifelse(is.na(count), 0, count)) %>%
-    mutate(rate = ifelse(popn == 0, 0, count/popn)) %>%
-    select(-popn, -count)
 
+  join_cols <- intersect(names(popn), names(component))
+  # TODO add these join cols to the log
+
+  rates <- left_join(popn, component, by=join_cols) %>%
+    mutate(!!sym(component_name) := ifelse(is.na(!!sym(component_name)), 0, !!sym(component_name))) %>%
+    mutate(rate = ifelse(popn == 0, 0, !!sym(component_name)/popn)) %>%
+    select(-popn, -!!sym(component_name))
 
   # Set max rate to 1 (this is mostly for mortality purposes, but nothing we're dealing with should be > 1 right?)
   if(any(rates$rate > 1)) {

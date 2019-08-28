@@ -15,8 +15,8 @@
 #'   between input data frames, use a named character vector, e.g.
 #'   \code{c("popn_age"="mortality_age")}. Can contain columns that are not in
 #'   \code{mortality}. Default \code{c("year", "gss_code", "age", "sex")}
-#' @param col_count String. Name of column in \code{popn} containing population
-#'   counts. Default "count"
+#' @param col_popn String. Name of column in \code{popn} containing population
+#'   counts. Default "popn"
 #' @param col_rate String. Name of column in \code{mortality} containing
 #'   mortality rates. Default "rate"
 #' @param col_deaths String. Name of column to write deaths to in the output.
@@ -31,18 +31,18 @@
 #'
 #' library(deaths)
 #'
-#' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), count = 100)
+#' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 #' mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 #'
 #' deaths <- popn_apply_rate(popn,
 #'                           mortality,
 #'                           col_aggregation = c("year", "gss_code", "sex", "age"),
-#'                           col_count = "count",
+#'                           col_popn = "popn",
 #'                           col_rate = "rate",
 #'                           col_deaths = "deaths")
 #'
 #' # Due to default parameter values, this is equivalent to
-#' count <- popn_apply_rate(popn, mortality)
+#' deaths <- popn_apply_rate(popn, mortality)
 #'
 #' @export
 #'
@@ -53,13 +53,13 @@
 deaths_from_popn_mort <- function(popn,
                                   mortality,
                                   col_aggregation = c("year", "gss_code", "sex", "age"),
-                                  col_count = "count",
+                                  col_popn = "popn",
                                   col_rate = "rate",
                                   col_deaths = "deaths") {
 
   # Validate input
   # --------------
-  validate_deaths_from_popn_mort_input(popn, mortality, col_aggregation, col_count, col_rate, col_deaths)
+  validate_deaths_from_popn_mort_input(popn, mortality, col_aggregation, col_popn, col_rate, col_deaths)
 
 
   # Calculate deaths
@@ -68,7 +68,7 @@ deaths_from_popn_mort <- function(popn,
   deaths <- popn_apply_rate(popn,
                             mortality,
                             col_aggregation,
-                            col_count,
+                            col_popn,
                             col_rate,
                             col_deaths)
 
@@ -78,7 +78,7 @@ deaths_from_popn_mort <- function(popn,
   # All that's left is to make sure there are no deaths < 0 or which exceed the population
   assert_that(!any(deaths[[col_deaths]] < 0),
               msg = "deaths_from_popn_mort produced negative deaths")
-  assert_that(!any(popn[[col_count]] < popn[[col_deaths]]),
+  assert_that(!any(popn[[col_popn]] < popn[[col_deaths]]),
               msg = "deaths_from_popn_mort produced more deaths than the population size")
 
   return(deaths)
@@ -89,7 +89,7 @@ deaths_from_popn_mort <- function(popn,
 
 
 # Check the function input is valid
-validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregation, col_count, col_rate, col_deaths) {
+validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregation, col_popn, col_rate, col_deaths) {
 
   # Type checking
   assert_that(is.data.frame(popn),
@@ -98,8 +98,8 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
               msg = "deaths_from_popn_mort needs a data frame of mortality data")
   assert_that(is.character(col_aggregation),
               msg = "deaths_from_popn_mort needs a string or character vector as the col_aggregation parameter")
-  assert_that(is.string(col_count),
-              msg = "deaths_from_popn_mort needs a string as the col_count parameter")
+  assert_that(is.string(col_popn),
+              msg = "deaths_from_popn_mort needs a string as the col_popn parameter")
   assert_that(is.string(col_rate),
               msg = "deaths_from_popn_mort needs a string as the col_rate parameter")
   assert_that(is.string(col_deaths),
@@ -107,7 +107,7 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
 
   # Other checks
   col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and mortality aggregation levels
-  assert_that(!col_count %in% names(col_aggregation),
+  assert_that(!col_popn %in% names(col_aggregation),
               msg = "deaths_from_popn_mort was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
               msg = "deaths_from_popn_mort was given a mortality rate column name that is also a named aggregation column")
@@ -119,8 +119,8 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
               msg = "duplicated mortality column names were provided to deaths_from_popn_mort")
   assert_that(!col_rate %in% names(col_aggregation),
               msg = "deaths_from_popn_mort can't have a col_rate that is also a named aggregation column in the input")
-  assert_that(is.numeric(popn[[col_count]]),
-              msg = paste("deaths_from_popn_mort needs a numeric column in the specified population count col:", col_count))
+  assert_that(is.numeric(popn[[col_popn]]),
+              msg = paste("deaths_from_popn_mort needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(mortality[[col_rate]]),
               msg = paste("deaths_from_popn_mort needs a numeric column in the specified mortality rate col:", col_rate))
   assert_that(all(mortality[[col_rate]] >= 0) && all(mortality[[col_rate]] <= 1),
