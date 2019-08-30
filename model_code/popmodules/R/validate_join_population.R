@@ -191,15 +191,3 @@ validate_join_population_inputs <-function(pop1,
   invisible(TRUE)
 }
 
-
-#--------------------------------------------------------------------------------
-
-# Convert non-named or partially-named character vector to a named character vector
-convert_to_named_vector <- function(vec) {
-  if(is.null(names(vec))) {
-    vec <- setNames(vec, vec)
-  } else {
-    vec <- setNames(vec, ifelse(names(vec) == "", vec, names(vec)))
-  }
-  return(vec)
-}

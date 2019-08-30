@@ -144,21 +144,3 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
   invisible(TRUE)
 }
 
-# -----------
-
-
-
-# Function: convert character vector (unnamed or partially named) to one where every element is named
-# TODO split this out into the general or helper_functions package. it's used in validate_pop::validate_join_population as well, and will be in births
-convert_to_named_vector <- function(vec) {
-  assert_that(is.vector(vec))
-
-  if(is.null(names(vec))) {
-    names(vec) <- vec
-  } else {
-    ix <- names(vec) == ""
-    names(vec)[ix] <- vec[ix]
-  }
-
-  return(vec)
-}
