@@ -30,6 +30,7 @@ run_trend_model <- function(config_list) {
   
   deaths <- get_component(filepath = config_list$deaths_mye_path, 
                                 max_yr = config_list$first_proj_yr - 1)
+  
   births <- get_component(filepath = config_list$births_mye_path,
                                   max_yr = config_list$first_proj_yr - 1)
   
@@ -44,9 +45,12 @@ run_trend_model <- function(config_list) {
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
+  population <- population %>% select(year, gss_code, age, sex, popn)
+  deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
+  births <- births %>% select(year, gss_code, age, sex, births)
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
   mortality <- mortality %>% select(year, gss_code, age, sex, rate)
-  
+
   # TODO fix the fertility data so we don't have to do this
   if(any(fertility$rate > 1)) {
     warning("Setting mortality rates > 1 to be 1")

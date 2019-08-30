@@ -16,7 +16,8 @@ fertility <- fertility %>%
     gss_code == "E08000020" ~ "E08000037",
     TRUE ~ gss_code
   )) %>%
-  filter(grepl("^E", gss_code))
+  filter(grepl("^E", gss_code)) %>%
+  filter(year != 2002) #there is missing data in 2002 for some reason. 
 
 # Make up some data for Wales to match MYE2018
 wales <- filter(fertility, gss_code == "E06000001") %>%

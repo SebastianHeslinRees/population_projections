@@ -7,9 +7,9 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
   # do checks on the input data
   validate_inputs <- function(population, fertility, mortality, first_proj_yr, n_proj_yr) {
     
-    popmodules::validate_population(population, )
-    popmodules::validate_population(fertility)
-    popmodules::validate_population(mortality)
+    popmodules::validate_population(population, col_data = "popn")
+    popmodules::validate_population(fertility, col_data = "rate")
+    popmodules::validate_population(mortality, col_data = "rate")
     
     # check that the rates join onto the population
     ## TODO make the aggregations columns flexible. Make this more elegant.
@@ -51,29 +51,33 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
     
-    aged_popn <- curr_yr_popn %>%
-      age_on() 
-    
     # aged on population is used due to definitions of MYE to ensure the correct denominator
     # population in population at 30th June
     # change rates are for changes that occured in the 12 months up to 30th June
     # age is the age the cohort is at 30th June
-    deaths <- calc_deaths(popn = aged_popn,
-                          mortality = filter(mortality, year == my_year),
-                          col_popn = "popn",
-                          col_rate = "rate")
+    aged_popn <- curr_yr_popn %>%
+      age_on() 
     
     births <- calc_births(popn = aged_popn,
                           fertility = filter(fertility, year == my_year),
-                          col_count = "value")
-   
-    # TODO validate joins
-    next_yr_popn <- aged_popn %>% 
-      left_join(deaths, by = names(deaths)[names(deaths)!= "deaths"]) %>%
+                          col_popn = "popn")
+    aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
+    validate_population(aged_popn_w_births, col_data = "popn")
+    
+    deaths <- calc_deaths(popn = aged_popn_w_births,
+                          mortality = filter(mortality, year == my_year),
+                          col_popn = "popn",
+                          col_rate = "rate")
+    validate_population(deaths, col_data = "deaths")
+    
+    validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
+    next_yr_popn <- aged_popn_w_births %>% 
+      left_join(deaths, by = intersect(names(deaths), names(aged_popn_w_births))) %>%
       mutate(popn = popn - deaths) %>%
       select(-deaths)
     
     proj_popn <- rbind(proj_popn, next_yr_popn)
+    proj_births <- rbind(proj_births, births)
     proj_deaths <- rbind(proj_deaths, deaths)
     
     curr_yr_popn <- next_yr_popn

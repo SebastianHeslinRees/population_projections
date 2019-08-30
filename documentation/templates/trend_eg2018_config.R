@@ -2,9 +2,9 @@
 
 first_proj_yr <- 2019
 n_proj_yr <- 20
-popn_mye_path <- "input_data/mye/2018/population_ons_2019-08-09.rds"
-deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-08-09.rds"
-births_mye_path <- "input_data/mye/2018/births_ons_2019-08-09.rds"
+popn_mye_path <- "input_data/mye/2018/population_ons_2019-08-27.rds"
+deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-08-27.rds"
+births_mye_path <- "input_data/mye/2018/births_ons_2019-08-27.rds"
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
