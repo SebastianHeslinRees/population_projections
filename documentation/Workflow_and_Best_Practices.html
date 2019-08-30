@@ -381,28 +381,56 @@ git pull</code></pre>
 <div id="project-best-practices" class="section level1">
 <h1>Project best practices</h1>
 <p>We’ll update this list as we go along! But to start with:</p>
+<div id="model-conventions" class="section level3">
+<h3>Model conventions</h3>
+<p>We’re still developing this, but we’ve roughly settled on the following:</p>
 <ul>
+<li>We have some standard names for columns in our population data frames. A population data frame will have the columns <code>year</code>, <code>gss_code</code>, <code>age</code> and <code>sex</code>. The population will be in a column called <code>popn</code> but we prefer more descriptive names for other counts, e.g. <code>births</code>, <code>deaths</code>. When writing a package function, these can be used as default values. When writing a model, the data can (usually) be assumed to have these names</li>
+<li>When writing functions, parameter names are only semi-standardised if we’re honest. An input population will usually be called <code>popn</code>. A variable referring to column name(s) will start with <code>col_*</code></li>
+</ul>
+</div>
+<div id="coding-best-practices" class="section level3">
+<h3>Coding best practices</h3>
+<ul>
+<li>When writing a module that will be reused across models (these will generally be in the <code>popmodules</code> package), try to make it flexible and general - build it to work with different data formats, column names, etc. Write checks and tests to make sure it behaves as expected and throws an informative warning or error when it encounters something it’s not expecting. On the other hand, when writing something that’s for one particular model and which will be used only for specific purposes (e.g. reading a particular file, wrangling something model-specific) there’s no need to do this extra work, and it’s safe to assume predictable input etc. (which is not to say that a couple of checks are a bad idea…). If you find yourself re-using this code in other models later, think about upgrading and generlaising it then</li>
 <li>Try to write everything as functions. Keep functions and the code that executes them separate</li>
-<li>Settings are a kind of data - don’t include them in code. Put all options and settings into a model config file. The goal is to build models where the users won’t need to edit any code to run them: everything will be done via the config file.</li>
+<li>Settings are a kind of data - don’t include them in code. Put all options and settings into a model config file. The goal is to build models where the users won’t need to edit any code to run them: everything will be done via the config file</li>
 <li>Don’t hard-code file paths
 <ul>
 <li>Store them as variables in a config file</li>
-<li>Use <code>rprojroot()</code> to build paths to locations within the repository</li>
+<li>Use <code>path()</code> and <code>rprojroot()</code> to build paths to locations within the repository, <code>path()</code> - the code will work on others’ machines, and on both Windows and Linux</li>
 </ul></li>
 <li>Try to build in checks to your functions to validate input and make sure that everything is behaving as expected. The <code>assertthat()</code> function is your friend</li>
 <li>If you change a function that more than one model or module depends on, let people know in the pull request so that they can fix dependencies. Try not to make breaking changes!</li>
 <li>Don’t use <code>require()</code> - if it fails it doesn’t tell you</li>
 <li>Remove feature branches after you merge them</li>
 </ul>
-<div id="optional-extras" class="section level3">
-<h3>Optional extras</h3>
-<p>These are things we may want to consider doing later on</p>
+</div>
+<div id="working-in-packages" class="section level3">
+<h3>Working in packages</h3>
+<p>It’s really easy to add a function to a package - just write the function, put it in the <code>R/</code> folder and add some basic <code>roxygen2</code> documentation:</p>
+<pre><code>#' Do a Thing
+#' @export</code></pre>
+<p>Then <code>devtools::document()</code> and <code>devtools::install()</code> will set it up ready to go.</p>
+<p>But to get the most value out of packages, its worth using their other capabilities. This book by Hadley Wickham is a good reference <a href="http://r-pkgs.had.co.nz" class="uri">http://r-pkgs.had.co.nz</a>. Here are a few of the best practices:</p>
 <ul>
-<li>Document your functions with <code>roxygen2</code> syntax, explained <a href="http://r-pkgs.had.co.nz/man.html">here</a>.</li>
-<li>Don’t use <code>rm(list=ls())</code></li>
-<li>Don’t use <code>library()</code> when you only need to make a couple of function calls - use <code>packagename::function()</code> instead, which doesn’t load the full package. This reduces the likelihood of conflicts between package namespaces. And if you’re editing the <code>popmodules</code> package, don’t use it at all - there are other ways of accessing package functionality within packages</li>
-<li>Build file paths with the <code>path()</code> function, which means they’ll work on both Windows and Linux</li>
-<li>In functions that will be reused a lot, create a separate test script using <code>testthat</code> - talk to other team members to find out more! Testing like this is useful because it helps make sure a function behaves as you’d expect when you build it, and can be re-run whenever you modify it. It’s also super useful because it provides you with simple example code to execute the function when you’re debugging</li>
+<li>Documenting functions can be easy and semi-automated with <code>roxygen2</code> syntax, explained <a href="http://r-pkgs.had.co.nz/man.html">here</a>. This gives a simple format to work with, and then the command <code>devtools::document()</code> automatically creates the documentation files and the helpfile queryable with <code>?functionname</code></li>
+<li>Don’t use anything that invisibly modifies the larger R environment:
+<ul>
+<li><code>rm(list=ls())</code> and <code>setwd()</code> aren’t necessary when programming functions</li>
+<li><p><code>library()</code> loads too many things invisibly and can overwrite other functions. When you only need to make a couple of calls to a package use <code>packagename::function()</code> instead. This reduces the likelihood of conflicts between package namespaces. If you’re using extra operators (e.g. <code>%&gt;%</code>) or are making a lot of calls to a package, <code>@ImportFrom</code> in your roxygen comments might be your friend - e.g.</p>
+<pre><code>#' @ImportFrom dplyr group_by summarise</code></pre>
+for more details see <a href="http://r-pkgs.had.co.nz/namespace.html" class="uri">http://r-pkgs.had.co.nz/namespace.html</a></li>
+</ul></li>
+<li>In functions that will be used in a number of (potentially unknown) ways, write some tests using <code>testthat</code>. These use very simple inputs and check that the function creates the outputs you’d expect. They go in the folder <code>tests/testthat/</code> and have a simple structure - see <a href="http://r-pkgs.had.co.nz/tests.html" class="uri">http://r-pkgs.had.co.nz/tests.html</a>. Your tests can be as brief or as in-depth as you find useful. I like to write tests for edge-cases of my functions, checking they work with difficult column names, factors or grouped tibbles, missing values etc. Tests can be re-run them every time you update the model to check that everything is still working as expected. Tests are also great for debugging, because they provide you with simple example code to execute when you’re trying to create a minimum reproducible example.</li>
+<li>You can run some standard checks on your package with the command <code>devtools::check(args=&quot;--no-install&quot;)</code> (the <code>--no-install</code> is something to do with the way the GLA network is set up - you can ignore it if you’re on another machine). It will fail if the package isn’t up to scratch and give you warnings suggesting non-essential improvements</li>
+<li>You can run some standard checks on your functions with the command <code>codetools::checkUsage(functionname, all = TRUE)</code>. It will spot common pitfalls (e.g. accessing a variable outside of the function environment) and advise on improvements</li>
+<li>The package <code>usethis</code> can be pretty useful. Its goal is to standardise everything you do while building a package, so that packages all have near-identical structure. It takes a while to learn, and sometimes it’s no better than making changes by hand. I’ve found it most useful when I want to do something moderately complex and I don’t know packages well enough to understand how - you can create READMEs, vignettes, documentation, etc with <code>usethis</code>. A few choice commands are:
+<ul>
+<li><code>usethis::use_package()</code> to add a package to the DESCRIPTION file’s list of dependencies</li>
+<li><code>usethis::use_data()</code> to save an object into the package’s <code>data/</code> folder</li>
+<li><code>usethis::use_testthat()</code> and <code>usethis::use_test(&quot;functionname&quot;)</code> to set up testing for the first time, and to create a test script for a partcular function.</li>
+</ul></li>
 </ul>
 </div>
 </div>

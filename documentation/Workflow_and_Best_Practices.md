@@ -184,23 +184,50 @@ Since this is a bare repository, you can run the models from the Q:/ drive, but 
 
 We'll update this list as we go along! But to start with:
 
+### Model conventions
+
+We're still developing this, but we've roughly settled on the following:
+
+*  We have some standard names for columns in our population data frames. A population data frame will have the columns `year`, `gss_code`, `age` and `sex`. The population will be in a column called `popn` but we prefer more descriptive names for other counts, e.g. `births`, `deaths`. When writing a package function, these can be used as default values. When writing a model, the data can (usually) be assumed to have these names
+*  When writing functions, parameter names are only semi-standardised if we're honest. An input population will usually be called `popn`. A variable referring to column name(s) will start with `col_*`
+
+
+### Coding best practices
+
+*  When writing a module that will be reused across models (these will generally be in the `popmodules` package), try to make it flexible and general - build it to work with different data formats, column names, etc. Write checks and tests to make sure it behaves as expected and throws an informative warning or error when it encounters something it's not expecting. On the other hand, when writing something that's for one particular model and which will be used only for specific purposes (e.g. reading a particular file, wrangling something model-specific) there's no need to do this extra work, and it's safe to assume predictable input etc. (which is not to say that a couple of checks are a bad idea...). If you find yourself re-using this code in other models later, think about upgrading and generlaising it then
 *  Try to write everything as functions. Keep functions and the code that executes them separate
-*  Settings are a kind of data - don't include them in code. Put all options and settings into a model config file. The goal is to build models where the users won't need to edit any code to run them: everything will be done via the config file.
+*  Settings are a kind of data - don't include them in code. Put all options and settings into a model config file. The goal is to build models where the users won't need to edit any code to run them: everything will be done via the config file
 *  Don't hard-code file paths
     +  Store them as variables in a config file
-    +  Use `rprojroot()` to build paths to locations within the repository
+    +  Use `path()` and `rprojroot()` to build paths to locations within the repository, `path()` - the code will work on others' machines, and on both Windows and Linux
 *  Try to build in checks to your functions to validate input and make sure that everything is behaving as expected. The `assertthat()` function is your friend
 *  If you change a function that more than one model or module depends on, let people know in the pull request so that they can fix dependencies. Try not to make breaking changes!
 *  Don't use `require()` - if it fails it doesn't tell you
 *  Remove feature branches after you merge them
 
-### Optional extras
+### Working in packages
 
-These are things we may want to consider doing later on
+It's really easy to add a function to a package - just write the function, put it in the `R/` folder and add some basic `roxygen2` documentation:
+```
+#' Do a Thing
+#' @export
+```
+Then `devtools::document()` and `devtools::install()` will set it up ready to go.
 
-*  Document your functions with `roxygen2` syntax, explained [here](http://r-pkgs.had.co.nz/man.html).
-*  Don't use `rm(list=ls())`
-*  Don't use `library()` when you only need to make a couple of function calls - use `packagename::function()` instead, which doesn't load the full package. This reduces the likelihood of conflicts between package namespaces. And if you're editing the `popmodules` package, don't use it at all - there are other ways of accessing package functionality within packages
-*  Build file paths with the `path()` function, which means they'll work on both Windows and Linux
-*  In functions that will be reused a lot, create a separate test script using `testthat` - talk to other team members to find out more! Testing like this is useful because it helps make sure a function behaves as you'd expect when you build it, and can be re-run whenever you modify it. It's also super useful because it provides you with simple example code to execute the function when you're debugging
+But to get the most value out of packages, its worth using their other capabilities. This book by Hadley Wickham is a good reference http://r-pkgs.had.co.nz. Here are a few of the best practices:
 
+*  Documenting functions can be easy and semi-automated with `roxygen2` syntax, explained [here](http://r-pkgs.had.co.nz/man.html). This gives a simple format to work with, and then the command `devtools::document()` automatically creates the documentation files and the helpfile queryable with `?functionname`
+*  Don't use anything that invisibly modifies the larger R environment:
+    +  `rm(list=ls())` and `setwd()` aren't necessary when programming functions
+    +  `library()` loads too many things invisibly and can overwrite other functions. When you only need to make a couple of calls to a package use `packagename::function()` instead. This reduces the likelihood of conflicts between package namespaces. If you're using extra operators (e.g. `%>%`) or are making a lot of calls to a package, `@ImportFrom` in your roxygen comments might be your friend - e.g.
+    ```
+    #' @ImportFrom dplyr group_by summarise
+    ```
+    for more details see http://r-pkgs.had.co.nz/namespace.html
+*  In functions that will be used in a number of (potentially unknown) ways, write some tests using `testthat`. These use very simple inputs and check that the function creates the outputs you'd expect. They go in the folder `tests/testthat/` and have a simple structure - see http://r-pkgs.had.co.nz/tests.html. Your tests can be as brief or as in-depth as you find useful. I like to write tests for edge-cases of my functions, checking they work with difficult column names, factors or grouped tibbles, missing values etc. Tests can be re-run them every time you update the model to check that everything is still working as expected. Tests are also great for debugging, because they provide you with simple example code to execute when you're trying to create a minimum reproducible example.
+* You can run some standard checks on your package with the command `devtools::check(args="--no-install")` (the `--no-install` is something to do with the way the GLA network is set up - you can ignore it if you're on another machine). It will fail if the package isn't up to scratch and give you warnings suggesting non-essential improvements
+* You can run some standard checks on your functions with the command `codetools::checkUsage(functionname, all = TRUE)`. It will spot common pitfalls (e.g. accessing a variable outside of the function environment) and advise on improvements
+*  The package `usethis` can be pretty useful. Its goal is to standardise everything you do while building a package, so that packages all have near-identical structure. It takes a while to learn, and sometimes it's no better than making changes by hand. I've found it most useful when I want to do something moderately complex and I don't know packages well enough to understand how - you can create READMEs, vignettes, documentation, etc with `usethis`. A few choice commands are:
+    +  `usethis::use_package()` to add a package to the DESCRIPTION file's list of dependencies
+    +  `usethis::use_data()` to save an object into the package's `data/` folder
+    +  `usethis::use_testthat()` and `usethis::use_test("functionname")` to set up testing for the first time, and to create a test script for a partcular function.
