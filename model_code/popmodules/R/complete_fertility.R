@@ -43,8 +43,7 @@ complete_fertility <- function(fertility, population,
   # check fertility and population exist
   population
   fertility
-
-  validate_inputs(fertility, population,
+  validate_complete_fertility_inputs(fertility, population,
                   col_sex_fert = col_sex_fert, col_sex_popn = col_sex_popn,
                   col_age_fert = col_age_fert, col_age_popn = col_age_popn,
                   col_rate = col_rate)
@@ -85,7 +84,7 @@ complete_fertility <- function(fertility, population,
 }
 
 
-validate_inputs <- function(fertility, population, col_sex_fert, col_sex_popn, col_age_fert, col_age_popn, col_rate) {
+validate_complete_fertility_inputs <- function(fertility, population, col_sex_fert, col_sex_popn, col_age_fert, col_age_popn, col_rate) {
   assert_that(is.data.frame(fertility), msg = "fertility must be a dataframe")
   assert_that(is.data.frame(population), msg = "population must be a dataframe")
 

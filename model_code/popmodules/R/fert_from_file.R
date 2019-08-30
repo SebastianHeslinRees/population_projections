@@ -17,13 +17,13 @@
 fert_from_file <- function(filepath) {
 
   # validate file type
-  validate_filetype(filepath)
+  validate_fert_from_file_filetype(filepath)
 
   fertility <- readRDS(filepath)
 
   # validate fertility dataframe
   # TODO should we enforce that fertility dfs must be complete?
-  validate_fertility_df(fertility)
+  validate_fert_from_file_fertility_df(fertility)
 
   # return fertility
   fertility
@@ -31,7 +31,7 @@ fert_from_file <- function(filepath) {
 }
 
 #----------------------------------
-validate_filetype <- function(filepath) {
+validate_fert_from_file_filetype <- function(filepath) {
   file_ext <- tolower(strsplit(basename(filepath), split="\\.")[[1]][[2]])
 
   assertthat::assert_that(file_ext == "rds",
@@ -41,7 +41,7 @@ validate_filetype <- function(filepath) {
 
 }
 
-validate_fertility_df <- function(fertility) {
+validate_fert_from_file_fertility_df <- function(fertility) {
   # TODO update to be able to handle more flexible dataframes
   assertthat::assert_that(setequal(sort(names(fertility)), c("age", "gss_code", "rate", "sex", "year")),
                           msg = "fertility dataframe must have col names: age, gss_code, rate, sex, year")
@@ -49,7 +49,7 @@ validate_fertility_df <- function(fertility) {
   assertthat::assert_that(all(unique(fertility$sex) %in% c("male", "female")),
                           msg = "sex must be coded as: male, female")
 
-  validate_population(fertility, test_complete = FALSE)
+  validate_population(fertility)
 
   invisible(TRUE)
 
