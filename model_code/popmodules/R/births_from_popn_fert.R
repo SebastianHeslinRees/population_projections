@@ -236,7 +236,7 @@ validate_births_from_popn_input <- function(popn,
   assert_that(nrow(popn) > 0,
               msg = "births_from_popn_fert was given a table with 0 rows of input")
   assert_that(is.null(col_sex) || all(popn[[col_sex]] %in% c("male", "female")),
-              msg = paste("births_from_popn_fert needs values of 'm' or 'f' in the specified sex col:", col_sex))
+              msg = paste("births_from_popn_fert needs values of 'male' or 'female' in the specified sex col:", col_sex))
   assert_that(is.numeric(popn[[col_popn]]),
               msg = paste("births_from_popn_fert needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(fertility[[col_rate]]),

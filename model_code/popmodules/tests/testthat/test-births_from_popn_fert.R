@@ -3,8 +3,8 @@ library(popmodules)
 library(testthat)
 
 # example inputs
-popn        <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("f","m"), popn = 205, stringsAsFactors = FALSE)
-popn_no_age <- expand.grid( year = 2000, gss_code=c("a","b"),            sex=c("f","m"), popn = 410, stringsAsFactors = FALSE)
+popn        <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21, sex=c("female","male"), popn = 205, stringsAsFactors = FALSE)
+popn_no_age <- expand.grid( year = 2000, gss_code=c("a","b"),            sex=c("female","male"), popn = 410, stringsAsFactors = FALSE)
 popn_no_sex <- expand.grid( year = 2000, gss_code=c("a","b"), age=20:21,                 popn = 205, stringsAsFactors = FALSE)
 popn_no_age_sex <- expand.grid( year = 2000, gss_code=c("a","b"),                        popn = 410, stringsAsFactors = FALSE)
 

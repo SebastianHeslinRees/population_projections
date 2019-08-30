@@ -60,11 +60,7 @@ Sex data (if used) must be provided as "male" and "female".
 
 library(births)
 
-<<<<<<< HEAD
-popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("female","male"), count = 100)
-=======
 popn <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), popn = 100)
->>>>>>> master
 fert <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), rate = 0.01)
 
 pop_births <- births_from_popn_fert(popn,
