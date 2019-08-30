@@ -13,7 +13,7 @@
 
 project_forward_flat <- function(df, first_proj_yr, n_proj_yr, hold_yr) {
 
-  validate_inputs(df, first_proj_yr, hold_yr)
+  validate_project_forward_flat_inputs(df, first_proj_yr, hold_yr)
 
   # remove any data that is a projection year
   df <- dplyr::filter(df, year < first_proj_yr)
@@ -36,7 +36,7 @@ project_forward_flat <- function(df, first_proj_yr, n_proj_yr, hold_yr) {
 
 }
 
-validate_inputs <- function(df, first_proj_yr, hold_yr) {
+validate_project_forward_flat_inputs <- function(df, first_proj_yr, hold_yr) {
   assert_that("year" %in% names(df), msg = "dataframe must contain a year column")
   assert_that(hold_yr %in% unique(df$year), msg = "dataframe must contain the hold_year")
   assert_that(first_proj_yr > hold_yr, msg = "first projection year must be later than the hold year")
