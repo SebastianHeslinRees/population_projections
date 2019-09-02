@@ -13,10 +13,14 @@ mortality_fns <- list(
 )
 
 fertility_fns <- list(
-  list(fn = popmodules::fert_from_file, args = list(filepath = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds"))
+  list(fn = popmodules::rates_from_file, args = list(filepath = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds"))
 )
 
-qa_areas_of_interest <- list("London", "E09000001","E09000002","E09000003","E09000004","E09000005")
+int_out_fns <- list(
+  list(fn = popmodules::rates_from_file, args = list(filepath = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds"))
+)
+
+qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
 config_list <- list(
@@ -28,10 +32,11 @@ config_list <- list(
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
+  int_out_fns = int_out_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
-rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, births_mye_path, outputs_dir, mortality_fns, fertility_fns, qa_areas_of_interest)
+rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, births_mye_path, outputs_dir, mortality_fns, fertility_fns, int_out_fns, qa_areas_of_interest)
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")

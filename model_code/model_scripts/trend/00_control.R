@@ -18,7 +18,7 @@ run_trend_model <- function(config_list) {
   
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
-  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "births_mye_path", "outputs_dir", "mortality_fns", "fertility_fns", "qa_areas_of_interest", "timestamp")
+  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "births_mye_path", "outputs_dir", "mortality_fns", "fertility_fns", "int_out_fns", "qa_areas_of_interest", "timestamp")
  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -33,6 +33,9 @@ run_trend_model <- function(config_list) {
   
   births <- get_component(filepath = config_list$births_mye_path,
                                   max_yr = config_list$first_proj_yr - 1)
+  
+  int_out <- get_component(filepath = config_list$_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
   
   # TODO: check that deaths and births have same geography, age, and sex coverage as population
   
