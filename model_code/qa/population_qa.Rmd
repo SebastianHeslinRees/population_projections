@@ -4,6 +4,7 @@ params:
   qa_areas_of_interest: list("London")
   popn_proj_fp: outputs/model/year/population_file.rds
   deaths_proj_fp: outputs/model/year/deaths_file.rds
+  births_proj_fp: outputs/model/year/births_file.rds
   output_files_dir: outputs/model/year/population_qa_files/
   first_proj_yr: 2018
 output:
@@ -31,7 +32,7 @@ library(scales)
 ```{r, echo=FALSE, message = FALSE}
 popn_proj <-   readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$popn_proj_fp))
 deaths_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$deaths_proj_fp))
-births_proj <- mutate(deaths_proj, births = 0) %>% select(-deaths)
+births_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$births_proj_fp))
 
 output_files_dir <- paste0(rprojroot::find_rstudio_root_file(),"/",params$output_files_dir)
 areas_of_interest <- params$qa_areas_of_interest
@@ -123,7 +124,7 @@ for(loc in seq_along(areas_of_interest)) {
   
   natchange_proj_loc <- full_join(births_proj_loc, deaths_proj_loc, by = c("gss_code", "sex", "age", "year")) %>%
     group_by(year) %>%
-    summarise(deaths = sum(deaths), births = sum(births)) %>%
+    summarise(deaths = sum(deaths), births = sum(births, na.rm=TRUE)) %>%
     mutate(`natural change` = births - deaths) %>%
     as.data.frame() %>%
     gather(key = "component", value = "value", births, deaths, `natural change`) %>%
