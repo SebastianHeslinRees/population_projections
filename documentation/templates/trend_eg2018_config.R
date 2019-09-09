@@ -5,6 +5,7 @@ n_proj_yr <- 20
 popn_mye_path <- "input_data/mye/2018/population_ons_2019-08-27.rds"
 deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-08-27.rds"
 births_mye_path <- "input_data/mye/2018/births_ons_2019-08-27.rds"
+int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-08-27.rds"
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
@@ -29,6 +30,7 @@ config_list <- list(
   popn_mye_path = popn_mye_path,
   deaths_mye_path = deaths_mye_path,
   births_mye_path = births_mye_path,
+  int_out_mye_path = int_out_mye_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
@@ -36,7 +38,7 @@ config_list <- list(
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
-rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, births_mye_path, outputs_dir, mortality_fns, fertility_fns, int_out_fns, qa_areas_of_interest)
+rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, births_mye_path, int_out_mye_path, outputs_dir, mortality_fns, fertility_fns, int_out_fns, qa_areas_of_interest)
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
