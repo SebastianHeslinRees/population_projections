@@ -18,7 +18,21 @@ run_trend_model <- function(config_list) {
   
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
-  expected_config <- c("first_proj_yr", "n_proj_yr", "popn_mye_path", "deaths_mye_path", "births_mye_path", "int_out_mye_path", "outputs_dir", "mortality_fns", "fertility_fns", "int_out_fns", "qa_areas_of_interest", "timestamp")
+  expected_config <- c("first_proj_yr", 
+                       "n_proj_yr", 
+                       "popn_mye_path", 
+                       "deaths_mye_path", 
+                       "births_mye_path", 
+                       "int_out_mye_path", 
+                       "int_in_mye_path",
+                       "outputs_dir", 
+                       "mortality_fns", 
+                       "fertility_fns",
+                       "int_out_fns", 
+                       "int_out_rate_fns",
+                       "int_in_fns",
+                       "qa_areas_of_interest", 
+                       "timestamp")
  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -37,6 +51,9 @@ run_trend_model <- function(config_list) {
   int_out <- get_component(filepath = config_list$int_out_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
+  int_in <- get_component(filepath = config_list$int_in_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
+  
   # TODO: check that deaths and births have same geography, age, and sex coverage as population
   
   
@@ -47,7 +64,7 @@ run_trend_model <- function(config_list) {
     
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
-  int_out_rate <- evaluate_fns_list(config_list$int_out_fns)
+  int_out_rate <- evaluate_fns_list(config_list$int_out_rate_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
   population <- population %>% select(year, gss_code, age, sex, popn)

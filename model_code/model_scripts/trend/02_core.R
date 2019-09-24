@@ -41,8 +41,9 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
   # Load core functions
   #age_on <- popmodules::age_on_sya
   age_on <- popmodules::popn_age_on
-  calc_deaths <- popmodules::deaths_from_popn_mort
+  calc_deaths <- popmodules::component_from_popn_rate
   calc_births <- popmodules::births_from_popn_fert
+  calc_int_out <- popmodules::component_from_popn_rate
   
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
@@ -50,9 +51,13 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
   proj_deaths <- deaths
   proj_births <- births
+  proj_int_out <- int_out
   
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
+    
+    # TODO pass births, deaths, migration function in via list along with their arguments to make the core more flexible.
+    # Would remove need for hard coded internation out migration method switch
     
     # aged on population is used due to definitions of MYE to ensure the correct denominator
     # population in population at 30th June
@@ -68,9 +73,10 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
     validate_population(aged_popn_w_births, col_data = "popn")
     
     deaths <- calc_deaths(popn = aged_popn_w_births,
-                          mortality = filter(mortality, year == my_year),
+                          component_rate = filter(mortality, year == my_year),
                           col_popn = "popn",
-                          col_rate = "rate")
+                          col_rate = "rate",
+                          col_component = "deaths")
     validate_population(deaths, col_data = "deaths")
     
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
@@ -79,9 +85,27 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
       mutate(popn = popn - deaths) %>%
       select(-deaths)
     
+    
+    # switch for changing whether international out is rates based, or just numbers to match international in
+    
+    int_out <- calc_int_out(popn = aged_popn_w_births,
+                            component_rate = filter(mortality, year == my_year),
+                            col_popn = "popn",
+                            col_rate = "rate",
+                            col_component = "int_out")
+    validate_population(int_out, col_data = "int_out")
+    
+    validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE) 
+    next_yr_popn <- aged_popn_w_births %>% 
+      left_join(int_out, by = intersect(names(int_out), names(aged_popn_w_births))) %>%
+      mutate(popn = popn - int_out) %>%
+      select(-int_out)
+    
+    
     proj_popn <- rbind(proj_popn, next_yr_popn)
     proj_births <- rbind(proj_births, births)
     proj_deaths <- rbind(proj_deaths, deaths)
+    prog_int_out <- rbind(proj_int_out, int_out)
     
     curr_yr_popn <- next_yr_popn
     
