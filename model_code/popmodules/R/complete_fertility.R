@@ -30,7 +30,7 @@
 #'   to the highest population age.  New entries are created with a rate value of 0.
 #'
 #' @importFrom assertthat assert_that
-#' @import tidyr
+#' @importFrom tidyr complete
 #' @export
 
 complete_fertility <- function(fertility, population,
@@ -41,8 +41,8 @@ complete_fertility <- function(fertility, population,
                                col_rate = "rate") {
 
   # check fertility and population exist
-  population
-  fertility
+  force(population)
+  force(fertility)
   validate_complete_fertility_inputs(fertility, population,
                   col_sex_fert = col_sex_fert, col_sex_popn = col_sex_popn,
                   col_age_fert = col_age_fert, col_age_popn = col_age_popn,
@@ -52,29 +52,29 @@ complete_fertility <- function(fertility, population,
   fill_list <- list()
   fill_list[col_rate] <- 0
 
-  if (!is.null(col_sex_fert) & # validate_inputs ensures that sex column is present in neither or both
-      !all(unique(population[, col_sex_popn]) %in% unique(fertility[, col_sex_fert]))) {
+  if (!is.null(col_sex_fert) && # validate_inputs ensures that sex column is present in neither or both
+      !all(unique(population[[col_sex_popn]]) %in% unique(fertility[[col_sex_fert]]))) {
 
     non_sex_cols <- setdiff(cols_agg_fertility, col_sex_fert)
-    sexes <- unique(population[, col_sex_popn])
+    sexes <- unique(population[[col_sex_popn]])
 
-    fertility <- fertility %>% tidyr::complete(nesting(!!!syms(non_sex_cols)),
+    fertility <- fertility %>% complete(nesting(!!!syms(non_sex_cols)),
                                                !!sym(col_sex_fert) := sexes,
                                                fill = fill_list) %>%
       as.data.frame()
   }
 
-  if(!is.null(col_age_fert) & # validate_inputs ensures that age column is present in neither or both
-     !all(unique(population[, col_age_popn]) %in% unique(fertility[, col_age_fert]))) {
+  if(!is.null(col_age_fert) && # validate_inputs ensures that age column is present in neither or both
+     !all(unique(population[[col_age_popn]]) %in% unique(fertility[[col_age_fert]]))) {
     non_age_cols <- setdiff(cols_agg_fertility, col_age_fert)
 
-    age_tails <- unique(population[, col_age_popn])
-    age_tails <- age_tails[age_tails < min(fertility[, col_age_fert]) |
-                             age_tails > max(fertility[, col_age_fert])]
-    ages <- unique(c(age_tails, unique(fertility[, col_age_fert])))
+    age_tails <- unique(population[[col_age_popn]])
+    age_tails <- age_tails[age_tails < min(fertility[[col_age_fert]]) |
+                             age_tails > max(fertility[[col_age_fert]])]
+    ages <- unique(c(age_tails, unique(fertility[[col_age_fert]])))
 
     fertility <- fertility %>%
-      tidyr::complete(nesting(!!!syms(non_age_cols)), !!sym(col_age_fert) := ages,
+      complete(nesting(!!!syms(non_age_cols)), !!sym(col_age_fert) := ages,
                       fill = fill_list) %>%
       as.data.frame()
   }
@@ -98,9 +98,12 @@ validate_complete_fertility_inputs <- function(fertility, population, col_sex_fe
 
   assert_that(!is.null(col_rate) & col_rate %in% names(fertility), msg = paste0("fertility dataframe does not contain '",col_rate, "' column"))
 
-  if (!is.null(col_sex_fert)) assert_that(unique(fertility[, col_sex_fert]) %in% unique(population[, col_sex_popn]), msg = "fertility and population dataframes appear to encode sex differently")
-  if (!is.null(col_age_fert)) assert_that(is.numeric(fertility[, col_age_fert]) & is.numeric(population[, col_age_popn]))
+  if (!is.null(col_sex_fert)) assert_that(all(unique(fertility[[col_sex_fert]]) %in% unique(population[[col_sex_popn]])), msg = "fertility and population dataframes appear to encode sex differently")
+  if (!is.null(col_age_fert)) assert_that(all(unique(fertility[[col_age_fert]]) %in% unique(population[[col_age_popn]])), msg = "fertility and population dataframes appear to encode age differently")
+  if (!is.null(col_age_fert)) assert_that(is.numeric(fertility[[col_age_fert]]) & is.numeric(population[[col_age_popn]]))
 
+  validate_population(fertility, col_aggregation = setdiff(names(fertility), col_rate))
+  
   invisible(TRUE)
 }
 
