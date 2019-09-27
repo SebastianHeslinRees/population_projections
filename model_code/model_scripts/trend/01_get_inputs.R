@@ -1,5 +1,5 @@
 
-get_mye_component <- function(filepath, max_yr) {
+get_component <- function(filepath, max_yr) {
   component <- readRDS(filepath) %>%
     filter(year <= max_yr)
   
@@ -33,6 +33,7 @@ evaluate_fns_list <- function(fns_args_list) {
   n_fns_remaining <- length(fns_args_list) - 1
   
   ## the rest take in mortality as their first argument
+  if (n_fns_remaining > 0) {
   for (i in 1:n_fns_remaining) {
     ind <- i + 1
     
@@ -45,6 +46,7 @@ evaluate_fns_list <- function(fns_args_list) {
     
     subject <- do.call(fns_args_list[[ind]]$fn, all_args)
     # TODO validate this df
+  }
   }
   return(subject)
 }
