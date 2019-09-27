@@ -4,36 +4,7 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
   library(assertthat)
   library(popmodules)
   
-  # do checks on the input data
-  validate_inputs <- function(population, fertility, mortality, first_proj_yr, n_proj_yr) {
-    
-    popmodules::validate_population(population, col_data = "popn")
-    popmodules::validate_population(fertility, col_data = "rate")
-    popmodules::validate_population(mortality, col_data = "rate")
-    
-    # check that the rates join onto the population
-    ## TODO make the aggregations columns flexible. Make this more elegant.
-    popmodules::validate_join_population(population %>% filter(year == first_proj_yr - 1) %>% select(gss_code, sex, age), 
-                                         mortality %>% filter(year == first_proj_yr) %>% select(gss_code, sex, age))
-    
-    ## TODO make the aggregations columns flexible. Make this more elegant.
-    popmodules::validate_join_population(population %>% filter(year == first_proj_yr - 1) %>% select(gss_code, age), 
-                                         fertility %>% filter(year == first_proj_yr) %>% select(gss_code, age))
-    
-    # check that the coverage of years is correct
-    last_proj_yr <- first_proj_yr + n_proj_yr -1
-    assert_that((first_proj_yr - 1) %in% unique(population$year), msg = paste0("the population backseries doesn't contain the projection jump-off year (", first_proj_yr-1,")"))
-    assert_that(all(first_proj_yr:last_proj_yr %in% fertility$year), msg = "the projected fertility data doesn't contain all the projection years")
-    assert_that(all(first_proj_yr:last_proj_yr %in% mortality$year), msg = "the projected mortality data doesn't contain all the projection years")
-    
-    # check that the rates values are always between 0 and 1 
-    assert_that(max(fertility$rate) <= 1 & min(fertility$rate >= 0), msg = "projected fertility contains rates outside the rage 0-1")
-    assert_that(max(mortality$rate) <= 1 & min(mortality$rate >= 0), msg = "projected mortality contains rates outside the rage 0-1")
-    
-    invisible(TRUE)
-  }
-  
-  validate_inputs(population, fertility, mortality, first_proj_yr, n_proj_yr)
+  validate_trend_core_inputs(population, fertility, mortality, first_proj_yr, n_proj_yr)
   
   # Load core functions
   #age_on <- popmodules::age_on_sya
@@ -62,17 +33,17 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
                           fertility = filter(fertility, year == my_year),
                           col_popn = "popn")
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
-    validate_population(aged_popn_w_births, col_data = "popn")
+    validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
     deaths <- calc_deaths(popn = aged_popn_w_births,
                           mortality = filter(mortality, year == my_year),
                           col_popn = "popn",
                           col_rate = "rate")
-    validate_population(deaths, col_data = "deaths")
+    validate_population(deaths, col_data = "deaths", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
     next_yr_popn <- aged_popn_w_births %>% 
-      left_join(deaths, by = intersect(names(deaths), names(aged_popn_w_births))) %>%
+      left_join(deaths, by = c("year", "gss_code", "age", "sex")) %>%
       mutate(popn = popn - deaths) %>%
       select(-deaths)
     
@@ -86,4 +57,29 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
   
   return(list(population = proj_popn, deaths = proj_deaths, births = proj_births))
   
+}
+
+# do checks on the input data
+validate_trend_core_inputs <- function(population, fertility, mortality, first_proj_yr, n_proj_yr) {
+  
+  popmodules::validate_population(population, col_data = "popn")
+  popmodules::validate_population(fertility, col_data = "rate")
+  popmodules::validate_population(mortality, col_data = "rate")
+  
+  # check that the rates join onto the population
+  ## TODO make the aggregations columns flexible. Make this more elegant.
+  popmodules::validate_join_population(population, mortality, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, fertility, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  
+  # check that the coverage of years is correct
+  last_proj_yr <- first_proj_yr + n_proj_yr -1
+  assert_that((first_proj_yr - 1) %in% unique(population$year), msg = paste0("the population backseries doesn't contain the projection jump-off year (", first_proj_yr-1,")"))
+  assert_that(all(first_proj_yr:last_proj_yr %in% fertility$year), msg = "the projected fertility data doesn't contain all the projection years")
+  assert_that(all(first_proj_yr:last_proj_yr %in% mortality$year), msg = "the projected mortality data doesn't contain all the projection years")
+  
+  # check that the rates values are always between 0 and 1 
+  assert_that(max(fertility$rate) <= 1 & min(fertility$rate) >= 0, msg = "projected fertility contains rates outside the range 0-1")
+  assert_that(max(mortality$rate) <= 1 & min(mortality$rate) >= 0, msg = "projected mortality contains rates outside the range 0-1")
+  
+  invisible(TRUE)
 }
