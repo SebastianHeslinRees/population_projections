@@ -85,16 +85,24 @@ validate_join_population <- function(pop1,
   test_pop1 <- pop1[names(cols_common_aggregation)]
   test_pop2 <- pop2[cols_common_aggregation]
   # convert aggregation columns to factors with common levels
+  # warn when factor levels don't match
   for(i in 1:length(cols_common_aggregation)) {
     var1 <- names(cols_common_aggregation)[i]
     var2 <- cols_common_aggregation[i]
+    if(is.factor(test_pop1[[var1]]) && is.factor(test_pop1[[var2]])) {
+      if(!setequal(levels(test_pop1[[var1]]), test_pop2[[var2]])) {
+        warning(paste("validate_join_population was given populations with different factor levels in the",
+                      var1,"-",var2,"join. The data will be converted to a character vector."))
+      }
+    }
     agg_levels <- sort(union(test_pop1[[var1]], test_pop2[[var2]]))
     test_pop1[var1] <- factor(test_pop1[[var1]], levels=agg_levels)
     test_pop2[var2] <- factor(test_pop2[[var2]], levels=agg_levels)
   }
 
-
   assert_that(ncol(test_pop1) == ncol(test_pop2))
+  #test_pop2 <- match_factors(test_pop1, test_pop2, cols_common_aggregation)
+
   # CHECK every level in pop1 maps to a level in pop2
   n_missing_levels <- nrow(test_pop1) - nrow(dplyr::semi_join(test_pop1, test_pop2, by=cols_common_aggregation))
   assert_that(n_missing_levels == 0,
@@ -106,13 +114,13 @@ validate_join_population <- function(pop1,
     n_missing_levels <- nrow(test_pop2) - nrow(dplyr::semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse))
     assert_that(n_missing_levels == 0,
                msg = paste("validate_join_population couldn't match all levels between inputs.",
-                           n_missing_levels,"are present in the second data frame that aren't mapped to from the first",
-                           "If it's ok that the first is a subset of the second, set pop1_is_subset = TRUE"))
+                           n_missing_levels,"are present in the second data frame that aren't mapped to from the first.",
+                           "\nIf it's ok that the first is a subset of the second, set pop1_is_subset = TRUE"))
   }
 
   # CHECK (optional) every level in pop2 matches at most one level in pop1
   if(!many2one) {
-    pop2_trim_to_pop1 <- semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
+    pop2_trim_to_pop1 <- dplyr::semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
     assert_that(nrow(pop2_trim_to_pop1) == nrow(dplyr::left_join(pop2_trim_to_pop1, test_pop1, by=cols_common_aggregation_reverse)),
                 msg = "validate_join_population detected several levels in the first population dataset matching to a single level in the second. If this is ok set many2one = TRUE")
   }

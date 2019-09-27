@@ -114,7 +114,7 @@ test_that("validate_join_population handles (potentially differing) factors and 
 
 test_that("validate_join_population handles unused factor levels, with appropriate warnings", {
   pop_in <- data.frame(gss_code = factor(c("a","b","c","d"), levels=c("a","b","c","d","e")))
-  expect_invisible(
+  expect_warning(
     validate_join_population(pop_in, pop_test1, cols_common_aggregation="gss_code"))
   expect_invisible(
     validate_join_population(pop_test1, pop_in, cols_common_aggregation="gss_code"))

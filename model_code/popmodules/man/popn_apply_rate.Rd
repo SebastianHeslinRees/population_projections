@@ -7,7 +7,8 @@
 popn_apply_rate(popn, popn_rate, col_aggregation = c("year", "gss_code",
   "sex", "age"), col_popn = "popn", col_rate = "rate",
   col_out = "component", pop1_is_subset = FALSE, many2one = TRUE,
-  additional_rate_levels = NA)
+  additional_rate_levels = NA, missing_levels_popn = FALSE,
+  missing_levels_rate = FALSE)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}
@@ -16,11 +17,12 @@ popn_apply_rate(popn, popn_rate, col_aggregation = c("year", "gss_code",
 year).}
 
 \item{col_aggregation}{A string or character vector giving the names of
-columns to which the output will be aggregated to. All elements must give
-columns in \code{popn} but not all need to be in \code{popn_rate}, that is,
-it can be at a lower resolution. If names differ between the two input data
-frames, use a named character vector, e.g. \code{c("gss_code"="LSOA11CD")}.
-Default \code{c("year", "gss_code", "age", "sex")}.}
+columns in \code{popn} which the output will be aggregated to. All elements
+must give columns in \code{popn} but not all need to be in
+\code{popn_rate}, (that is, \code{popn_rate} can be at a lower resolution).
+If names differ between the two input data frames, use a named character
+vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
+"gss_code", "age", "sex")}.}
 
 \item{col_popn}{String. Name of column in \code{popn} containing population
 counts. Default "popn".}
@@ -46,6 +48,16 @@ which should be included in the join beyond those named in
 aggregation level, e.g. outmigration to multiple locations. The resulting
 left join with \code{popn_rate} can therefore return a much larger data
 frame. Default NA.}
+
+\item{missing_levels_popn}{Logical. Is the popn data frame missing any
+levels? Reminder: \code{pop1_is_subset} will probably be TRUE in this case.
+Default FALSE.}
+
+\item{missing_levels_rate}{Logical or character vector. Is the rates data
+missing any levels? If joining the missing levels to the input population
+would create NAs, the missing values in the output column will be NA. Note:
+setting this to TRUE will disable some of the checks on the input and join
+datasets. Default FALSE.}
 }
 \value{
 A data frame of component counts calculated as input popn * rate, with one row
@@ -55,23 +67,4 @@ A data frame of component counts calculated as input popn * rate, with one row
 Given a cohort population and a data frame of rates at the same or lower
 resolution, return a data table of the population's aggregation levels, and a
 component count resulting from the rate applied to the population.
-}
-\examples{
-
-library(generalpop)
-
-popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
-rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
-
-component <- popn_apply_rate(popn,
-                         rate,
-                         col_aggregation = c("year", "gss_code", "sex", "age"),
-                         col_popn = "popn",
-                         col_rate = "rate",
-                         col_out = "component",
-                         pop1_is_subset = FALSE,
-
-# Due to default parameter values, this is equivalent to
-component <- popn_apply_rate(popn, rate)
-
 }

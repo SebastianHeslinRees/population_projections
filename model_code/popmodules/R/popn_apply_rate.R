@@ -8,11 +8,12 @@
 #' @param popn_rate A data frame containing rates data per time step (usually
 #'   year).
 #' @param col_aggregation A string or character vector giving the names of
-#'   columns to which the output will be aggregated to. All elements must give
-#'   columns in \code{popn} but not all need to be in \code{popn_rate}, that is,
-#'   it can be at a lower resolution. If names differ between the two input data
-#'   frames, use a named character vector, e.g. \code{c("gss_code"="LSOA11CD")}.
-#'   Default \code{c("year", "gss_code", "age", "sex")}.
+#'   columns in \code{popn} which the output will be aggregated to. All elements
+#'   must give columns in \code{popn} but not all need to be in
+#'   \code{popn_rate}, (that is, \code{popn_rate} can be at a lower resolution).
+#'   If names differ between the two input data frames, use a named character
+#'   vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
+#'   "gss_code", "age", "sex")}.
 #' @param col_popn String. Name of column in \code{popn} containing population
 #'   counts. Default "popn".
 #' @param col_rate String. Name of column in \code{popn_rate} containing rate
@@ -32,6 +33,14 @@
 #'   aggregation level, e.g. outmigration to multiple locations. The resulting
 #'   left join with \code{popn_rate} can therefore return a much larger data
 #'   frame. Default NA.
+#' @param missing_levels_popn Logical. Is the popn data frame missing any
+#'   levels? Reminder: \code{pop1_is_subset} will probably be TRUE in this case.
+#'   Default FALSE.
+#' @param missing_levels_rate Logical or character vector. Is the rates data
+#'   missing any levels? If joining the missing levels to the input population
+#'   would create NAs, the missing values in the output column will be NA. Note:
+#'   setting this to TRUE will disable some of the checks on the input and join
+#'   datasets. Default FALSE.
 #'
 #' @return A data frame of component counts calculated as input popn * rate, with one row
 #'   for each distinct level of the input \code{col_aggregation} columns.
@@ -48,13 +57,16 @@
 #' rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 #'
 #' component <- popn_apply_rate(popn,
-#'                          rate,
-#'                          col_aggregation = c("year", "gss_code", "sex", "age"),
-#'                          col_popn = "popn",
-#'                          col_rate = "rate",
-#'                          col_out = "component",
-#'                          pop1_is_subset = FALSE,
-#                           additional_rate_levels = NA) {
+#'                              rate,
+#'                              col_aggregation = c("year", "gss_code", "sex", "age"),
+#'                              col_popn = "popn",
+#'                              col_rate = "rate",
+#'                              col_out = "component",
+#'                              pop1_is_subset = FALSE,
+#'                              many2one = TRUE,
+#                               additional_rate_levels = NA,
+#'                              missing_levels_popn = FALSE,
+#'                              missing_levels_rate = FALSE) {
 #'
 #' # Due to default parameter values, this is equivalent to
 #' component <- popn_apply_rate(popn, rate)
@@ -69,6 +81,8 @@
 #  but for frequent operations on large datasets, it could be sped up if we
 # just don't subset inside this function.
 
+# TODO add nesting!
+
 popn_apply_rate <- function(popn,
                             popn_rate,
                             col_aggregation = c("year", "gss_code", "sex", "age"),
@@ -77,12 +91,15 @@ popn_apply_rate <- function(popn,
                             col_out = "component",
                             pop1_is_subset = FALSE,
                             many2one = TRUE,
-                            additional_rate_levels = NA) {
+                            additional_rate_levels = NA,
+                            missing_levels_popn = FALSE,
+                            missing_levels_rate = FALSE) {
 
   # Validate input
   # --------------
   validate_popn_apply_rate_input(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
-                                 pop1_is_subset, many2one, additional_rate_levels)
+                                 pop1_is_subset, many2one, additional_rate_levels,
+                                 missing_levels_popn, missing_levels_rate)
 
 
   # Standardise data
@@ -139,7 +156,9 @@ popn_apply_rate <- function(popn,
                                   col_out,
                                   output,
                                   one2many,
-                                  additional_rate_levels)
+                                  additional_rate_levels,
+                                  missing_levels_popn,
+                                  missing_levels_rate)
 
   return(output)
 }
@@ -150,7 +169,8 @@ popn_apply_rate <- function(popn,
 
 # Check the function input is valid
 validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
-                                           pop1_is_subset, many2one, additional_rate_levels) {
+                                           pop1_is_subset, many2one, additional_rate_levels,
+                                           missing_levels_popn, missing_levels_rate) {
 
   # Type checking
   assert_that(is.data.frame(popn),
@@ -173,6 +193,10 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
               msg = "popn_apply_rate needs a logical value as the many2one parameter")
   assert_that(identical(additional_rate_levels, NA) | is.character(additional_rate_levels),
               msg = "additional_rate_levels should be NA or a character vector")
+  assert_that(rlang::is_bool(missing_levels_popn),
+              msg = "popn_apply_rate needs a logical value for missing_levels_popn")
+  assert_that(rlang::is_bool(missing_levels_rate),
+              msg = "popn_apply_rate needs a logical value for missing_levels_rate")
 
 
   # Other checks
@@ -226,28 +250,31 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
   }
 
   join_by <- col_aggregation[ col_aggregation %in% names(popn_rate) ]
+
   assert_that(length(join_by) > 0,
               msg = "popn_apply_rate must share some aggregation column names with the input popn_rate, or a column mapping must be included in the col_aggregation parameter")
 
   validate_population(popn,
                       col_aggregation = names(col_aggregation),
                       col_data = col_popn,
-                      test_complete = TRUE,
+                      test_complete = !missing_levels_popn,
                       test_unique = TRUE,
                       check_negative_values = TRUE)
   validate_population(popn_rate,
                       col_aggregation = all_rate_cols,
                       col_data = col_rate,
-                      test_complete = TRUE,
+                      test_complete = !missing_levels_rate,
                       test_unique = TRUE,
                       check_negative_values = FALSE)
-  validate_join_population(popn,
-                      popn_rate,
-                      cols_common_aggregation = join_by,
-                      pop1_is_subset = pop1_is_subset,
-                      many2one = many2one,
-                      one2many = one2many,
-                      warn_unused_shared_cols = FALSE)
+  if(!missing_levels_rate) {
+    validate_join_population(popn,
+                             popn_rate,
+                             cols_common_aggregation = join_by,
+                             pop1_is_subset = pop1_is_subset,
+                             many2one = many2one,
+                             one2many = one2many,
+                             warn_unused_shared_cols = FALSE)
+  }
 
   invisible(TRUE)
 }
@@ -257,31 +284,34 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
 
 # Check the function output isn't doing anything unexpected
 
-validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, output, one2many, additional_rate_levels) {
+validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, output, one2many, additional_rate_levels, missing_levels_popn, missing_levels_rate) {
 
   col_aggregation <- convert_to_named_vector(col_aggregation)
 
   output_col_aggregation <- unique(c(names(col_aggregation), additional_rate_levels))
-
   assert_that(all(output_col_aggregation %in% names(output)))
 
   assert_that(col_out %in% names(output))
 
-  assert_that(all(stats::complete.cases(output)))
+  if(!missing_levels_rate) {
+    assert_that(all(stats::complete.cases(output)))
+  }
 
-  if(one2many) {
+  if(one2many | missing_levels_popn) {
     output_comparison <- NA # TODO: could we use semi_join(popn_rate, popn, by=...) here?
   } else {
     output_comparison <- popn
   }
 
-  validate_population(output,
-                      col_aggregation = output_col_aggregation,
-                      col_data = col_out,
-                      test_complete = TRUE,
-                      test_unique = TRUE,
-                      check_negative_values = FALSE,
-                      comparison_pop = output_comparison)
+  if(!missing_levels_rate) {
+    validate_population(output,
+                        col_aggregation = output_col_aggregation,
+                        col_data = col_out,
+                        test_complete = !missing_levels_popn,
+                        test_unique = TRUE,
+                        check_negative_values = FALSE,
+                        comparison_pop = output_comparison)
+  }
 
   invisible(TRUE)
 }
@@ -320,10 +350,10 @@ match_factors <- function(dfsource, dftarget, col_mapping) {
     if(!is.factor(source_col) & is.factor(target_col)) {
       col_class <- class(source_col)
       if(col_class == "numeric") {
-        dftarget[[names(icol)]] <- levels(target_col)[target_col] %>%
+        dftarget[[icol]] <- levels(target_col)[target_col] %>%
           as.numeric()
       } else {
-        dftarget[[names(icol)]] <- as.character(target_col)
+        dftarget[[icol]] <- as.character(target_col)
       }
     }
   }
