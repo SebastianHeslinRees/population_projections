@@ -6,7 +6,8 @@
 \usage{
 popn_apply_rate(popn, popn_rate, col_aggregation = c("year", "gss_code",
   "sex", "age"), col_popn = "popn", col_rate = "rate",
-  col_out = "component")
+  col_out = "component", pop1_is_subset = FALSE, many2one = TRUE,
+  additional_rate_levels = NA)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}
@@ -27,8 +28,24 @@ counts. Default "popn".}
 \item{col_rate}{String. Name of column in \code{popn_rate} containing rate
 data. Default "rate".}
 
-\item{col_out}{String. Name of column for the output component count (popn*rate) in
-the output. Default "component".}
+\item{col_out}{String. Name of column for the output component count
+(popn*rate) in the output. Default "component".}
+
+\item{pop1_is_subset}{Logical. If the two input data frames cover the same
+domain and you expect every level of \code{popn_rate} to be matched to by a
+level in \code{popn} set this to TRUE, and this will be checked. Default
+FALSE.}
+
+\item{many2one}{Logical. Setting this to FALSE will check that no more than
+one level from \code{popn} matches to each level of \code{rate}. Default
+TRUE.}
+
+\item{additional_rate_levels}{String. Names of columns in \code{popn_rate}
+which should be included in the join beyond those named in
+\code{col_aggregation}. Used when multiple rates apply to the same
+aggregation level, e.g. outmigration to multiple locations. The resulting
+left join with \code{popn_rate} can therefore return a much larger data
+frame. Default NA.}
 }
 \value{
 A data frame of component counts calculated as input popn * rate, with one row
@@ -51,7 +68,8 @@ component <- popn_apply_rate(popn,
                          col_aggregation = c("year", "gss_code", "sex", "age"),
                          col_popn = "popn",
                          col_rate = "rate",
-                         col_out = "component")
+                         col_out = "component",
+                         pop1_is_subset = FALSE,
 
 # Due to default parameter values, this is equivalent to
 component <- popn_apply_rate(popn, rate)

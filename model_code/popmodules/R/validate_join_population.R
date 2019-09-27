@@ -22,11 +22,11 @@
 #'
 #' @param pop1,pop2 Data frames.
 #' @param cols_common_aggregation A character vector. Names of columns for data
-#'   aggregation common to both input data frames (e.g. age, ward). If columns
-#'   don't have the same name, use a named character vector (e.g.
-#'   \code{"WARD"="WARD11CD"}). Defaults to column names shared between the
-#'   input data frames, but it's best not to use this in case the overlap it
-#'   finds is not what you expect.
+#'   aggregation (e.g. age, ward). If columns don't have the same name, use a
+#'   named character vector (e.g. \code{"WARD"="WARD11CD"}). All elements must give
+#'   columns in \code{popn} but not all need to be in \code{popn_rate}, that is,
+#'   it can be at a lower resolution. Defaults to
+#'   \code{c("year","gss_code","age","sex")}.
 #' @param pop1_is_subset Logical. When TRUE \code{pop1} is allowed to match to
 #'   subset of \code{pop2}.When FALSE the aggregation levels should be the same
 #'   (ignoring duplicates) and the mapping will be surjective, i.e. all
@@ -34,7 +34,7 @@
 #' @param many2one Logical. Can multiple rows in \code{pop1} map to a single row
 #'   in \code{pop2}? Set to FALSE when matching should be unique (i.e.
 #'   injective), and leave TRUE when, e.g. \code{pop2} has fewer aggregation
-#'   levels than code{pop2}, for example when validating a join from LSOA data
+#'   levels than \code{pop2}, for example when validating a join from LSOA data
 #'   to MSOA data on MSOA11CD.
 #' @param one2many Logical. Can one row in the first population map to several
 #'   in the second? Set to FALSE when testing a left join that expects the same
@@ -50,7 +50,7 @@
 
 validate_join_population <- function(pop1,
                                      pop2,
-                                     cols_common_aggregation = intersect(names(pop1),names(pop2)),
+                                     cols_common_aggregation = c("year","gss_code","age","sex"),
                                      pop1_is_subset = TRUE,
                                      many2one = TRUE,
                                      one2many = TRUE,
@@ -142,49 +142,49 @@ validate_join_population_inputs <-function(pop1,
 
   assert_that(is.data.frame(pop1),
               is.data.frame(pop2),
-              msg="validate_overlapping_populations needs data frames as inputs for pop1 and pop2")
+              msg="validate_join_population needs data frames as inputs for pop1 and pop2")
   assert_that(is.character(cols_common_aggregation),
-              msg="validate_overlapping_populations needs a character vector of common aggregation column names as input")
+              msg="validate_join_population needs a character vector of common aggregation column names as input")
   assert_that(length(cols_common_aggregation) > 0,
-              msg="validate_overlapping_populations was given a zero-length vector of common column names to compare")
+              msg="validate_join_population was given a zero-length vector of common column names to compare")
   assert_that(!any(is.na(cols_common_aggregation)),
-              msg="validate_overlapping_populations can't handle missing in common aggreagation column names")
+              msg="validate_join_population can't handle missing in common aggreagation column names")
   assert_that(is.logical(pop1_is_subset),
-              msg="validate_overlapping_populations needs a logical value for the pop1_is_subset input parameter")
+              msg="validate_join_population needs a logical value for the pop1_is_subset input parameter")
   assert_that(is.logical(many2one),
-              msg="validate_overlapping_populations needs a logical value for the many2one input parameter")
+              msg="validate_join_population needs a logical value for the many2one input parameter")
   assert_that(is.logical(one2many),
-              msg="validate_overlapping_populations needs a logical value for the one2many input parameter")
+              msg="validate_join_population needs a logical value for the one2many input parameter")
   assert_that(is.logical(warn_unused_shared_cols),
-              msg="validate_overlapping_populations needs a logical value for the warn_unused_shared_cols input parameter")
+              msg="validate_join_population needs a logical value for the warn_unused_shared_cols input parameter")
 
   if(nrow(pop1) == 0) {
-    warning("An empty data frame was passed to validate_overlapping_populations as parameter pop1")
+    warning("An empty data frame was passed to validate_join_population as parameter pop1")
   }
   if(nrow(pop2) == 0) {
-    warning("An empty data frame was passed to validate_overlapping_populations as parameter pop2")
+    warning("An empty data frame was passed to validate_join_population as parameter pop2")
   }
 
   cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
 
   # Check all expected columns are present
   assert_that(all(names(cols_common_aggregation) %in% names(pop1)),
-              msg=paste(c("validate_overlapping_populations couldn't find all expected column names in the input for the pop1 parameter.",
+              msg=paste(c("validate_join_population couldn't find all expected column names in the input for the pop1 parameter.",
                           "\nExpected:",names(cols_common_aggregation),
                           "\nNames of input data frame:",names(pop1)),
                         collapse = " "))
   assert_that(all(cols_common_aggregation %in% names(pop2)),
-              msg=paste(c("validate_overlapping_populations couldn't find all expected column names in the input for the pop2 parameter.",
+              msg=paste(c("validate_join_population couldn't find all expected column names in the input for the pop2 parameter.",
                           "\nExpected:",cols_common_aggregation,
                           "\nNames of input data frame:",names(pop2)),
                         collapse = " "))
 
   # Check no missing values
   if(any(is.na(pop1[,names(cols_common_aggregation)]))) {
-    warning("validate_overlapping_populations was given NA values in the aggregation levels of pop1")
+    warning("validate_join_population was given NA values in the aggregation levels of pop1")
   }
   if(any(is.na(pop2[,cols_common_aggregation]))) {
-    warning("validate_overlapping_populations was given NA values in the aggregation levels of pop2")
+    warning("validate_join_population was given NA values in the aggregation levels of pop2")
   }
 
 

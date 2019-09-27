@@ -105,7 +105,7 @@ validate_population <- function( population,
   }
 
   # CHECK: no duplicates in input aggregation levels
-  n_duplicates <- nrow(test_population) - data.table::uniqueN(data.table::as.data.table(test_population[col_aggregation]))
+  n_duplicates <- sum(duplicated(data.table::as.data.table(test_population[col_aggregation])))
   #n_duplicates <- sum(duplicated(test_population[col_aggregation]))   # r base equivalent
   if(test_unique) {
     assert_that(n_duplicates == 0,

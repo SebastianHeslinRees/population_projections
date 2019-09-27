@@ -19,7 +19,10 @@ output2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m")
 #                            col_aggregation = c("year", "gss_code", "sex", "age"),
 #                            col_popn = "popn",
 #                            col_rate = "rate",
-#                            col_out = "component") {
+#                            col_out = "component",
+#                            pop1_is_subset = FALSE,
+#                            many2one = TRUE,
+#                            additional_rate_levels = FALSE) {
 
 #--------------------------------------------------------------
 # The tests here use expect_equivalent. This is expect_equal (i.e. objects must be the same) but doesn't compare object attributes
@@ -32,9 +35,10 @@ test_that("popn_apply_rate creates the expected output", {
                     output2)
 })
 
-test_that("popn_apply_rate can work with rates at a coarser resolution than the population", {
+test_that("popn_apply_rate can work with rates at a coarser resolution than the population, but fails when many2one = FALSE", {
   expect_equivalent(popn_apply_rate(popn2, rate),
                     output2)
+  expect_error(popn_apply_rate(popn2, rate, many2one = FALSE))
 })
 
 test_that("popn_apply_rate fails when there's more than one death rate for each aggregation level", {
@@ -168,7 +172,20 @@ test_that("popn_apply_rate throws an error with implicit missing aggregation val
 })
 
 
-test_that("popn_apply_rate throws an error with duplicate aggregation values", {
+test_that("popn_apply_rate throws an error when there is more than one match in the rate data frame for a level", {
   expect_error(popn_apply_rate(popn2, rate2, col_aggregation = c("gss_code","sex")))
 })
 
+test_that("popn_apply_rate can deal with a join to a higher resolution (one2many) rate data", {
+  popn_in <- unique(dplyr::select(popn2, -sex))
+  expect_error(popn_apply_rate(popn2, rate2, one2many=FALSE))
+  expect_equivalent(popn_apply_rate(popn_in, rate2, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex"),
+                    dplyr::arrange(output2, year, gss_code, age, sex)) # Joining results in a different ordering here
+})
+
+test_that("popn_apply_rate can check that all rates are matched to", {
+  rate_in  <- expand.grid(year=2000, age=20:21, gss_code=c("a","b","c"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
+  expect_equivalent(popn_apply_rate(popn2, rate_in, pop1_is_subset = TRUE),
+                    output2)
+  expect_error(popn_apply_rate(popn2, rate_in, pop1_is_subset = FALSE))
+})
