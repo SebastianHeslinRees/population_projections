@@ -54,7 +54,7 @@ aggregation levels, a births count split by a provided male:female births
 ratio, and age set to zero.
 }
 \details{
-Sex data (if used) must be provided as "m" and "f".
+Sex data (if used) must be provided as "male" and "female".
 }
 \examples{
 

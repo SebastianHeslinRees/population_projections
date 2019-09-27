@@ -5,7 +5,7 @@
 #' aggregation levels, a births count split by a provided male:female births
 #' ratio, and age set to zero.
 #'
-#' Sex data (if used) must be provided as "m" and "f".
+#' Sex data (if used) must be provided as "male" and "female".
 #'
 #' @param popn A data frame containing population data.
 #' @param fertility A data frame containing fertiity rates per person per year.
@@ -91,7 +91,7 @@ births_from_popn_fert <- function(popn,
   col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
 
   # If col_sex is specified and is an aggregation column, but is not in the
-  # fertility data, set fertility sex to "f" and warn we're making this assumption
+  # fertility data, set fertility sex to "female" and warn we're making this assumption
   output_sex <- !is.null(col_sex)
   if( output_sex &&
       col_sex %in% names(col_aggregation) &&
@@ -99,8 +99,8 @@ births_from_popn_fert <- function(popn,
     warning(paste("births_from_popn_fert input has column", col_sex, "for population sex,",
                   "but no corresponding column in the fertility data. The function will assume",
                   "that the fertility rates are per women, not per person."))
-    fertility[[col_sex]] <- "f"
-    male_fertility <- dplyr::mutate(fertility, !!sym(col_rate) := 0, !!sym(col_sex) := "m")
+    fertility[[col_sex]] <- "female"
+    male_fertility <- dplyr::mutate(fertility, !!sym(col_rate) := 0, !!sym(col_sex) := "male")
     fertility <- rbind(fertility, male_fertility)
   }
   # In the case where there's no sex data in the popn aggregation
@@ -138,8 +138,8 @@ births_from_popn_fert <- function(popn,
     prop_female <- 1 / (1 + birthratio_m2f)
 
     births_names <- names(births)
-    births <- tidyr::expand(births, tidyr::nesting(!!!syms(births_names)), !!sym(col_sex) := c("f","m")) %>%
-      mutate( !!sym(col_births) := ifelse( !!sym(col_sex) == "m", !!sym(col_births) * prop_male, !!sym(col_births) * prop_female))
+    births <- tidyr::expand(births, tidyr::nesting(!!!syms(births_names)), !!sym(col_sex) := c("female","male")) %>%
+      mutate( !!sym(col_births) := ifelse( !!sym(col_sex) == "male", !!sym(col_births) * prop_male, !!sym(col_births) * prop_female))
   }
   assert_that(all.equal(total_births, sum(births[[col_births]])))
 
@@ -235,8 +235,8 @@ validate_births_from_popn_input <- function(popn,
   # Check columns contain the correct data
   assert_that(nrow(popn) > 0,
               msg = "births_from_popn_fert was given a table with 0 rows of input")
-  assert_that(is.null(col_sex) || all(popn[[col_sex]] %in% c("m", "f")),
-              msg = paste("births_from_popn_fert needs values of 'm' or 'f' in the specified sex col:", col_sex))
+  assert_that(is.null(col_sex) || all(popn[[col_sex]] %in% c("male", "female")),
+              msg = paste("births_from_popn_fert needs values of 'male' or 'female' in the specified sex col:", col_sex))
   assert_that(is.numeric(popn[[col_popn]]),
               msg = paste("births_from_popn_fert needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(fertility[[col_rate]]),
