@@ -1,16 +1,22 @@
 # TODO make this take a list? 
-trend_core <- function(population, births, deaths, int_out, fertility, mortality, int_out_rate, first_proj_yr, n_proj_yr) {
+trend_core <- function(population, births, deaths, int_out, int_in,
+                       fertility, mortality, int_out_rate, int_in_proj,
+                       first_proj_yr, n_proj_yr) {
   library(dplyr)
   library(assertthat)
   library(popmodules)
   
   # do checks on the input data
-  validate_inputs <- function(population, fertility, mortality, int_out_rate, first_proj_yr, n_proj_yr) {
+  validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in,
+                                         fertility, mortality, int_out_rate, int_in_proj,
+                                         first_proj_yr, n_proj_yr) {
     
     popmodules::validate_population(population, col_data = "popn")
+    
     popmodules::validate_population(fertility, col_data = "rate")
     popmodules::validate_population(mortality, col_data = "rate")
     popmodules::validate_population(int_out_rate, col_data = "rate")
+    popmodules::validate_population(int_in_proj, col_data = "int_in")
     
     # check that the rates join onto the population
     ## TODO make the aggregations columns flexible. Make this more elegant.
@@ -27,6 +33,7 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
     assert_that(all(first_proj_yr:last_proj_yr %in% fertility$year), msg = "the projected fertility data doesn't contain all the projection years")
     assert_that(all(first_proj_yr:last_proj_yr %in% mortality$year), msg = "the projected mortality data doesn't contain all the projection years")
     assert_that(all(first_proj_yr:last_proj_yr %in% int_out_rate$year), msg = "the projected int_out_rate data doesn't contain all the projection years")
+    assert_that(all(first_proj_yr:last_proj_yr %in% int_in_proj$year), msg = "the projected int_in data doesn't contain all the projection years")
     
     # check that the rates values are always between 0 and 1 
     assert_that(max(fertility$rate) <= 1 & min(fertility$rate >= 0), msg = "projected fertility contains rates outside the rage 0-1")
@@ -36,7 +43,9 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
     invisible(TRUE)
   }
   
-  validate_inputs(population, fertility, mortality, int_out_rate,  first_proj_yr, n_proj_yr)
+  validate_trend_core_inputs(population, births, deaths, int_out, int_in,
+                             fertility, mortality, int_out_rate, int_in_proj,
+                             first_proj_yr, n_proj_yr)
   
   # Load core functions
   #age_on <- popmodules::age_on_sya
@@ -52,6 +61,7 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
   proj_deaths <- deaths
   proj_births <- births
   proj_int_out <- int_out
+  proj_int_in <- int_in
   
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
@@ -78,12 +88,7 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
                           col_rate = "rate",
                           col_component = "deaths")
     validate_population(deaths, col_data = "deaths")
-    
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
-    next_yr_popn <- aged_popn_w_births %>% 
-      left_join(deaths, by = intersect(names(deaths), names(aged_popn_w_births))) %>%
-      mutate(popn = popn - deaths) %>%
-      select(-deaths)
     
     
     # switch for changing whether international out is rates based, or just numbers to match international in
@@ -94,23 +99,29 @@ trend_core <- function(population, births, deaths, int_out, fertility, mortality
                             col_rate = "rate",
                             col_component = "int_out")
     validate_population(int_out, col_data = "int_out")
+    validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
     
-    validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE) 
+    int_in <- int_in_proj %>% filter(year == my_year)
+    validate_population(int_out, col_data = "int_in")
+    validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
+    
     next_yr_popn <- aged_popn_w_births %>% 
-      left_join(int_out, by = intersect(names(int_out), names(aged_popn_w_births))) %>%
-      mutate(popn = popn - int_out) %>%
-      select(-int_out)
-    
+      left_join(deaths, by = intersect(names(deaths), names(aged_popn_w_births))) %>%
+      left_join(int_out, by = intersect(names(int_out), names(aged_popn_w_births)) ) %>%
+      left_join(int_in, by = intersect(names(int_in), names(aged_popn_w_births)) ) %>% 
+      mutate(popn = popn - deaths - int_out + int_in) %>%
+      select(-c(deaths, int_in, int_out))
     
     proj_popn <- rbind(proj_popn, next_yr_popn)
     proj_births <- rbind(proj_births, births)
     proj_deaths <- rbind(proj_deaths, deaths)
-    prog_int_out <- rbind(proj_int_out, int_out)
+    proj_int_out <- rbind(proj_int_out, int_out)
+    proj_int_in <- rbind(proj_int_in, int_in)
     
     curr_yr_popn <- next_yr_popn
     
   }
   
-  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births))
+  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births, int_out = proj_int_out, int_in = proj_int_in))
   
 }

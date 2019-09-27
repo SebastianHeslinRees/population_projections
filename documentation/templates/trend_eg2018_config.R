@@ -18,14 +18,13 @@ fertility_fns <- list(
   list(fn = popmodules::rates_from_file, args = list(filepath = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds"))
 )
 
-int_out_fns <- NA
-
 int_out_rate_fns <- list(
   list(fn = popmodules::rates_from_file, args = list(filepath = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds"))
 )
 
 int_in_fns <- list(
-  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_in_2017_base_trend_med.rds"))
+  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_in_2017_base_trend_med.rds",
+                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1)))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
@@ -42,7 +41,6 @@ config_list <- list(
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
-  int_out_fns = int_out_fns,
   int_out_rate_fns = int_out_rate_fns,
   int_in_fns = int_in_fns,
   qa_areas_of_interest = qa_areas_of_interest,
@@ -59,7 +57,6 @@ rm(first_proj_yr,
    outputs_dir,
    mortality_fns, 
    fertility_fns, 
-   int_out_fns,
    int_out_rate_fns,
    int_in_fns,
    qa_areas_of_interest)

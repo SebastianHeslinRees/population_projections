@@ -8,11 +8,19 @@ saveRDS(test_data_pass, file = "test_data/test_component_proj_from_file_pass.rds
 # tests for the filename validation
 
 test_that("a .csv file should fail with a message", {
-  expect_error(component_proj_from_file("popmodules/tests/testthat/test_data/test_component_proj_from_file.csv"),"component projection file must be a .rds file")
+  expect_error(component_proj_from_file("popmodules/tests/testthat/test_data/test_component_proj_from_file.csv", proj_yrs = 2001:2002),"component projection file must be a .rds file")
 })
 
 test_that("a .rds file should read in OK", {
-  expect_equivalent(component_proj_from_file("test_data/test_component_proj_from_file_pass.rds"), test_data_pass)
+  expect_equivalent(component_proj_from_file("test_data/test_component_proj_from_file_pass.rds", proj_yrs = 2001:2002), test_data_pass)
+})
+
+test_that("error should be thrown if first proj year is not in component df", {
+  expect_error(component_proj_from_file("test_data/test_component_proj_from_file_pass.rds", proj_yrs = 2002:2003), "the component projection data does not contain all the projection years")
+})
+
+test_that("the df should be filtered to only projection years", {
+  expect_equivalent(component_proj_from_file("test_data/test_component_proj_from_file_pass.rds", proj_yrs = 2002), filter(test_data_pass, year >= 2002))
 })
 
 # TODO add tests for the dataframe validation
