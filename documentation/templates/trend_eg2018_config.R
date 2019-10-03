@@ -36,3 +36,4 @@ rm(first_proj_yr, n_proj_yr, popn_mye_path, deaths_mye_path, births_mye_path, ou
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 run_trend_model(config_list)
+ 

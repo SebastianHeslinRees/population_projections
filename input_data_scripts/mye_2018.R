@@ -7,6 +7,18 @@ mye_coc <- readRDS(coc_file) %>%
   mutate(geography = "LAD18", sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female"), year = as.integer(year)) %>%
   as.data.frame()
 
+mye_wales <- filter(mye_coc, country=="W") %>%
+  mutate(gss_code = "W92000004",
+         gss_name = "Wales") %>%
+  group_by(gss_code, gss_name, country, sex, age, component, year, geography) %>%
+  summarise(value = sum(value)) %>%
+  ungroup() %>%
+  select(names(mye_coc))
+
+mye_coc <- filter(mye_coc, country!="W") %>%
+  rbind(mye_wales)
+  
+
 births <- filter(mye_coc, component == "births") %>% select(-component) %>% rename(births = value)
 deaths <- filter(mye_coc, component == "deaths") %>% select(-component) %>% rename(deaths = value)
 population <- filter(mye_coc, component == "population") %>% select(-component) %>% rename(popn = value)
