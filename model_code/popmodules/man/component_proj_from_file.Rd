@@ -4,12 +4,12 @@
 \alias{component_proj_from_file}
 \title{Read component projection from file (e.g. international in migration)}
 \usage{
-component_proj_from_file(filepath, first_proj_yr)
+component_proj_from_file(filepath, proj_yrs)
 }
 \arguments{
 \item{filepath}{Filepath to the component RDS file}
 
-\item{first_proj_yr}{First projection year}
+\item{proj_yrs}{Years that should be present in projection data}
 }
 \value{
 A data frame of component projection
