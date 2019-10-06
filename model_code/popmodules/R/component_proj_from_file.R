@@ -1,11 +1,20 @@
-#' Read component projection from file (e.g. international in migration)
+#' Read component or component rate projection from file
+#' (e.g. international in migration or fertility)
 #'
 #' Given a filepath to a RDS file that contains component projection, return a
-#' component projection dataframe
+#' component or component rate projection dataframe
 #'
-#' @param filepath Filepath to the component RDS file
-#' @param proj_yrs Years that should be present in projection data
-#' @return A data frame of component projection
+#' @param filepath A string giving the filepath to the component RDS file
+#' @param proj_yrs A vector of years that should be present in projection data
+#' @param col_data A string giving the name of the column which contains the data value
+#' @param col_year A string giving the name of the column which contains the year. Defaults to "year"
+#' @param col_sex A string giving the name of the column which contains the sex. Defaults to "sex".
+#'   If there is no sex column set to NA
+#' @param col_aggregation Character vector of columns acting as
+#'   aggregation levels. Default c("year","gss_code","age","sex").  All columns not
+#'   specified in \code{col_data}, \code{col_year} or \code{col_sex} must be
+#'   specified here.
+#' @return A data frame of component or component rate projections
 #'
 #' @import assertthat
 #' @importFrom dplyr filter
@@ -31,7 +40,7 @@ component_proj_from_file <- function(filepath,
   # TODO should we enforce that component_proj dfs must be complete?
   validate_component_proj_from_file_data(component_proj, proj_yrs, col_data, col_year, col_sex, col_aggregation)
 
-  component_proj <- filter_at(component_proj, vars(col_year) %in% proj_yrs)
+  component_proj <- filter_at(component_proj, vars(col_year), any_vars(. %in% proj_yrs))
   # return component_proj
   component_proj
 
