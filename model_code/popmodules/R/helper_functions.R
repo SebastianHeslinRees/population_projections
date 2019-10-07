@@ -67,7 +67,12 @@ match_factors <- function(dfsource, dftarget, col_mapping) {
     target_col <- dftarget[[icol]]
 
     if(is.factor(source_col) & !is.factor(target_col)) {
-      dftarget[[icol]] <- factor(dftarget[[icol]])
+      if(identical(levels(source_col), as.character(dftarget[[icol]]))) {
+        dftarget[[icol]] <- factor(dftarget[[icol]])
+      } else {
+        warning(paste("match_factors was given a source and target with different levels in",
+                      col_mapping[i],"- a factor conversion will not be performed"))
+      }
     }
 
     if(!is.factor(source_col) & is.factor(target_col)) {
@@ -79,12 +84,6 @@ match_factors <- function(dfsource, dftarget, col_mapping) {
       }
     }
 
-    if(is.factor(source_col)) {
-      if(!identical(levels(source_col), levels(dftarget[[icol]]))) {
-        warning(paste("match_factors was given a source and target with different levels in",
-                      col_mapping[i],"- watch out: any subsequent joins between the two will be coerced to character vectors"))
-      }
-    }
   }
   return(dftarget)
 }
