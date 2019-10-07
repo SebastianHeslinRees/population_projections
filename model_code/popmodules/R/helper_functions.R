@@ -67,8 +67,7 @@ match_factors <- function(dfsource, dftarget, col_mapping) {
     target_col <- dftarget[[icol]]
 
     if(is.factor(source_col) & !is.factor(target_col)) {
-      target_levels <- intersect(levels(source_col), target_col)
-      dftarget[[icol]] <- factor(dftarget[[icol]], levels = target_levels)
+      dftarget[[icol]] <- factor(dftarget[[icol]])
     }
 
     if(!is.factor(source_col) & is.factor(target_col)) {
@@ -77,6 +76,13 @@ match_factors <- function(dfsource, dftarget, col_mapping) {
         dftarget[[names(icol)]] <- as.numeric(levels(target_col)[target_col])
       } else {
         dftarget[[names(icol)]] <- as.character(target_col)
+      }
+    }
+
+    if(is.factor(source_col)) {
+      if(!identical(levels(source_col), levels(dftarget[[icol]]))) {
+        warning(paste("match_factors was given a source and target with different levels in",
+                      col_mapping[i],"- watch out: any subsequent joins between the two will be coerced to character vectors"))
       }
     }
   }
