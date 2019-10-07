@@ -1,25 +1,52 @@
 #NPP Mortality Trend data
-mort_trend <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Inputs/2017 base/constant inputs/npp_mortality_trend.rds")
 
-mort_trend <- setnames(mort_trend, c("sex","age","year","2018_principal","2018_low","2018_high",
-                   "2016_principal","2016_low","2016_high"))
+max_year <- 2050
+npp_data_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
 
-mort_trend <- gather(mort_trend, variant, national_rate, 4:9) %>%
-  mutate(sex = ifelse(sex=="F", "female", ifelse(sex=="M","Male",NA))) %>%
+#function to read and wrangle raw data
+mortality_trend <- function(file, var, max_year){
+  mort <- fread(file) %>%
+    gather(year, rate, 3:102) %>%
+    mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
+    mutate(age = ifelse(Age == "Birth", -1, Age),
+           age = as.numeric(age))%>%
+    select(-Sex, -Age) %>%
+    mutate(year = as.numeric(substr(year, 8,11))) %>%
+    filter(year <= max_year) %>%
+    select(sex, age, year, rate)
+  
+  back_to_2001 <- list()
+  for(y in 2001:2016){
+    back_to_2001[[y]] <- filter(mort, year == 2017) %>%
+      mutate(year = y)
+  }
+  
+  mort <- rbind(rbindlist(back_to_2001), mort) %>%
+    mutate(variant = var)
+  
+  return(mort)
+  
+}
+
+#read in data
+x <- getwd()
+setwd(npp_data_location)
+principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year)
+high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year)
+low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year)
+
+#bind the variants together
+mort_trend <- rbind(principal, high, low)%>%
   mutate(age = age + 1) %>%
   filter(age %in% c(0:90)) %>%
   arrange(sex, age, year) %>%
-  mutate(last_year = lag(national_rate)) %>%
-  #filter(year <= 2050) %>%
-  mutate(change = (national_rate - last_year)/last_year)%>%
+  mutate(last_year = lag(rate)) %>%
+  mutate(change = (rate - last_year)/last_year)%>%
   mutate(change = ifelse(year == min(year),0,change)) %>%
-  select(-national_rate, -last_year)
+  select(-rate, -last_year)
 
+#write output
+setwd(x)
 saveRDS(mort_trend, "input_data/mortality/npp_mortality_trend.rds" )
 
-#SNPP ASMR curves
-mortality_curves <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Inputs/2017 base/constant inputs/ons_asmr_curves.rds") %>%
-  mutate(sex = ifelse(sex == "M", "male", ifelse(sex == "F", "female", NA))) %>%
-  select(-year)
-
-saveRDS(mortality_curves, "input_data/mortality/ons_asmr_curves.rds" )
+rm(high, low, principal, mort_trend, max_year, npp_data_location, x, mortality_trend)
