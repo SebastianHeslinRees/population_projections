@@ -55,10 +55,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
     
     
-    # switch for changing whether international out is rates based, or just numbers to match international in
+    # TODO add switch for changing whether international out is rates based, or just numbers to match international in
     
     int_out <- calc_int_out(popn = aged_popn_w_births,
-                            component_rate = filter(mortality, year == my_year),
+                            component_rate = filter(int_out_rate, year == my_year),
                             col_popn = "popn",
                             col_rate = "rate",
                             col_component = "int_out")

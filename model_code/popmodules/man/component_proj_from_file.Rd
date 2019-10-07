@@ -2,21 +2,36 @@
 % Please edit documentation in R/component_proj_from_file.R
 \name{component_proj_from_file}
 \alias{component_proj_from_file}
-\title{Read component projection from file (e.g. international in migration)}
+\title{Read component or component rate projection from file
+(e.g. international in migration or fertility)}
 \usage{
-component_proj_from_file(filepath, proj_yrs)
+component_proj_from_file(filepath, proj_yrs, col_data, col_year = "year",
+  col_sex = "sex", col_aggregation = c("year", "gss_code", "age",
+  "sex"))
 }
 \arguments{
-\item{filepath}{Filepath to the component RDS file}
+\item{filepath}{A string giving the filepath to the component RDS file}
 
-\item{proj_yrs}{Years that should be present in projection data}
+\item{proj_yrs}{A vector of years that should be present in projection data}
+
+\item{col_data}{A string giving the name of the column which contains the data value}
+
+\item{col_year}{A string giving the name of the column which contains the year. Defaults to "year"}
+
+\item{col_sex}{A string giving the name of the column which contains the sex. Defaults to "sex".
+If there is no sex column set to NA}
+
+\item{col_aggregation}{Character vector of columns acting as
+aggregation levels. Default c("year","gss_code","age","sex").  All columns not
+specified in \code{col_data}, \code{col_year} or \code{col_sex} must be
+specified here.}
 }
 \value{
-A data frame of component projection
+A data frame of component or component rate projections
 }
 \description{
 Given a filepath to a RDS file that contains component projection, return a
-component projection dataframe
+component or component rate projection dataframe
 }
 \examples{
 

@@ -4,6 +4,8 @@ params:
   qa_areas_of_interest: list("London")
   popn_proj_fp: outputs/model/year/population_file.rds
   deaths_proj_fp: outputs/model/year/deaths_file.rds
+  int_in_proj_fp: outputs/model/year/int_in_file.rds
+  int_out_proj_fp: outputs/model/year/int_out_file.rds
   output_files_dir: outputs/model/year/population_qa_files/
 output:
   html_document:
@@ -28,6 +30,8 @@ library(gganimate)
 ```{r, echo=FALSE, message = FALSE}
 popn_proj <-   readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$popn_proj_fp))
 deaths_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$deaths_proj_fp))
+int_in_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$int_in_proj_fp))
+int_out_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$int_out_proj_fp))
 
 output_files_dir <- paste0(rprojroot::find_rstudio_root_file(),"/",params$output_files_dir)
 areas_of_interest <- params$qa_areas_of_interest
@@ -130,5 +134,55 @@ for(loc in seq_along(areas_of_interest)) {
 
 ```{r, echo=FALSE}
 gifs <- list.files(output_files_dir,"*loc_deaths_by_yr*", full.names = TRUE)
+knitr::include_graphics(gifs)
+```
+
+# International in age structure over projection years
+```{r, echo=FALSE, message = FALSE, results = 'hide'}
+for(loc in seq_along(areas_of_interest)) {
+  int_in_proj_loc <- filter(int_in_proj, gss_code %in% areas_of_interest[[loc]])
+  loc_int_in_by_yr <- int_in_proj_loc %>%
+    group_by(year, age) %>%
+    summarise(int_in = sum(int_in)) %>%
+    ggplot(aes(age, int_in, colour = as.character(year))) +
+    scale_colour_manual(values = c(rep("black", length(min(int_in_proj_loc$year):2018)),
+                                   rep("red", length(2019:max(int_in_proj_loc$year))))) +
+    geom_point() +
+    theme(legend.position = "none")
+  
+  anim <- loc_int_in_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+    labs(title = paste(names(areas_of_interest)[loc], "international in migration age structure over projection years"),
+         subtitle = '{closest_state}')
+  anim_save(paste0(output_files_dir, "/loc_int_in_by_yr_",loc,".gif"), anim)
+}
+```
+
+```{r, echo=FALSE}
+gifs <- list.files(output_files_dir,"*loc_int_in_by_yr*", full.names = TRUE)
+knitr::include_graphics(gifs)
+```
+
+# International out age structure over projection years
+```{r, echo=FALSE, message = FALSE, results = 'hide'}
+for(loc in seq_along(areas_of_interest)) {
+  int_out_proj_loc <- filter(int_out_proj, gss_code %in% areas_of_interest[[loc]])
+  loc_int_out_by_yr <- int_out_proj_loc %>%
+    group_by(year, age) %>%
+    summarise(int_out = sum(int_out)) %>%
+    ggplot(aes(age, int_out, colour = as.character(year))) +
+    scale_colour_manual(values = c(rep("black", length(min(int_out_proj_loc$year):2018)),
+                                   rep("red", length(2019:max(int_out_proj_loc$year))))) +
+    geom_point() +
+    theme(legend.position = "none")
+  
+  anim <- loc_int_out_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+    labs(title = paste(names(areas_of_interest)[loc], "international out migration age structure over projection years"),
+         subtitle = '{closest_state}')
+  anim_save(paste0(output_files_dir, "/loc_int_out_by_yr_",loc,".gif"), anim)
+}
+```
+
+```{r, echo=FALSE}
+gifs <- list.files(output_files_dir,"*loc_int_out_by_yr*", full.names = TRUE)
 knitr::include_graphics(gifs)
 ```

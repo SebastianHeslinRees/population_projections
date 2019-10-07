@@ -12,20 +12,25 @@ outputs_dir = "outputs/trend/2018/"
 mortality_fns <- list(
   list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = deaths_mye_path, popn_mye_path = popn_mye_path, births_mye_path = births_mye_path)),
   list(fn = popmodules::project_forward_flat, args = list(first_proj_yr = first_proj_yr, n_proj_yr = n_proj_yr, hold_yr = (first_proj_yr - 2)))
-)
+  )
 
 fertility_fns <- list(
-  list(fn = popmodules::rates_from_file, args = list(filepath = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds"))
-)
+  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds",
+                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
+                                                              col_data = "rate"))
+  )
 
 int_out_rate_fns <- list(
-  list(fn = popmodules::rates_from_file, args = list(filepath = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds"))
-)
+  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds",
+                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
+                                                              col_data = "rate"))
+  )
 
 int_in_fns <- list(
   list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_in_2017_base_trend_med.rds",
-                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1)))
-)
+                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
+                                                              col_data = "int_in"))
+  )
 
 qa_areas_of_interest <- list("London", "E09000001")
 
