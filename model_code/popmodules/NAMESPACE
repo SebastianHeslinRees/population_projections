@@ -32,5 +32,3 @@ importFrom(magrittr,"%>%")
 importFrom(stats,complete.cases)
 importFrom(tidyr,complete)
 importFrom(tidyr,nesting)
-
-

@@ -8,7 +8,7 @@ migrate_domestic(popn, mign_rate, col_aggregation = c("year", gss_code =
   "gss_out", "sex", "age"), col_gss_destination = "gss_in",
   col_popn = "popn", col_rate = "rate", col_flow = "flow",
   pop1_is_subset = FALSE, many2one = FALSE,
-  missing_levels_rate = FALSE, col_origin_destination = NA)
+  missing_levels_rate = TRUE, col_origin_destination = NA)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}
@@ -53,9 +53,11 @@ FALSE.}
 one level from \code{popn} matches to each level of \code{mign_rate}.
 Default TRUE.}
 
-\item{missing_levels_rate}{Logical. Setting this to TRUE will set assume
-missing origin-destination flows are zero. If FALSE then an error will be
-thrown if any are missing Default FALSE.}
+\item{missing_levels_rate}{Logical. Setting this to TRUE will assume missing
+origin-destination flows are zero. Note that your origin-destination flows
+must contain rates from each geography to itself before this can be set to
+FALSE. If FALSE then an error will be thrown if missing levels are
+detected. Default TRUE.}
 
 \item{col_origin_destination}{Character vector. Names of the origin and
 destination columns in \code{mign_rate}. Only required when

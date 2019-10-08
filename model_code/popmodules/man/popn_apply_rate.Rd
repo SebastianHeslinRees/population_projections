@@ -68,3 +68,25 @@ Given a cohort population and a data frame of rates at the same or lower
 resolution, return a data table of the population's aggregation levels, and a
 component count resulting from the rate applied to the population.
 }
+\examples{
+
+library(generalpop)
+
+popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
+rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
+
+component <- popn_apply_rate(popn,
+                             rate,
+                             col_aggregation = c("year", "gss_code", "sex", "age"),
+                             col_popn = "popn",
+                             col_rate = "rate",
+                             col_out = "component",
+                             pop1_is_subset = FALSE,
+                             many2one = TRUE,
+                             missing_levels_popn = FALSE,
+                             missing_levels_rate = FALSE)
+
+# Due to default parameter values, this is equivalent to
+component <- popn_apply_rate(popn, rate)
+
+}

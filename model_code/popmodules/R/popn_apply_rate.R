@@ -66,7 +66,7 @@
 #'                              many2one = TRUE,
 #                               additional_rate_levels = NA,
 #'                              missing_levels_popn = FALSE,
-#'                              missing_levels_rate = FALSE) {
+#'                              missing_levels_rate = FALSE)
 #'
 #' # Due to default parameter values, this is equivalent to
 #' component <- popn_apply_rate(popn, rate)

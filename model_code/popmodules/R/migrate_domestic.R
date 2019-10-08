@@ -49,10 +49,11 @@
 #'   one level from \code{popn} matches to each level of \code{mign_rate}.
 #'   Default TRUE.
 #' @param missing_levels_rate Logical. Setting this to TRUE will assume missing
-#'   origin-destination flows are zero. Note that your origin-destination flows
-#'   must contain rates from each geography to itself before this can be set to
-#'   FALSE. If FALSE then an error will be thrown if missing levels are
-#'   detected. Default TRUE.
+#'   origin-destination flows are zero. A warning will still be thrown if there
+#'   is zero outmigration for an entire aggregation level in a geography. Note that
+#'   your origin-destination flows must contain rates from each geography to
+#'   itself before this can be set to FALSE. If FALSE then an error will be
+#'   thrown if missing levels are detected. Default TRUE.
 #' @param col_origin_destination Character vector. Names of the origin and
 #'   destination columns in \code{mign_rate}. Only required when
 #'   \code{col_gss_destination} is of length two or more, though providing it
@@ -274,6 +275,8 @@ validate_migrate_domestic_input <- function(popn,
                         test_complete = TRUE,
                         test_unique = TRUE)
 
+    try_join <- FALSE
+
     tryCatch({
       mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels]))
       validate_population(mign_validation,
@@ -281,24 +284,28 @@ validate_migrate_domestic_input <- function(popn,
                           col_data = NA,
                           test_complete = TRUE,
                           test_unique = FALSE)
+      try_join <- TRUE},
+      warning = function(w) {
+        warning(paste("migrate_domestic threw a warning while validating the migration inputs:\n", w))
+      },
+       error = function(e) {
+         warning(paste("migrate_domestic threw an error while validating the migration inputs.",
+                       "It's being converted to a warning because most origin-destination flows have",
+                       "some missing levels and the function expects that.",
+                       "Note that validate_population will fail if run on the output.",
+                       "\n\nError (converted to warning):\n", e))
+       })
 
+    if(try_join) {
       validate_join_population(popn,
                                mign_validation,
                                cols_common_aggregation = validation_agg_levels,
                                pop1_is_subset = pop1_is_subset,
                                many2one = many2one,
                                one2many = FALSE,
-                               warn_unused_shared_cols = TRUE)},
-      warning = function(w) {
-        warning(paste("migrate_domestic threw a warning while validating the migration inputs:\n", w))
-      },
-      error = function(e) {
-        stop(paste(c("migrate_domestic failed to validate the migration inputs.",
-                     "\nNote: Since missing_levels_rate is TRUE, the validation is only against the population aggregation columns -",
-                     as.character(validation_agg_levels), "- which are expected to pass validate_population and validate_join_population",
-                     "with the input popn data frame.",
-                     "\n\nError message:\n", e), collapse = " "))
-      })
+                               warn_unused_shared_cols = TRUE)
+    }
+
   }
 
   # Other checks (by the more expensive validatepop functions) are done within popn_apply_rates
