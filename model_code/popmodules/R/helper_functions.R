@@ -20,13 +20,13 @@
 # Function: convert character vector (unnamed or partially named) to one where
 # every element is named
 #
-# e.g. c("a", two=b, "c") will become c(a="a", two=b, c="c")
+# e.g. c("a", two="b", "c") will become c(a="a", two="b", c="c")
 #
 # Used repeatedly in the package, usually to standardise mappings between data
 # frame columns to allow for reliable joins
-convert_to_named_vector <- function(vec) {
+.convert_to_named_vector <- function(vec) {
   assert_that(is.vector(vec) | is.factor(vec),
-              msg = "convert_to_named_vector needs a vector or a factor as input")
+              msg = ".convert_to_named_vector needs a vector or a factor as input")
 
   if(is.null(names(vec))) {
     names(vec) <- vec
@@ -59,18 +59,18 @@ convert_to_named_vector <- function(vec) {
 # Used in the package to make sure that the output of various functions
 # preserves the factoring of the input
 
-match_factors <- function(dfsource, dftarget, col_mapping) {
-  col_mapping <- convert_to_named_vector(col_mapping)
+.match_factors <- function(dfsource, dftarget, col_mapping) {
+  col_mapping <- .convert_to_named_vector(col_mapping)
   for(i in  seq_along(col_mapping)) {
     icol <- col_mapping[i]
     source_col <- dfsource[[names(icol)]]
     target_col <- dftarget[[icol]]
 
     if(is.factor(source_col) & !is.factor(target_col)) {
-      if(identical(levels(source_col), as.character(dftarget[[icol]]))) {
+      if(setequal(levels(source_col), as.character(dftarget[[icol]]))) {
         dftarget[[icol]] <- factor(dftarget[[icol]])
       } else {
-        warning(paste("match_factors was given a source and target with different levels in",
+        warning(paste(".match_factors was given a source and target with different levels in",
                       col_mapping[i],"- a factor conversion will not be performed"))
       }
     }

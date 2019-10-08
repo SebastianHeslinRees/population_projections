@@ -70,7 +70,7 @@ popn_apply_rate <- function(popn,
   # ----------------
 
   # Reformat col_aggregation to a named vector mapping between popn columns and popn_rate columns
-  col_aggregation <- convert_to_named_vector(col_aggregation)
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
   # and reorder it to match popn's column ordering
   popn_cols_to_aggregate <- intersect( names(popn), names(col_aggregation) )
   col_aggregation <- col_aggregation[ popn_cols_to_aggregate ]
@@ -84,7 +84,7 @@ popn_apply_rate <- function(popn,
   popn_rate <- popn_rate[c(rate_cols, col_rate)]
 
   # Make sure the columns that are factors match
-  popn_rate <- match_factors(popn, popn_rate, col_aggregation)
+  popn_rate <- .match_factors(popn, popn_rate, col_aggregation)
 
   # Deal with the possibility of duplicate data column names
   if(col_popn == col_rate) {
@@ -130,7 +130,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
               msg = "popn_apply_rate needs a string as the col_out parameter")
 
   # Other checks
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and popn_rate aggregation levels
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and popn_rate aggregation levels
   assert_that(!col_popn %in% names(col_aggregation),
               msg = "popn_apply_rate was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
@@ -193,7 +193,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
 
 validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, output) {
 
-  col_aggregation <- convert_to_named_vector(col_aggregation)
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
 
   assert_that(all(names(col_aggregation) %in% names(output)))
 
