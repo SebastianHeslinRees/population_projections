@@ -111,10 +111,22 @@ international_out <- filter(mye_coc, component == "international_out") %>% selec
 international_net <- filter(mye_coc, component == "international_net") %>% select(-component) %>% rename(int_net = value)
 
 #Domestic here does not include Scotland and NI
+#TODO process this from the domestic migration dataset
 domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component) %>% rename(dom_in = value)
 domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component) %>% rename(dom_out = value)
 domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component) %>% rename(dom_net = value)
 
+#Other components
+uk_upc <- filter(births, country %in% c("N","S")) %>%
+  rename(upc = births) %>%
+  mutate(upc = 0)
+
+upc <- filter(mye_coc, component %in% c("special_change", "unattrib", "other_adjust")) %>%
+  group_by(gss_code, gss_name, country, sex, age, year, geography) %>%
+  summarise(upc = sum(value)) %>%
+  ungroup() %>%
+  select(names(uk_upc)) %>%
+  rbind(uk_upc)
 
 # interpolate points where deaths == -1
 # FIXME this is a clumsy way to do it but everything with grouping was taking a million years, and no 2018 data are missing
@@ -133,12 +145,14 @@ validate_population(population)
 validate_population(international_in)
 validate_population(international_out)
 validate_population(international_net)
+validate_population(upc)
 
 validate_same_geog(population, births)
 validate_same_geog(population, deaths)
 validate_same_geog(population, international_in)
 validate_same_geog(population, international_out)
 validate_same_geog(population, international_net)
+validate_same_geog(population, upc)
 
 
 datestamp <- Sys.Date()
@@ -155,5 +169,6 @@ saveRDS(international_net, file = paste0("input_data/mye/2018/international_net_
 saveRDS(domestic_in, file = paste0("input_data/mye/2018/domestic_in_ons_", datestamp, ".rds"))
 saveRDS(domestic_out, file = paste0("input_data/mye/2018/domestic_out_ons_", datestamp, ".rds"))
 saveRDS(domestic_net, file = paste0("input_data/mye/2018/domestic_net_ons_", datestamp, ".rds"))
+saveRDS(upc, file = paste0("input_data/mye/2018/upc_ons_", datestamp, ".rds"))
 
 
