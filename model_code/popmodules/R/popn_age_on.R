@@ -203,7 +203,6 @@ popn_age_on <- function(popn,
       new_age_values <- c( old_age_values[-1], old_age_values[n] )  # Last two age bands map to the same band
 
       # Map old ages to new ages
-      # TODO this might be faster in data.table
       aged[[col_age]] <- plyr::mapvalues(aged[[col_age]], old_age_values, new_age_values)
     }
 
