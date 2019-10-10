@@ -26,7 +26,8 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
   
   recode_gss_to_2011
   
-  df <- rename(df, "gss_code" = col_geog)
+  df <- ungroup(df) %>%
+    rename("gss_code" = col_geog)
   
   recoding <- c("E07000001" = "E06000056",
     "E07000002" = "E06000055",
