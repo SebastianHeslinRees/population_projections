@@ -104,7 +104,7 @@ validate_component_from_popn_rate_input <- function(popn, component_rate, col_ag
               msg = "component_from_popn_rate needs a string as the col_component parameter")
 
   # Other checks
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and component_rate aggregation levels
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and component_rate aggregation levels
   assert_that(!col_popn %in% names(col_aggregation),
               msg = "component_from_popn_rate was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
@@ -140,23 +140,4 @@ validate_component_from_popn_rate_input <- function(popn, component_rate, col_ag
   # Other checks (by the more expensive validatepop functions) are done within popn_apply_rates
 
   invisible(TRUE)
-}
-
-# -----------
-
-
-
-# Function: convert character vector (unnamed or partially named) to one where every element is named
-# TODO split this out into the general or helper_functions package. it's used in validate_pop::validate_join_population as well, and will be in births
-convert_to_named_vector <- function(vec) {
-  assert_that(is.vector(vec))
-
-  if(is.null(names(vec))) {
-    names(vec) <- vec
-  } else {
-    ix <- names(vec) == ""
-    names(vec)[ix] <- vec[ix]
-  }
-
-  return(vec)
 }

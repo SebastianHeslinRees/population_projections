@@ -88,7 +88,7 @@ births_from_popn_fert <- function(popn,
   popn_is_tibble <- "tbl" %in% class(popn)
   popn_groups <- dplyr::group_vars(popn)
 
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
 
   # If col_sex is specified and is an aggregation column, but is not in the
   # fertility data, set fertility sex to "female" and warn we're making this assumption
@@ -162,7 +162,7 @@ births_from_popn_fert <- function(popn,
   }
 
   # Recover columns that were factors
-  births <- match_factors(popn_empty, births, intersect(names(popn_empty), names(births)))
+  births <- .match_factors(popn_empty, births, intersect(names(popn_empty), names(births)))
 
   validate_births_from_popn_output(births, popn, col_aggregation, col_age, col_sex, col_births)
 
@@ -204,7 +204,7 @@ validate_births_from_popn_input <- function(popn,
               msg = "births_from_popn_fert needs a number as the birthratio_m2f parameter")
 
   # Check for naming conflicts
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and fertility aggregation levels
   assert_that(!col_popn %in% names(col_aggregation),
               msg = "births_from_popn_fert was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
@@ -316,49 +316,4 @@ validate_births_from_popn_output <- function(births,
                            warn_unused_shared_cols = TRUE)
 }
 
-# -------------------------------------------------------
 
-# Function: convert character vector (unnamed or partially named) to one where every element is named
-# TODO split this out into the general or helper_functions package. it's used in popmodules::validate_join_population as well, and will be in births
-convert_to_named_vector <- function(vec) {
-  assert_that(is.vector(vec))
-
-  if(is.null(names(vec))) {
-    names(vec) <- vec
-  } else {
-    ix <- names(vec) == ""
-    names(vec)[ix] <- vec[ix]
-  }
-
-  return(vec)
-}
-
-
-
-# ---------------------------------------------------
-
-# Function: given source and target data frames with a column mapping, add or
-# remove factoring in the target to match the source
-# TODO split this out into a helper function
-match_factors <- function(dfsource, dftarget, col_mapping) {
-  col_mapping <- convert_to_named_vector(col_mapping)
-  for(i in  seq_along(col_mapping)) {
-    icol <- col_mapping[i]
-    if(is.factor(dfsource[[names(icol)]]) & !is.factor(dftarget[[icol]])) {
-      dftarget[[icol]] <- as.factor(dftarget[[icol]])
-    }
-
-    source_col <- dfsource[[names(icol)]]
-    target_col <- dftarget[[icol]]
-    if(!is.factor(source_col) & is.factor(target_col)) {
-      col_class <- class(source_col)
-      if(col_class == "numeric") {
-        dftarget[[names(icol)]] <- levels(target_col)[target_col] %>%
-          as.numeric()
-      } else {
-        dftarget[[names(icol)]] <- as.character(target_col)
-      }
-    }
-  }
-  return(dftarget)
-}

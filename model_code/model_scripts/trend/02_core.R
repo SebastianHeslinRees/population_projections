@@ -20,13 +20,14 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
-  proj_popn <- population %>% filter(year < first_proj_yr)
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
-  proj_deaths <- deaths
-  proj_births <- births
-  proj_int_out <- int_out
-  proj_int_in <- int_in
   
+  proj_popn <- list(population %>% filter(year < first_proj_yr))
+  proj_int_out <- list(int_out)
+  proj_int_in <- list(int_in)
+  proj_deaths <- list(deaths)
+  proj_births <- list(births)
+
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
     
@@ -66,7 +67,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
     
     int_in <- int_in_proj %>% filter(year == my_year)
-    validate_population(int_out, col_data = "int_in")
+    validate_population(int_in, col_data = "int_in")
     validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
     
     next_yr_popn <- aged_popn_w_births %>% 
@@ -76,19 +77,23 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       mutate(popn = popn - deaths - int_out + int_in) %>%
       select(-c(deaths, int_in, int_out))
 
-    
-    proj_popn <- rbind(proj_popn, next_yr_popn)
-    proj_births <- rbind(proj_births, births)
-    proj_deaths <- rbind(proj_deaths, deaths)
-    proj_int_out <- rbind(proj_int_out, int_out)
-    proj_int_in <- rbind(proj_int_in, int_in)
+    proj_popn[[length(proj_popn)+1]] <- next_yr_popn
+    proj_deaths[[length(proj_deaths)+1]] <- deaths
+    proj_births[[length(proj_births)+1]] <- births
+    proj_int_out[[length(proj_int_out)+1]] <- int_out
+    proj_int_in[[length(proj_int_in)+1]] <- int_in
     
     curr_yr_popn <- next_yr_popn
-    
   }
   
-  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births, int_out = proj_int_out, int_in = proj_int_in))
+
+  proj_popn   <- data.frame(data.table::rbindlist(proj_popn))
+  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths))
+  proj_births <- data.frame(data.table::rbindlist(proj_births))
+  proj_int_out <- data.frame(data.table::rbindlist(proj_int_out))
+  proj_int_in <- data.frame(data.table::rbindlist(proj_int_in))
   
+  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births, int_out = proj_int_out, int_in = proj_int_in))
 }
 
 
