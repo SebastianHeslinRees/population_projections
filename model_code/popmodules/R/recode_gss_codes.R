@@ -77,7 +77,7 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
   
   df <- rename(df, !!col_geog := "gss_code")
   
-  df_2 <- group_by_(df, .dots = col_aggregation) %>%
+   df_2 <- group_by_at(df, col_aggregation) %>%
     summarise_all(fun) %>%
     ungroup()
   
