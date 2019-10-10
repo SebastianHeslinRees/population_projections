@@ -81,11 +81,8 @@ validate_population <- function( population,
       }
     }
   }
-
   # drop unused factor levels
   test_population <- droplevels(test_population)
-  # convert aggregation levels to factors
-  test_population[col_aggregation] <- lapply(test_population[col_aggregation], as.factor)
 
   # CHECK: aggregation levels have no missing values
   for(col in col_aggregation) {
@@ -127,7 +124,11 @@ validate_population <- function( population,
   # CHECK: no negative counts in the data (optional)
   if(check_negative_values & length(col_data)!=0) {
     for(col in col_data) {
-      test_col <- as.character(test_population[[col]]) # convert from factor
+      if(is.factor(test_population[[col]])) {
+        test_col <- as.character(test_population[[col]])
+      } else {
+        test_col <- test_population[[col]]
+      }
       assert_that( all( test_col >= 0),
                    msg=paste("validate_population found negative values in column",col,
                              "- call with check_negative_values = FALSE if this is permitted."))
@@ -140,8 +141,6 @@ validate_population <- function( population,
 
     # drop missing factor levels from the comparison population (we warned about them above)
     comparison_pop <- as.data.frame(droplevels(comparison_pop))
-    # convert aggregation levels to factors
-    comparison_pop[col_comparison] <- lapply(comparison_pop[col_comparison], as.factor)
 
     # rename columns in comparison table
     if(!is.null(names(col_comparison))) {
@@ -156,10 +155,17 @@ validate_population <- function( population,
       assert_that(all(col_aggregation %in% names(comparison_pop)))
     }
 
-    # compare populations
-    comparison <- dplyr::all_equal(test_population[col_aggregation],
-                                   comparison_pop[col_aggregation],
-                                   ignore_col_order = TRUE, ignore_row_order = TRUE, convert = TRUE)
+    # convert when necessary to match factored columns
+    comparison_pop <- match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
+
+    # compare populations. if we can assume completeness we have a shortcut
+    if(test_complete) {
+      comparison <- all(sapply(col_aggregation, function(x) setequal(test_population[[x]], comparison_pop[[x]])))
+    } else {
+      comparison <- dplyr::all_equal(test_population[col_aggregation],
+                                     comparison_pop[col_aggregation],
+                                     ignore_col_order = TRUE, ignore_row_order = TRUE, convert = TRUE)
+    }
     if(!isTRUE(comparison)) {
       stop(paste(c(
         "validate_population couldn't match aggregation levels in the input data compared to the provided comparison population",
@@ -260,3 +266,5 @@ check_validate_pop_input <- function(population,
 
   invisible(TRUE)
 }
+
+

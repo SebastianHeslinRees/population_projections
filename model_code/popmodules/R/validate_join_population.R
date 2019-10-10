@@ -112,7 +112,7 @@ validate_join_population <- function(pop1,
 
   # CHECK (optional) every level in pop2 matches at most one level in pop1
   if(!many2one) {
-    pop2_trim_to_pop1 <- semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
+    pop2_trim_to_pop1 <- dplyr::semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
     assert_that(nrow(pop2_trim_to_pop1) == nrow(dplyr::left_join(pop2_trim_to_pop1, test_pop1, by=cols_common_aggregation_reverse)),
                 msg = "validate_join_population detected several levels in the first population dataset matching to a single level in the second. If this is ok set many2one = TRUE")
   }
