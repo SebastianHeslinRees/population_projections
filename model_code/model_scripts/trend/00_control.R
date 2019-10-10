@@ -25,6 +25,8 @@ run_trend_model <- function(config_list) {
                        "births_mye_path", 
                        "int_out_mye_path", 
                        "int_in_mye_path",
+                       "dom_historic_path",
+                       "dom_rate_path",
                        "outputs_dir", 
                        "mortality_fns", 
                        "fertility_fns",
@@ -53,6 +55,9 @@ run_trend_model <- function(config_list) {
   int_in <- get_component(filepath = config_list$int_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
+  dom_historic <- readRDS(config_list$dom_historic_path)
+  dom_rate <- readRDS(config_list$dom_rate_path)
+  
   # TODO: check that deaths and births have same geography, age, and sex coverage as population
   
   
@@ -66,6 +71,7 @@ run_trend_model <- function(config_list) {
   int_out_rate <- evaluate_fns_list(config_list$int_out_rate_fns) 
 
   int_in_proj <- evaluate_fns_list(config_list$int_in_fns)
+  
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
   population <- population %>% select(year, gss_code, age, sex, popn)
@@ -91,7 +97,8 @@ run_trend_model <- function(config_list) {
    
   ## run the core
   projection <- trend_core(population, births, deaths, int_out, int_in, 
-                           fertility, mortality, int_out_rate, int_in_proj, 
+                           fertility, mortality, int_out_rate, int_in_proj,
+                           dom_historic, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr)
   
   ## write the output data

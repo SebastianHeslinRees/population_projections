@@ -7,6 +7,8 @@ deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-08-27.rds"
 births_mye_path <- "input_data/mye/2018/births_ons_2019-08-27.rds"
 int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-08-27.rds"
 int_in_mye_path <- "input_data/mye/2018/international_in_ons_2019-08-27.rds"
+dom_historic_path <- "input_data/domestic_migration/2018/domestic_migration_net_2019-10-09.rds"
+dom_rate_path <- "input_data/domestic_migration/2018/domestic_migration_rate_5year_2019-10-09.rds"
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
@@ -43,6 +45,8 @@ config_list <- list(
   births_mye_path = births_mye_path,
   int_out_mye_path = int_out_mye_path,
   int_in_mye_path = int_in_mye_path,
+  dom_historic_path = dom_historic_path,
+  dom_rate_path = dom_rate_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
@@ -59,6 +63,8 @@ rm(first_proj_yr,
    births_mye_path, 
    int_out_mye_path, 
    int_in_mye_path,
+   dom_historic_path = dom_historic_path,
+   dom_rate_path = dom_rate_path,
    outputs_dir,
    mortality_fns, 
    fertility_fns, 

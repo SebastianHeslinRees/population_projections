@@ -1,15 +1,17 @@
 # TODO make this take a list? 
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
+                       dom_historic, dom_rate,
                        first_proj_yr, n_proj_yr) {
   library(dplyr)
   library(assertthat)
   library(popmodules)
   
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
-                             fertility, mortality, int_out_rate, int_in_proj,
+                             fertility, mortality, int_out_rate, int_in_proj, 
+                             dom_historic, dom_rate,
                              first_proj_yr, n_proj_yr)
-
+  
   
   # Load core functions
   #age_on <- popmodules::age_on_sya
@@ -17,6 +19,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   calc_deaths <- popmodules::component_from_popn_rate
   calc_births <- popmodules::births_from_popn_fert
   calc_int_out <- popmodules::component_from_popn_rate
+  calc_dom_mign <- popmodules::migrate_domestic
   
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
@@ -26,6 +29,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_births <- births
   proj_int_out <- int_out
   proj_int_in <- int_in
+  proj_dom <- dom_historic
+
   
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
@@ -69,19 +74,53 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     validate_population(int_out, col_data = "int_in")
     validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
     
+    # TODO adapt this to write out gss-to-gss flows by SYA
+    # TODO adapt this to work with time-varying migration rates
+    domestic_flow <- aged_popn %>%
+      calc_dom_mign(mign_rate = dom_rate,
+                    col_aggregation = c("gss_code"="out_la", "sex", "age"),
+                    col_gss_destination = "in_la",
+                    col_popn = "popn",
+                    col_rate = "flow_rate", 
+                    col_flow = "flow", 
+                    pop1_is_subset = FALSE, 
+                    many2one = FALSE, 
+                    missing_levels_rate = TRUE) %>%
+      mutate(year = my_year)
+    
+    dom_out <- domestic_flow %>%
+      group_by(year, la_out, sex, age) %>%
+      summarise(dom_out = sum(flow)) %>%
+      rename(gss_code = la_out)
+    
+    dom_in <- domestic_flow %>%
+      group_by(year, la_in, sex, age) %>%
+      summarise(dom_in = sum(flow)) %>%
+      rename(gss_code = la_in)
+    
+    dom_net <- left_join(dom_out, dom_in, by = c("year", "gss_code", "sex", "age")) %>%
+      tidyr::replace_na(list(dom_out = 0, dom_in = 0)) %>%
+      tidyr::complete(year, gss_code, sex, age, fill=list(dom_out=0, dom_in=0)) %>%
+      mutate(dom_net = dom_in - dom_out)
+      
+      
+      
+      
     next_yr_popn <- aged_popn_w_births %>% 
       left_join(deaths, by = c("year", "gss_code", "age", "sex")) %>%
       left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
       left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
-      mutate(popn = popn - deaths - int_out + int_in) %>%
-      select(-c(deaths, int_in, int_out))
-
+      left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
+    mutate(popn = popn - deaths - int_out + int_in + dom_net) %>%
+    select(-c(deaths, int_in, int_out, dom_in, dom_out, dom_net))
+  
     
     proj_popn <- rbind(proj_popn, next_yr_popn)
     proj_births <- rbind(proj_births, births)
     proj_deaths <- rbind(proj_deaths, deaths)
     proj_int_out <- rbind(proj_int_out, int_out)
     proj_int_in <- rbind(proj_int_in, int_in)
+    proj_dom  <- rbind(proj_dom, dom_net)
     
     curr_yr_popn <- next_yr_popn
     
@@ -95,6 +134,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in,
                                        fertility, mortality, int_out_rate, int_in_proj,
+                                       dom_historic, dom_rate,
                                        first_proj_yr, n_proj_yr) {
   
   popmodules::validate_population(population, col_data = "popn")
@@ -103,12 +143,17 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_population(mortality, col_data = "rate")
   popmodules::validate_population(int_out_rate, col_data = "rate")
   popmodules::validate_population(int_in_proj, col_data = "int_in")
+  popmodules::validate_population(dom_historic, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out","dom_in","dom_net"), test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
+  popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+  
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
   popmodules::validate_join_population(population, mortality, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, fertility, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, int_out_rate, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, dom_rate, cols_common_aggregation = c("gss_code","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(dom_rate, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
   
   # check that the coverage of years is correct
   last_proj_yr <- first_proj_yr + n_proj_yr -1
@@ -122,6 +167,8 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   assert_that(max(fertility$rate) <= 1 & min(fertility$rate) >= 0, msg = "projected fertility contains rates outside the range 0-1")
   assert_that(max(mortality$rate) <= 1 & min(mortality$rate) >= 0, msg = "projected mortality contains rates outside the range 0-1")
   assert_that(max(int_out_rate$rate) <= 1 & min(int_out_rate$rate) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
+  assert_that(max(dom_rate$rate) <= 1 & min(dom_rate$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
+  
   
   invisible(TRUE)
 }
