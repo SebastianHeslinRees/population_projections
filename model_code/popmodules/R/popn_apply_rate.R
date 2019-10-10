@@ -244,8 +244,7 @@ match_factors <- function(dfsource, dftarget, col_mapping) {
     source_col <- dfsource[[names(icol)]]
     target_col <- dftarget[[icol]]
     if(!is.factor(source_col) & is.factor(target_col)) {
-      col_class <- class(source_col)
-      if(col_class == "numeric") {
+      if(is.numeric(source_col)) {
         dftarget[[names(icol)]] <- levels(target_col)[target_col] %>%
           as.numeric()
       } else {
