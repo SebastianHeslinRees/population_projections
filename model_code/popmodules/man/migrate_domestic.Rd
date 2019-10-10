@@ -54,10 +54,11 @@ one level from \code{popn} matches to each level of \code{mign_rate}.
 Default TRUE.}
 
 \item{missing_levels_rate}{Logical. Setting this to TRUE will assume missing
-origin-destination flows are zero. Note that your origin-destination flows
-must contain rates from each geography to itself before this can be set to
-FALSE. If FALSE then an error will be thrown if missing levels are
-detected. Default TRUE.}
+origin-destination flows are zero. A warning will still be thrown if there
+is zero outmigration for an entire aggregation level in a geography. Note that
+your origin-destination flows must contain rates from each geography to
+itself before this can be set to FALSE. If FALSE then an error will be
+thrown if missing levels are detected. Default TRUE.}
 
 \item{col_origin_destination}{Character vector. Names of the origin and
 destination columns in \code{mign_rate}. Only required when

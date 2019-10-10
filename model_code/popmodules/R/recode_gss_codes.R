@@ -2,7 +2,7 @@
 #'
 #' Switches any non-2011 gss codes to Census 2011 gss codes
 #' Uses a hard-coded list of changes
-#' 
+#'
 #' Aggregates data where rows with the same gss code are present
 #'
 #' User must define the column containing the gss_code and the columns to
@@ -10,12 +10,12 @@
 #'
 #' @param df A data frame containing gss_codes and data.
 #' @param col_aggregation A string or character vector giving column names for
-#'   levels of data aggregations: e.g. geographic area, age/age band, sex. 
+#'   levels of data aggregations: e.g. geographic area, age/age band, sex.
 #' @param col_geog A character vector. The column which contains gss codes
 #' (defaults to \code{gss_code})
 #' @param fun A list. A function to summarise the data. Must be provided in a list.
 #' Defaults to \code{list(sum)}
-#' 
+#'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
 #' @import dplyr
@@ -23,20 +23,18 @@
 
 
 recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=list(sum)){
-  
-  recode_gss_to_2011
-  
+
   df <- rename(df, "gss_code" = col_geog)
-  
+
   recoding <- c("E07000001" = "E06000056",
     "E07000002" = "E06000055",
     "E07000003" = "E06000056",
     "E07000013" = "E06000050",
     "E07000014" = "E06000049",
     "E07000015" = "E06000049",
-    "E07000016" = "E06000050", 
+    "E07000016" = "E06000050",
     "E07000017" = "E06000049",
-    "E07000018" = "E06000050", 
+    "E07000018" = "E06000050",
     "E07000019" = "E06000052",
     "E07000020" = "E06000052",
     "E07000021" = "E06000052",
@@ -61,27 +59,27 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
     "E07000160" = "E06000048",
     "E07000161" = "E06000048",
     "E07000162" = "E06000048",
-    "E07000182" = "E06000051", 
-    "E07000183" = "E06000051", 
-    "E07000184" = "E06000051", 
-    "E07000185" = "E06000051", 
-    "E07000186" = "E06000051", 
+    "E07000182" = "E06000051",
+    "E07000183" = "E06000051",
+    "E07000184" = "E06000051",
+    "E07000185" = "E06000051",
+    "E07000186" = "E06000051",
     "E07000230" = "E06000054",
     "E07000231" = "E06000054",
     "E07000232" = "E06000054",
     "E07000233" = "E06000054",
-    "E07000240" = "E07000100", 
+    "E07000240" = "E07000100",
     "E07000241" = "E07000104")
-  
+
   df <- mutate(df, gss_code = recode(gss_code, !!!recoding))
-  
+
   df <- rename(df, !!col_geog := "gss_code")
-  
+
   df_2 <- group_by_(df, .dots = col_aggregation) %>%
     summarise_all(fun) %>%
     ungroup()
-  
+
 return(df_2)
-  
+
 }
 
