@@ -106,7 +106,7 @@ validate_deaths_from_popn_mort_input <- function(popn, mortality, col_aggregatio
               msg = "deaths_from_popn_mort needs a string as the col_deaths parameter")
 
   # Other checks
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and mortality aggregation levels
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and mortality aggregation levels
   assert_that(!col_popn %in% names(col_aggregation),
               msg = "deaths_from_popn_mort was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% col_aggregation,
