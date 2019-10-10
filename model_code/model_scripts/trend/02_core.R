@@ -14,11 +14,11 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
   
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
-  proj_popn <- population %>% filter(year < first_proj_yr)
+  proj_popn <- list(population %>% filter(year < first_proj_yr))
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
-  proj_deaths <- deaths
-  proj_births <- births
-  
+  proj_deaths <- list(deaths)
+  proj_births <- list(births)
+
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
     
@@ -46,17 +46,20 @@ trend_core <- function(population, births, deaths, fertility, mortality, first_p
       left_join(deaths, by = c("year", "gss_code", "age", "sex")) %>%
       mutate(popn = popn - deaths) %>%
       select(-deaths)
-    
-    proj_popn <- rbind(proj_popn, next_yr_popn)
-    proj_births <- rbind(proj_births, births)
-    proj_deaths <- rbind(proj_deaths, deaths)
+
+    proj_popn[[length(proj_popn)+1]] <- next_yr_popn
+    proj_deaths[[length(proj_deaths)+1]] <- deaths
+    proj_births[[length(proj_births)+1]] <- births
     
     curr_yr_popn <- next_yr_popn
-    
   }
   
-  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births))
+
+  proj_popn   <- data.frame(data.table::rbindlist(proj_popn))
+  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths))
+  proj_births <- data.frame(data.table::rbindlist(proj_births))
   
+  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births))
 }
 
 # do checks on the input data
