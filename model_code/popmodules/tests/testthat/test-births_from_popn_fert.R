@@ -169,10 +169,10 @@ test_that("births_from_popn_fert handles factors, tibbles and groups", {
 test_that("births_from_popn_fert warns when factor levels don't match the input", {
   popn_in  <- dplyr::mutate(popn, gss_code=factor(gss_code, levels = c("a","b","c","d")))
   fert_in  <- dplyr::mutate(fert, gss_code=factor(gss_code, levels = c("a","b","c","d")))
-  births_out <- dplyr::mutate(births, gss_code=factor(gss_code, levels = c("a","b","c","d")))
+  #births_out <- dplyr::mutate(births, gss_code=factor(gss_code, levels = c("a","b","c","d")))
 
   expect_warning( temp <- births_from_popn_fert(popn_in, fert) )
-  expect_equivalent(temp, births_out)
+  expect_equivalent(temp, births)
 
   expect_warning( temp <- births_from_popn_fert(popn, fert_in))
   expect_equivalent(temp, births)
