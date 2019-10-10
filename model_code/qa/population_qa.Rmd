@@ -154,40 +154,40 @@ for(loc in seq_along(areas_of_interest)) {
 
 # Components of natural change by age
 ```{r, echo=FALSE, message = FALSE, results = 'hide'}
-for(loc in seq_along(areas_of_interest)) {
-  deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
-  births_proj_loc <- filter(births_proj, gss_code %in% areas_of_interest[[loc]])
-  
-  natchange_proj_loc <- full_join(births_proj_loc, deaths_proj_loc, by = c("gss_code", "sex", "age", "year")) %>%
-    group_by(year, age) %>%
-    summarise(deaths = sum(deaths), births = sum(births)) %>%
-    mutate(`natural change` = births - deaths) %>%
-    as.data.frame() %>%
-    gather(key = "component", value = "value", births, deaths, `natural change`) %>%
-    mutate(component = factor(component, levels=c("natural change","births","deaths")))
-
-  loc_natchange_by_yr <- 
-    ggplot(natchange_proj_loc,
-           aes(age, value, colour = component, group = interaction(year, component))) +
-      theme_gla(legend = TRUE) +
-      geom_point() +
-      scale_colour_manual(values = pal) +
-      scale_y_continuous(labels = dollar_format(prefix="")) +
-      scale_x_continuous(breaks = seq(0,90,5),
-                         expand = expand_scale(add = c(1.5, 0.5))) +
-      ggla_axisat0() +
-      labs(title = paste("Natural change in", names(areas_of_interest)[loc], "by year"))
-
-  anim <- loc_natchange_by_yr +
-    transition_states(year, transition_length = 2, state_length = 1) +
-    labs(title = paste(names(areas_of_interest)[loc], "natural change"),
-         subtitle = '{closest_state}')
-  
-  anim_save(paste0(output_files_dir, "/loc_natchange_by_yr_",loc,".gif"), anim)
-}
+# for(loc in seq_along(areas_of_interest)) {
+#   deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
+#   births_proj_loc <- filter(births_proj, gss_code %in% areas_of_interest[[loc]])
+#   
+#   natchange_proj_loc <- full_join(births_proj_loc, deaths_proj_loc, by = c("gss_code", "sex", "age", "year")) %>%
+#     group_by(year, age) %>%
+#     summarise(deaths = sum(deaths), births = sum(births)) %>%
+#     mutate(`natural change` = births - deaths) %>%
+#     as.data.frame() %>%
+#     gather(key = "component", value = "value", births, deaths, `natural change`) %>%
+#     mutate(component = factor(component, levels=c("natural change","births","deaths")))
+# 
+#   loc_natchange_by_yr <- 
+#     ggplot(natchange_proj_loc,
+#            aes(age, value, colour = component, group = interaction(year, component))) +
+#       theme_gla(legend = TRUE) +
+#       geom_point() +
+#       scale_colour_manual(values = pal) +
+#       scale_y_continuous(labels = dollar_format(prefix="")) +
+#       scale_x_continuous(breaks = seq(0,90,5),
+#                          expand = expand_scale(add = c(1.5, 0.5))) +
+#       ggla_axisat0() +
+#       labs(title = paste("Natural change in", names(areas_of_interest)[loc], "by year"))
+# 
+#   anim <- loc_natchange_by_yr +
+#     transition_states(year, transition_length = 2, state_length = 1) +
+#     labs(title = paste(names(areas_of_interest)[loc], "natural change"),
+#          subtitle = '{closest_state}')
+#   
+#   anim_save(paste0(output_files_dir, "/loc_natchange_by_yr_",loc,".gif"), anim)
+# }
 ```
 
 ```{r, echo=FALSE}
-gifs <- list.files(output_files_dir,"*loc_natchange_by_yr*", full.names = TRUE)
-knitr::include_graphics(gifs)
+# gifs <- list.files(output_files_dir,"*loc_natchange_by_yr*", full.names = TRUE)
+# knitr::include_graphics(gifs)
 ```
