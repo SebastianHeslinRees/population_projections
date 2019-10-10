@@ -58,7 +58,7 @@ validate_join_population <- function(pop1,
 
   validate_join_population_inputs(pop1, pop2, cols_common_aggregation, pop1_is_subset, many2one, one2many, warn_unused_shared_cols)
 
-  cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
+  cols_common_aggregation <- .convert_to_named_vector(cols_common_aggregation)
 
   # swap names and values for joining from pop2 to pop1
   cols_common_aggregation_reverse <- names(cols_common_aggregation)
@@ -112,7 +112,7 @@ validate_join_population <- function(pop1,
 
   # CHECK (optional) every level in pop2 matches at most one level in pop1
   if(!many2one) {
-    pop2_trim_to_pop1 <- semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
+    pop2_trim_to_pop1 <- dplyr::semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse )
     assert_that(nrow(pop2_trim_to_pop1) == nrow(dplyr::left_join(pop2_trim_to_pop1, test_pop1, by=cols_common_aggregation_reverse)),
                 msg = "validate_join_population detected several levels in the first population dataset matching to a single level in the second. If this is ok set many2one = TRUE")
   }
@@ -165,7 +165,7 @@ validate_join_population_inputs <-function(pop1,
     warning("An empty data frame was passed to validate_overlapping_populations as parameter pop2")
   }
 
-  cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
+  cols_common_aggregation <- .convert_to_named_vector(cols_common_aggregation)
 
   # Check all expected columns are present
   assert_that(all(names(cols_common_aggregation) %in% names(pop1)),
@@ -191,15 +191,3 @@ validate_join_population_inputs <-function(pop1,
   invisible(TRUE)
 }
 
-
-#--------------------------------------------------------------------------------
-
-# Convert non-named or partially-named character vector to a named character vector
-convert_to_named_vector <- function(vec) {
-  if(is.null(names(vec))) {
-    vec <- setNames(vec, vec)
-  } else {
-    vec <- setNames(vec, ifelse(names(vec) == "", vec, names(vec)))
-  }
-  return(vec)
-}
