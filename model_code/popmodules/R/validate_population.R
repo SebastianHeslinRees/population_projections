@@ -156,7 +156,7 @@ validate_population <- function( population,
     }
 
     # convert when necessary to match factored columns
-    comparison_pop <- match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
+    comparison_pop <- .match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
 
     # compare populations. if we can assume completeness we have a shortcut
     if(test_complete) {

@@ -3,7 +3,8 @@
 # A place for reusuable code internal to the
 # popmodules package. For any short functions
 # that are reused across the package but which
-# aren't exported.
+# aren't exported. By convention function names
+# should start with a '.'
 #
 # ===========================================
 
