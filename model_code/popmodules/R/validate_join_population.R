@@ -58,7 +58,7 @@ validate_join_population <- function(pop1,
 
   validate_join_population_inputs(pop1, pop2, cols_common_aggregation, pop1_is_subset, many2one, one2many, warn_unused_shared_cols)
 
-  cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
+  cols_common_aggregation <- .convert_to_named_vector(cols_common_aggregation)
 
   # swap names and values for joining from pop2 to pop1
   cols_common_aggregation_reverse <- names(cols_common_aggregation)
@@ -165,7 +165,7 @@ validate_join_population_inputs <-function(pop1,
     warning("An empty data frame was passed to validate_overlapping_populations as parameter pop2")
   }
 
-  cols_common_aggregation <- convert_to_named_vector(cols_common_aggregation)
+  cols_common_aggregation <- .convert_to_named_vector(cols_common_aggregation)
 
   # Check all expected columns are present
   assert_that(all(names(cols_common_aggregation) %in% names(pop1)),
@@ -191,15 +191,3 @@ validate_join_population_inputs <-function(pop1,
   invisible(TRUE)
 }
 
-
-#--------------------------------------------------------------------------------
-
-# Convert non-named or partially-named character vector to a named character vector
-convert_to_named_vector <- function(vec) {
-  if(is.null(names(vec))) {
-    vec <- setNames(vec, vec)
-  } else {
-    vec <- setNames(vec, ifelse(names(vec) == "", vec, names(vec)))
-  }
-  return(vec)
-}

@@ -156,7 +156,7 @@ validate_population <- function( population,
     }
 
     # convert when necessary to match factored columns
-    comparison_pop <- match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
+    comparison_pop <- .match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
 
     # compare populations. if we can assume completeness we have a shortcut
     if(test_complete) {
@@ -267,33 +267,4 @@ check_validate_pop_input <- function(population,
   invisible(TRUE)
 }
 
-
-
-
-
-# ==================================================
-
-# Function: given source and target data frames with a column mapping, add or
-# remove factoring in the target to match the source
-match_factors <- function(dfsource, dftarget, col_mapping) {
-  col_mapping <- convert_to_named_vector(col_mapping)
-  for(i in  seq_along(col_mapping)) {
-    icol <- col_mapping[i]
-    if(is.factor(dfsource[[names(icol)]]) & !is.factor(dftarget[[icol]])) {
-      dftarget[[icol]] <- as.factor(dftarget[[icol]])
-    }
-
-    source_col <- dfsource[[names(icol)]]
-    target_col <- dftarget[[icol]]
-    if(!is.factor(source_col) & is.factor(target_col)) {
-      if(is.numeric(source_col)) {
-        dftarget[[names(icol)]] <- levels(target_col)[target_col] %>%
-          as.numeric()
-      } else {
-        dftarget[[names(icol)]] <- as.character(target_col)
-      }
-    }
-  }
-  return(dftarget)
-}
 
