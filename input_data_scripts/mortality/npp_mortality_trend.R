@@ -5,7 +5,7 @@ max_year <- 2050
 npp_data_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
 
 #function to read and wrangle raw data
-mortality_trend <- function(file, var, max_year){
+mortality_trend <- function(file, var, max_year, npp_data_location){
   mort <- fread(paste0(npp_data_location, file)) %>%
     gather(year, rate, 3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
