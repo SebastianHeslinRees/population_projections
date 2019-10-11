@@ -4,7 +4,8 @@ Title: Modular functions to be called in the GLA population models
 Version: 0.1.0
 Authors@R: c(
    person("Chris", "Fairless", email="christopher.fairless@london.gov.uk", role = c("aut", "cre")),
-   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut")
+   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut"),
+   person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = "aut")
    )
 Description: The GLA's cohort population models work by combining modular functions to calcula and validate components of change. This package contains the functions to do this, with methods to calculate births, deaths, and migration, to age on a population, to apply rates and to validate population data frames. See the README for a more detailed breakdown.
 Depends: R (>= 3.5.0)
