@@ -17,8 +17,8 @@
 
 validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2="gss_code"){
 
-  df_1 <- select(df_1, col_1) %>% as.character
-  df_2 <- select(df_2, col_2) %>% as.character
+  df_1 <- pull(df_1, col_1) %>% unique %>% as.character
+  df_2 <- pull(df_2, col_2) %>% unique %>% as.character
 
   x <- setdiff(df_1, df_2)
   y <- setdiff(df_2, df_1)
