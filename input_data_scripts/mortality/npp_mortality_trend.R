@@ -30,7 +30,6 @@ mortality_trend <- function(file, var, max_year){
 }
 
 #read in data
-x <- getwd()
 setwd(npp_data_location)
 principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year)
 high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year)
