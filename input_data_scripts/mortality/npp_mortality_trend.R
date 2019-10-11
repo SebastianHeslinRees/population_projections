@@ -22,7 +22,7 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
       mutate(year = y)
   }
   
-  mort <- rbind(rbindlist(back_to_2001), mort) %>%
+  mort <- rbind(data.table::rbindlist(back_to_2001), mort) %>%
     mutate(variant = var)
   
   return(mort)
