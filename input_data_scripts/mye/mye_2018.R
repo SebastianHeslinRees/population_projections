@@ -8,7 +8,7 @@ ew_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/c
 uk_pop_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/MYEB1_detailed_population_estimates_series_UK_(2018).csv"
 uk_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/MYEB3_summary_components_of_change_series_UK_(2018).csv"
 
-#Engalnd and Wales
+#England and Wales
 mye_coc <- readRDS(ew_coc_file) %>%
   rename(gss_code = ladcode18, gss_name = laname18) %>%
   mutate(geography = "LAD18", sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female"), 
