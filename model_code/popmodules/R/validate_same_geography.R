@@ -16,19 +16,26 @@
 #' @export
 
 validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2="gss_code"){
-
-  df_1 <- pull(df_1, col_1) %>% unique %>% as.character
-  df_2 <- pull(df_2, col_2) %>% unique %>% as.character
-
+  
+  nm_1 <- deparse(substitute(df_1))
+  nm_2 <- deparse(substitute(df_2))
+  
+  df_1 <- df_1[col_1] %>% unique()
+  df_2 <- df_2[col_2] %>% unique()
+  
   x <- setdiff(df_1, df_2)
   y <- setdiff(df_2, df_1)
-
-  if(length(c(x,y))==0){
-    message("same geography")
-  }else{
-    if(length(x>0)){print(x)
-      message("in d1_1, not in df_2")
-    }else{print(y)
-      message("in df_2, not in df_1")}
+  
+  if(nrow(rbind(x,y))==0){
+    message(paste("same geography in",nm_1,"&",nm_2))
   }
+  
+  if(nrow(x)>0){
+    message(paste(nrow(x),"codes in",nm_1,"not in",nm_2))
+  }
+  
+  if(nrow(y)>0){
+    message(paste(nrow(y),"codes in",nm_2,"not in",nm_1))
+  }
+  
 }
