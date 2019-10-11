@@ -42,17 +42,13 @@ run_trend_model <- function(config_list) {
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
     complete_fertility(population)
     
-  #browser()
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
   # TODO is this the best way to handle the Wales problem
-  population <- population %>% select(year, gss_code, age, sex, popn) %>%
-    popmodules::consolidate_national_data("popn")
-  deaths <- deaths %>% select(year, gss_code, age, sex, deaths)%>%
-    popmodules::consolidate_national_data("deaths")
-  births <- births %>% select(year, gss_code, age, sex, births)%>%
-    popmodules::consolidate_national_data("births")
+  population <- population %>% select(year, gss_code, age, sex, popn)
+  deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
+  births <- births %>% select(year, gss_code, age, sex, births)
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
   mortality <- mortality %>% select(year, gss_code, age, sex, rate)
 

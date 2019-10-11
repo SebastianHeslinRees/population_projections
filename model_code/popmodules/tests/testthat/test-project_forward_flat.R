@@ -1,4 +1,4 @@
-context("project_mortality_probs")
+context("project_forward_flat")
 library(popmodules)
 library(testthat)
 library(dplyr)
