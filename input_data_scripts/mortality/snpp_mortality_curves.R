@@ -11,7 +11,7 @@ ons_mort <- data.table::fread(mort_curve_file) %>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
   select(gss_code, sex, age, death_rate)
 
-national_mort <- fread(national_file) %>%
+national_mort <- data.table::fread(national_file) %>%
   mutate(age = ifelse(age == "Birth", -1, age),
          age = as.numeric(age),
          age = age+1) %>%
