@@ -5,7 +5,7 @@ mort_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2016-base
 national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/national asmrs.csv"
 over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/NPP deaths over 90.csv"
 
-ons_mort <- fread(mort_curve_file) %>%
+ons_mort <- data.table::fread(mort_curve_file) %>%
   gather(year, death_rate, 5:29) %>%
   filter(year == 2017)%>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
