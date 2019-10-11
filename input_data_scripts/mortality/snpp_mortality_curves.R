@@ -1,6 +1,7 @@
 #Mortality Curves
 library(dplyr)
 library(tidyr)
+library(data.table)
 mort_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2016-based (May 2018)/model_inputs/2016 snpp sya mortality rates.csv"
 national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/national asmrs.csv"
 over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/NPP deaths over 90.csv"
@@ -29,9 +30,24 @@ over90s <- data.table::fread(over90_file) %>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
   select(-pop, -deaths)
 
-ons_mort <- rbind(ons_mort, national_mort, over90s) %>%
+national_mort <- rbind(national_mort, over90s)
+
+welsh_gss_codes <- c(paste0("W0600000",1:6),paste0("W0600000",8:9),paste0("W060000",10:16),paste0("W060000",18:24))
+wales <- list()
+for(w in seq(welsh_gss_codes)){
+  wales[[w]] <- filter(national_mort, gss_code == "W92000004") %>%
+    mutate(gss_code = welsh_gss_codes[w])
+}
+wales <- data.table::rbindlist(wales)
+
+national_mort <- filter(national_mort, gss_code != "W92000004")
+
+ons_mort <- rbind(ons_mort, national_mort, wales) %>%
   mutate(year = 2017) %>%
-  select(gss_code, sex, age, year, death_rate)
+  select(gss_code, sex, age, year, death_rate) %>%
+  recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code", "sex", "age", "year"), fun = list(mean))
+
+
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves.rds" )
 
