@@ -2,11 +2,13 @@ library(tidyverse)
 library(data.table)
 library(popmodules)
 
+message("mye data")
+
 ew_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/detailed_mye_coc.rds"
 uk_pop_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/MYEB1_detailed_population_estimates_series_UK_(2018).csv"
 uk_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/MYEB3_summary_components_of_change_series_UK_(2018).csv"
 
-#Engalnd and Wales
+#England and Wales
 mye_coc <- readRDS(ew_coc_file) %>%
   rename(gss_code = ladcode18, gss_name = laname18) %>%
   mutate(geography = "LAD18", sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female"), 
@@ -21,10 +23,10 @@ uk_pop <- fread(uk_pop_file) %>%
          year = as.numeric(year),
          component = "population",
          geography = "LAD18") %>%
-  mutate(gss_code = case_when(substr(ladcode18,1,1)=="S" ~ "S92000003",
-                              substr(ladcode18,1,1)=="N" ~ "N92000002")) %>%
-  mutate(gss_name = case_when(substr(ladcode18,1,1)=="S" ~ "Scotland",
-                              substr(ladcode18,1,1)=="N" ~ "Northern Ireland")) %>%
+  mutate(gss_code = case_when(country=="S" ~ "S92000003",
+                              country=="N" ~ "N92000002")) %>%
+  mutate(gss_name = case_when(country=="S" ~ "Scotland",
+                              country=="N" ~ "Northern Ireland")) %>%
   mutate(sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female")) %>%
   group_by(gss_code, gss_name, country, sex, age, component, year, geography) %>%
   summarise(value = sum(value)) %>%
@@ -61,7 +63,7 @@ uk_births <- filter(uk_coc, component == "births") %>%
 x <- list()
 for(i in 1:90){x[[i]] <- mutate(uk_births, age = i, value = 0)}
 uk_births <- rbind(uk_births, rbindlist(x))
-rm(x)
+rm(x,i)
 
 #Scotland & NI International
 international_curves <- filter(mye_coc, component %in% c("international_in","international_out")) %>%
@@ -100,7 +102,14 @@ uk_deaths <- filter(uk_coc, component == "deaths") %>%
   select(names(mye_coc))
 
 #Append Scotland and NI data to E&W
-mye_coc <- rbind(mye_coc, uk_pop, uk_births, uk_international, uk_net_international, uk_deaths)
+#Recode any gss codes which are not standard 2011 codes
+mye_coc <- rbind(mye_coc, uk_pop, uk_births, uk_international, uk_net_international, uk_deaths) %>%
+  recode_gss_to_2011(col_geog="gss_code",
+                     col_aggregation=c("gss_code","gss_name","country","year","component","sex","age","geography"),
+                     fun=list(sum))
+
+rm(death_curves, international_curves, uk_births, uk_coc, uk_deaths, uk_international, uk_net_international,
+   uk_pop, ew_coc_file, uk_coc_file, uk_pop_file, right)
 
 #Split out components
 births <- filter(mye_coc, component == "births") %>% select(-component) %>% rename(births = value)
@@ -111,10 +120,22 @@ international_out <- filter(mye_coc, component == "international_out") %>% selec
 international_net <- filter(mye_coc, component == "international_net") %>% select(-component) %>% rename(int_net = value)
 
 #Domestic here does not include Scotland and NI
+#TODO process this from the domestic migration dataset
 domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component) %>% rename(dom_in = value)
 domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component) %>% rename(dom_out = value)
 domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component) %>% rename(dom_net = value)
 
+#Other components
+uk_upc <- filter(births, country %in% c("N","S")) %>%
+  rename(upc = births) %>%
+  mutate(upc = 0)
+
+upc <- filter(mye_coc, component %in% c("special_change", "unattrib", "other_adjust")) %>%
+  group_by(gss_code, gss_name, country, sex, age, year, geography) %>%
+  summarise(upc = sum(value)) %>%
+  ungroup() %>%
+  select(names(uk_upc)) %>%
+  rbind(uk_upc)
 
 # interpolate points where deaths == -1
 # FIXME this is a clumsy way to do it but everything with grouping was taking a million years, and no 2018 data are missing
@@ -133,12 +154,14 @@ validate_population(population)
 validate_population(international_in)
 validate_population(international_out)
 validate_population(international_net)
+validate_population(upc)
 
 validate_same_geog(population, births)
 validate_same_geog(population, deaths)
 validate_same_geog(population, international_in)
 validate_same_geog(population, international_out)
 validate_same_geog(population, international_net)
+validate_same_geog(population, upc)
 
 
 datestamp <- Sys.Date()
@@ -155,5 +178,7 @@ saveRDS(international_net, file = paste0("input_data/mye/2018/international_net_
 saveRDS(domestic_in, file = paste0("input_data/mye/2018/domestic_in_ons_", datestamp, ".rds"))
 saveRDS(domestic_out, file = paste0("input_data/mye/2018/domestic_out_ons_", datestamp, ".rds"))
 saveRDS(domestic_net, file = paste0("input_data/mye/2018/domestic_net_ons_", datestamp, ".rds"))
+saveRDS(upc, file = paste0("input_data/mye/2018/upc_ons_", datestamp, ".rds"))
 
-
+rm(births, deaths, domestic_in, domestic_net, domestic_out, international_in, international_out,
+   international_net, missing_deaths, mye_coc, population, uk_upc, upc, ix, datestamp)

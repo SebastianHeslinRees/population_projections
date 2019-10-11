@@ -23,15 +23,16 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
-  proj_popn <- population %>% filter(year < first_proj_yr)
+  proj_popn <- list(population %>% filter(year < first_proj_yr))
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
-  proj_deaths <- deaths
-  proj_births <- births
-  proj_int_out <- int_out
-  proj_int_in <- int_in
-  proj_dom <- dom_historic
 
-  
+  proj_deaths <- list(deaths)
+  proj_births <- list(births)
+  proj_int_out <- list(int_out)
+  proj_int_in <- list(int_in)
+  proj_dom_out <- list(dom_out)
+  proj_dom_in <- list(dom_in)
+
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
     
@@ -114,20 +115,31 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     mutate(popn = popn - deaths - int_out + int_in + dom_net) %>%
     select(-c(deaths, int_in, int_out, dom_in, dom_out, dom_net))
   
-    
-    proj_popn <- rbind(proj_popn, next_yr_popn)
-    proj_births <- rbind(proj_births, births)
-    proj_deaths <- rbind(proj_deaths, deaths)
-    proj_int_out <- rbind(proj_int_out, int_out)
-    proj_int_in <- rbind(proj_int_in, int_in)
-    proj_dom  <- rbind(proj_dom, dom_net)
+  
+    proj_popn[[length(proj_popn)+1]] <- next_yr_popn
+    proj_deaths[[length(proj_deaths)+1]] <- deaths
+    proj_births[[length(proj_births)+1]] <- births
+    proj_int_out[[length(proj_int_out)+1]] <- proj_int_out
+    proj_int_in[[length(proj_int_in)+1]] <- proj_int_in
+    proj_dom_out[[length(proj_dom_out)+1]] <- proj_dom_out
+    proj_dom_in[[length(proj_dom_in)+1]] <- proj_dom_in
     
     curr_yr_popn <- next_yr_popn
-    
   }
   
-  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births, int_out = proj_int_out, int_in = proj_int_in))
+
+  proj_popn   <- data.frame(data.table::rbindlist(proj_popn))
+  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths))
+  proj_births <- data.frame(data.table::rbindlist(proj_births))
+  proj_int_out <- data.frame(data.table::rbindlist(proj_int_out))
+  proj_int_in <- data.frame(data.table::rbindlist(proj_int_in))
+  proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out))
+  proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in))
   
+  
+  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births,
+              int_out = proj_int_out, int_in = proj_int_in,
+              dom_out = proj_dom_out, dom_in = proj_dom_in))
 }
 
 
@@ -143,8 +155,8 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_population(mortality, col_data = "rate")
   popmodules::validate_population(int_out_rate, col_data = "rate")
   popmodules::validate_population(int_in_proj, col_data = "int_in")
-  popmodules::validate_population(dom_historic, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out","dom_in","dom_net"), test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
-  popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+#  popmodules::validate_population(dom_historic, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out","dom_in","dom_net"), test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
+#  popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
   
   
   # check that the rates join onto the population
@@ -153,7 +165,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_join_population(population, fertility, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, int_out_rate, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, dom_rate, cols_common_aggregation = c("gss_code","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(dom_rate, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
+#  popmodules::validate_join_population(dom_rate, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
   
   # check that the coverage of years is correct
   last_proj_yr <- first_proj_yr + n_proj_yr -1
@@ -167,7 +179,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   assert_that(max(fertility$rate) <= 1 & min(fertility$rate) >= 0, msg = "projected fertility contains rates outside the range 0-1")
   assert_that(max(mortality$rate) <= 1 & min(mortality$rate) >= 0, msg = "projected mortality contains rates outside the range 0-1")
   assert_that(max(int_out_rate$rate) <= 1 & min(int_out_rate$rate) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
-  assert_that(max(dom_rate$rate) <= 1 & min(dom_rate$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
+#  assert_that(max(dom_rate$rate) <= 1 & min(dom_rate$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
   
   
   invisible(TRUE)

@@ -106,7 +106,7 @@ popn_apply_rate <- function(popn,
   # ----------------
 
   # Reformat col_aggregation to a named vector mapping between popn columns and popn_rate columns
-  col_aggregation <- convert_to_named_vector(col_aggregation)
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
   # and reorder it to match popn's column ordering
   popn_cols_to_aggregate <- intersect( names(popn), names(col_aggregation) )
   col_aggregation <- col_aggregation[ popn_cols_to_aggregate ]
@@ -135,7 +135,7 @@ popn_apply_rate <- function(popn,
   popn_rate <- popn_rate[c(all_rate_cols, col_rate)]
 
   # Make sure the columns that are factors match
-  popn_rate <- match_factors(popn, popn_rate, col_aggregation)
+  popn_rate <- .match_factors(popn, popn_rate, col_aggregation)
 
   # Deal with the possibility of duplicate data column names
   if(col_popn == col_rate) {
@@ -208,7 +208,8 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
   all_rate_cols <- c(as.character(col_aggregation), additional_rate_levels)
   all_rate_cols <- intersect(all_rate_cols, names(popn_rate))
 
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and popn_rate aggregation levels
+
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and popn_rate aggregation levels
 
   assert_that(!col_popn %in% names(col_aggregation),
               msg = "popn_apply_rate was given a population count column name that is also a named aggregation column")
@@ -286,7 +287,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
 
 validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, output, one2many, additional_rate_levels, missing_levels_popn, missing_levels_rate) {
 
-  col_aggregation <- convert_to_named_vector(col_aggregation)
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
 
   output_col_aggregation <- unique(c(names(col_aggregation), additional_rate_levels))
   assert_that(all(output_col_aggregation %in% names(output)))
@@ -314,48 +315,4 @@ validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, outp
   }
 
   invisible(TRUE)
-}
-
-
-
-
-# Function: convert character vector (unnamed or partially named) to one where every element is named
-# TODO split this out into the general or helper_functions package. it's used in validate_pop::validate_join_population as well, and will be in births
-convert_to_named_vector <- function(vec) {
-  assert_that(is.vector(vec))
-
-  if(is.null(names(vec))) {
-    names(vec) <- vec
-  } else {
-    ix <- names(vec) == ""
-    names(vec)[ix] <- vec[ix]
-  }
-
-  return(vec)
-}
-
-
-# Function: given source and target data frames with a column mapping, add or
-# remove factoring in the target to match the source
-match_factors <- function(dfsource, dftarget, col_mapping) {
-  col_mapping <- convert_to_named_vector(col_mapping)
-  for(i in  seq_along(col_mapping)) {
-    icol <- col_mapping[i]
-    if(is.factor(dfsource[[names(icol)]]) & !is.factor(dftarget[[icol]])) {
-      dftarget[[icol]] <- as.factor(dftarget[[icol]])
-    }
-
-    source_col <- dfsource[[names(icol)]]
-    target_col <- dftarget[[icol]]
-    if(!is.factor(source_col) & is.factor(target_col)) {
-      col_class <- class(source_col)
-      if(col_class == "numeric") {
-        dftarget[[icol]] <- levels(target_col)[target_col] %>%
-          as.numeric()
-      } else {
-        dftarget[[icol]] <- as.character(target_col)
-      }
-    }
-  }
-  return(dftarget)
 }

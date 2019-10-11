@@ -6,13 +6,15 @@ params:
   deaths_proj_fp: outputs/model/year/deaths_file.rds
   int_in_proj_fp: outputs/model/year/int_in_file.rds
   int_out_proj_fp: outputs/model/year/int_out_file.rds
+  births_proj_fp: outputs/model/year/births_file.rds
   output_files_dir: outputs/model/year/population_qa_files/
+  first_proj_yr: 2018
 output:
   html_document:
     df_print: paged
     self_contained: no
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, echo = FALSE}
@@ -25,6 +27,8 @@ editor_options:
 library(tidyverse)
 library(gganimate)
 #library(transformr)
+library(gglaplot)
+library(scales)
 ```
 
 ```{r, echo=FALSE, message = FALSE}
@@ -32,10 +36,14 @@ popn_proj <-   readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$pop
 deaths_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$deaths_proj_fp))
 int_in_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$int_in_proj_fp))
 int_out_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$int_out_proj_fp))
+births_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$births_proj_fp))
 
 output_files_dir <- paste0(rprojroot::find_rstudio_root_file(),"/",params$output_files_dir)
 areas_of_interest <- params$qa_areas_of_interest
 #areas_of_interest <- list("London")
+
+minyear <- min(popn_proj$year)
+maxyear <- max(popn_proj$year)
 
 # convert areas of interest to a named list
 if (is.null(names(areas_of_interest))) {
@@ -53,15 +61,24 @@ if("London" %in% areas_of_interest) {
 # Total population by year
 ```{r, echo=FALSE, message = FALSE, results='asis'}
 for(loc in seq_along(areas_of_interest)) {
-  popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]])
-  loc_by_yr <- popn_proj_loc %>%
+  popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year) %>%
     summarise(popn = sum(popn)) %>%
-    as.data.frame() %>%
-    ggplot(aes(year, popn)) +
-      geom_line() +
-      ggtitle(paste("Total", names(areas_of_interest)[loc], "population by year"))
+    as.data.frame()
+  
+  pal <- gla_pal(palette_type = "categorical", n = 1)
 
+  loc_by_yr <- 
+    (ggplot(popn_proj_loc, aes(x = year, y = popn)) +
+      theme_gla(legend = FALSE) +
+      ggla_line() +
+      ggla_labelline(x1 = params$first_proj_yr-1) +
+      scale_y_continuous(labels = dollar_format(prefix="")) +
+      scale_x_continuous(breaks = seq(2000, maxyear, 5),
+                         expand = expand_scale(add = c(1.5, 0.5))) +
+      labs(title = paste("Total", names(areas_of_interest)[loc], "population by year"))) %>%
+    left_align_labs()
+  
   plot(loc_by_yr)
 }
 ```
@@ -69,19 +86,26 @@ for(loc in seq_along(areas_of_interest)) {
 # Population age structure over projection years
 ```{r, echo=FALSE, message = FALSE, results='hide'}
 for(loc in seq_along(areas_of_interest)) {
-  popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]])
-  loc_age_by_yr <- popn_proj_loc %>%
+  popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year, age) %>%
-    summarise(popn = sum(popn)) %>%
-    ggplot(aes(age, popn, colour = as.character(year))) +
-    scale_colour_manual(values = c(rep("black", length(min(popn_proj_loc$year):2018)),
-                                   rep("red", length(2019:max(popn_proj_loc$year))))) +
-    geom_point() +
-    theme(legend.position = "none")
+    summarise(popn = sum(popn))
   
-  anim <- loc_age_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
+  loc_age_by_yr <- 
+    ggplot(popn_proj_loc, aes(age, popn, colour = as.character(year))) +
+      theme_gla(legend = FALSE) +
+      scale_colour_manual(values = c(rep("#cccccc", length(min(popn_proj_loc$year):(params$first_proj_yr-1))),
+                                     rep("#6da7de", length(params$first_proj_yr:max(popn_proj_loc$year))))) +
+      geom_point() +
+      scale_y_continuous(labels = dollar_format(prefix="")) +
+      scale_x_continuous(breaks = seq(0, 90, 5),
+                         expand = expand_scale(add = c(1.5, 0.5)))
+  # Note that gganimate can't deal with a '%>% left_align_labs()' here
+
+  anim <- loc_age_by_yr +
+    transition_states(year, transition_length = 2, state_length = 1) +
     labs(title = paste(names(areas_of_interest)[loc], "age structure over projection years"),
          subtitle = '{closest_state}')
+  
   anim_save(paste0(output_files_dir, "/loc_age_by_yr_",loc,".gif"), anim)
 }
 ```
@@ -100,41 +124,76 @@ knitr::include_graphics(gifs)
 ```{r, echo=FALSE, message = FALSE}
 for(loc in seq_along(areas_of_interest)) {
   deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
-  loc_deaths_by_yr <- deaths_proj_loc %>%
+  births_proj_loc <- filter(births_proj, gss_code %in% areas_of_interest[[loc]])
+  
+  natchange_proj_loc <- full_join(births_proj_loc, deaths_proj_loc, by = c("gss_code", "sex", "age", "year")) %>%
     group_by(year) %>%
-    summarise(deaths = sum(deaths)) %>%
+    summarise(deaths = sum(deaths), births = sum(births, na.rm=TRUE)) %>%
+    mutate(`natural change` = births - deaths) %>%
     as.data.frame() %>%
-    ggplot(aes(year, deaths)) +
-    geom_line() +
-    ggtitle(paste("Total", names(areas_of_interest)[loc], "deaths by year"))
-
-  plot(loc_deaths_by_yr)
+    gather(key = "component", value = "value", births, deaths, `natural change`) %>%
+    mutate(component = factor(component, levels=c("natural change","births","deaths")))
+  
+  pal <- c("#000000", gla_pal(palette_type = "categorical", n = 2))
+  
+  loc_natchange_by_yr <- 
+    (ggplot(natchange_proj_loc, aes(year, value, group = component)) +
+      theme_gla(legend = FALSE) +
+      ggla_line(aes(colour = component)) +
+      scale_colour_manual(values = pal) +
+      ggla_labelline(x1 = params$first_proj_yr-1) +
+      scale_y_continuous(labels = dollar_format(prefix="")) +
+      scale_x_continuous(breaks = seq(2000, maxyear, 5),
+                         expand = expand_scale(add = c(1.5, 0.5))) +
+      ggla_axisat0() +
+      ggla_highlight(aes(label = component, size=0.1), filter_type = "end",
+                     geom = GeomGLATextHighlight, 
+                     position = position_nudge(x = -1.2, y = 0)) +
+      labs(title = paste("Natural change in", names(areas_of_interest)[loc], "by year"))) %>%
+    left_align_labs()
+  
+  plot(loc_natchange_by_yr)
 }
 ```
 
-# Deaths age structure over projection years
+# Components of natural change by age
 ```{r, echo=FALSE, message = FALSE, results = 'hide'}
-for(loc in seq_along(areas_of_interest)) {
-  deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
-  loc_deaths_by_yr <- deaths_proj_loc %>%
-    group_by(year, age) %>%
-    summarise(deaths = sum(deaths)) %>%
-    ggplot(aes(age, deaths, colour = as.character(year))) +
-    scale_colour_manual(values = c(rep("black", length(min(deaths_proj_loc$year):2018)),
-                                   rep("red", length(2019:max(deaths_proj_loc$year))))) +
-    geom_point() +
-    theme(legend.position = "none")
-  
-  anim <- loc_deaths_by_yr + transition_states(year, transition_length = 2, state_length = 1) +
-    labs(title = paste(names(areas_of_interest)[loc], "deaths age structure over projection years"),
-         subtitle = '{closest_state}')
-  anim_save(paste0(output_files_dir, "/loc_deaths_by_yr_",loc,".gif"), anim)
-}
+# for(loc in seq_along(areas_of_interest)) {
+#   deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
+#   births_proj_loc <- filter(births_proj, gss_code %in% areas_of_interest[[loc]])
+#   
+#   natchange_proj_loc <- full_join(births_proj_loc, deaths_proj_loc, by = c("gss_code", "sex", "age", "year")) %>%
+#     group_by(year, age) %>%
+#     summarise(deaths = sum(deaths), births = sum(births)) %>%
+#     mutate(`natural change` = births - deaths) %>%
+#     as.data.frame() %>%
+#     gather(key = "component", value = "value", births, deaths, `natural change`) %>%
+#     mutate(component = factor(component, levels=c("natural change","births","deaths")))
+# 
+#   loc_natchange_by_yr <- 
+#     ggplot(natchange_proj_loc,
+#            aes(age, value, colour = component, group = interaction(year, component))) +
+#       theme_gla(legend = TRUE) +
+#       geom_point() +
+#       scale_colour_manual(values = pal) +
+#       scale_y_continuous(labels = dollar_format(prefix="")) +
+#       scale_x_continuous(breaks = seq(0,90,5),
+#                          expand = expand_scale(add = c(1.5, 0.5))) +
+#       ggla_axisat0() +
+#       labs(title = paste("Natural change in", names(areas_of_interest)[loc], "by year"))
+# 
+#   anim <- loc_natchange_by_yr +
+#     transition_states(year, transition_length = 2, state_length = 1) +
+#     labs(title = paste(names(areas_of_interest)[loc], "natural change"),
+#          subtitle = '{closest_state}')
+#   
+#   anim_save(paste0(output_files_dir, "/loc_natchange_by_yr_",loc,".gif"), anim)
+# }
 ```
 
 ```{r, echo=FALSE}
-gifs <- list.files(output_files_dir,"*loc_deaths_by_yr*", full.names = TRUE)
-knitr::include_graphics(gifs)
+# gifs <- list.files(output_files_dir,"*loc_natchange_by_yr*", full.names = TRUE)
+# knitr::include_graphics(gifs)
 ```
 
 # International in age structure over projection years

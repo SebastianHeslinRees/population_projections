@@ -112,7 +112,7 @@ run_trend_model <- function(config_list) {
                     params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
                                   popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
                                   deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds"),
-                                  int_in_proj_fp = paste0(config_list$outputs_dir,"/int_in",config_list$timestamp,".rds"),
-                                  int_out_proj_fp = paste0(config_list$outputs_dir,"/int_out",config_list$timestamp,".rds"),
-                                  output_files_dir = paste0(config_list$outputs_dir,"population_qa",config_list$timestamp,"_files/")))
+                                  births_proj_fp = paste0(config_list$outputs_dir,"/births",config_list$timestamp,".rds"),
+                                  output_files_dir = paste0(config_list$outputs_dir,"population_qa",config_list$timestamp,"_files/"),
+                                  first_proj_yr = config_list$first_proj_yr))
 }
