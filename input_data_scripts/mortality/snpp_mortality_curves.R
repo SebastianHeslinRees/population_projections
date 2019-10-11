@@ -20,7 +20,7 @@ national_mort <- fread(national_file) %>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
   select(-mortality_rate)
 
-over90s <- fread(over90_file) %>%
+over90s <- data.table::fread(over90_file) %>%
   mutate(death_rate = deaths/pop) %>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
   select(-pop, -deaths)
