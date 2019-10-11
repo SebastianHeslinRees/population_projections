@@ -11,6 +11,10 @@ ons_mort <- data.table::fread(mort_curve_file) %>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
   select(gss_code, sex, age, death_rate)
 
+#npp mortality data is published as deaths per 100k of population
+#Also ages are offset by -1 year of age
+#Death data are provided up to 125 so data can safely be filter to < age 90
+#without the need to aggregate the 90+ age group following the age shift
 national_mort <- data.table::fread(national_file) %>%
   mutate(age = ifelse(age == "Birth", -1, age),
          age = as.numeric(age),
