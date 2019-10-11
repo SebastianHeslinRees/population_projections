@@ -45,7 +45,7 @@ mort_trend <- rbind(principal, high, low)%>%
   select(-rate, -last_year)
 
 #write output
-setwd(x)
+dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(mort_trend, "input_data/mortality/npp_mortality_trend.rds" )
 
 rm(high, low, principal, mort_trend, max_year, npp_data_location, x, mortality_trend)
