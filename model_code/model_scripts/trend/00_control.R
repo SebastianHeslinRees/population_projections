@@ -42,7 +42,6 @@ run_trend_model <- function(config_list) {
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
     complete_fertility(population)
     
-  #browser()
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
@@ -77,5 +76,7 @@ run_trend_model <- function(config_list) {
                     params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
                                   popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
                                   deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds"),
-                                  output_files_dir = paste0(config_list$outputs_dir,"population_qa",config_list$timestamp,"_files/")))
+                                  births_proj_fp = paste0(config_list$outputs_dir,"/births",config_list$timestamp,".rds"),
+                                  output_files_dir = paste0(config_list$outputs_dir,"population_qa",config_list$timestamp,"_files/"),
+                                  first_proj_yr = config_list$first_proj_yr))
 }
