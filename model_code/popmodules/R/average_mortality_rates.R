@@ -20,13 +20,16 @@
 #' @return A data frame of mortality probabilities.
 #'
 #' @import purrr
+#' @import dplyr
+#' @import assertthat
 #'
 #' @export
 
 initial_year_mortality_rate <- function(mye_population, births, deaths, mortality_curves, last_data_year, years_to_avg, avg_or_trend){
 
 
-  check_init_mort_rates
+  check_init_mort_rates(mye_population, births, deaths, mortality_curves,
+                        last_data_year, years_to_avg, avg_or_trend)
 
   #TODO Change this to the age_on_sya function
   #popmodules::age_on_sya(mye_population)
@@ -144,20 +147,26 @@ check_init_mort_rates <- function(mye_population, births, deaths, mortality_curv
   assert_that(is.data.frame(births),
               msg="births expects a data frame as input")
   assert_that(is.data.frame(deaths),
-              msg="deaths expects an integer as input")
+              msg="deaths expects a data frame as input")
   assert_that(is.data.frame(mortality_curves),
-              msg="mortality_curves expects an integer as input")
+              msg="mortality_curves expects a data frame as input")
   assert_that(is.numeric(last_data_year),
-              msg="last_data_year expects character input")
+              msg="last_data_year expects numeric input")
   assert_that(is.numeric(years_to_avg),
-              msg="years_to_avg expects character input")
-  assert_that(is.numeric(avg_or_trend),
+              msg="years_to_avg expects numeric input")
+  assert_that(is.character(avg_or_trend),
               msg="avg_or_trend expects character input")
 
-  validate_population(mye_population)
-  validate_population(births)
-  validate_population(deaths)
-  validate_population(mortality_curves)
+  # check that the years requested are present in the MYEs
+
+
+  validate_population(mye_population, col_data = "popn")
+  validate_population(births, col_data = "births",
+                      comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
+  validate_population(deaths, col_data = "deaths",
+                      comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
+  validate_population(mortality_curves, col_data = "death_rate",
+                      comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
 
 }
 
