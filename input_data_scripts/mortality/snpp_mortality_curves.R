@@ -28,6 +28,6 @@ over90s <- data.table::fread(over90_file) %>%
 ons_mort <- rbind(ons_mort, national_mort, over90s) %>%
   mutate(year = 2017) %>%
   select(gss_code, sex, age, year, death_rate)
-
+dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves.rds" )
 
