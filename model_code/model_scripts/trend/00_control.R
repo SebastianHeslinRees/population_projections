@@ -42,7 +42,6 @@ run_trend_model <- function(config_list) {
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
     complete_fertility(population)
     
-  #browser()
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
