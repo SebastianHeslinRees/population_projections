@@ -25,8 +25,10 @@ run_trend_model <- function(config_list) {
                        "births_mye_path", 
                        "int_out_mye_path", 
                        "int_in_mye_path",
-                       "dom_historic_path",
-                       "dom_rate_path",
+                       "dom_out_mye_path",
+                       "dom_in_mye_path",
+                       "dom_origin_destination_path",
+                       "dom_rate_fns",
                        "outputs_dir", 
                        "mortality_fns", 
                        "fertility_fns",
@@ -55,8 +57,13 @@ run_trend_model <- function(config_list) {
   int_in <- get_component(filepath = config_list$int_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
-  dom_historic <- readRDS(config_list$dom_historic_path)
-  dom_rate <- readRDS(config_list$dom_rate_path)
+  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
+  
+  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
+  
+  dom_origin_dest <- readRDS(config_list$dom_origin_destination_path)
   
   # TODO: check that deaths and births have same geography, age, and sex coverage as population
   
@@ -71,6 +78,8 @@ run_trend_model <- function(config_list) {
   int_out_rate <- evaluate_fns_list(config_list$int_out_rate_fns) 
 
   int_in_proj <- evaluate_fns_list(config_list$int_in_fns)
+  
+  dom_rate <- evaluate_fns_list(config_list$dom_rate_fns)
   
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer

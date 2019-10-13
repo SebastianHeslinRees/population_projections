@@ -36,13 +36,15 @@ int_in_fns <- list(
                                                               col_data = "int_in"))
   )
 
-
 dom_rate_fns <- list(
-  list(fun = popmodules::calculate_dom_rates, args = list(dom_origin_destination_path = dom_origin_destination_path,
+  list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = dom_origin_destination_path,
                                                           popn_mye_path = popn_mye_path,
-                                                          n_dom_averaging_yr = n_dom_averaging_yr)
-                                                          
-  )
+                                                          births_mye_path = births_mye_path,
+                                                          col_partial_match = "gss_in",
+                                                          col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
+                                                          col_component = "value")),
+  list(fn = popmodules::average_past_rates, args = list(col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
+                                                        n_years = n_dom_averaging_yr))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
@@ -56,13 +58,15 @@ config_list <- list(
   births_mye_path = births_mye_path,
   int_out_mye_path = int_out_mye_path,
   int_in_mye_path = int_in_mye_path,
-  dom_historic_path = dom_historic_path,
-  dom_rate_path = dom_rate_path,
+  dom_out_mye_path = dom_out_mye_path,
+  dom_in_mye_path = dom_in_mye_path,
+  dom_origin_destination_path = dom_origin_destination_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   int_out_rate_fns = int_out_rate_fns,
   int_in_fns = int_in_fns,
+  dom_rate_fns = dom_rate_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
@@ -74,13 +78,15 @@ rm(first_proj_yr,
    births_mye_path, 
    int_out_mye_path, 
    int_in_mye_path,
-   dom_historic_path = dom_historic_path,
-   dom_rate_path = dom_rate_path,
+   dom_out_mye_path,
+   dom_in_mye_path,
+   dom_origin_destination_path,
    outputs_dir,
    mortality_fns, 
    fertility_fns, 
    int_out_rate_fns,
    int_in_fns,
+   dom_rate_fns,
    qa_areas_of_interest)
 
 # Run the model
