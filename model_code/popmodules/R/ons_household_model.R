@@ -237,22 +237,22 @@ ons_household_model <- function(projection, file_location){
 
 
 
-summary_tbl <- left_join(constrained_proj, household_pop,
-                         by=c("gss_code","year","sex","age_group")) %>%
-        left_join(communal_pop,
-                  by=c("gss_code","year","sex","age_group")) %>%
-        mutate(total_pop = hh_pop + ce_pop) %>%
-        select(-age_group, -sex) %>%
-        data.frame() %>%
-        group_by(gss_code, district, year) %>%
-        summarise_all(funs(sum)) %>%
-        data.frame() %>%
-        mutate(ahs = hh_pop / households) %>%
-        mutate(ahs = round(ahs, 3),
-               total_pop = round(total_pop, 0),
-               hh_pop = round(hh_pop, 0),
-               ce_pop = round(ce_pop, 0),
-               households = round(households, 0))
+# summary_tbl <- left_join(constrained_proj, household_pop,
+#                          by=c("gss_code","year","sex","age_group")) %>%
+#         left_join(communal_pop,
+#                   by=c("gss_code","year","sex","age_group")) %>%
+#         mutate(total_pop = hh_pop + ce_pop) %>%
+#         select(-age_group, -sex) %>%
+#         data.frame() %>%
+#         group_by(gss_code, district, year) %>%
+#         summarise_all(funs(sum)) %>%
+#         data.frame() %>%
+#         mutate(ahs = hh_pop / households) %>%
+#         mutate(ahs = round(ahs, 3),
+#                total_pop = round(total_pop, 0),
+#                hh_pop = round(hh_pop, 0),
+#                ce_pop = round(ce_pop, 0),
+#                households = round(households, 0))
 
 
 
