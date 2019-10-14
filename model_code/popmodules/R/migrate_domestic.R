@@ -145,9 +145,12 @@ migrate_domestic <- function(popn,
                                                     col_rate, missing_levels_rate, col_origin_destination)
   popn <- popn[ c(names(col_aggregation), col_popn)]
 
-  # Calculate deaths
-  # ----------------
+  # Calculate migration flows
+  # -------------------------
   # This will deal with most checks on the input and output
+  # TODO: looks like this join will be ~25% faster and the code easier to read
+  # if popn_apply_rate is used to join popn to mign_rate rather than the other
+  # way round.
   migration <- popn_apply_rate(popn,
                                mign_rate,
                                col_aggregation,
