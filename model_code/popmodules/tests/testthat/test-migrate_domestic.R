@@ -253,8 +253,10 @@ test_that("migrate_domestic throws an error with explicit missing aggregation va
 
 test_that("migrate_domestic throws an error/warning with implicit missing aggregation values", {
   mign_in <- mign_rate[-1,]
+  output_out <- mign_out[-2,]
   expect_error(migrate_domestic(popn, mign_in, missing_levels_rate = FALSE))
-  expect_warning(migrate_domestic(popn, mign_in, missing_levels_rate = TRUE))
+  expect_warning(temp <- migrate_domestic(popn, mign_in, missing_levels_rate = TRUE))
+  expect_equivalent(temp, output_out)
 
   popn_in <- popn[-1,]
   expect_error(migrate_domestic(popn_in, mign_rate))

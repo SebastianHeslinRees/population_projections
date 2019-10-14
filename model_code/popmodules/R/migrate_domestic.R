@@ -55,10 +55,12 @@
 #' @param missing_levels_rate Logical. Setting this to TRUE will allow implicity
 #'   missing origin-destination flows and assume that they are zero. A warning
 #'   will still be thrown if there is zero outmigration for an entire
-#'   aggregation level in a geography. Note that if this is set to FALSE, your
-#'   origin-destination flows must contain rates from each geography to itself.
-#'   When FALSE an error will be thrown if missing levels are detected. Default
-#'   TRUE.
+#'   aggregation level in a geography. These geographies will **not** be
+#'   included in the output data frame, meaning you may need to call
+#'   \code{tidyr::complete} on the results (after aggregation to in/out/net
+#'   flows). Note that if this is set to FALSE, your origin-destination flows
+#'   must contain rates from each geography to itself. When FALSE an error will
+#'   be thrown if missing levels are detected. Default TRUE.
 #' @param col_origin_destination Character vector. Names of the origin and
 #'   destination columns in \code{mign_rate}. Only required when
 #'   \code{col_gss_destination} is of length two or more, though providing it
@@ -157,6 +159,14 @@ migrate_domestic <- function(popn,
                                additional_rate_levels = col_gss_destination,
                                missing_levels_popn = FALSE,
                                missing_levels_rate = missing_levels_rate)
+
+  unmatched_levels <- is.na(migration[[col_flow]])
+  if(sum(unmatched_levels) > 0) {
+    warning(paste(c("migrate_domestic found", sum(unmatched_levels), "aggregation levels with no net outmigration.",
+                    "These levels will be absent from the output.",
+                    "\nAggregation levels:", names(col_aggregation)), collapse=" "))
+    migration <- filter(migration, !unmatched_levels)
+  }
 
   # rename input gss column to match origin column
   old_name <- names(col_aggregation)[col_aggregation == col_origin_destination[1]]
