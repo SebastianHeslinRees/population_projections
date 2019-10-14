@@ -1,35 +1,42 @@
-#' Output Stage 1 and Stage 2 Househoilds
-#'
-#' This is Sunny's code with a few superficial tweaks.
-#' @param population Dataframe. SYA population output from the population_projection loop.
-#' @param la_la_lookup Dataframe. Local authority code to name la_lookup with added output order.
-#' @param region_la_lookup Dataframe. Local authority to region la_lookup.
-#' @export
+library(dplyr)
+library(data.table)
+library(tidyr)
+
+#RUN THE MODEL
+stage_1 <- dclg_stage_1(population_projection, stage_1_file, stage_2_file, file_location)
+stage_2 <- dclg_stage_2(stage_1[[1]])
+dclg_outputs(stage_1[[2]], stage_1[[3]], stage_1[[4]], stage_1[[5]], stage_1[[6]],
+             stage_2[[1]], stage_2[[2]])
 
 
-Output.DCLG.HH <- function(population_projection, la_lookup, region_la_lookup){
+#FUNCTIONS
+extend_data <- function(stage1_data, max_dclg_year, max_projection_year){
         
-        library(dplyr); library(data.table); library(tidyr)
         
-        la_lookup <- data.frame(la_lookup)
+        dclg_final_rates <- filter(stage1_data, year==max_dclg_year)
+        dclg_extra_years <- vector("list", max_projection_year)
         
-        ### DCLG data inputs ###
-        if(user_selections$household.model == "2012 DCLG"){
-                dclg_stage1_data <- readRDS(paste0(root.dir,"/Inputs/2012 DCLG Stage 1 data.rds"))
-                dclg_headship_rates <- readRDS(paste0(root.dir,"/Inputs/2012 DCLG Stage 2 headship rates.rds"))
+        if(max_projection_year > max_dclg_year){
+                for(i in (max_dclg_year+1):max_projection_year){
+                        
+                        dclg_extra_years[[i]] <- dclg_final_rates %>%
+                                mutate(year = i)
+                        
+                }
                 
+                dclg_extra_years <- rbindlist(dclg_extra_years) %>%
+                        as.data.frame()
         }
-        
-        if(user_selections$household.model == "2014 DCLG"){
-                dclg_stage1_data <- readRDS(paste0(root.dir,"/Inputs/2014 DCLG Stage 1 data.rds"))
-                dclg_headship_rates <- readRDS(paste0(root.dir,"/Inputs/2014 DCLG Stage 2 headship rates.rds"))
-        }
+        return(rbind(dclg_stage1_data, dclg_extra_years))
         
         
-        
-        proj.years <- c(min(population_projection$year):max(population_projection$year))
-        
-        
+}
+
+
+dclg_household_model <- function(population_projection, stage_1_file, stage_2_file, file_location){
+
+        stage1_data <- readRDS(paste0(file_location,stage_1_file))
+        headship_rates <- readRDS(paste0(file_location,stage_2_file))
         
         ### Group sya pop into 5 year bands up to 85+
         popn_5yr_bands <- population_projection %>%
@@ -47,30 +54,12 @@ Output.DCLG.HH <- function(population_projection, la_lookup, region_la_lookup){
         ### calc implied dclg HH rep rates
         
         ### Create data for years beyond last dclg year ###
-        max_dclg_year <- max(dclg_stage1_data$year)
-        max_projection_year <- max(population_projection$year)
         
-        dclg_final_rates <- filter(dclg_stage1_data, year==max_dclg_year)
-        dclg_extra_years <- vector("list", max_projection_year)
-        
-        if(max_projection_year > max_dclg_year){
-                for(i in (max_dclg_year+1):max_projection_year){
-                        
-                        dclg_extra_years[[i]] <- dclg_final_rates %>%
-                                mutate(year = i)
-                        
-                }
-                
-                dclg_extra_years <- rbindlist(dclg_extra_years) %>%
-                        as.data.frame()
-                
-                dclg_stage1_data <- rbind(dclg_stage1_data, dclg_extra_years)
-                
-        }
-        
+        stage1_data <- extend_data(stage1_data, max(stage1_data$year), max(population_projection$year))
         
         ### Aggregate populations by HH type
-        dclg.summedhhtype <- group_by(dclg_stage1_data, gss_code,year,sex,age_group) %>%
+        dclg.summedhhtype <- stage1_data %>%
+                group_by(gss_code,year,sex,age_group) %>%
                 mutate(dclg_household_population.SummedHHtype = sum(dclg_household_population),
                        dclg_households.SummedHHtype = sum(dclg_households),
                        dclg_total_population.SummedHHtype = sum(dclg_total_population),
@@ -79,7 +68,6 @@ Output.DCLG.HH <- function(population_projection, la_lookup, region_la_lookup){
         
         ### Calc proportion in each HH type
         ### Multiply proportions by GLA popn
-        
         dclg.gla <- left_join(dclg.summedhhtype, popn_5yr_bands,
                               by=c("gss_code", "year", "sex", "age_group")) %>%
                 as.data.frame() %>%
@@ -138,26 +126,32 @@ Output.DCLG.HH <- function(population_projection, la_lookup, region_la_lookup){
                 select(gss_code, district, sex, household_type, age_group, year, GLA.Inst.popn) %>%
                 spread(year, GLA.Inst.popn)
         
+        return(dclg.gla, households, stage_1, household_population, institutional_population, households_regional)
         
-        #### STAGE 2 ####
-        
-        ### Create data for years beyond 2037 ###
-        max_dclg_year <- max(dclg_headship_rates$year)
+}
+
+extend_rates <- function(dclg_headship_rates, max_dclg_year){
         
         dclg_final_rates <- filter(dclg_headship_rates, year==max_dclg_year)
+        
         dclg_extra_years <- vector("list", max_projection_year)
         
-        if(max(population_projection$year > max_dclg_year)){
-                for(i in (max_dclg_year+1):max_projection_year){
-                        
-                        dclg_extra_years[[i]] <- dclg_final_rates %>%
-                                mutate(year = i)
-                        
-                }
-                dclg_extra_years <- rbindlist(dclg_extra_years)
-                dclg_headship_rates <- as.data.frame(rbind(dclg_headship_rates, dclg_extra_years))
+        for(i in (max_dclg_year+1):max_projection_year){
+                
+                dclg_extra_years[[i]] <- dclg_final_rates %>%
+                        mutate(year = i)
+                
         }
         
+        
+        dclg_extra_years <- rbindlist(dclg_extra_years)
+        
+        return(as.data.frame(rbind(dclg_headship_rates, dclg_extra_years)))
+}
+
+dclg_stage_2 <- function(dclg_headship_rates, dclg.gla){
+
+        extend_rates <- (dclg_headship_rates, max(dclg_headship_rates$year))
         
         age.change <- data.frame(
                 age_group = c("15_19","20_24","25_29","30_34","35_39","40_44","45_49","50_54","55_59",
@@ -207,10 +201,14 @@ Output.DCLG.HH <- function(population_projection, la_lookup, region_la_lookup){
                 as.data.frame() %>%
                 mutate(AHS = HH.popn / Households)
         
+        return(list(stage_2, AHS))
+        
+}
+
+dclg_outputs <- function(households, stage_1, household_population, institutional_population,
+                         households_regional, stage_2, AHS, output_location){
         ### Output files
-        dclg.dir <- paste0(dir.nm,"/DCLG Households")
-        dir.create(dclg.dir, showWarnings = FALSE)
-        setwd(dclg.dir)
+        setwd(output_location)
         
         fwrite(households, "Households - district Totals.csv", quote = TRUE)
         fwrite(households_regional, "Households - Regional Totals.csv", quote = TRUE)
@@ -222,8 +220,7 @@ Output.DCLG.HH <- function(population_projection, la_lookup, region_la_lookup){
         fwrite(stage2, "Households - Stage 2.csv", quote = TRUE)
         fwrite(AHS, "Households - AHS.csv", quote = TRUE)
         
-        setwd(dir.nm)
-        #return(setnames(return_HH, "popn.Implied.HH", "households"))
         
 }
+
 
