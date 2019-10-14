@@ -101,7 +101,7 @@ get_rate_backseries <- function(component_mye_path,
               msg = "get_rates_backseries didn't find any common levels in the MYE and component data frames' year column")
   popn <- filter(popn, year %in% common_years)
   component <- filter(component, year %in% common_years) %>%
-    replace_na(list(!!sym(col_component) = 0))
+    replace_na(list(!!sym(col_component) := 0))
 
   if(any(component[,component_name] < 0)) {
     warning(paste("get_rate_backseries found negative counts in the components in", component_mye_path,
