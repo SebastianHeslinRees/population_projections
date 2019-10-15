@@ -1,9 +1,11 @@
 #ONS Household Rates
+library(dplyr)
+library(data.table)
 
-read_hh_data_files <- function(file, file_location, year){
+read_hh_data_files <- function(file, file_location, yr){
   
   x <- readRDS(paste0(file_location, file)) %>%
-    filter(year == year)
+    filter(year == yr)
   return(x)
 }
 
@@ -76,4 +78,17 @@ setwd("M:/Projects/population_projections/input_data/household_model/")
 
 saveRDS(stage1_data, "dclg_stage1_data_2014.rds")
 saveRDS(stage2_data, "dclg_headship_rates_2014.rds")
+
+#-------------------------------------------------------
+
+region_codes <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/region to region gss code.csv")
+
+district_to_region <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/district to region.rds") %>%
+  left_join(region_codes, by="region") %>%
+  select(gss_code, region_gss_code)
+
+setwd("M:/Projects/population_projections/input_data/household_model/")
+saveRDS(district_to_region, "district_to_region.rds")
+
+
 

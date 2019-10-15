@@ -1,24 +1,27 @@
-ons_household_model <- function(projection, hh_rep_rates_file, ce_file, file_location){
+ons_household_model <- function(population, hh_rep_rates_file, ce_file, file_location){
+
+  district_to_region <- readRDS(paste0(file_location,"/district_to_region.rds"))
 
   household_rates <- readRDS(paste0(file_location, hh_rep_rates_file))
 
-  projection <- aggregate_geography(projection)
+  population <- aggregate_geography(population) %>%
+    create_regional_data(district_to_region)
 
   #       Same number as 2011 for 0-74
   #       Same proportion 75+
   #       Prison population updated upto and inc 2016
 
-  projection_age_groups <- population_into_age_groups(projection, age_groups = c(0, 16,seq(19,84,5),Inf),
+  population_age_groups <- population_into_age_groups(population, age_groups = c(0, 16,seq(19,84,5),Inf),
                                                       labels = c("0_15","16_19","20_24","25_29","30_34","35_39","40_44",
                                                                  "45_49","50_54","55_59","60_64","65_69",
                                                                  "70_74","75_79","80_84","85_over"),
                                                       popn_col = "popn")
 
 
-  communal_establishment <- get_communal_establishment_popn(paste0(file_location, ce_file),
-                                                            projection_age_groups, rates_ages = c("75_79","80_84","85_over"))
+  communal_establishment <- get_communal_establishment_popn(ce_file, file_location,
+                                                            population_age_groups, rates_ages = c("75_79","80_84","85_over"))
 
-  household_population <- get_household_popn(projection_age_groups, communal_establishment)
+  household_population <- get_household_popn(population_age_groups, communal_establishment)
 
   household_projection <- apply_household_rates(household_population, household_rates, rates_col="HRR", hh_pop_col="household_popn")
 
@@ -32,10 +35,9 @@ ons_household_model <- function(projection, hh_rep_rates_file, ce_file, file_loc
   constrained_regional <- constrain_regional_hh(unconstrained_regional, england_proj)
 
   #Districts constrained to regions
-  #TODO add region-to-LA lookup
-  #constrained_district <- constrain_district_hh(unconstrained_la, constrained_regional)
+  constrained_district <- constrain_district_hh(unconstrained_la, constrained_regional, district_to_region)
 
-  return(list(unconstrained = household_projection,
+  return(list(unconstrained = household_population,
               constrained = rbind(england_proj, constrained_regional, constrained_district),
               household_population = data.table::rbindlist(household_ce_pop[[1]]),
               communal_establishment_population = data.table::rbindlist(household_ce_pop[[2]])))
@@ -44,27 +46,25 @@ ons_household_model <- function(projection, hh_rep_rates_file, ce_file, file_loc
 
 #-----------------------------------------------------
 
-aggregate_geography <- function(projection){
+aggregate_geography <- function(population){
 
-  projection <- filter(projection, substr(gss_code,1,1)=="E")
+  population <- filter(population, substr(gss_code,1,1)=="E")
 
-  #TODO Get a region lookup
-
-
-  projection <- projection %>%
-    mutate(gss_code = case_when(gss_code == "E09000033" ~ "E090000001",
-                                gss_code == "E06000052" ~ "E06000053")) %>%
+  population <- population %>%
+    mutate(gss_code = recode(gss_code,
+                             "E09000033" = "E09000001",
+                             "E06000052" = "E06000053")) %>%
     group_by(gss_code, sex, age, year) %>%
     summarise_all(funs(sum)) %>%
-    as.data.frame
+    ungroup()
 
-  # eng <- projection %>%
+  # eng <- population %>%
   #   mutate(gss_code = "E92000001") %>%
   #   group_by(gss_code, sex, age, year) %>%
   #   summarise_all(funs(sum)) %>%
   #   as.data.frame()
   #
-  # reg <- projection %>%
+  # reg <- population %>%
   #   left_join(region_lk, by="gss_code") %>%
   #   select(-gss_code, -district) %>%
   #   rename(gss_code=region_gss_code) %>%
@@ -72,33 +72,32 @@ aggregate_geography <- function(projection){
   #   summarise_all(funs(sum)) %>%
   #   as.data.frame()
   #
-  # projection <- rbind(projection, reg, eng)
+  # population <- rbind(population, reg, eng)
 
-  return(projection)
+  return(population)
 
 }
 
 #-----------------------------------------------------
 
-get_communal_establishment_popn <- function(ce_file, population, rates_ages) {
+get_communal_establishment_popn <- function(ce_file, file_location, population, rates_ages) {
 
-  ce <- readRDS(ce_file)
+  ce <- readRDS(paste0(file_location, ce_file))
 
-  absolute <- filter(ce, !age_group %in% rates_ages, year == max(ce$year)) %>% select(-year)
-  proportional <- filter(ce, age_group %in% rates_ages, year == max(ce$year)) %>% select(-year)
+  absolute <- filter(ce, !age_group %in% rates_ages, year == max(ce$year)) %>% select(-year, -ce_rate)
+  proportional <- filter(ce, age_group %in% rates_ages, year == max(ce$year)) %>% select(-year, -ce_pop)
 
   older_ce <- list()
   younger_ce <- list()
 
   for(yr in c(max(ce$year):max(population$year))){
 
-    older_ce[[yr]] <- filter(population, year == yr) %>%
+    older_ce[[yr]] <- filter(population, year == yr, age_group %in% rates_ages) %>%
       left_join(proportional, by=c("gss_code","sex","age_group")) %>%
       mutate(ce_pop = popn * ce_rate) %>%
       select(-popn, -ce_rate)
 
-    younger_ce[[yr]] <- mutate(absolute, year = yr) %>%
-      select(-ce_rate)
+    younger_ce[[yr]] <- mutate(absolute, year = yr)
 
   }
 
@@ -125,7 +124,7 @@ constrain_regional_hh <- function(unconstrained_regional, england_proj){
 
   constraint_regional <- group_by(unconstrained_regional, year, sex, age_group) %>%
     summarise(reg_hh = sum(households)) %>%
-    data.frame() %>%
+    ungroup() %>%
     left_join(england_proj, by=c("year", "sex", "age_group")) %>%
     rename(eng_hh = households) %>%
     mutate(constr = ifelse(eng_hh == 0, 1, eng_hh/reg_hh)) %>%
@@ -141,28 +140,51 @@ constrain_regional_hh <- function(unconstrained_regional, england_proj){
 
 #-----------------------------------------------------
 
-constrain_district_hh <- function(unconstrained_la, constrained_regional){
+constrain_district_hh <- function(unconstrained_la, constrained_regional, district_to_region){
 
-  constraint_la <- left_join(unconstrained_la, region_lk, by="gss_code") %>%
+  constraint_la <- left_join(unconstrained_la, district_to_region, by="gss_code") %>%
     group_by(region_gss_code, year, sex, age_group) %>%
     summarise(la_hh = sum(households)) %>%
-    data.frame() %>%
+    ungroup() %>%
     left_join(constrained_regional, by=c("region_gss_code"="gss_code","year","sex","age_group")) %>%
     rename(reg_hh = households) %>%
     mutate(constr = ifelse(reg_hh == 0, 0, reg_hh/la_hh)) %>%
     select(region_gss_code, year, sex, age_group, constr)
 
-  constrained_la <- left_join(unconstrained_la, region_lk, by="gss_code") %>%
+  constrained_la <- left_join(unconstrained_la, district_to_region, by="gss_code") %>%
     left_join(constraint_la, by=c("region_gss_code","year","sex","age_group")) %>%
     mutate(households = households*constr) %>%
-    select(-hh_pop, -HRR, -constr, -region, -region_gss_code)
+    select(gss_code, year, sex, age_group, households)
 
-  return(constraint_la)
+  return(constrained_la)
 
 }
 
 
 #-----------------------------------------------------
+
+create_regional_data <- function(population, district_to_region) {
+
+  reg <- left_join(population, district_to_region, by="gss_code") %>%
+    group_by(gss_code = region_gss_code, year, sex, age) %>%
+    summarise(popn = sum(popn)) %>%
+    ungroup()
+
+  eng <- mutate(reg, gss_code = "E92000001") %>%
+    group_by(gss_code, year, sex, age) %>%
+    summarise(popn = sum(popn)) %>%
+    ungroup()
+
+  out <- rbind(population, reg, eng)
+
+  return(out)
+
+}
+
+
+#-----------------------------------------------------
+
+
 
 
 # summary_tbl <- left_join(constrained_proj, household_pop,
