@@ -16,7 +16,7 @@ jump$death_rate <- (1:nrow(jump))/(5 * nrow(jump))
 trend <- expand.grid(year = c(2001:2005),
                     age = c(2,3),
                     sex = c("male", "female"),
-                    variant = "2018_principal",
+                    variant = "2016_principal",
                     stringsAsFactors = F)
 x <- seq(0,1,(1/nrow(trend)))[-1]
 trend$change <- x
@@ -35,9 +35,9 @@ proj_df <- filter(trend, year != 2001) %>%
 
 first_proj_yr <- 2001
 n_proj_yr <- 5
-npp_var <- "2018_principal"
+npp_var <- "2016_principal"
 
-test_that("project_mortality_rates produces the expected output", {
-  expect_equivalent(project_mortality_rates(jump, trend, first_proj_yr, n_proj_yr, npp_var),
+test_that("project_rates produces the expected output", {
+  expect_equivalent(project_rates(jump, "death_rate", trend, first_proj_yr, n_proj_yr, npp_var),
                     proj_df)
 })

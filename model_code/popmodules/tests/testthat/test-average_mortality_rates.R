@@ -72,7 +72,7 @@ years_to_avg <- 3
 back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
 
 
-mean <- averaged <- filter(scaling_backseries, year %in% back_years) %>%
+mean <- filter(scaling_backseries, year %in% back_years) %>%
   group_by(gss_code, sex) %>%
   summarise(scaling = sum(scaling)/years_to_avg) %>%
   data.frame() %>%

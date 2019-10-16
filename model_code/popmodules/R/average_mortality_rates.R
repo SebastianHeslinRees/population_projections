@@ -28,7 +28,7 @@
 initial_year_mortality_rate <- function(mye_population, births, deaths, mortality_curves, last_data_year, years_to_avg, avg_or_trend){
   
   
-  check_init_mort_rates(mye_population, births, deaths, mortality_curves,
+  check_init_rates(mye_population, births, deaths, mortality_curves,
                         last_data_year, years_to_avg, avg_or_trend)
   
   aged_on_population <- mye_population %>%
@@ -36,7 +36,7 @@ initial_year_mortality_rate <- function(mye_population, births, deaths, mortalit
     filter(year != max(year)) %>%
     rbind(filter(births, age==0) %>% rename(popn = births))
   
-  mortality_curves <- select(mortality_curves, -year)
+  if("year" %in% names(mortality_curves)){mortality_curves <- select(mortality_curves, -year)}
   
   mortality_scaling_backseries <- left_join(aged_on_population, mortality_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_deaths = death_rate * popn) %>%
@@ -51,16 +51,14 @@ initial_year_mortality_rate <- function(mye_population, births, deaths, mortalit
     select(gss_code, year, sex, scaling)
   
   #TODO make it work without this line
-  #mortality_scaling_backseries <- filter(mortality_scaling_backseries, !is.na(scaling))
-  
-  check_mort_forward(mortality_scaling_backseries)
+  check_rate_forward(mortality_scaling_backseries)
   
   if(avg_or_trend == "trend"){
-    jump_off_mortality <- trend_mortality_forward(mortality_scaling_backseries, years_to_avg, last_data_year)
+    jump_off_mortality <- calc_trend_rate(mortality_scaling_backseries, years_to_avg, last_data_year)
   }
   
   if(avg_or_trend == "average"){
-    jump_off_mortality <- mean_mortality_forward(mortality_scaling_backseries, years_to_avg, last_data_year)
+    jump_off_mortality <- calc_mean_rate(mortality_scaling_backseries, years_to_avg, last_data_year)
   }
   
   jump_off_mortality <- mortality_curves %>%
@@ -77,7 +75,7 @@ initial_year_mortality_rate <- function(mye_population, births, deaths, mortalit
 
 # Function to apply linear regression to mortality scaling factors
 
-trend_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, last_data_year){
+calc_trend_rate <- function(rate_scaling_backseries, years_to_avg, last_data_year){
   
   regression <- function(df){
     lm(scaling ~ year, data=df)
@@ -89,7 +87,7 @@ trend_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, 
   
   back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
   
-  trended <- as.data.frame(mortality_scaling_backseries) %>%
+  trended <- as.data.frame(rate_scaling_backseries) %>%
     filter(year %in% back_years) %>%
     mutate(year = years_to_avg - last_data_year + year)%>%
     group_by(gss_code, sex)%>%
@@ -114,11 +112,11 @@ trend_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, 
 
 # Function to calculate the mean of mortality scaling factors
 
-mean_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, last_data_year){
+calc_mean_rate <- function(rate_scaling_backseries, years_to_avg, last_data_year){
   
   back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
   
-  averaged <- filter(mortality_scaling_backseries, year %in% back_years) %>%
+  averaged <- filter(rate_scaling_backseries, year %in% back_years) %>%
     group_by(gss_code, sex) %>%
     summarise(scaling = sum(scaling)/years_to_avg) %>%
     data.frame() %>%
@@ -134,7 +132,7 @@ mean_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, l
 
 # Function to check that the input to initial_year_mortality_rates is all legal
 
-check_init_mort_rates <- function(mye_population, births, deaths, mortality_curves,
+check_init_rates <- function(mye_population, births, deaths, mortality_curves,
                                   last_data_year, years_to_avg, avg_or_trend){
   
   # test input parameters are of the correct type
@@ -167,14 +165,14 @@ check_init_mort_rates <- function(mye_population, births, deaths, mortality_curv
 
 #--------------------------------------------------------------------
 
-# Function to check that the input to trend_mortality_forward
-# and mean_mortality_forward is all legal
+# Function to check that the input to calc_trend_rate
+# and calc_mean_rate is all legal
 
-check_mort_forward <- function(mortality_scaling_backseries){
+check_rate_forward <- function(rate_scaling_backseries){
   
-  assert_that(is.data.frame(mortality_scaling_backseries),
-              msg="mortality_scaling_backseries expects a dataframe")
+  assert_that(is.data.frame(rate_scaling_backseries),
+              msg="rate_scaling_backseries expects a dataframe")
   
-  validate_population(mortality_scaling_backseries, col_aggregation = c("gss_code", "year", "sex"), data = "scaling")
+  #validate_population(rate_scaling_backseries, col_aggregation = c("gss_code", "year", "sex"), data = "scaling")
 }
 

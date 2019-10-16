@@ -17,7 +17,7 @@
 #' @import assertthat
 #' @export
 
-project_fertility_rates <- function(jump_off_rates, col_rate, rate_trajectory, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
+project_rates <- function(jump_off_rates, col_rate, rate_trajectory, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
   
   #Test/validate
   #check_validate_proj_mort_rates(jump_off_rates, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
@@ -35,7 +35,8 @@ project_fertility_rates <- function(jump_off_rates, col_rate, rate_trajectory, f
     ungroup() %>%
     arrange(age,sex,year)%>%
     left_join(select(jump_off_rates, -year), by=c("sex","age")) %>%
-    mutate(rate = cumprod*col_rate) %>%
+    rename(jump_rate = col_rate) %>%
+    mutate(rate = cumprod*jump_rate) %>%
     select(gss_code, sex, age, year, rate) %>%
     arrange(gss_code,sex,age,year)
   
