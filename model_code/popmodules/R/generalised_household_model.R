@@ -57,3 +57,33 @@ extend_data <- function(data, max_projection_year){
 
 }
 
+#-------------------------------------------------
+
+household_summary <- function(households, household_population, communal_establishment, col_aggregation){
+  
+  # households <- stage_2[[5]]
+  # household_population <- stage_2[[3]]
+  # communal_establishment <- stage_2[[4]]
+  # col_aggregation <- c("gss_code","year","age_group")
+  
+  summary_tbl <- left_join(households, household_population,
+                           by=col_aggregation) %>%
+    left_join(communal_establishment,
+              by=col_aggregation) %>%
+    mutate(total_popn = household_popn + ce_pop) %>%
+    select(gss_code, year, households, household_popn, ce_pop, total_popn) %>%
+    data.frame() %>%
+    group_by(gss_code, year) %>%
+    summarise_all(list(sum)) %>%
+    ungroup() %>%
+    mutate(ahs = household_popn / households) %>%
+    mutate(ahs = round(ahs, 3),
+           total_popn = round(total_popn, 0),
+           household_popn = round(household_popn, 0),
+           ce_popn = round(ce_pop, 0),
+           households = round(households, 0)) %>%
+    select(gss_code, year, total_popn, ce_popn = ce_pop, household_popn, households, ahs)
+  
+  return(summary_tbl)
+  
+}
