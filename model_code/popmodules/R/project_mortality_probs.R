@@ -21,7 +21,7 @@ project_mortality_rates <- function(jump_off_rates, future_mortality, first_proj
   #Test/validate
   check_validate_proj_mort_rates(jump_off_rates, future_mortality, first_proj_yr, n_proj_yr, npp_var)
 
-  final_projection_year <- first_proj_yr + n_proj_yr
+  final_projection_year <- first_proj_yr + n_proj_yr -1
 
   future_mortality_probs <- future_mortality %>%
     filter(variant == npp_var) %>%
