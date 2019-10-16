@@ -39,7 +39,7 @@ low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year)
 mort_trend <- rbind(principal, high, low)%>%
   mutate(age = age + 1) %>%
   filter(age %in% c(0:90)) %>%
-  arrange(sex, age, year) %>%
+  arrange(variant, sex, age, year) %>%
   mutate(last_year = lag(rate)) %>%
   mutate(change = (rate - last_year)/last_year)%>%
   mutate(change = ifelse(year == min(year),0,change)) %>%
