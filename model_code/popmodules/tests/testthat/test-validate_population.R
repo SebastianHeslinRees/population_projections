@@ -58,6 +58,12 @@ test_that("validate_population comparison fails when comparison columns don't ma
                "validate_population couldn't match aggregation levels in the input data compared to the provided comparison population \\(aggregating over area age \\)")
 })
 
+test_that("...but it passes when the missing aggregation levels aren't in columns being checked on", {
+  expect_silent(validate_population(filter(mort_test4, year != 2001), col_aggregation = c("area", "age", "year"),
+                                    col_data = "mort",
+                                    comparison_pop = pop_test4, col_comparison = c("area", "age")))
+})
+
 
 
 # Run tests
