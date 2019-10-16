@@ -31,9 +31,9 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
 }
 
 #read in data
-principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year)
-high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year)
-low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year)
+principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year, npp_data_location)
+high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year, npp_data_location)
+low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year, npp_data_location)
 
 #bind the variants together
 mort_trend <- rbind(principal, high, low)%>%

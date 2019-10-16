@@ -66,9 +66,9 @@ check_validate_proj_mort_rates <- function(jump_off_rates,
               msg="npp_var expects character input")
 
   #TODO find out why these fall over
-  #validate_population(jump_off_rates)
+  validate_population(jump_off_rates)
   validate_population(future_mortality, col_aggregation = c("sex","age","year","variant"))
-  #validate_join_population(jump_off_rates, future_mortality)
+  validate_join_population(jump_off_rates, future_mortality)
 
 
 }
