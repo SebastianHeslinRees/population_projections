@@ -177,6 +177,6 @@ check_mort_forward <- function(mortality_scaling_backseries){
   assert_that(is.data.frame(mortality_scaling_backseries),
               msg="mortality_scaling_backseries expects a dataframe")
   
-  validate_population(mortality_scaling_backseries)
+  validate_population(mortality_scaling_backseries, col_aggregation = c("gss_code", "year", "sex"), data = "scaling")
 }
 
