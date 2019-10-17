@@ -170,7 +170,7 @@ calc_trend_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_
       rate = ifelse(rate < 0, 0, rate)) %>%
     as.data.frame()  %>%
     mutate(year = last_data_year + 1) %>%
-    select(gss_code, sex, year, rate) %>%
+    select(gss_code, year, sex, age, rate) %>%
     rename(!!rate_col := rate)
   
   return(trended)
