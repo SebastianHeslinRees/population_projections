@@ -115,7 +115,7 @@ calc_mean_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_c
   averaged <- rate_backseries %>%
     rename(rate = rate_col) %>%
     filter(year %in% back_years) %>%
-    group_by(gss_code, sex) %>%
+group_by(gss_code, sex, age) %>%
     summarise(rate = sum(rate)/years_to_avg) %>%
     ungroup() %>%
     mutate(year = last_data_year+1) %>%
