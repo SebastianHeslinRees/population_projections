@@ -1,8 +1,9 @@
 #NPP Mortality Trend data
 library(dplyr)
 library(tidyr)
+library(data.table)
 max_year <- 2050
-npp_data_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
+npp_data_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/"
 
 #function to read and wrangle raw data
 mortality_trend <- function(file, var, max_year, npp_data_location){
@@ -30,15 +31,15 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
 }
 
 #read in data
-principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year)
-high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year)
-low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year)
+principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year, npp_data_location)
+high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year, npp_data_location)
+low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year, npp_data_location)
 
 #bind the variants together
 mort_trend <- rbind(principal, high, low)%>%
   mutate(age = age + 1) %>%
   filter(age %in% c(0:90)) %>%
-  arrange(sex, age, year) %>%
+  arrange(variant, sex, age, year) %>%
   mutate(last_year = lag(rate)) %>%
   mutate(change = (rate - last_year)/last_year)%>%
   mutate(change = ifelse(year == min(year),0,change)) %>%

@@ -153,9 +153,7 @@ check_init_mort_rates <- function(mye_population, births, deaths, mortality_curv
   assert_that(is.character(avg_or_trend),
               msg="avg_or_trend expects character input")
   
-  # check that the years requested are present in the MYEs
-  
-  
+
   validate_population(mye_population, col_data = "popn")
   validate_population(births, col_data = "births",
                       comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
@@ -177,6 +175,6 @@ check_mort_forward <- function(mortality_scaling_backseries){
   assert_that(is.data.frame(mortality_scaling_backseries),
               msg="mortality_scaling_backseries expects a dataframe")
   
-  validate_population(mortality_scaling_backseries)
+  validate_population(mortality_scaling_backseries, col_aggregation = c("gss_code", "year", "sex"), data = "scaling")
 }
 
