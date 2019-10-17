@@ -42,9 +42,13 @@ fert_trend <- rbind(principal, high, low) %>%
   mutate(change = ifelse(year == min(year),0,change)) %>%
   select(-rate, -last_year)
 
+popmodules::validate_population(fert_trend, 
+                                col_aggregation = c("sex", "age", "year", "variant"), 
+                                col_data = "change", 
+                                check_negative_values = FALSE)
+
 #write output
 dir.create("input_data/fertility", recursive = TRUE, showWarnings = FALSE)
 saveRDS(fert_trend, "input_data/fertility/npp_fertility_trend.rds" )
 
-rm(high, low, principal, fert_trend, max_year, npp_data_location, x, fertility_trend,
-   y, file, fert, back_to_2001)
+rm(high, low, principal, fert_trend, max_year, npp_data_location, fertility_trend)

@@ -33,12 +33,20 @@ national_fert <- filter(national_fert, gss_code != "W92000004")
 
 #Recode - takes a simple average when rates have to to be aggregated
 ons_fert <- rbind(ons_fert, national_fert, wales) %>%
-  mutate(year = 2017) %>%
   select(gss_code, sex, age, year, fert_rate) %>%
-  recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code", "sex", "age", "year"), fun = list(mean))
+  popmodules::recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code", "sex", "age", "year"), fun = list(mean)) %>%
+  as.data.frame()
 
-smoothed_curves <- fit_fertility_rates(ons_fert)
+# Rename col and sex to "F" is so that the fit_fertility_rates function can work
+# TODO change the fit_fertility_rates function to accept "fert_rate" and "female"
+ons_fert <- ons_fert %>%
+  filter(age < 45)
+smoothed_curves <- smooth_fertility(ons_fert)$data %>%
+  mutate(year = 2017)
+  
+validate_population(smoothed_curves, col_data = "fert_rate")
 
 dir.create("input_data/fertility", recursive = TRUE, showWarnings = FALSE)
 saveRDS(smoothed_curves, "input_data/fertility/ons_asfr_curves.rds" )
 
+rm(ons_fert, national_fert, wales,fert_curve_file, national_file, over90_file, w, welsh_gss_codes, smoothed_curves)
