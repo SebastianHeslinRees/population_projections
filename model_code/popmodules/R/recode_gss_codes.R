@@ -19,6 +19,7 @@
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
 #' @import dplyr
+#' @importFrom data.table setDF setDT
 #' @export
 
 
@@ -30,6 +31,9 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
   df <- ungroup(df) %>%
     rename("gss_code" = col_geog)
 
+  i <- which(col_aggregation == col_geog)
+  col_aggregation[i] <- "gss_code"
+  
   recoding <- c("E07000001" = "E06000056",
                 "E07000002" = "E06000055",
                 "E07000003" = "E06000056",
@@ -75,16 +79,27 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
                 "E07000240" = "E07000100",
                 "E07000241" = "E07000104")
 
-  df <- mutate(df, gss_code = recode(gss_code, !!!recoding))
-
+  data.table::setDT(df)
+  df[gss_code %in% names(recoding), gss_code := recode(gss_code, !!!recoding)]
+  df[, lapply(.SD, fun[[1]]), by = col_aggregation]
+  data.table::setDF(df)
   df <- rename(df, !!col_geog := "gss_code")
+  
+  return(df)
+  
+  if(FALSE) { # tidyverse equivalent
+    df <- mutate(df, gss_code = recode(gss_code, !!!recoding))
+  
+    df <- rename(df, !!col_geog := "gss_code")
+  
+    df_2 <- group_by_at(df, col_aggregation) %>%
+  
+      summarise_all(.funs=fun) %>%
+      ungroup()
+    
+    return(df_2)
+  }
 
-  df_2 <- group_by_at(df, col_aggregation) %>%
-
-    summarise_all(.funs=fun) %>%
-    ungroup()
-
-  return(df_2)
 
 }
 
