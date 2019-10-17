@@ -30,7 +30,7 @@ group_by(gss_out, gss_in, year, sex, age) %>%
 summarise(value = sum(value)) %>%
 ungroup()
 message("Saving domestic origin-destination flows. This may take a while")
-saveRDS(domestic, file = paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds"))
+saveRDS(domestic_c, file = paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds"))
 
 
 
