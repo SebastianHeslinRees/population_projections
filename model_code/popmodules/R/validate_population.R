@@ -153,24 +153,44 @@ validate_population <- function( population,
       assert_that(!any(duplicated(names(comparison_pop))),
                   msg="Renaming columns in the comparison data frame in validate_population resulted in duplicate column names. This occurs when a column in pop2 isn't an aggregation level but has the same name as an aggregation level in pop1") # check no duplicate names
       assert_that(all(col_aggregation %in% names(comparison_pop)))
-    }
+      col_comparison <- names(col_comparison)
+
+      }
+
+    # after renameing the dataframes, the col_comparison values are redundant.
 
     # convert when necessary to match factored columns
     comparison_pop <- .match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
 
+    # get only the unique values in the comparison columns. Unique() is faster on data tables
+    comparison_pop <- dplyr::select_at(comparison_pop, col_comparison)
+    test_population_comparison <- dplyr::select_at(test_population, col_comparison)
+    data.table::setDT(comparison_pop)
+    data.table::setDT(test_population_comparison)
+    comparison_pop <- as.data.frame(unique(comparison_pop))
+    test_population_comparison <- as.data.frame(unique(test_population_comparison))
+
+    # validate the comparison population.
+    tryCatch(validate_population(comparison_pop,
+                                 col_aggregation = col_comparison,
+                                 col_data = NA,
+                                 comparison_pop = NA),
+             error = function(e) stop(paste0("validate_population found an error in the comparison population it was given:\n",e,"\n")),
+             warning = function(w) warning(paste0("validate_population threw a warning when checking the given comparison population:\n",w,"\n")))
+
+
     # compare populations. if we can assume completeness we have a shortcut
     if(test_complete) {
-      comparison <- all(sapply(col_aggregation, function(x) setequal(test_population[[x]], comparison_pop[[x]])))
+      comparison <- all(sapply(col_aggregation, function(x) setequal(test_population_comparison[[x]], comparison_pop[[x]])))
     } else {
-      comparison <- dplyr::all_equal(test_population[col_aggregation],
-                                     comparison_pop[col_aggregation],
+      comparison <- dplyr::all_equal(test_population_comparison[col_comparison],
+                                     comparison_pop[col_comparison],
                                      ignore_col_order = TRUE, ignore_row_order = TRUE, convert = TRUE)
     }
     if(!isTRUE(comparison)) {
       stop(paste(c(
         "validate_population couldn't match aggregation levels in the input data compared to the provided comparison population",
-        "(aggregating over",col_aggregation,")",
-        "with error message(s):\n", comparison),
+        "(aggregating over",col_comparison,")"),
         collapse=" "))
     }
 
@@ -214,8 +234,11 @@ check_validate_pop_input <- function(population,
               msg="validate_population requires a logical value for input parameter check_negative_values")
   assert_that(identical(col_comparison, NA) | is.character(col_comparison),
               msg="validate_population requires NA or a vector of column names for input parameter col_comparison")
-
-  assert_that(identical(col_comparison, NA) | length(col_aggregation) == length(col_comparison))
+  assert_that(is.null(names(col_aggregation)),
+              msg = "validate_population cannot take a named vector for col_aggregation")
+  col_comparison_test_pop <- names(.convert_to_named_vector(col_comparison))
+  assert_that(identical(col_comparison, NA) | all(col_comparison_test_pop %in% col_aggregation),
+              msg = "validate_popualation requires that comparison columns are a subset of aggregation columns (or the same)")
 
   # test at least one aggregation variable is present
   missing_cols <- col_aggregation[ !col_aggregation %in% names(population)]
@@ -254,15 +277,6 @@ check_validate_pop_input <- function(population,
     warning("Empty data frame passed to validate_population")
   }
 
-  # validate the comparison population.
-  if(!identical(comparison_pop, NA)) {
-    tryCatch(validate_population(comparison_pop,
-                                 col_aggregation = unname(col_comparison),
-                                 col_data = NA,
-                                 comparison_pop = NA),
-             error = function(e) stop(paste0("validate_population found an error in the comparison population it was given:\n",e,"\n")),
-             warning = function(w) warning(paste0("validate_population threw a warning when checking the given comparison population:\n",w,"\n")))
-  }
 
   invisible(TRUE)
 }

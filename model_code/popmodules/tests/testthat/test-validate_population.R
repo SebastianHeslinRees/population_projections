@@ -10,7 +10,53 @@ pop_test2 <- expand.grid( area=c("a","b","c","d"), age = 0:3, stringsAsFactors =
 
 pop_test3 <- dplyr::mutate(pop_test2, popn = 10000)
 
+set.seed(101)
+pop_test4 <- pop_test2 %>%
+  tidyr::expand(area, age, year = c(2001:2002)) %>%
+  dplyr::mutate(popn = rnorm(n(), mean = 10000, sd = 100)) %>%
+  as.data.frame()
+mort_test4 <- pop_test4 %>%
+  filter(year == 2002) %>%
+  mutate(mort = rnorm(n(), mean = 0.1, sd = 0.001)) %>%
+  select(-popn)
+
 pop <- dplyr::mutate(pop_test3, popn2 = "fill")
+
+
+test_that("validate_population allows comparison columns to be a subset of aggregation columns", {
+  expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
+                                    col_data = "mort",
+                                    comparison_pop = pop_test4, col_comparison = c("area", "age")))
+})
+
+test_that("validate_population allows comparison columns to be a subset of aggregation columns", {
+  expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
+                                    col_data = "mort",
+                                    comparison_pop = pop_test4, col_comparison = c("area", "age"),
+                                    test_complete = FALSE))
+})
+
+
+test_that("validate_population allows comparison columns to be a subset of aggregation columns", {
+  expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
+                                    col_data = "mort",
+                                    comparison_pop = rename(pop_test4, Age = age), col_comparison = c("area", "age" = "Age")))
+})
+
+test_that("validate_population allows comparison columns to be a subset of aggregation columns", {
+  expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
+                                    col_data = "mort",
+                                    comparison_pop = rename(pop_test4, Age = age), col_comparison = c("area", "age" = "Age"),
+                                    test_complete = FALSE))
+})
+
+
+test_that("validate_population comparison fails when comparison columns don't match and are a subset of aggregation columns", {
+  expect_error(validate_population(filter(mort_test4, age != 3), col_aggregation = c("area", "age", "year"),
+                                    col_data = "mort",
+                                    comparison_pop = pop_test4, col_comparison = c("area", "age")),
+               "validate_population couldn't match aggregation levels in the input data compared to the provided comparison population \\(aggregating over area age \\)")
+})
 
 
 
@@ -205,6 +251,7 @@ test_that("validate_population throws an error when the comparison population ha
 
 
 test_that("validate_population can handle comparison populations with unused factor levels", {
+  skip("too much faff, maybe impletment later")
   pop_in <- data.frame( area=factor(c("a","b"), levels=c("a","b","c")))
 
   expect_warning(
