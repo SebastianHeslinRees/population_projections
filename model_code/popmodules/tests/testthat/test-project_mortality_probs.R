@@ -29,8 +29,8 @@ proj_df <- filter(trend, year != 2001) %>%
   ungroup() %>%
   arrange(age,sex,year)%>%
   left_join(select(jump, -year), by=c("sex","age")) %>%
-  mutate(rate = cumprod*death_rate) %>%
-  select(gss_code, sex, age, year, rate)%>%
+  mutate(death_rate = cumprod*death_rate) %>%
+  select(gss_code, sex, age, year, death_rate)%>%
   arrange(gss_code,sex,age,year)
 
 first_proj_yr <- 2001
@@ -41,3 +41,4 @@ test_that("project_rates produces the expected output", {
   expect_equivalent(project_rates(jump, "death_rate", trend, first_proj_yr, n_proj_yr, npp_var),
                     proj_df)
 })
+
