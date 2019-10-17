@@ -23,7 +23,12 @@ dir.create("input_data/domestic_migration/2018", showWarnings = T)
 
 datestamp <- Sys.Date()
 
-# Save absolute values
+domestic_c <- domestic_b %>%
+mutate(year = as.integer(year)) %>%
+mutate(age = ifelse(age < 90, age, 90)) %>%
+group_by(gss_out, gss_in, year, sex, age) %>%
+summarise(value = sum(value)) %>%
+ungroup()
 message("Saving domestic origin-destination flows. This may take a while")
 saveRDS(domestic, file = paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds"))
 
