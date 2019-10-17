@@ -159,7 +159,7 @@ calc_trend_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_
     rename(rate = rate_col) %>%
     filter(year %in% back_years) %>%
     mutate(year = years_to_avg - last_data_year + year)%>%
-    group_by(gss_code, sex)%>%
+    group_by(gss_code, sex, age) %>%
     tidyr::nest() %>%
     mutate(
       Model = map(data, regression),
