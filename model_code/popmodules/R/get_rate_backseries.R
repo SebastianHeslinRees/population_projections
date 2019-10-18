@@ -40,7 +40,6 @@
 #'   \code{component_mye_path} data frame. Need not be specified when one of
 #'   "births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in",
 #'   "dom_out", "dom_net".
-#' @param many2one Logical. Are many levels
 #'
 #' @return A data frame containing rates for the component of change (in the
 #'   "rate" column)
@@ -61,6 +60,10 @@ get_rate_backseries <- function(component_mye_path,
   # List valid names of population components
   usual_col_component <- c("births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in", "dom_out", "dom_net")
 
+
+  # LOAD AND SET UP POPULATION DATA
+  # -------------------------------
+
   # population is aged on due to definitions of MYE to ensure the correct denominator
   # population is population at 30th June
   # changes are changes that occured in the 12 months up to 30th June
@@ -80,12 +83,17 @@ get_rate_backseries <- function(component_mye_path,
     filter(year %in% common_years) %>%
     popmodules::validate_population(col_data = "popn")
 
+
+
+  # LOAD AND SET UP CompoNENT DATA
+  # ------------------------------
+
   component <- readRDS(component_mye_path)
 
   if(is.null(col_component)) {
     col_component <- usual_col_component
   }
-  col_component <- intersect(names(component), usual_col_component)
+  col_component <- intersect(names(component), col_component)
 
   assert_that(length(col_component) == 1,
               msg = paste(c("get_rate_backseries couldn't find a unique column for the component in the file",
@@ -96,67 +104,90 @@ get_rate_backseries <- function(component_mye_path,
   if(class(component[["year"]]) == "character") {
     component$year <- as.integer(component$year)
   }
+
+
+
+  # WRANGLE AND VALIDATE THE DATASETS FOR A JOIN
+  # --------------------------------------------
+
+  # Filter to common years
   common_years <- intersect(common_years, component[["year"]])
   assert_that(length(common_years) > 0,
               msg = "get_rates_backseries didn't find any common levels in the MYE and component data frames' year column")
   popn <- filter(popn, year %in% common_years)
-  component <- filter(component, year %in% common_years) %>%
-    replace_na(list(!!sym(col_component) := 0))
+  component <- filter(component, year %in% common_years)
 
-  if(any(component[,component_name] < 0)) {
+  # Fill missing values as zero
+  ix <- is.na(component[[col_component]])
+  component[ix, col_component] <- 0
+
+  # Set negative values to zero
+  if(any(component[,col_component] < 0)) {
     warning(paste("get_rate_backseries found negative counts in the components in", component_mye_path,
                   "- these will be set to zero"))
-    component[[component_name]] <- ifelse(component[[component_name]] < 0, 0, component[[component_name]])
+    component[[col_component]] <- ifelse(component[[col_component]] < 0, 0, component[[col_component]])
   }
 
   # If there are missing levels expected in the component data, check all *other* levels are complete and match
-  levels <- setdiff( col_aggregation, col_partial_match)
+  levels <- col_aggregation[ !col_aggregation %in% col_partial_match]
   if(!is.null(col_partial_match)) {
     n_levels_popn <- popn[levels] %>%
-      sapply(unique) %>%
+      sapply(function(col) length(unique(col))) %>%
       prod()
     n_levels_component <- component[levels] %>%
-      sapply(unique) %>%
+      sapply(function(col) length(unique(col))) %>%
       prod()
     assert_that(n_levels_component == n_levels_popn,
                 msg = paste(c("get_rate_backseries found differering aggregation levels in the populations at",
                               component_mye_path, "and", popn_mye_path, "when comparing on", levels), collapse=" "))
   }
 
-
   # validate the component population and check levels match popn for the join
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
+  join_by <- col_aggregation[ names(col_aggregation) %in% names(popn)]
+
   popmodules::validate_population(popn)
   popmodules::validate_population(component,
                                   col_aggregation = unname(col_aggregation),
-                                  col_data = component_name,
+                                  col_data = col_component,
                                   test_complete = is.null(col_partial_match),
-                                  test_unique = !is.null(col_partial_match),
-                                  comparison_pop = popn,
-                                  col_comparison = col_aggregation)
-  popmodules::validate_join_population(popn,
-                                       component,
-                                       cols_common_aggregation = col_aggregation,
-                                       pop1_is_subset = !is.null(col_partial_match),
-                                       many2one = !any(names(popn) %in% col_aggregation),
-                                       one2many = !any(col_aggregation %in% names(popn)),
-                                       warn_unused_shared_cols = FALSE)
+                                  test_unique = TRUE)
 
-  # TODO split the rates calculation out into a separate function
+  # TODO investigate another way to validate this: currently it's failing due to insufficient memory
+  # (when it's run as part of the model with a bunch of other memory usage)
+  #popmodules::validate_join_population(popn,
+  #                                     component,
+  #                                     cols_common_aggregation = join_by,
+  #                                     pop1_is_subset = !is.null(col_partial_match),
+  #                                     many2one = !any(names(popn) %in% col_aggregation),
+  #                                     one2many = !any(col_aggregation %in% names(popn)),
+  #                                     warn_unused_shared_cols = FALSE)
+
   # TODO check the methodological decision to set value to 0 if popn is 0
 
-  # TODO convert to data.table for very big calculations
-  popn <- data.table::setDF(popn)
-  data.table::setkeyv(popn, c("year","gss_code","sex","age"))
-  component <- data.table::setDF(component)
-  data.table::setkeyv(component, unname(col_aggregation))
-  rates <- popn[component]
+
+
+  # JOIN THE DATASETS
+  # -----------------
+
+  # we're gonna use data.table because the data are huge when we're dealing with origin-destination data
+  # see below for tidyverse equivalent
+
+  popn <- data.table::setDT(popn)
+  #data.table::setkeyv(popn, c("year","gss_code","age","sex"))
+  component <- data.table::setDT(component)
+  #data.table::setkeyv(component, unname(col_aggregation))
+
+  rates <- merge(popn, component, by.x = names(join_by), by.y = unname(join_by))
   rates[, rate := ifelse(popn == 0, 0, get(col_component)/popn)]
-  setDF(rates)
+  data.table::setnames(rates, names(join_by), unname(join_by))
+  data.table::setDF(rates)
 
   if(FALSE) { # the above but with tidyverse
     rates <- left_join(popn, component, by=col_aggregation) %>%
-      mutate(rate = ifelse(popn == 0, 0, !!sym(component_name)/popn)) %>%
-      select(-popn, -!!sym(component_name))
+      mutate(rate = ifelse(popn == 0, 0, !!sym(col_component)/popn)) %>%
+      select(-popn, -!!sym(col_component)) %>%
+      rename(setNames(names(join_by), unname(join_by))) # check this...
   }
 
   # Set max rate to 1 (this is mostly for mortality purposes, but nothing we're dealing with should be > 1 right?)

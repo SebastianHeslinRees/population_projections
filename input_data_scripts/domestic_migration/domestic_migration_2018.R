@@ -23,8 +23,9 @@ datestamp <- Sys.Date()
 
 # The dataset's so big we'd better use data.table here (sorry)
 data.table::setDT(domestic)
-domestic[, year := as.integer(year)][, age := ifelse(age < 90, age, 90)]
-domestic[, value := sum(value), by=c("gss_out", "gss_in", "year", "sex", "age")]
+domestic <- domestic[, year := as.integer(year)
+                     ][, age := ifelse(age < 90, age, 90)
+                     ][, .(value = sum(value)), .(gss_out, gss_in, year, sex, age)]
 data.table::setDF(domestic)
 
 if(FALSE) { # tidyverse equivalent
@@ -43,7 +44,7 @@ saveRDS(domestic, file = paste0("input_data/domestic_migration/2018/domestic_mig
 
 # Calculate net flows
 message("Calculating historic net flows. This may also take a while")
-
+backseries_years <- sort(unique(domestic$year))
 
 # data.table again - it's repeated below in a tidyverse equivalent
 
@@ -61,7 +62,7 @@ assert_that(all(complete.cases(dom_in_dt)))
 dom_net <- merge(dom_out_dt, dom_in_dt, by=c("year","gss_code","sex","age"), all=TRUE, sort=TRUE)
 dom_net[ is.na(dom_out), dom_out := 0]
 dom_net[ is.na(dom_in), dom_in := 0]
-dom_net <- complete(dom_net, year=2002:2018, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
+dom_net <- complete(dom_net, year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
   data.table::setDT()
 dom_net[, dom_net := dom_in - dom_out] %>%
   data.table::setDF()
@@ -84,7 +85,7 @@ if(FALSE) {
   
   dom_net <- full_join(dom_out, dom_in, by = c("year", "gss_code", "sex", "age")) %>%
     replace_na(list(dom_out = 0, dom_in = 0)) %>%
-    complete(year=2002:2018, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
+    complete(year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
     mutate(dom_net = dom_in - dom_out)
 }
 

@@ -19,7 +19,8 @@ run_trend_model <- function(config_list) {
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
   expected_config <- c("first_proj_yr", 
-                       "n_proj_yr", 
+                       "n_proj_yr",
+                       "n_dom_averaging_yr",
                        "popn_mye_path", 
                        "deaths_mye_path", 
                        "births_mye_path", 
@@ -57,13 +58,15 @@ run_trend_model <- function(config_list) {
   int_in <- get_component(filepath = config_list$int_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
-  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
-                          max_yr = config_list$first_proj_yr - 1)
+  # TODO: sooooo these MYE dom_out/dom_in don't match the ONS flows below. Might want to think about why.
+#  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
+#                          max_yr = config_list$first_proj_yr - 1)
   
-  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
-                          max_yr = config_list$first_proj_yr - 1)
+#  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
+#                          max_yr = config_list$first_proj_yr - 1)
   
-  dom_origin_dest <- readRDS(config_list$dom_origin_destination_path)
+#  dom_origin_dest <- readRDS(config_list$dom_origin_destination_path)
+
   
   # TODO: check that deaths and births have same geography, age, and sex coverage as population
   

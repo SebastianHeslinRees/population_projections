@@ -3,14 +3,14 @@
 first_proj_yr <- 2019
 n_proj_yr <- 20
 n_dom_averaging_yr <- 5
-popn_mye_path <- "input_data/mye/2018/population_ons_2019-08-27.rds"
-deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-08-27.rds"
-births_mye_path <- "input_data/mye/2018/births_ons_2019-08-27.rds"
-int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-08-27.rds"
-int_in_mye_path <- "input_data/mye/2018/international_in_ons_2019-08-27.rds"
-dom_out_mye_path <- "input_data/mye/2018/domestic_out_ons_2019-08-27.rds"
-dom_in_mye_path <- "input_data/mye/2018/domestic_in_ons_2019-08-27.rds"
-dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_ons_2019-10-11.rds"
+popn_mye_path <- "input_data/mye/2018/population_ons_2019-10-18.rds"
+deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-10-18.rds"
+births_mye_path <- "input_data/mye/2018/births_ons_2019-10-18.rds"
+int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-10-11.rds"
+int_in_mye_path <- "input_data/mye/2018/international_in_ons_2019-10-11.rds"
+dom_out_mye_path <- "input_data/mye/2018/domestic_out_ons_2019-10-11.rds"
+dom_in_mye_path <- "input_data/mye/2018/domestic_in_ons_2019-10-11.rds"
+dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_ons_2019-10-18.rds"
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
@@ -40,11 +40,12 @@ dom_rate_fns <- list(
   list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = dom_origin_destination_path,
                                                           popn_mye_path = popn_mye_path,
                                                           births_mye_path = births_mye_path,
-                                                          col_partial_match = "gss_in",
+                                                          col_partial_match = c("gss_out","gss_in"),
                                                           col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                           col_component = "value")),
-  list(fn = popmodules::average_past_rates, args = list(col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
-                                                        n_years = n_dom_averaging_yr))
+  list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
+                                                                      years_to_avg = n_dom_averaging_yr,
+                                                                      col_rate = "rate"))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
@@ -53,6 +54,7 @@ qa_areas_of_interest <- list("London", "E09000001")
 config_list <- list(
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
+  n_dom_averaging_yr = n_dom_averaging_yr,
   popn_mye_path = popn_mye_path,
   deaths_mye_path = deaths_mye_path,
   births_mye_path = births_mye_path,
@@ -73,6 +75,7 @@ config_list <- list(
 
 rm(first_proj_yr, 
    n_proj_yr, 
+   n_dom_averaging_yr,
    popn_mye_path, 
    deaths_mye_path, 
    births_mye_path, 
