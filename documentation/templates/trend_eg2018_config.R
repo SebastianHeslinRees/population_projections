@@ -2,38 +2,67 @@
 
 first_proj_yr <- 2019
 n_proj_yr <- 20
-n_dom_averaging_yr <- 5
+years_to_avg <- 5
 popn_mye_path <- "input_data/mye/2018/population_ons_2019-10-18.rds"
 deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-10-18.rds"
 births_mye_path <- "input_data/mye/2018/births_ons_2019-10-18.rds"
-int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-10-11.rds"
-int_in_mye_path <- "input_data/mye/2018/international_in_ons_2019-10-11.rds"
-dom_out_mye_path <- "input_data/mye/2018/domestic_out_ons_2019-10-11.rds"
-dom_in_mye_path <- "input_data/mye/2018/domestic_in_ons_2019-10-11.rds"
+int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-10-18.rds"
+int_in_mye_path <- "input_data/mye/2018/international_in_ons_2019-10-18.rds"
+dom_out_mye_path <- "input_data/mye/2018/domestic_out_ons_2019-10-18.rds"
+dom_in_mye_path <- "input_data/mye/2018/domestic_in_ons_2019-10-18.rds"
+mortality_curves <- "input_data/mortality/ons_asmr_curves.rds"
+fertility_curves <- "input_data/fertility/ons_asfr_curves.rds"
+mortality_trends <- "input_data/mortality/npp_mortality_trend.rds"
+fertility_trends <- "input_data/fertility/npp_fertility_trend.rds"
 dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_ons_2019-10-18.rds"
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
-  list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = deaths_mye_path, popn_mye_path = popn_mye_path, births_mye_path = births_mye_path)),
-  list(fn = popmodules::project_forward_flat, args = list(first_proj_yr = first_proj_yr, n_proj_yr = n_proj_yr, hold_yr = (first_proj_yr - 2)))
+  list(fn = popmodules::initial_year_rate, args = list(population = c(popn_mye_path, births_mye_path),
+                                                       component_data = deaths_mye_path,
+                                                       target_curves = mortality_curves,
+                                                       last_data_year = first_proj_yr - 1,
+                                                       years_to_avg = years_to_avg,
+                                                       avg_or_trend = "average",
+                                                       data_col = "deaths",
+                                                       output_col = "rate")),
+  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
+                                                   rate_trajectory = mortality_trends,
+                                                   first_proj_yr = first_proj_yr,
+                                                   n_proj_yr = n_proj_yr,
+                                                   npp_var = "2016_principal"))
   )
 
 fertility_fns <- list(
-  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds",
-                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
-                                                              col_data = "rate"))
+  list(fn = popmodules::initial_year_rate, args = list(population = popn_mye_path,
+                                                       component_data = births_mye_path,
+                                                       target_curves = fertility_curves,
+                                                       last_data_year = first_proj_yr - 1,
+                                                       years_to_avg = years_to_avg,
+                                                       avg_or_trend = "average",
+                                                       data_col = "births",
+                                                       output_col = "rate")),
+  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
+                                                   rate_trajectory = fertility_trends,
+                                                   first_proj_yr = first_proj_yr,
+                                                   n_proj_yr = n_proj_yr,
+                                                   npp_var = "2016_principal"))
   )
 
 int_out_rate_fns <- list(
   list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds",
                                                               proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
-                                                              col_data = "rate"))
+                                                              col_data = "rate")),
+  list(fn = popmodules::recode_gss_to_2011, args = list(col_aggregation = c("gss_code", "year" ,"age", "sex"),
+                                                        funs = list(mean)))
   )
 
 int_in_fns <- list(
   list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_in_2017_base_trend_med.rds",
                                                               proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
-                                                              col_data = "int_in"))
+                                                              col_data = "int_in")),
+  list(fn = popmodules::recode_gss_to_2011, args = list(col_aggregation = c("gss_code", "year" ,"age", "sex"),
+                                                        funs = list(mean)))
   )
 
 dom_rate_fns <- list(
@@ -44,7 +73,7 @@ dom_rate_fns <- list(
                                                           col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                           col_component = "value")),
   list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
-                                                                      years_to_avg = n_dom_averaging_yr,
+                                                                      years_to_avg = years_to_avg,
                                                                       col_rate = "rate"))
 )
 
@@ -54,7 +83,7 @@ qa_areas_of_interest <- list("London", "E09000001")
 config_list <- list(
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
-  n_dom_averaging_yr = n_dom_averaging_yr,
+  years_to_avg = years_to_avg,
   popn_mye_path = popn_mye_path,
   deaths_mye_path = deaths_mye_path,
   births_mye_path = births_mye_path,
@@ -62,6 +91,10 @@ config_list <- list(
   int_in_mye_path = int_in_mye_path,
   dom_out_mye_path = dom_out_mye_path,
   dom_in_mye_path = dom_in_mye_path,
+  mortality_curves = mortality_curves,
+  fertility_curves = fertility_curves,
+  mortality_trends = mortality_trends,
+  fertility_trends = fertility_trends,
   dom_origin_destination_path = dom_origin_destination_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
@@ -75,7 +108,7 @@ config_list <- list(
 
 rm(first_proj_yr, 
    n_proj_yr, 
-   n_dom_averaging_yr,
+   years_to_avg,
    popn_mye_path, 
    deaths_mye_path, 
    births_mye_path, 
@@ -83,6 +116,10 @@ rm(first_proj_yr,
    int_in_mye_path,
    dom_out_mye_path,
    dom_in_mye_path,
+   mortality_curves,
+   fertility_curves,
+   mortality_trends,
+   fertility_trends,
    dom_origin_destination_path,
    outputs_dir,
    mortality_fns, 

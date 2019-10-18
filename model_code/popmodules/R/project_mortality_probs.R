@@ -5,7 +5,8 @@
 #'
 #' @param jump_off_rates Dataframe. A set of LA/age/sex rates for the first projection year.
 #' @param rate_col Character. The column in the jump_off_rates dataframe containing the rates.
-#' @param rate_trajectory Dataframe. A national-level ASMR/ASFR trajectory.
+#' @param rate_trajectory String or data frame. A national-level ASMR/ASFR
+#'   trajectory, or a filepath to it in RDS format
 #' @param first_proj_yr Integer. The first projection year.
 #' @param n_proj_year Integer. Number of years to project
 #' @param npp_var Character. NPP trend variant. Either \code{2018_principal},
@@ -17,16 +18,21 @@
 #' @import assertthat
 #' @export
 
-project_rates <- function(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
-  
+project_rates <- function(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var="2016_principal"){
+
   #Test/validate
   #check_validate_proj_mort_rates(jump_off_rates, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
-  
+
+  if(is.string(rate_trajectory)) {
+    rate_trajectory <- readRDS(rate_trajectory)
+  }
+
   final_projection_year <- first_proj_yr + n_proj_yr -1
-  
+
+  # FIXME: check this carefully - I made a few changes and didn't think about it while I did it -- Chris
   rates <- rate_trajectory %>%
     filter(variant == npp_var) %>%
-    filter(year > first_proj_yr) %>%
+    filter(year >= first_proj_yr) %>%
     filter(year <= final_projection_year) %>%
     arrange(year) %>%
     group_by(sex, age) %>%
@@ -40,9 +46,9 @@ project_rates <- function(jump_off_rates, rate_col, rate_trajectory, first_proj_
     select(gss_code, sex, age, year, rate) %>%
     rename(!!rate_col := rate) %>%
     arrange(gss_code,sex,age,year)
-  
+
   return(rates)
-  
+
 }
 
 
@@ -56,13 +62,13 @@ check_validate_proj_mort_rates <- function(jump_off_rates,
                                            first_proj_yr,
                                            n_proj_yr,
                                            npp_var) {
-  
+
   # test input parameters are of the correct type
   assert_that(is.data.frame(jump_off_rates),
               msg="jump_off_rates expects a data frame as input")
   assert_that(is.character(rate_col),
               msg="rate_col should be character")
-  assert_that(is.data.frame(rate_trajectory),
+  assert_that(is.string(rate_trajectory) | is.data.frame(rate_trajectory),
               msg="rate_trajectory expects a data frame as input")
   assert_that(is.numeric(first_proj_yr),
               msg="first_proj_year expects an integer as input")
@@ -70,13 +76,13 @@ check_validate_proj_mort_rates <- function(jump_off_rates,
               msg="n_proj_yr expects an integer as input")
   assert_that(is.character(npp_var),
               msg="npp_var expects character input")
-  
+
   #TODO find out why these fall over
   validate_population(jump_off_rates)
   validate_population(rate_trajectory, col_aggregation = c("sex","age","year","variant"))
   validate_join_population(jump_off_rates, rate_trajectory)
-  
-  
+
+
 }
 
 
