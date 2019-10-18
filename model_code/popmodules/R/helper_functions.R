@@ -29,13 +29,12 @@
   assert_that(is.vector(vec) | is.factor(vec),
               msg = ".convert_to_named_vector needs a vector or a factor as input")
 
-  i_not_na <- !is.na(vec)
+  if (identical(NA, vec)) return(vec)
 
   if(is.null(names(vec))) {
-    names(vec)[i_not_na] <- vec[i_not_na]
+    names(vec) <- vec
   } else {
     ix <- names(vec) == ""
-    ix <- ix & i_not_na
     names(vec)[ix] <- vec[ix]
   }
 
