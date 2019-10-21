@@ -50,17 +50,22 @@ run_trend_model <- function(config_list) {
   population <- get_component(filepath = config_list$popn_mye_path, 
                            max_yr = config_list$first_proj_yr - 1)
   
+  # TODO probably move these geocoding conversions into the input_scripts
   deaths <- get_component(filepath = config_list$deaths_mye_path, 
-                                max_yr = config_list$first_proj_yr - 1)
+                                max_yr = config_list$first_proj_yr - 1) %>%
+    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
   
   births <- get_component(filepath = config_list$births_mye_path,
-                                  max_yr = config_list$first_proj_yr - 1)
+                                  max_yr = config_list$first_proj_yr - 1) %>%
+    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
   
   int_out <- get_component(filepath = config_list$int_out_mye_path,
-                          max_yr = config_list$first_proj_yr - 1)
+                          max_yr = config_list$first_proj_yr - 1) %>%
+    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
   
   int_in <- get_component(filepath = config_list$int_in_mye_path,
-                          max_yr = config_list$first_proj_yr - 1)
+                          max_yr = config_list$first_proj_yr - 1) %>%
+    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
   
   # TODO: sooooo these MYE dom_out/dom_in don't match the ONS flows below. Might want to think about why.
 #  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
@@ -119,6 +124,7 @@ run_trend_model <- function(config_list) {
                            config_list$first_proj_yr, config_list$n_proj_yr)
   
   ## write the output data
+  dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
   output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
   
   ## output the QA

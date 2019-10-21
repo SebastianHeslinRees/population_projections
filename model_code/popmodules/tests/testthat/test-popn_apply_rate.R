@@ -123,7 +123,7 @@ test_that("popn_apply_rate warns when factor levels don't match the input", {
 test_that("popn_apply_rate warns with an empty input", {
   popn_in <- popn[NULL,]
   output_out <- output[NULL,]
-  expect_warning( temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code"))
+  expect_warning( temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", pop1_is_subset = TRUE))
   expect_equivalent(temp, output_out)
 })
 

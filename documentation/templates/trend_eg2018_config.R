@@ -54,7 +54,7 @@ int_out_rate_fns <- list(
                                                               proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
                                                               col_data = "rate")),
   list(fn = popmodules::recode_gss_to_2011, args = list(col_aggregation = c("gss_code", "year" ,"age", "sex"),
-                                                        funs = list(mean)))
+                                                        fun = list(mean)))
   )
 
 int_in_fns <- list(
@@ -62,7 +62,7 @@ int_in_fns <- list(
                                                               proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
                                                               col_data = "int_in")),
   list(fn = popmodules::recode_gss_to_2011, args = list(col_aggregation = c("gss_code", "year" ,"age", "sex"),
-                                                        funs = list(mean)))
+                                                        fun = list(mean)))
   )
 
 dom_rate_fns <- list(

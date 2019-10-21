@@ -71,6 +71,7 @@
 #'   provided by \code{col_aggregation}.
 #'
 #' @import assertthat
+#' @importFrom data.table as.data.table
 #'
 #' @examples
 #'
@@ -132,7 +133,7 @@ migrate_domestic <- function(popn,
   validate_migrate_domestic_input(popn, mign_rate, col_aggregation, col_gss_destination,
                                   col_popn, col_rate, col_flow,
                                   pop1_is_subset, many2one, missing_levels_rate, col_origin_destination)
-
+  
   # identify origin and destination columns if we don't have them
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
@@ -324,7 +325,7 @@ validate_migrate_domestic_input <- function(popn,
     tryCatch({
       mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels]))
       validate_population(mign_validation,
-                          col_aggregation = validation_agg_levels,
+                          col_aggregation = unname(validation_agg_levels),
                           col_data = NA,
                           test_complete = TRUE,
                           test_unique = FALSE)

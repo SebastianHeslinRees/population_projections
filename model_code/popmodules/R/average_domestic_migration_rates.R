@@ -34,7 +34,7 @@ average_domestic_migration_rates <- function(origin_destination_rates,
   # data.table because it's so big
   data.table::setDT(origin_destination_rates)
   origin_destination_rates[year %in% backseries_years, ]
-  origin_destination_rates <- origin_destination_rates[, .(rate = sum(rate)/years_to_avg),
+    origin_destination_rates <- origin_destination_rates[, .(rate = sum(rate)/years_to_avg),
                                                          .(gss_out, gss_in, age, sex)]
 
     # tidyverse equivalent
@@ -50,6 +50,8 @@ average_domestic_migration_rates <- function(origin_destination_rates,
     i <- names(origin_destination_rates) == "rate"
     names(origin_destination_rates)[i] <- col_rate
   }
+    
+  return(origin_destination_rates)
 
 }
 

@@ -122,8 +122,7 @@ popn_apply_rate <- function(popn,
   all_rate_cols <- c(as.character(col_aggregation), additional_rate_levels)
   all_rate_cols <- intersect(all_rate_cols, names(popn_rate))
 
-  col_aggregation_rate <- intersect(names(popn_rate), col_aggregation)
-  if(anyDuplicated(data.table::as.data.table(popn_rate[col_aggregation_rate]))) {
+  if(anyDuplicated(data.table::as.data.table(popn_rate[join_by]))) {
     one2many <- TRUE
   } else {
     one2many = FALSE
@@ -243,14 +242,18 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
                   "\nThe output will contain the output in this column, so be careful with subsequent joins or binds."))
   }
 
-  col_aggregation_rate <- intersect(names(popn_rate), col_aggregation)
-  if(anyDuplicated(data.table::as.data.table(popn_rate[col_aggregation_rate]))) {
+  join_by <- col_aggregation[ col_aggregation %in% names(popn_rate) ]
+  if(anyDuplicated(data.table::as.data.table(popn_rate[join_by]))) {
     one2many <- TRUE
   } else {
     one2many = FALSE
   }
 
-  join_by <- col_aggregation[ col_aggregation %in% names(popn_rate) ]
+  if(!identical(additional_rate_levels, NA)) {
+    col_aggregation_rate <- c(join_by, additional_rate_levels)
+  } else {
+    col_aggregation_rate <- join_by
+  }
 
   assert_that(length(join_by) > 0,
               msg = "popn_apply_rate must share some aggregation column names with the input popn_rate, or a column mapping must be included in the col_aggregation parameter")
@@ -262,7 +265,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
                       test_unique = TRUE,
                       check_negative_values = TRUE)
   validate_population(popn_rate,
-                      col_aggregation = unname(join_by),
+                      col_aggregation = unname(col_aggregation_rate),
                       col_data = col_rate,
                       test_complete = !missing_levels_rate,
                       test_unique = TRUE,

@@ -122,6 +122,7 @@ validate_population <- function( population,
   }
 
   # CHECK: no negative counts in the data (optional)
+  # TODO: this falls over if col_data has NAs - these should be checked for first
   if(check_negative_values & length(col_data)!=0) {
     for(col in col_data) {
       if(is.factor(test_population[[col]])) {

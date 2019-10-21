@@ -30,8 +30,6 @@ character vector. e.g. in origin-destination data,
 \code{component_mye_path} data frame. Need not be specified when one of
 "births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in",
 "dom_out", "dom_net".}
-
-\item{many2one}{Logical. Are many levels}
 }
 \value{
 A data frame containing rates for the component of change (in the

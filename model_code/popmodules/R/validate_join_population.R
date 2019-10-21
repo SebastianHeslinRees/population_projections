@@ -80,10 +80,10 @@ validate_join_population <- function(pop1,
                   "but this is (separately) a column in the pop2 input. Output will include this column with a .y suffix"))
   }
 
-
   # cut down to only the columns we're interested in
-  test_pop1 <- pop1[names(cols_common_aggregation)]
-  test_pop2 <- pop2[cols_common_aggregation]
+  test_pop1 <- dplyr::select(pop1, names(cols_common_aggregation))
+  test_pop2 <- dplyr::select(pop2, unname(cols_common_aggregation))
+
   # convert aggregation columns to factors with common levels
   # warn when factor levels don't match
   for(i in 1:length(cols_common_aggregation)) {
@@ -96,8 +96,8 @@ validate_join_population <- function(pop1,
       }
     }
     agg_levels <- sort(union(test_pop1[[var1]], test_pop2[[var2]]))
-    test_pop1[var1] <- factor(test_pop1[[var1]], levels=agg_levels)
-    test_pop2[var2] <- factor(test_pop2[[var2]], levels=agg_levels)
+    test_pop1[[var1]] <- factor(test_pop1[[var1]], levels=agg_levels)
+    test_pop2[[var2]] <- factor(test_pop2[[var2]], levels=agg_levels)
   }
 
   assert_that(ncol(test_pop1) == ncol(test_pop2))
@@ -188,10 +188,10 @@ validate_join_population_inputs <-function(pop1,
                         collapse = " "))
 
   # Check no missing values
-  if(any(is.na(pop1[,names(cols_common_aggregation)]))) {
+  if(any(!complete.cases(dplyr::select(pop1, names(cols_common_aggregation))))) {
     warning("validate_join_population was given NA values in the aggregation levels of pop1")
   }
-  if(any(is.na(pop2[,cols_common_aggregation]))) {
+  if(any(!complete.cases(dplyr::select(pop2, unname(cols_common_aggregation))))) {
     warning("validate_join_population was given NA values in the aggregation levels of pop2")
   }
 
