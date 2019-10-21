@@ -8,8 +8,8 @@ npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based N
 
 
 #function to read and wrangle raw data
-fertility_trend <- function(file, var, max_year, npp_data_2016){
-  fert <- fread(paste0(npp_data_2016, file)) %>%
+fertility_trend <- function(file, var, max_year, npp_data_location){
+  fert <- fread(paste0(npp_data_location, file)) %>%
     gather(year, rate, 3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
     mutate(age = as.numeric(Age))%>%
