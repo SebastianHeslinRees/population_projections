@@ -21,7 +21,8 @@ trend <- expand.grid(year = c(2001:2005),
 x <- seq(0,1,(1/nrow(trend)))[-1]
 trend$change <- x
 
-proj_df <- filter(trend, year != 2001) %>%
+proj_df <- trend %>%
+  #filter(year != 2001) %>%
   arrange(year) %>%
   group_by(sex, age) %>%
   mutate(change = change + 1,

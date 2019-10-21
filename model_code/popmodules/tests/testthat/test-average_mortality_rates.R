@@ -92,7 +92,7 @@ mean <- filter(scaling_backseries, year %in% back_years) %>%
 mean <- curves %>%
   left_join(mean, by = c("gss_code", "sex")) %>%
   mutate(death_rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, death_rate)
+  select(gss_code, year, age, sex, death_rate)
 
 trend <- scaling_backseries %>%
   filter(year %in% back_years) %>%
@@ -113,7 +113,7 @@ trend <- scaling_backseries %>%
 trend <- curves %>%
   left_join(trend, by = c("gss_code", "sex")) %>%
   mutate(death_rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, death_rate)
+  select(gss_code, year, age, sex, death_rate)
 
 
 #-----------------------------------------------------------
