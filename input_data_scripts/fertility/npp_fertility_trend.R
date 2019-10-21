@@ -3,11 +3,13 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 max_year <- 2050
-npp_data_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
+npp_data_2016 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
+npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs"
+
 
 #function to read and wrangle raw data
-fertility_trend <- function(file, var, max_year, npp_data_location){
-  fert <- fread(paste0(npp_data_location, file)) %>%
+fertility_trend <- function(file, var, max_year, npp_data_2016){
+  fert <- fread(paste0(npp_data_2016, file)) %>%
     gather(year, rate, 3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
     mutate(age = as.numeric(Age))%>%
@@ -30,18 +32,24 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
 }
 
 #read in data
-principal <- fertility_trend("/Principal Fertility Assumptions.csv", "2016_principal", max_year, npp_data_location)
-high <- fertility_trend("/High Fertility Assumptions.csv", "2016_high", max_year, npp_data_location)
-low <- fertility_trend("/Low Fertility Assumptions.csv", "2016_low", max_year, npp_data_location)
+principal_2016 <- fertility_trend("/Principal Fertility Assumptions.csv", "2016_principal", max_year, npp_data_2016)
+high_2016 <- fertility_trend("/High Fertility Assumptions.csv", "2016_high", max_year, npp_data_2016)
+low_2016 <- fertility_trend("/Low Fertility Assumptions.csv", "2016_low", max_year, npp_data_2016)
+
+principal_2018 <- fertility_trend("/fertility_principal.csv", "2018_principal", max_year, npp_data_2018)
+high_2018 <- fertility_trend("/fertility_high.csv", "2018_high", max_year, npp_data_2018)
+low_2018 <- fertility_trend("/fertility_low.csv", "2018_low", max_year, npp_data_2018)
 
 #bind the variants together
-fert_trend <- rbind(principal, high, low) %>%
+fert_trend <- rbind(principal_2016, high_2016, low_2016,
+                    principal_2018, high_2018, low_2018) %>%
   arrange(variant, sex, age, year) %>%
   mutate(last_year = lag(rate)) %>%
   mutate(change = (rate - last_year)/last_year)%>%
   mutate(change = ifelse(year == min(year),0,change)) %>%
   select(-rate, -last_year)
 
+#The 2016 and 2018 data have different years
 popmodules::validate_population(fert_trend, 
                                 col_aggregation = c("sex", "age", "year", "variant"), 
                                 col_data = "change", 
@@ -51,4 +59,4 @@ popmodules::validate_population(fert_trend,
 dir.create("input_data/fertility", recursive = TRUE, showWarnings = FALSE)
 saveRDS(fert_trend, "input_data/fertility/npp_fertility_trend.rds" )
 
-rm(high, low, principal, fert_trend, max_year, npp_data_location, fertility_trend)
+rm(list=ls())
