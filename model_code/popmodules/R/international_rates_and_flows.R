@@ -45,7 +45,8 @@ international_rates_and_flows <- function(popn_mye_path=NULL, births_mye_path=NU
     mutate(rate = ifelse(popn == 0, 0, value/popn)) %>%
     select(gss_code, year, sex, age, rate)
 
-  rates <- calc_mean_rate(rate_backseries, years_to_avg, last_data_year, "rate")
+  rates <- calc_mean_rate(rate_backseries, years_to_avg, last_data_year, "rate") %>%
+    mutate(rate = ifelse(rate > 0.8, 0.8, rate))
 
   output_df <- project_forward_flat(df = rates, first_proj_yr = last_data_year+2,
                                   n_proj_yr = n_proj_yr, hold_yr = last_data_year+1) %>%

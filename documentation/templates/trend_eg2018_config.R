@@ -80,24 +80,25 @@ fertility_fns <- list(
 #-----------------------------------------------------
 
 int_out_rate_fns <- list(
-  list(popmodules::international_rates_and_flows(popn_mye_path = popn_mye_path,
-                                                 births_mye_path = births_mye_path,
-                                                 component_path = int_out_mye_path,
-                                                 flow_or_rate = "rate",
-                                                 last_data_year = int_out_last_data_year,
-                                                 years_to_avg = int_out_years_to_avg,
-                                                 data_col = "int_out",
-                                                 n_proj_yr = n_proj_yr))
+  list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                 births_mye_path = births_mye_path,
+                                                                 component_path = int_out_mye_path,
+                                                        
+                                                                          flow_or_rate = "rate",
+                                                                 last_data_year = int_out_last_data_year,
+                                                                 years_to_avg = int_out_years_to_avg,
+                                                                 data_col = "int_out",
+                                                                 n_proj_yr = n_proj_yr))
 )
 
 
 int_in_fns <- list(
-  list(popmodules::international_rates_and_flows(component_path = int_in_mye_path,
-                                                 flow_or_rate = "flow",
-                                                 last_data_year = int_in_last_data_year,
-                                                 years_to_avg = int_in_years_to_avg,
-                                                 data_col = "int_in",
-                                                 n_proj_yr = n_proj_yr))
+  list(fn = popmodules::international_rates_and_flows, args=list(component_path = int_in_mye_path,
+                                                                 flow_or_rate = "flow",
+                                                                 last_data_year = int_in_last_data_year,
+                                                                 years_to_avg = int_in_years_to_avg,
+                                                                 data_col = "int_in",
+                                                                 n_proj_yr = n_proj_yr))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
