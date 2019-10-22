@@ -65,11 +65,11 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
   #check_rate_forward(scaling_backseries)
 
   if(avg_or_trend == "trend"){
-    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
+    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
   }
 
   if(avg_or_trend == "average"){
-    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
+    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
   }
 
   jump_off_rates <- target_curves %>%
