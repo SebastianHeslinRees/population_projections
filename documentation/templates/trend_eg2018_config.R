@@ -83,8 +83,7 @@ int_out_rate_fns <- list(
   list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
                                                                  births_mye_path = births_mye_path,
                                                                  component_path = int_out_mye_path,
-                                                        
-                                                                          flow_or_rate = "rate",
+                                                                 flow_or_rate = "rate",
                                                                  last_data_year = int_out_last_data_year,
                                                                  years_to_avg = int_out_years_to_avg,
                                                                  data_col = "int_out",
