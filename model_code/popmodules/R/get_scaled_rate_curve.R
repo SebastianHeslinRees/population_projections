@@ -65,11 +65,11 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
   #check_rate_forward(scaling_backseries)
 
   if(avg_or_trend == "trend"){
-    averaged_scaling_factors <- calc_trend_rate(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
+    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
   }
 
   if(avg_or_trend == "average"){
-    averaged_scaling_factors <- calc_mean_rate(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
+    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
   }
 
   jump_off_rates <- target_curves %>%
@@ -81,106 +81,6 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
   return(jump_off_rates)
 
 }
-
-
-#--------------------------------------------------------------------
-
-#' Calculate average rates based on past data
-#'
-#' Given a backseries of rates the function will return an average rate
-#'
-#' @param rate_backseries Dataframe. A set of rates by LA, sex and age
-#' @param years_to_avg numeric. Number of years data to include in the average
-#' @param last_data_year numeric. The final year of data to include in the average
-#' @param rate_col Character. The name of the column containing the rates
-#'
-#' @return A data frame of mortality probabilities or fertility rates.
-#'
-#' @import dplyr
-#' @import assertthat
-#'
-#' @export
-
-calc_mean_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_col){
-
-  assert_that(is.data.frame(rate_backseries),
-              msg="calc_trend_rate expects that rate_backseries is a dataframe")
-  assert_that(is.numeric(years_to_avg),
-              msg="calc_trend_rate expects that years_to_avg is an numeric")
-  assert_that(is.numeric(last_data_year),
-              msg="calc_trend_rate expects that last_data_year is an numeric")
-  assert_that(is.character(rate_col),
-              msg="calc_trend_rate expects that rate_col is a column")
-  assert_that(rate_col %in% names(rate_backseries),
-              msg = "in calc_trend_rate the rtae_col variable must be the name of a column in the rate_backseries dataframe")
-
-  back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
-
-  averaged <- rate_backseries %>%
-    rename(rate = rate_col) %>%
-    filter(year %in% back_years) %>%
-    group_by(gss_code, sex, age) %>%
-    summarise(rate = sum(rate)/years_to_avg) %>%
-    ungroup() %>%
-    mutate(year = last_data_year+1) %>%
-    select(gss_code, year, sex, age, rate) %>%
-    rename(!!rate_col := rate)
-
-  return(averaged)
-
-}
-
-
-#--------------------------------------------------------------------
-
-# Function to apply linear regression to a set of rates
-
-calc_trend_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_col){
-
-  assert_that(is.data.frame(rate_backseries),
-              msg="calc_trend_rate expects that rate_backseries is a dataframe")
-  assert_that(is.numeric(years_to_avg),
-              msg="calc_trend_rate expects that years_to_avg is an numeric")
-  assert_that(is.numeric(last_data_year),
-              msg="calc_trend_rate expects that last_data_year is an numeric")
-  assert_that(is.character(rate_col),
-              msg="calc_trend_rate expects that rate_col is a column")
-  assert_that(rate_col %in% names(rate_backseries),
-              msg = "in calc_trend_rate the rtae_col variable must be the name of a column in the rate_backseries dataframe")
-
-
-  regression <- function(df){
-    lm(rate ~ year, data=df)
-  }
-
-  get_coef <- function(df){
-    coef(df)
-  }
-
-  back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
-
-  trended <- as.data.frame(rate_backseries) %>%
-    rename(rate = rate_col) %>%
-    filter(year %in% back_years) %>%
-    mutate(year = years_to_avg - last_data_year + year)%>%
-    group_by(gss_code, sex, age) %>%
-    tidyr::nest() %>%
-    mutate(
-      Model = map(data, regression),
-      Coef = Model %>% map(get_coef),
-      Intercept = Coef %>% map_dbl("(Intercept)"),
-      Slope = Coef %>% map_dbl("year"),
-      rate = Slope * (years_to_avg+1) + Intercept,
-      rate = ifelse(rate < 0, 0, rate)) %>%
-    as.data.frame()  %>%
-    mutate(year = last_data_year + 1) %>%
-    select(gss_code, year, sex, age, rate) %>%
-    rename(!!rate_col := rate)
-
-  return(trended)
-
-}
-
 
 #--------------------------------------------------------------------
 
@@ -228,9 +128,6 @@ births_denominator <- function(population) {
 
   return(population)
 }
-
-
-
 
 #-----------------------------------------------
 
