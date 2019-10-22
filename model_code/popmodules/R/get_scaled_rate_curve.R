@@ -49,6 +49,7 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
 
   if("year" %in% names(target_curves)){target_curves <- select(target_curves, -year)}
 
+  if(data_col == "deaths"){
   scaling_backseries <- left_join(population, target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
     left_join(component_data, by = c("gss_code", "age", "sex", "year")) %>%
@@ -61,8 +62,30 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, sex, age, scaling)
+  }
 
-  #check_rate_forward(scaling_backseries)
+  if(data_col == "births"){
+
+    component_data <- group_by(component_data, year, gss_code) %>%
+      summarise(births = sum(births))
+
+    population <- filter(population, sex == "female", age %in% unique(target_curves$age))
+
+    scaling_backseries <- left_join(target_curves, population, by = c("gss_code", "age", "sex")) %>%
+      mutate(curve_count = rate * popn) %>%
+      group_by(year, gss_code) %>%
+      summarise(curve_count = sum(curve_count)) %>%
+      ungroup() %>%
+      left_join(component_data, by = c("gss_code", "year")) %>%
+      rename(actual = data_col) %>%
+      mutate(scaling = ifelse(actual == 0,
+                              0,
+                              actual / curve_count)) %>%
+      select(gss_code, year, scaling)
+
+  }
+
+  #TODO: Make the below functions work with a dataframe that doesnt have aghe and sex
 
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
@@ -72,11 +95,21 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
     averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
   }
 
+  if(data_col == "deaths"){
+
   jump_off_rates <- target_curves %>%
     left_join(averaged_scaling_factors, by = c("gss_code", "sex", "age")) %>%
     mutate(jump_off_rate = scaling * rate) %>%
     select(gss_code, year, sex, age, jump_off_rate) %>%
     rename(!!output_col := jump_off_rate)
+
+  }
+
+  if(data_col == "births"){
+
+    #TODO: Apply births scaling factors
+
+  }
 
   return(jump_off_rates)
 
