@@ -45,7 +45,8 @@ ons_fert <- ons_fert %>%
   filter(age < 45)
 smoothed_curves <- smooth_fertility(ons_fert)$data %>%
   mutate(year = 2017) %>%
-  rename(rate = fert_rate)
+  rename(rate = fert_rate) %>%
+  mutate(gss_code = as.character(gss_code))
   
 validate_population(smoothed_curves, col_data = "rate")
 

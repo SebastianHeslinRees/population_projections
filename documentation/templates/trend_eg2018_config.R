@@ -14,14 +14,14 @@ outputs_dir = "outputs/trend/2018/"
 
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "average"
-mortality_last_data_year <- 2017
+mortality_last_data_year <- 2018
 mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 5
 fertility_avg_or_trend <- "average"
-fertility_last_data_year <- 2017
+fertility_last_data_year <- 2018
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
@@ -39,9 +39,9 @@ mortality_fns <- list(
                                                            years_to_avg = mortality_years_to_avg,
                                                            avg_or_trend = mortality_avg_or_trend,
                                                            data_col = "deaths",
-                                                           output_col = "mortality")),
+                                                           output_col = "rate")),
   
-  list(fn = popmodules::project_rates, args = list(rate_col = "mortality",
+  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = mortality_trajectory_filepath,
                                                    first_proj_yr = first_proj_yr,
                                                    n_proj_yr = n_proj_yr,
@@ -61,9 +61,9 @@ fertility_fns <- list(
                                                            years_to_avg = fertility_years_to_avg,
                                                            avg_or_trend = fertility_avg_or_trend,
                                                            data_col = "births",
-                                                           output_col = "fertility")),
+                                                           output_col = "rate")),
   
-  list(fn = popmodules::project_rates, args = list(rate_col = "fertility",
+  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = fertility_trajectory_filepath,
                                                    first_proj_yr = first_proj_yr,
                                                    n_proj_yr = n_proj_yr,

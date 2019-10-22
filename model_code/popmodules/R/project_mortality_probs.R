@@ -33,12 +33,13 @@ project_rates <- function(jump_off_rates, rate_col, rate_trajectory_filepath, fi
     mutate(change = change + 1,
            cumprod = cumprod(change))%>%
     ungroup() %>%
-    arrange(age,sex,year)%>%
+    arrange(age,sex,year) %>%
     left_join(select(jump_off_rates, -year), by=c("sex","age")) %>%
     rename(jump_rate = rate_col) %>%
     mutate(rate = cumprod*jump_rate) %>%
     select(gss_code, sex, age, year, rate) %>%
     rename(!!rate_col := rate) %>%
+    rbind(jump_off_rates) %>%
     arrange(gss_code,sex,age,year)
 
   return(rates)

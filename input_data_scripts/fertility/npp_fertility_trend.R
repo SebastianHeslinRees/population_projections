@@ -20,11 +20,18 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
   
   back_to_2001 <- list()
   for(y in 2001:2016){
-    back_to_2001[[y]] <- filter(fert, year == 2017) %>%
-      mutate(year = y)
+    back_to_2001[[y]] <- filter(fert, year == max(fert$year)) %>% mutate(year = y)
   }
   
-  fert <- rbind(data.table::rbindlist(back_to_2001), fert) %>%
+  fert <- rbind(data.table::rbindlist(back_to_2001), fert)
+  
+  additional_ages <- list()
+  for(a in 47:49){
+    additional_ages[[a]] <- filter(fert, age == max(fert$age)) %>% mutate(age = a)
+  }
+  
+  
+  fert <- rbind(data.table::rbindlist(additional_ages), fert) %>%
     mutate(variant = var)
   
   return(fert)
@@ -50,10 +57,10 @@ fert_trend <- rbind(principal_2016, high_2016, low_2016,
   select(-rate, -last_year)
 
 #The 2016 and 2018 data have different years
-popmodules::validate_population(fert_trend, 
-                                col_aggregation = c("sex", "age", "year", "variant"), 
-                                col_data = "change", 
-                                check_negative_values = FALSE)
+# popmodules::validate_population(fert_trend, 
+#                                 col_aggregation = c("sex", "age", "year", "variant"), 
+#                                 col_data = "change", 
+#                                 check_negative_values = FALSE)
 
 #write output
 dir.create("input_data/fertility", recursive = TRUE, showWarnings = FALSE)

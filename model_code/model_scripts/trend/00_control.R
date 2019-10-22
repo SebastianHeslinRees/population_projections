@@ -55,7 +55,6 @@ run_trend_model <- function(config_list) {
   
   # TODO: check that deaths and births have same geography, age, and sex coverage as population
   
-  
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
