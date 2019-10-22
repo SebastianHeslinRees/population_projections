@@ -8,15 +8,16 @@ int_in <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Out
 
 # Update gss_code to 2018 to match MYE2018 and get rid of Scotland
 int_in <- int_in %>%
-  filter(grepl("^E", gss_code)) %>%
-  mutate(gss_code = case_when(
-    gss_code == "E06000048" ~ "E06000057",
-    gss_code == "E07000097" ~ "E07000242",
-    gss_code == "E07000101" ~ "E07000243",
-    gss_code == "E08000020" ~ "E08000037",
-    TRUE ~ gss_code
-  ),
-  sex = case_when(
+  # filter(grepl("^E", gss_code)) %>%
+  # mutate(gss_code = case_when(
+  #   gss_code == "E06000048" ~ "E06000057",
+  #   gss_code == "E07000097" ~ "E07000242",
+  #   gss_code == "E07000101" ~ "E07000243",
+  #   gss_code == "E08000020" ~ "E08000037",
+  #   TRUE ~ gss_code
+  # ),
+  filter(gss_code != "W92000004") %>%
+  mutate(sex = case_when(
     sex == "M" ~ "male",
     sex == "F" ~ "female"
   ))
@@ -30,7 +31,10 @@ wales <- filter(int_in, gss_code == "E06000001") %>%
   as.data.frame()
 
 
-int_in  <- int_in %>% rbind(wales)
+int_in  <- int_in %>% rbind(wales)%>%
+  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
 
 dir.create("input_data/migration", showWarnings = F, recursive = T)
 saveRDS(int_in, file = "input_data/migration/modified_int_in_2017_base_trend_med.rds")
+
+
