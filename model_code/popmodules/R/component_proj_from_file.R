@@ -20,7 +20,7 @@
 #' @importFrom dplyr filter
 #' @examples
 #'
-#' int_in <- popmodules::component_proj_from_file(filepath = "my_int_in_file.rds", first_proj_yr = 2018)
+#' int_in <- popmodules::component_proj_from_file(filepath = "my_int_in_file.rds", proj_yrs = 2011:2020, col_data = "int_in")
 #'
 #' @export
 #'
