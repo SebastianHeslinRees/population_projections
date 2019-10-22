@@ -1,23 +1,25 @@
-#' Calculate average mortality rates based on past data
+#' Calculate average rates based on past data
 #'
-#' Compares past mortality rates by LA, age and sex to an input mortality
+#' Compares past rates by LA, age and sex to an input
 #' curve to derive a set of scaling factors. The scaling factors are then
 #' averaged or trended forward using regression. The resulting scaling
-#' factor is applied to the input mortality curve to produce a set of
-#' mortality rates.
+#' factor is applied to the input curve to produce a set of rates.
 #'
-#' @param mye_population Dataframe. The mye backseries population.
-#' @param births Dataframe. Births componet from the mye.
-#' @param deaths Dataframe. Deaths component from the mye.
-#' @param mortality_curves Dataframe. Age-and-sex-specific mortality
-#'   rate by local authority.
-#' @param last_data_year Integer. The last year of death data on which to calculate
+#' @param data_input List with 2 elements. 1: The mye backseries population.
+#' For mortality rates the input is a list of 2 elements \code{population} aand \code{births}.
+#' For fertility rates the input is a dataframe of \code{population}
+#' 2: Dataframe. \code{Births} or \code{deaths} by sex and age.
+#' @param target_curves Dataframe. Age-and-sex-specific mortality or fertiltiy
+#'   rates by local authority.
+#' @param last_data_year numeric. The last year of death data on which to calculate
 #'   averages.
-#' @param years_to_avg Integer. The number of years to use in calculating averages.
+#' @param years_to_avg numeric. The number of years to use in calculating averages.
 #' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
 #'   or by linear regression \code{Trend}.
+#' @param data_col Character. The column in the \code{component_data} dataframe containing the rates
+#' @param output_col Character. The name of the column in the output dataframe containing the calculated rates
 #'
-#' @return A data frame of mortality probabilities.
+#' @return A data frame of mortality probabilities or fertility rates by LA, year, sex and age.
 #'
 #' @import purrr
 #' @import dplyr
@@ -25,156 +27,240 @@
 #'
 #' @export
 
-initial_year_mortality_rate <- function(mye_population, births, deaths, mortality_curves, last_data_year, years_to_avg, avg_or_trend){
-  
-  
-  check_init_mort_rates(mye_population, births, deaths, mortality_curves,
-                        last_data_year, years_to_avg, avg_or_trend)
-  
-  aged_on_population <- mye_population %>%
-    popmodules::popn_age_on() %>%
-    filter(year != max(year)) %>%
-    rbind(filter(births, age==0) %>% rename(popn = births))
-  
-  mortality_curves <- select(mortality_curves, -year)
-  
-  mortality_scaling_backseries <- left_join(aged_on_population, mortality_curves, by = c("gss_code", "age", "sex")) %>%
-    mutate(curve_deaths = death_rate * popn) %>%
-    left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
-    group_by(gss_code, year, sex) %>%
-    summarise(actual_deaths = sum(deaths),
-              curve_deaths = sum(curve_deaths)) %>%
-    ungroup() %>%
-    mutate(scaling = ifelse(actual_deaths == 0,
-                            0,
-                            actual_deaths / curve_deaths)) %>%
-    select(gss_code, year, sex, scaling)
-  
-  #TODO make it work without this line
-  #mortality_scaling_backseries <- filter(mortality_scaling_backseries, !is.na(scaling))
-  
-  check_mort_forward(mortality_scaling_backseries)
-  
-  if(avg_or_trend == "trend"){
-    jump_off_mortality <- trend_mortality_forward(mortality_scaling_backseries, years_to_avg, last_data_year)
-  }
-  
-  if(avg_or_trend == "average"){
-    jump_off_mortality <- mean_mortality_forward(mortality_scaling_backseries, years_to_avg, last_data_year)
-  }
-  
-  jump_off_mortality <- mortality_curves %>%
-    left_join(jump_off_mortality, by = c("gss_code", "sex")) %>%
-    mutate(death_rate = scaling * death_rate)
-  
-  return(jump_off_mortality)
-  
-}
 
+get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_year, years_to_avg,
+                              avg_or_trend, data_col, output_col){
+
+  population <- data_input[["population"]]
+  component_data <- data_input[["component_data"]]
+
+  target_curves <- readRDS(target_curves_filepath)
+
+  check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
+                          avg_or_trend, data_col, output_col)
+
+
+  if(data_col == "deaths"){
+    population <- deaths_denominator(population)
+  }
+  if(data_col== "births"){
+    population <- births_denominator(population)
+  }
+
+  if("year" %in% names(target_curves)){target_curves <- select(target_curves, -year)}
+
+  scaling_backseries <- left_join(population, target_curves, by = c("gss_code", "age", "sex")) %>%
+    mutate(curve_count = rate * popn) %>%
+    left_join(component_data, by = c("gss_code", "age", "sex", "year")) %>%
+    rename(value = data_col) %>%
+    group_by(gss_code, year, sex, age) %>%
+    summarise(actual = sum(value),
+              curve_count = sum(curve_count)) %>%
+    ungroup() %>%
+    mutate(scaling = ifelse(actual == 0,
+                            0,
+                            actual / curve_count)) %>%
+    select(gss_code, year, sex, age, scaling)
+
+  #check_rate_forward(scaling_backseries)
+
+  if(avg_or_trend == "trend"){
+    averaged_scaling_factors <- calc_trend_rate(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
+  }
+
+  if(avg_or_trend == "average"){
+    averaged_scaling_factors <- calc_mean_rate(scaling_backseries, years_to_avg, last_data_year, rate_col="scaling")
+  }
+
+  jump_off_rates <- target_curves %>%
+    left_join(averaged_scaling_factors, by = c("gss_code", "sex", "age")) %>%
+    mutate(jump_off_rate = scaling * rate) %>%
+    select(gss_code, year, sex, age, jump_off_rate) %>%
+    rename(!!output_col := jump_off_rate)
+
+  return(jump_off_rates)
+
+}
 
 
 #--------------------------------------------------------------------
 
-# Function to apply linear regression to mortality scaling factors
+#' Calculate average rates based on past data
+#'
+#' Given a backseries of rates the function will return an average rate
+#'
+#' @param rate_backseries Dataframe. A set of rates by LA, sex and age
+#' @param years_to_avg numeric. Number of years data to include in the average
+#' @param last_data_year numeric. The final year of data to include in the average
+#' @param rate_col Character. The name of the column containing the rates
+#'
+#' @return A data frame of mortality probabilities or fertility rates.
+#'
+#' @import dplyr
+#' @import assertthat
+#'
+#' @export
 
-trend_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, last_data_year){
-  
+calc_mean_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_col){
+
+  assert_that(is.data.frame(rate_backseries),
+              msg="calc_trend_rate expects that rate_backseries is a dataframe")
+  assert_that(is.numeric(years_to_avg),
+              msg="calc_trend_rate expects that years_to_avg is an numeric")
+  assert_that(is.numeric(last_data_year),
+              msg="calc_trend_rate expects that last_data_year is an numeric")
+  assert_that(is.character(rate_col),
+              msg="calc_trend_rate expects that rate_col is a column")
+  assert_that(rate_col %in% names(rate_backseries),
+              msg = "in calc_trend_rate the rtae_col variable must be the name of a column in the rate_backseries dataframe")
+
+  back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
+
+  averaged <- rate_backseries %>%
+    rename(rate = rate_col) %>%
+    filter(year %in% back_years) %>%
+    group_by(gss_code, sex, age) %>%
+    summarise(rate = sum(rate)/years_to_avg) %>%
+    ungroup() %>%
+    mutate(year = last_data_year+1) %>%
+    select(gss_code, year, sex, age, rate) %>%
+    rename(!!rate_col := rate)
+
+  return(averaged)
+
+}
+
+
+#--------------------------------------------------------------------
+
+# Function to apply linear regression to a set of rates
+
+calc_trend_rate <- function(rate_backseries, years_to_avg, last_data_year, rate_col){
+
+  assert_that(is.data.frame(rate_backseries),
+              msg="calc_trend_rate expects that rate_backseries is a dataframe")
+  assert_that(is.numeric(years_to_avg),
+              msg="calc_trend_rate expects that years_to_avg is an numeric")
+  assert_that(is.numeric(last_data_year),
+              msg="calc_trend_rate expects that last_data_year is an numeric")
+  assert_that(is.character(rate_col),
+              msg="calc_trend_rate expects that rate_col is a column")
+  assert_that(rate_col %in% names(rate_backseries),
+              msg = "in calc_trend_rate the rtae_col variable must be the name of a column in the rate_backseries dataframe")
+
+
   regression <- function(df){
-    lm(scaling ~ year, data=df)
+    lm(rate ~ year, data=df)
   }
-  
+
   get_coef <- function(df){
     coef(df)
   }
-  
+
   back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
-  
-  trended <- as.data.frame(mortality_scaling_backseries) %>%
+
+  trended <- as.data.frame(rate_backseries) %>%
+    rename(rate = rate_col) %>%
     filter(year %in% back_years) %>%
     mutate(year = years_to_avg - last_data_year + year)%>%
-    group_by(gss_code, sex)%>%
+    group_by(gss_code, sex, age) %>%
     tidyr::nest() %>%
     mutate(
       Model = map(data, regression),
       Coef = Model %>% map(get_coef),
       Intercept = Coef %>% map_dbl("(Intercept)"),
       Slope = Coef %>% map_dbl("year"),
-      scaling = Slope * (years_to_avg+1) + Intercept,
-      scaling = ifelse(scaling < 0, 0, scaling)) %>%
+      rate = Slope * (years_to_avg+1) + Intercept,
+      rate = ifelse(rate < 0, 0, rate)) %>%
     as.data.frame()  %>%
     mutate(year = last_data_year + 1) %>%
-    select(gss_code, sex, year, scaling)
-  
+    select(gss_code, year, sex, age, rate) %>%
+    rename(!!rate_col := rate)
+
   return(trended)
-  
+
 }
 
 
 #--------------------------------------------------------------------
 
-# Function to calculate the mean of mortality scaling factors
+#Function to create denominators for initial rate calculation
 
-mean_mortality_forward <- function(mortality_scaling_backseries, years_to_avg, last_data_year){
-  
-  back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
-  
-  averaged <- filter(mortality_scaling_backseries, year %in% back_years) %>%
-    group_by(gss_code, sex) %>%
-    summarise(scaling = sum(scaling)/years_to_avg) %>%
-    data.frame() %>%
-    mutate(year = last_data_year+1) %>%
-    select(gss_code, sex, year, scaling)
-  
-  return(averaged)
-  
+deaths_denominator <- function(population){
+
+  assert_that(is.data.frame(population[[1]]),
+              msg="deaths_denominator expects population[[1]] to be a dataframe")
+  assert_that(is.data.frame(population[[2]]),
+              msg="deaths_denominator expects population[[2]] to be a dataframe")
+
+  #Deaths denominator
+  births <- population[[2]] %>%
+    filter(age==0) %>%
+    rename(popn = births)
+
+  population <- population[[1]] %>%
+    popmodules::popn_age_on() %>%
+    filter(year != max(year)) %>%
+    rbind(births)%>%
+    select(gss_code, year, sex, age, popn) %>%
+    arrange(gss_code, year, sex, age)
+
+  return(population)
+
+}
+
+#-----------------------------------------------
+
+#Function for creating birth denominator population
+
+births_denominator <- function(population) {
+
+  assert_that(is.data.frame(population),
+              msg="births_denominator expects population to be a dataframe")
+
+  population <- mutate(population, year=year+1) %>%
+    filter(year != max(year)) %>%
+    left_join(population, by=c("gss_code","year","sex","age")) %>%
+    mutate(popn = (popn.x + popn.y)/2)       %>%
+    mutate(popn = ifelse(is.na(popn),0,popn)) %>%
+    select(gss_code, year, sex, age, popn) %>%
+    arrange(gss_code, year, sex, age)
+
+  return(population)
 }
 
 
-#--------------------------------------------------------------------
+
+
+#-----------------------------------------------
 
 # Function to check that the input to initial_year_mortality_rates is all legal
 
-check_init_mort_rates <- function(mye_population, births, deaths, mortality_curves,
-                                  last_data_year, years_to_avg, avg_or_trend){
-  
+check_init_rate <- function(population, component_data, target_curves, last_data_year, years_to_avg,
+                avg_or_trend, data_col, output_col){
+
   # test input parameters are of the correct type
-  assert_that(is.data.frame(mye_population),
-              msg="mye_population expects a data frame as input")
-  assert_that(is.data.frame(births),
-              msg="births expects a data frame as input")
-  assert_that(is.data.frame(deaths),
-              msg="deaths expects a data frame as input")
-  assert_that(is.data.frame(mortality_curves),
-              msg="mortality_curves expects a data frame as input")
+  assert_that(is.data.frame(population)|is.list(population),
+              msg="initial_year_rate expects that population is a data frame or a list")
+
+  assert_that(is.data.frame(component_data),
+              msg="initial_year_rate expects that component_data is a data frame")
+  assert_that(is.data.frame(target_curves),
+              msg="initial_year_rate expects that target_curves is a data frame")
   assert_that(is.numeric(last_data_year),
-              msg="last_data_year expects numeric input")
+              msg="initial_year_rate expects that last_data_year is an numeric")
   assert_that(is.numeric(years_to_avg),
-              msg="years_to_avg expects numeric input")
+              msg="initial_year_rate expects that years_to_avg is an numeric")
   assert_that(is.character(avg_or_trend),
-              msg="avg_or_trend expects character input")
-  
+              msg="initial_year_rate expects that avg_or_trend is a character")
+  assert_that(is.character(data_col),
+              msg="initial_year_rate expects that data_col is a character")
+  assert_that(is.character(output_col),
+              msg="initial_year_rate expects that output_col is a character")
+  assert_that(data_col %in% names(component_data),
+              msg="initial_year_rate expects that data_col is a column in component_data dataframe")
 
-  validate_population(mye_population, col_data = "popn")
-  validate_population(births, col_data = "births",
-                      comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
-  validate_population(deaths, col_data = "deaths",
-                      comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
-  validate_population(mortality_curves, col_data = "death_rate",
-                      comparison_pop = mye_population, col_comparison = c("gss_code", "age", "sex"))
-  
-}
+ }
 
 
-#--------------------------------------------------------------------
-
-# Function to check that the input to trend_mortality_forward
-# and mean_mortality_forward is all legal
-
-check_mort_forward <- function(mortality_scaling_backseries){
-  
-  assert_that(is.data.frame(mortality_scaling_backseries),
-              msg="mortality_scaling_backseries expects a dataframe")
-  
-  validate_population(mortality_scaling_backseries, col_aggregation = c("gss_code", "year", "sex"), data = "scaling")
-}
 

@@ -31,6 +31,7 @@
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom tidyr complete nesting
+#'
 #' @export
 
 complete_fertility <- function(fertility, population,
