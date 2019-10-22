@@ -30,8 +30,8 @@
 #'   to the highest population age.  New entries are created with a rate value of 0.
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom tidyr complete
-#' @importFrom tidyr nesting
+#' @importFrom tidyr complete nesting
+
 #' @export
 
 complete_fertility <- function(fertility, population,

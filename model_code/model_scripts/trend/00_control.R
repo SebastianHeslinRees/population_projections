@@ -68,6 +68,7 @@ run_trend_model <- function(config_list) {
   int_in_proj <- evaluate_fns_list(config_list$int_in_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
+  # TODO is this the best way to handle the Wales problem
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
   births <- births %>% select(year, gss_code, age, sex, births)

@@ -69,3 +69,4 @@ rm(first_proj_yr,
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 run_trend_model(config_list)
+ 
