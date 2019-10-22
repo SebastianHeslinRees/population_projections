@@ -26,6 +26,12 @@ fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
+int_out_last_data_year <- 2018
+int_out_years_to_avg <- 5
+
+int_in_last_data_year <- 2018
+int_in_years_to_avg <- 5
+
 #-------------------------------------------------
 
 mortality_fns <- list(
@@ -73,17 +79,25 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-
 int_out_rate_fns <- list(
-  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds",
-                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
-                                                              col_data = "rate"))
+  list(popmodules::international_rates_and_flows(popn_mye_path = popn_mye_path,
+                                                 births_mye_path = births_mye_path,
+                                                 component_path = int_out_mye_path,
+                                                 flow_or_rate = "rate",
+                                                 last_data_year = int_out_last_data_year,
+                                                 years_to_avg = int_out_years_to_avg,
+                                                 data_col = "int_out",
+                                                 n_proj_yr = n_proj_yr))
 )
 
+
 int_in_fns <- list(
-  list(fn = popmodules::component_proj_from_file, args = list(filepath = "input_data/migration/modified_int_in_2017_base_trend_med.rds",
-                                                              proj_yrs = first_proj_yr:(first_proj_yr + n_proj_yr - 1),
-                                                              col_data = "int_in"))
+  list(popmodules::international_rates_and_flows(component_path = int_in_mye_path,
+                                                 flow_or_rate = "flow",
+                                                 last_data_year = int_in_last_data_year,
+                                                 years_to_avg = int_in_years_to_avg,
+                                                 data_col = "int_in",
+                                                 n_proj_yr = n_proj_yr))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
