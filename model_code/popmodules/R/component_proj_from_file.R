@@ -42,7 +42,7 @@ component_proj_from_file <- function(filepath,
 
   component_proj <- filter_at(component_proj, vars(col_year), any_vars(. %in% proj_yrs))
   # return component_proj
-  component_proj
+  return(component_proj)
 
 }
 
