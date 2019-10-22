@@ -15,7 +15,7 @@
 #'
 #' @export
 
-calculate_mean_from_backseries <- function(data_backseries, years_to_avg, last_data_year, data_col){
+calculate_mean_from_backseries <- function(data_backseries, years_to_avg, last_data_year, data_col, col_aggregation = c("gss_code","sex","age")){
 
   assert_that(is.data.frame(data_backseries),
               msg="calc_trend_rate expects that data_backseries is a dataframe")
@@ -33,11 +33,11 @@ calculate_mean_from_backseries <- function(data_backseries, years_to_avg, last_d
   averaged <- data_backseries %>%
     rename(value = data_col) %>%
     filter(year %in% back_years) %>%
-    group_by(gss_code, sex, age) %>%
+    group_by_at(col_aggregation) %>%
     summarise(value = sum(value)/years_to_avg) %>%
     ungroup() %>%
     mutate(year = last_data_year+1) %>%
-    select(gss_code, year, sex, age, value) %>%
+    select_at(c("year", col_aggregation, "value")) %>%
     rename(!!data_col := value)
 
   return(averaged)

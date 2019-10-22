@@ -29,7 +29,7 @@
 
 
 get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_year, years_to_avg,
-                              avg_or_trend, data_col, output_col){
+                                  avg_or_trend, data_col, output_col){
 
   population <- data_input[["population"]]
   component_data <- data_input[["component_data"]]
@@ -37,34 +37,51 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
   target_curves <- readRDS(target_curves_filepath)
 
   check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
-                          avg_or_trend, data_col, output_col)
+                  avg_or_trend, data_col, output_col)
 
 
-  if(data_col == "deaths"){
-    population <- deaths_denominator(population)
-  }
-  if(data_col== "births"){
-    population <- births_denominator(population)
-  }
+
 
   if("year" %in% names(target_curves)){target_curves <- select(target_curves, -year)}
 
   if(data_col == "deaths"){
-  scaling_backseries <- left_join(population, target_curves, by = c("gss_code", "age", "sex")) %>%
-    mutate(curve_count = rate * popn) %>%
-    left_join(component_data, by = c("gss_code", "age", "sex", "year")) %>%
-    rename(value = data_col) %>%
-    group_by(gss_code, year, sex, age) %>%
-    summarise(actual = sum(value),
-              curve_count = sum(curve_count)) %>%
-    ungroup() %>%
-    mutate(scaling = ifelse(actual == 0,
-                            0,
-                            actual / curve_count)) %>%
-    select(gss_code, year, sex, age, scaling)
+
+    population <- deaths_denominator(population)
+
+    scaling_backseries <- left_join(population, target_curves, by = c("gss_code", "age", "sex")) %>%
+      mutate(curve_count = rate * popn) %>%
+      left_join(component_data, by = c("gss_code", "age", "sex", "year")) %>%
+      rename(value = data_col) %>%
+      group_by(gss_code, year, sex, age) %>%
+      summarise(actual = sum(value),
+                curve_count = sum(curve_count)) %>%
+      ungroup() %>%
+      mutate(scaling = ifelse(actual == 0,
+                              0,
+                              actual / curve_count)) %>%
+      select(gss_code, year, sex, age, scaling)
+
+    if(avg_or_trend == "trend"){
+      averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
+    }
+
+    if(avg_or_trend == "average"){
+      averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
+    }
+
+    jump_off_rates <- target_curves %>%
+      left_join(averaged_scaling_factors, by = c("gss_code", "sex", "age")) %>%
+      mutate(jump_off_rate = scaling * rate) %>%
+      select(gss_code, year, sex, age, jump_off_rate) %>%
+      rename(!!output_col := jump_off_rate)
+
   }
 
+
+
   if(data_col == "births"){
+
+    population <- births_denominator(population)
 
     component_data <- group_by(component_data, year, gss_code) %>%
       summarise(births = sum(births))
@@ -83,31 +100,21 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
                               actual / curve_count)) %>%
       select(gss_code, year, scaling)
 
-  }
+    if(avg_or_trend == "trend"){
+      averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling",
+                                                               col_aggregation = "gss_code")
+    }
 
-  #TODO: Make the below functions work with a dataframe that doesnt have aghe and sex
+    if(avg_or_trend == "average"){
+      averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling",
+                                                                 col_aggregation = "gss_code")
+    }
 
-  if(avg_or_trend == "trend"){
-    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
-  }
-
-  if(avg_or_trend == "average"){
-    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
-  }
-
-  if(data_col == "deaths"){
-
-  jump_off_rates <- target_curves %>%
-    left_join(averaged_scaling_factors, by = c("gss_code", "sex", "age")) %>%
-    mutate(jump_off_rate = scaling * rate) %>%
-    select(gss_code, year, sex, age, jump_off_rate) %>%
-    rename(!!output_col := jump_off_rate)
-
-  }
-
-  if(data_col == "births"){
-
-    #TODO: Apply births scaling factors
+    jump_off_rates <- target_curves %>%
+      left_join(averaged_scaling_factors, by = "gss_code") %>%
+      mutate(jump_off_rate = scaling * rate) %>%
+      select(gss_code, year, sex, age, jump_off_rate) %>%
+      rename(!!output_col := jump_off_rate)
 
   }
 
@@ -167,7 +174,7 @@ births_denominator <- function(population) {
 # Function to check that the input to initial_year_mortality_rates is all legal
 
 check_init_rate <- function(population, component_data, target_curves, last_data_year, years_to_avg,
-                avg_or_trend, data_col, output_col){
+                            avg_or_trend, data_col, output_col){
 
   # test input parameters are of the correct type
   assert_that(is.data.frame(population)|is.list(population),
@@ -190,7 +197,7 @@ check_init_rate <- function(population, component_data, target_curves, last_data
   assert_that(data_col %in% names(component_data),
               msg="initial_year_rate expects that data_col is a column in component_data dataframe")
 
- }
+}
 
 
 
