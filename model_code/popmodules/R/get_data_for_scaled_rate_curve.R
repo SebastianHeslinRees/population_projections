@@ -1,4 +1,4 @@
-get_data_for_snpp_rate_chain <- function(popn_mye_path,
+get_data_for_scaled_rate_curve <- function(popn_mye_path,
                                          births_mye_path,
                                          deaths_mye_path=NULL,
                                          fertility_or_mortality){

@@ -3,7 +3,7 @@
 first_proj_yr <- 2019
 n_proj_yr <- 20
 
-datestamp <- "2019-10-11"
+datestamp <- "2019-10-22"
 
 popn_mye_path <- paste0("input_data/mye/2018/population_ons_",datestamp,".rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
@@ -51,7 +51,7 @@ mortality_fns <- list(
 #------------------------------------------
 
 fertility_fns <- list(
-  list(fn = popmodules::get_data_for_snpp_rate_chain, args = list(popn_mye_path = popn_mye_path,
+  list(fn = popmodules::get_data_for_scaled_rate_curve, args = list(popn_mye_path = popn_mye_path,
                                                                   births_mye_path = births_mye_path,
                                                                   deaths_mye_path = NULL,
                                                                   fertility_or_mortality = "fertility")),
