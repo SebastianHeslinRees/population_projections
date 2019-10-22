@@ -101,7 +101,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in,
                                        fertility, mortality, int_out_rate, int_in_proj,
                                        first_proj_yr, n_proj_yr) {
-  
+ 
   popmodules::validate_population(population, col_data = "popn")
   
   popmodules::validate_population(fertility, col_data = "rate")
