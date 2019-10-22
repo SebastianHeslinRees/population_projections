@@ -6,7 +6,13 @@ popn_mye_path <- "input_data/mye/2018/population_ons_2019-08-27.rds"
 deaths_mye_path <- "input_data/mye/2018/deaths_ons_2019-08-27.rds"
 births_mye_path <- "input_data/mye/2018/births_ons_2019-08-27.rds"
 int_out_mye_path <- "input_data/mye/2018/international_out_ons_2019-08-27.rds"
-int_in_mye_path <- "input_data/mye/2018/international_in_ons_2019-08-27.rds"
+datestamp <- "2019-08-27"
+
+popn_mye_path <- paste0("input_data/mye/2018/population_ons_",datestamp,".rds")
+deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
+births_mye_path <-  paste0("input_data/mye/2018/births_ons_",datestamp,".rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_ons_",datestamp,".rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_ons_",datestamp,".rds")
 outputs_dir = "outputs/trend/2018/"
 
 mortality_fns <- list(
