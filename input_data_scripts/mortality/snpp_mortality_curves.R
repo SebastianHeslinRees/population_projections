@@ -49,7 +49,7 @@ national_mort <- filter(national_mort, gss_code != "W92000004")
 #Recode - takes a simple average when rates have to to be aggregated
 ons_mort <- rbind(ons_mort, national_mort, wales) %>%
   mutate(year = 2017) %>%
-  select(gss_code, sex, age, year, death_rate) %>%
+  select(gss_code, sex, age, year, rate = death_rate) %>%
   recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code", "sex", "age", "year"), fun = list(mean))
 
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
