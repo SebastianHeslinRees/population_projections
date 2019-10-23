@@ -40,7 +40,9 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
-    message(paste("  Projecting year",my_year))
+    
+    cat('\r',paste("  Projecting year",my_year))
+    flush.console()
     
     # TODO pass births, deaths, migration function in via list along with their arguments to make the core more flexible.
     # Would remove need for hard coded internation out migration method switch
