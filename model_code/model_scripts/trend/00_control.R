@@ -20,9 +20,6 @@ run_trend_model <- function(config_list) {
   # TODO: change this to look for a config template file?
   expected_config <- c("first_proj_yr", 
                        "n_proj_yr",
-                       "years_to_avg_domestic",
-                       "years_to_avg_international",
-                       "years_to_average_mortality",
                        "popn_mye_path", 
                        "deaths_mye_path", 
                        "births_mye_path", 
@@ -30,10 +27,6 @@ run_trend_model <- function(config_list) {
                        "int_in_mye_path",
                        "dom_out_mye_path",
                        "dom_in_mye_path",
-                       "mortality_curves",
-                       "fertility_curves",
-                       "mortality_trends",
-                       "fertility_trends",
                        "dom_origin_destination_path",
                        "dom_rate_fns",
                        "outputs_dir", 
@@ -52,34 +45,24 @@ run_trend_model <- function(config_list) {
   population <- get_component(filepath = config_list$popn_mye_path, 
                            max_yr = config_list$first_proj_yr - 1)
   
-  # TODO probably move these geocoding conversions into the input_scripts
   deaths <- get_component(filepath = config_list$deaths_mye_path, 
-                                max_yr = config_list$first_proj_yr - 1) %>%
-    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
+                                max_yr = config_list$first_proj_yr - 1)
   
   births <- get_component(filepath = config_list$births_mye_path,
-                                  max_yr = config_list$first_proj_yr - 1) %>%
-    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
+                                  max_yr = config_list$first_proj_yr - 1) 
   
   int_out <- get_component(filepath = config_list$int_out_mye_path,
-                          max_yr = config_list$first_proj_yr - 1) %>%
-    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
+                          max_yr = config_list$first_proj_yr - 1)
   
   int_in <- get_component(filepath = config_list$int_in_mye_path,
-                          max_yr = config_list$first_proj_yr - 1) %>%
-    recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code","year","sex","age", "gss_name","country","geography"), fun = list(mean))
+                          max_yr = config_list$first_proj_yr - 1)
   
-  # TODO: sooooo these MYE dom_out/dom_in don't match the ONS flows below. Might want to think about why.
-#  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
-#                          max_yr = config_list$first_proj_yr - 1)
+  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
   
-#  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
-#                          max_yr = config_list$first_proj_yr - 1)
+  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
   
-#  dom_origin_dest <- readRDS(config_list$dom_origin_destination_path)
-
-  
-  # TODO: check that deaths and births have same geography, age, and sex coverage as population
   
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
@@ -102,11 +85,16 @@ run_trend_model <- function(config_list) {
   births <- births %>% select(year, gss_code, age, sex, births)
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
+  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out)
+  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in)
+  
   
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
   mortality <- mortality %>% select(year, gss_code, age, sex, rate)
   int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, rate)
   int_in_proj <- int_in_proj %>% select(year, gss_code, age, sex, int_in)
+  dom_rate <- dom_rate %>% select(gss_out, gss_in, age, sex, rate)
+  
 
   # TODO fix the fertility data so we don't have to do this
   if(any(fertility$rate > 1)) {
@@ -121,7 +109,7 @@ run_trend_model <- function(config_list) {
   ## run the core
   projection <- trend_core(population, births, deaths, int_out, int_in, 
                            fertility, mortality, int_out_rate, int_in_proj,
-                           dom_historic, dom_rate,
+                           dom_in, dom_out, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr)
   
   ## write the output data

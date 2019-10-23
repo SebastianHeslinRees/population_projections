@@ -26,7 +26,7 @@
 #'   FALSE.
 #' @param many2one Logical. Setting this to FALSE will check that no more than
 #'   one level from \code{popn} matches to each level of \code{rate}. Default
-#'   TRUE.
+#'   FALSE.
 #' @param additional_rate_levels String. Names of columns in \code{popn_rate}
 #'   which should be included in the join beyond those named in
 #'   \code{col_aggregation}. Used when multiple rates apply to the same
@@ -74,6 +74,8 @@
 #' @export
 #'
 
+# TODO simplify the function - the validation steps are making the inputs complicated. 
+
 # TODO Would it be useful to add an option to return the output as the input +
 # an extra column, rather than the current version which strips down to
 # aggregation levels + an extra column? Of course you can just use
@@ -90,7 +92,7 @@ popn_apply_rate <- function(popn,
                             col_rate = "rate",
                             col_out = "component",
                             pop1_is_subset = FALSE,
-                            many2one = TRUE,
+                            many2one = FALSE,
                             additional_rate_levels = NA,
                             missing_levels_popn = FALSE,
                             missing_levels_rate = FALSE) {

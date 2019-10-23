@@ -56,7 +56,11 @@ get_rate_backseries <- function(component_mye_path,
                                 col_partial_match = NULL,
                                 col_aggregation = c("year","gss_code","age","sex"),
                                 col_component = NULL) {
-
+  # TODO: Instead of looking for common years, just specifcy the number of backyears that you will need, and
+  # a simple check can make sure it is in both.  Will improve readability, and make sure the model setup
+  # is done with this explicitly in mind. 
+  
+  
   # List valid names of population components
   usual_col_component <- c("births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in", "dom_out", "dom_net")
 
@@ -118,6 +122,7 @@ get_rate_backseries <- function(component_mye_path,
   component <- filter(component, year %in% common_years)
 
   # Fill missing values as zero
+  # TODO throw error instead if there are NAs?
   ix <- is.na(component[[col_component]])
   component[ix, col_component] <- 0
 
@@ -183,7 +188,6 @@ get_rate_backseries <- function(component_mye_path,
   data.table::setnames(rates, names(join_by), unname(join_by))
   data.table::setDF(rates)
   rates <- select(rates, -popn, -!!sym(col_component))
-  rates <- select(rates, -popn, -!!sym(col_component))
 
   if(FALSE) { # the above but with tidyverse
     rates <- left_join(popn, component, by=col_aggregation) %>%
@@ -192,6 +196,7 @@ get_rate_backseries <- function(component_mye_path,
       rename(setNames(names(join_by), unname(join_by))) # check this...
   }
 
+  # TODO remove this from here and do after the averaging step
   # Set max rate to 1 (this is mostly for mortality purposes, but nothing we're dealing with should be > 1 right?)
   if(any(rates$rate > 1)) {
     n <- sum(rates$rate > 1)

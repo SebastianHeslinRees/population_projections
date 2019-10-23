@@ -138,7 +138,7 @@ migrate_domestic <- function(popn,
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }
-  col_aggregation <- convert_to_named_vector(col_aggregation)
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
 
   # limit to columns we're interested in, fill missing if requested,
   # and add zero migration rates from each geography to itself
@@ -236,7 +236,7 @@ validate_migrate_domestic_input <- function(popn,
 
   # Other checks
   # TODO most of these checks are actually done by popn_apply_rates and maybe shouldn't be duplicated here?
-  col_aggregation <- convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and mign_rate aggregation levels
+  col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and mign_rate aggregation levels
 
   assert_that(nrow(popn) > 0,
               msg = "migrate_domestice was given an empty population data frame")

@@ -1,6 +1,6 @@
 # config file for model runs
 
-#devtools::load_all("model_code/popmodules")
+devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 20
@@ -30,6 +30,8 @@ fertility_last_data_year <- 2018
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
+
+dom_mig_years_to_avg <- 3
 
 #-------------------------------------------------
 
@@ -96,7 +98,7 @@ dom_rate_fns <- list(
                                                           col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                           col_component = "value")),
   list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
-                                                                      years_to_avg = years_to_avg,
+                                                                      years_to_avg = dom_mig_years_to_avg,
                                                                       col_rate = "rate"))
 )
 
@@ -106,7 +108,6 @@ qa_areas_of_interest <- list("London", "E09000001")
 config_list <- list(
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
-  years_to_avg = years_to_avg,
   popn_mye_path = popn_mye_path,
   deaths_mye_path = deaths_mye_path,
   births_mye_path = births_mye_path,
@@ -114,10 +115,6 @@ config_list <- list(
   int_in_mye_path = int_in_mye_path,
   dom_out_mye_path = dom_out_mye_path,
   dom_in_mye_path = dom_in_mye_path,
-  mortality_curves = mortality_curves,
-  fertility_curves = fertility_curves,
-  mortality_trends = mortality_trends,
-  fertility_trends = fertility_trends,
   dom_origin_destination_path = dom_origin_destination_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
@@ -129,28 +126,7 @@ config_list <- list(
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
 
-rm(first_proj_yr, 
-   n_proj_yr, 
-   years_to_avg,
-   popn_mye_path, 
-   deaths_mye_path, 
-   births_mye_path, 
-   int_out_mye_path, 
-   int_in_mye_path,
-   dom_out_mye_path,
-   dom_in_mye_path,
-   mortality_curves,
-   fertility_curves,
-   mortality_trends,
-   fertility_trends,
-   dom_origin_destination_path,
-   outputs_dir,
-   mortality_fns, 
-   fertility_fns, 
-   int_out_rate_fns,
-   int_in_fns,
-   dom_rate_fns,
-   qa_areas_of_interest)
+rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")

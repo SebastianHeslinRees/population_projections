@@ -1,7 +1,7 @@
 # TODO make this take a list? 
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
-                       dom_historic, dom_rate,
+                       dom_in, dom_out, dom_rate,
                        first_proj_yr, n_proj_yr) {
   library(dplyr)
   library(assertthat)
@@ -9,7 +9,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              fertility, mortality, int_out_rate, int_in_proj, 
-                             dom_historic, dom_rate,
+                             dom_in, dom_out, dom_rate,
                              first_proj_yr, n_proj_yr)
   
   
@@ -25,18 +25,18 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
   
+  # set up output lists. Done in lists for speed and rbind done after projection.
+  # TODO name the list elements with the years?
   proj_popn <- list(population %>% filter(year < first_proj_yr))
-  proj_int_out <- list(int_out)
-  proj_int_in <- list(int_in)
-  proj_deaths <- list(deaths)
-  proj_births <- list(births)
+  proj_int_out <- list(int_out %>% filter(year < first_proj_yr))
+  proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
+  proj_deaths <- list(deaths %>% filter(year < first_proj_yr))
+  proj_births <- list(births %>% filter(year < first_proj_yr))
 # TODO: calculate domestic migration backseries for the input (this is done in
   # input_data_scripts/domestic_migration_2018.R, it just needs to be recoded to
   # 2011 geographies and read in at the start)
-#  proj_dom_out <- list(dom_out)
-#  proj_dom_in <- list(dom_in)
-  proj_dom_out <- list()
-  proj_dom_in <- list()
+  proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
+  proj_dom_in <- list(dom_in %>% filter(year < first_proj_yr))
   
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
@@ -160,7 +160,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in,
                                        fertility, mortality, int_out_rate, int_in_proj,
-                                       dom_historic, dom_rate,
+                                       dom_in, dom_out, dom_rate,
                                        first_proj_yr, n_proj_yr) {
  
   popmodules::validate_population(population, col_data = "popn")
@@ -169,7 +169,8 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_population(mortality, col_data = "rate")
   popmodules::validate_population(int_out_rate, col_data = "rate")
   popmodules::validate_population(int_in_proj, col_data = "int_in")
-#  popmodules::validate_population(dom_historic, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out","dom_in","dom_net"), test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
+  popmodules::validate_population(dom_in, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
+  popmodules::validate_population(dom_out, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out"), test_complete = TRUE, test_unique = TRUE)
   popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
   
   
@@ -179,8 +180,9 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_join_population(population, fertility, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, int_out_rate, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, int_in_proj, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-#  popmodules::validate_join_population(population, dom_rate, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-#  popmodules::validate_join_population(dom_rate, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
+  # TODO fix these checks for dom_rate double geography.  Currently the below both fail
+  #popmodules::validate_join_population(population, dom_rate, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  #popmodules::validate_join_population(dom_rate, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
   
   # check that the coverage of years is correct
   last_proj_yr <- first_proj_yr + n_proj_yr -1
