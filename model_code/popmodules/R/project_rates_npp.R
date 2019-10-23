@@ -26,7 +26,7 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
 
   rates <- readRDS(rate_trajectory_filepath) %>%
     filter(variant == npp_var) %>%
-    filter(year >= first_proj_yr) %>%
+    filter(year > first_proj_yr) %>%
     filter(year <= final_projection_year) %>%
     arrange(year) %>%
     group_by(sex, age) %>%
@@ -39,7 +39,7 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
     mutate(rate = cumprod*jump_rate) %>%
     select(gss_code, sex, age, year, rate) %>%
     rename(!!rate_col := rate) %>%
-    #rbind(jump_off_rates) %>%
+    rbind(jump_off_rates) %>%
     arrange(gss_code,sex,age,year)
 
   return(rates)
