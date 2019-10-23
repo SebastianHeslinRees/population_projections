@@ -46,7 +46,8 @@ average_domestic_migration_rates <- function(origin_destination_rates,
       group_by(gss_out, gss_in, age, sex) %>%
       summarise(rate = rate/years_to_avg)
   }
-
+origin_destination_rates <- origin_destination_rates %>%
+    mutate(rate = ifelse(rate > rate_cap, rate_cap, rate))
   if(col_rate != "rate") {
     i <- names(origin_destination_rates) == "rate"
     names(origin_destination_rates)[i] <- col_rate
