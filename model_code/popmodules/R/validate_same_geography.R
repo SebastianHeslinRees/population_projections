@@ -20,8 +20,8 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2="gss_code"){
   nm_1 <- deparse(substitute(df_1))
   nm_2 <- deparse(substitute(df_2))
   
-  df_1 <- df_1[col_1] %>% unique()
-  df_2 <- df_2[col_2] %>% unique()
+  df_1 <- df_1[col_1] %>% unique() %>% rename("gss_code" = col_1)
+  df_2 <- df_2[col_2] %>% unique() %>% rename("gss_code" = col_2)
   
   x <- setdiff(df_1, df_2)
   y <- setdiff(df_2, df_1)

@@ -5,18 +5,31 @@
 \title{Divide a component of change by population to give historical rates}
 \usage{
 get_rate_backseries(component_mye_path, popn_mye_path, births_mye_path,
-  col_partial_match = NULL)
+  col_partial_match = NULL, col_aggregation = c("year", "gss_code",
+  "age", "sex"), col_component = NULL)
 }
 \arguments{
 \item{component_mye_path}{Path to the mid-year estimates of the desired
 component of change.}
 
-\item{popn_mye_path}{Path to poplation mid-year estimates.}
+\item{popn_mye_path}{Path to population mid-year estimates.}
 
 \item{births_mye_path}{Path to births mid-year estimates.}
 
 \item{col_partial_match}{List of columns in \code{component_mye_path} where
 levels are a subset of those in \code{popn_mye_path}.}
+
+\item{col_aggregation}{Vector of column names used for aggregation in the
+input in \code{component_mye_path}. If column names are different from MYE
+columns, specify the mapping from MYE to the component data with a named
+character vector. e.g. in origin-destination data,
+\code{c("gss_code"="gss_out", "gss_in")}. Default
+\code{c("year","gss_code","age","sex")}.}
+
+\item{col_component}{String. Column name for data in the
+\code{component_mye_path} data frame. Need not be specified when one of
+"births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in",
+"dom_out", "dom_net".}
 }
 \value{
 A data frame containing rates for the component of change (in the
@@ -28,15 +41,23 @@ change, total population, and birth rates, and returns a data frame with
 rates.
 }
 \details{
-The function assumes input has the standard mid-year-estimate column names:
-\code{c("gss_code","gss_name","geography","country","sex","age","year")} with
-data stored in a \code{value} column.
+The function assumes that MYE data has the standard mid-year-estimate
+aggregation columns: \code{c("gss_code","sex","age","year")}. The component
+file is assumed to have the same columns unless this is specified in the
+\code{col_aggregation} parameter and with data stored in the \code{value}
+column Note, however, that a column named "year" is currently required in all
+input datasets.
 
 If the components of change data is known to be at fewer levels than the
 population mid-year estimates, then the \code{col_partial_match} parameter
 should name the columns where this is the case. This will be true for example
 with fertility data, which is limited to a certain age range.
 
-Due to the way data comparisons work, the population must be agerd on as part
+The name of the component of change in question need not be specified if it
+is one of these ONS default MYE components: "births", "deaths", "popn",
+"int_in", "int_out", "int_net", "dom_in", "dom_out", "dom_net". Otherwise,
+specify it via the \code{col_component} parameter.
+
+Due to the way data comparisons work, the population must be aged on as part
 of the calculations, and the function also needs births estimates as input.
 }

@@ -308,4 +308,3 @@ for(loc in seq_along(areas_of_interest)) {
 gifs <- list.files(output_files_dir,"*loc_int_out_age_by_yr*", full.names = TRUE)
 knitr::include_graphics(gifs)
 ```
-

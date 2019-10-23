@@ -14,12 +14,17 @@ output2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m")
 # -------------------------------------------------------------
 
 # The function being tested uses default values:
-# popn_apply_rate <- function(popn,
-#                            popn_rate,
-#                            col_aggregation = c("year", "gss_code", "sex", "age"),
-#                            col_popn = "popn",
-#                            col_rate = "rate",
-#                            col_out = "component") {
+#' component <- popn_apply_rate(popn,
+#'                              rate,
+#'                              col_aggregation = c("year", "gss_code", "sex", "age"),
+#'                              col_popn = "popn",
+#'                              col_rate = "rate",
+#'                              col_out = "component",
+#'                              pop1_is_subset = FALSE,
+#'                              many2one = TRUE,
+#                               additional_rate_levels = NA,
+#'                              missing_levels_popn = FALSE,
+#'                              missing_levels_rate = FALSE) {
 
 #--------------------------------------------------------------
 # The tests here use expect_equivalent. This is expect_equal (i.e. objects must be the same) but doesn't compare object attributes
@@ -32,9 +37,10 @@ test_that("popn_apply_rate creates the expected output", {
                     output2)
 })
 
-test_that("popn_apply_rate can work with rates at a coarser resolution than the population", {
+test_that("popn_apply_rate can work with rates at a coarser resolution than the population, but fails when many2one = FALSE", {
   expect_equivalent(popn_apply_rate(popn2, rate),
                     output2)
+  expect_error(popn_apply_rate(popn2, rate, many2one = FALSE))
 })
 
 test_that("popn_apply_rate fails when there's more than one death rate for each aggregation level", {
@@ -93,6 +99,15 @@ test_that("popn_apply_rate handles factors, tibbles and groups", {
                     output_out)
 })
 
+
+# TODO
+test_that("popn_apply_rate handles joining to a larger, factored population", {
+  skip("TODO: make this work :O :O (Chris F)")
+  rate_in <- expand.grid(year=2000, age=20:21, gss_code=factor("a","b","c"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
+  expect_error(popn_apply_rate(popn2, rate_in, pop1_is_subset = FALSE))
+  expect_equivalent(popn_apply_rate(popn2, rate_in, pop1_is_subset = TRUE))
+})
+
 test_that("popn_apply_rate warns when factor levels don't match the input", {
   popn_in  <-  dplyr::mutate(popn,  gss_code=factor(gss_code, levels = c("a","b","c","d")))
   rate_in  <- dplyr::mutate(rate, gss_code=factor(gss_code, levels = c("a","b","c","d")))
@@ -108,7 +123,7 @@ test_that("popn_apply_rate warns when factor levels don't match the input", {
 test_that("popn_apply_rate warns with an empty input", {
   popn_in <- popn[NULL,]
   output_out <- output[NULL,]
-  expect_warning( temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code"))
+  expect_warning( temp <- popn_apply_rate(popn_in, rate, col_aggregation = "gss_code", pop1_is_subset = TRUE))
   expect_equivalent(temp, output_out)
 })
 
@@ -152,23 +167,57 @@ test_that("popn_apply_rate throws an error with explicit missing aggregation val
   popn_in <- popn
   popn_in$gss_code[1] <- NA
 
+  expect_error(popn_apply_rate(popn_in, rate, col_aggregation = "gss_code"))
+
   rate_in <- rate
   rate_in$gss_code[1] <- NA
 
-  expect_error(popn_apply_rate(popn_in, rate, col_aggregation = "gss_code"))
   expect_error(popn_apply_rate(popn, rate_in, col_aggregation = "gss_code"))
 })
 
 test_that("popn_apply_rate throws an error with implicit missing aggregation values", {
-  rate_in <- rate[-1,]
-  expect_error(popn_apply_rate(popn, rate_in, col_aggregation = "gss_code"))
 
   popn_in <- popn2[-1,]
+  output_out <- output2[-1,]
+
   expect_error(popn_apply_rate(popn_in, rate2))
+  expect_equivalent(popn_apply_rate(popn_in, rate2, pop1_is_subset = TRUE, missing_levels_popn = TRUE),
+                    output_out)
+
+  rate_in <- rate2[-1,]
+  output_out <- output2
+  output_out$component[1] <- NA
+
+  expect_error(popn_apply_rate(popn2, rate_in, missing_levels_rate = FALSE))
+  expect_equivalent(temp <- popn_apply_rate(popn2, rate_in, missing_levels_rate = TRUE),
+                    output_out)
 })
 
 
-test_that("popn_apply_rate throws an error with duplicate aggregation values", {
+test_that("popn_apply_rate throws an error when there is more than one match in the rate data frame for a level", {
   expect_error(popn_apply_rate(popn2, rate2, col_aggregation = c("gss_code","sex")))
 })
 
+test_that("popn_apply_rate can deal with a join to a higher resolution (one2many) rate data and that it needn't be complete", {
+  popn_in <- unique(dplyr::select(popn2, -sex))
+  expect_error(popn_apply_rate(popn2, rate2, one2many=FALSE))
+  expect_equivalent(popn_apply_rate(popn_in, rate2, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex"),
+                    dplyr::arrange(output2, year, gss_code, age, sex)) # Joining results in a different ordering here
+
+  rate_in <- rate2[-1,]
+  output_out <- output2[-1,]
+  expect_error(popn_apply_rate(popn_in, rate_in, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex"))
+  expect_equivalent(popn_apply_rate(popn_in, rate_in, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex", missing_levels_rate = TRUE),
+                    dplyr::arrange(output_out, year, gss_code, age, sex)) # Joining results in a different ordering here
+
+  # TODO test this but when missing_levels_rate is length >= 2
+})
+
+test_that("popn_apply_rate can check that all rates are matched to", {
+  rate_in  <- expand.grid(year=2000, age=20:21, gss_code=c("a","b","c"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
+  expect_equivalent(popn_apply_rate(popn2, rate_in, pop1_is_subset = TRUE),
+                    output2)
+  expect_error(popn_apply_rate(popn2, rate_in, pop1_is_subset = FALSE))
+})
+
+# TODO check a commit from before 03/10 to see if i accidentally deleted a test here

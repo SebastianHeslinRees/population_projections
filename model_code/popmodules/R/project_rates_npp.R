@@ -63,7 +63,7 @@ check_validate_proj_mort_rates <- function(jump_off_rates,
               msg="jump_off_rates expects a data frame as input")
   assert_that(is.character(rate_col),
               msg="rate_col should be character")
-  assert_that(is.data.frame(rate_trajectory),
+  assert_that(is.string(rate_trajectory) | is.data.frame(rate_trajectory),
               msg="rate_trajectory expects a data frame as input")
   assert_that(is.numeric(first_proj_yr),
               msg="first_proj_year expects an integer as input")

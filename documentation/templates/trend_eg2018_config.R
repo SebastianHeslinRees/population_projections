@@ -12,6 +12,9 @@ deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons_",datestamp,".rds")
 int_out_mye_path <-  paste0("input_data/mye/2018/international_out_ons_",datestamp,".rds")
 int_in_mye_path <-  paste0("input_data/mye/2018/international_in_ons_",datestamp,".rds")
+dom_out_mye_path <- paste0("input_data/mye/2018/domestic_out_ons_", datestamp, ".rds")
+dom_in_mye_path <- paste0("input_data/mye/2018/domestic_in_ons_", datestamp, ".rds")
+dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
 outputs_dir = "outputs/trend/2018/"
 
 mortality_years_to_avg <- 5
@@ -28,6 +31,7 @@ fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
+
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 5
 int_out_flow_or_rate <- "rate"
@@ -36,9 +40,13 @@ int_in_last_data_year <- 2018
 int_in_years_to_avg <- 5
 int_in_flow_or_rate <- "flow"
 
+dom_mig_years_to_avg <- 3
+
+
 #-------------------------------------------------
 
 mortality_fns <- list(
+
   
   list(fn = popmodules::scaled_mortality_curve, args = list(popn_mye_path = popn_mye_path,
                                                             births_mye_path = births_mye_path,
@@ -100,6 +108,18 @@ int_in_fns <- list(
                                                                  n_proj_yr = n_proj_yr))
 )
 
+dom_rate_fns <- list(
+  list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = dom_origin_destination_path,
+                                                          popn_mye_path = popn_mye_path,
+                                                          births_mye_path = births_mye_path,
+                                                          col_partial_match = c("gss_out","gss_in"),
+                                                          col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
+                                                          col_component = "value")),
+  list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
+                                                                      years_to_avg = dom_mig_years_to_avg,
+                                                                      col_rate = "rate"))
+)
+
 qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
@@ -111,28 +131,20 @@ config_list <- list(
   births_mye_path = births_mye_path,
   int_out_mye_path = int_out_mye_path,
   int_in_mye_path = int_in_mye_path,
+  dom_out_mye_path = dom_out_mye_path,
+  dom_in_mye_path = dom_in_mye_path,
+  dom_origin_destination_path = dom_origin_destination_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   int_out_rate_fns = int_out_rate_fns,
   int_in_fns = int_in_fns,
+  dom_rate_fns = dom_rate_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
 
-rm(first_proj_yr, 
-   n_proj_yr, 
-   popn_mye_path, 
-   deaths_mye_path, 
-   births_mye_path, 
-   int_out_mye_path, 
-   int_in_mye_path,
-   outputs_dir,
-   mortality_fns, 
-   fertility_fns, 
-   int_out_rate_fns,
-   int_in_fns,
-   qa_areas_of_interest)
+rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
