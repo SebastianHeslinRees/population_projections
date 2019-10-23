@@ -1,5 +1,7 @@
 # config file for model runs
 
+#devtools::load_all("model_code/popmodules")
+
 first_proj_yr <- 2019
 n_proj_yr <- 20
 
@@ -29,17 +31,16 @@ fertility_npp_variant <- "2018_principal"
 #-------------------------------------------------
 
 mortality_fns <- list(
-  list(fn = popmodules::get_data_for_scaled_rate_curve, args = list(popn_mye_path = popn_mye_path,
-                                                                  births_mye_path = births_mye_path,
-                                                                  deaths_mye_path = deaths_mye_path,
-                                                                  fertility_or_mortality = "mortality")),
   
-  list(fn = popmodules::get_scaled_rate_curve, args = list(target_curves_filepath = mortality_curve_filepath,
-                                                           last_data_year = mortality_last_data_year,
-                                                           years_to_avg = mortality_years_to_avg,
-                                                           avg_or_trend = mortality_avg_or_trend,
-                                                           data_col = "deaths",
-                                                           output_col = "rate")),
+  list(fn = popmodules::scaled_mortality_curve, args = list(popn_mye_path = popn_mye_path,
+                                                            births_mye_path = births_mye_path,
+                                                            deaths_mye_path = deaths_mye_path,
+                                                            target_curves_filepath = mortality_curve_filepath,
+                                                            last_data_year = mortality_last_data_year,
+                                                            years_to_avg = mortality_years_to_avg,
+                                                            avg_or_trend = mortality_avg_or_trend,
+                                                            data_col = "deaths",
+                                                            output_col = "rate")),
   
   list(fn = popmodules::project_rates, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = mortality_trajectory_filepath,
@@ -51,12 +52,9 @@ mortality_fns <- list(
 #------------------------------------------
 
 fertility_fns <- list(
-  list(fn = popmodules::get_data_for_scaled_rate_curve, args = list(popn_mye_path = popn_mye_path,
-                                                                  births_mye_path = births_mye_path,
-                                                                  deaths_mye_path = NULL,
-                                                                  fertility_or_mortality = "fertility")),
-  
-  list(fn = popmodules::get_scaled_rate_curve, args = list(target_curves_filepath = fertility_curve_filepath,
+  list(fn = popmodules::scaled_fertility_curve, args = list(popn_mye_path = popn_mye_path,
+                                                           births_mye_path = births_mye_path,
+                                                           target_curves_filepath = fertility_curve_filepath,
                                                            last_data_year = fertility_last_data_year,
                                                            years_to_avg = fertility_years_to_avg,
                                                            avg_or_trend = fertility_avg_or_trend,

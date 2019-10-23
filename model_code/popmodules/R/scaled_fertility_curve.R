@@ -34,8 +34,8 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
   births <- data.frame(readRDS(births_mye_path))
   target_curves <- readRDS(target_curves_filepath) %>% select(-year)
 
-  check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
-                  avg_or_trend, data_col, output_col)
+  # check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
+  #                 avg_or_trend, data_col, output_col)
 
     population <- births_denominator(population)
 

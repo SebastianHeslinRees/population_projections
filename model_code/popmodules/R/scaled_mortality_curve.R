@@ -37,8 +37,8 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
 
   population <- deaths_denominator(population, births)
 
-  check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
-                  avg_or_trend, data_col, output_col)
+  # check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
+  #                 avg_or_trend, data_col, output_col)
 
   scaling_backseries <- left_join(population, target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
