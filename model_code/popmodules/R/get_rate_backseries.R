@@ -85,7 +85,7 @@ get_rate_backseries <- function(component_mye_path,
 
 
 
-  # LOAD AND SET UP CompoNENT DATA
+  # LOAD AND SET UP COMPONENT DATA
   # ------------------------------
 
   component <- readRDS(component_mye_path)
