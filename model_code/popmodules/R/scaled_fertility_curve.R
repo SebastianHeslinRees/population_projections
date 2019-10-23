@@ -1,22 +1,19 @@
-#' Calculate average rates based on past data
+#' Calculate average fertility rates based on past data
 #'
 #' Compares past rates by LA, age and sex to an input
 #' curve to derive a set of scaling factors. The scaling factors are then
 #' averaged or trended forward using regression. The resulting scaling
 #' factor is applied to the input curve to produce a set of rates.
 #'
-#' @param data_input List with 2 elements. 1: The mye backseries population.
-#' For mortality rates the input is a list of 2 elements \code{population} aand \code{births}.
-#' For fertility rates the input is a dataframe of \code{population}
-#' 2: Dataframe. \code{Births} or \code{deaths} by sex and age.
-#' @param target_curves Dataframe. Age-and-sex-specific mortality or fertiltiy
-#'   rates by local authority.
+#' @param popn_mye_path Character. Path to the MYE population data
+#' @param births_mye_path Character. Path to the MYE births component data
+#' @param target_curves_filepath Character. Path to the SNPP target fertility curves
 #' @param last_data_year numeric. The last year of death data on which to calculate
 #'   averages.
 #' @param years_to_avg numeric. The number of years to use in calculating averages.
 #' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
 #'   or by linear regression \code{Trend}.
-#' @param data_col Character. The column in the \code{component_data} dataframe containing the rates
+#' @param data_col Character. The column in the \code{births} dataframe containing the rates. Defaults to \code{births}
 #' @param output_col Character. The name of the column in the output dataframe containing the calculated rates
 #'
 #' @return A data frame of mortality probabilities or fertility rates by LA, year, sex and age.
@@ -28,62 +25,21 @@
 #' @export
 
 
-get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_year, years_to_avg,
-                                  avg_or_trend, data_col, output_col){
+scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
+                                  years_to_avg, avg_or_trend, data_col="births", output_col){
 
-  population <- data_input[["population"]]
-  component_data <- data_input[["component_data"]]
+  validate_scaled_fertility_curve_filetype(popn_mye_path, births_mye_path, target_curves_filepath)
 
-  target_curves <- readRDS(target_curves_filepath)
+  population <- data.frame(readRDS(popn_mye_path))
+  births <- data.frame(readRDS(births_mye_path))
+  target_curves <- readRDS(target_curves_filepath) %>% select(-year)
 
   check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
                   avg_or_trend, data_col, output_col)
 
-
-
-
-  if("year" %in% names(target_curves)){target_curves <- select(target_curves, -year)}
-
-  if(data_col == "deaths"){
-
-    population <- deaths_denominator(population)
-
-    scaling_backseries <- left_join(population, target_curves, by = c("gss_code", "age", "sex")) %>%
-      mutate(curve_count = rate * popn) %>%
-      left_join(component_data, by = c("gss_code", "age", "sex", "year")) %>%
-      rename(value = data_col) %>%
-      group_by(gss_code, year, sex, age) %>%
-      summarise(actual = sum(value),
-                curve_count = sum(curve_count)) %>%
-      ungroup() %>%
-      mutate(scaling = ifelse(actual == 0,
-                              0,
-                              actual / curve_count)) %>%
-      select(gss_code, year, sex, age, scaling)
-
-    if(avg_or_trend == "trend"){
-      averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
-    }
-
-    if(avg_or_trend == "average"){
-      averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
-    }
-
-    jump_off_rates <- target_curves %>%
-      left_join(averaged_scaling_factors, by = c("gss_code", "sex", "age")) %>%
-      mutate(jump_off_rate = scaling * rate) %>%
-      select(gss_code, year, sex, age, jump_off_rate) %>%
-      rename(!!output_col := jump_off_rate)
-
-  }
-
-
-
-  if(data_col == "births"){
-
     population <- births_denominator(population)
 
-    component_data <- group_by(component_data, year, gss_code) %>%
+    births <- group_by(births, year, gss_code) %>%
       summarise(births = sum(births))
 
     population <- filter(population, sex == "female", age %in% unique(target_curves$age))
@@ -93,7 +49,7 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
       group_by(year, gss_code) %>%
       summarise(curve_count = sum(curve_count)) %>%
       ungroup() %>%
-      left_join(component_data, by = c("gss_code", "year")) %>%
+      left_join(births, by = c("gss_code", "year")) %>%
       rename(actual = data_col) %>%
       mutate(scaling = ifelse(actual == 0,
                               0,
@@ -116,40 +72,11 @@ get_scaled_rate_curve <- function(data_input, target_curves_filepath, last_data_
       select(gss_code, year, sex, age, jump_off_rate) %>%
       rename(!!output_col := jump_off_rate)
 
-  }
-
   return(jump_off_rates)
 
 }
 
 #--------------------------------------------------------------------
-
-#Function to create denominators for initial rate calculation
-
-deaths_denominator <- function(population){
-
-  assert_that(is.data.frame(population[[1]]),
-              msg="deaths_denominator expects population[[1]] to be a dataframe")
-  assert_that(is.data.frame(population[[2]]),
-              msg="deaths_denominator expects population[[2]] to be a dataframe")
-
-  #Deaths denominator
-  births <- population[[2]] %>%
-    filter(age==0) %>%
-    rename(popn = births)
-
-  population <- population[[1]] %>%
-    popmodules::popn_age_on() %>%
-    filter(year != max(year)) %>%
-    rbind(births)%>%
-    select(gss_code, year, sex, age, popn) %>%
-    arrange(gss_code, year, sex, age)
-
-  return(population)
-
-}
-
-#-----------------------------------------------
 
 #Function for creating birth denominator population
 
@@ -173,15 +100,15 @@ births_denominator <- function(population) {
 
 # Function to check that the input to initial_year_mortality_rates is all legal
 
-check_init_rate <- function(population, component_data, target_curves, last_data_year, years_to_avg,
+check_init_rate <- function(population, births, target_curves, last_data_year, years_to_avg,
                             avg_or_trend, data_col, output_col){
 
   # test input parameters are of the correct type
   assert_that(is.data.frame(population)|is.list(population),
               msg="initial_year_rate expects that population is a data frame or a list")
 
-  assert_that(is.data.frame(component_data),
-              msg="initial_year_rate expects that component_data is a data frame")
+  assert_that(is.data.frame(births),
+              msg="initial_year_rate expects that births is a data frame")
   assert_that(is.data.frame(target_curves),
               msg="initial_year_rate expects that target_curves is a data frame")
   assert_that(is.numeric(last_data_year),
@@ -194,10 +121,24 @@ check_init_rate <- function(population, component_data, target_curves, last_data
               msg="initial_year_rate expects that data_col is a character")
   assert_that(is.character(output_col),
               msg="initial_year_rate expects that output_col is a character")
-  assert_that(data_col %in% names(component_data),
-              msg="initial_year_rate expects that data_col is a column in component_data dataframe")
+  assert_that(data_col %in% names(births),
+              msg="initial_year_rate expects that data_col is a column in births dataframe")
 
 }
 
+#---------------------------------------------
 
+validate_scaled_fertility_curve_filetype <- function(path_1, path_2, path_3) {
+
+  for(i in c(path_1, path_2, path_3)){
+    filepath <- i
+    file_ext <- tolower(strsplit(basename(filepath), split="\\.")[[1]][[2]])
+
+    assertthat::assert_that(file_ext == "rds",
+                            msg = paste(i,": file must be a .rds file"))
+  }
+
+  invisible(TRUE)
+
+}
 
