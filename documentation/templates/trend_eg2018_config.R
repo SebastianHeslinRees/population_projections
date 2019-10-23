@@ -5,7 +5,7 @@ devtools::load_all("model_code/popmodules")
 first_proj_yr <- 2019
 n_proj_yr <- 20
 
-datestamp <- "2019-10-11"
+datestamp <- "2019-10-22"
 
 popn_mye_path <- paste0("input_data/mye/2018/population_ons_",datestamp,".rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
@@ -42,7 +42,7 @@ mortality_fns <- list(
                                                             data_col = "deaths",
                                                             output_col = "rate")),
   
-  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
+  list(fn = popmodules::project_rates_npp, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = mortality_trajectory_filepath,
                                                    first_proj_yr = first_proj_yr,
                                                    n_proj_yr = n_proj_yr,
@@ -61,7 +61,7 @@ fertility_fns <- list(
                                                            data_col = "births",
                                                            output_col = "rate")),
   
-  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
+  list(fn = popmodules::project_rates_npp, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = fertility_trajectory_filepath,
                                                    first_proj_yr = first_proj_yr,
                                                    n_proj_yr = n_proj_yr,
