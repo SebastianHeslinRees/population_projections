@@ -1,6 +1,6 @@
 #' Project mortality/fertility rates forward based on a national trend
 #'
-#' Applies the national rate of change in fertility to a set of local
+#' Applies the national rate of change in mortality/fertility to a set of local
 #' authority ASMRs/ASFRs to produce a mortality/fertility probability trajectory.
 #'
 #' @param jump_off_rates Dataframe. A set of LA/age/sex rates for the first projection year.
@@ -17,7 +17,7 @@
 #' @import assertthat
 #' @export
 
-project_rates <- function(jump_off_rates, rate_col, rate_trajectory_filepath, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
+project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
 
   #Test/validate
   #check_validate_proj_mort_rates(jump_off_rates, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
