@@ -6,7 +6,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   library(dplyr)
   library(assertthat)
   library(popmodules)
-  
+
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              fertility, mortality, int_out_rate, int_in_proj, 
                              dom_historic, dom_rate,
@@ -23,21 +23,21 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
-  proj_popn <- list(population %>% filter(year < first_proj_yr))
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
-
-  proj_deaths <- list(deaths)
-  proj_births <- list(births)
+  
+  proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_int_out <- list(int_out)
   proj_int_in <- list(int_in)
-  
-  # TODO: calculate domestic migration backseries for the input (this is done in
+  proj_deaths <- list(deaths)
+  proj_births <- list(births)
+# TODO: calculate domestic migration backseries for the input (this is done in
   # input_data_scripts/domestic_migration_2018.R, it just needs to be recoded to
   # 2011 geographies and read in at the start)
 #  proj_dom_out <- list(dom_out)
 #  proj_dom_in <- list(dom_in)
   proj_dom_out <- list()
   proj_dom_in <- list()
+  
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
     message(paste("  Projecting year",my_year))
@@ -162,7 +162,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                                        fertility, mortality, int_out_rate, int_in_proj,
                                        dom_historic, dom_rate,
                                        first_proj_yr, n_proj_yr) {
-  
+ 
   popmodules::validate_population(population, col_data = "popn")
   
   popmodules::validate_population(fertility, col_data = "rate")

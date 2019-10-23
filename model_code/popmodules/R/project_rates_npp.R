@@ -1,12 +1,11 @@
 #' Project mortality/fertility rates forward based on a national trend
 #'
-#' Applies the national rate of change in fertility to a set of local
+#' Applies the national rate of change in mortality/fertility to a set of local
 #' authority ASMRs/ASFRs to produce a mortality/fertility probability trajectory.
 #'
 #' @param jump_off_rates Dataframe. A set of LA/age/sex rates for the first projection year.
 #' @param rate_col Character. The column in the jump_off_rates dataframe containing the rates.
-#' @param rate_trajectory String or data frame. A national-level ASMR/ASFR
-#'   trajectory, or a filepath to it in RDS format
+#' @param rate_trajectory_filepath Character. The filepath for the national-level ASMR/ASFR trajectory.
 #' @param first_proj_yr Integer. The first projection year.
 #' @param n_proj_year Integer. Number of years to project
 #' @param npp_var Character. NPP trend variant. Either \code{2018_principal},
@@ -18,19 +17,14 @@
 #' @import assertthat
 #' @export
 
-project_rates <- function(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var="2016_principal"){
+project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
 
   #Test/validate
   #check_validate_proj_mort_rates(jump_off_rates, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
 
-  if(is.string(rate_trajectory)) {
-    rate_trajectory <- readRDS(rate_trajectory)
-  }
-
   final_projection_year <- first_proj_yr + n_proj_yr -1
 
-  # FIXME: check this carefully - I made a few changes and didn't think about it while I did it -- Chris
-  rates <- rate_trajectory %>%
+  rates <- readRDS(rate_trajectory_filepath) %>%
     filter(variant == npp_var) %>%
     filter(year >= first_proj_yr) %>%
     filter(year <= final_projection_year) %>%
@@ -39,12 +33,13 @@ project_rates <- function(jump_off_rates, rate_col, rate_trajectory, first_proj_
     mutate(change = change + 1,
            cumprod = cumprod(change))%>%
     ungroup() %>%
-    arrange(age,sex,year)%>%
+    arrange(age,sex,year) %>%
     left_join(select(jump_off_rates, -year), by=c("sex","age")) %>%
     rename(jump_rate = rate_col) %>%
     mutate(rate = cumprod*jump_rate) %>%
     select(gss_code, sex, age, year, rate) %>%
     rename(!!rate_col := rate) %>%
+    rbind(jump_off_rates) %>%
     arrange(gss_code,sex,age,year)
 
   return(rates)

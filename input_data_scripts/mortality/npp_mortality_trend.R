@@ -3,7 +3,9 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 max_year <- 2050
-npp_data_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/"
+npp_data_2016 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/"
+npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/"
+
 
 #function to read and wrangle raw data
 mortality_trend <- function(file, var, max_year, npp_data_location){
@@ -19,7 +21,7 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
   
   back_to_2001 <- list()
   for(y in 2001:2016){
-    back_to_2001[[y]] <- filter(mort, year == 2017) %>%
+    back_to_2001[[y]] <- filter(mort, year == max(mort$year)) %>%
       mutate(year = y)
   }
   
@@ -31,12 +33,18 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
 }
 
 #read in data
-principal <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year, npp_data_location)
-high <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year, npp_data_location)
-low <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year, npp_data_location)
+principal_2016 <- mortality_trend("Principal Mortality Assumptions.csv", "2016_principal", max_year, npp_data_2016)
+high_2016 <- mortality_trend("High Mortality Assumptions.csv", "2016_high", max_year, npp_data_2016)
+low_2016 <- mortality_trend("Low Mortality Assumptions.csv", "2016_low", max_year, npp_data_2016)
+
+principal_2018 <- mortality_trend("mortality_principal.csv", "2018_principal", max_year, npp_data_2018)
+high_2018 <- mortality_trend("mortality_high.csv", "2018_high", max_year, npp_data_2018)
+low_2018 <- mortality_trend("mortality_low.csv", "2018_low", max_year, npp_data_2018)
+
 
 #bind the variants together
-mort_trend <- rbind(principal, high, low)%>%
+mort_trend <- rbind(principal_2016, high_2016, low_2016,
+                    principal_2018, high_2018, low_2018)%>%
   mutate(age = age + 1) %>%
   filter(age %in% c(0:90)) %>%
   arrange(variant, sex, age, year) %>%
@@ -49,4 +57,4 @@ mort_trend <- rbind(principal, high, low)%>%
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(mort_trend, "input_data/mortality/npp_mortality_trend.rds" )
 
-rm(high, low, principal, mort_trend, max_year, npp_data_location, x, mortality_trend)
+rm(list=ls())

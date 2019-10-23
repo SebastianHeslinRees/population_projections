@@ -20,7 +20,7 @@
 #' @importFrom dplyr filter
 #' @examples
 #'
-#' int_in <- popmodules::component_proj_from_file(filepath = "my_int_in_file.rds", first_proj_yr = 2018)
+#' int_in <- popmodules::component_proj_from_file(filepath = "my_int_in_file.rds", proj_yrs = 2011:2020, col_data = "int_in")
 #'
 #' @export
 #'
@@ -42,7 +42,7 @@ component_proj_from_file <- function(filepath,
 
   component_proj <- filter_at(component_proj, vars(col_year), any_vars(. %in% proj_yrs))
   # return component_proj
-  component_proj
+  return(component_proj)
 
 }
 

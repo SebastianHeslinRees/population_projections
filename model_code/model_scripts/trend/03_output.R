@@ -1,5 +1,6 @@
 output_projection <- function(projection, output_dir, timestamp) {
-  # TODO create dir if it doesn't exist
+  
+  dir.create(output_dir, recursive = T, showWarnings = F)
   
   # TODO add timestamp to file name and pass in from control.R
   
