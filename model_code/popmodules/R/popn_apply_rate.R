@@ -268,7 +268,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
                       col_aggregation = unname(col_aggregation_rate),
                       col_data = col_rate,
                       test_complete = !missing_levels_rate,
-                      test_unique = TRUE,
+                      test_unique = FALSE,
                       check_negative_values = FALSE)
   if(!missing_levels_rate) {
     validate_join_population(popn,
