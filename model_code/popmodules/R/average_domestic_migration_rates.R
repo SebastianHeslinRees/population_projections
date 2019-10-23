@@ -21,7 +21,8 @@
 average_domestic_migration_rates <- function(origin_destination_rates,
                                              last_data_year,
                                              years_to_avg,
-                                             col_rate = "rate") {
+                                             col_rate = "rate",
+                                             rate_cap = 0.8) {
   # validate input
   check_average_domestic_rate_input(origin_destination_rates, last_data_year, years_to_avg, col_rate)
   if(col_rate != "rate") {
