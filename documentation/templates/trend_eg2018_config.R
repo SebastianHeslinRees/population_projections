@@ -1,6 +1,6 @@
 # config file for model runs
 
-#devtools::load_all("model_code/popmodules")
+devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 20
