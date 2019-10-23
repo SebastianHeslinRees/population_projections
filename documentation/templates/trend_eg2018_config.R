@@ -30,9 +30,11 @@ fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 5
+int_out_flow_or_rate <- "rate"
 
 int_in_last_data_year <- 2018
 int_in_years_to_avg <- 5
+int_in_flow_or_rate <- "flow"
 
 #-------------------------------------------------
 
@@ -81,7 +83,7 @@ int_out_rate_fns <- list(
   list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
                                                                  births_mye_path = births_mye_path,
                                                                  component_path = int_out_mye_path,
-                                                                 flow_or_rate = "rate",
+                                                                 flow_or_rate = int_out_flow_or_rate,
                                                                  last_data_year = int_out_last_data_year,
                                                                  years_to_avg = int_out_years_to_avg,
                                                                  data_col = "int_out",
@@ -91,7 +93,7 @@ int_out_rate_fns <- list(
 
 int_in_fns <- list(
   list(fn = popmodules::international_rates_and_flows, args=list(component_path = int_in_mye_path,
-                                                                 flow_or_rate = "flow",
+                                                                 flow_or_rate = int_in_flow_or_rate,
                                                                  last_data_year = int_in_last_data_year,
                                                                  years_to_avg = int_in_years_to_avg,
                                                                  data_col = "int_in",
