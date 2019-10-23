@@ -68,10 +68,12 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     validate_population(deaths, col_data = "deaths", comparison_pop = mutate(curr_yr_popn, year=year+1))
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
     
+    natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("gss_code","sex","age")) %>%
+      mutate(popn - popn - deaths) %>%
+      select(-deaths)
     
     # TODO add switch for changing whether international out is rates based, or just numbers to match international in
-    
-    int_out <- calc_int_out(popn = aged_popn_w_births,
+    int_out <- calc_int_out(popn = natural_change_popn,
                             component_rate = filter(int_out_rate, year == my_year),
                             col_popn = "popn",
                             col_rate = "rate",
@@ -85,7 +87,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     # TODO adapt this to write out gss-to-gss flows by SYA
     # TODO adapt this to work with time-varying migration rates
-    domestic_flow <- aged_popn_w_births %>%
+    domestic_flow <- natural_change_popn %>%
       calc_dom_mign(mign_rate = dom_rate,
                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
                     col_gss_destination = "gss_in",
@@ -97,6 +99,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                     missing_levels_rate = TRUE) %>%
       mutate(year = my_year)
     
+    #TODO Look at whether its worth doing this in data.table
     dom_out <- domestic_flow %>%
       group_by(year, gss_out, sex, age) %>%
       summarise(dom_out = sum(flow)) %>%
@@ -107,17 +110,15 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       summarise(dom_in = sum(flow)) %>%
       rename(gss_code = gss_in)
     
+    #TODO Do we need to do this in the model core - inconsistent with what we do for international
     dom_net <- left_join(dom_out, dom_in, by = c("year", "gss_code", "sex", "age")) %>%
       tidyr::replace_na(list(dom_out = 0, dom_in = 0)) %>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
       mutate(dom_net = dom_in - dom_out)
       
       
-      
-      
-    next_yr_popn <- aged_popn_w_births %>% 
+    next_yr_popn <- natural_change_popn %>% 
       arrange(year, gss_code, sex, age) %>%
-      left_join(deaths, by = c("year", "gss_code", "age", "sex")) %>%
       left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
       left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
       left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
@@ -143,7 +144,6 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     curr_yr_popn <- next_yr_popn
   }
   
-
   proj_popn   <- data.frame(data.table::rbindlist(proj_popn))
   proj_deaths <- data.frame(data.table::rbindlist(proj_deaths))
   proj_births <- data.frame(data.table::rbindlist(proj_births))

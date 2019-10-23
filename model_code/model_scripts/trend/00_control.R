@@ -79,14 +79,17 @@ run_trend_model <- function(config_list) {
   
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
-  # TODO is this the best way to handle the Wales problem
+  
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
   births <- births %>% select(year, gss_code, age, sex, births)
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
-  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out)
-  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in)
+  
+  #TODO Figure out why the core outputs these in a different order to other components
+  #For now just switch the order here
+  dom_out <- dom_out %>% select(year, gss_code, sex, age, dom_out)
+  dom_in <- dom_in %>% select(year, gss_code, sex, age, dom_in)
   
   
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
