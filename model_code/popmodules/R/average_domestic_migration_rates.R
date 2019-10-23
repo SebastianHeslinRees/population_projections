@@ -8,6 +8,7 @@
 #'   averages.
 #' @param years_to_avg numeric. The number of years to use in calculating averages.
 #' @param col_rate Character. The column in the \code{origin_destinatation_flows} dataframe containing the rates
+#' @param rate_cap Numeric. A value which calculated rates cannot exceed. Where rates exceed \code{rate_cap} they are limited to the value of \code{rate_cap}.
 #'
 #' @return A data frame of origin-destination migration probabilities by LA, year, sex and age.
 #'
