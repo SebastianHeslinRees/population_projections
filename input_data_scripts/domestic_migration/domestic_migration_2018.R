@@ -14,7 +14,8 @@ domestic <- readRDS(domestic_file) %>%
 
 domestic <- domestic %>%
   popmodules::recode_gss_to_2011(col_geog="gss_in", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum)) %>%
-  popmodules::recode_gss_to_2011(col_geog="gss_out", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum))
+  popmodules::recode_gss_to_2011(col_geog="gss_out", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum)) %>%
+  mutate(year = as.numeric(year))
 
 
 dir.create("input_data/domestic_migration/", showWarnings = T)
