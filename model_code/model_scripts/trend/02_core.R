@@ -67,9 +67,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                           col_component = "deaths")
     validate_population(deaths, col_data = "deaths", comparison_pop = mutate(curr_yr_popn, year=year+1))
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
-    
-    natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("gss_code","sex","age")) %>%
-      mutate(popn - popn - deaths) %>%
+   
+    #TODO do this better
+    natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
+      mutate(popn = popn - deaths) %>%
       select(-deaths)
     
     # TODO add switch for changing whether international out is rates based, or just numbers to match international in
@@ -122,8 +123,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
       left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
       left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
-      mutate(popn = popn - deaths - int_out + int_in + dom_net) %>%
-      select(-c(deaths, int_in, int_out, dom_in, dom_out, dom_net)) %>%
+      mutate(popn = popn - int_out + int_in + dom_net) %>%
+      select(-c(int_in, int_out, dom_in, dom_out, dom_net)) %>%
       # FIXME / TODO This setup creates negative populations - should we add
       # deaths/int/domestic migration as soon as each is calculated?? For now
       # I'm just setting -ve pops to zero and noting this in the pull request
