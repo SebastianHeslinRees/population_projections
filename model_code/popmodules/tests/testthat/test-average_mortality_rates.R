@@ -22,6 +22,14 @@ pop_data <- expand.grid(year = c(2001:2005),
 
 pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
 
+birth_dom <- mutate(pop_data, year=year+1) %>%
+  filter(year != max(year)) %>%
+  left_join(pop_data, by=c("gss_code","year","sex","age")) %>%
+  mutate(popn = (popn.x + popn.y)/2)       %>%
+  mutate(popn = ifelse(is.na(popn),0,popn)) %>%
+  select(gss_code, year, sex, age, popn) %>%
+  arrange(gss_code, year, sex, age)
+
 births <- expand.grid(year = c(2001:2005),
                       gss_code = c("E0901", "E0902"),
                       age = c(0:90),
@@ -42,7 +50,7 @@ curves <- expand.grid(gss_code = c("E0901", "E0902"),
                       age = c(0:90),
                       sex = c("male", "female"),
                       stringsAsFactors = F)
-curves$death_rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
+curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
 
 aged <- pop_data %>%
   mutate(year = year + 1) %>%
@@ -51,10 +59,12 @@ aged <- pop_data %>%
   summarise(popn = sum(popn)) %>%
   data.frame() %>%
   filter(year != max(year)) %>%
-  rbind(filter(births, age==0) %>% select(gss_code, age, sex, year, popn = births))
+  rbind(filter(births, age==0) %>% select(gss_code, age, sex, year, popn = births)) %>%
+  select(gss_code, year, sex, age, popn) %>%
+  arrange(gss_code, year, sex, age)
 
 scaling_backseries <- left_join(aged, curves, by = c("gss_code", "age", "sex")) %>%
-  mutate(curve_deaths = death_rate * popn) %>%
+  mutate(curve_deaths = rate * popn) %>%
   left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
   group_by(gss_code, year, sex) %>%
   summarise(actual_deaths = sum(deaths),
@@ -72,7 +82,7 @@ years_to_avg <- 3
 back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
 
 
-mean <- averaged <- filter(scaling_backseries, year %in% back_years) %>%
+mean <- filter(scaling_backseries, year %in% back_years) %>%
   group_by(gss_code, sex) %>%
   summarise(scaling = sum(scaling)/years_to_avg) %>%
   data.frame() %>%
@@ -81,7 +91,8 @@ mean <- averaged <- filter(scaling_backseries, year %in% back_years) %>%
 
 mean <- curves %>%
   left_join(mean, by = c("gss_code", "sex")) %>%
-  mutate(death_rate = scaling * death_rate)
+  mutate(death_rate = scaling * rate) %>%
+  select(gss_code, year, sex, age, death_rate)
 
 trend <- scaling_backseries %>%
   filter(year %in% back_years) %>%
@@ -101,21 +112,37 @@ trend <- scaling_backseries %>%
 
 trend <- curves %>%
   left_join(trend, by = c("gss_code", "sex")) %>%
-  mutate(death_rate = scaling * death_rate)
+  mutate(death_rate = scaling * rate) %>%
+  select(gss_code, year, sex, age, death_rate)
+
+
+#-----------------------------------------------------------
+
+test_that("deaths_denominator produces the expected output",{
+  expect_equivalent(
+    deaths_denominator(list(pop_data, births)), aged)
+})
+
+test_that("births_denominator produces the expected output",{
+  expect_equivalent(
+    births_denominator(pop_data), birth_dom)
+})
 
 
 test_that("project_mortality_rates produces the expected output", {
   expect_equivalent(
-    initial_year_mortality_rate(pop_data, births, deaths, curves,
-                                last_data_year, years_to_avg, avg_or_trend="average"),
+    initial_year_rate(list(pop_data, births), deaths, curves,
+                      last_data_year, years_to_avg, avg_or_trend="average",
+                      data_col = "deaths", output_col = "death_rate"),
     mean)
 })
 
 
 test_that("project_mortality_rates produces the expected output", {
   expect_equivalent(
-    initial_year_mortality_rate(pop_data, births, deaths, curves,
-                                last_data_year, years_to_avg, avg_or_trend="trend"),
+    initial_year_rate(list(pop_data, births), deaths, curves,
+                      last_data_year, years_to_avg, avg_or_trend="trend",
+                      data_col = "deaths", output_col = "death_rate"),
     trend)
 })
 

@@ -5,7 +5,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   library(dplyr)
   library(assertthat)
   library(popmodules)
-  
+
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              fertility, mortality, int_out_rate, int_in_proj,
                              first_proj_yr, n_proj_yr)
