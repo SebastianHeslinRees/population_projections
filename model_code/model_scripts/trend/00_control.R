@@ -20,7 +20,9 @@ run_trend_model <- function(config_list) {
   # TODO: change this to look for a config template file?
   expected_config <- c("first_proj_yr", 
                        "n_proj_yr",
-                       "years_to_avg",
+                       "years_to_avg_domestic",
+                       "years_to_avg_international",
+                       "years_to_average_mortality",
                        "popn_mye_path", 
                        "deaths_mye_path", 
                        "births_mye_path", 
