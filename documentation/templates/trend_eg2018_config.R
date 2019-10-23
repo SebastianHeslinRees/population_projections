@@ -1,6 +1,6 @@
 # config file for model runs
 
-#devtools::load_all("model_code/popmodules")
+devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 20
@@ -50,7 +50,7 @@ mortality_fns <- list(
                                                             data_col = "deaths",
                                                             output_col = "rate")),
   
-  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
+  list(fn = popmodules::project_rates_npp, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = mortality_trajectory_filepath,
                                                    first_proj_yr = first_proj_yr,
                                                    n_proj_yr = n_proj_yr,
@@ -69,7 +69,7 @@ fertility_fns <- list(
                                                            data_col = "births",
                                                            output_col = "rate")),
   
-  list(fn = popmodules::project_rates, args = list(rate_col = "rate",
+  list(fn = popmodules::project_rates_npp, args = list(rate_col = "rate",
                                                    rate_trajectory_filepath = fertility_trajectory_filepath,
                                                    first_proj_yr = first_proj_yr,
                                                    n_proj_yr = n_proj_yr,
