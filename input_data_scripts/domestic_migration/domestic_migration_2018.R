@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(assertthat)
+library(data.table)
 
 message("domestic migration")
 
