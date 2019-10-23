@@ -183,6 +183,7 @@ get_rate_backseries <- function(component_mye_path,
   data.table::setnames(rates, names(join_by), unname(join_by))
   data.table::setDF(rates)
   rates <- select(rates, -popn, -!!sym(col_component))
+  rates <- select(rates, -popn, -!!sym(col_component))
 
   if(FALSE) { # the above but with tidyverse
     rates <- left_join(popn, component, by=col_aggregation) %>%
