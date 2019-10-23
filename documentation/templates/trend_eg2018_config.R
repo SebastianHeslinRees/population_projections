@@ -5,7 +5,7 @@ devtools::load_all("model_code/popmodules")
 first_proj_yr <- 2019
 n_proj_yr <- 20
 
-datestamp <- "2019-10-22"
+datestamp <- "2019-10-11"
 
 popn_mye_path <- paste0("input_data/mye/2018/population_ons_",datestamp,".rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
