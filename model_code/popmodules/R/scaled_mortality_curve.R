@@ -44,14 +44,14 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     mutate(curve_count = rate * popn) %>%
     left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
     rename(value = data_col) %>%
-    group_by(gss_code, year, sex, age) %>%
+    group_by(gss_code, year, sex) %>%
     summarise(actual = sum(value),
               curve_count = sum(curve_count)) %>%
     ungroup() %>%
     mutate(scaling = ifelse(actual == 0,
                             0,
                             actual / curve_count)) %>%
-    select(gss_code, year, sex, age, scaling)
+    select(gss_code, year, sex, scaling)
 
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling")
