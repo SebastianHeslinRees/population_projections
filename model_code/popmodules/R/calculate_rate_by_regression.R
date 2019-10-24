@@ -15,7 +15,8 @@
 #'
 #' @export
 
-calculate_rate_by_regression <- function(data_backseries, years_to_avg, last_data_year, data_col){
+calculate_rate_by_regression <- function(data_backseries, years_to_avg, last_data_year, data_col,
+                                         col_aggregation=c("gss_code","sex")){
 
   assert_that(is.data.frame(data_backseries),
               msg="calc_trend_rate expects that data_backseries is a dataframe")
@@ -30,7 +31,7 @@ calculate_rate_by_regression <- function(data_backseries, years_to_avg, last_dat
 
 
   regression <- function(df){
-    lm(rate ~ year, data=df)
+    lm(value ~ year, data=df)
   }
 
   get_coef <- function(df){
@@ -43,7 +44,7 @@ calculate_rate_by_regression <- function(data_backseries, years_to_avg, last_dat
     rename(value = data_col) %>%
     filter(year %in% back_years) %>%
     mutate(year = years_to_avg - last_data_year + year)%>%
-    group_by(gss_code, sex, age) %>%
+    group_by_at(col_aggregation) %>%
     tidyr::nest() %>%
     mutate(
       Model = map(data, regression),
@@ -54,7 +55,7 @@ calculate_rate_by_regression <- function(data_backseries, years_to_avg, last_dat
       value = ifelse(value < 0, 0, value)) %>%
     as.data.frame()  %>%
     mutate(year = last_data_year + 1) %>%
-    select(gss_code, year, sex, age, value) %>%
+    select_at(c("year", col_aggregation, "value")) %>%
     rename(!!data_col := value)
 
   return(trended)

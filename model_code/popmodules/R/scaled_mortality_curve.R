@@ -62,11 +62,10 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
   }
 
   jump_off_rates <- target_curves %>%
-    left_join(averaged_scaling_factors, by = c("gss_code", "sex", "age")) %>%
+    left_join(averaged_scaling_factors, by = c("gss_code", "sex")) %>%
     mutate(jump_off_rate = scaling * rate) %>%
     select(gss_code, year, sex, age, jump_off_rate) %>%
     rename(!!output_col := jump_off_rate)
-
 
   return(jump_off_rates)
 

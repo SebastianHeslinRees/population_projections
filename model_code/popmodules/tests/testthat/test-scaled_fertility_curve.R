@@ -4,26 +4,25 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 
+# setwd("..")
+# setwd("..")
+# devtools::load_all()
+# setwd("..")
+# setwd("..")
 # setwd("model_code/popmodules/tests/testthat")
-# 
-popn_mye_path <- "test_data/test-popn-scaled-mort-curve.rds"
-births_mye_path <- "test_data/test-births-scaled-mort-curve.rds"
-deaths_mye_path <- "test_data/test-deaths-scaled-mort-curve.rds"
-target_curves_filepath <- "test_data/test-curves-scaled-mort-curve.rds"
+
+popn_mye_path <- "test_data/test-popn-scaled-fert-curve.rds"
+births_mye_path <- "test_data/test-births-scaled-fert-curve.rds"
+target_curves_filepath <- "test_data/test-curves-scaled-fert-curve.rds"
+birth_dom_filepath <- "test_data/test-birth_dom-scaled-fert-curve.rds"
 
 last_data_year <- 2005
 years_to_avg <- 3
 
 # #------------------------------------------------
- 
-regression <- function(df){
-  lm(scaling ~ year, data=df)
-}
-
-get_coef <- function(df){
-  coef(df)
-}
- 
+# 
+# #Data Creation
+# 
 # pop_data <- expand.grid(year = c(2001:2005),
 #                         gss_code = c("E0901", "E0902"),
 #                         age = c(0:90),
@@ -31,6 +30,14 @@ get_coef <- function(df){
 #                         stringsAsFactors = F)
 # 
 # pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
+# 
+# birth_dom <- mutate(pop_data, year=year+1) %>%
+#   filter(year != max(year)) %>%
+#   left_join(pop_data, by=c("gss_code","year","sex","age")) %>%
+#   mutate(popn = (popn.x + popn.y)/2)       %>%
+#   mutate(popn = ifelse(is.na(popn),0,popn)) %>%
+#   select(gss_code, year, sex, age, popn) %>%
+#   arrange(gss_code, year, sex, age)
 # 
 # births <- expand.grid(year = c(2001:2005),
 #                       gss_code = c("E0901", "E0902"),
@@ -41,13 +48,6 @@ get_coef <- function(df){
 # births$births <- sample(c(20:100),nrow(births), replace=T)
 # births <- mutate(births, births = ifelse(age==0, births, 0))
 # 
-# deaths <- expand.grid(year = c(2001:2005),
-#                       gss_code = c("E0901", "E0902"),
-#                       age = c(0:90),
-#                       sex = c("male", "female"),
-#                       stringsAsFactors = F)
-# deaths$deaths <- sample(c(5:15),nrow(deaths),replace=T)
-# 
 # curves <- expand.grid(gss_code = c("E0901", "E0902"),
 #                       age = c(0:90),
 #                       sex = c("male", "female"),
@@ -57,55 +57,62 @@ get_coef <- function(df){
 # 
 # saveRDS(pop_data, popn_mye_path)
 # saveRDS(births, births_mye_path)
-# saveRDS(deaths, deaths_mye_path)
 # saveRDS(curves, target_curves_filepath)
+# saveRDS(birth_dom, birth_dom_filepath)
+
+regression <- function(df){
+  lm(scaling ~ year, data=df)
+}
+
+get_coef <- function(df){
+  coef(df)
+}
 
 pop_data <- readRDS(popn_mye_path)
-births <- readRDS(births_mye_path)
-deaths <- readRDS(deaths_mye_path)
+birth_dom <- readRDS(birth_dom_filepath)
+births_data <- readRDS(births_mye_path)
 curves <- readRDS(target_curves_filepath)
 
-aged <- pop_data %>%
-  mutate(year = year + 1) %>%
-  mutate(age = ifelse(age == 90, 90, age + 1)) %>%
-  group_by(gss_code, age, sex, year) %>%
-  summarise(popn = sum(popn)) %>%
-  data.frame() %>%
-  filter(year != max(year)) %>%
-  rbind(filter(births, age==0) %>% select(gss_code, age, sex, year, popn = births)) %>%
-  select(gss_code, year, sex, age, popn) %>%
-  arrange(gss_code, year, sex, age)
+test_that("births_denominator in scaled_fertility_curve function",{
+  expect_equivalent(
+    births_denominator(pop_data), birth_dom)
+})
 
-curves <- select(curves, -year)
+curves <- select(curves, -year) %>% as.data.frame()
 
-scaling_backseries <- left_join(aged, curves, by = c("gss_code", "age", "sex")) %>%
+birth_dom <- filter(birth_dom, sex == "female", age %in% unique(curves$age))
+
+births_data <- group_by(births_data, year, gss_code) %>%
+  summarise(births = sum(births))
+
+scaling_backseries <- left_join(curves, birth_dom, by = c("gss_code", "age", "sex")) %>%
   mutate(curve_deaths = rate * popn) %>%
-  left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
-  group_by(gss_code, year, sex, age) %>%
-  summarise(actual_deaths = sum(deaths),
-            curve_deaths = sum(curve_deaths)) %>%
-  mutate(scaling = actual_deaths / curve_deaths) %>%
-  select(gss_code, year, sex, age, scaling) %>%
+  group_by(gss_code, year) %>%
+  summarise(curve_deaths = sum(curve_deaths)) %>%
+  ungroup() %>%
+  left_join(births_data, by = c("gss_code", "year")) %>%
+  mutate(scaling = births / curve_deaths) %>%
+  select(gss_code, year, scaling) %>%
   data.frame()
 
 back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
 
 mean <- filter(scaling_backseries, year %in% back_years) %>%
-  group_by(gss_code, sex) %>%
+  group_by(gss_code) %>%
   summarise(scaling = sum(scaling)/years_to_avg) %>%
   data.frame() %>%
   mutate(year = last_data_year+1) %>%
-  select(gss_code, sex, year, scaling)
+  select(gss_code, year, scaling)
 
 mean <- curves %>%
-  left_join(mean, by = c("gss_code", "sex")) %>%
+  left_join(mean, by = c("gss_code")) %>%
   mutate(rate = scaling * rate) %>%
   select(gss_code, year, sex, age, rate)
 
 trend <- scaling_backseries %>%
   filter(year %in% back_years) %>%
   mutate(year = years_to_avg - last_data_year + year)%>%
-  group_by(gss_code, sex)%>%
+  group_by(gss_code)%>%
   tidyr::nest() %>%
   mutate(
     Model = map(data, regression),
@@ -116,43 +123,31 @@ trend <- scaling_backseries %>%
     scaling = ifelse(scaling < 0, 0, scaling)) %>%
   as.data.frame()  %>%
   mutate(year = last_data_year + 1) %>%
-  select(gss_code, sex, year, scaling)
+  select(gss_code, year, scaling)
 
 trend <- curves %>%
-  left_join(trend, by = c("gss_code", "sex")) %>%
+  left_join(trend, by = c("gss_code")) %>%
   mutate(rate = scaling * rate) %>%
   select(gss_code, year, sex, age, rate)
 
-
 #-----------------------------------------------------------
 
-test_that("deaths_denominator in scaled_mortality_curve function",{
+test_that("scaled_fertility_curve function: test with mean", {
   expect_equivalent(
-    deaths_denominator(pop_data, births), aged)
-})
-
-# test_that("births_denominator produces the expected output",{
-#   expect_equivalent(
-#     births_denominator(pop_data), birth_dom)
-# })
-
-
-test_that("scaled_mortality_curve function: test with mean", {
-  expect_equivalent(
-    scaled_mortality_curve(popn_mye_path, births_mye_path, deaths_mye_path,
+    scaled_fertility_curve(popn_mye_path, births_mye_path,
                            target_curves_filepath, last_data_year,
                            years_to_avg, avg_or_trend="average",
-                           data_col = "deaths", output_col = "rate"),
+                           data_col = "births", output_col = "rate"),
     mean)
 })
 
 
-test_that("scaled_mortality_curve function: test with regression", {
+test_that("scaled_fertility_curve function: test with regression", {
   expect_equivalent(
-    scaled_mortality_curve(popn_mye_path, births_mye_path, deaths_mye_path,
+    scaled_fertility_curve(popn_mye_path, births_mye_path,
                       target_curves_filepath, last_data_year,
                       years_to_avg, avg_or_trend="trend",
-                      data_col = "deaths", output_col = "rate"),
+                      data_col = "births", output_col = "rate"),
     trend)
 })
 
