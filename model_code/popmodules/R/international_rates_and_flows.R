@@ -46,7 +46,8 @@ international_rates_and_flows <- function(popn_mye_path=NULL, births_mye_path=NU
     select(gss_code, year, sex, age, rate)
 
   #TODO: Does this need a report?
-  rates <- calculate_mean_from_backseries(rate_backseries, years_to_avg, last_data_year, "rate") %>%
+  rates <- calculate_mean_from_backseries(rate_backseries, years_to_avg, last_data_year, "rate",
+                                          col_aggregation = c("gss_code","sex","age")) %>%
     mutate(rate = ifelse(rate > 0.8, 0.8, rate))
 
 

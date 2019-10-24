@@ -42,3 +42,4 @@ validate_project_forward_flat_inputs <- function(df, first_proj_yr, hold_yr) {
   assert_that(first_proj_yr > hold_yr, msg = "first projection year must be later than the hold year")
   invisible(TRUE)
 }
+
