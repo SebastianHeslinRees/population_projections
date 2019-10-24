@@ -19,12 +19,16 @@ run_trend_model <- function(config_list) {
   # check that the config_list contains expected variables 
   # TODO: change this to look for a config template file?
   expected_config <- c("first_proj_yr", 
-                       "n_proj_yr", 
+                       "n_proj_yr",
                        "popn_mye_path", 
                        "deaths_mye_path", 
                        "births_mye_path", 
                        "int_out_mye_path", 
                        "int_in_mye_path",
+                       "dom_out_mye_path",
+                       "dom_in_mye_path",
+                       "dom_origin_destination_path",
+                       "dom_rate_fns",
                        "outputs_dir", 
                        "mortality_fns", 
                        "fertility_fns",
@@ -45,7 +49,7 @@ run_trend_model <- function(config_list) {
                                 max_yr = config_list$first_proj_yr - 1)
   
   births <- get_component(filepath = config_list$births_mye_path,
-                                  max_yr = config_list$first_proj_yr - 1)
+                                  max_yr = config_list$first_proj_yr - 1) 
   
   int_out <- get_component(filepath = config_list$int_out_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
@@ -53,7 +57,12 @@ run_trend_model <- function(config_list) {
   int_in <- get_component(filepath = config_list$int_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
-  # TODO: check that deaths and births have same geography, age, and sex coverage as population
+  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
+  
+  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
+                          max_yr = config_list$first_proj_yr - 1)
+  
   
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
@@ -66,18 +75,29 @@ run_trend_model <- function(config_list) {
 
   int_in_proj <- evaluate_fns_list(config_list$int_in_fns)
   
+  dom_rate <- evaluate_fns_list(config_list$dom_rate_fns)
+  
+  
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
-  # TODO is this the best way to handle the Wales problem
+  
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
   births <- births %>% select(year, gss_code, age, sex, births)
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
   
+  #TODO Figure out why the core outputs these in a different order to other components
+  #For now just switch the order here
+  dom_out <- dom_out %>% select(year, gss_code, sex, age, dom_out)
+  dom_in <- dom_in %>% select(year, gss_code, sex, age, dom_in)
+  
+  
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
   mortality <- mortality %>% select(year, gss_code, age, sex, rate)
   int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, rate)
   int_in_proj <- int_in_proj %>% select(year, gss_code, age, sex, int_in)
+  dom_rate <- dom_rate %>% select(gss_out, gss_in, age, sex, rate)
+  
 
   # TODO fix the fertility data so we don't have to do this
   if(any(fertility$rate > 1)) {
@@ -91,10 +111,12 @@ run_trend_model <- function(config_list) {
    
   ## run the core
   projection <- trend_core(population, births, deaths, int_out, int_in, 
-                           fertility, mortality, int_out_rate, int_in_proj, 
+                           fertility, mortality, int_out_rate, int_in_proj,
+                           dom_in, dom_out, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr)
   
   ## write the output data
+  dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
   output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
   
   ## output the QA

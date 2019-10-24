@@ -7,7 +7,7 @@ output_projection <- function(projection, output_dir, timestamp) {
   if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
   
   lapply(seq_along(projection), 
-         function(i) write_rds(projection[[i]], paste0(output_dir, names(projection)[[i]],timestamp, ".rds"), "gz")) %>%
+         function(i) saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]],timestamp, ".rds"), compress = "gzip")) %>%
     invisible()
   
 }
