@@ -275,11 +275,13 @@ popn_age_on <- function(popn,
     
     births <- births %>%
       filter(age == 0) %>%
-      mutate(year = year + 1) %>%
       rename(popn = births) %>%
       select(names(aged))
     
-    aged <- rbind(births, aged)
+    common_years <- intersect(aged[["year"]], births[["year"]])
+    
+    aged <- rbind(births, aged)%>%
+      filter(year %in% common_years) 
     
   }
   
