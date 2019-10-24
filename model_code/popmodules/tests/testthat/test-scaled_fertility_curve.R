@@ -4,21 +4,61 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 
-setwd("..")
-setwd("..")
-devtools::load_all()
-setwd("..")
-setwd("..")
-setwd("model_code/popmodules/tests/testthat")
+# setwd("..")
+# setwd("..")
+# devtools::load_all()
+# setwd("..")
+# setwd("..")
+# setwd("model_code/popmodules/tests/testthat")
 
-popn_mye_path <- "test_data/test-popn-scaled-mort-curve.rds"
-births_mye_path <- "test_data/test-births-scaled-mort-curve.rds"
-target_curves_filepath <- "test_data/test-curves-scaled-mort-curve.rds"
+popn_mye_path <- "test_data/test-popn-scaled-fert-curve.rds"
+births_mye_path <- "test_data/test-births-scaled-fert-curve.rds"
+target_curves_filepath <- "test_data/test-curves-scaled-fert-curve.rds"
+birth_dom_filepath <- "test_data/test-birth_dom-scaled-fert-curve.rds"
 
 last_data_year <- 2005
 years_to_avg <- 3
 
-#------------------------------------------------
+# #------------------------------------------------
+# 
+# #Data Creation
+# 
+# pop_data <- expand.grid(year = c(2001:2005),
+#                         gss_code = c("E0901", "E0902"),
+#                         age = c(0:90),
+#                         sex = c("male", "female"),
+#                         stringsAsFactors = F)
+# 
+# pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
+# 
+# birth_dom <- mutate(pop_data, year=year+1) %>%
+#   filter(year != max(year)) %>%
+#   left_join(pop_data, by=c("gss_code","year","sex","age")) %>%
+#   mutate(popn = (popn.x + popn.y)/2)       %>%
+#   mutate(popn = ifelse(is.na(popn),0,popn)) %>%
+#   select(gss_code, year, sex, age, popn) %>%
+#   arrange(gss_code, year, sex, age)
+# 
+# births <- expand.grid(year = c(2001:2005),
+#                       gss_code = c("E0901", "E0902"),
+#                       age = c(0:90),
+#                       sex = c("male", "female"),
+#                       stringsAsFactors = F)
+# 
+# births$births <- sample(c(20:100),nrow(births), replace=T)
+# births <- mutate(births, births = ifelse(age==0, births, 0))
+# 
+# curves <- expand.grid(gss_code = c("E0901", "E0902"),
+#                       age = c(0:90),
+#                       sex = c("male", "female"),
+#                       year = 2005,
+#                       stringsAsFactors = F)
+# curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
+# 
+# saveRDS(pop_data, popn_mye_path)
+# saveRDS(births, births_mye_path)
+# saveRDS(curves, target_curves_filepath)
+# saveRDS(birth_dom, birth_dom_filepath)
 
 regression <- function(df){
   lm(scaling ~ year, data=df)
@@ -28,57 +68,29 @@ get_coef <- function(df){
   coef(df)
 }
 
-pop_data <- expand.grid(year = c(2001:2005),
-                        gss_code = c("E0901", "E0902"),
-                        age = c(0:90),
-                        sex = c("male", "female"),
-                        stringsAsFactors = F)
-
-pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
-
-birth_dom <- mutate(pop_data, year=year+1) %>%
-  filter(year != max(year)) %>%
-  left_join(pop_data, by=c("gss_code","year","sex","age")) %>%
-  mutate(popn = (popn.x + popn.y)/2)       %>%
-  mutate(popn = ifelse(is.na(popn),0,popn)) %>%
-  select(gss_code, year, sex, age, popn) %>%
-  arrange(gss_code, year, sex, age)
+pop_data <- readRDS(popn_mye_path)
+birth_dom <- readRDS(birth_dom_filepath)
+births_data <- readRDS(births_mye_path)
+curves <- readRDS(target_curves_filepath)
 
 test_that("births_denominator in scaled_fertility_curve function",{
   expect_equivalent(
     births_denominator(pop_data), birth_dom)
 })
 
-births <- expand.grid(year = c(2001:2005),
-                      gss_code = c("E0901", "E0902"),
-                      age = c(0:90),
-                      sex = c("male", "female"),
-                      stringsAsFactors = F)
-
-births$births <- sample(c(20:100),nrow(births), replace=T)
-births <- mutate(births, births = ifelse(age==0, births, 0))
-
-curves <- expand.grid(gss_code = c("E0901", "E0902"),
-                      age = c(0:90),
-                      sex = c("male", "female"),
-                      year = 2005,
-                      stringsAsFactors = F)
-curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
-
-saveRDS(pop_data, popn_mye_path)
-saveRDS(births, births_mye_path)
-saveRDS(curves, target_curves_filepath)
-
-curves <- select(curves, -year)
+curves <- select(curves, -year) %>% as.data.frame()
 
 birth_dom <- filter(birth_dom, sex == "female", age %in% unique(curves$age))
+
+births_data <- group_by(births_data, year, gss_code) %>%
+  summarise(births = sum(births))
 
 scaling_backseries <- left_join(curves, birth_dom, by = c("gss_code", "age", "sex")) %>%
   mutate(curve_deaths = rate * popn) %>%
   group_by(gss_code, year) %>%
   summarise(curve_deaths = sum(curve_deaths)) %>%
   ungroup() %>%
-  left_join(births, by = c("gss_code", "year")) %>%
+  left_join(births_data, by = c("gss_code", "year")) %>%
   mutate(scaling = births / curve_deaths) %>%
   select(gss_code, year, scaling) %>%
   data.frame()
@@ -118,10 +130,6 @@ trend <- curves %>%
   mutate(rate = scaling * rate) %>%
   select(gss_code, year, sex, age, rate)
 
-rm(list=setdiff(ls(),c("trend","mean","pop_data",
-                       "popn_mye_path", "births_mye_path",
-                       "target_curves_filepath","years_to_avg",
-                       "last_data_year")))
 #-----------------------------------------------------------
 
 test_that("scaled_fertility_curve function: test with mean", {

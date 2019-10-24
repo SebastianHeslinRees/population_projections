@@ -4,9 +4,8 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 
-
-setwd("model_code/popmodules/tests/testthat")
-
+# setwd("model_code/popmodules/tests/testthat")
+# 
 popn_mye_path <- "test_data/test-popn-scaled-mort-curve.rds"
 births_mye_path <- "test_data/test-births-scaled-mort-curve.rds"
 deaths_mye_path <- "test_data/test-deaths-scaled-mort-curve.rds"
@@ -15,8 +14,8 @@ target_curves_filepath <- "test_data/test-curves-scaled-mort-curve.rds"
 last_data_year <- 2005
 years_to_avg <- 3
 
-#------------------------------------------------
-
+# #------------------------------------------------
+ 
 regression <- function(df){
   lm(scaling ~ year, data=df)
 }
@@ -24,50 +23,47 @@ regression <- function(df){
 get_coef <- function(df){
   coef(df)
 }
+ 
+# pop_data <- expand.grid(year = c(2001:2005),
+#                         gss_code = c("E0901", "E0902"),
+#                         age = c(0:90),
+#                         sex = c("male", "female"),
+#                         stringsAsFactors = F)
+# 
+# pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
+# 
+# births <- expand.grid(year = c(2001:2005),
+#                       gss_code = c("E0901", "E0902"),
+#                       age = c(0:90),
+#                       sex = c("male", "female"),
+#                       stringsAsFactors = F)
+# 
+# births$births <- sample(c(20:100),nrow(births), replace=T)
+# births <- mutate(births, births = ifelse(age==0, births, 0))
+# 
+# deaths <- expand.grid(year = c(2001:2005),
+#                       gss_code = c("E0901", "E0902"),
+#                       age = c(0:90),
+#                       sex = c("male", "female"),
+#                       stringsAsFactors = F)
+# deaths$deaths <- sample(c(5:15),nrow(deaths),replace=T)
+# 
+# curves <- expand.grid(gss_code = c("E0901", "E0902"),
+#                       age = c(0:90),
+#                       sex = c("male", "female"),
+#                       year = 2005,
+#                       stringsAsFactors = F)
+# curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
+# 
+# saveRDS(pop_data, popn_mye_path)
+# saveRDS(births, births_mye_path)
+# saveRDS(deaths, deaths_mye_path)
+# saveRDS(curves, target_curves_filepath)
 
-pop_data <- expand.grid(year = c(2001:2005),
-                        gss_code = c("E0901", "E0902"),
-                        age = c(0:90),
-                        sex = c("male", "female"),
-                        stringsAsFactors = F)
-
-pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
-
-# birth_dom <- mutate(pop_data, year=year+1) %>%
-#   filter(year != max(year)) %>%
-#   left_join(pop_data, by=c("gss_code","year","sex","age")) %>%
-#   mutate(popn = (popn.x + popn.y)/2)       %>%
-#   mutate(popn = ifelse(is.na(popn),0,popn)) %>%
-#   select(gss_code, year, sex, age, popn) %>%
-#   arrange(gss_code, year, sex, age)
-
-births <- expand.grid(year = c(2001:2005),
-                      gss_code = c("E0901", "E0902"),
-                      age = c(0:90),
-                      sex = c("male", "female"),
-                      stringsAsFactors = F)
-
-births$births <- sample(c(20:100),nrow(births), replace=T)
-births <- mutate(births, births = ifelse(age==0, births, 0))
-
-deaths <- expand.grid(year = c(2001:2005),
-                      gss_code = c("E0901", "E0902"),
-                      age = c(0:90),
-                      sex = c("male", "female"),
-                      stringsAsFactors = F)
-deaths$deaths <- sample(c(5:15),nrow(deaths),replace=T)
-
-curves <- expand.grid(gss_code = c("E0901", "E0902"),
-                      age = c(0:90),
-                      sex = c("male", "female"),
-                      year = 2005,
-                      stringsAsFactors = F)
-curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
-
-saveRDS(pop_data, popn_mye_path)
-saveRDS(births, births_mye_path)
-saveRDS(deaths, deaths_mye_path)
-saveRDS(curves, target_curves_filepath)
+pop_data <- readRDS(popn_mye_path)
+births <- readRDS(births_mye_path)
+deaths <- readRDS(deaths_mye_path)
+curves <- readRDS(target_curves_filepath)
 
 aged <- pop_data %>%
   mutate(year = year + 1) %>%
