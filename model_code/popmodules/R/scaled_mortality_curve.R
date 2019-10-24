@@ -83,14 +83,9 @@ deaths_denominator <- function(population, births){
               msg="deaths_denominator expects population[[2]] to be a dataframe")
 
   #Deaths denominator
-  births <- births %>%
-    filter(age==0) %>%
-    rename(popn = births)
-
   population <- population %>%
-    popmodules::popn_age_on() %>%
+    popmodules::popn_age_on(births=births) %>%
     filter(year != max(year)) %>%
-    rbind(births)%>%
     select(gss_code, year, sex, age, popn) %>%
     arrange(gss_code, year, sex, age)
 
