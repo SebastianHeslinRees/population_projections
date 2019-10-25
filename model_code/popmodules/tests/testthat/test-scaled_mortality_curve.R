@@ -5,7 +5,7 @@ library(tidyr)
 library(purrr)
 
 # setwd("model_code/popmodules/tests/testthat")
-# 
+#
 popn_mye_path <- "test_data/test-popn-scaled-mort-curve.rds"
 births_mye_path <- "test_data/test-births-scaled-mort-curve.rds"
 deaths_mye_path <- "test_data/test-deaths-scaled-mort-curve.rds"
@@ -15,7 +15,7 @@ last_data_year <- 2005
 years_to_avg <- 3
 
 # #------------------------------------------------
- 
+
 regression <- function(df){
   lm(scaling ~ year, data=df)
 }
@@ -23,38 +23,38 @@ regression <- function(df){
 get_coef <- function(df){
   coef(df)
 }
- 
+
 # pop_data <- expand.grid(year = c(2001:2005),
 #                         gss_code = c("E0901", "E0902"),
 #                         age = c(0:90),
 #                         sex = c("male", "female"),
 #                         stringsAsFactors = F)
-# 
+#
 # pop_data$popn <- sample(c(20:100),nrow(pop_data), replace=T)
-# 
+#
 # births <- expand.grid(year = c(2001:2005),
 #                       gss_code = c("E0901", "E0902"),
 #                       age = c(0:90),
 #                       sex = c("male", "female"),
 #                       stringsAsFactors = F)
-# 
+#
 # births$births <- sample(c(20:100),nrow(births), replace=T)
 # births <- mutate(births, births = ifelse(age==0, births, 0))
-# 
+#
 # deaths <- expand.grid(year = c(2001:2005),
 #                       gss_code = c("E0901", "E0902"),
 #                       age = c(0:90),
 #                       sex = c("male", "female"),
 #                       stringsAsFactors = F)
 # deaths$deaths <- sample(c(5:15),nrow(deaths),replace=T)
-# 
+#
 # curves <- expand.grid(gss_code = c("E0901", "E0902"),
 #                       age = c(0:90),
 #                       sex = c("male", "female"),
 #                       year = 2005,
 #                       stringsAsFactors = F)
 # curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
-# 
+#
 # saveRDS(pop_data, popn_mye_path)
 # saveRDS(births, births_mye_path)
 # saveRDS(deaths, deaths_mye_path)
@@ -78,14 +78,14 @@ aged <- pop_data %>%
 
 curves <- select(curves, -year)
 
-scaling_backseries <- left_join(aged, curves, by = c("gss_code", "age", "sex")) %>%
+scaling_backseries_1 <- left_join(aged, curves, by = c("gss_code", "age", "sex")) %>%
   mutate(curve_deaths = rate * popn) %>%
   left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
-  group_by(gss_code, year, sex, age) %>%
+  group_by(gss_code, year, sex) %>%
   summarise(actual_deaths = sum(deaths),
             curve_deaths = sum(curve_deaths)) %>%
   mutate(scaling = actual_deaths / curve_deaths) %>%
-  select(gss_code, year, sex, age, scaling) %>%
+  select(gss_code, year, sex, scaling) %>%
   data.frame()
 
 back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
