@@ -10,7 +10,7 @@
 #' @param target_curves_filepath Character. Path to the SNPP target fertility curves
 #' @param last_data_year numeric. The last year of death data on which to calculate
 #'   averages.
-#' @param years_to_avg numeric. The number of years to use in calculating averages.
+#' @param n_years_to_avg numeric. The number of years to use in calculating averages.
 #' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
 #'   or by linear regression \code{Trend}.
 #' @param data_col Character. The column in the \code{births} dataframe containing the rates. Defaults to \code{births}
@@ -26,7 +26,7 @@
 
 
 scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
-                                  years_to_avg, avg_or_trend, data_col="births", output_col){
+                                  n_years_to_avg, avg_or_trend, data_col="births", output_col){
 
   validate_scaled_fertility_curve_filetype(popn_mye_path, births_mye_path, target_curves_filepath)
 
@@ -34,7 +34,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
   births <- data.frame(readRDS(births_mye_path))
   target_curves <- readRDS(target_curves_filepath) %>% select(-year)
 
-  # check_init_rate(population, component_data, target_curves, last_data_year, years_to_avg,
+  # check_init_rate(population, component_data, target_curves, last_data_year, n_years_to_avg,
   #                 avg_or_trend, data_col, output_col)
 
     population <- births_denominator(population)
@@ -57,12 +57,12 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
       select(gss_code, year, scaling)
 
     if(avg_or_trend == "trend"){
-      averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, years_to_avg, last_data_year, data_col="scaling",
+      averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
                                                                col_aggregation = "gss_code")
     }
 
     if(avg_or_trend == "average"){
-      averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, years_to_avg, last_data_year, data_col="scaling",
+      averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, n_years_to_avg, last_data_year, data_col="scaling",
                                                                  col_aggregation = "gss_code")
     }
 
@@ -100,7 +100,7 @@ births_denominator <- function(population) {
 
 # Function to check that the input to initial_year_mortality_rates is all legal
 
-check_init_rate <- function(population, births, target_curves, last_data_year, years_to_avg,
+check_init_rate <- function(population, births, target_curves, last_data_year, n_years_to_avg,
                             avg_or_trend, data_col, output_col){
 
   # test input parameters are of the correct type
@@ -113,8 +113,8 @@ check_init_rate <- function(population, births, target_curves, last_data_year, y
               msg="initial_year_rate expects that target_curves is a data frame")
   assert_that(is.numeric(last_data_year),
               msg="initial_year_rate expects that last_data_year is an numeric")
-  assert_that(is.numeric(years_to_avg),
-              msg="initial_year_rate expects that years_to_avg is an numeric")
+  assert_that(is.numeric(n_years_to_avg),
+              msg="initial_year_rate expects that n_years_to_avg is an numeric")
   assert_that(is.character(avg_or_trend),
               msg="initial_year_rate expects that avg_or_trend is a character")
   assert_that(is.character(data_col),
