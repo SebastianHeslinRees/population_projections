@@ -20,7 +20,8 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
     select(sex, age, year, rate)
   
   back_to_2001 <- list()
-  for(y in 2001:2016){
+  min_year <- min(mort$year)
+  for(y in 2001:(min_year -1)){
     back_to_2001[[y]] <- filter(mort, year == max(mort$year)) %>%
       mutate(year = y)
   }
