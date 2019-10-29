@@ -138,6 +138,21 @@ popn_constrain <- function(popn,
     mutate(popn_total__ = sum(!!sym(col_popn_x)),
            scaling__ = !!sym(col_popn_y)/popn_total__,
            popn_scaled__ = !!sym(col_popn_x) * scaling__)
+  
+  #Using generic function - the above validation has been transferred to the function
+  #so it would be removed from here
+  #reminder: would also need to amend output dataframe (esp. line 165)
+  do_scale <- filter(births, substr(gss_code,1,1)=="E")
+  dont_scale <- filter(births, substr(gss_code,1,1)!="E")
+
+  scaling <- do_scale %>%
+    filter(substr(gss_code,1,1)=="E") %>%
+    get_scaling_factors(constraint, col_popn=col_popn) %>%
+    left_join(do_scale, by=col_aggregation) %>%
+    mutate(popn_scaled = scaling * col_popn) %>%
+    select(year, gss_code, sex, age, popn_scaled) %>%
+    rename(!!col_popn := popn_scaled) %>%
+    rbind(dont_scale)
 
   # TODO run some checks on the scaling factors
   if(all(scaling$n == 1)) {
@@ -282,104 +297,8 @@ validate_popn_constrain_output <- function(popn, col_aggregation, col_popn, outp
 }
 
 
-#--------
-#births workflow
-
-#The births constraint is 15-46
-#The births data in the model is 15-49
-#I couldn't see a simple way to the existing function
-#This is is the way I would approach it. I've tried to use the
-#same variable and column names but this is specific rather
-#than generalised
-max_constraint_age <- max(constraint$age)
-
-#dummy data
-popn <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Outputs/2016 Base/2016 Base - Central/Births (SYA).rds") %>%
-  filter(year == 2021) %>%
-  mutate(sex = "female")
-col_popn <- "births"
-constraint <- readRDS("~/Projects/population_projections/input_data/constraints/npp_2018_fertility_constraint.rds") 
-
-do_scale <- filter(popn, substr(gss_code,1,1)=="E")
-dont_scale <- filter(popn, substr(gss_code,1,1)!="E")
-
-max_age_popn <- filter(do_scale, age >= max_constraint_age) %>%
-  mutate(age = max_constraint_age) %>%
-  group_by(year, gss_code, sex, age) %>%
-  summarise(births = sum(births)) %>%
-  ungroup()
-
-other_popn <- filter(do_scale, age < max_constraint_age) %>%
-  select(year, gss_code, sex, age, births)
-
-popn_1 <- rbind(max_age_popn, other_popn)
-
-scaling <- popn_1 %>%
-  left_join(constraint, by = c("year", "sex", "age")) %>%
-  group_by(year, sex, age) %>%
-  add_tally() %>%
-  ungroup() %>%
-  data.frame() %>%
-  mutate(popn_total = sum(births.x),
-         scaling = births.y/popn_total)
-
-max_age_scaling <- filter(scaling, age == max_constraint_age) %>%
-  select(year, sex, scaling)
-max_age_scaled <- filter(do_scale, age >= max_constraint_age) %>%
-  
-  #this join isn't behaving like I expect
-  left_join(max_age_scaling, by=c("year", "sex")) %>%
-  mutate(popn_scaled = scaling * births) %>%
-  select(year, gss_code, sex, age, popn_scaled)
-
-other_scaled <- filter(scaling, age < max_constraint_age) %>%
-  mutate(popn_scaled = scaling * births.x) %>%
-  select(year, gss_code, sex, age, popn_scaled)
-
-scaled <- rbind(other_scaled, max_age_scaled) %>%
-  rename(births = popn_scaled) %>%
-  rbind(dont_scale)
-
-testthat::expect_equal(nrow(scaled),nrow(popn))
-
-#Domestic constraint workflow
-#I think this will be easier to fit into the structure as is
-
-#Out Flow
-out_flow <- filter(popn, substr(gss_out,1,1) == "E") %>%
-  filter(substr(gss_in,1,1) != "E") %>%
-  group_by(year, sex, age) %>%
-  summarise(flow = sum(flow))
-
-scaling <- left_join(out_flow, constraint, by=c("year","sex","age")) %>%
-  mutate(scaling = flow / cross_out)
-
-scaled_out <- filter(popn, substr(gss_out,1,1) == "E") %>%
-  filter(substr(gss_in,1,1) != "E") %>%
-  left_join(scaling, by=c("year","sex","age")) %>%
-  mutate(scaled = flow * scaling) %>%
-  select(year, gss_out, gss_in, sex, age, flow = scaled)
 
 
-#In flow
-in_flow <- filter(popn, substr(gss_out,1,1) != "E") %>%
-  filter(substr(gss_in,1,1) == "E") %>%
-  group_by(year, sex, age) %>%
-  summarise(flow = sum(flow))
-
-scaling <- left_join(in_flow, constraint, by=c("year","sex","age")) %>%
-  mutate(scaling = flow / cross_in)
-
-scaled_in <- filter(popn, substr(gss_out,1,1) != "E") %>%
-  filter(substr(gss_in,1,1) == "E") %>%
-  left_join(scaling, by=c("year","sex","age")) %>%
-  mutate(scaled = flow * scaling) %>%
-  select(year, gss_out, gss_in, sex, age, flow = scaled)
-
-#Put it back together
-popn <- filter(popn, substr(gss_out,1,1) == "E") %>%
-  filter(substr(gss_in,1,1) == "E") %>%
-  rbind(scaled_out, scaled_in)
 
                            
 
