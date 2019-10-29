@@ -8,8 +8,6 @@ Worksheets("Sheet1").Delete
 Application.DisplayAlerts = True
 wkb.SaveAs fileName:="M:/Projects/population_projections/outputs/trend/2018/datastore\datastore_file.xlsx"
 wkb.Close SaveChanges:=False
-This_wkb.Close SaveChanges:=False
-Application.Quit
 End Sub
 Sub run_open()
 Call open_copy_csv("M:/Projects/population_projections/outputs/trend/2018/datastore\persons.csv", "persons")
