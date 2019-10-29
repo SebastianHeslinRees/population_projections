@@ -166,8 +166,7 @@ validate_same_geog(population, upc)
 
 datestamp <- Sys.Date()
 
-dir.create("input_data/mye")
-dir.create("input_data/mye/2018", showWarnings = T)
+dir.create("input_data/mye/2018", showWarnings = FALSE, recursive = TRUE)
 
 saveRDS(births, file = paste0("input_data/mye/2018/births_ons_", datestamp, ".rds"))
 saveRDS(deaths, file = paste0("input_data/mye/2018/deaths_ons_", datestamp, ".rds"))
