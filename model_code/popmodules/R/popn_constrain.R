@@ -91,6 +91,9 @@ popn_constrain <- function(popn,
   # Standardise data
   # ----------------
 
+  popn <- as.data.frame(popn)
+  constraint <- as.data.frame(constraint)
+
   # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
   col_aggregation <- .convert_to_named_vector(col_aggregation)
   # and reorder it to match popn's column ordering
@@ -162,7 +165,7 @@ popn_constrain <- function(popn,
   output <- select_at(scaling, c(names(col_aggregation), "popn_scaled__")) %>%
     rename(!!sym(names(col_popn)) := popn_scaled__) %>%
     data.frame() %>%
-    rbind(filter(popn, substr(gss_code,1,1)!="E"))
+    rbind(filter(popn[c(popn_cols, names(col_popn))], substr(gss_code,1,1)!="E"))
 
   # Validate output
   # ---------------
@@ -246,7 +249,7 @@ validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col
                       test_complete = !missing_levels_constraint,
                       test_unique = TRUE,
                       check_negative_values = TRUE)
-  
+
   #TODO: Why does this fail with actual data
   # if(!missing_levels_constraint) {
   #   validate_join_population(popn,
@@ -295,12 +298,3 @@ validate_popn_constrain_output <- function(popn, col_aggregation, col_popn, outp
 
   invisible(TRUE)
 }
-
-
-
-
-
-                           
-
-
-
