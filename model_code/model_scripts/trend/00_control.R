@@ -85,7 +85,6 @@ run_trend_model <- function(config_list) {
   births <- births %>% select(year, gss_code, age, sex, births)
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
-  
   #TODO Figure out why the core outputs these in a different order to other components
   #For now just switch the order here
   dom_out <- dom_out %>% select(year, gss_code, sex, age, dom_out)
@@ -110,9 +109,8 @@ run_trend_model <- function(config_list) {
   }
    
   ## run the core
-  projection <- trend_core(population, births, deaths, int_out, int_in, 
-                           fertility, mortality, int_out_rate, int_in_proj,
-                           dom_in, dom_out, dom_rate,
+  projection <- trend_core(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                           fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr)
   
   ## write the output data
@@ -121,6 +119,7 @@ run_trend_model <- function(config_list) {
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
+  # TODO: add domestic migration to QA doc
   rmarkdown::render("model_code/qa/population_qa.Rmd",
                     output_file = paste0("population_qa",config_list$timestamp,".html"),
                     output_dir = config_list$outputs_dir,

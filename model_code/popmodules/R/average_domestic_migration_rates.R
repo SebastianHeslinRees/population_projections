@@ -32,6 +32,7 @@ average_domestic_migration_rates <- function(origin_destination_rates,
   }
   
   backseries_years <- (last_data_year - n_years_to_avg + 1):last_data_year
+  assert_that(length(backseries_years) == n_years_to_avg)
   
   # data.table because it's so big
   data.table::setDT(origin_destination_rates)
@@ -48,16 +49,23 @@ average_domestic_migration_rates <- function(origin_destination_rates,
       summarise(rate = rate/n_years_to_avg)
   }
   
-  # TODO report on any changed rates
-  origin_destination_rates <- origin_destination_rates %>%
-    mutate(rate = ifelse(rate > rate_cap, rate_cap, rate))
+  if(any(origin_destination_rates$rate > rate_cap)) {
+    n <- sum(origin_destination_rates$rate > rate_cap)
+    warning(paste(c("average_domestic_migration rates created", n, "rates greater than the cap of ",rate_cap,"- these will be set to ",rate_cap),
+                    #TODO sort out warning message to contain some helpful info
+                    #"\nLocations: from", unique(origin_destination_rates[origin_destination_rates$rate > rate_cap, "gss_out"]), 
+                    #"to", unique(origin_destination_rates[origin_destination_rates$rate > rate_cap, "gss_in"]) ), 
+                     collapse = " "))
+    origin_destination_rates$rate[origin_destination_rates$rate > rate_cap] <- rate_cap
+  }
+  
   
   if(col_rate != "rate") {
     i <- names(origin_destination_rates) == "rate"
     names(origin_destination_rates)[i] <- col_rate
   }
   
-  return(origin_destination_rates)
+  return(as.data.frame(origin_destination_rates))
   
 }
 
@@ -76,9 +84,9 @@ check_average_domestic_rate_input <- function(origin_destination_rates, last_dat
   assert_that(is.count(n_years_to_avg),
               msg="average_domestic_migration_rates expects that n_years_to_avg is a numeric")
   assert_that(is.character(col_rate),
-              msg="average_domestic_migration_rates expects that data_col is a character")
+              msg="average_domestic_migration_rates expects that col_rate is a character")
   assert_that(col_rate %in% names(origin_destination_rates),
-              msg="average_domestic_migration_rates expects that data_col is a column in component_data dataframe")
+              msg="average_domestic_migration_rates expects that col_rate is a column in component_data dataframe")
   
   backseries_years <- (last_data_year - n_years_to_avg + 1):last_data_year
   assert_that(all(backseries_years %in% origin_destination_rates$year),

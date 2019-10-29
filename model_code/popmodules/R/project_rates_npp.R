@@ -2,6 +2,8 @@
 #'
 #' Applies the national rate of change in mortality/fertility to a set of local
 #' authority ASMRs/ASFRs to produce a mortality/fertility probability trajectory.
+#' This takes the projection for the first projection year as an input, and 
+#' extends it to the required number of projection years
 #'
 #' @param jump_off_rates Dataframe. A set of LA/age/sex rates for the first projection year
 #' Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility_curve()}
@@ -24,10 +26,13 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
   
   #Test/validate
   check_validate_proj_mort_rates(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
-
   final_projection_year <- first_proj_yr + n_proj_yr -1
-
-  rates <- readRDS(rate_trajectory_filepath) %>%
+  assert_that(all((first_proj_yr + 1):final_projection_year %in% rate_trajectory$year))
+  
+  # calculate the rate changes relative to the first year, and apply this to the
+  # jump off rate to calulate the rest of the projection years
+  
+  rates <- rate_trajectory %>%
     filter(variant == npp_var) %>%
     filter(year > first_proj_yr) %>%
     filter(year <= final_projection_year) %>%
@@ -43,7 +48,11 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
     select(gss_code, sex, age, year, rate) %>%
     rename(!!rate_col := rate) %>%
     rbind(jump_off_rates) %>%
-    arrange(gss_code,sex,age,year)
+    arrange(gss_code,sex,age,year) %>%
+    as.data.frame()
+  
+  validate_population(rates, col_aggregation = c("gss_code", "sex", "age", "year"),
+                      col_data = "rate")
 
   return(rates)
 

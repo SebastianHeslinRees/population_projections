@@ -9,7 +9,7 @@
 #' @param popn_mye_path Character. Path to the MYE population data
 #' @param births_mye_path Character. Path to the MYE births component data
 #' @param deaths_mye_path Character. Path to the MYE deaths component data
-#' @param target_curves_filepath Character. Path to the SNPP target fertility curves
+#' @param target_curves_filepath Character. Path to the SNPP target mortality curves
 #' @param last_data_year numeric. The last year of death and population data on which to calculate averages.
 #' @param n_years_to_avg numeric. The number of years to use in calculating averages/trending forward.
 #' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
@@ -38,11 +38,10 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
   deaths <- data.frame(readRDS(deaths_mye_path))
   target_curves <- data.frame(readRDS(target_curves_filepath)) %>% select(-year)
   
-  population <- deaths_denominator(population, births)
+  validate_scaled_mortality_curve_inputs(population, births, deaths, target_curves, last_data_year, n_years_to_avg,
+                  avg_or_trend, data_col, output_col)
   
-  # TODO put these checks back in
-  # check_scaled_mortality_curve_inputs(population, component_data, target_curves, last_data_year, n_years_to_avg,
-  #                 avg_or_trend, data_col, output_col)
+  population <- deaths_denominator(population, births)
   
   # Calculate the total deaths per year for each geography and sex that the target mortality curve would would create from population
   # Compare to the total deaths per year for each geography and sex in the actual deaths
@@ -70,6 +69,8 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
   if(avg_or_trend == "average"){
     averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, n_years_to_avg, last_data_year, data_col="scaling")
   }
+  
+  validate_population(averaged_scaling_factors, col_aggregation = c("year", "gss_code", "sex"), col_data = "scaling")
   
   jump_off_rates <- target_curves %>%
     left_join(averaged_scaling_factors, by = c("gss_code", "sex")) %>%
@@ -117,32 +118,39 @@ deaths_denominator <- function(population, births){
 
 
 # Function to check that the input to scaled_mortality_curves is all legal
-
-check_scaled_mortality_curve_inputs <- function(population, deaths, target_curves, last_data_year, n_years_to_avg,
+validate_scaled_mortality_curve_inputs <- function(population, births, deaths, target_curves, last_data_year, n_years_to_avg,
                                                 avg_or_trend, data_col, output_col){
   
   # test input parameters are of the correct type
-  assert_that(is.data.frame(population)|is.list(population),
-              msg="initial_year_rate expects that population is a data frame or a list")
-  
+  assert_that(is.data.frame(population),
+              msg="scaled_mortality_curve expects that population is a data frame")
+  assert_that(is.data.frame(births),
+              msg="scaled_mortality_curve expects that births is a data frame")
   assert_that(is.data.frame(deaths),
-              msg="initial_year_rate expects that deaths is a data frame")
+              msg="scaled_mortality_curve expects that deaths is a data frame")
   assert_that(is.data.frame(target_curves),
-              msg="initial_year_rate expects that target_curves is a data frame")
+              msg="scaled_mortality_curve expects that target_curves is a data frame")
   assert_that(is.numeric(last_data_year),
-              msg="initial_year_rate expects that last_data_year is an numeric")
+              msg="scaled_mortality_curve expects that last_data_year is an numeric")
   assert_that(is.numeric(n_years_to_avg),
-              msg="initial_year_rate expects that n_years_to_avg is an numeric")
+              msg="scaled_mortality_curve expects that n_years_to_avg is an numeric")
   assert_that(is.character(avg_or_trend),
-              msg="initial_year_rate expects that avg_or_trend is a character")
+              msg="scaled_mortality_curve expects that avg_or_trend is a character")
   assert_that(is.character(data_col),
-              msg="initial_year_rate expects that data_col is a character")
+              msg="scaled_mortality_curve expects that data_col is a character")
   assert_that(is.character(output_col),
-              msg="initial_year_rate expects that output_col is a character")
+              msg="scaled_mortality_curve expects that output_col is a character")
   assert_that(data_col %in% names(deaths),
-              msg="initial_year_rate expects that data_col is a column in deaths dataframe")
+              msg="scaled_mortality_curve expects that data_col is a column in deaths dataframe")
   
-}
+  validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn")
+  validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births")
+  validate_population(deaths, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "deaths")
+  validate_population(target_curves, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate")
+  
+  invisible(TRUE)
+  
+  }
 
 #----------------------------------------------
 

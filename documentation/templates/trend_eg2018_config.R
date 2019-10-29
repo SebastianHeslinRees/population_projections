@@ -5,7 +5,7 @@ devtools::load_all("model_code/popmodules")
 first_proj_yr <- 2019
 n_proj_yr <- 20
 
-datestamp <- "2019-10-11"
+datestamp <- "2019-10-22"
 
 popn_mye_path <- paste0("input_data/mye/2018/population_ons_",datestamp,".rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
@@ -94,6 +94,7 @@ dom_rate_fns <- list(
   list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = dom_origin_destination_path,
                                                           popn_mye_path = popn_mye_path,
                                                           births_mye_path = births_mye_path,
+                                                          years_backseries = (first_proj_yr - dom_mig_years_to_avg):(first_proj_yr - 1),
                                                           col_partial_match = c("gss_out","gss_in"),
                                                           col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                           col_component = "value")),
