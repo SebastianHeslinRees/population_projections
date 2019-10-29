@@ -29,6 +29,8 @@
 #' @param col_births String. Name for births column in output. Default "births".
 #' @param birthratio_m2f Numeric. Ratio of male births to female births (if
 #'   outputting sex). Default 1.05.
+#' @param constraint FALSE or Dataframe. If births are to be constrained to
+#'   NPP totals then pass a dataframe of constraining values. Default FALSE
 #' @return A data frame of births with one row for each distinct value of the
 #'   \code{col_aggregation} columns of the input, plus a \code{col_births}
 #'   column containing births, and a \code{col_age} column with value 0.
@@ -67,7 +69,8 @@ births_from_popn_fert <- function(popn,
                                   col_popn = "popn",
                                   col_rate = "rate",
                                   col_births = "births",
-                                  birthratio_m2f = 1.05) {
+                                  birthratio_m2f = 1.05,
+                                  constraint = FALSE) {
 
   # TODO Adapt so that this can work with banded age data (i.e. age != 0 for births)
 
@@ -121,6 +124,10 @@ births_from_popn_fert <- function(popn,
                             col_rate = col_rate,
                             col_out = col_births)
 
+  #constrain to national totals
+  if(constraint != FALSE){
+    births <- births_constrain(births, constraint)
+  }
 
   total_births <- sum(births[[col_births]])
 

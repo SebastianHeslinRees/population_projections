@@ -2,7 +2,7 @@
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
                        dom_in, dom_out, dom_rate,
-                       first_proj_yr, n_proj_yr) {
+                       first_proj_yr, n_proj_yr, birth_constraint) {
   library(dplyr)
   library(assertthat)
   library(popmodules)
@@ -56,7 +56,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     births <- calc_births(popn = aged_popn,
                           fertility = filter(fertility, year == my_year, age!=0),  # TODO: should births function care that the input pop has no 0-year-olds?
-                          col_popn = "popn")
+                          col_popn = "popn",
+                          constraint = birth_constraint)
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
     validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
