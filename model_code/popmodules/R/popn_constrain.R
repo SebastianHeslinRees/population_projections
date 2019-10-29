@@ -1,14 +1,14 @@
-#' Apply rates to a population.
+#' Scale one population to match the totals of another
 #'
-#' Given a cohort population and a data frame of rates at the same or lower
-#' resolution, return a data table of the population's aggregation levels, and a
-#' component count resulting from the rate applied to the population.
+#' Given a cohort population and a data frame of target marginal population
+#' subtotals, return the input population scaled so that its population
+#' subtotals match the target's at each grouping level.
 #'
 #' @param popn A data frame containing population data.
-#' @param constraint A data frame containing rates data per time step (usually
-#'   year).
+#' @param constraint A data frame containing population data at the same
+#'   resolution or lower.
 #' @param col_aggregation A string or character vector giving the names of
-#'   columns in \code{popn} which the output will be aggregated to. All elements
+#'   columns in \code{popn} contain aggregation levels. All elements
 #'   must give columns in \code{popn} but not all need to be in
 #'   \code{constraint}, (that is, \code{constraint} can be at a lower resolution).
 #'   If names differ between the two input data frames, use a named character
@@ -16,27 +16,14 @@
 #'   "gss_code", "age", "sex")}.
 #' @param col_popn String. Name of column in \code{popn} containing population
 #'   counts. Default "popn".
-#' @param col_rate String. Name of column in \code{constraint} containing rate
-#'   data. Default "rate".
-#' @param col_out String. Name of column for the output component count
-#'   (popn*rate) in the output. Default "component".
 #' @param pop1_is_subset Logical. If the two input data frames cover the same
 #'   domain and you expect every level of \code{constraint} to be matched to by a
 #'   level in \code{popn} set this to TRUE, and this will be checked. Default
 #'   FALSE.
-#' @param many2one Logical. Setting this to FALSE will check that no more than
-#'   one level from \code{popn} matches to each level of \code{rate}. Default
-#'   FALSE.
-#' @param additional_rate_levels String. Names of columns in \code{constraint}
-#'   which should be included in the join beyond those named in
-#'   \code{col_aggregation}. Used when multiple rates apply to the same
-#'   aggregation level, e.g. outmigration to multiple locations. The resulting
-#'   left join with \code{constraint} can therefore return a much larger data
-#'   frame. Default NA.
 #' @param missing_levels_popn Logical. Is the popn data frame missing any
 #'   levels? Reminder: \code{pop1_is_subset} will probably be TRUE in this case.
 #'   Default FALSE.
-#' @param missing_levels_rate Logical or character vector. Is the rates data
+#' @param missing_levels_constraint Logical or character vector. Is the rates data
 #'   missing any levels? If joining the missing levels to the input population
 #'   would create NAs, the missing values in the output column will be NA. Note:
 #'   setting this to TRUE will disable some of the checks on the input and join
@@ -47,41 +34,43 @@
 #'
 #' @import assertthat
 #' @importFrom magrittr %>%
-#' @importFrom dplyr left_join mutate select sym syms
+#' @importFrom dplyr left_join mutate select_at group_by_at rename add_tally sym syms
 #'
 #' @examples
 #'
 #' library(popmodules)
 #'
 #' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
-#' rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
+#' constraint <- expand.grid(year=2000, age=20:21, sex=c("f","m"), popn = 400)
 #'
-#' component <- popn_constrain(popn,
-#'                              rate,
-#'                              col_aggregation = c("year", "gss_code", "sex", "age"),
-#'                              col_popn = "popn",
-#'                              col_rate = "rate",
-#'                              col_out = "component",
-#'                              pop1_is_subset = FALSE,
-#'                              many2one = TRUE,
-#                               additional_rate_levels = NA,
-#'                              missing_levels_popn = FALSE,
-#'                              missing_levels_rate = FALSE)
+#' scaled <- popn_constrain(popn,
+#'                          constraint,
+#'                          col_aggregation = c("year", "gss_code", "sex", "age"),
+#'                          col_popn = "popn",
+#'                          pop1_is_subset = FALSE,
+#'                          missing_levels_popn = FALSE,
+#'                          missing_levels_constraint = FALSE)
 #'
 #' # Due to default parameter values, this is equivalent to
-#' component <- popn_constrain(popn, rate)
+#' scaled <- popn_constrain(popn, constraint)
+#'
+#' constraint <- expand.grid(xyear=2000, xage=20:21, xsex=c("f","m"), xpopn = 400)
+#'
+#' scaled <- popn_constrain(popn,
+#'                          constraint,
+#'                          col_aggregation = c("year"="xyear", "gss_code", "sex"="xsex", "age"="xage"),
+#'                          col_popn = c("popn"="xpopn"),
+#'                          pop1_is_subset = FALSE,
+#'                          missing_levels_popn = FALSE,
+#'                          missing_levels_constraint = FALSE)
+#'
 #'
 #' @export
 #'
 
 # TODO simplify the function - the validation steps are making the inputs complicated.
-
-# TODO Would it be useful to add an option to return the output as the input +
-# an extra column, rather than the current version which strips down to
-# aggregation levels + an extra column? Of course you can just use
-#     left_join(input, popn_constrain(input, rate))
-#  but for frequent operations on large datasets, it could be sped up if we
-# just don't subset inside this function.
+# TODO expand the function so that the constraint parameter can take a single
+# population number to scale to
 
 # TODO add nesting!
 
@@ -90,15 +79,13 @@ popn_constrain <- function(popn,
                            col_aggregation = c("year", "gss_code", "sex", "age"),
                            col_popn = "popn",
                            pop1_is_subset = FALSE,
-                           additional_rate_levels = NA,
                            missing_levels_popn = FALSE,
-                           missing_levels_rate = FALSE) {
+                           missing_levels_constraint = FALSE) {
 
   # Validate input
   # --------------
   validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn,
-                                 pop1_is_subset, many2one, additional_rate_levels,
-                                 missing_levels_popn, missing_levels_rate)
+                                pop1_is_subset, missing_levels_popn, missing_levels_constraint)
 
 
   # Standardise data
@@ -107,56 +94,66 @@ popn_constrain <- function(popn,
   # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
   col_aggregation <- .convert_to_named_vector(col_aggregation)
   # and reorder it to match popn's column ordering
-  popn_cols_to_aggregate <- intersect( names(popn), names(col_aggregation) )
-  col_aggregation <- col_aggregation[ popn_cols_to_aggregate ]
+  col_aggregation_popn <- intersect( names(popn), names(col_aggregation) )
+  col_aggregation <- col_aggregation[ col_aggregation_popn ]
 
   join_by <- col_aggregation[col_aggregation %in% names(constraint)]  # this is a named character vector
 
-  # if we want to include extra columns from the rate in the output, check if
-  # these are a one2many matching in the join
-  if(identical(additional_rate_levels, NA)) {
-    additional_rate_levels <- NULL
-  }
+  # TODO split these out into two variables rather than a named vector
+  col_popn <- .convert_to_named_vector(col_popn)
 
-  all_rate_cols <- c(as.character(col_aggregation), additional_rate_levels)
-  all_rate_cols <- intersect(all_rate_cols, names(constraint))
+  one2many = FALSE
 
-  if(anyDuplicated(data.table::as.data.table(constraint[join_by]))) {
-    one2many <- TRUE
-  } else {
-    one2many = FALSE
-  }
 
   # Trim inputs to the columns we care about (reduces the chances of column name conflicts)
   popn_cols <- names(col_aggregation)
-  popn <- popn[c(popn_cols, col_popn)]
-  constraint <- constraint[c(all_rate_cols, col_rate)]
+  popn <- popn[c(popn_cols, names(col_popn))]
+  constraint <- constraint[c(join_by, col_popn)]
 
   # Make sure the columns that are factors match
   constraint <- .match_factors(popn, constraint, col_aggregation)
 
-  # Deal with the possibility of duplicate data column names
-  if(col_popn == col_rate) {
-    col_popn <- paste0(col_popn, ".x")
-    col_rate  <- paste0(col_rate,  ".y")
+  # Deal with possible duplicate data column names
+  col_popn_x <- names(col_popn)
+  col_popn_y <- unname(col_popn)
+  if(col_popn_x == col_popn_y) {
+    col_popn_x_new <- paste0(col_popn_x, ".x")
+    col_popn_y_new <- paste0(col_popn_y, ".y")
+
+    rename(popn, !!sym(col_popn_x_new) := !!sym(col_popn_x))
+    rename(constraint, !!sym(col_popn_y_new) := !!sym(col_popn_y))
+
+    col_popn_x <- col_popn_x_new
+    col_popn_y <- col_popn_y_new
   }
 
-  # Apply rates
-  # ----------------
-  output <- left_join(popn, constraint, by = join_by) %>%
-    mutate(!!sym(col_out) := !!sym(col_popn) * !!sym(col_rate) ) %>%
-    select(!!!syms(popn_cols), additional_rate_levels, !!sym(col_out))
+  # Apply constraints
+  # -----------------
+  assert_that(!"n" %in% names(popn))
+  scaling <- popn %>%
+    left_join(constraint, by = join_by) %>%
+    group_by_at(names(join_by)) %>%
+    add_tally() %>%
+    mutate(popn_total__ = sum(!!sym(col_popn_x)),
+           scaling__ = !!sym(col_popn_y)/popn_total__,
+           popn_scaled__ = !!sym(col_popn_x) * scaling__)
+
+  # TODO run some checks on the scaling factors
+  if(all(scaling$n == 1)) {
+    warning("popn_constrain was constrained by a data frame at the same resolution as the population: the population will effectively be overwritten by the scaling dataset")
+  }
+
+  output <- select_at(scaling, c(names(col_aggregation), "popn_scaled__")) %>%
+    rename(!!sym(names(col_popn)) := popn_scaled__)
 
   # Validate output
   # ---------------
   validate_popn_constrain_output(popn,
-                                  col_aggregation,
-                                  col_out,
-                                  output,
-                                  one2many,
-                                  additional_rate_levels,
-                                  missing_levels_popn,
-                                  missing_levels_rate)
+                                 col_aggregation,
+                                 col_popn,
+                                 output,
+                                 missing_levels_popn,
+                                 missing_levels_constraint)
 
   return(output)
 }
@@ -166,9 +163,8 @@ popn_constrain <- function(popn,
 
 
 # Check the function input is valid
-validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col_popn, col_rate, col_out,
-                                           pop1_is_subset, many2one, additional_rate_levels,
-                                           missing_levels_popn, missing_levels_rate) {
+validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col_popn,
+                                          pop1_is_subset, missing_levels_popn, missing_levels_constraint) {
 
   # Type checking
   assert_that(is.data.frame(popn),
@@ -179,79 +175,41 @@ validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col
               msg = "popn_constrain needs a string or character vector as the col_aggregation parameter")
   assert_that(is.string(col_popn),
               msg = "popn_constrain needs a string as the col_popn parameter")
-  assert_that(is.string(col_rate),
-              msg = "popn_constrain needs a string as the col_rate parameter")
-  assert_that(is.string(col_out),
-              msg = "popn_constrain needs a string as the col_out parameter")
-  assert_that(is.string(col_out),
-              msg = "popn_constrain needs a string as the col_out parameter")
   assert_that(rlang::is_bool(pop1_is_subset),
               msg = "popn_constrain needs a logical value as the pop1_is_subset parameter")
-  assert_that(rlang::is_bool(many2one),
-              msg = "popn_constrain needs a logical value as the many2one parameter")
-  assert_that(identical(additional_rate_levels, NA) | is.character(additional_rate_levels),
-              msg = "additional_rate_levels should be NA or a character vector")
   assert_that(rlang::is_bool(missing_levels_popn),
               msg = "popn_constrain needs a logical value for missing_levels_popn")
-  assert_that(rlang::is_bool(missing_levels_rate),
-              msg = "popn_constrain needs a logical value for missing_levels_rate")
+  assert_that(rlang::is_bool(missing_levels_constraint),
+              msg = "popn_constrain needs a logical value for missing_levels_constraint")
 
 
   # Other checks
-  if(!identical(additional_rate_levels, NA)) {
-    assert_that(all(additional_rate_levels %in% names(constraint)))
-  } else {
-    additional_rate_levels <- NULL
-  }
-  all_rate_cols <- c(as.character(col_aggregation), additional_rate_levels)
-  all_rate_cols <- intersect(all_rate_cols, names(constraint))
+  all_constraint_cols <- intersect(unname(col_aggregation), names(constraint))
 
 
   col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and constraint aggregation levels
+  col_popn <- .convert_to_named_vector(col_popn)
 
-  assert_that(!col_popn %in% names(col_aggregation),
-              msg = "popn_constrain was given a population count column name that is also a named aggregation column")
-  assert_that(!col_rate %in% all_rate_cols,
-              msg = "popn_constrain was given a rate column name that is also a named aggregation column")
+  assert_that(!names(col_popn) %in% names(col_aggregation),
+              msg = "popn_constrain was given a population count column name that is also a named aggregation column in the population data frame")
+  assert_that(!unname(col_popn) %in% all_constraint_cols,
+              msg = "popn_constrain was given a population count column name that is also a named aggregation column in the constraint data frame")
   assert_that(all(names(col_aggregation) %in% names(popn)),
               msg = "in popn_constrain, all columns named in col_aggregation must be columns in the popn table")
   assert_that(!any(duplicated(names(col_aggregation))),
               msg = "duplicated population column names were provided to popn_constrain")
-  assert_that(!any(duplicated(as.character(col_aggregation))),
+  assert_that(!any(duplicated(unname(col_aggregation))),
               msg = "duplicated constraint column names were provided to popn_constrain")
   assert_that(any(col_aggregation %in% names(constraint)),
               msg = "in popn_constrain, no aggregation column names were found in constraint - at least one must be present")
-  assert_that(!col_rate %in% names(col_aggregation),
-              msg = "popn_constrain can't have a col_rate that is also a named aggregation column in the input")
-  assert_that(is.numeric(popn[[col_popn]]),
-              msg = paste("popn_constrain needs a numeric column in the specified population count col:", col_popn))
-  assert_that(is.numeric(constraint[[col_rate]]),
-              msg = paste("popn_constrain needs a numeric column in the specified constraint rate col:", col_rate))
-  assert_that(!col_out %in% names(col_aggregation),
-              msg = paste("popn_constrain can't handle an output count column with the same name as one of the aggregation columns",
-                          "\nOutput column:", col_out,
-                          "\nAggregation columns:", col_aggregation))
-
-
-  if(any(constraint[[col_rate]] < 0)) {
-    warning("popn_constrain was passed negative rates")
-  }
-  if(col_out %in% names(popn)) {
-    warning(paste("popn_constrain is writing output count to a column name that was also in the input:", col_out,
-                  "\nThe output will contain the output in this column, so be careful with subsequent joins or binds."))
-  }
+  assert_that(is.numeric(popn[[names(col_popn)]]),
+              msg = paste("popn_constrain needs a numeric column in the specified population count col:", names(col_popn)))
+  assert_that(is.numeric(constraint[[col_popn]]),
+              msg = paste("popn_constrain needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
 
   join_by <- col_aggregation[ col_aggregation %in% names(constraint) ]
   if(anyDuplicated(data.table::as.data.table(constraint[join_by]))) {
-    one2many <- TRUE
-  } else {
-    one2many = FALSE
-  }
-
-  if(!identical(additional_rate_levels, NA)) {
-    col_aggregation_rate <- c(join_by, additional_rate_levels)
-  } else {
-    col_aggregation_rate <- join_by
+    stop("popn_constrain was given a population that maps to multiple levels in the constraint population")
   }
 
   assert_that(length(join_by) > 0,
@@ -259,23 +217,23 @@ validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col
 
   validate_population(popn,
                       col_aggregation = names(col_aggregation),
-                      col_data = col_popn,
+                      col_data = names(col_popn),
                       test_complete = !missing_levels_popn,
                       test_unique = TRUE,
                       check_negative_values = TRUE)
   validate_population(constraint,
-                      col_aggregation = unname(col_aggregation_rate),
-                      col_data = col_rate,
-                      test_complete = !missing_levels_rate,
-                      test_unique = FALSE,
-                      check_negative_values = FALSE)
-  if(!missing_levels_rate) {
+                      col_aggregation = unname(join_by),
+                      col_data = unname(col_popn),
+                      test_complete = !missing_levels_constraint,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
+  if(!missing_levels_constraint) {
     validate_join_population(popn,
                              constraint,
                              cols_common_aggregation = join_by,
                              pop1_is_subset = pop1_is_subset,
-                             many2one = many2one,
-                             one2many = one2many,
+                             many2one = TRUE,
+                             one2many = FALSE,
                              warn_unused_shared_cols = FALSE)
   }
 
@@ -287,32 +245,30 @@ validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col
 
 # Check the function output isn't doing anything unexpected
 
-validate_popn_constrain_output <- function(popn, col_aggregation, col_out, output, one2many, additional_rate_levels, missing_levels_popn, missing_levels_rate) {
+validate_popn_constrain_output <- function(popn, col_aggregation, col_popn, output, missing_levels_popn, missing_levels_constraint) {
 
   col_aggregation <- .convert_to_named_vector(col_aggregation)
 
-  output_col_aggregation <- unique(c(names(col_aggregation), additional_rate_levels))
-  assert_that(all(output_col_aggregation %in% names(output)))
+  assert_that(all(names(col_aggregation) %in% names(output)))
+  assert_that(names(col_popn) %in% names(output))
 
-  assert_that(col_out %in% names(output))
-
-  if(!missing_levels_rate) {
+  if(!missing_levels_constraint) {
     assert_that(all(stats::complete.cases(output)))
   }
 
-  if(one2many | missing_levels_popn) {
+  if(missing_levels_popn) {
     output_comparison <- NA # TODO: could we use semi_join(constraint, popn, by=...) here?
   } else {
     output_comparison <- popn
   }
 
-  if(!missing_levels_rate) {
+  if(!missing_levels_constraint) {
     validate_population(output,
-                        col_aggregation = output_col_aggregation,
-                        col_data = col_out,
+                        col_aggregation = names(col_aggregation),
+                        col_data = names(col_popn),
                         test_complete = !missing_levels_popn,
                         test_unique = TRUE,
-                        check_negative_values = FALSE,
+                        check_negative_values = TRUE,
                         comparison_pop = output_comparison)
   }
 
