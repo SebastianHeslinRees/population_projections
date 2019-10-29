@@ -17,7 +17,6 @@ output_projection <- function(projection, output_dir, timestamp) {
                     int_out = projection[[4]],
                     dom_in,
                     dom_out,
-                    output_dir = output_dir,
+                    output_dir = config_list$outputs_dir,
                     file_name = paste0("datastore_",timestamp,".xlsx"))
-  
 }

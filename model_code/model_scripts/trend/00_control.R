@@ -97,7 +97,7 @@ run_trend_model <- function(config_list) {
   ## write the output data
   output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
   
-  ## output the QA
+   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
   rmarkdown::render("model_code/qa/population_qa.Rmd",
                     output_file = paste0("population_qa",config_list$timestamp,".html"),

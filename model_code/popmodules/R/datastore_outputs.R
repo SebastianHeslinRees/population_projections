@@ -66,9 +66,12 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   dom_in <- get_component_datastore(dom_in, "dom_in")
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
+  
+  #TODO: Make this better
+  gss_names <- get_gss_names()
 
-  #TODO: Add LA names to output
-  components <- left_join(popn, births, by = c("gss_code", "year")) %>%
+  components <- left_join(popn, gss_names, by="gss_code") %>%
+    left_join(births, by = c("gss_code", "year")) %>%
     left_join(deaths, by = c("gss_code", "year")) %>%
     left_join(int_in, by = c("gss_code", "year")) %>%
     left_join(int_out, by = c("gss_code", "year")) %>%
@@ -76,7 +79,16 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
     left_join(dom_in, by = c("gss_code", "year")) %>%
     left_join(dom_out, by = c("gss_code", "year")) %>%
     mutate(dom_net = dom_in - dom_out) %>%
-    mutate(total_change = births - deaths + int_net + dom_net)
+    mutate(total_change = births - deaths + int_net + dom_net) %>%
+    select(gss_code, gss_name, year,
+           population = popn, births, deaths,
+           int_in, int_out, int_net,
+           dom_in, dom_out, dom_net,
+           total_change)
+  
+  #round data for output
+  idx <- sapply(components, class)=="numeric"
+  components[, idx] <- lapply(components[, idx], round, digits=3)
 
   #write
   dir.create(output_dir, recursive = T, showWarnings = F)
