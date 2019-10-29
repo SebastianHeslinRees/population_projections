@@ -91,6 +91,9 @@ popn_constrain <- function(popn,
   # Standardise data
   # ----------------
 
+  popn <- as.data.frame(popn)
+  constraint <- as.data.frame(constraint)
+
   # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
   col_aggregation <- .convert_to_named_vector(col_aggregation)
   # and reorder it to match popn's column ordering
@@ -147,7 +150,7 @@ popn_constrain <- function(popn,
   output <- select_at(scaling, c(names(col_aggregation), "popn_scaled__")) %>%
     rename(!!sym(names(col_popn)) := popn_scaled__) %>%
     data.frame() %>%
-    rbind(filter(popn, substr(gss_code,1,1)!="E"))
+    rbind(filter(popn[c(popn_cols, names(col_popn))], substr(gss_code,1,1)!="E"))
 
   # Validate output
   # ---------------
@@ -231,7 +234,7 @@ validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col
                       test_complete = !missing_levels_constraint,
                       test_unique = TRUE,
                       check_negative_values = TRUE)
-  
+
   #TODO: Why does this fail with actual data
   # if(!missing_levels_constraint) {
   #   validate_join_population(popn,
@@ -298,7 +301,7 @@ popn <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - ori
   filter(year == 2021) %>%
   mutate(sex = "female")
 col_popn <- "births"
-constraint <- readRDS("~/Projects/population_projections/input_data/constraints/npp_2018_fertility_constraint.rds") 
+constraint <- readRDS("~/Projects/population_projections/input_data/constraints/npp_2018_fertility_constraint.rds")
 
 do_scale <- filter(popn, substr(gss_code,1,1)=="E")
 dont_scale <- filter(popn, substr(gss_code,1,1)!="E")
@@ -326,7 +329,7 @@ scaling <- popn_1 %>%
 max_age_scaling <- filter(scaling, age == max_constraint_age) %>%
   select(year, sex, scaling)
 max_age_scaled <- filter(do_scale, age >= max_constraint_age) %>%
-  
+
   #this join isn't behaving like I expect
   left_join(max_age_scaling, by=c("year", "sex")) %>%
   mutate(popn_scaled = scaling * births) %>%
@@ -381,7 +384,7 @@ popn <- filter(popn, substr(gss_out,1,1) == "E") %>%
   filter(substr(gss_in,1,1) == "E") %>%
   rbind(scaled_out, scaled_in)
 
-                           
+
 
 
 
