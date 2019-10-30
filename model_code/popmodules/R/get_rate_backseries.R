@@ -63,6 +63,7 @@ get_rate_backseries <- function(component_mye_path,
   # separate function which calls this one?  This function has become hard to read.
   
   # TODO To simplify the function make it strict on passing the col_component name
+  
   # List valid names of population components
   usual_col_component <- c("births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in", "dom_out", "dom_net")
   
@@ -82,23 +83,18 @@ get_rate_backseries <- function(component_mye_path,
   validate_get_rate_backseries_inputs(popn, births, component, years_backseries,
                                       col_partial_match, col_aggregation, col_component)
   
-  #TODO: replace this with age_on function which contains births addition
-  popn <- popn %>%
-    popmodules::popn_age_on() %>%
-    filter(year %in% years_backseries)
-  
-  # TODO change the filter so that it can take any age band: will need to factorise and order age data when read in
-  births <- births %>%
-    filter(age == 0) %>%
+ 
+  popn <- popn  %>%
+    popmodules::popn_age_on(births = readRDS(births_mye_path))%>%
+    #TODO do we need filter below or should it be in age_on()?
+    filter(year != max(year)) %>%
     filter(year %in% years_backseries) %>%
-    rename(popn = births)
-  
-  popn <- rbind(popn, births) %>%
-    popmodules::validate_population(col_data = "popn")
-  
+      popmodules::validate_population(col_data = "popn")
+
   # LOAD AND SET UP COMPONENT DATA
   # ------------------------------
   
+
   if(is.null(col_component)) {
     col_component <- usual_col_component
   }
@@ -113,6 +109,7 @@ get_rate_backseries <- function(component_mye_path,
   # WRANGLE AND VALIDATE THE DATASETS FOR A JOIN
   # --------------------------------------------
   
+
   # Fill missing values as zero
   # TODO throw error instead if there are NAs?
   ix <- is.na(component[[col_component]])
@@ -124,7 +121,7 @@ get_rate_backseries <- function(component_mye_path,
                   "- these will be set to zero"))
     component[[col_component]] <- ifelse(component[[col_component]] < 0, 0, component[[col_component]])
   }
-  #browser()
+  
   # If there are missing levels expected in the component data, check all *other* levels are complete and match
   # Wil - If I'm right I think this is taking the unique values from each column and multiplying them together
   # I'm not sure what that tells you or why comaring the results for 2 dfs is a check of anything. The test is
@@ -154,6 +151,7 @@ get_rate_backseries <- function(component_mye_path,
                                   test_unique = TRUE)
   
   # TODO investigate another way to validate this join: currently it's failing due to insufficient memory
+
   # (when it's run as part of the model with a bunch of other memory usage)
   #popmodules::validate_join_population(popn,
   #                                     component,

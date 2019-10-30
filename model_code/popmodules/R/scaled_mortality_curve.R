@@ -86,7 +86,7 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
 #--------------------------------------------------------------------
 
 #Function to create denominators for initial rate calculation
-
+# TODO move the code below into the main function for readability
 deaths_denominator <- function(population, births){
   
   assert_that(is.data.frame(population),
@@ -96,14 +96,10 @@ deaths_denominator <- function(population, births){
   
   #TODO replace this with a general age_on function which adds in the births as well
   #Deaths denominator
-  births <- births %>%
-    filter(age==0) %>%
-    rename(popn = births)
-  
   population <- population %>%
-    popmodules::popn_age_on() %>%
+    popmodules::popn_age_on(births=births) %>%
+    #TODO do we need the filter step below or should age_on do it?
     filter(year != max(year)) %>%
-    rbind(births)%>%
     # TODO do we want to do this select here?  Could be confusing if we want to keep more cols
     select(gss_code, year, sex, age, popn) %>%
     arrange(gss_code, year, sex, age)

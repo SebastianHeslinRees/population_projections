@@ -27,15 +27,8 @@ international_rates_and_flows <- function(popn_mye_path=NULL, births_mye_path=NU
   component <- readRDS(component_path)
 
   if(flow_or_rate == "rate"){
-  births <- readRDS(births_mye_path) %>%
-    filter(age == 0) %>%
-    mutate(year = year + 1) %>%
-    rename(popn = births) %>%
-    data.frame()
-
   population <- readRDS(popn_mye_path) %>%
-    popn_age_on() %>%
-    rbind(births) %>%
+    popn_age_on(births = readRDS(births_mye_path)) %>%
     data.frame()
 
   rate_backseries <- population %>%
