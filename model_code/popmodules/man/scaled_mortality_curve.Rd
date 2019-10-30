@@ -2,7 +2,7 @@
 % Please edit documentation in R/scaled_mortality_curve.R
 \name{scaled_mortality_curve}
 \alias{scaled_mortality_curve}
-\title{Calculate average mortality probabilities based on past data and assign to 
+\title{Calculate average mortality probabilities based on past data and assign to
 first projection year}
 \usage{
 scaled_mortality_curve(popn_mye_path, births_mye_path, deaths_mye_path,

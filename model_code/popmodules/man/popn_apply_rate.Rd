@@ -6,7 +6,7 @@
 \usage{
 popn_apply_rate(popn, popn_rate, col_aggregation = c("year", "gss_code",
   "sex", "age"), col_popn = "popn", col_rate = "rate",
-  col_out = "component", pop1_is_subset = FALSE, many2one = FALSE,
+  col_out = "component", pop1_is_subset = FALSE, many2one = TRUE,
   additional_rate_levels = NA, missing_levels_popn = FALSE,
   missing_levels_rate = FALSE)
 }

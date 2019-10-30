@@ -29,6 +29,6 @@ A data frame of fertility probabilities for all projection years.
 \description{
 Applies the national rate of change in mortality/fertility to a set of local
 authority ASMRs/ASFRs to produce a mortality/fertility probability trajectory.
-This takes the projection for the first projection year as an input, and 
+This takes the projection for the first projection year as an input, and
 extends it to the required number of projection years
 }
