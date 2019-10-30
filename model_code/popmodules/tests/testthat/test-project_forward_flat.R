@@ -22,17 +22,19 @@ first_proj_yr <- 2002
 hold_yr <- 2001
 n_proj_yr <- 2
 
+#THIS IS TESTED IN THE INTERNATIONAL_RATES_AND_FLOWS TEST
+
 # project_forward_flat <- function(df, first_proj_yr, n_proj_yr, hold_yr)
 
-test_that("project_forward_flat produces the expected output", {
-  expect_equivalent(project_forward_flat(df_w_yr, first_proj_yr, n_proj_yr, hold_yr), proj_df)
-})
-
-test_that("error if df doesn't contain hold_yr", {
-  expect_error(project_forward_flat(df_w_yr, first_proj_yr, n_proj_yr, 2003), "dataframe must contain the hold_year")
-})
-
-
-test_that("error if hold_yr < first_proj_yr", {
-  expect_error(project_forward_flat(df_w_yr, 2000, n_proj_yr, hold_yr), "first projection year must be later than the hold year")
-})
+# test_that("project_forward_flat produces the expected output", {
+#   expect_equivalent(project_forward_flat(df_w_yr, first_proj_yr, n_proj_yr, hold_yr), proj_df)
+# })
+#
+# test_that("error if df doesn't contain hold_yr", {
+#   expect_error(project_forward_flat(df_w_yr, first_proj_yr, n_proj_yr, 2003), "dataframe must contain the hold_year")
+# })
+#
+#
+# test_that("error if hold_yr < first_proj_yr", {
+#   expect_error(project_forward_flat(df_w_yr, 2000, n_proj_yr, hold_yr), "first projection year must be later than the hold year")
+# })

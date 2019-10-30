@@ -1,29 +1,61 @@
 library(dplyr)
 library(testthat)
-devtools::load_all()
+#devtools::load_all()
 
-popn <- expand.grid(year = c(2000:2004),
-                    gss_code = c("E0901", "E0902"),
-                    age = c(1,2),
-                    sex = c("male", "female"),
-                    stringsAsFactors = F) %>%
-  data.frame()
-popn$popn <- sample(c(1000:3000), size=40, replace=T)
+# popn <- expand.grid(year = c(2000:2004),
+#                     gss_code = c("E0901", "E0902"),
+#                     age = c(0:3),
+#                     sex = c("male", "female"),
+#                     stringsAsFactors = F) %>%
+#   data.frame()
+# popn$popn <- sample(c(1000:3000), size=80, replace=T)
+#
+# births <- expand.grid(year = c(2001:2005),
+#                     gss_code = c("E0901", "E0902"),
+#                     age = 0,
+#                     sex = c("male", "female"),
+#                     stringsAsFactors = F) %>%
+#   data.frame()
+# births$births <- sample(c(1000:3000), size=20, replace=T)
+#
+# components <- expand.grid(year = c(2001:2005),
+#                           gss_code = c("E0901", "E0902"),
+#                           age = c(0:3),
+#                           sex = c("male", "female"),
+#                           stringsAsFactors = F)%>%
+#   data.frame()
+#
+# int_out <- components
+# int_out$int_out <- sample(c(100:200), size=80, replace=T)
+#
+# int_in <- components
+# int_in$int_in <- sample(c(100:200), size=80, replace=T)
 
-components <- expand.grid(year = c(2001:2005),
-                          gss_code = c("E0901", "E0902"),
-                          age = c(2,3),
-                          sex = c("male", "female"),
-                          stringsAsFactors = F)%>%
-  data.frame()
+# saveRDS(popn, "model_code/popmodules/tests/testthat/test_data/test-internationa_rates_and_flows_popn.rds")
+# saveRDS(births, "model_code/popmodules/tests/testthat/test_data/test-internationa_rates_and_flows_births.rds")
+# saveRDS(int_out, "model_code/popmodules/tests/testthat/test_data/test-internationa_rates_and_flows_int_out.rds")
+# saveRDS(int_in, "model_code/popmodules/tests/testthat/test_data/test-internationa_rates_and_flows_int_in.rds")
+
+#-----------------------------==
+
+popn <- readRDS("test_data/test-internationa_rates_and_flows_popn.rds")
+births <- readRDS("test_data/test-internationa_rates_and_flows_births.rds")
+int_out <- readRDS("test_data/test-internationa_rates_and_flows_int_out.rds")
+int_in <- readRDS("test_data/test-internationa_rates_and_flows_int_in.rds")
 
 #----------------------------------
 
-int_out <- components
-int_out$int_out <- sample(c(100:200), size=40, replace=T)
+aged <- popn %>%
+  mutate(year = year +1,
+         age = ifelse(age == 3, 3, age +1))%>%
+  group_by(year, gss_code, age, sex) %>%
+  summarise(popn = sum(popn)) %>%
+  ungroup() %>%
+  #filter(year != max(year)) %>%
+  rbind(rename(births, popn = births))
 
 out_rates <- int_out %>%
-  left_join(popn) %>%
+  left_join(aged, by = c("year", "gss_code", "age", "sex")) %>%
   mutate(int_out = int_out/popn) %>%
   select(year, gss_code, sex, age, int_out)
 
@@ -33,42 +65,59 @@ out_flow <- out_rates %>%
   summarise(int_out = sum(int_out)/3) %>%
   ungroup()
 
-traj <- list()
-for(i in 2006:2010){
-  traj[[i]] <- mutate(out_flow, year = i)
+out_traj <- list()
+for(i in 2006:2011){
+  out_traj[[i]] <- mutate(out_flow, year = i)
 }
-traj <- data.table::rbindlist(traj) %>% select(names(out_rates))
-out_rates <- rbind(out_rates, traj)
+out_traj <- data.table::rbindlist(out_traj) %>% select(names(out_rates)) %>%
+  mutate(year = as.numeric(year), age=as.numeric(age))
 
-#-----------------------------------
 
-test_that("international_rates produces the expected output", {
-  expect_equivalent(international_rates(population = popn, component=int_in,
-                                        last_data_year=2005, years_to_avg=3, data_col="int_out", n_proj_years=5),
-                    in_flow)
-})
-
-#-----------------------------------
-int_in <- components
-int_in$int_in <- sample(c(100:200), size=40, replace=T)
+#--------------------------------
 
 in_flow <- filter(int_in, year %in% c(2003:2005)) %>%
   group_by(gss_code, sex, age) %>%
   summarise(int_in = sum(int_in)/3) %>%
   ungroup()
 
-traj <- list()
-for(i in 2006:2010){
-  traj[[i]] <- mutate(in_flow, year = i)
+in_traj <- list()
+for(i in 2006:2011){
+  in_traj[[i]] <- mutate(in_flow, year = i)
 }
-traj <- data.table::rbindlist(traj) %>% select(names(int_in))
-in_flow <- rbind(int_in, traj)
+in_traj <- data.table::rbindlist(in_traj) %>% select(names(int_in)) %>%
+  data.frame() %>% mutate(year = as.numeric(year))
+
+#-----------------------------------
+
+x <- international_rates_and_flows(popn_mye_path=NULL,
+                                   births_mye_path=NULL,
+                                   flow_or_rate="flow",
+                                   component_path="test_data/test-internationa_rates_and_flows_int_in.rds",
+                                   last_data_year=2005,
+                                   n_years_to_avg=3,
+                                   data_col="int_in",
+                                   first_proj_yr=2006,
+                                   n_proj_yr=5,
+                                   rate_cap = NULL)
+test_that("international_rates_and_flows error in flow calc", {
+  expect_equivalent(x, in_traj)
+})
+
 
 #------------------------------------
 
-test_that("international_flows produces the expected output", {
-  expect_equivalent(international_flows(component=int_in, last_data_year=2005, years_to_avg=3, flow_col="int_in", n_proj_years=5),
-                    in_flow)
+x <- international_rates_and_flows(popn_mye_path="test_data/test-internationa_rates_and_flows_popn.rds",
+                                   births_mye_path="test_data/test-internationa_rates_and_flows_births.rds",
+                                   flow_or_rate="rate",
+                                   component_path="test_data/test-internationa_rates_and_flows_int_out.rds",
+                                   last_data_year=2005,
+                                   n_years_to_avg=3,
+                                   data_col="int_out",
+                                   first_proj_yr=2006,
+                                   n_proj_yr=5,
+                                   rate_cap = 0.8)
+test_that("international_rates_and_flows: error in rate calc", {
+  expect_equivalent(x, out_traj)
 })
 
 #x <- international_flows(component=int_in, last_data_year=2005, years_to_avg=3, flow_col="int_in", n_proj_years=5)
