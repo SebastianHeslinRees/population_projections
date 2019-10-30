@@ -2,10 +2,11 @@
 % Please edit documentation in R/scaled_fertility_curve.R
 \name{scaled_fertility_curve}
 \alias{scaled_fertility_curve}
-\title{Calculate average fertility rates based on past data}
+\title{Calculate average fertility rates based on past data and assign to first
+projection year}
 \usage{
 scaled_fertility_curve(popn_mye_path, births_mye_path,
-  target_curves_filepath, last_data_year, years_to_avg, avg_or_trend,
+  target_curves_filepath, last_data_year, n_years_to_avg, avg_or_trend,
   data_col = "births", output_col)
 }
 \arguments{
@@ -15,10 +16,10 @@ scaled_fertility_curve(popn_mye_path, births_mye_path,
 
 \item{target_curves_filepath}{Character. Path to the SNPP target fertility curves}
 
-\item{last_data_year}{numeric. The last year of death data on which to calculate
+\item{last_data_year}{numeric. The last year of births data on which to calculate
 averages.}
 
-\item{years_to_avg}{numeric. The number of years to use in calculating averages.}
+\item{n_years_to_avg}{numeric. The number of years to use in calculating averages/trend forward.}
 
 \item{avg_or_trend}{Character. Should the averaged be caulated as the mean \code{Average},
 or by linear regression \code{Trend}.}
@@ -28,7 +29,8 @@ or by linear regression \code{Trend}.}
 \item{output_col}{Character. The name of the column in the output dataframe containing the calculated rates}
 }
 \value{
-A data frame of mortality probabilities or fertility rates by LA, year, sex and age.
+A data frame of mortality probabilities or fertility rates by LA, year, sex and age with the same age structure
+as the target curves and overall rates scaled so that they are consistent with past births.
 }
 \description{
 Compares past rates by LA, age and sex to an input

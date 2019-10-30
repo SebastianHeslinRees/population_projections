@@ -8,7 +8,8 @@ project_rates_npp(jump_off_rates, rate_col, rate_trajectory_filepath,
   first_proj_yr, n_proj_yr, npp_var = "2018_principal")
 }
 \arguments{
-\item{jump_off_rates}{Dataframe. A set of LA/age/sex rates for the first projection year.}
+\item{jump_off_rates}{Dataframe. A set of LA/age/sex rates for the first projection year
+Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility_curve()}}
 
 \item{rate_col}{Character. The column in the jump_off_rates dataframe containing the rates.}
 
@@ -28,4 +29,6 @@ A data frame of fertility probabilities for all projection years.
 \description{
 Applies the national rate of change in mortality/fertility to a set of local
 authority ASMRs/ASFRs to produce a mortality/fertility probability trajectory.
+This takes the projection for the first projection year as an input, and
+extends it to the required number of projection years
 }

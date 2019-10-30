@@ -2,10 +2,11 @@
 % Please edit documentation in R/scaled_mortality_curve.R
 \name{scaled_mortality_curve}
 \alias{scaled_mortality_curve}
-\title{Calculate average mortality probabilities based on past data}
+\title{Calculate average mortality probabilities based on past data and assign to
+first projection year}
 \usage{
 scaled_mortality_curve(popn_mye_path, births_mye_path, deaths_mye_path,
-  target_curves_filepath, last_data_year, years_to_avg, avg_or_trend,
+  target_curves_filepath, last_data_year, n_years_to_avg, avg_or_trend,
   data_col = "deaths", output_col)
 }
 \arguments{
@@ -15,11 +16,11 @@ scaled_mortality_curve(popn_mye_path, births_mye_path, deaths_mye_path,
 
 \item{deaths_mye_path}{Character. Path to the MYE deaths component data}
 
-\item{target_curves_filepath}{Character. Path to the SNPP target fertility curves}
+\item{target_curves_filepath}{Character. Path to the SNPP target mortality curves}
 
-\item{last_data_year}{numeric. The last year of death data on which to calculate averages.}
+\item{last_data_year}{numeric. The last year of death and population data on which to calculate averages.}
 
-\item{years_to_avg}{numeric. The number of years to use in calculating averages.}
+\item{n_years_to_avg}{numeric. The number of years to use in calculating averages/trending forward.}
 
 \item{avg_or_trend}{Character. Should the averaged be caulated as the mean \code{Average},
 or by linear regression \code{Trend}.}
@@ -29,11 +30,12 @@ or by linear regression \code{Trend}.}
 \item{output_col}{Character. The name of the column in the output dataframe containing the calculated rates}
 }
 \value{
-A data frame of mortality probabilities rates by LA, year, sex and age.
+A data frame of mortality probabilities rates by LA, year, sex and age with the same age structure
+as the target curves and overall rates scaled so that they are consistent with past deaths.
 }
 \description{
-Compares past rates by LA, age and sex to an input
+Compares past rates by LA and sex to an input
 curve to derive a set of scaling factors. The scaling factors are then
 averaged or trended forward using regression. The resulting scaling
-factor is applied to the input curve to produce a set of rates.
+factor is applied to the age specific input curve to produce a set of rates.
 }

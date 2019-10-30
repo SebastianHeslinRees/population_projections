@@ -54,7 +54,7 @@ mortality_fns <- list(
                                                             deaths_mye_path = deaths_mye_path,
                                                             target_curves_filepath = mortality_curve_filepath,
                                                             last_data_year = mortality_last_data_year,
-                                                            years_to_avg = mortality_years_to_avg,
+                                                            n_years_to_avg = mortality_years_to_avg,
                                                             avg_or_trend = mortality_avg_or_trend,
                                                             data_col = "deaths",
                                                             output_col = "rate")),
@@ -73,7 +73,7 @@ fertility_fns <- list(
                                                            births_mye_path = births_mye_path,
                                                            target_curves_filepath = fertility_curve_filepath,
                                                            last_data_year = fertility_last_data_year,
-                                                           years_to_avg = fertility_years_to_avg,
+                                                           n_years_to_avg = fertility_years_to_avg,
                                                            avg_or_trend = fertility_avg_or_trend,
                                                            data_col = "births",
                                                            output_col = "rate")),
@@ -118,11 +118,12 @@ dom_rate_fns <- list(
   list(fn = popmodules::get_rate_backseries, args = list(component_mye_path = dom_origin_destination_path,
                                                           popn_mye_path = popn_mye_path,
                                                           births_mye_path = births_mye_path,
+                                                          years_backseries = (first_proj_yr - dom_mig_years_to_avg):(first_proj_yr - 1),
                                                           col_partial_match = c("gss_out","gss_in"),
                                                           col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                           col_component = "value")),
   list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
-                                                                      years_to_avg = dom_mig_years_to_avg,
+                                                                      n_years_to_avg = dom_mig_years_to_avg,
                                                                       col_rate = "rate"))
 )
 

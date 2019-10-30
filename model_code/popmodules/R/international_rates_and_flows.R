@@ -34,15 +34,9 @@ international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_o
   component <- readRDS(component_path)
 
   if(flow_or_rate == "rate"){
-    births <- readRDS(births_mye_path) %>%
-      filter(age == 0) %>%
-      rename(popn = births) %>%
-      data.frame()
 
     population <- readRDS(popn_mye_path) %>%
-      #TODO: when merged in this line can be edited and the births above removed
-      popn_age_on() %>%
-      rbind(births) %>%
+      popn_age_on(births = readRDS(births_mye_path)) %>%
       data.frame()
 
     rate_backseries <- population %>%
@@ -56,7 +50,6 @@ international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_o
     rates <- calculate_mean_from_backseries(rate_backseries, n_years_to_avg, last_data_year, "rate",
                                             col_aggregation = c("gss_code","sex","age")) %>%
       mutate(rate = ifelse(rate > rate_cap, rate_cap, rate))
-
 
     last_proj_yr <- n_proj_yr + first_proj_yr - 1
 
