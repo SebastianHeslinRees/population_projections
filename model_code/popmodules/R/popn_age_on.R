@@ -172,11 +172,6 @@ popn_age_on <- function(popn,
     
   }
   
-  
-  
-  
-  
-  
   # Equivalent to the above, but with the tidyverse
   
   if(!requireNamespace("data.table", quietly=TRUE)) {
