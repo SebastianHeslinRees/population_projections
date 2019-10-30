@@ -30,7 +30,7 @@ geographic resolution, only specify the finest resolution common to the
 population data frame and the origin-destination data. Default
 \code{c("year", "gss_code"="gss_out", "sex", "age")}.}
 
-\item{col_gss_destination}{String or character vector givein names of columns
+\item{col_gss_destination}{String or character vector giving names of columns
 in \code{mign_rate} to which the output will be aggregated, and which
 weren't included in \code{col_aggregation} because \code{popn} doesn't join
 to them. This will usually just be \code{mign_rate}'s destination
@@ -120,7 +120,7 @@ migrate_domestic(popn,
                  col_rate = "rate",
                  col_flow = "flow",
                  pop1_is_subset = FALSE,
-                 many2one = FALSE,
+                 many2one = TRUE,
                  missing_levels_rate = TRUE,
                  col_origin_destination = NA)
 

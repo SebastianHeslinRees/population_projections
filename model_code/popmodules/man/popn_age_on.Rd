@@ -6,7 +6,7 @@
 \usage{
 popn_age_on(popn, col_aggregation = c("year", "gss_code", "age", "sex"),
   col_age = "age", col_year = "year", timestep = 1,
-  template_age_levels = NULL)
+  template_age_levels = NULL, births = NULL)
 }
 \arguments{
 \item{popn}{Data frame containing a cohort population.}

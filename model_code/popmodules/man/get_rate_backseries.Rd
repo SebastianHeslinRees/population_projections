@@ -5,8 +5,9 @@
 \title{Divide a component of change by population to give historical rates}
 \usage{
 get_rate_backseries(component_mye_path, popn_mye_path, births_mye_path,
-  col_partial_match = NULL, col_aggregation = c("year", "gss_code",
-  "age", "sex"), col_component = NULL)
+  years_backseries, col_partial_match = NULL,
+  col_aggregation = c("year", "gss_code", "age", "sex"),
+  col_component = NULL)
 }
 \arguments{
 \item{component_mye_path}{Path to the mid-year estimates of the desired
@@ -15,6 +16,8 @@ component of change.}
 \item{popn_mye_path}{Path to population mid-year estimates.}
 
 \item{births_mye_path}{Path to births mid-year estimates.}
+
+\item{years_backseries}{The years for which the backseries are to be calculated. Numeric vector.}
 
 \item{col_partial_match}{List of columns in \code{component_mye_path} where
 levels are a subset of those in \code{popn_mye_path}.}
