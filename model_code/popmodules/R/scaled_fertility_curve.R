@@ -37,7 +37,6 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
   births <- data.frame(readRDS(births_mye_path))
   target_curves <- readRDS(target_curves_filepath) %>% select(-year)
   
-  #TODO put these checks back in
   validate_scaled_fertility_curve_input(population, births, target_curves, last_data_year, n_years_to_avg,
                                         avg_or_trend, data_col, output_col)
   
@@ -60,7 +59,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     ungroup() %>%
     left_join(births, by = c("gss_code", "year")) %>%
     rename(actual = data_col) %>%
-    mutate(scaling = ifelse(actual == 0,
+    mutate(scaling = ifelse(curve_count == 0,
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, scaling)

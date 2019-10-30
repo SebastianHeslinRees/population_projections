@@ -56,8 +56,7 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     summarise(actual = sum(value),
               curve_count = sum(curve_count)) %>%
     as.data.frame() %>%
-    # TODO what if curve_count is 0?  would end up with div by 0
-    mutate(scaling = ifelse(actual == 0,
+    mutate(scaling = ifelse(curve_count == 0,
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, sex, scaling)
