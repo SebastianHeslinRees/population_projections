@@ -39,7 +39,6 @@ run_trend_model <- function(config_list) {
  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
-  
   # get the MYEs
   # TODO: should this be done all together?
   population <- get_component(filepath = config_list$popn_mye_path, 
