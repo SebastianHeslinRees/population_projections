@@ -1,17 +1,20 @@
 #' Calculate average international rates based on past data
 #'
-#' A wrepper for \code{calc_mean_rate} which prepares mye
+#' A wrapper for \code{calc_mean_rate} which prepares mye
 #' and international in/out flow component data.
 #'
 #' @param popn_mye_path Character. The path to the mye backseries population.
+#' @param births_mye_path Character. The path to the mye births backseries.
+#' @param flow_or_rate Character. Either "flow" or "rate" - determines whether
+#'   the function returns absolute flows or migration rates.
 #' @param component_path Character The path to the international in or out migration
-#'   componet from the mye.
-#' @param last_data_year Integer. The last year of death data on which to calculate
+#'   component from the mye.
+#' @param last_data_year Integer. The last year of data on which to calculate
 #'   averages.
 #' @param years_to_avg Integer. The number of years to use in calculating averages.
 #' @param data_col Character. The column in the component dataframe containing
 #'   the flow data.
-#' @param n_proj_years Numeric. The number of years to project forward
+#' @param n_proj_years Numeric. The number of years to project forward.
 #'
 #' @return A data frame of international migration probabilities.
 #'
