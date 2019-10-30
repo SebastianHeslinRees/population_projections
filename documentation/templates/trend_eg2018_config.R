@@ -34,6 +34,7 @@ fertility_npp_variant <- "2018_principal"
 int_out_last_data_year <- 2016
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
+int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2016
 int_in_years_to_avg <- 10
@@ -97,7 +98,7 @@ int_out_rate_fns <- list(
                                                                  data_col = "int_out",
                                                                  first_proj_yr = first_proj_yr,
                                                                  n_proj_yr = n_proj_yr,
-                                                                 rate_cap = 0.8))
+                                                                 rate_cap = int_out_rate_cap))
 )
 
 
