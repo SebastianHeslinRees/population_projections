@@ -55,12 +55,14 @@ mig_rate_answer <- left_join(popn_aged, migration, by = c("year", "gss_code", "a
 
 mortality <- get_rate_backseries(component_mye_path = "test_data/test-get_rates_backseries_deaths.rds",
                          popn_mye_path = "test_data/test-get_rates_backseries_popn.rds",
-                         births_mye_path = "test_data/test-get_rates_backseries_births.rds") %>%
+                         births_mye_path = "test_data/test-get_rates_backseries_births.rds",
+                         years_backseries = c(2013,2014)) %>%
   arrange(year, gss_code, age, sex)
 
 migration_rate <- get_rate_backseries(component_mye_path = "test_data/test-get_rates_backseries_migration.rds",
                          popn_mye_path = "test_data/test-get_rates_backseries_popn.rds",
-                         births_mye_path = "test_data/test-get_rates_backseries_births.rds") %>%
+                         births_mye_path = "test_data/test-get_rates_backseries_births.rds",
+                         years_backseries = c(2013, 2014)) %>%
   arrange(year, gss_code, age, sex)
 
 test_that("get_rate_backseries creates expected output for mortality test case", {

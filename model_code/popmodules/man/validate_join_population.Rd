@@ -4,20 +4,19 @@
 \alias{validate_join_population}
 \title{Check one population is contained within another}
 \usage{
-validate_join_population(pop1, pop2,
-  cols_common_aggregation = intersect(names(pop1), names(pop2)),
-  pop1_is_subset = TRUE, many2one = TRUE, one2many = TRUE,
-  warn_unused_shared_cols = TRUE)
+validate_join_population(pop1, pop2, cols_common_aggregation = c("year",
+  "gss_code", "age", "sex"), pop1_is_subset = TRUE, many2one = TRUE,
+  one2many = TRUE, warn_unused_shared_cols = TRUE)
 }
 \arguments{
 \item{pop1, pop2}{Data frames.}
 
 \item{cols_common_aggregation}{A character vector. Names of columns for data
-aggregation common to both input data frames (e.g. age, ward). If columns
-don't have the same name, use a named character vector (e.g.
-\code{"WARD"="WARD11CD"}). Defaults to column names shared between the
-input data frames, but it's best not to use this in case the overlap it
-finds is not what you expect.}
+aggregation (e.g. age, ward). If columns don't have the same name, use a
+named character vector (e.g. \code{"WARD"="WARD11CD"}). All elements must give
+columns in \code{popn} but not all need to be in \code{popn_rate}, that is,
+it can be at a lower resolution. Defaults to
+\code{c("year","gss_code","age","sex")}.}
 
 \item{pop1_is_subset}{Logical. When TRUE \code{pop1} is allowed to match to
 subset of \code{pop2}.When FALSE the aggregation levels should be the same
@@ -27,7 +26,7 @@ aggregation levels must be present in both data frames. Default TRUE.}
 \item{many2one}{Logical. Can multiple rows in \code{pop1} map to a single row
 in \code{pop2}? Set to FALSE when matching should be unique (i.e.
 injective), and leave TRUE when, e.g. \code{pop2} has fewer aggregation
-levels than code{pop2}, for example when validating a join from LSOA data
+levels than \code{pop2}, for example when validating a join from LSOA data
 to MSOA data on MSOA11CD.}
 
 \item{one2many}{Logical. Can one row in the first population map to several

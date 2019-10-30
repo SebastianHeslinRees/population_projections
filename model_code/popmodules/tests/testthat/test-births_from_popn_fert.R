@@ -330,3 +330,4 @@ test_that("births_from_popn_fert can produce output without sex data", {
   expect_warning(temp <- births_from_popn_fert(popn, fert, col_sex=NULL, col_aggregation = c("year", "gss_code", "age", "sex")))
   expect_equivalent(temp, births_out)
 })
+

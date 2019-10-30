@@ -39,18 +39,19 @@ expect_3 <- data.frame(area=c("E06000049","E06000050"),
 
 #test with 1 var
 test_that("recode_gss_to_2011 produces the expected output", {
-  expect_equivalent(recode_gss_to_2011(df_1, "area", c("area","sex","age")), expect_1)
+  # for why we use data.table::copy() here, see the FIXME within the function
+  expect_equivalent(recode_gss_to_2011(data.table::copy(df_1), "area", c("area","sex","age")), expect_1)
 })
 
 #test with 2 vars
   test_that("recode_gss_to_2011 produces the expected output", {
-    expect_equivalent(recode_gss_to_2011(df_2, "area", c("area","sex","age")), expect_2)
+    expect_equivalent(recode_gss_to_2011(data.table::copy(df_2), "area", c("area","sex","age")), expect_2)
   })
 
 
 #test with fun = mean
   #test with 2 vars
   test_that("recode_gss_to_2011 produces the expected output", {
-    expect_equivalent(recode_gss_to_2011(df_2, "area", c("area","sex","age"), fun=list(mean)), expect_3)
+    expect_equivalent(recode_gss_to_2011(data.table::copy(df_2), "area", c("area","sex","age"), fun=list(mean)), expect_3)
   })
 
