@@ -1,9 +1,8 @@
-#' Copy the hold year data into the projection years
+#' Project a population data frame forward by taking the most recent year and
+#' repeating it for each year up to an input last_proj_yr
 #'
-#' @param df A data frame
-#' @param first_proj_yr The first year of the projection
-#' @param n_proj_yr The number of years being projected
-#' @param hold_yr The hold year
+#' @param df A population data frame
+#' @param last_proj_yr The last year of the projection
 #'
 #' @return A data frame containing the past years and the projection years
 #'
@@ -27,12 +26,12 @@ project_forward_flat <- function(df, last_proj_yr) {
 
   projection <- dplyr::bind_rows(df, projection)
 
-
   # TODO check that there aren't any missing years between the past data and the projections
   # TODO check that there aren't any duplicate years
   # TODO validate projection
   # TODO add module function rules checks - must return fert/mort df
 
+  return(projection)
 }
 
 

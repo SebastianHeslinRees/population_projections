@@ -120,7 +120,7 @@ migrate_domestic(popn,
                  col_rate = "rate",
                  col_flow = "flow",
                  pop1_is_subset = FALSE,
-                 many2one = FALSE,
+                 many2one = TRUE,
                  missing_levels_rate = TRUE,
                  col_origin_destination = NA)
 

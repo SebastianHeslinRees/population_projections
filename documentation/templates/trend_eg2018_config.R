@@ -90,23 +90,26 @@ fertility_fns <- list(
 int_out_rate_fns <- list(
   list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
                                                                  births_mye_path = births_mye_path,
-                                                                 component_path = int_out_mye_path,
                                                                  flow_or_rate = int_out_flow_or_rate,
+                                                                 component_path = int_out_mye_path,
                                                                  last_data_year = int_out_last_data_year,
-                                                                 years_to_avg = int_out_years_to_avg,
+                                                                 n_years_to_avg = int_out_years_to_avg,
                                                                  data_col = "int_out",
-                                                                 n_proj_yr = n_proj_yr))
+                                                                 first_proj_yr = first_proj_yr,
+                                                                 n_proj_yr = n_proj_yr,
+                                                                 rate_cap = 0.8))
 )
 
 
 int_in_fns <- list(
   list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
                                                                  births_mye_path = births_mye_path,
-                                                                 component_path = int_in_mye_path,
                                                                  flow_or_rate = int_in_flow_or_rate,
+                                                                 component_path = int_in_mye_path,
                                                                  last_data_year = int_in_last_data_year,
-                                                                 years_to_avg = int_in_years_to_avg,
+                                                                 n_years_to_avg = int_in_years_to_avg,
                                                                  data_col = "int_in",
+                                                                 first_proj_yr = first_proj_yr,
                                                                  n_proj_yr = n_proj_yr))
 )
 

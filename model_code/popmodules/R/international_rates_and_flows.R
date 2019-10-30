@@ -14,7 +14,10 @@
 #' @param n_years_to_avg Integer. The number of years to use in calculating averages.
 #' @param data_col Character. The column in the component dataframe containing
 #'   the flow data.
-#' @param n_proj_years Numeric. The number of years to project forward.
+#' @param first_proj_yr Numeric. The first year of the model's projection (may
+#'   not always be the last_data_year + 1).
+#' @param n_proj_yr Numeric. The number of years to project forward.
+#' @param rate_cap Numeric. A cap constraining the maximum rates output.
 #'
 #' @return A data frame of international migration probabilities.
 #'
@@ -24,7 +27,7 @@
 #'
 #' @export
 
-international_rates_and_flows <- function(popn_mye_path=NULL, births_mye_path=NULL, flow_or_rate,
+international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
                                           component_path, last_data_year, n_years_to_avg, data_col,
                                           first_proj_yr, n_proj_yr, rate_cap = 0.8) {
 
@@ -55,7 +58,7 @@ international_rates_and_flows <- function(popn_mye_path=NULL, births_mye_path=NU
       mutate(rate = ifelse(rate > rate_cap, rate_cap, rate))
 
 
-    last_proj_yr <- n_proj_yr+first_proj_yr
+    last_proj_yr <- n_proj_yr + first_proj_yr - 1
 
     output_df <- project_forward_flat(df = rates,
                                       last_proj_yr = last_proj_yr) %>%
@@ -80,7 +83,7 @@ international_rates_and_flows <- function(popn_mye_path=NULL, births_mye_path=NU
       mutate(year = last_data_year+1)
 
 
-    last_proj_yr <- n_proj_yr+first_proj_yr
+    last_proj_yr <- n_proj_yr + first_proj_yr - 1
 
     output_df <- project_forward_flat(df = flows,
                                       last_proj_yr = last_proj_yr) %>%

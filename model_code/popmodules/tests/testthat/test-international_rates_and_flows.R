@@ -38,10 +38,14 @@ library(testthat)
 
 #-----------------------------==
 
-popn <- readRDS("test_data/test-internationa_rates_and_flows_popn.rds")
-births <- readRDS("test_data/test-internationa_rates_and_flows_births.rds")
-int_out <- readRDS("test_data/test-internationa_rates_and_flows_int_out.rds")
-int_in <- readRDS("test_data/test-internationa_rates_and_flows_int_in.rds")
+popn_path <- "test_data/test-internationa_rates_and_flows_popn.rds"
+births_path <- "test_data/test-internationa_rates_and_flows_births.rds"
+int_out_path <- "test_data/test-internationa_rates_and_flows_int_out.rds"
+int_in_path <- "test_data/test-internationa_rates_and_flows_int_in.rds"
+popn <- readRDS(popn_path)
+births <- readRDS(births_path)
+int_out <- readRDS(int_out_path)
+int_in <- readRDS(int_in_path)
 
 #----------------------------------
 
@@ -89,15 +93,15 @@ in_traj <- data.table::rbindlist(in_traj) %>% select(names(int_in)) %>%
 
 #-----------------------------------
 
-x <- international_rates_and_flows(popn_mye_path=NULL,
-                                   births_mye_path=NULL,
+x <- international_rates_and_flows(popn_mye_path=popn_path,
+                                   births_mye_path=births_path,
                                    flow_or_rate="flow",
-                                   component_path="test_data/test-internationa_rates_and_flows_int_in.rds",
+                                   component_path=int_in_path,
                                    last_data_year=2005,
                                    n_years_to_avg=3,
                                    data_col="int_in",
                                    first_proj_yr=2006,
-                                   n_proj_yr=5,
+                                   n_proj_yr=6,
                                    rate_cap = NULL)
 test_that("international_rates_and_flows error in flow calc", {
   expect_equivalent(x, in_traj)
@@ -106,15 +110,15 @@ test_that("international_rates_and_flows error in flow calc", {
 
 #------------------------------------
 
-x <- international_rates_and_flows(popn_mye_path="test_data/test-internationa_rates_and_flows_popn.rds",
-                                   births_mye_path="test_data/test-internationa_rates_and_flows_births.rds",
+x <- international_rates_and_flows(popn_mye_path=popn_path,
+                                   births_mye_path=births_path,
                                    flow_or_rate="rate",
-                                   component_path="test_data/test-internationa_rates_and_flows_int_out.rds",
+                                   component_path=int_out_path,
                                    last_data_year=2005,
                                    n_years_to_avg=3,
                                    data_col="int_out",
                                    first_proj_yr=2006,
-                                   n_proj_yr=5,
+                                   n_proj_yr=6,
                                    rate_cap = 0.8)
 test_that("international_rates_and_flows: error in rate calc", {
   expect_equivalent(x, out_traj)
