@@ -124,11 +124,6 @@ births_from_popn_fert <- function(popn,
                             col_rate = col_rate,
                             col_out = col_births)
 
-  #constrain to national totals
-  if(constraint != FALSE){
-    births <- births_constrain(births, constraint)
-  }
-
   total_births <- sum(births[[col_births]])
 
   cols_grouping <- setdiff(names(col_aggregation), c(col_age, col_sex))

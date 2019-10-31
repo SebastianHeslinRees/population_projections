@@ -8,14 +8,13 @@
 #' @param constraint A data frame containing population data at the same
 #'   resolution or lower.
 #' @param col_aggregation A string or character vector giving the names of
-#'   columns in \code{popn} contain aggregation levels. All elements
-#'   must give columns in \code{popn} but not all need to be in
-#'   \code{constraint}, (that is, \code{constraint} can be at a lower resolution).
-#'   If names differ between the two input data frames, use a named character
-#'   vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
-#'   "gss_code", "age", "sex")}.
+#'   columns in \code{constraint} contain aggregation levels. All elements
+#'   must give columns in \code{constraint} and \code{popn}.
+#'   Default \code{c("year", "age", "sex")}.
 #' @param col_popn String. Name of column in \code{popn} containing population
 #'   counts. Default "popn".
+#' @param col_constraint String. Name of column in \code{constraint} containing population
+#'   counts. Default col_popn.
 #' @param pop1_is_subset Logical. If the two input data frames cover the same
 #'   domain and you expect every level of \code{constraint} to be matched to by a
 #'   level in \code{popn} set this to TRUE, and this will be checked. Default
@@ -30,7 +29,7 @@
 #'   datasets. Default FALSE.
 #'
 #' @return A data frame of component counts calculated as input popn * rate, with one row
-#'   for each distinct level of the input \code{col_aggregation} columns.
+#'   for each distinct level of the input \code{popn} dataframe
 #'
 #' @import assertthat
 #' @importFrom magrittr %>%
@@ -76,97 +75,41 @@
 
 popn_constrain <- function(popn,
                            constraint,
-                           col_aggregation = c("year", "gss_code", "sex", "age"),
-                           col_popn = "popn",
+                           col_aggregation = c("year", "sex", "age"),
+                           col_popn,
+                           col_constraint = col_popn,
                            pop1_is_subset = FALSE,
                            missing_levels_popn = FALSE,
                            missing_levels_constraint = FALSE) {
 
   # Validate input
   # --------------
-  validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn,
-                                pop1_is_subset, missing_levels_popn, missing_levels_constraint)
+  #validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn,
+  #                              pop1_is_subset, missing_levels_popn, missing_levels_constraint)
 
-
-  # Standardise data
-  # ----------------
-
-  popn <- as.data.frame(popn)
-  constraint <- as.data.frame(constraint)
-
-  # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
-  col_aggregation <- .convert_to_named_vector(col_aggregation)
-  # and reorder it to match popn's column ordering
-  col_aggregation_popn <- intersect( names(popn), names(col_aggregation) )
-  col_aggregation <- col_aggregation[ col_aggregation_popn ]
-
-  join_by <- col_aggregation[col_aggregation %in% names(constraint)]  # this is a named character vector
-
-  # TODO split these out into two variables rather than a named vector
-  col_popn <- .convert_to_named_vector(col_popn)
-
-  one2many = FALSE
-
-
-  # Trim inputs to the columns we care about (reduces the chances of column name conflicts)
-  popn_cols <- names(col_aggregation)
-  popn <- popn[c(popn_cols, names(col_popn))]
-  constraint <- constraint[c(join_by, col_popn)]
-
-  # Make sure the columns that are factors match
-  constraint <- .match_factors(popn, constraint, col_aggregation)
-
-  # Deal with possible duplicate data column names
-  col_popn_x <- names(col_popn)
-  col_popn_y <- unname(col_popn)
-  if(col_popn_x == col_popn_y) {
-    col_popn_x_new <- paste0(col_popn_x, ".x")
-    col_popn_y_new <- paste0(col_popn_y, ".y")
-
-    rename(popn, !!sym(col_popn_x_new) := !!sym(col_popn_x))
-    rename(constraint, !!sym(col_popn_y_new) := !!sym(col_popn_y))
-
-    col_popn_x <- col_popn_x_new
-    col_popn_y <- col_popn_y_new
-  }
-
-  # Apply constraints
-  # -----------------
-  assert_that(!"n" %in% names(popn))
-  scaling <- popn %>%
-    filter(substr(gss_code,1,1)=="E") %>%
-    left_join(constraint, by = join_by) %>%
-    group_by_at(names(join_by)) %>%
-    add_tally() %>%
-    mutate(popn_total__ = sum(!!sym(col_popn_x)),
-           scaling__ = !!sym(col_popn_y)/popn_total__,
-           popn_scaled__ = !!sym(col_popn_x) * scaling__)
+  do_scale <- filter(popn, substr(gss_code,1,1)=="E")
+  dont_scale <- filter(popn, substr(gss_code,1,1)!="E")
   
-  #Using generic function - the above validation has been transferred to the function
-  #so it would be removed from here
-  #reminder: would also need to amend output dataframe (esp. line 165)
-  do_scale <- filter(births, substr(gss_code,1,1)=="E")
-  dont_scale <- filter(births, substr(gss_code,1,1)!="E")
+  #constraint_cols <- names(constraint)[names(constraint)!=col_popn]
 
-  scaling <- do_scale %>%
-    filter(substr(gss_code,1,1)=="E") %>%
-    get_scaling_factors(constraint, col_popn=col_popn) %>%
-    left_join(do_scale, by=col_aggregation) %>%
-    mutate(popn_scaled = scaling * col_popn) %>%
-    select(year, gss_code, sex, age, popn_scaled) %>%
-    rename(!!col_popn := popn_scaled) %>%
-    rbind(dont_scale)
-
+  scaling_factors <- get_scaling_factors(do_scale, constraint,
+                                         col_aggregation = col_aggregation, col_popn=col_popn)
+  
+  scaled_popn <- scaling_factors %>%
+    mutate(popn_scaled = !!sym(col_popn) * scaling) %>%
+    select(-!!sym(col_popn))
+    
   # TODO run some checks on the scaling factors
   if(all(scaling$n == 1)) {
     warning("popn_constrain was constrained by a data frame at the same resolution as the population: the population will effectively be overwritten by the scaling dataset")
   }
 
-  output <- select_at(scaling, c(names(col_aggregation), "popn_scaled__")) %>%
-    rename(!!sym(names(col_popn)) := popn_scaled__) %>%
+  output <- scaled_popn %>%
+    rename(!!col_popn := popn_scaled) %>%
+    select(names(popn)) %>%
     data.frame() %>%
-    rbind(filter(popn[c(popn_cols, names(col_popn))], substr(gss_code,1,1)!="E"))
-
+    rbind(dont_scale)
+   
   # Validate output
   # ---------------
   # TODO: Should this be taking the output dataframe?
