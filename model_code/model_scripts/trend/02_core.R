@@ -76,7 +76,7 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
     int_out <- calc_int_out(popn = natural_change_popn,
                             component_rate = filter(int_out_rate, year == my_year),
                             col_popn = "popn",
-                            col_rate = "rate",
+                            col_rate = "int_out",
                             col_component = "int_out")
     validate_population(int_out, col_data = "int_out")
     validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)

@@ -92,7 +92,7 @@ run_trend_model <- function(config_list) {
   
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
   mortality <- mortality %>% select(year, gss_code, age, sex, rate)
-  int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, rate)
+  int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, int_out)
   int_in_proj <- int_in_proj %>% select(year, gss_code, age, sex, int_in)
   dom_rate <- dom_rate %>% select(gss_out, gss_in, age, sex, rate)
   

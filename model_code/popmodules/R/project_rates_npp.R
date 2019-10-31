@@ -27,14 +27,15 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
   #Test/validate
   check_validate_proj_rates_npp(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
   final_projection_year <- first_proj_yr + n_proj_yr -1
-  assert_that(all((first_proj_yr + 1):final_projection_year %in% rate_trajectory$year))
+  jump_off_year <- max(jump_off_rates$year)
+  assert_that(all((jump_off_year + 1):final_projection_year %in% rate_trajectory$year))
 
   # calculate the rate changes relative to the first year, and apply this to the
   # jump off rate to calulate the rest of the projection years
 
   rates <- rate_trajectory %>%
     filter(variant == npp_var) %>%
-    filter(year > first_proj_yr) %>%
+    filter(year > jump_off_year) %>%
     filter(year <= final_projection_year) %>%
     arrange(year) %>%
     group_by(sex, age) %>%
