@@ -34,6 +34,8 @@ run_trend_model <- function(config_list) {
                        "fertility_fns",
                        "int_out_rate_fns",
                        "int_in_fns",
+                       "dom_rate_fns",
+                       "constraint_fns",
                        "qa_areas_of_interest", 
                        "timestamp")
  
@@ -76,6 +78,7 @@ run_trend_model <- function(config_list) {
   
   dom_rate <- evaluate_fns_list(config_list$dom_rate_fns)
   
+  constraints <- evaluate_fns_list(config_list$constraint_fns)
   
   # TODO work out how to handle this better.  For now strip out everything from components dfs to make joining safer
   
@@ -112,7 +115,7 @@ run_trend_model <- function(config_list) {
                            fertility, mortality, int_out_rate, int_in_proj,
                            dom_in, dom_out, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr,
-                           config_list$birth_constraint)
+                           constraints)
   
   ## write the output data
   dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
