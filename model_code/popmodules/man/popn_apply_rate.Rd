@@ -40,7 +40,7 @@ FALSE.}
 
 \item{many2one}{Logical. Setting this to FALSE will check that no more than
 one level from \code{popn} matches to each level of \code{rate}. Default
-TRUE.}
+FALSE.}
 
 \item{additional_rate_levels}{String. Names of columns in \code{popn_rate}
 which should be included in the join beyond those named in

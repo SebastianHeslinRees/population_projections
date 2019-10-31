@@ -33,7 +33,7 @@
 #'   geographic resolution, only specify the finest resolution common to the
 #'   population data frame and the origin-destination data. Default
 #'   \code{c("year", "gss_code"="gss_out", "sex", "age")}.
-#' @param col_gss_destination String or character vector givein names of columns
+#' @param col_gss_destination String or character vector giving names of columns
 #'   in \code{mign_rate} to which the output will be aggregated, and which
 #'   weren't included in \code{col_aggregation} because \code{popn} doesn't join
 #'   to them. This will usually just be \code{mign_rate}'s destination
@@ -109,6 +109,8 @@
 #' @export
 #'
 
+# TODO: get rid of tibbles everywhere in codebase. They can be really slow.
+# TODO: simply the col_aggregation concept in this function.
 # TODO: case: deal with origin and destination data being at different resolutions?
 # TODO: deal with origin destination data being coarser than the input
 # TODO: add nesting functionality :O
@@ -135,6 +137,7 @@ migrate_domestic <- function(popn,
                                   pop1_is_subset, many2one, missing_levels_rate, col_origin_destination)
   
   # identify origin and destination columns if we don't have them
+  # TODO: make the function require the origin and destination columns to simplify the code?
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }
@@ -212,9 +215,9 @@ validate_migrate_domestic_input <- function(popn,
 
   # Type checking
   assert_that(is.data.frame(popn),
-              msg = "migrate_domestic needs a data frame as input")
+              msg = "migrate_domestic needs a data frame as input for population")
   assert_that(is.data.frame(mign_rate),
-              msg = "migrate_domestic needs a data frame of origin-destination data")
+              msg = "migrate_domestic needs a data frame of origin-destination data for mign_rate")
   assert_that(is.character(col_aggregation),
               msg = "migrate_domestic needs a string or character vector as the col_aggregation parameter")
   assert_that(is.character(col_gss_destination),
@@ -250,6 +253,7 @@ validate_migrate_domestic_input <- function(popn,
               msg = "in migrate_domestic, all columns named in col_aggregation must be columns in the popn table")
   assert_that(!any(duplicated(names(col_aggregation))),
               msg = "duplicated population column names were provided to migrate_domestic")
+  #TODO should test below be on col_gss_destination?
   assert_that(!any(duplicated(as.character(col_aggregation))),
               msg = "duplicated mign_rate column names were provided to migrate_domestic")
   assert_that(all(col_gss_destination %in% names(mign_rate)),
@@ -297,10 +301,13 @@ validate_migrate_domestic_input <- function(popn,
 
   # If we weren't told the origin-destination data columns, figure them out and validate
   # TODO this might be quite slow: see if it shows up in a profvis analysis
+  # TODO what is the disadvantage of being strict about specifying origin-destination cols? ML thinks it would increase speed and readability
+  
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }
   # Check the origin and destination columns have the same levels in them
+  # TODO it might make the code more readable just to change the column names of the mign_rate to match popn at the beginning of the function
   popn_out_col <- names(col_aggregation)[col_aggregation == col_origin_destination[1]]
   popn_out_in_origin <- intersect(popn[[popn_out_col]], mign_rate[[col_origin_destination[1]]])
   popn_out_in_destination <- intersect(popn[[popn_out_col]], mign_rate[[col_origin_destination[2]]])

@@ -19,6 +19,11 @@ aged <- arrange_popn(aged)
 popn_banded <- arrange_popn(popn_banded)
 aged_banded <- arrange_popn(aged_banded)
 
+births <- expand.grid(year = 2001, gss_code = c("a","b","c"), age = 0, sex = c("f","m"), births = 100, stringsAsFactors = F)
+
+aged_w_births <- rbind(rename(births, popn = births),aged)
+aged_w_births <- arrange_popn(aged_w_births)
+
 # The function being tested is:
 #
 #popn_age_on <- function(popn,
@@ -38,6 +43,11 @@ aged_banded <- arrange_popn(aged_banded)
 test_that("popn_age_on works on a simple population", {
   expect_equivalent(popn_age_on(popn),
                     aged)
+})
+
+test_that("popn_age_on works on a simple population", {
+  expect_equivalent(popn_age_on(popn, births=births),
+                    aged_w_births)
 })
 
 test_that("popn_age_on handles age when it's an ordered factor", {

@@ -21,7 +21,8 @@ Imports:
     data.table (>= 1.12.2),
     tidyr (>= 0.8.3),
     plyr (>= 1.8.4),
-    tibble (>= 2.1.1)
+    tibble (>= 2.1.1),
+    minpack.lm
 Suggests: 
     testthat (>= 2.1.0)
 RoxygenNote: 6.1.1

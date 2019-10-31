@@ -74,7 +74,7 @@
 #' @export
 #'
 
-# TODO simplify the function - the validation steps are making the inputs complicated. 
+# TODO simplify the function - the validation steps are making the inputs complicated.
 
 # TODO Would it be useful to add an option to return the output as the input +
 # an extra column, rather than the current version which strips down to
@@ -92,7 +92,7 @@ popn_apply_rate <- function(popn,
                             col_rate = "rate",
                             col_out = "component",
                             pop1_is_subset = FALSE,
-                            many2one = FALSE,
+                            many2one = TRUE,
                             additional_rate_levels = NA,
                             missing_levels_popn = FALSE,
                             missing_levels_rate = FALSE) {

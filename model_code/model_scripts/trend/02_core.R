@@ -1,15 +1,20 @@
 # TODO make this take a list? 
+<<<<<<< HEAD
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
                        dom_in, dom_out, dom_rate,
                        first_proj_yr, n_proj_yr, birth_constraint) {
+=======
+trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                       fertility, mortality, int_out_rate, int_in_proj, dom_rate,
+                       first_proj_yr, n_proj_yr) {
+>>>>>>> master
   library(dplyr)
   library(assertthat)
   library(popmodules)
 
-  validate_trend_core_inputs(population, births, deaths, int_out, int_in,
-                             fertility, mortality, int_out_rate, int_in_proj, 
-                             dom_in, dom_out, dom_rate,
+  validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                             fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                              first_proj_yr, n_proj_yr)
   
   
@@ -32,7 +37,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
   proj_deaths <- list(deaths %>% filter(year < first_proj_yr))
   proj_births <- list(births %>% filter(year < first_proj_yr))
-# TODO: calculate domestic migration backseries for the input (this is done in
+# TODO: would we rather calculate domestic migration backseries for the input (this is done in
   # input_data_scripts/domestic_migration_2018.R, it just needs to be recoded to
   # 2011 geographies and read in at the start)
   proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
@@ -54,6 +59,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     aged_popn <- curr_yr_popn %>%
       age_on() 
     
+    # TODO calculate the births from the popn/aged_on_popn combo
     births <- calc_births(popn = aged_popn,
                           fertility = filter(fertility, year == my_year, age!=0),  # TODO: should births function care that the input pop has no 0-year-olds?
                           col_popn = "popn",
@@ -129,6 +135,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       # FIXME / TODO This setup creates negative populations - should we add
       # deaths/int/domestic migration as soon as each is calculated?? For now
       # I'm just setting -ve pops to zero and noting this in the pull request
+      # TODO warn on negative populations
       mutate(popn = ifelse(popn < 0, 0, popn))
     
     validate_population(next_yr_popn, col_data = "popn",
@@ -162,19 +169,23 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 
 
 # do checks on the input data
-validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in,
-                                       fertility, mortality, int_out_rate, int_in_proj,
-                                       dom_in, dom_out, dom_rate,
+validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                                       fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                                        first_proj_yr, n_proj_yr) {
  
   popmodules::validate_population(population, col_data = "popn")
+  popmodules::validate_population(births, col_data = "births")
+  popmodules::validate_population(deaths, col_data = "deaths")
+  popmodules::validate_population(int_out, col_data = "int_out")
+  popmodules::validate_population(int_in, col_data = "int_in")
+  popmodules::validate_population(dom_out, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out"), test_complete = TRUE, test_unique = TRUE)
+  popmodules::validate_population(dom_in, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
   
   popmodules::validate_population(fertility, col_data = "rate")
   popmodules::validate_population(mortality, col_data = "rate")
   popmodules::validate_population(int_out_rate, col_data = "rate")
   popmodules::validate_population(int_in_proj, col_data = "int_in")
-  popmodules::validate_population(dom_in, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
-  popmodules::validate_population(dom_out, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_out"), test_complete = TRUE, test_unique = TRUE)
+  #TODO add check for completeness of dom_rate
   popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
   
   
