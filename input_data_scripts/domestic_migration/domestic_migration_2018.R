@@ -65,10 +65,14 @@ assert_that(all(complete.cases(dom_in_dt)))
 dom_net <- merge(dom_out_dt, dom_in_dt, by=c("year","gss_code","sex","age"), all=TRUE, sort=TRUE)
 dom_net[ is.na(dom_out), dom_out := 0]
 dom_net[ is.na(dom_in), dom_in := 0]
+
 dom_net <- complete(dom_net, year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
   data.table::setDT()
 dom_net[, dom_net := dom_in - dom_out] %>%
   data.table::setDF()
+
+dom_in_dt  <- complete(dom_in_dt,  year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_in=0))
+dom_out_dt <- complete(dom_out_dt, year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_out=0))
 
 
 # Tidyverse equivalent
@@ -76,13 +80,15 @@ if(FALSE) {
   dom_out <- domestic %>%
     group_by(year, gss_out, sex, age) %>%
     summarise(dom_out = sum(value)) %>%
-    rename(gss_code = gss_out)
+    rename(gss_code = gss_out) %>%
+    complete(year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_out=0))
   assert_that(all(complete.cases(dom_out)))
   
   dom_in <- domestic %>%
     group_by(year, gss_in, sex, age) %>%
     summarise(dom_in = sum(value)) %>%
-    rename(gss_code = gss_in)
+    rename(gss_code = gss_in) %>%
+    complete(year=backseries_years, gss_code, sex, age=0:90, fill=list(dom_in=0))
   assert_that(all(complete.cases(dom_in)))
   
   dom_net <- full_join(dom_out, dom_in, by = c("year", "gss_code", "sex", "age")) %>%
