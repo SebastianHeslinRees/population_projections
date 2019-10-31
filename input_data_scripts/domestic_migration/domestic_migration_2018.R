@@ -3,6 +3,7 @@ library(tidyr)
 library(assertthat)
 library(data.table)
 
+rm(list=ls()) # we're going to need memory, sorry
 message("domestic migration")
 
 domestic_file <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/processed/2002-2018 but codes not changed.rds"
@@ -14,8 +15,7 @@ domestic <- readRDS(domestic_file) %>%
 
 domestic <- domestic %>%
   popmodules::recode_gss_to_2011(col_geog="gss_in", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum)) %>%
-  popmodules::recode_gss_to_2011(col_geog="gss_out", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum)) %>%
-  mutate(year = as.numeric(year))
+  popmodules::recode_gss_to_2011(col_geog="gss_out", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum))
 
 
 dir.create("input_data/domestic_migration/", showWarnings = T)
@@ -58,6 +58,7 @@ data.table::setnames(dom_out_dt, "gss_out", "gss_code")
 dom_in_dt <- domestic[, .(dom_in = sum(value)), .(year, gss_in, sex, age)]
 data.table::setnames(dom_in_dt, "gss_in", "gss_code")
 
+rm(domestic) # mercy for machines with less RAM
 assert_that(all(complete.cases(dom_out_dt)))
 assert_that(all(complete.cases(dom_in_dt)))
 
@@ -69,7 +70,6 @@ dom_net <- complete(dom_net, year=backseries_years, gss_code, sex, age=0:90, fil
 dom_net[, dom_net := dom_in - dom_out] %>%
   data.table::setDF()
 
-data.table::setDF(domestic)
 
 # Tidyverse equivalent
 if(FALSE) {
@@ -91,4 +91,6 @@ if(FALSE) {
     mutate(dom_net = dom_in - dom_out)
 }
 
+saveRDS(dom_out_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds"))
+saveRDS(dom_in_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds"))
 saveRDS(dom_net, file = paste0("input_data/domestic_migration/2018/domestic_migration_net_", datestamp, ".rds"))
