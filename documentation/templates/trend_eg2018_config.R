@@ -167,6 +167,7 @@ config_list <- list(
   int_out_rate_fns = int_out_rate_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
+  constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
