@@ -4,8 +4,8 @@
 \alias{popn_constrain}
 \title{Scale one population to match the totals of another}
 \usage{
-popn_constrain(popn, constraint, col_aggregation = c("year", "gss_code",
-  "sex", "age"), col_popn = "popn", pop1_is_subset = FALSE,
+popn_constrain(popn, constraint, col_aggregation = c("year", "sex",
+  "age"), col_popn, col_constraint = col_popn, pop1_is_subset = FALSE,
   missing_levels_popn = FALSE, missing_levels_constraint = FALSE)
 }
 \arguments{
@@ -14,16 +14,14 @@ popn_constrain(popn, constraint, col_aggregation = c("year", "gss_code",
 \item{constraint}{A data frame containing population data at the same
 resolution or lower.}
 
-\item{col_aggregation}{A string or character vector giving the names of
-columns in \code{popn} contain aggregation levels. All elements
-must give columns in \code{popn} but not all need to be in
-\code{constraint}, (that is, \code{constraint} can be at a lower resolution).
-If names differ between the two input data frames, use a named character
-vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
-"gss_code", "age", "sex")}.}
+\item{col_aggregation}{A string or character vector giving the join mapping between
+\code{popn} and \code{constraint}. Equivalent to \code{by} in \code{dplyr} joins}
 
 \item{col_popn}{String. Name of column in \code{popn} containing population
 counts. Default "popn".}
+
+\item{col_constraint}{String. Name of column in \code{constraint} containing population
+counts. Default col_popn.}
 
 \item{pop1_is_subset}{Logical. If the two input data frames cover the same
 domain and you expect every level of \code{constraint} to be matched to by a
@@ -42,12 +40,14 @@ datasets. Default FALSE.}
 }
 \value{
 A data frame of component counts calculated as input popn * rate, with one row
-  for each distinct level of the input \code{col_aggregation} columns.
+  for each distinct level of the input \code{popn} dataframe
 }
 \description{
 Given a cohort population and a data frame of target marginal population
 subtotals, return the input population scaled so that its population
 subtotals match the target's at each grouping level.
+Scaling is only perfomed within England, i.e. on entries in the
+\code{gss_code} column starting with \code{E}
 }
 \examples{
 

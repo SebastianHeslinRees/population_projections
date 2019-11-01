@@ -106,11 +106,11 @@ popn_constrain <- function(popn,
   # validate_popn_constrain_output(popn,
   #                                col_aggregation,
   #                                col_popn,
-  #                                output,
+  #                                scaled_popn,
   #                                missing_levels_popn,
   #                                missing_levels_constraint)
 
-  return(output)
+  return(scaled_popn)
 }
 
 
