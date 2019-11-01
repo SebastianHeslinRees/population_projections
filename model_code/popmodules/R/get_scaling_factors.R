@@ -36,16 +36,10 @@ get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "s
   constraint <- .match_factors(popn, constraint, col_aggregation)
 
   # Deal with possible duplicate data column names
-  if(col_popn == col_constraint) {
-    col_popn_new <- paste0(col_popn, ".x")
-    col_constraint_new <- paste0(col_constraint, ".y")
-
-    rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
-    rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
-
-    # col_popn <- col_popn_new
-    # col_constraint <- col_constraint_new
-  }
+  col_popn_new <- paste0(col_popn, ".x")
+  col_constraint_new <- paste0(col_constraint, ".y")
+  rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
+  rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
 
   #Calculate scaling rates
   scaling <- popn %>%
