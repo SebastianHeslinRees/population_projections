@@ -89,27 +89,27 @@ popn_constrain <- function(popn,
 
   do_scale <- filter(popn, substr(gss_code,1,1)=="E")
   dont_scale <- filter(popn, substr(gss_code,1,1)!="E")
-  
+
   #constraint_cols <- names(constraint)[names(constraint)!=col_popn]
 
   scaling_factors <- get_scaling_factors(do_scale, constraint,
                                          col_aggregation = col_aggregation, col_popn=col_popn)
-  
+
   scaled_popn <- scaling_factors %>%
     mutate(popn_scaled = !!sym(col_popn) * scaling) %>%
     select(-!!sym(col_popn))
-    
+
   # TODO run some checks on the scaling factors
-  if(all(scaling$n == 1)) {
-    warning("popn_constrain was constrained by a data frame at the same resolution as the population: the population will effectively be overwritten by the scaling dataset")
-  }
+  # if(all(scaling$n == 1)) {
+  #   warning("popn_constrain was constrained by a data frame at the same resolution as the population: the population will effectively be overwritten by the scaling dataset")
+  # }
 
   output <- scaled_popn %>%
     rename(!!col_popn := popn_scaled) %>%
     select(names(popn)) %>%
     data.frame() %>%
     rbind(dont_scale)
-   
+
   # Validate output
   # ---------------
   # TODO: Should this be taking the output dataframe?
