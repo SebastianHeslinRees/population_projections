@@ -164,10 +164,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                         col_comparison = c("gss_code","sex","age"))
     
     if(!is.null(constraints)){
-      testthat::expect_equal(popn_constrain(popn = next_yr_popn,
+      assert_that(isTRUE(testthat::expect_equal(popn_constrain(popn = next_yr_popn,
                                             constraint = constraints$population_constraint,
                                             col_popn = "popn"),
-                             next_yr_popn)
+                             next_yr_popn)))
     }
   
     proj_popn[[length(proj_popn)+1]] <- next_yr_popn

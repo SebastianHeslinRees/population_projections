@@ -7,10 +7,8 @@
 #' @param popn A data frame containing population data.
 #' @param constraint A data frame containing population data at the same
 #'   resolution or lower.
-#' @param col_aggregation A string or character vector giving the names of
-#'   columns in \code{constraint} contain aggregation levels. All elements
-#'   must give columns in \code{constraint} and \code{popn}.
-#'   Default \code{c("year", "age", "sex")}.
+#' @param col_aggregation A string or character vector giving the join mapping between
+#'   \code{popn} and \code{constraint}. Equivalent to \code{by} in \code{dplyr} joins
 #' @param col_popn String. Name of column in \code{popn} containing population
 #'   counts. Default "popn".
 #' @param col_constraint String. Name of column in \code{constraint} containing population
@@ -96,16 +94,7 @@ popn_constrain <- function(popn,
                                          col_aggregation = col_aggregation, col_popn=col_popn)
 
   scaled_popn <- scaling_factors %>%
-    mutate(popn_scaled = !!sym(col_popn) * scaling) %>%
-    select(-!!sym(col_popn))
-
-  # TODO run some checks on the scaling factors
-  # if(all(scaling$n == 1)) {
-  #   warning("popn_constrain was constrained by a data frame at the same resolution as the population: the population will effectively be overwritten by the scaling dataset")
-  # }
-
-  output <- scaled_popn %>%
-    rename(!!col_popn := popn_scaled) %>%
+    mutate(!!sym(col_popn) := !!sym(col_popn) * scaling) %>%
     select(names(popn)) %>%
     data.frame() %>%
     rbind(dont_scale)
