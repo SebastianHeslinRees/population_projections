@@ -9,14 +9,6 @@ fertility <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/
 
 # Update gss_code to 2018 to match MYE2018 and get rid of Scotland
 fertility <- fertility %>%
-  mutate(gss_code = case_when(
-    gss_code == "E06000048" ~ "E06000057",
-    gss_code == "E07000097" ~ "E07000242",
-    gss_code == "E07000101" ~ "E07000243",
-    gss_code == "E08000020" ~ "E08000037",
-    TRUE ~ gss_code
-  )) %>%
-  filter(grepl("^E", gss_code)) %>%
   filter(year != 2002) #there is missing data in 2002 for some reason. 
 
 # Make up some data for Wales to match MYE2018
@@ -28,6 +20,11 @@ wales <- filter(fertility, gss_code == "E06000001") %>%
   as.data.frame()
 
 
-fertility  <- fertility %>% rbind(wales)
+fertility  <- fertility %>% rbind(wales) %>%
+  filter(gss_code != "W92000004") %>%
+  popmodules::recode_gss_to_2011(col_aggregation = c("year","gss_code","sex","age"))
+
+assertthat::assert_that(dir.exists("input_data"))
+dir.create("input_data/fertility", showWarnings = FALSE)
 
 saveRDS(fertility, file = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds")

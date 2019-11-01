@@ -29,6 +29,8 @@
   assert_that(is.vector(vec) | is.factor(vec),
               msg = ".convert_to_named_vector needs a vector or a factor as input")
 
+  if (identical(NA, vec)) return(vec)
+
   if(is.null(names(vec))) {
     names(vec) <- vec
   } else {

@@ -2,22 +2,20 @@
 % Please edit documentation in R/project_forward_flat.R
 \name{project_forward_flat}
 \alias{project_forward_flat}
-\title{Copy the hold year data into the projection years}
+\title{Project a population data frame forward by taking the most recent year and
+repeating it for each year up to an input last_proj_yr}
 \usage{
-project_forward_flat(df, first_proj_yr, n_proj_yr, hold_yr)
+project_forward_flat(df, last_proj_yr)
 }
 \arguments{
-\item{df}{A data frame}
+\item{df}{A population data frame}
 
-\item{first_proj_yr}{The first year of the projection}
-
-\item{n_proj_yr}{The number of years being projected}
-
-\item{hold_yr}{The hold year}
+\item{last_proj_yr}{The last year of the projection}
 }
 \value{
 A data frame containing the past years and the projection years
 }
 \description{
-Copy the hold year data into the projection years
+Project a population data frame forward by taking the most recent year and
+repeating it for each year up to an input last_proj_yr
 }

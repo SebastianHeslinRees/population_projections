@@ -30,7 +30,7 @@
 #'   to the highest population age.  New entries are created with a rate value of 0.
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom tidyr complete
+#' @importFrom tidyr complete nesting
 #' @export
 
 complete_fertility <- function(fertility, population,
@@ -103,7 +103,7 @@ validate_complete_fertility_inputs <- function(fertility, population, col_sex_fe
   if (!is.null(col_age_fert)) assert_that(is.numeric(fertility[[col_age_fert]]) & is.numeric(population[[col_age_popn]]))
 
   validate_population(fertility, col_aggregation = setdiff(names(fertility), col_rate))
-  
+
   invisible(TRUE)
 }
 
