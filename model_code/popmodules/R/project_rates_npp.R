@@ -53,7 +53,7 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
     as.data.frame()
 
   validate_population(rates, col_aggregation = c("gss_code", "sex", "age", "year"),
-                      col_data = "rate")
+                      col_data = rate_col)
 
   return(rates)
 
@@ -86,7 +86,7 @@ check_validate_proj_rates_npp <- function(jump_off_rates,
               msg="npp_var expects character input")
 
   #TODO find out why these fall over
-  validate_population(jump_off_rates)
+  validate_population(jump_off_rates, col_data = rate_col)
   #validate_population(rate_trajectory, col_aggregation = c("sex","age","year","variant"))
   validate_join_population(jump_off_rates, rate_trajectory, cols_common_aggregation = c("sex", "age", "year"))
 
