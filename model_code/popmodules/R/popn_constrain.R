@@ -3,7 +3,8 @@
 #' Given a cohort population and a data frame of target marginal population
 #' subtotals, return the input population scaled so that its population
 #' subtotals match the target's at each grouping level.
-#'
+#' Scaling is only perfomed within England, i.e. on entries in the
+#' \code{gss_code} column starting with \code{E}
 #' @param popn A data frame containing population data.
 #' @param constraint A data frame containing population data at the same
 #'   resolution or lower.
