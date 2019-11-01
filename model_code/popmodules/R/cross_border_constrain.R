@@ -60,7 +60,7 @@ cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint,
 
   assert_that(isTRUE(testthat::expect_equal(nrow(out_flow),nrow(scaled_out))))
   assert_that(isTRUE(testthat::expect_equal(nrow(in_flow),nrow(scaled_in))))
-  assert_that(is.TRUE(testthat::expect_equal(nrow(scaled_flows),nrow(domestic_flow))))
+  assert_that(isTRUE(testthat::expect_equal(nrow(scaled_flows),nrow(domestic_flow))))
 
   return(scaled_flows)
 
