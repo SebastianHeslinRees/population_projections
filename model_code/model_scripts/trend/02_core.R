@@ -53,9 +53,16 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
       age_on() 
     
     # TODO calculate the births from the popn/aged_on_popn combo
-    births <- calc_births(popn = aged_popn,
-                          fertility = filter(fertility, year == my_year, age!=0),  # TODO: should births function care that the input pop has no 0-year-olds?
-                          col_popn = "popn")
+    births <- popn_apply_rate(aged_popn,
+                              filter(fertility, year == my_year, age!=0),
+                              col_out = "births",
+                              many2one = FALSE)
+    # TODO constrain births here
+    # TODO output births by mother's year of age here
+
+    birthratio_m2f <- 1.05 # TODO put this in config
+    births <- sum_births_and_split_by_sex_ratio(births, birthratio_m2f)
+
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
     validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
@@ -76,7 +83,7 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
     int_out <- calc_int_out(popn = natural_change_popn,
                             component_rate = filter(int_out_rate, year == my_year),
                             col_popn = "popn",
-                            col_rate = "rate",
+                            col_rate = "int_out",
                             col_component = "int_out")
     validate_population(int_out, col_data = "int_out")
     validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
@@ -145,13 +152,13 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
     curr_yr_popn <- next_yr_popn
   }
   
-  proj_popn   <- data.frame(data.table::rbindlist(proj_popn))
-  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths))
-  proj_births <- data.frame(data.table::rbindlist(proj_births))
-  proj_int_out <- data.frame(data.table::rbindlist(proj_int_out))
-  proj_int_in <- data.frame(data.table::rbindlist(proj_int_in))
-  proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out))
-  proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in))
+  proj_popn   <- data.frame(data.table::rbindlist(proj_popn, use.names=TRUE))
+  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths, use.names=TRUE))
+  proj_births <- data.frame(data.table::rbindlist(proj_births, use.names=TRUE))
+  proj_int_out <- data.frame(data.table::rbindlist(proj_int_out, use.names=TRUE))
+  proj_int_in <- data.frame(data.table::rbindlist(proj_int_in, use.names=TRUE))
+  proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
+  proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   
   
   return(list(population = proj_popn, deaths = proj_deaths, births = proj_births,
