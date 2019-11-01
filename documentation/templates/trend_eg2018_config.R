@@ -42,6 +42,14 @@ int_in_flow_or_rate <- "flow"
 
 dom_mig_years_to_avg <- 10
 
+popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"
+births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
+deaths_constraint_path <- "input_data/constraints/npp_2018_mortality_constraint.rds"
+int_in_constraint_path <- "input_data/constraints/npp_2018_international_in_constraint.rds"
+int_in_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
+cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
+cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
+
 
 
 #-------------------------------------------------
@@ -127,6 +135,21 @@ dom_rate_fns <- list(
                                                                       col_rate = "rate"))
 )
 
+
+constraint_fns <- list(
+  list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
+                                                               births_path = births_constraint_path,
+                                                               deaths_path = deaths_constraint_path,
+                                                               int_in_path = int_in_constraint_path,
+                                                               int_out_path = int_in_constraint_path,
+                                                               cross_in_path = cross_in_constraint_path,
+                                                               cross_out_path = cross_out_constraint_path))
+
+  )
+
+#TODO figure out the best way to get a null value when we don't want to constraint
+#constraint_fns <- list(list(fn = function() NULL, args = list()))
+
 qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
@@ -147,6 +170,7 @@ config_list <- list(
   int_out_rate_fns = int_out_rate_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
+  constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )

@@ -1,7 +1,10 @@
 # TODO make this take a list? 
-trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
-                       fertility, mortality, int_out_rate, int_in_proj, dom_rate,
-                       first_proj_yr, n_proj_yr) {
+
+trend_core <- function(population, births, deaths, int_out, int_in,
+                       fertility, mortality, int_out_rate, int_in_proj,
+                       dom_in, dom_out, dom_rate,
+                       first_proj_yr, n_proj_yr, constraints = NULL) {
+
   library(dplyr)
   library(assertthat)
   library(popmodules)
@@ -57,10 +60,12 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
                               filter(fertility, year == my_year, age!=0),
                               col_out = "births",
                               many2one = FALSE)
-    # TODO constrain births here
-    # TODO output births by mother's year of age here
-
-    birthratio_m2f <- 1.05 # TODO put this in config
+    
+    if(!is.null(constraints)){
+      births <- births_constrain(births=births, constraint=constraints$birth_constraint)
+    }
+    
+    birthratio_m2f <- 1.05 
     births <- sum_births_and_split_by_sex_ratio(births, birthratio_m2f)
 
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
@@ -73,6 +78,10 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
                           col_component = "deaths")
     validate_population(deaths, col_data = "deaths", comparison_pop = mutate(curr_yr_popn, year=year+1))
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
+    
+    if(!is.null(constraints)){
+      deaths <- popn_constrain(popn=deaths, constraint = constraints$death_constraint, col_popn = "deaths")
+    }
    
     #TODO do this better
     natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
@@ -88,9 +97,19 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
     validate_population(int_out, col_data = "int_out")
     validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
     
+    if(!is.null(constraints)){
+      int_out <- popn_constrain(popn=int_out, constraint = constraints$international_out_constraint,
+                                col_popn = "int_out")
+    }
+    
     int_in <- int_in_proj %>% filter(year == my_year)
     validate_population(int_in, col_data = "int_in")
     validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
+    
+    if(!is.null(constraints)){
+      int_in <- popn_constrain(popn=int_in, constraint = constraints$international_in_constraint,
+                               col_popn = "int_in")
+    }
     
     # TODO adapt this to write out gss-to-gss flows by SYA
     # TODO adapt this to work with time-varying migration rates
@@ -105,6 +124,13 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
                     many2one = FALSE, 
                     missing_levels_rate = TRUE) %>%
       mutate(year = my_year)
+    
+    if(!is.null(constraints)){
+      domestic_flow <- cross_border_constrain(domestic_flow = domestic_flow,
+                                              in_constraint = constraints$cross_border_in_constraint,
+                                              out_constraint = constraints$cross_border_out_constraint,
+                                              col_flow = "flow")
+    }
     
     #TODO Look at whether its worth doing this in data.table
     dom_out <- domestic_flow %>%
@@ -140,6 +166,13 @@ trend_core <- function(population, births, deaths, int_out, int_in, dom_out, dom
     validate_population(next_yr_popn, col_data = "popn",
                         comparison_pop = curr_yr_popn,
                         col_comparison = c("gss_code","sex","age"))
+    
+    if(!is.null(constraints)){
+      assert_that(isTRUE(testthat::expect_equal(popn_constrain(popn = next_yr_popn,
+                                            constraint = constraints$population_constraint,
+                                            col_popn = "popn"),
+                             next_yr_popn)))
+    }
   
     proj_popn[[length(proj_popn)+1]] <- next_yr_popn
     proj_deaths[[length(proj_deaths)+1]] <- deaths
