@@ -2,6 +2,8 @@
 library(dplyr)
 library(tidyr)
 library(data.table)
+library(popmodules)
+
 fert_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2016-based (May 2018)/model_inputs/2016 snpp sya fert rates.csv"
 national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/national asfrs.csv"
 over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/NPP deaths over 90.csv"

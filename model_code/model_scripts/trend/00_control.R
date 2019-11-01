@@ -50,7 +50,8 @@ run_trend_model <- function(config_list) {
                                 max_yr = config_list$first_proj_yr - 1)
   
   births <- get_component(filepath = config_list$births_mye_path,
-                                  max_yr = config_list$first_proj_yr - 1) 
+                                  max_yr = config_list$first_proj_yr - 1) %>%
+    filter(age == 0)
   
   int_out <- get_component(filepath = config_list$int_out_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
@@ -95,7 +96,7 @@ run_trend_model <- function(config_list) {
   
   fertility <- fertility %>% select(year, gss_code, age, sex, rate)
   mortality <- mortality %>% select(year, gss_code, age, sex, rate)
-  int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, rate)
+  int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, int_out)
   int_in_proj <- int_in_proj %>% select(year, gss_code, age, sex, int_in)
   dom_rate <- dom_rate %>% select(gss_out, gss_in, age, sex, rate)
   

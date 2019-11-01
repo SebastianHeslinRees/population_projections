@@ -27,14 +27,15 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
   #Test/validate
   check_validate_proj_rates_npp(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
   final_projection_year <- first_proj_yr + n_proj_yr -1
-  assert_that(all((first_proj_yr + 1):final_projection_year %in% rate_trajectory$year))
+  jump_off_year <- max(jump_off_rates$year)
+  assert_that(all((jump_off_year + 1):final_projection_year %in% rate_trajectory$year))
 
   # calculate the rate changes relative to the first year, and apply this to the
   # jump off rate to calulate the rest of the projection years
 
   rates <- rate_trajectory %>%
     filter(variant == npp_var) %>%
-    filter(year > first_proj_yr) %>%
+    filter(year > jump_off_year) %>%
     filter(year <= final_projection_year) %>%
     arrange(year) %>%
     group_by(sex, age) %>%
@@ -52,7 +53,7 @@ project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath
     as.data.frame()
 
   validate_population(rates, col_aggregation = c("gss_code", "sex", "age", "year"),
-                      col_data = "rate")
+                      col_data = rate_col)
 
   return(rates)
 
@@ -85,7 +86,7 @@ check_validate_proj_rates_npp <- function(jump_off_rates,
               msg="npp_var expects character input")
 
   #TODO find out why these fall over
-  validate_population(jump_off_rates)
+  validate_population(jump_off_rates, col_data = rate_col)
   #validate_population(rate_trajectory, col_aggregation = c("sex","age","year","variant"))
   validate_join_population(jump_off_rates, rate_trajectory, cols_common_aggregation = c("sex", "age", "year"))
 
