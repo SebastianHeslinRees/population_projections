@@ -64,7 +64,7 @@ births_constrain <- function(births, constraint){
     rbind(dont_scale) %>%
     arrange(gss_code)
   
-  testthat::expect_equal(nrow(scaled),nrow(births))
+  assert_that(isTRUE(testthat::expect_equal(nrow(scaled),nrow(births))))
   
   return(scaled)
   
