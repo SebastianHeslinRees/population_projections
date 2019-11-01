@@ -18,6 +18,7 @@ sum_births_and_split_by_sex_ratio <- function(births,
 
   this_year <- births$year[1]
 
+
   births <- group_by(births, gss_code) %>%
     summarise(births = sum(births)) %>%
     ungroup() %>%
@@ -25,6 +26,16 @@ sum_births_and_split_by_sex_ratio <- function(births,
     mutate(births = ifelse(sex == "male", births * prop_male, births * prop_female)) %>%
     select(year, gss_code, sex, age, births) %>%
     data.frame()
+
+  #Slightly different way of doing the same thing
+  # births <- group_by(births, gss_code) %>%
+  #   summarise(births = sum(births)) %>%
+  #   ungroup() %>%
+  #   mutate(age = 0, year = this_year, male = births * prop_male, female = births * prop_female) %>%
+  # select(-births) %>%
+  # tidyr::pivot_longer(4:5, names_to = "sex", values_to = "births") %>%
+  # select(year, gss_code, sex, age, births) %>%
+  # data.frame()
 
   return(births)
 }
