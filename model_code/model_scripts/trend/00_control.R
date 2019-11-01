@@ -48,7 +48,8 @@ run_trend_model <- function(config_list) {
                                 max_yr = config_list$first_proj_yr - 1)
   
   births <- get_component(filepath = config_list$births_mye_path,
-                                  max_yr = config_list$first_proj_yr - 1) 
+                                  max_yr = config_list$first_proj_yr - 1) %>%
+    filter(age == 0)
   
   int_out <- get_component(filepath = config_list$int_out_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
