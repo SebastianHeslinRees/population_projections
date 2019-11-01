@@ -19,15 +19,20 @@
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
 #' @import dplyr
+#' @importFrom data.table setDF setDT setkeyv
 #' @export
 
 
 recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=list(sum)){
 
+
   #TODO Add something that flags or deals with 2019 changes to LA codes
 
   df <- ungroup(df) %>%
     rename("gss_code" = col_geog)
+
+  i <- which(col_aggregation == col_geog)
+  col_aggregation[i] <- "gss_code"
 
   recoding <- c("E07000001" = "E06000056",
                 "E07000002" = "E06000055",
@@ -74,16 +79,31 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
                 "E07000240" = "E07000100",
                 "E07000241" = "E07000104")
 
-  df <- mutate(df, gss_code = recode(gss_code, !!!recoding))
-
+  # FIXME: using data.table here means that the input df is changed by
+  # reference, i.e. if you set x <- recode_gss_to_2011(z), then both x and z
+  # will contain the recoded data frame. Is this ok? What should we do about it? --CF
+  data.table::setDT(df)
+  df[gss_code %in% names(recoding), gss_code := recode(gss_code, !!!recoding)]
+  df <- df[, lapply(.SD, fun[[1]]), by = col_aggregation]
+  data.table::setkeyv(df, col_aggregation)
+  data.table::setDF(df)
   df <- rename(df, !!col_geog := "gss_code")
 
-  df_2 <- group_by_at(df, col_aggregation) %>%
+  return(df)
 
-    summarise_all(.funs=fun) %>%
-    ungroup()
+  if(FALSE) { # tidyverse equivalent
+    df <- mutate(df, gss_code = recode(gss_code, !!!recoding))
 
-  return(df_2)
+    df <- rename(df, !!col_geog := "gss_code")
+
+    df_2 <- group_by_at(df, col_aggregation) %>%
+
+      summarise_all(.funs=fun) %>%
+      ungroup()
+
+    return(df_2)
+  }
+
 
 }
 

@@ -22,6 +22,9 @@ wales <- filter(fertility, gss_code == "E06000001") %>%
 
 fertility  <- fertility %>% rbind(wales) %>%
   filter(gss_code != "W92000004") %>%
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","sex","age"))
+  popmodules::recode_gss_to_2011(col_aggregation = c("year","gss_code","sex","age"))
+
+assertthat::assert_that(dir.exists("input_data"))
+dir.create("input_data/fertility", showWarnings = FALSE)
 
 saveRDS(fertility, file = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds")

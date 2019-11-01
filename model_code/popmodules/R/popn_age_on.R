@@ -55,7 +55,12 @@ popn_age_on <- function(popn,
                         col_age = "age",
                         col_year = "year",
                         timestep = 1,
-                        template_age_levels = NULL) {
+                        template_age_levels = NULL,
+                        births=NULL) {
+
+  # TODO This is a mental amount of code to do something simple
+  # We need to think about what we're trying to achieve here
+  # Is this doing everything twice?
 
   # TODO Set this up so with an additional parameters data_combine_method, a
   # named list of functions describing how to how to combine data when they are
@@ -167,9 +172,6 @@ popn_age_on <- function(popn,
 
   }
 
-
-
-
   # Equivalent to the above, but with the tidyverse
 
   if(!requireNamespace("data.table", quietly=TRUE)) {
@@ -244,6 +246,40 @@ popn_age_on <- function(popn,
                               aged,
                               col_aggregation,
                               col_age)
+
+
+
+
+
+  if(FALSE){
+
+    #TODO Why can't this function look like this?
+
+    aged <- popn %>%
+      mutate(year = year +1,
+             age = ifelse(age == 90, 90, age +1)) %>%
+      group_by_at(col_aggregation) %>%
+      summarise(popn = sum(popn)) %>%
+      ungroup()
+
+  }
+
+
+  #Add births
+  if(!is.null(births)){
+
+    births <- births %>%
+      filter(age == 0) %>%
+      rename(popn = births) %>%
+      select(names(aged))
+
+    common_years <- intersect(aged[["year"]], births[["year"]])
+
+    aged <- rbind(births, aged)%>%
+      filter(year %in% common_years) %>%
+      arrange(year, gss_code, age, sex)
+
+  }
 
   return(aged)
 
@@ -338,7 +374,7 @@ validate_popn_age_on_input <- function(popn,
                                check_negative_values = FALSE),
            error = function(e) stop(paste0("popn_age_on found an error in the input population it was given:\n",e,"\n")),
            warning = function(w) warning(paste0("popn_age_on threw a warning when checking the input population:\n",w,"\n"))
-           )
+  )
 
   # Check no non-numeric columns depend on age
   col_non_numeric <- names(popn)[ !sapply(popn, is.numeric)]

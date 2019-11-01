@@ -120,10 +120,10 @@ international_out <- filter(mye_coc, component == "international_out") %>% selec
 international_net <- filter(mye_coc, component == "international_net") %>% select(-component) %>% rename(int_net = value)
 
 #Domestic here does not include Scotland and NI
-#TODO process this from the domestic migration dataset
-domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component) %>% rename(dom_in = value)
-domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component) %>% rename(dom_out = value)
-domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component) %>% rename(dom_net = value)
+#THis is processed this from the domestic migration dataset in domestic_migration_2018.R
+# domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component) %>% rename(dom_in = value)
+# domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component) %>% rename(dom_out = value)
+# domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component) %>% rename(dom_net = value)
 
 #Other components
 uk_upc <- filter(births, country %in% c("N","S")) %>%
@@ -174,10 +174,9 @@ saveRDS(population, file = paste0("input_data/mye/2018/population_ons_", datesta
 saveRDS(international_in, file = paste0("input_data/mye/2018/international_in_ons_", datestamp, ".rds"))
 saveRDS(international_out, file = paste0("input_data/mye/2018/international_out_ons_", datestamp, ".rds"))
 saveRDS(international_net, file = paste0("input_data/mye/2018/international_net_ons_", datestamp, ".rds"))
-saveRDS(domestic_in, file = paste0("input_data/mye/2018/domestic_in_ons_", datestamp, ".rds"))
-saveRDS(domestic_out, file = paste0("input_data/mye/2018/domestic_out_ons_", datestamp, ".rds"))
-saveRDS(domestic_net, file = paste0("input_data/mye/2018/domestic_net_ons_", datestamp, ".rds"))
+#saveRDS(domestic_in, file = paste0("input_data/mye/2018/domestic_in_ons_", datestamp, ".rds"))
+#saveRDS(domestic_out, file = paste0("input_data/mye/2018/domestic_out_ons_", datestamp, ".rds"))
+#saveRDS(domestic_net, file = paste0("input_data/mye/2018/domestic_net_ons_", datestamp, ".rds"))
 saveRDS(upc, file = paste0("input_data/mye/2018/upc_ons_", datestamp, ".rds"))
 
-rm(births, deaths, domestic_in, domestic_net, domestic_out, international_in, international_out,
-   international_net, missing_deaths, mye_coc, population, uk_upc, upc, ix, datestamp)
+rm(list=ls())

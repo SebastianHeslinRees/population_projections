@@ -6,6 +6,8 @@ params:
   deaths_proj_fp: outputs/model/year/deaths_file.rds
   int_in_proj_fp: outputs/model/year/int_in_file.rds
   int_out_proj_fp: outputs/model/year/int_out_file.rds
+  dom_in_proj_fp: outputs/model/year/dom_in_file.rds
+  dom_out_proj_fp: outputs/model/year/dom_out_file.rds
   births_proj_fp: outputs/model/year/births_file.rds
   output_files_dir: outputs/model/year/population_qa_files/
   first_proj_yr: 2018
@@ -37,6 +39,8 @@ deaths_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$dea
 int_in_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$int_in_proj_fp))
 int_out_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$int_out_proj_fp))
 births_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$births_proj_fp))
+dom_in_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$dom_in_proj_fp))
+dom_out_proj <- readRDS(paste0(rprojroot::find_rstudio_root_file(),"/",params$dom_out_proj_fp))
 
 output_files_dir <- paste0(rprojroot::find_rstudio_root_file(),"/",params$output_files_dir)
 areas_of_interest <- params$qa_areas_of_interest
@@ -59,7 +63,7 @@ if("London" %in% areas_of_interest) {
 ```
 
 # Total population by year
-```{r, echo=FALSE, message = FALSE, results='asis'}
+```{r population, echo=FALSE, message = FALSE, results='asis'}
 for(loc in seq_along(areas_of_interest)) {
   popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year) %>%
@@ -84,7 +88,7 @@ for(loc in seq_along(areas_of_interest)) {
 ```
 
 # Population age structure over projection years
-```{r, echo=FALSE, message = FALSE, results='hide'}
+```{r population_by_age, echo=FALSE, message = FALSE, results='hide'}
 for(loc in seq_along(areas_of_interest)) {
   popn_proj_loc <- filter(popn_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year, age) %>%
@@ -121,7 +125,7 @@ knitr::include_graphics(gifs)
 ```
 
 # Components of natural change by year
-```{r, echo=FALSE, message = FALSE}
+```{r natural_change, echo=FALSE, message = FALSE}
 for(loc in seq_along(areas_of_interest)) {
   deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
   births_proj_loc <- filter(births_proj, gss_code %in% areas_of_interest[[loc]])
@@ -157,7 +161,7 @@ for(loc in seq_along(areas_of_interest)) {
 ```
 
 # Components of natural change by age
-```{r, echo=FALSE, message = FALSE, results = 'hide'}
+```{r natural_change_by_age, echo=FALSE, message = FALSE, results = 'hide'}
 # for(loc in seq_along(areas_of_interest)) {
 #   deaths_proj_loc <- filter(deaths_proj, gss_code %in% areas_of_interest[[loc]])
 #   births_proj_loc <- filter(births_proj, gss_code %in% areas_of_interest[[loc]])
@@ -196,7 +200,7 @@ for(loc in seq_along(areas_of_interest)) {
 # knitr::include_graphics(gifs)
 ```
 # Total international in migration by year
-```{r, echo=FALSE, message = FALSE, results='asis'}
+```{r international_in, echo=FALSE, message = FALSE, results='asis'}
 for(loc in seq_along(areas_of_interest)) {
   int_in_proj_loc <- filter(int_in_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year) %>%
@@ -221,7 +225,7 @@ for(loc in seq_along(areas_of_interest)) {
 ```
 
 # International in migration age structure over projection years
-```{r, echo=FALSE, message = FALSE, results='hide'}
+```{r international_in_by_age, echo=FALSE, message = FALSE, results='hide'}
 for(loc in seq_along(areas_of_interest)) {
   int_in_proj_loc <- filter(int_in_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year, age) %>%
@@ -253,7 +257,7 @@ knitr::include_graphics(gifs)
 ```
 
 # Total international out migration by year
-```{r, echo=FALSE, message = FALSE, results='asis'}
+```{r international_out, echo=FALSE, message = FALSE, results='asis'}
 for(loc in seq_along(areas_of_interest)) {
   int_out_proj_loc <- filter(int_out_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year) %>%
@@ -278,7 +282,7 @@ for(loc in seq_along(areas_of_interest)) {
 ```
 
 # International out migration age structure over projection years
-```{r, echo=FALSE, message = FALSE, results='hide'}
+```{r international_out_by_age, echo=FALSE, message = FALSE, results='hide'}
 for(loc in seq_along(areas_of_interest)) {
   int_out_proj_loc <- filter(int_out_proj, gss_code %in% areas_of_interest[[loc]]) %>%
     group_by(year, age) %>%
@@ -308,4 +312,115 @@ for(loc in seq_along(areas_of_interest)) {
 gifs <- list.files(output_files_dir,"*loc_int_out_age_by_yr*", full.names = TRUE)
 knitr::include_graphics(gifs)
 ```
+# Total domestic in migration by year
+```{r domestic_in, echo=FALSE, message = FALSE, results='asis'}
+for(loc in seq_along(areas_of_interest)) {
+  dom_in_proj_loc <- filter(dom_in_proj, gss_code %in% areas_of_interest[[loc]]) %>%
+    group_by(year) %>%
+    summarise(dom_in = sum(dom_in)) %>%
+    as.data.frame()
+  
+  pal <- gla_pal(palette_type = "categorical", n = 1)
+  
+  loc_by_yr <- 
+    (ggplot(dom_in_proj_loc, aes(x = year, y = dom_in)) +
+       theme_gla(legend = FALSE) +
+       ggla_line() +
+       ggla_labelline(x1 = params$first_proj_yr-1) +
+       scale_y_continuous(labels = dollar_format(prefix="")) +
+       scale_x_continuous(breaks = seq(2000, maxyear, 5),
+                          expand = expand_scale(add = c(1.5, 0.5))) +
+       labs(title = paste("Total", names(areas_of_interest)[loc], "domestic in migration by year"))) %>%
+    left_align_labs()
+  
+  plot(loc_by_yr)
+}
+```
 
+# Domestic in migration age structure over projection years
+```{r domestic_in_by_age, echo=FALSE, message = FALSE, results='hide'}
+for(loc in seq_along(areas_of_interest)) {
+  dom_in_proj_loc <- filter(dom_in_proj, gss_code %in% areas_of_interest[[loc]]) %>%
+    group_by(year, age) %>%
+    summarise(dom_in = sum(dom_in))
+  
+  loc_age_by_yr <- 
+    ggplot(dom_in_proj_loc, aes(age, dom_in, colour = as.character(year))) +
+    theme_gla(legend = FALSE) +
+    scale_colour_manual(values = c(rep("#cccccc", length(min(dom_in_proj_loc$year):(params$first_proj_yr-1))),
+                                   rep("#6da7de", length(params$first_proj_yr:max(dom_in_proj_loc$year))))) +
+    geom_point() +
+    scale_y_continuous(labels = dollar_format(prefix="")) +
+    scale_x_continuous(breaks = seq(0, 90, 5),
+                       expand = expand_scale(add = c(1.5, 0.5)))
+  # Note that gganimate can't deal with a '%>% left_align_labs()' here
+  
+  anim <- loc_age_by_yr +
+    transition_states(year, transition_length = 2, state_length = 1) +
+    labs(title = paste(names(areas_of_interest)[loc], "domestic in migration age structure over projection years"),
+         subtitle = '{closest_state}')
+  
+  anim_save(paste0(output_files_dir, "/loc_dom_in_age_by_yr_",loc,".gif"), anim)
+}
+```
+
+```{r, echo=FALSE}
+gifs <- list.files(output_files_dir,"*loc_dom_in_age_by_yr*", full.names = TRUE)
+knitr::include_graphics(gifs)
+```
+
+# Total domestic out migration by year
+```{r domestic_out, echo=FALSE, message = FALSE, results='asis'}
+for(loc in seq_along(areas_of_interest)) {
+  dom_out_proj_loc <- filter(dom_out_proj, gss_code %in% areas_of_interest[[loc]]) %>%
+    group_by(year) %>%
+    summarise(dom_out = sum(dom_out)) %>%
+    as.data.frame()
+  
+  pal <- gla_pal(palette_type = "categorical", n = 1)
+  
+  loc_by_yr <- 
+    (ggplot(dom_out_proj_loc, aes(x = year, y = dom_out)) +
+       theme_gla(legend = FALSE) +
+       ggla_line() +
+       ggla_labelline(x1 = params$first_proj_yr-1) +
+       scale_y_continuous(labels = dollar_format(prefix="")) +
+       scale_x_continuous(breaks = seq(2000, maxyear, 5),
+                          expand = expand_scale(add = c(1.5, 0.5))) +
+       labs(title = paste("Total", names(areas_of_interest)[loc], "domestic out migration by year"))) %>%
+    left_align_labs()
+  
+  plot(loc_by_yr)
+}
+```
+
+# Domestic out migration age structure over projection years
+```{r domestic_out_by_age, echo=FALSE, message = FALSE, results='hide'}
+for(loc in seq_along(areas_of_interest)) {
+  dom_out_proj_loc <- filter(dom_out_proj, gss_code %in% areas_of_interest[[loc]]) %>%
+    group_by(year, age) %>%
+    summarise(dom_out = sum(dom_out))
+  
+  loc_age_by_yr <- 
+    ggplot(dom_out_proj_loc, aes(age, dom_out, colour = as.character(year))) +
+    theme_gla(legend = FALSE) +
+    scale_colour_manual(values = c(rep("#cccccc", length(min(dom_out_proj_loc$year):(params$first_proj_yr-1))),
+                                   rep("#6da7de", length(params$first_proj_yr:max(dom_out_proj_loc$year))))) +
+    geom_point() +
+    scale_y_continuous(labels = dollar_format(prefix="")) +
+    scale_x_continuous(breaks = seq(0, 90, 5),
+                       expand = expand_scale(add = c(1.5, 0.5)))
+  # Note that gganimate can't deal with a '%>% left_align_labs()' here
+  
+  anim <- loc_age_by_yr +
+    transition_states(year, transition_length = 2, state_length = 1) +
+    labs(title = paste(names(areas_of_interest)[loc], "domestic out migration age structure over projection years"),
+         subtitle = '{closest_state}')
+  
+  anim_save(paste0(output_files_dir, "/loc_dom_out_age_by_yr_",loc,".gif"), anim)
+}
+```
+```{r, echo=FALSE}
+gifs <- list.files(output_files_dir,"*loc_dom_out_age_by_yr*", full.names = TRUE)
+knitr::include_graphics(gifs)
+```
