@@ -86,8 +86,9 @@ popn_constrain <- function(popn,
   #validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn,
   #                              pop1_is_subset, missing_levels_popn, missing_levels_constraint)
 
-  do_scale <- filter(popn, substr(gss_code,1,1)=="E")
-  dont_scale <- filter(popn, substr(gss_code,1,1)!="E")
+  popn <- mutate(popn, country = substr(gss_code,1,1))  
+  do_scale <- filter(popn, country %in% unique(constraint$country))
+  dont_scale <- filter(popn, !country %in% unique(constraint$country))
 
   #constraint_cols <- names(constraint)[names(constraint)!=col_popn]
 
@@ -110,7 +111,7 @@ popn_constrain <- function(popn,
   #                                missing_levels_popn,
   #                                missing_levels_constraint)
 
-  return(output)
+  return(scaled_popn)
 }
 
 

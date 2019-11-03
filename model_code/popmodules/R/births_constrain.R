@@ -16,27 +16,31 @@
 #' @return A data frame of scaled births by mother's year of age.
 
 births_constrain <- function(births, constraint){
-  
+
   births <- births %>%
     select(year, gss_code, sex, age, births)
   
   max_constraint_age <- max(constraint$age)
   
-  do_scale <- filter(births, substr(gss_code,1,1)=="E")
-  dont_scale <- filter(births, substr(gss_code,1,1)!="E")
+  births <- mutate(births, country = substr(gss_code,1,1))
+  
+  do_scale <- filter(births, country %in% unique(constraint$country))
+  dont_scale <- filter(births, !country %in% unique(constraint$country)) %>%
+    select(-country)
   
   #group ages in births that are >= max age in constraint
   scaling <- filter(do_scale, age >= max_constraint_age) %>%
     mutate(age = max_constraint_age) %>%
-    group_by(year, gss_code, sex, age) %>%
+    group_by(year, gss_code, sex, age, country) %>%
     summarise(births = sum(births)) %>%
     ungroup()%>%
     rbind(filter(do_scale, age < max_constraint_age)) %>%
-    group_by(year, sex, age) %>%
+    group_by(year, sex, age, country) %>%
     summarise(births = sum(births)) %>%
     ungroup()
     
-  scaling <- get_scaling_factors(scaling, constraint, col_popn="births") %>%
+  scaling <- get_scaling_factors(scaling, constraint, col_popn="births",
+                                 col_aggregation = c("year","sex","age","country")) %>%
     select(-births)
   
   #split out the max age
@@ -48,23 +52,23 @@ births_constrain <- function(births, constraint){
   
   #Apply the max age rate to ages >= max age
   max_age_scaled <- filter(do_scale, age >= max_constraint_age) %>%
-    left_join(max_age_scaling, by=c("year", "sex")) %>%
+    left_join(max_age_scaling, by=c("year", "sex","country")) %>%
     mutate(popn_scaled = scaling * births) %>%
     select(year, gss_code, sex, age, popn_scaled)
   
   #Apply age-specific rates to everyone else
   other_scaled <- filter(do_scale, age < max_constraint_age) %>%
-    left_join(other_scaling, by=c("year","sex","age")) %>%
+    left_join(other_scaling, by=c("year","sex","age","country")) %>%
     mutate(popn_scaled = scaling * births) %>%
     select(year, gss_code, sex, age, popn_scaled)
-  
+
   #rejoin everything
   scaled <- rbind(other_scaled, max_age_scaled) %>%
     rename(births = popn_scaled) %>%
     rbind(dont_scale) %>%
     arrange(gss_code)
   
-  assert_that(isTRUE(testthat::expect_equal(nrow(scaled),nrow(births))))
+  testthat::expect_equal(nrow(scaled),nrow(births))
   
   return(scaled)
   
