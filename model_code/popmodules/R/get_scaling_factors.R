@@ -18,7 +18,7 @@
 #'   with one row for each level of the input population for each distinct level of the
 #'   input \code{col_aggregation} columns.
 
-get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "sex", "age"), col_popn,
+get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "sex", "age", "country"), col_popn,
                                 col_constraint = col_popn) {
 
   # Standardise data

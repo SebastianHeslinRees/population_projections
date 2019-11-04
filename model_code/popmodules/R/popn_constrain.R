@@ -74,7 +74,7 @@
 
 popn_constrain <- function(popn,
                            constraint,
-                           col_aggregation = c("year", "sex", "age"),
+                           col_aggregation = c("year", "sex", "age", "country"),
                            col_popn,
                            col_constraint = col_popn,
                            pop1_is_subset = FALSE,
@@ -99,7 +99,8 @@ popn_constrain <- function(popn,
     mutate(!!sym(col_popn) := !!sym(col_popn) * scaling) %>%
     select(names(popn)) %>%
     data.frame() %>%
-    rbind(dont_scale)
+    rbind(dont_scale) %>%
+    select(-country)
 
   # Validate output
   # ---------------

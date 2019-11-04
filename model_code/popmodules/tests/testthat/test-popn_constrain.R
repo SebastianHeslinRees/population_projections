@@ -8,46 +8,27 @@ constraint <- expand.grid(year=2000, age=20:21, sex=c("female","male"), popn=400
 output <- expand.grid(year=2000, age=20:21, gss_code=c("E01","E02"), sex=c("female","male"), popn = 200, stringsAsFactors = FALSE) %>%
   rbind(expand.grid(year=2000, age=20:21, gss_code="S03", sex=c("female","male"), popn = 100, stringsAsFactors = FALSE))
 
-# -------------------------------------------------------------
-
-# The function being tested uses default values:
-# popn_constrain <- function(popn,
-#                            constraint,
-#                            col_aggregation = c("year", "gss_code", "sex", "age"),
-#                            col_popn = "popn",
-#                            col_constraint = col_popn,
-#                            pop1_is_subset = FALSE,
-#                            missing_levels_popn = FALSE,
-#                            missing_levels_constraint = FALSE) {
-
-#--------------------------------------------------------------
 # The tests here use expect_equivalent. This is expect_equal (i.e. objects must be the same) but doesn't compare object attributes
 # TODO find out whether the attributes matter, and whether it matters that they don't match
 
 test_that("popn_constrain can scale up and down", {
   expect_equivalent(popn_constrain(popn,
                                    constraint,
-                                   col_aggregation = c("year", "sex", "age"),
+                                   col_aggregation = c("year", "sex", "age", "country"),
                                    col_popn = "popn",
                                    col_constraint = "popn",
                                    pop1_is_subset = FALSE,
                                    missing_levels_popn = FALSE,
                                    missing_levels_constraint = FALSE),
                     output)
-
+  
   expect_equivalent(popn_constrain(popn, constraint, col_popn="popn"),
                     output)
-
+  
   constraint_in <- dplyr::mutate(constraint, popn = popn/4)
   output_out <- dplyr::mutate(output, popn = ifelse(substr(gss_code,1,1)=="E", popn/4, popn))
-
-  expect_equivalent(popn_constrain(popn, constraint = constraint_in,
-                                   col_aggregation = c("year", "sex", "age"),
-                                   col_popn = "popn",
-                                   col_constraint = "popn",
-                                   pop1_is_subset = FALSE,
-                                   missing_levels_popn = FALSE,
-                                   missing_levels_constraint = FALSE),
+  
+  expect_equivalent(popn_constrain(popn, constraint_in, col_popn = "popn"),
                     output_out)
 })
 
@@ -58,8 +39,7 @@ constraint_cty <- expand.grid(year=2000, age=20:21, sex=c("female","male"), popn
 popn_cty <- popn #mutate(popn, country = substr(gss_code,1,1))
 output_cty <- expand.grid(year=2000, age=20:21, gss_code=c("E01","E02"), sex=c("female","male"), popn = 200, stringsAsFactors = FALSE) %>%
   rbind(expand.grid(year=2000, age=20:21, gss_code="S03", sex=c("female","male"), popn = 400, stringsAsFactors = FALSE)) %>%
-  arrange(sex, gss_code, age) %>%
-  mutate(country = substr(gss_code,1,1))
+  arrange(sex, gss_code, age)
 
 x <- popn_constrain(popn_cty,
                     constraint_cty,
@@ -70,85 +50,7 @@ x <- popn_constrain(popn_cty,
                     missing_levels_popn = FALSE,
                     missing_levels_constraint = FALSE)
 
-expect_equivalent(x,
-                  output_cty)
-
-#---------------------------------------
-
-births <-  expand.grid(year=2000, age=45:49, gss_code=c("E01","E02","S03"), sex="female", births = 100, stringsAsFactors = FALSE)
-constraint <- expand.grid(year=2000, age=45, sex="female", births=400, country = "E", stringsAsFactors = FALSE) %>%
-  rbind(expand.grid(year = 2000, age = 46, sex = "female", births=1600, country = "E", stringsAsFactors = FALSE))
-output <- expand.grid(year=2000, age=45:49, gss_code=c("E01","E02"), sex= "female", births = 200, country = "E", stringsAsFactors = FALSE) %>%
-  rbind(expand.grid(year=2000, age=45:49, gss_code="S03", sex= "female", births = 100, country = "S", stringsAsFactors = FALSE)) %>%
-  data.frame() %>%
-  select(year, gss_code, sex, age, births)
-
-x <- births_constrain(births, constraint)
-
-test_that("births_constrain can scale up and down", {
-  expect_equivalent(x, output)
-
-  constraint_in <- dplyr::mutate(constraint, births = births/4)
-  output_out <- dplyr::mutate(output, births = ifelse(substr(gss_code,1,1)=="E", births/4, births))
-
-  expect_equivalent(births_constrain(births, constraint_in),
-                    output_out)
-})
-
-
-#countries
-constraint <- expand.grid(year=2000, age=45, sex="female", births=400, country = c("E","S"), stringsAsFactors = FALSE) %>%
-  rbind(expand.grid(year = 2000, age = 46, sex = "female", births=1600, country = c("E","S"), stringsAsFactors = FALSE))
-output <- expand.grid(year=2000, age=45:49, gss_code=c("E01","E02"), sex= "female", births = 200, country = "E", stringsAsFactors = FALSE) %>%
-  rbind(expand.grid(year=2000, age=45:49, gss_code="S03", sex= "female", births = 400, country = "S", stringsAsFactors = FALSE)) %>%
-  data.frame() %>%
-  select(year, gss_code, sex, age, births)
-
-x <- births_constrain(births, constraint)
-
-test_that("births_constrain can scale up and down", {
-  expect_equivalent(x, output)
-})
-
-#-----------------------------------
-
-in_constraint_1 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_in=400, country = "E", stringsAsFactors = FALSE)
-out_constraint_1 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_out=400, country = "E", stringsAsFactors = FALSE)
-
-in_constraint_2 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_in=100, country = "E", stringsAsFactors = FALSE)
-out_constraint_2 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_out=100, country = "E", stringsAsFactors = FALSE)
-
-
-domestic_flow <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"),
-                             gss_out = c("E01", "E02", "S01"),
-                             gss_in = c("E01", "E02", "S01"),
-                             flow = 100,
-                             stringsAsFactors = FALSE) %>%
-  filter(gss_out!=gss_in)
-
-x_1 <- cross_border_constrain(domestic_flow, in_constraint_1, out_constraint_1, col_flow = "flow")
-x_2 <- cross_border_constrain(domestic_flow, in_constraint_2, out_constraint_2, col_flow = "flow")
-
-output_1 <- domestic_flow %>%
-  mutate(cb = ifelse(substr(gss_out,1,1)=="E" & substr(gss_in,1,1)=="E",TRUE,FALSE)) %>%
-  mutate(flow = ifelse(cb==TRUE,100,200))
-
-output_2 <- output_1 %>%
-  mutate(flow = ifelse(cb==TRUE,100,50)) %>%
-  select(names(domestic_flow))%>%
-  arrange(gss_out, gss_in)
-
-output_1 <- output_1 %>%
-  select(names(domestic_flow))%>%
-  arrange(gss_out, gss_in)
-
-test_that("cross_border_constrain can scale up and down",{
-  expect_equivalent(x_1, output_1)
-  expect_equivalent(x_2, output_2)
-})
-
-#---------------------------------
-#countries
+expect_equivalent(x, output_cty)
 
 
 #--------------------------------
