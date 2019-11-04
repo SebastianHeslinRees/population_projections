@@ -101,7 +101,8 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   #excel
   #TODO: Do the folder setting better - VBA needs whole path, not relative
   bas_file <- "documentation/templates/datastoreVBA.bas"
-  datastore_folder <- paste0("M:/Projects/population_projections/",output_dir)
+  output_separated <- strsplit(output_dir, "/")[[1]]
+  rprojroot::find_root_file(output_separated, criterion = rprojroot::is_git_root)
   vba <- create_VBA_script(datastore_folder, file_name)
   data.table::fwrite(vba, bas_file, col.names=F, quote=F)
   file.remove("documentation/templates/temp_file.xlsm")
