@@ -1,11 +1,12 @@
-#
-population <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/population19-10-25_1457.rds")
-births <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/births19-10-25_1457.rds")
-deaths <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/deaths19-10-25_1457.rds")
-int_in <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/int_in19-10-25_1457.rds")
-int_out <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/int_out19-10-25_1457.rds")
-dom_in <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/dom_in19-10-25_1457.rds")
-dom_out <- readRDS("//homedata/home$/WTonkiss1/Projects/population_projections/outputs/trend/2018/dom_out19-10-25_1457.rds")
+
+output_date <- "19-10-25_1457"
+population <- readRDS(paste0("outputs/trend/2018/population", output_date, ".rds"))
+births <- readRDS(paste0("outputs/trend/2018/births", output_date, ".rds"))
+deaths <- readRDS(paste0("outputs/trend/2018/deaths", output_date, ".rds"))
+int_in <- readRDS(paste0("outputs/trend/2018/int_in", output_date, ".rds"))
+int_out <- readRDS(paste0("outputs/trend/2018/int_out", output_date, ".rds"))
+dom_in <- readRDS(paste0("outputs/trend/2018/dom_in", output_date, ".rds"))
+dom_out <- readRDS(paste0("outputs/trend/2018/dom_out",output_date,".rds"))
 
 
 datastore_outputs(population, births, deaths, int_in, int_out, dom_in, dom_out,
@@ -66,7 +67,7 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   dom_in <- get_component_datastore(dom_in, "dom_in")
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
-  
+
   #TODO: Make this better
   gss_names <- get_gss_names()
 
@@ -85,7 +86,7 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
            int_in, int_out, int_net,
            dom_in, dom_out, dom_net,
            total_change)
-  
+
   #round data for output
   idx <- sapply(components, class)=="numeric"
   components[, idx] <- lapply(components[, idx], round, digits=3)
@@ -107,7 +108,7 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   data.table::fwrite(vba, bas_file, col.names=F, quote=F)
   file.remove("documentation/templates/temp_file.xlsm")
   shell.exec("M:/Projects/population_projections/documentation/templates/run_excel_vba.bat")
-  
+
   message("excel process running")
 
 }
