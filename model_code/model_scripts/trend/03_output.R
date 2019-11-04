@@ -33,4 +33,15 @@ output_projection <- function(projection, output_dir, timestamp) {
          function(i) make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))) %>%
     invisible()
   
+  #Excel
+  datastore_outputs(population = projection[[1]],
+                    births = projection[[3]],
+                    deaths = projection[[2]],
+                    int_in = projection[[5]],
+                    int_out = projection[[4]],
+                    dom_in,
+                    dom_out,
+                    output_dir = output_dir,
+                    file_name = paste0("datastore_",timestamp,".xlsx"))
 }
+

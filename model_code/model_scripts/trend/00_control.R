@@ -136,7 +136,7 @@ run_trend_model <- function(config_list) {
   #TODO I'm changing the config list entry here so that QA render can see the right path
   config_list$outputs_dir <- output_dir
   
-  ## output the QA
+   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
   rmarkdown::render("model_code/qa/population_qa.Rmd",
                     output_file = paste0("population_qa",config_list$timestamp,".html"),
