@@ -35,7 +35,8 @@ run_trend_model <- function(config_list) {
                        "int_in_fns",
                        "dom_rate_fns",
                        "constraint_fns",
-                       "qa_areas_of_interest", 
+                       "qa_areas_of_interest",
+                       "projection_name",
                        "timestamp")
  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
@@ -122,14 +123,24 @@ run_trend_model <- function(config_list) {
   ## write the output data
   message("running outputs")
   dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
-  output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
+  
+  #TODO I'm moving this directory creation stuff here for now
+  # I wanted to add an extra folder for saving and in order to
+  # give the path to both the outputs and the qa this was necessary
+  if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
+  output_dir <- paste0(config_list$outputs_dir, config_list$projection_name,"/")
+  dir.create(output_dir, recursive = T, showWarnings = F)
+  
+  output_projection(projection, output_dir, timestamp = config_list$timestamp)
+  
+  #TODO I'm changing the config list entry here so that QA render can see the right path
+  config_list$outputs_dir <- output_dir
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
-  # TODO: add domestic migration to QA doc
   rmarkdown::render("model_code/qa/population_qa.Rmd",
                     output_file = paste0("population_qa",config_list$timestamp,".html"),
-                    output_dir = config_list$outputs_dir,
+                    output_dir = config_list$output_dir,
                     params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
                                   popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
                                   deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds"),

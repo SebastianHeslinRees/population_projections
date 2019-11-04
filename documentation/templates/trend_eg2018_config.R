@@ -4,6 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 2
+projection_name <- "test"
 
 datestamp <- "2019-10-11"
 
@@ -172,6 +173,7 @@ config_list <- list(
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
+  projection_name = projection_name,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
 
