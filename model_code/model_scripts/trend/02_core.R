@@ -148,7 +148,6 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
       mutate(dom_net = dom_in - dom_out)
       
-      
     next_yr_popn <- natural_change_popn %>% 
       arrange(year, gss_code, sex, age) %>%
       left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%

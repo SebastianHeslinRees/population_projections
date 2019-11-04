@@ -42,6 +42,7 @@ run_trend_model <- function(config_list) {
   
   # get the MYEs
   # TODO: should this be done all together?
+  message("get components")
   population <- get_component(filepath = config_list$popn_mye_path, 
                            max_yr = config_list$first_proj_yr - 1)
   
@@ -67,6 +68,7 @@ run_trend_model <- function(config_list) {
   
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
+  message("get projected rates")
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
     complete_fertility(population)
     
@@ -118,6 +120,7 @@ run_trend_model <- function(config_list) {
                            constraints)
   
   ## write the output data
+  message("running outputs")
   dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
   output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
   
