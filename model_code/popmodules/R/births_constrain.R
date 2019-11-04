@@ -19,9 +19,9 @@ births_constrain <- function(births, constraint){
 
   births <- births %>%
     select(year, gss_code, sex, age, births)
-  
+
   max_constraint_age <- max(constraint$age)
-  
+
   births <- mutate(births, country = substr(gss_code,1,1))
   
   do_scale <- filter(births, country %in% unique(constraint$country))
@@ -38,24 +38,26 @@ births_constrain <- function(births, constraint){
     group_by(year, sex, age, country) %>%
     summarise(births = sum(births)) %>%
     ungroup()
-    
+
   scaling <- get_scaling_factors(scaling, constraint, col_popn="births",
                                  col_aggregation = c("year","sex","age","country")) %>%
-    select(-births)
+    select(-births)%>%
+    mutate(scaling = ifelse(is.na(scaling), 0, scaling))
   
+
   #split out the max age
   max_age_scaling <- filter(scaling, age == max_constraint_age) %>%
     select(-age)
-  
+
   #split out the < max age
   other_scaling <- filter(scaling, age < max_constraint_age)
-  
+
   #Apply the max age rate to ages >= max age
   max_age_scaled <- filter(do_scale, age >= max_constraint_age) %>%
     left_join(max_age_scaling, by=c("year", "sex","country")) %>%
     mutate(popn_scaled = scaling * births) %>%
     select(year, gss_code, sex, age, popn_scaled)
-  
+
   #Apply age-specific rates to everyone else
   other_scaled <- filter(do_scale, age < max_constraint_age) %>%
     left_join(other_scaling, by=c("year","sex","age","country")) %>%
@@ -67,9 +69,9 @@ births_constrain <- function(births, constraint){
     rename(births = popn_scaled) %>%
     rbind(dont_scale) %>%
     arrange(gss_code)
-  
+
   testthat::expect_equal(nrow(scaled),nrow(births))
-  
+
   return(scaled)
-  
+
 }

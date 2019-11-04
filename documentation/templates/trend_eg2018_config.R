@@ -46,7 +46,7 @@ popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.r
 births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
 deaths_constraint_path <- "input_data/constraints/npp_2018_mortality_constraint.rds"
 int_in_constraint_path <- "input_data/constraints/npp_2018_international_in_constraint.rds"
-int_in_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
+int_out_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
 cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
 cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
 
@@ -141,7 +141,7 @@ constraint_fns <- list(
                                                                births_path = births_constraint_path,
                                                                deaths_path = deaths_constraint_path,
                                                                int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_in_constraint_path,
+                                                               int_out_path = int_out_constraint_path,
                                                                cross_in_path = cross_in_constraint_path,
                                                                cross_out_path = cross_out_constraint_path))
 

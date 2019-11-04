@@ -28,7 +28,6 @@ run_trend_model <- function(config_list) {
                        "dom_out_mye_path",
                        "dom_in_mye_path",
                        "dom_origin_destination_path",
-                       "dom_rate_fns",
                        "outputs_dir", 
                        "mortality_fns", 
                        "fertility_fns",
