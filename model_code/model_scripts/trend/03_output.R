@@ -45,3 +45,12 @@ output_projection <- function(projection, output_dir, timestamp) {
                     file_name = paste0("datastore_",timestamp,".xlsx"))
 }
 
+
+#Config
+#TODO Test
+config_output <- data.frame()
+for(i in seq_along(config_list)){
+  config_output <- rbind(config_output,
+                         data.frame(config = paste(names(config_list)[[i]], config_list[[i]], sep=": ")))
+}
+data.table::fwrite(config_output, "config.txt", col.names = FALSE)
