@@ -41,18 +41,19 @@ output_projection <- function(projection, output_dir, timestamp) {
                     int_out = projection$int_out,
                     dom_in = projection$dom_in,
                     dom_out = projection$dom_out,
-                    output_dir = config_list$outputs_dir,
+                    output_dir = output_dir,
                     file_name = paste0("datastore_",timestamp,".xlsx"),
                     output_date = config_list$timestamp,
                     write_excel = config_list$write_excel)
-}
 
 
-#Config
-#TODO Test
-config_output <- data.frame()
-for(i in seq_along(config_list)){
-  config_output <- rbind(config_output,
-                         data.frame(config = paste(names(config_list)[[i]], config_list[[i]], sep=": ")))
+  #Config
+  #TODO Test
+  config_output <- data.frame()
+  for(i in seq_along(config_list)){
+    config_output <- rbind(config_output,
+                           data.frame(config = paste(names(config_list)[[i]], config_list[[i]], sep=": ")))
+  }
+  data.table::fwrite(config_output, paste0(output_dir, "config.txt"), col.names = FALSE)
+
 }
-data.table::fwrite(config_output, "config.txt", col.names = FALSE)

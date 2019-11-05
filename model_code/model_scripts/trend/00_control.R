@@ -141,7 +141,7 @@ run_trend_model <- function(config_list) {
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
   rmarkdown::render("model_code/qa/population_qa.Rmd",
                     output_file = paste0("population_qa",config_list$timestamp,".html"),
-                    output_dir = config_list$output_dir,
+                    output_dir = config_list$outputs_dir,
                     params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
                                   popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
                                   deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds"),
