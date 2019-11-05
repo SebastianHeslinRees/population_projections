@@ -74,7 +74,7 @@
 
 popn_constrain <- function(popn,
                            constraint,
-                           col_aggregation = c("year", "sex", "age"),
+                           col_aggregation = c("year", "sex", "age", "country"),
                            col_popn,
                            col_constraint = col_popn,
                            pop1_is_subset = FALSE,
@@ -86,8 +86,9 @@ popn_constrain <- function(popn,
   #validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn,
   #                              pop1_is_subset, missing_levels_popn, missing_levels_constraint)
 
-  do_scale <- filter(popn, substr(gss_code,1,1)=="E")
-  dont_scale <- filter(popn, substr(gss_code,1,1)!="E")
+  popn <- mutate(popn, country = substr(gss_code,1,1))  
+  do_scale <- filter(popn, country %in% unique(constraint$country))
+  dont_scale <- filter(popn, !country %in% unique(constraint$country))
 
   #constraint_cols <- names(constraint)[names(constraint)!=col_popn]
 
@@ -98,7 +99,8 @@ popn_constrain <- function(popn,
     mutate(!!sym(col_popn) := !!sym(col_popn) * scaling) %>%
     select(names(popn)) %>%
     data.frame() %>%
-    rbind(dont_scale)
+    rbind(dont_scale) %>%
+    select(-country)
 
   # Validate output
   # ---------------
@@ -106,11 +108,11 @@ popn_constrain <- function(popn,
   # validate_popn_constrain_output(popn,
   #                                col_aggregation,
   #                                col_popn,
-  #                                output,
+  #                                scaled_popn,
   #                                missing_levels_popn,
   #                                missing_levels_constraint)
 
-  return(output)
+  return(scaled_popn)
 }
 
 

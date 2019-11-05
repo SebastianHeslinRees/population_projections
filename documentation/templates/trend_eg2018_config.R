@@ -3,7 +3,8 @@
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
-n_proj_yr <- 20
+n_proj_yr <- 6
+projection_name <- "test"
 
 datestamp <- "2019-10-31"
 
@@ -46,14 +47,18 @@ popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.r
 births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
 deaths_constraint_path <- "input_data/constraints/npp_2018_mortality_constraint.rds"
 int_in_constraint_path <- "input_data/constraints/npp_2018_international_in_constraint.rds"
-int_in_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
+int_out_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
 cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
 cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
 
 hh_rep_rates_path <- "input_data/household_model/ons_household_representative_rates.rds"
 communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population.rds"
 stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
-stage1_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
+stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
+
+write_excel <- FALSE
+
+
 
 #-------------------------------------------------
 
@@ -144,14 +149,14 @@ constraint_fns <- list(
                                                                births_path = births_constraint_path,
                                                                deaths_path = deaths_constraint_path,
                                                                int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_in_constraint_path,
+                                                               int_out_path = int_out_constraint_path,
                                                                cross_in_path = cross_in_constraint_path,
                                                                cross_out_path = cross_out_constraint_path))
 
   )
 
 #TODO figure out the best way to get a null value when we don't want to constraint
-#constraint_fns <- list(list(fn = function() NULL, args = list()))
+constraint_fns <- list(list(fn = function() NULL, args = list()))
 
 qa_areas_of_interest <- list("London", "E09000001")
 
@@ -175,14 +180,25 @@ config_list <- list(
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
-  timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
+  write_excel  = write_excel,
   communal_est_pop_path = communal_est_pop_path,
   hh_rep_rates_path = hh_rep_rates_path,
   stage1_file_path = stage1_file_path,
-  stage2_file_path = stage2_file_path
+  stage2_file_path = stage2_file_path,
+  projection_name = projection_name,
+  timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )
 
 rm(list = setdiff(ls(), "config_list"))
+
+# Save settings
+# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
+if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
+projdir <- rprojroot::find_root(rprojroot::is_git_root)
+copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection_name)
+dir.create(copy_dir, recursive = TRUE)
+this_file <- rstudioapi::getSourceEditorContext()$path
+file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")

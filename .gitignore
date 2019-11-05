@@ -47,3 +47,6 @@ $RECYCLE.BIN/
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+
+# Destop files from Mac
+.DS_Store
