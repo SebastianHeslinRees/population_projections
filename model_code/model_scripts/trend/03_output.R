@@ -6,7 +6,7 @@ output_projection <- function(projection, output_dir, timestamp) {
     invisible()
   
   #CSV
-  csv_dir <- paste0(output_dir,"csv/")
+  csv_dir <- paste0(output_dir,"csv_", timestamp, "/")
   dir.create(csv_dir)
   
   make_csvs <- function(data, name_stub){
