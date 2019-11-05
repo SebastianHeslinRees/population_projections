@@ -1,19 +1,7 @@
-
-output_date <- "19-10-25_1457"
-population <- readRDS(paste0("outputs/trend/2018/population", output_date, ".rds"))
-births <- readRDS(paste0("outputs/trend/2018/births", output_date, ".rds"))
-deaths <- readRDS(paste0("outputs/trend/2018/deaths", output_date, ".rds"))
-int_in <- readRDS(paste0("outputs/trend/2018/int_in", output_date, ".rds"))
-int_out <- readRDS(paste0("outputs/trend/2018/int_out", output_date, ".rds"))
-dom_in <- readRDS(paste0("outputs/trend/2018/dom_in", output_date, ".rds"))
-dom_out <- readRDS(paste0("outputs/trend/2018/dom_out",output_date,".rds"))
-
-
-datastore_outputs(population, births, deaths, int_in, int_out, dom_in, dom_out,
-                  output_dir = "outputs/trend/2018/datastore", file_name = "datastore_file.xlsx")
-
+# TODO document!!
+#' @export
 datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
-                              output_dir, file_name){
+                              output_dir, file_name, output_date, write_excel){
 
   wrangle <- function(x){
     x <- filter(x, year >= 2011) %>%
@@ -92,6 +80,8 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   components[, idx] <- lapply(components[, idx], round, digits=3)
 
   #write
+  if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
+  output_dir <- paste0(output_dir,"datastore")
   dir.create(output_dir, recursive = T, showWarnings = F)
 
   data.table::fwrite(persons, paste0(output_dir,"/persons.csv"))
@@ -100,17 +90,23 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   data.table::fwrite(components, paste0(output_dir,"/components.csv"))
 
   #excel
-  #TODO: Do the folder setting better - VBA needs whole path, not relative
-  bas_file <- "documentation/templates/datastoreVBA.bas"
-  output_separated <- strsplit(output_dir, "/")[[1]]
-  rprojroot::find_root_file(output_separated, criterion = rprojroot::is_git_root)
-  vba <- create_VBA_script(datastore_folder, file_name)
-  data.table::fwrite(vba, bas_file, col.names=F, quote=F)
-  file.remove("documentation/templates/temp_file.xlsm")
-  shell.exec("M:/Projects/population_projections/documentation/templates/run_excel_vba.bat")
+  if(write_excel) {
+    message("excel process running")
 
-  message("excel process running")
+    datastore_folder <- rprojroot::find_root_file(output_dir, criterion = rprojroot::is_git_root)
+    datastore_folder <- gsub("/", "\\\\", datastore_folder)
+    templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
+    templates_folder <- gsub("/", "\\\\", templates_folder)
+    run_excel_vba <- data.frame(a = paste0("start Excel.exe \"", templates_folder, "\\excel_template.xlsm"))
+    data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_vba.bat", col.names=F, quote=F)
 
+    bas_file <- "documentation/templates/datastoreVBA.bas"
+    vba <- create_VBA_script(datastore_folder, file_name)
+    data.table::fwrite(vba, bas_file, col.names=F, quote=F)
+    file.remove("documentation/templates/temp_file.xlsm")
+    shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_vba.bat", criterion = rprojroot::is_git_root))
+
+  }
 }
 
 #--------------------------------------
