@@ -34,15 +34,17 @@ output_projection <- function(projection, output_dir, timestamp) {
     invisible()
   
   #Excel
-  datastore_outputs(population = projection[[1]],
-                    births = projection[[3]],
-                    deaths = projection[[2]],
-                    int_in = projection[[5]],
-                    int_out = projection[[4]],
-                    dom_in,
-                    dom_out,
-                    output_dir = output_dir,
-                    file_name = paste0("datastore_",timestamp,".xlsx"))
+  datastore_outputs(population = projection$population,
+                    births = projection$births,
+                    deaths = projection$deaths,
+                    int_in = projection$int_in,
+                    int_out = projection$int_out,
+                    dom_in = projection$dom_in,
+                    dom_out = projection$dom_out,
+                    output_dir = config_list$outputs_dir,
+                    file_name = paste0("datastore_",timestamp,".xlsx"),
+                    output_date = config_list$timestamp,
+                    write_excel = config_list$write_excel)
 }
 
 

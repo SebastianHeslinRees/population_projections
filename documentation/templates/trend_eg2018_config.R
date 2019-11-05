@@ -51,6 +51,7 @@ int_out_constraint_path <- "input_data/constraints/npp_2018_international_out_co
 cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
 cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
 
+write_excel <- FALSE
 
 
 #-------------------------------------------------
@@ -174,7 +175,8 @@ config_list <- list(
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   projection_name = projection_name,
-  timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
+  timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
+  write_excel  = write_excel
 )
 
 rm(list = setdiff(ls(), "config_list"))

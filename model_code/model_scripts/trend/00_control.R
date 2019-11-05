@@ -37,8 +37,9 @@ run_trend_model <- function(config_list) {
                        "constraint_fns",
                        "qa_areas_of_interest",
                        "projection_name",
-                       "timestamp")
- 
+                       "timestamp",
+                       "write_excel")
+
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   # get the MYEs
