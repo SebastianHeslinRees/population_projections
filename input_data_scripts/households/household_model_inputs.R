@@ -1,12 +1,12 @@
 #ONS Household Rates
 library(dplyr)
 library(data.table)
+library(popmodules)
 
 read_hh_data_files <- function(file, file_location, yr){
   
   x <- readRDS(paste0(file_location, file)) %>%
-    filter(year == yr)
-  return(x)
+    filter(year == yr) 
 }
 
 file_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/ONS Household Projections/GLA implementation/input"
@@ -55,31 +55,28 @@ for(i in 2022:2041){
     mutate(year = i)
 }
 
-
 rates <- data.table::rbindlist(rates)
 
-setwd("M:/Projects/population_projections/input_data/household_model/")
-saveRDS(rates, "ons_household_representative_rates.rds")
-
-saveRDS(ce, "ons_communal_establishment_population.rds")
-
+saveRDS(rates, "input_data/household_model/ons_household_representative_rates.rds")
+saveRDS(ce, "input_data/household_model/ons_communal_establishment_population.rds")
+rm(list=ls())
 #--------------------------------------------------------
+#DCLG Data
+data_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/"
 
-stage1_data <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/2014 DCLG stage 1 data.rds") %>%
+stage1_data <- readRDS(paste0(data_location,"2014 DCLG stage 1 data.rds")) %>%
   setnames(c("gss_code","year","sex","household_type","age_group","households",
              "household_population","institutional_population","total_population","hh_rep_rates"))
 
-
-stage2_data <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/2014 DCLG Stage 2 headship rates.rds") %>%
+stage2_data <- readRDS(paste0(data_location,"2014 DCLG Stage 2 headship rates.rds")) %>%
   rename(rate = DCLG.rate) %>%
   select(-district)
 
-setwd("M:/Projects/population_projections/input_data/household_model/")
-
-saveRDS(stage1_data, "dclg_stage1_data_2014.rds")
-saveRDS(stage2_data, "dclg_headship_rates_2014.rds")
+saveRDS(stage1_data, "input_data/household_model/dclg_stage1_data_2014.rds")
+saveRDS(stage2_data, "input_data/household_model/dclg_headship_rates_2014.rds")
 
 #-------------------------------------------------------
+#Lookup
 
 region_codes <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/region to region gss code.csv")
 
@@ -87,8 +84,7 @@ district_to_region <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Loo
   left_join(region_codes, by="region") %>%
   select(gss_code, region_gss_code)
 
-setwd("M:/Projects/population_projections/input_data/household_model/")
-saveRDS(district_to_region, "district_to_region.rds")
-
+saveRDS(district_to_region, "input_data/household_model/district_to_region.rds")
+rm(list=ls())
 
 

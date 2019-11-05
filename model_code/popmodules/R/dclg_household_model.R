@@ -1,21 +1,21 @@
-library(dplyr)
-library(data.table)
-library(tidyr)
+#' Implementation of the DCLG 2014 Stage 1 Household Model
+#'
+#' Produce household projections from an input population
+#' projection using the 2016 ONS household projection methodology
+#'
+#' @param population A data frame containing population data.
+#' @param stage1_file_path String. Path to file containing DCLG
+#'   stage 1 household inputs
+#'
+#' @return A list containing 2 dataframes: Stage 1 household by household
+#'   type and total.
 
-# dclg_outputs(stage_1[[2]], stage_1[[3]], stage_1[[4]], stage_1[[5]], stage_1[[6]],
-#              stage_2[[1]], stage_2[[2]])
-
-
-#FUNCTIONS
-
-
-
-dclg_stage_1 <- function(population_projection, stage1_file, file_location){
+dclg_stage_1 <- function(population, stage1_file_path){
   
-  stage1_data <- readRDS(paste0(file_location,stage1_file))
+  stage1_data <- readRDS(stage1_file_path)
   
   ### Group sya pop into 5 year bands up to 85+
-  popn_5yr_bands <-  population_into_age_groups(population_projection,
+  popn_5yr_bands <-  population_into_age_groups(population,
                                                 age_groups=c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,Inf),
                                                 labels=c("0_4","5_9","10_14","15_19","20_24","25_29","30_34","35_39","40_44",
                                                          "45_49","50_54","55_59","60_64","65_69","70_74","75_79","80_84","85&"),
@@ -26,7 +26,7 @@ dclg_stage_1 <- function(population_projection, stage1_file, file_location){
   ### calc implied dclg HH rep rates
   
   ### Create data for years beyond last dclg year ###
-  stage1_data <- extend_data(stage1_data, max(population_projection$year))
+  stage1_data <- extend_data(stage1_data, max(population$year))
   
   ### Aggregate populations by HH type
   sum_hh_type <- stage1_data %>%
@@ -37,9 +37,8 @@ dclg_stage_1 <- function(population_projection, stage1_file, file_location){
            sum_ce_popn = sum(institutional_population)) %>%
     ungroup()
   
-  
   ### Calc proportion in each HH type
-  ### Multiply proportions by GLA popn
+  ### Multiply proportions by popn
   scaled_projection <- left_join(sum_hh_type, popn_5yr_bands, by=c("gss_code", "year", "sex", "age_group")) %>%
     mutate(scaled_popn = (total_population / sum_total_popn) * popn_5yr_bands)
   
@@ -58,35 +57,35 @@ dclg_stage_1 <- function(population_projection, stage1_file, file_location){
                                       scaled_hh_popn * hh_rep_rates,
                                       0))
   
-  
   ### Total households by borough and year
-  
-  households <- scaled_households %>%
+  total_households <- scaled_households %>%
     group_by(gss_code, year) %>%
     summarise(stage_1_households = sum(scaled_households)) %>%
     ungroup()
   
-  ### Total households by region
-  # households_regional <- left_join(households, region_la_lookup, by="gss_code") %>%
-  #   group_by(region, year) %>%
-  #   summarise(households = sum(scaled_households))%>%
-  #   select(region, year, households)
-  
-  
-  return(list(scaled_households, households))
+  return(list(scaled_households, total_households))
   
 }
 
 #---------------------------------------------------------
+#' Implementation of the DCLG 2014 Stage 2 Household Model
+#'
+#' Produce household projections from an input population
+#' projection using the 2016 ONS household projection methodology
+#'
+#' @param headship_rates_path A data frame containing DCLG headship rates.
+#' @param stage1_file_path String. DCLG stage 1 model outputs
+#'
+#' @return A list containing 5 dataframes: unconstrained and constrained
+#'   household projections, household and communal establishment populations,
+#'   and households by age.
 
-
-
-dclg_stage_2 <- function(headship_rates_file, file_location, stage1_output){
+dclg_stage_2 <- function(headship_rates_path, stage1_output){
   
-  headship_rates <- readRDS(paste0(file_location, headship_rates_file))
+  headship_rates <- readRDS(headship_rates_path)
   
-  scaled_households <- stage1_output[[1]]
-  stg1_total_households <- stage1_output[[2]]
+  scaled_households <- stage1_output$scaled_households
+  stg1_total_households <- stage1_output$total_households
   
   headship_rates <- extend_data(headship_rates, max(scaled_households$year))
   
@@ -106,7 +105,6 @@ dclg_stage_2 <- function(headship_rates_file, file_location, stage1_output){
                      "75_79" = "75_84",
                      "80_84" = "75_84")
   
-  
   child_hh_pop <- scaled_households %>%
     filter(gss_code %in% unique(headship_rates$gss_code)) %>%
     filter(age_group %in% c("0_4","5_9","10_14"))%>%
@@ -123,7 +121,6 @@ dclg_stage_2 <- function(headship_rates_file, file_location, stage1_output){
     group_by(gss_code, year, age_group) %>%
     summarise(hh_popn = sum(scaled_hh_popn)) %>%
     ungroup()
-  
   
   stage2_unconstrained <- left_join(adult_hh_pop, headship_rates, by=c("gss_code","year","age_group")) %>%
     mutate(hh_stg2_unconstrained = hh_popn * rate)
@@ -162,27 +159,3 @@ dclg_stage_2 <- function(headship_rates_file, file_location, stage1_output){
               households_by_age = households_stage_2_ages))
          
 }
-
-#--------------------------------------------------
-
-
-
-# dclg_outputs <- function(households, stage_1, household_population, institutional_population,
-#                          households_regional, stage_2, AHS, output_location){
-#   ### Output files
-#   setwd(output_location)
-#
-#   fwrite(households, "Households - district Totals.csv", quote = TRUE)
-#   fwrite(households_regional, "Households - Regional Totals.csv", quote = TRUE)
-#
-#   fwrite(household_population, "Household population.csv", quote = TRUE)
-#   fwrite(institutional_population, "Institutional population.csv", quote = TRUE)
-#
-#   fwrite(stage1, "Households - Stage 1.csv", quote = TRUE)
-#   fwrite(stage2, "Households - Stage 2.csv", quote = TRUE)
-#   fwrite(AHS, "Households - AHS.csv", quote = TRUE)
-#
-#
-# }
-
-
