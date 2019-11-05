@@ -18,7 +18,7 @@
 #'   with one row for each level of the input population for each distinct level of the
 #'   input \code{col_aggregation} columns.
 
-get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "sex", "age"), col_popn,
+get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "sex", "age", "country"), col_popn,
                                 col_constraint = col_popn) {
 
   # Standardise data
@@ -46,7 +46,8 @@ get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "s
     left_join(constraint, by = join_by) %>%
     group_by_at(join_by) %>%
     mutate(popn_total = sum(!!sym(col_popn_new)),
-           scaling = !!sym(col_constraint_new)/popn_total) %>%
+           scaling = ifelse(popn_total == 0, 0,
+             !!sym(col_constraint_new)/popn_total)) %>%
     ungroup() %>%
     data.frame() %>%
     rename(!!col_popn := !!sym(col_popn_new)) %>%

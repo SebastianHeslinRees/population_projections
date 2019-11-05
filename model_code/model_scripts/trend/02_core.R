@@ -112,6 +112,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     # TODO adapt this to write out gss-to-gss flows by SYA
     # TODO adapt this to work with time-varying migration rates
+
     domestic_flow <- natural_change_popn %>%
       calc_dom_mign(mign_rate = dom_rate,
                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
@@ -125,10 +126,9 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       mutate(year = my_year)
     
     if(!is.null(constraints)){
-      domestic_flow <- cross_border_constrain(domestic_flow = domestic_flow,
-                                              in_constraint = constraints$cross_border_in_constraint,
-                                              out_constraint = constraints$cross_border_out_constraint,
-                                              col_flow = "flow")
+      domestic_flow <- cross_border_constrain_all(domestic_flow = domestic_flow,
+                                                  in_constraint = constraints$cross_border_in_constraint,
+                                                  col_flow = "flow")
     }
     
     #TODO Look at whether its worth doing this in data.table
@@ -147,7 +147,6 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       tidyr::replace_na(list(dom_out = 0, dom_in = 0)) %>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
       mutate(dom_net = dom_in - dom_out)
-      
       
     next_yr_popn <- natural_change_popn %>% 
       arrange(year, gss_code, sex, age) %>%
