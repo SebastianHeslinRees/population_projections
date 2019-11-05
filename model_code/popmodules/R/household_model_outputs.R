@@ -1,24 +1,3 @@
-
-#ons_household_model(population, hh_rep_rates_path, communal_est_pop_path)
-
-# dclg_outputs <- function(households, stage_1, household_population, institutional_population,
-#                          households_regional, stage_2, AHS, output_location){
-#   ### Output files
-#   setwd(output_location)
-#
-#   fwrite(households, "Households - district Totals.csv", quote = TRUE)
-#   fwrite(households_regional, "Households - Regional Totals.csv", quote = TRUE)
-#
-#   fwrite(household_population, "Household population.csv", quote = TRUE)
-#   fwrite(institutional_population, "Institutional population.csv", quote = TRUE)
-#
-#   fwrite(stage1, "Households - Stage 1.csv", quote = TRUE)
-#   fwrite(stage2, "Households - Stage 2.csv", quote = TRUE)
-#   fwrite(AHS, "Households - AHS.csv", quote = TRUE)
-#
-#
-# }
-
 ons_hh_model_outputs <- function(model_output, output_dir){
   
   #Deatiled outputs
@@ -58,15 +37,67 @@ ons_hh_model_outputs <- function(model_output, output_dir){
   
   #write outputs
   #TODO Add LA & region names to outputs
-  output_dataframes <- list(detailed_unconstrained=detailed_unconstrained,
-                            detailed_constrained=detailed_constrained,
-                            detailed_household_pop=detailed_household_pop,
-                            detailed_ce_pop=detailed_ce_pop,
-                            household_summary_sheet=household_summary_sheet)
+  output_dataframes <- list(detailed_unconstrained = detailed_unconstrained,
+                            detailed_constrained = detailed_constrained,
+                            detailed_household_pop = detailed_household_pop,
+                            detailed_ce_pop = detailed_ce_pop,
+                            household_summary = household_summary_sheet)
+  
+  output_dir <- paste0(output_dir, "/households")
+  dir.create(output_dir, showWarnings = FALSE)
   
   lapply(seq_along(output_dataframes),
          function(i) data.table::fwrite(output_dataframes[[i]],
-                                        paste0(output_dir, names(output_dataframes)[i], ".csv"))) %>%
+                                        paste0(output_dir, "ons_",names(output_dataframes)[i], ".csv"))) %>%
     invisible()
+  
+}
 
+
+dclg_model_outputs <- function(model_output, output_dir){
+  
+  stage_1_sheet <- model_output$stage_1$scaled_households %>%
+    group_by(gss_code, year, sex, age_group) %>%
+    summarise(households = sum(households)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = year, values_from = households)
+  
+  stage_2_sheet <- model_output$stage_2$constrained %>%
+    group_by(gss_code, year, age_group) %>%
+    summarise(households = sum(households)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = year, values_from = households)
+  
+  ce_pop <- model_output$stage_1$scaled_households %>%
+    group_by(gss_code, year, sex, age_group) %>%
+    summarise(scaled_ce_popn = sum(scaled_ce_popn)) %>%
+    pivot_wider(names_from = year, values_from = scaled_ce_popn)
+  
+  hh_pop <- model_output$stage_1$scaled_households %>%
+    group_by(gss_code, year, sex, age_group) %>%
+    summarise(scaled_hh_popn = sum(scaled_hh_popn)) %>%
+    pivot_wider(names_from = year, values_from = scaled_hh_popn)
+  
+  household_summary_sheet <- model_output$stage_1$scaled_households %>%
+    group_by(gss_code, year) %>%
+    summarise(households = sum(scaled_households),
+              households_population = sum(scaled_hh_popn),
+              communal_establishment_population = sum(scaled_ce_popn)) %>%
+    ungroup() %>%
+    mutate(average_households_size = households_population / households)
+  
+  output_dataframes <- list(stage1_households = stage_1_sheet,
+                            stage2_households = stage_2_sheet,
+                            detailed_ce_pop = ce_pop,
+                            detailed_hh_pop = hh_pop,
+                            household_summary = household_summary_sheet)
+  
+  output_dir <- paste0(output_dir, "/households/")
+  dir.create(output_dir, showWarnings = FALSE)
+  
+  lapply(seq_along(output_dataframes),
+         function(i) data.table::fwrite(output_dataframes[[i]],
+                                        paste0(output_dir, "dclg_", names(output_dataframes)[i], ".csv"))) %>%
+    invisible()
+  
 }

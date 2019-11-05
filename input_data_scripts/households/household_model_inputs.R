@@ -77,11 +77,24 @@ data_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - or
 
 stage1_data <- readRDS(paste0(data_location,"2014 DCLG stage 1 data.rds")) %>%
   setnames(c("gss_code","year","sex","household_type","age_group","households",
-             "household_population","institutional_population","total_population","hh_rep_rates"))
+             "household_population","institutional_population","total_population","hh_rep_rates"))%>%
+  mutate(sex = case_when(sex == "F" ~ "female",
+                         sex == "M" ~ "male"))
+
+stage_1_totals <- select(stage1_data, -hh_rep_rates) %>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","household_type","age_group"))
+
+stage_1_rates <- select(stage1_data, -households, -household_population,
+                        -institutional_population, -total_population) %>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
+                     fun = list(mean))
+
+stage1_data <- left_join(stage_1_totals, stage_1_rates, by = c("gss_code","year","sex","household_type","age_group"))
 
 stage2_data <- readRDS(paste0(data_location,"2014 DCLG Stage 2 headship rates.rds")) %>%
   rename(rate = DCLG.rate) %>%
-  select(-district)
+  select(-district) %>%
+  recode_gss_to_2011(col_aggregation = c("gss_code", "year", "household_type", "age_group"), fun = list(mean))
 
 saveRDS(stage1_data, "input_data/household_model/dclg_stage1_data_2014.rds")
 saveRDS(stage2_data, "input_data/household_model/dclg_headship_rates_2014.rds")

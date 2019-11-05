@@ -52,6 +52,8 @@ cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_c
 
 hh_rep_rates_path <- "input_data/household_model/ons_household_representative_rates.rds"
 communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population.rds"
+stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
+stage1_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
 #-------------------------------------------------
 
@@ -175,7 +177,9 @@ config_list <- list(
   qa_areas_of_interest = qa_areas_of_interest,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
   communal_est_pop_path = communal_est_pop_path,
-  hh_rep_rates_path = hh_rep_rates_path
+  hh_rep_rates_path = hh_rep_rates_path,
+  stage1_file_path = stage1_file_path,
+  stage2_file_path = stage2_file_path
 )
 
 rm(list = setdiff(ls(), "config_list"))

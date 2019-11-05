@@ -1,3 +1,24 @@
+#' Run the 2014 DCLG household model
+#' 
+#' Run stages 1 and 2 of the DCLG household model and retuen outputs
+#' 
+#' @param population A data frame containing population data.
+#' @param stage1_file_path String. Path to file containing DCLG
+#'   stage 1 household inputs
+#' @param stage1_file_path String. DCLG stage 1 model outputs
+#' 
+#' @return A list containing 2 dataframes: Stage 1 household by household
+#'   type and total.
+
+dclg_household_model <- function(population, stage1_file_path, stage2_file_path){
+  
+  stage_1 <- dclg_stage_1(population, stage1_file_path)
+  stage_2 <- dclg_stage_2(stage2_file_path, stage_1)
+  
+  return(list(stage_1 = stage_1, stage_2 = stage_2))
+  
+}
+
 #' Implementation of the DCLG 2014 Stage 1 Household Model
 #'
 #' Produce household projections from an input population
@@ -12,7 +33,8 @@
 
 dclg_stage_1 <- function(population, stage1_file_path){
   
-  stage1_data <- readRDS(stage1_file_path)
+  stage1_data <- readRDS(stage1_file_path) %>%
+    filter(year <= max(population$year))
   
   ### Group sya pop into 5 year bands up to 85+
   popn_5yr_bands <-  population_into_age_groups(population,
@@ -63,7 +85,8 @@ dclg_stage_1 <- function(population, stage1_file_path){
     summarise(stage_1_households = sum(scaled_households)) %>%
     ungroup()
   
-  return(list(scaled_households, total_households))
+  return(list(scaled_households = scaled_households,
+              total_households = total_households))
   
 }
 
@@ -73,16 +96,16 @@ dclg_stage_1 <- function(population, stage1_file_path){
 #' Produce household projections from an input population
 #' projection using the 2016 ONS household projection methodology
 #'
-#' @param headship_rates_path A data frame containing DCLG headship rates.
+#' @param stage2_file_path A data frame containing DCLG headship rates.
 #' @param stage1_file_path String. DCLG stage 1 model outputs
 #'
 #' @return A list containing 5 dataframes: unconstrained and constrained
 #'   household projections, household and communal establishment populations,
 #'   and households by age.
 
-dclg_stage_2 <- function(headship_rates_path, stage1_output){
+dclg_stage_2 <- function(stage2_file_path, stage1_output){
   
-  headship_rates <- readRDS(headship_rates_path)
+  headship_rates <- readRDS(stage2_file_path)
   
   scaled_households <- stage1_output$scaled_households
   stg1_total_households <- stage1_output$total_households
