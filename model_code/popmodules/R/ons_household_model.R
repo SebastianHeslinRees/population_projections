@@ -12,13 +12,13 @@
 #' @return A list containing 4 dataframes: Unconstrained and constrained household projections,
 #' communal establishment and household populations for the projection period.
 
-ons_household_model <- function(population, hh_rep_rates_path, communal_est_pop_path){
-  
+ons_household_model <- function(popn, hh_rep_rates_path, communal_est_pop_path){
+
   district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
   
   household_rates <- readRDS(hh_rep_rates_path)
   
-  population <- aggregate_geography(population) %>%
+  population <- aggregate_geography(popn) %>%
     create_regional_data(district_to_region)
   
   #       Same number as 2011 for 0-74
@@ -32,8 +32,9 @@ ons_household_model <- function(population, hh_rep_rates_path, communal_est_pop_
                                                       popn_col = "popn")
   
   
-  communal_establishment <- get_communal_establishment_popn(communal_est_pop_path, file_location,
-                                                            population_age_groups, rates_ages = c("75_79","80_84","85_over"))
+  communal_establishment <- get_communal_establishment_popn(communal_est_pop_path,
+                                                            population_age_groups,
+                                                            rates_ages = c("75_79","80_84","85_over"))
   
   household_population <- get_household_popn(population_age_groups, communal_establishment)
   

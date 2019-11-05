@@ -6,19 +6,29 @@ library(popmodules)
 read_hh_data_files <- function(file, file_location, yr){
   
   x <- readRDS(paste0(file_location, file)) %>%
-    filter(year == yr) 
+    filter(year == yr) %>%
+    mutate(sex = case_when(sex == "F" ~ "female",
+                           sex == "M" ~ "male"))
 }
 
 file_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/ONS Household Projections/GLA implementation/input"
 
-rates_2001 <- read_hh_data_files("/hh_rep_rates.rds", file_location, 2001)
-rates_2011 <- read_hh_data_files("/hh_rep_rates.rds", file_location, 2011)
+rates_2001 <- read_hh_data_files("/hh_rep_rates.rds", file_location, 2001) %>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age_group"),
+                     fun = list(mean))
 
-households_2001 <- read_hh_data_files("/households.rds", file_location, 2001)
-households_2011 <- read_hh_data_files("/households.rds", file_location, 2011)
+rates_2011 <- read_hh_data_files("/hh_rep_rates.rds", file_location, 2011) %>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age_group"),
+                     fun = list(mean))
 
-ce <- read_hh_data_files("/communal_pop.rds", file_location, 2011)
+households_2001 <- read_hh_data_files("/households.rds", file_location, 2001)%>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age_group"))
 
+households_2011 <- read_hh_data_files("/households.rds", file_location, 2011)%>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age_group"))
+
+ce <- read_hh_data_files("/communal_pop.rds", file_location, 2011)%>%
+  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age_group"))
 
 rates <- vector("list", 2041)
 rates[[2001]] <- rates_2001
@@ -61,6 +71,7 @@ saveRDS(rates, "input_data/household_model/ons_household_representative_rates.rd
 saveRDS(ce, "input_data/household_model/ons_communal_establishment_population.rds")
 rm(list=ls())
 #--------------------------------------------------------
+
 #DCLG Data
 data_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/"
 
@@ -82,7 +93,8 @@ region_codes <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models
 
 district_to_region <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/district to region.rds") %>%
   left_join(region_codes, by="region") %>%
-  select(gss_code, region_gss_code)
+  select(gss_code, region_gss_code) %>%
+  rbind(data.frame(gss_code = c("E07000100","E07000104"), region_gss_code = rep("E12000006")))
 
 saveRDS(district_to_region, "input_data/household_model/district_to_region.rds")
 rm(list=ls())

@@ -37,7 +37,9 @@ run_trend_model <- function(config_list) {
                        "dom_rate_fns",
                        "constraint_fns",
                        "qa_areas_of_interest", 
-                       "timestamp")
+                       "timestamp",
+                       "hh_rep_rates_path",
+                       "communal_est_pop_path")
  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -118,9 +120,16 @@ run_trend_model <- function(config_list) {
                            config_list$first_proj_yr, config_list$n_proj_yr,
                            constraints)
   
+  ## household models
+  ons_households <- ons_household_model(popn = projection$population,
+                                        hh_rep_rates_path = config_list$hh_rep_rates_path,
+                                        communal_est_pop_path = config_list$communal_est_pop_path)
+
+  
   ## write the output data
   dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
   output_projection(projection, config_list$outputs_dir, timestamp = config_list$timestamp)
+  ons_hh_model_outputs(ons_households, config_list$outputs_dir)
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
