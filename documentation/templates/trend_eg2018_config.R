@@ -179,6 +179,15 @@ config_list <- list(
 
 rm(list = setdiff(ls(), "config_list"))
 
+# Save settings
+# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
+if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
+projdir <- rprojroot::find_root(rprojroot::is_git_root)
+copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection_name)
+dir.create(copy_dir, recursive = TRUE)
+this_file <- rstudioapi::getSourceEditorContext()$path
+file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
+
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 run_trend_model(config_list)
