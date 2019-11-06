@@ -35,6 +35,7 @@ run_trend_model <- function(config_list) {
                        "int_in_fns",
                        "dom_rate_fns",
                        "constraint_fns",
+                       "int_out_flow_or_rate",
                        "qa_areas_of_interest",
                        "projection_name",
                        "timestamp",
@@ -119,7 +120,7 @@ run_trend_model <- function(config_list) {
                            fertility, mortality, int_out_rate, int_in_proj,
                            dom_in, dom_out, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr,
-                           constraints)
+                           constraints, config_list$int_out_flow_or_rate)
   
   ## write the output data
   message("running outputs")

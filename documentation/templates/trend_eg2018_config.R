@@ -1,9 +1,8 @@
 # config file for model runs
-
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
-n_proj_yr <- 6
+n_proj_yr <- 20
 projection_name <- "test_unconstrained"
 
 datestamp <- "2019-10-11"
@@ -173,6 +172,7 @@ config_list <- list(
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
+  int_out_flow_or_rate = int_out_flow_or_rate,
   qa_areas_of_interest = qa_areas_of_interest,
   projection_name = projection_name,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),

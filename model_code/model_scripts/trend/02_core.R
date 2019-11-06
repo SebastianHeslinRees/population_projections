@@ -3,7 +3,8 @@
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
                        dom_in, dom_out, dom_rate,
-                       first_proj_yr, n_proj_yr, constraints = NULL) {
+                       first_proj_yr, n_proj_yr, constraints = NULL,
+                       int_out_flow_or_rate) {
   
   library(dplyr)
   library(assertthat)
@@ -87,14 +88,19 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       mutate(popn = popn - deaths) %>%
       select(-deaths)
     
-    # TODO add switch for changing whether international out is rates based, or just numbers to match international in
-    int_out <- calc_int_out(popn = natural_change_popn,
-                            component_rate = filter(int_out_rate, year == my_year),
-                            col_popn = "popn",
-                            col_rate = "int_out",
-                            col_component = "int_out")
+    if(int_out_flow_or_rate=="flow"){
+      #TODO cosmetic but the df is called int_out_rate when its not always a rate
+      int_out <- int_out_rate %>% filter(year == my_year)
+    } else {
+      int_out <- calc_int_out(popn = natural_change_popn,
+                              component_rate = filter(int_out_rate, year == my_year),
+                              col_popn = "popn",
+                              col_rate = "int_out",
+                              col_component = "int_out")
+    }
     validate_population(int_out, col_data = "int_out")
     validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
+    
     
     if(!is.null(constraints)){
       int_out <- popn_constrain(popn=int_out, constraint = constraints$international_out_constraint,
