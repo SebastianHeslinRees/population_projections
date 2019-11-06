@@ -121,8 +121,10 @@ validate_component_from_popn_rate_input <- function(popn, component_rate, col_ag
               msg = paste("component_from_popn_rate needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(component_rate[[col_rate]]),
               msg = paste("component_from_popn_rate needs a numeric column in the specified component rate rate col:", col_rate))
-  assert_that(all(component_rate[[col_rate]] >= 0) && all(component_rate[[col_rate]] <= 1),
-              msg = "component rates in component_from_popn_rate must be between 0 and 1")
+  assert_that(all(component_rate[[col_rate]] >= 0),
+              msg = paste("component rates for", col_rate,"in component_from_popn_rate were negative"))
+  assert_that(all(component_rate[[col_rate]] <= 1),
+              msg = paste("component rates for", col_rate, "in component_from_popn_rate were > 1"))
   assert_that(!col_component %in% names(col_aggregation),
               msg = paste("component_from_popn_rate can't handle a component column with the same name as one of the aggregation columns",
                           "\ncomponent column:", col_component,
