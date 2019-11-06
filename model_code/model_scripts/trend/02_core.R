@@ -4,11 +4,11 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
                        dom_in, dom_out, dom_rate,
                        first_proj_yr, n_proj_yr, constraints = NULL) {
-
+  
   library(dplyr)
   library(assertthat)
   library(popmodules)
-
+  
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                              first_proj_yr, n_proj_yr)
@@ -32,7 +32,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
   proj_deaths <- list(deaths %>% filter(year < first_proj_yr))
   proj_births <- list(births %>% filter(year < first_proj_yr))
-# TODO: would we rather calculate domestic migration backseries for the input (this is done in
+  # TODO: would we rather calculate domestic migration backseries for the input (this is done in
   # input_data_scripts/domestic_migration_2018.R, it just needs to be recoded to
   # 2011 geographies and read in at the start)
   proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
@@ -43,7 +43,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     cat('\r',paste("  Projecting year",my_year))
     flush.console()
-
+    
     # TODO pass births, deaths, migration function in via list along with their arguments to make the core more flexible.
     # Would remove need for hard coded internation out migration method switch
     
@@ -66,7 +66,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     birthratio_m2f <- 1.05 
     births <- sum_births_and_split_by_sex_ratio(births, birthratio_m2f)
-
+    
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
     validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
@@ -81,7 +81,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     if(!is.null(constraints)){
       deaths <- popn_constrain(popn=deaths, constraint = constraints$deaths_constraint, col_popn = "deaths")
     }
-   
+    
     #TODO do this better
     natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
       mutate(popn = popn - deaths) %>%
@@ -112,7 +112,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     # TODO adapt this to write out gss-to-gss flows by SYA
     # TODO adapt this to work with time-varying migration rates
-
+    
     domestic_flow <- natural_change_popn %>%
       calc_dom_mign(mign_rate = dom_rate,
                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
@@ -126,9 +126,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       mutate(year = my_year)
     
     if(!is.null(constraints)){
-      domestic_flow <- cross_border_constrain_all(domestic_flow = domestic_flow,
-                                                  in_constraint = constraints$cross_border_in_constraint,
-                                                  col_flow = "flow")
+      domestic_flow <- cross_border_constrain(domestic_flow = domestic_flow,
+                                              in_constraint = constraints$cross_border_in_constraint,
+                                              out_constraint = constraints$cross_border_out_constraint,
+                                              col_flow = "flow")
     }
     
     #TODO Look at whether its worth doing this in data.table
@@ -147,7 +148,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       tidyr::replace_na(list(dom_out = 0, dom_in = 0)) %>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
       mutate(dom_net = dom_in - dom_out)
-      
+    
     next_yr_popn <- natural_change_popn %>% 
       arrange(year, gss_code, sex, age) %>%
       left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
@@ -172,7 +173,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       #                                      col_popn = "popn"),
       #                       next_yr_popn)
     }
-  
+    
     proj_popn[[length(proj_popn)+1]] <- next_yr_popn
     proj_deaths[[length(proj_deaths)+1]] <- deaths
     proj_births[[length(proj_births)+1]] <- births
@@ -203,7 +204,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
                                        fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                                        first_proj_yr, n_proj_yr) {
- 
+  
   popmodules::validate_population(population, col_data = "popn")
   popmodules::validate_population(births, col_data = "births")
   popmodules::validate_population(deaths, col_data = "deaths")
