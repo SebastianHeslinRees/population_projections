@@ -5,7 +5,7 @@
 \title{Produce scaling factors to convert one population to another}
 \usage{
 get_scaling_factors(popn, constraint, col_aggregation = c("year", "sex",
-  "age"), col_popn, col_constraint = col_popn)
+  "age", "country"), col_popn, col_constraint = col_popn)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}

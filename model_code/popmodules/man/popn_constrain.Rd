@@ -5,8 +5,9 @@
 \title{Scale one population to match the totals of another}
 \usage{
 popn_constrain(popn, constraint, col_aggregation = c("year", "sex",
-  "age"), col_popn, col_constraint = col_popn, pop1_is_subset = FALSE,
-  missing_levels_popn = FALSE, missing_levels_constraint = FALSE)
+  "age", "country"), col_popn, col_constraint = col_popn,
+  pop1_is_subset = FALSE, missing_levels_popn = FALSE,
+  missing_levels_constraint = FALSE)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}

@@ -9,6 +9,8 @@
 #' @param cross_out_path String
 #'
 #' @return List of dataframes
+#'
+#' @export
 
 get_constraints_from_file <- function(popn_path, births_path, deaths_path,
                                       int_in_path, int_out_path, cross_in_path, cross_out_path) {
