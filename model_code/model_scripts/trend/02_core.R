@@ -192,6 +192,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   
+  message(" ")
   
   return(list(population = proj_popn, deaths = proj_deaths, births = proj_births,
               int_out = proj_int_out, int_in = proj_int_in,

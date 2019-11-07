@@ -35,34 +35,38 @@ run_trend_model <- function(config_list) {
                        "int_in_fns",
                        "dom_rate_fns",
                        "constraint_fns",
-                       "qa_areas_of_interest",
                        "projection_name",
-                       "timestamp",
-                       "write_excel")
-
+                       "write_excel",
+                       "hh_rep_rates_path",
+                       "communal_est_pop_path",
+                       "stage1_file_path",
+                       "stage2_file_path",
+                       "qa_areas_of_interest", 
+                       "timestamp")
+  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   # get the MYEs
   # TODO: should this be done all together?
   message("get components")
   population <- get_component(filepath = config_list$popn_mye_path, 
-                           max_yr = config_list$first_proj_yr - 1)
+                              max_yr = config_list$first_proj_yr - 1)
   
   deaths <- get_component(filepath = config_list$deaths_mye_path, 
-                                max_yr = config_list$first_proj_yr - 1)
+                          max_yr = config_list$first_proj_yr - 1)
   
   births <- get_component(filepath = config_list$births_mye_path,
-                                  max_yr = config_list$first_proj_yr - 1) %>%
+                          max_yr = config_list$first_proj_yr - 1) %>%
     filter(age == 0)
   
   int_out <- get_component(filepath = config_list$int_out_mye_path,
-                          max_yr = config_list$first_proj_yr - 1)
+                           max_yr = config_list$first_proj_yr - 1)
   
   int_in <- get_component(filepath = config_list$int_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
   dom_out <- get_component(filepath = config_list$dom_out_mye_path,
-                          max_yr = config_list$first_proj_yr - 1)
+                           max_yr = config_list$first_proj_yr - 1)
   
   dom_in <- get_component(filepath = config_list$dom_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
@@ -73,11 +77,11 @@ run_trend_model <- function(config_list) {
   message("get projected rates")
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
     complete_fertility(population)
-    
+  
   mortality <- evaluate_fns_list(config_list$mortality_fns)
   
   int_out_rate <- evaluate_fns_list(config_list$int_out_rate_fns) 
-
+  
   int_in_proj <- evaluate_fns_list(config_list$int_in_fns)
   
   dom_rate <- evaluate_fns_list(config_list$dom_rate_fns)
@@ -103,7 +107,7 @@ run_trend_model <- function(config_list) {
   int_in_proj <- int_in_proj %>% select(year, gss_code, age, sex, int_in)
   dom_rate <- dom_rate %>% select(gss_out, gss_in, age, sex, rate)
   
-
+  
   # TODO fix the fertility data so we don't have to do this
   if(any(fertility$rate > 1)) {
     warning("Setting mortality rates > 1 to be 1")
@@ -113,7 +117,7 @@ run_trend_model <- function(config_list) {
     warning("Setting mortality rates < 0 to be 0")
     fertility$rate <- sapply(fertility$rate, function(x) max(x,0))
   }
-   
+  
   ## run the core
   projection <- trend_core(population, births, deaths, int_out, int_in, 
                            fertility, mortality, int_out_rate, int_in_proj,
@@ -121,17 +125,26 @@ run_trend_model <- function(config_list) {
                            config_list$first_proj_yr, config_list$n_proj_yr,
                            constraints)
   
+  ## household models
+  message('running household models')
+  ons_households <- ons_household_model(popn = projection$population,
+                                        hh_rep_rates_path = config_list$hh_rep_rates_path,
+                                        communal_est_pop_path = config_list$communal_est_pop_path)
+  
+  dclg_households <- dclg_household_model(population, config_list$stage1_file_path, config_list$stage2_file_path)
+  
+  
   ## write the output data
   message("running outputs")
   
   #TODO I'm moving this directory creation stuff here for now
-  # I wanted to add an extra folder for saving and in order to
-  # give the path to both the outputs and the qa this was necessary
   if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
   output_dir <- paste0(config_list$outputs_dir, config_list$projection_name,"/")
   dir.create(output_dir, recursive = T, showWarnings = F)
-  
+
   output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
+  ons_hh_model_outputs(ons_households, output_dir)
+  dclg_hh_model_outputs(dclg_households, output_dir)
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
