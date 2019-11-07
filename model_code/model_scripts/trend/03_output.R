@@ -1,4 +1,4 @@
-output_projection <- function(projection, output_dir, timestamp) {
+output_projection <- function(projection, output_dir, timestamp, write_excel) {
   
   #RDS
   lapply(seq_along(projection), 
@@ -44,7 +44,7 @@ output_projection <- function(projection, output_dir, timestamp) {
                     output_dir = output_dir,
                     file_name = paste0("datastore_",timestamp,".xlsx"),
                     output_date = config_list$timestamp,
-                    write_excel = config_list$write_excel)
+                    write_excel = write_excel)
 
 
   #Config

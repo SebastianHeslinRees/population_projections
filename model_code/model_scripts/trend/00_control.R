@@ -131,7 +131,7 @@ run_trend_model <- function(config_list) {
   output_dir <- paste0(config_list$outputs_dir, config_list$projection_name,"/")
   dir.create(output_dir, recursive = T, showWarnings = F)
   
-  output_projection(projection, output_dir, timestamp = config_list$timestamp)
+  output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
