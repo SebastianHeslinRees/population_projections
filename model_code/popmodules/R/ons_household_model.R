@@ -12,6 +12,7 @@
 #' @return A list containing 4 dataframes: Unconstrained and constrained household projections,
 #' communal establishment and household populations for the projection period.
 #' @export
+
 ons_household_model <- function(popn, hh_rep_rates_path, communal_est_pop_path){
 
   district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
@@ -55,8 +56,7 @@ ons_household_model <- function(popn, hh_rep_rates_path, communal_est_pop_path){
   return(list(unconstrained = data.frame(household_projection),
               constrained = data.frame(rbind(england_proj, constrained_regional, constrained_district)),
               household_population = data.frame(household_population),
-              communal_establishment_population = data.frame(communal_establishment)))
-  
+              communal_establishment_population = data.frame(communal_establishment)))  
 }
 
 #-----------------------------------------------------

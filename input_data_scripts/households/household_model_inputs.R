@@ -66,6 +66,7 @@ for(i in 2022:2041){
 }
 
 rates <- data.table::rbindlist(rates)
+
 dir.create("input_data/household_model")
 saveRDS(rates, "input_data/household_model/ons_household_representative_rates.rds")
 saveRDS(ce, "input_data/household_model/ons_communal_establishment_population.rds")
