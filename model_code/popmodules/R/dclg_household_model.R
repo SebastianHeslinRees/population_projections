@@ -5,10 +5,12 @@
 #' @param population A data frame containing population data.
 #' @param stage1_file_path String. Path to file containing DCLG
 #'   stage 1 household inputs
-#' @param stage1_file_path String. DCLG stage 1 model outputs
-#' 
-#' @return A list containing 2 dataframes: Stage 1 household by household
-#'   type and total.
+#' @param stage2_file_path String. Path to file containing DCLG
+#'   stage 2 household inputs
+#'   
+#' @return A list containing 2 lists: Stage 1 outputs and Stage 2
+#'   outputs.
+#' @export
 
 dclg_household_model <- function(population, stage1_file_path, stage2_file_path){
   
@@ -37,8 +39,9 @@ dclg_stage_1 <- function(population, stage1_file_path){
     filter(year <= max(population$year))
   
   ### Group sya pop into 5 year bands up to 85+
-  popn_5yr_bands <-  population_into_age_groups(population,
-                                                age_groups=c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,Inf),
+  popn_5yr_bands <-  population %>%
+    filter(gss_code %in% unique(stage1_data$gss_code)) %>%
+    population_into_age_groups(age_groups=c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,Inf),
                                                 labels=c("0_4","5_9","10_14","15_19","20_24","25_29","30_34","35_39","40_44",
                                                          "45_49","50_54","55_59","60_64","65_69","70_74","75_79","80_84","85&"),
                                                 popn_col="popn") %>%
@@ -48,7 +51,14 @@ dclg_stage_1 <- function(population, stage1_file_path){
   ### calc implied dclg HH rep rates
   
   ### Create data for years beyond last dclg year ###
-  stage1_data <- extend_data(stage1_data, max(population$year))
+  if(max(stage1_data$year) < max(population$year)){
+    stage1_data <- project_forward_flat(stage1_data, max(population$year))
+  }
+  
+  #Make sure years match
+  common_years <- intersect(stage1_data$year, popn_5yr_bands$year)
+  stage1_data <- filter(stage1_data, year %in% common_years)
+  popn_5yr_bands <- filter(popn_5yr_bands, year %in% common_years)
   
   ### Aggregate populations by HH type
   sum_hh_type <- stage1_data %>%
@@ -61,6 +71,8 @@ dclg_stage_1 <- function(population, stage1_file_path){
   
   ### Calc proportion in each HH type
   ### Multiply proportions by popn
+  validate_join_population(sum_hh_type, popn_5yr_bands, cols_common_aggregation = c("year", "gss_code", "sex", "age_group"), pop1_is_subset = FALSE, many2one=TRUE, one2many = FALSE)
+
   scaled_projection <- left_join(sum_hh_type, popn_5yr_bands, by=c("gss_code", "year", "sex", "age_group")) %>%
     mutate(scaled_popn = (total_population / sum_total_popn) * popn_5yr_bands)
   
@@ -102,6 +114,7 @@ dclg_stage_1 <- function(population, stage1_file_path){
 #' @return A list containing 5 dataframes: unconstrained and constrained
 #'   household projections, household and communal establishment populations,
 #'   and households by age.
+#' @export
 
 dclg_stage_2 <- function(stage2_file_path, stage1_output){
   
@@ -112,9 +125,9 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
   
   headship_rates <- extend_data(headship_rates, max(scaled_households$year))
   
-  recoding_ages <- c("0_14" = "0_4",
-                     "0_14" = "5_9",
-                     "0_14" = "10_14",
+  recoding_ages <- c("0_4" = "0_14",
+                     "5_9" = "0_14",
+                     "10_14" = "0_14",
                      "15_19" = "15_24",
                      "20_24" = "15_24",
                      "25_29" = "25_34",
@@ -123,6 +136,8 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
                      "40_44" = "35_44",
                      "45_49" = "45_54",
                      "50_54" = "45_54",
+                     "55_59" = "55_59",
+                     "60_64" = "60_64",
                      "65_69" = "65_74",
                      "70_74" = "65_74",
                      "75_79" = "75_84",

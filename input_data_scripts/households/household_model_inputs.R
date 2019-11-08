@@ -67,6 +67,7 @@ for(i in 2022:2041){
 
 rates <- data.table::rbindlist(rates)
 
+dir.create("input_data/household_model")
 saveRDS(rates, "input_data/household_model/ons_household_representative_rates.rds")
 saveRDS(ce, "input_data/household_model/ons_communal_establishment_population.rds")
 rm(list=ls())
@@ -107,7 +108,8 @@ region_codes <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models
 district_to_region <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/district to region.rds") %>%
   left_join(region_codes, by="region") %>%
   select(gss_code, region_gss_code) %>%
-  rbind(data.frame(gss_code = c("E07000100","E07000104"), region_gss_code = rep("E12000006")))
+  recode_gss_to_2011(col_aggregation = "gss_code", fun=list(c)) %>%
+  mutate(region_gss_code = ifelse(substr(gss_code,1,1) == "E", region_gss_code, gss_code))
 
 saveRDS(district_to_region, "input_data/household_model/district_to_region.rds")
 rm(list=ls())

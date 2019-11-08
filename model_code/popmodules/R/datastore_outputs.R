@@ -81,7 +81,7 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
 
   #write
   if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
-  output_dir <- paste0(output_dir,"datastore")
+  output_dir <- paste0(output_dir,"datastore_", output_date)
   dir.create(output_dir, recursive = T, showWarnings = F)
 
   data.table::fwrite(persons, paste0(output_dir,"/persons.csv"))

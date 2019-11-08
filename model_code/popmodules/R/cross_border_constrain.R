@@ -12,6 +12,8 @@
 #'
 #' @return A data frame of scaled domestic flows by authority, sex and
 #'   single year of age.
+#'
+#' @export
 
 cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint, col_flow = "flow"){
 

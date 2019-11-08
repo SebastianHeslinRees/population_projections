@@ -126,6 +126,7 @@ run_trend_model <- function(config_list) {
                            constraints)
   
   ## household models
+  message('running household models')
   ons_households <- ons_household_model(popn = projection$population,
                                         hh_rep_rates_path = config_list$hh_rep_rates_path,
                                         communal_est_pop_path = config_list$communal_est_pop_path)
@@ -135,17 +136,15 @@ run_trend_model <- function(config_list) {
   
   ## write the output data
   message("running outputs")
-  dir.create(config_list$outputs_dir, recursive = TRUE) # is recursive = TRUE dangerous?
   
   #TODO I'm moving this directory creation stuff here for now
   if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
   output_dir <- paste0(config_list$outputs_dir, config_list$projection_name,"/")
   dir.create(output_dir, recursive = T, showWarnings = F)
-  
-  output_projection(projection, output_dir, timestamp = config_list$timestamp)
+
+  output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   ons_hh_model_outputs(ons_households, output_dir)
-  dclg_hh_model_outputs(dclg_households, output_dirr)
-  
+  dclg_hh_model_outputs(dclg_households, output_dir)
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
@@ -153,13 +152,13 @@ run_trend_model <- function(config_list) {
                     output_file = paste0("population_qa",config_list$timestamp,".html"),
                     output_dir = output_dir,
                     params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
-                                  popn_proj_fp =   paste0(config_list$outputs_dir,"/population",config_list$timestamp,".rds"),
-                                  deaths_proj_fp = paste0(config_list$outputs_dir,"/deaths",config_list$timestamp,".rds"),
-                                  int_in_proj_fp = paste0(config_list$outputs_dir,"/int_in",config_list$timestamp,".rds"),
-                                  int_out_proj_fp = paste0(config_list$outputs_dir,"/int_out",config_list$timestamp,".rds"),
-                                  dom_in_proj_fp = paste0(config_list$outputs_dir,"/dom_in",config_list$timestamp,".rds"),
-                                  dom_out_proj_fp = paste0(config_list$outputs_dir,"/dom_out",config_list$timestamp,".rds"),
-                                  births_proj_fp = paste0(config_list$outputs_dir,"/births",config_list$timestamp,".rds"),
-                                  output_files_dir = paste0(config_list$outputs_dir,"population_qa",config_list$timestamp,"_files/"),
+                                  popn_proj_fp =   paste0(output_dir,"/population",config_list$timestamp,".rds"),
+                                  deaths_proj_fp = paste0(output_dir,"/deaths",config_list$timestamp,".rds"),
+                                  int_in_proj_fp = paste0(output_dir,"/int_in",config_list$timestamp,".rds"),
+                                  int_out_proj_fp = paste0(output_dir,"/int_out",config_list$timestamp,".rds"),
+                                  dom_in_proj_fp = paste0(output_dir,"/dom_in",config_list$timestamp,".rds"),
+                                  dom_out_proj_fp = paste0(output_dir,"/dom_out",config_list$timestamp,".rds"),
+                                  births_proj_fp = paste0(output_dir,"/births",config_list$timestamp,".rds"),
+                                  output_files_dir = paste0(output_dir,"population_qa",config_list$timestamp,"_files/"),
                                   first_proj_yr = config_list$first_proj_yr))
 }

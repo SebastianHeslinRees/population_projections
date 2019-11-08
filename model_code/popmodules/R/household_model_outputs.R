@@ -16,8 +16,12 @@ ons_hh_model_outputs <- function(model_output, output_dir){
   
   #Summary outputs
   data_totals <- function(data, in_col, out_col){
-    x <- group_by(data, gss_code, year) %>%
-      summarise(!!out_col := sum(!!sym(in_col)))
+    x <- data.frame(data) %>%
+      rename(value = in_col) %>%
+      group_by(gss_code, year) %>%
+      summarise(value = sum(value)) %>%
+      ungroup() %>%
+      rename(!!out_col := value)
   }
   
   total_ce_pop <- data_totals(model_output$communal_establishment_population,
@@ -43,7 +47,7 @@ ons_hh_model_outputs <- function(model_output, output_dir){
                             detailed_ce_pop = detailed_ce_pop,
                             household_summary = household_summary_sheet)
   
-  output_dir <- paste0(output_dir, "/households")
+  output_dir <- paste0(output_dir, "/households/")
   dir.create(output_dir, showWarnings = FALSE)
   
   lapply(seq_along(output_dataframes),
@@ -54,7 +58,7 @@ ons_hh_model_outputs <- function(model_output, output_dir){
 }
 
 
-dclg_model_outputs <- function(model_output, output_dir){
+dclg_hh_model_outputs <- function(model_output, output_dir){
   
   stage_1_sheet <- model_output$stage_1$scaled_households %>%
     group_by(gss_code, year, sex, age_group) %>%
@@ -101,3 +105,4 @@ dclg_model_outputs <- function(model_output, output_dir){
     invisible()
   
 }
+

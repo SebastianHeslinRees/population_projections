@@ -4,6 +4,8 @@
 #'
 #'
 #' @import assertthat
+#'
+#' @export
 
 sum_births_and_split_by_sex_ratio <- function(births,
                                               birthratio_m2f = 1.05) {

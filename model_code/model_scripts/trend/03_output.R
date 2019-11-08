@@ -1,4 +1,4 @@
-output_projection <- function(projection, output_dir, timestamp) {
+output_projection <- function(projection, output_dir, timestamp, write_excel) {
   
   #RDS
   lapply(seq_along(projection), 
@@ -6,7 +6,7 @@ output_projection <- function(projection, output_dir, timestamp) {
     invisible()
   
   #CSV
-  csv_dir <- paste0(output_dir,"csv/")
+  csv_dir <- paste0(output_dir,"csv_", timestamp, "/")
   dir.create(csv_dir)
   
   make_csvs <- function(data, name_stub){
@@ -44,16 +44,14 @@ output_projection <- function(projection, output_dir, timestamp) {
                     output_dir = output_dir,
                     file_name = paste0("datastore_",timestamp,".xlsx"),
                     output_date = config_list$timestamp,
-                    write_excel = config_list$write_excel)
-
-
+                    write_excel = write_excel)
   #Config
   #TODO Test
-  config_output <- data.frame()
-  for(i in seq_along(config_list)){
-    config_output <- rbind(config_output,
-                           data.frame(config = paste(names(config_list)[[i]], config_list[[i]], sep=": ")))
-  }
-  data.table::fwrite(config_output, paste0(output_dir, "config.txt"), col.names = FALSE)
+  # config_output <- data.frame()
+  # for(i in seq_along(config_list)){
+  #   config_output <- rbind(config_output,
+  #                          data.frame(config = paste(names(config_list)[[i]], config_list[[i]], sep=": ")))
+  # }
+  # data.table::fwrite(config_output, paste0(output_dir, "config.txt"), col.names = FALSE)
 
 }

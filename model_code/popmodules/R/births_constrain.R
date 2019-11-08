@@ -14,6 +14,8 @@
 #'   resolution or lower.
 #'
 #' @return A data frame of scaled births by mother's year of age.
+#'
+#' @export
 
 births_constrain <- function(births, constraint){
 
@@ -23,11 +25,11 @@ births_constrain <- function(births, constraint){
   max_constraint_age <- max(constraint$age)
 
   births <- mutate(births, country = substr(gss_code,1,1))
-  
+
   do_scale <- filter(births, country %in% unique(constraint$country))
   dont_scale <- filter(births, !country %in% unique(constraint$country)) %>%
     select(-country)
-  
+
   #group ages in births that are >= max age in constraint
   scaling <- filter(do_scale, age >= max_constraint_age) %>%
     mutate(age = max_constraint_age) %>%
@@ -43,7 +45,7 @@ births_constrain <- function(births, constraint){
                                  col_aggregation = c("year","sex","age","country")) %>%
     select(-births)%>%
     mutate(scaling = ifelse(is.na(scaling), 0, scaling))
-  
+
 
   #split out the max age
   max_age_scaling <- filter(scaling, age == max_constraint_age) %>%
