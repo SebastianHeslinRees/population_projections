@@ -3,7 +3,7 @@
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2017
-n_proj_yr <- 33
+n_proj_yr <- 24
 projection_name <- "2016_central"
 
 datestamp <- "2019-10-11"
@@ -24,14 +24,14 @@ mortality_avg_or_trend <- "trend"
 mortality_last_data_year <- 2016
 mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
-mortality_npp_variant <- "2016_principal"
+mortality_npp_variant <- "2014_principal"
 
 fertility_years_to_avg <- 1
 fertility_avg_or_trend <- "average"
 fertility_last_data_year <- 2016
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
-fertility_npp_variant <- "2016_principal"
+fertility_npp_variant <- "2012_principal"
 
 int_out_last_data_year <- 2016
 int_out_years_to_avg <- 10
