@@ -16,6 +16,7 @@ int_in_mye_path <-  paste0("input_data/mye/2018/international_in_ons_",datestamp
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
+upc_path <- NULL
 outputs_dir = "outputs/trend/2018/"
 
 mortality_years_to_avg <- 5
@@ -164,6 +165,7 @@ config_list <- list(
   dom_out_mye_path = dom_out_mye_path,
   dom_in_mye_path = dom_in_mye_path,
   dom_origin_destination_path = dom_origin_destination_path,
+  upc_path = upc_path,
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
