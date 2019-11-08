@@ -28,6 +28,7 @@ run_trend_model <- function(config_list) {
                        "dom_out_mye_path",
                        "dom_in_mye_path",
                        "dom_origin_destination_path",
+                       "upc_path",
                        "outputs_dir", 
                        "mortality_fns", 
                        "fertility_fns",
@@ -71,10 +72,17 @@ run_trend_model <- function(config_list) {
   dom_in <- get_component(filepath = config_list$dom_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
+  if(is.na(config_list$upc_path)){
+    upc <- NULL
+  } else { 
+    upc <- readRDS(config_list$upc_path)
+  }
+  
   
   # get the projected rates
   # strings together 'building blocks' which can be swapped out and replaced in config file
   message("get projected rates")
+  #browser()
   fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
     complete_fertility(population)
   
@@ -123,7 +131,7 @@ run_trend_model <- function(config_list) {
                            fertility, mortality, int_out_rate, int_in_proj,
                            dom_in, dom_out, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr,
-                           constraints)
+                           constraints, upc)
   
   ## household models
   message('running household models')
@@ -141,7 +149,7 @@ run_trend_model <- function(config_list) {
   if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
   output_dir <- paste0(config_list$outputs_dir, config_list$projection_name,"/")
   dir.create(output_dir, recursive = T, showWarnings = F)
-
+  
   output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   ons_hh_model_outputs(ons_households, output_dir)
   dclg_hh_model_outputs(dclg_households, output_dir)
