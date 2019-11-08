@@ -35,13 +35,14 @@ run_trend_model <- function(config_list) {
                        "int_in_fns",
                        "dom_rate_fns",
                        "constraint_fns",
+                       "int_out_flow_or_rate",
+                       "qa_areas_of_interest",
                        "projection_name",
                        "write_excel",
                        "hh_rep_rates_path",
                        "communal_est_pop_path",
                        "stage1_file_path",
                        "stage2_file_path",
-                       "qa_areas_of_interest", 
                        "timestamp")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
@@ -123,7 +124,7 @@ run_trend_model <- function(config_list) {
                            fertility, mortality, int_out_rate, int_in_proj,
                            dom_in, dom_out, dom_rate,
                            config_list$first_proj_yr, config_list$n_proj_yr,
-                           constraints)
+                           constraints, config_list$int_out_flow_or_rate)
   
   ## household models
   message('running household models')
