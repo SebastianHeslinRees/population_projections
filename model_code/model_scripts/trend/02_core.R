@@ -12,7 +12,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility, mortality, int_out_rate, int_in_proj, dom_rate,
-                             first_proj_yr, n_proj_yr)
+                             first_proj_yr, n_proj_yr, int_out_flow_or_rate)
   
   
   # Load core functions
@@ -210,7 +210,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
                                        fertility, mortality, int_out_rate, int_in_proj, dom_rate,
-                                       first_proj_yr, n_proj_yr) {
+                                       first_proj_yr, n_proj_yr, int_out_flow_or_rate) {
   
   popmodules::validate_population(population, col_data = "popn")
   popmodules::validate_population(births, col_data = "births")
@@ -222,11 +222,13 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   
   popmodules::validate_population(fertility, col_data = "rate")
   popmodules::validate_population(mortality, col_data = "rate")
-  popmodules::validate_population(int_out_rate, col_data = "rate")
+  
+  assert_that(int_out_flow_or_rate %in% c("flow", "rate"),
+              msg = "the config variable int_out_flow_or_rate must be either 'flow' or 'rate'")
+  popmodules::validate_population(int_out_rate, col_data = ifelse(int_out_flow_or_rate == "flow", "int_out", "rate"))
   popmodules::validate_population(int_in_proj, col_data = "int_in")
   #TODO add check for completeness of dom_rate
   popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
-  
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
@@ -249,9 +251,10 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   # check that the rates values are always between 0 and 1 
   assert_that(max(fertility$rate) <= 1 & min(fertility$rate) >= 0, msg = "projected fertility contains rates outside the range 0-1")
   assert_that(max(mortality$rate) <= 1 & min(mortality$rate) >= 0, msg = "projected mortality contains rates outside the range 0-1")
-  assert_that(max(int_out_rate$rate) <= 1 & min(int_out_rate$rate) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
+  if(int_out_flow_or_rate == "rate") {
+    assert_that(max(int_out_rate$rate) <= 1 & min(int_out_rate$rate) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
+  }
   assert_that(max(dom_rate$rate) <= 1 & min(dom_rate$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
-  
   
   invisible(TRUE)
 }
