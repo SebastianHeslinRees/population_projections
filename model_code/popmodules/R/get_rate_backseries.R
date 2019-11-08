@@ -41,6 +41,8 @@
 #'   \code{component_mye_path} data frame. Need not be specified when one of
 #'   "births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in",
 #'   "dom_out", "dom_net".
+#' @param rate_cap Numeric. Upper limits to values in the \code{col_component}
+#'   column. NULL applies no limits. Default 1.
 #'
 #' @return A data frame containing rates for the component of change (in the
 #'   "rate" column)
@@ -57,7 +59,8 @@ get_rate_backseries <- function(component_mye_path,
                                 years_backseries,
                                 col_partial_match = NULL,
                                 col_aggregation = c("year","gss_code","age","sex"),
-                                col_component = NULL) {
+                                col_component = NULL,
+                                rate_cap = 1) {
 
   # TODO split this into two functions - can a function for domestic migration matrix be built as a
   # separate function which calls this one?  This function has become hard to read.
@@ -81,7 +84,7 @@ get_rate_backseries <- function(component_mye_path,
   component <- readRDS(component_mye_path)
 
   validate_get_rate_backseries_inputs(popn, births, component, years_backseries,
-                                      col_partial_match, col_aggregation, col_component)
+                                      col_partial_match, col_aggregation, col_component, rate_cap)
 
 
   popn <- popn  %>%
@@ -185,15 +188,17 @@ get_rate_backseries <- function(component_mye_path,
       rename(setNames(names(join_by), unname(join_by))) # check this...
   }
 
-  # TODO remove this from here and do after the averaging step
-  # Set max rate to 1 (this is mostly for mortality purposes, but nothing we're dealing with should be > 1 right?)
-  if(any(rates$rate > 1)) {
-    n <- sum(rates$rate > 1)
-    warning(paste(c("get_rate_backseries found", n, "rates > 1 - these will be set to 1.",
-                    "\nInput was", component_mye_path, "and", popn_mye_path,
-                    "\nLocations:", unique(rates[rates$rate > 1, "gss_code"]),
-                    "\nTODO: edit code to move this to happen after the rates have been averaged in the next step"), collapse = " "))
-    rates$rate[rates$rate > 1] <- 1
+
+  if(!is.null(rate_cap)) {
+    ix <- rates$rate > rate_cap
+    if(any(ix)) {
+      n <- sum(ix)
+      warning(paste(c("get_rate_backseries found", n, "rates >", rate_cap, "- these will be capped.",
+                      "\nInput was", component_mye_path, "and", popn_mye_path,
+                      "\nLocations:", unique(rates[ix, "gss_code"]),
+                      "\nTODO: edit code to move this to happen after the rates have been averaged in the next step"), collapse = " "))
+      rates$rate[ix] <- 1
+    }
   }
 
   return(rates)
@@ -208,7 +213,8 @@ validate_get_rate_backseries_inputs <- function(population,
                                                 years_backseries,
                                                 col_partial_match,
                                                 col_aggregation,
-                                                col_component){
+                                                col_component,
+                                                rate_cap){
 
   assert_that(is.data.frame(population),
               msg="get_rate_backseries expects that population is a data frame")
@@ -231,6 +237,9 @@ validate_get_rate_backseries_inputs <- function(population,
               msg = "get_rate_backseries expects that year column in the births dataframe is numeric")
   assert_that(is.numeric(component$year),
               msg = "get_rate_backseries expects that year column in the component dataframe is numeric")
+  assert_that(is.null(rate_cap) | is.number(rate_cap),
+              msg = "get_rate_backseries expects a single number for rate_cap")
+
 
   validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn")
   validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births")
