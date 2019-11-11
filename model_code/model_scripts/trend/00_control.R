@@ -137,11 +137,11 @@ run_trend_model <- function(config_list) {
   
   ## household models
   message('running household models')
-  ons_households <- ons_household_model(popn = projection$population,
+  projection$ons_households <- ons_household_model(popn = projection$population,
                                         hh_rep_rates_path = config_list$hh_rep_rates_path,
                                         communal_est_pop_path = config_list$communal_est_pop_path)
   
-  dclg_households <- dclg_household_model(population, config_list$stage1_file_path, config_list$stage2_file_path)
+  projection$dclg_households <- dclg_household_model(population, config_list$stage1_file_path, config_list$stage2_file_path)
   
   
   ## write the output data
@@ -153,8 +153,9 @@ run_trend_model <- function(config_list) {
   dir.create(output_dir, recursive = T, showWarnings = F)
   
   output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
-  ons_hh_model_outputs(ons_households, output_dir, timestamp = config_list$timestamp)
-  dclg_hh_model_outputs(dclg_households, output_dir, timestamp = config_list$timestamp)
+
+  ons_hh_model_outputs(projection$ons_households, output_dir, timestamp = config_list$timestamp)
+  dclg_hh_model_outputs(projection$dclg_households, output_dir, timestamp = config_list$timestamp)
   
   ## output the QA
   # TODO: is this the right place to call the QA? The QA might be changed more often than the rest of the model code. 
@@ -171,4 +172,6 @@ run_trend_model <- function(config_list) {
                                   births_proj_fp = paste0(output_dir,"/births",config_list$timestamp,".rds"),
                                   output_files_dir = paste0(output_dir,"population_qa",config_list$timestamp,"_files/"),
                                   first_proj_yr = config_list$first_proj_yr))
+  
+  return(projection)
 }
