@@ -61,6 +61,7 @@ trend_2012 <- select(npp_fertility_trend, year, age, High.2012, Low.2012, Princi
   gather(variant, rate, c(High.2012, Low.2012, Principal.2012)) %>%
   mutate(sex = "female") %>%
   select(names(fert_trend)) %>%
+  filter(year <= max(fert_trend$year)) %>%
   mutate(variant = case_when(variant == "High.2012" ~ "2012_high",
                              variant == "Low.2012"~ "2012_low",
                              variant == "Principal.2012" ~ "2012_principal"))
