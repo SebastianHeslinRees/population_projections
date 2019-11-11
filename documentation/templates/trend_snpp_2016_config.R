@@ -51,6 +51,12 @@ system.time({
   cross_in_constraint_path <- "input_data/constraints/npp_2016_cross_border_in_constraint.rds"
   cross_out_constraint_path <- "input_data/constraints/npp_2016_cross_border_out_constraint.rds"
   
+  ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates.rds"
+  ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016.rds"
+  communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population.rds"
+  dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
+  dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
+  
   write_excel <- FALSE
 
   
@@ -174,10 +180,15 @@ system.time({
     dom_rate_fns = dom_rate_fns,
     constraint_fns = constraint_fns,
     qa_areas_of_interest = qa_areas_of_interest,
+    write_excel  = write_excel,
+    communal_est_pop_path = communal_est_pop_path,
+    ons_stage1_file_path = ons_stage1_file_path,
+    ons_stage2_file_path = ons_stage2_file_path,
+    dclg_stage1_file_path = dclg_stage1_file_path,
+    dclg_stage2_file_path = dclg_stage2_file_path,
     int_out_flow_or_rate = int_out_flow_or_rate,
     projection_name = projection_name,
-    timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
-    write_excel  = write_excel
+    timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
   )
   
   rm(list = setdiff(ls(), "config_list"))

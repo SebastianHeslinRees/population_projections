@@ -1,4 +1,30 @@
+#' Run the 2016 ONS household model
+#' 
+#' Run stages 1 and 2 of the ONS household model and retuen outputs
+#' 
+#' @param population A data frame containing population data.
+#' @param stage1_file_path String. Path to file containing DCLG
+#'   stage 1 household inputs
+#' @param stage2_file_path String. Path to file containing DCLG
+#'   stage 2 household inputs
+#' @param communal_est_pop_path String. Path to file containing communal
+#'   establishment population rates for the each year of the projection period
+#'   
+#' @return A list containing 2 lists: Stage 1 outputs and Stage 2
+#'   outputs.
+#' @export
+
+ons_household_model <- function(population, stage1_file_path, stage2_file_path, communal_est_pop_path){
+  
+  stage_1 <- ons_stage_1(population, stage1_file_path, communal_est_pop_path)
+  stage_2 <- ons_stage_2(stage2_file_path, stage_1)
+  
+  return(list(stage_1 = stage_1, stage_2 = stage_2))
+  
+}
+
 #' Implementation of the ONS 2016 Household Model
+#' Stage 1
 #'
 #' Produce household projections from an input population
 #' projection using the 2016 ONS household projection methodology
@@ -13,8 +39,8 @@
 #' communal establishment and household populations for the projection period.
 #' @export
 
-ons_household_model <- function(popn, hh_rep_rates_path, communal_est_pop_path){
-
+ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
+  
   district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
   
   household_rates <- readRDS(hh_rep_rates_path)
@@ -26,20 +52,21 @@ ons_household_model <- function(popn, hh_rep_rates_path, communal_est_pop_path){
   #       Same proportion 75+
   #       Prison population updated upto and inc 2016
   
-  population_age_groups <- population_into_age_groups(population, age_groups = c(0, 16,seq(19,84,5),Inf),
+  population_age_groups <- population_into_age_groups(population, age_groups = c(0, 16,seq(19,89,5),Inf),
                                                       labels = c("0_15","16_19","20_24","25_29","30_34","35_39","40_44",
                                                                  "45_49","50_54","55_59","60_64","65_69",
-                                                                 "70_74","75_79","80_84","85_over"),
+                                                                 "70_74","75_79","80_84","85_89","90+"),
                                                       popn_col = "popn")
   
   
   communal_establishment <- get_communal_establishment_popn(communal_est_pop_path,
                                                             population_age_groups,
-                                                            rates_ages = c("75_79","80_84","85_over"))
+                                                            rates_ages = c("75_79","80_84","85_89","90+"))
   
   household_population <- get_household_popn(population_age_groups, communal_establishment)
   
-  household_projection <- apply_household_rates(household_population, household_rates, rates_col="HRR", hh_pop_col="household_popn")
+  household_projection <- apply_household_rates(household_population, household_rates,
+                                                rates_col="HRR", hh_pop_col="household_popn")
   
   
   #Constrain regions to England, LAs to regions
@@ -58,6 +85,72 @@ ons_household_model <- function(popn, hh_rep_rates_path, communal_est_pop_path){
               household_population = data.frame(household_population),
               communal_establishment_population = data.frame(communal_establishment)))  
 }
+
+#' Implementation of the ONS 2016 Stage 2 Household Model
+#'
+#' Produce household projections from an input population
+#' projection using the 2016 ONS household projection methodology
+#'
+#' @param stage2_file_path String. File path to a dataframe containing
+#'   ONS headship rates.
+#' @param stage1_output A list of dataframes of ONS stage 1 model outputs
+#'
+#' @return A list containing 2 dataframes: unconstrained and constrained
+#'   household projections.
+#' @export
+
+ons_stage_2 <- function(stage_2_file_path, stage1_output){
+
+  household_popn <- stage1_output$household_population
+  stg1_total_households <- stage1_output$constrained
+  
+  headship_rates <- readRDS(stage2_file_path) %>%
+    extend_data(max(household_popn$year)) %>%
+    filter(gss_code %in% unique(household_popn$gss_code))
+
+  
+  hh_rates_no_sex <- filter(headship_rates, !household_type %in%
+                                   c("One person households: Male", "One person households: Female"))
+    
+  hh_rates_female <- filter(headship_rates, household_type == "One person households: Female")
+  hh_rates_male <- filter(headship_rates, household_type == "One person households: Male")
+  
+  hh_pop_total <- group_by(household_popn, gss_code, year, age_group) %>%
+    summarise(household_popn = sum(household_popn)) %>%
+    ungroup()
+  
+  hh_pop_female <- filter(household_popn, sex == "female") %>%
+    group_by(gss_code, year, age_group) %>%
+    summarise(household_popn = sum(household_popn)) %>%
+    ungroup()
+  
+  hh_pop_male <- filter(household_popn, sex == "male") %>%
+    group_by(gss_code, year, age_group) %>%
+    summarise(household_popn = sum(household_popn)) %>%
+    ungroup()
+  
+  unconstrained_total <- left_join(hh_rates_no_sex, hh_pop_total, by = c("gss_code", "year", "age_group"))
+  unconstrained_female <- left_join(hh_rates_female, hh_pop_female, by = c("gss_code", "year", "age_group"))
+  unconstrained_male <- left_join(hh_rates_male, hh_pop_male, by = c("gss_code", "year", "age_group"))
+  
+  unconstrained_hh <- rbind(unconstrained_total, unconstrained_female, unconstrained_male) %>%
+    mutate(unconstrained = household_popn * rate)
+  
+  stg1_total_households <- group_by(stg1_total_households, year, gss_code, age_group) %>%
+    summarise(stg1_total = sum(households)) %>%
+    ungroup()
+  
+  constrained_hh <- group_by(unconstrained_hh, year, gss_code, age_group) %>%
+    mutate(total_unconstrained = sum(unconstrained)) %>%
+    left_join(stg1_total_households, by = c("gss_code", "year", "age_group")) %>%
+    mutate(scaling = ifelse(total_unconstrained == 0, 0, stg1_total / total_unconstrained)) %>%
+    mutate(constrained = unconstrained * scaling)
+  
+  return(list(unconstrained = unconstrained_hh,
+              constrained = constrained_hh))
+  
+}
+
 
 #-----------------------------------------------------
 
@@ -101,8 +194,9 @@ get_communal_establishment_popn <- function(communal_est_pop_path, population, r
     
   }
   
-  ce <- rbind(older_ce <- data.table::rbindlist(older_ce),
-              younger_ce <- data.table::rbindlist(younger_ce))
+  ce <- select(ce, -ce_rate) %>%
+    rbind(data.table::rbindlist(older_ce),
+          data.table::rbindlist(younger_ce))
   
   return(ce)
 }
