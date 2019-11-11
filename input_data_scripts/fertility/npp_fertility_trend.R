@@ -21,10 +21,11 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
   back_to_2001 <- list()
   min_year <- min(fert$year)
   for(y in 2001:(min_year - 1)){
-    back_to_2001[[y]] <- filter(fert, year == max(fert$year)) %>% mutate(year = y)
+    back_to_2001[[y]] <- filter(fert, year == min_year) %>% mutate(year = y)
   }
   
   fert <- rbind(data.table::rbindlist(back_to_2001), fert)
+  
   
   additional_ages <- list()
   for(a in 47:49){
