@@ -21,10 +21,11 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
   back_to_2001 <- list()
   min_year <- min(fert$year)
   for(y in 2001:(min_year - 1)){
-    back_to_2001[[y]] <- filter(fert, year == max(fert$year)) %>% mutate(year = y)
+    back_to_2001[[y]] <- filter(fert, year == min_year) %>% mutate(year = y)
   }
   
   fert <- rbind(data.table::rbindlist(back_to_2001), fert)
+  
   
   additional_ages <- list()
   for(a in 47:49){
@@ -60,6 +61,7 @@ trend_2012 <- select(npp_fertility_trend, year, age, High.2012, Low.2012, Princi
   gather(variant, rate, c(High.2012, Low.2012, Principal.2012)) %>%
   mutate(sex = "female") %>%
   select(names(fert_trend)) %>%
+  filter(year <= max(fert_trend$year)) %>%
   mutate(variant = case_when(variant == "High.2012" ~ "2012_high",
                              variant == "Low.2012"~ "2012_low",
                              variant == "Principal.2012" ~ "2012_principal"))
