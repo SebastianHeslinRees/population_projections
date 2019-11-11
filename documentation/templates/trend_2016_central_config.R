@@ -174,6 +174,7 @@ config_list <- list(
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
+  int_out_flow_or_rate = int_out_flow_or_rate,
   write_excel  = write_excel,
   communal_est_pop_path = communal_est_pop_path,
   hh_rep_rates_path = hh_rep_rates_path,

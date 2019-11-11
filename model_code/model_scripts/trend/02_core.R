@@ -38,6 +38,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   # 2011 geographies and read in at the start)
   proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
   proj_dom_in <- list(dom_in %>% filter(year < first_proj_yr))
+  proj_natural_change <- list()
+  proj_births_by_mother <- list()
   
   # run projection
   for (my_year in first_proj_yr:last_proj_yr) {
@@ -56,17 +58,17 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       age_on() 
     
     # TODO calculate the births from the popn/aged_on_popn combo
-    births <- popn_apply_rate(aged_popn,
+    births_by_mother <- popn_apply_rate(aged_popn,
                               filter(fertility, year == my_year, age!=0),
                               col_out = "births",
                               many2one = FALSE)
     
     if(!is.null(constraints)){
-      births <- births_constrain(births=births, constraint=constraints$births_constraint)
+      births_by_mother <- births_constrain(births=births_by_mother, constraint=constraints$births_constraint)
     }
     
     birthratio_m2f <- 1.05 
-    births <- sum_births_and_split_by_sex_ratio(births, birthratio_m2f)
+    births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
     
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
     validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
@@ -207,6 +209,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     proj_int_in[[length(proj_int_in)+1]] <- int_in
     proj_dom_out[[length(proj_dom_out)+1]] <- dom_out
     proj_dom_in[[length(proj_dom_in)+1]] <- dom_in
+    proj_natural_change[[length(proj_dom_in)+1]] <- natural_change_popn
+    proj_births_by_mother[[length(proj_dom_in)+1]] <- births_by_mother
     
     curr_yr_popn <- next_yr_popn
   }
@@ -218,12 +222,24 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_int_in <- data.frame(data.table::rbindlist(proj_int_in, use.names=TRUE))
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
+  proj_natural_change <- data.frame(data.table::rbindlist(proj_natural_change, use.names=TRUE))
+  proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE)) %>%
+    filter(sex == "female", age %in% 15:49)
   
   message(" ")
+ 
+  #For int_out and domestic the rate is constant so there is no need to output all years
+  int_out_rate <- filter(int_out_rate, year <= first_proj_yr)
   
   return(list(population = proj_popn, deaths = proj_deaths, births = proj_births,
               int_out = proj_int_out, int_in = proj_int_in,
-              dom_out = proj_dom_out, dom_in = proj_dom_in))
+              dom_out = proj_dom_out, dom_in = proj_dom_in,
+              births_by_mothers_age = proj_births_by_mother,
+              natural_change = proj_natural_change,
+              fertility_rates = fertility,
+              mortality_rates = mortality,
+              int_out_rates = int_out_rate,
+              domestic_rates = dom_rate))
 }
 
 
