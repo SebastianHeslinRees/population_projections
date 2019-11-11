@@ -3,7 +3,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 
-n_proj_yr <- 20
+n_proj_yr <- 2
 projection_name <- "test"
 
 datestamp <- "2019-10-11"
@@ -159,7 +159,7 @@ constraint_fns <- list(
   )
 
 #TODO figure out the best way to get a null value when we don't want to constraint
-constraint_fns <- list(list(fn = function() NULL, args = list()))
+#constraint_fns <- list(list(fn = function() NULL, args = list()))
 
 qa_areas_of_interest <- list("London", "E09000001")
 
