@@ -1,4 +1,4 @@
-ons_hh_model_outputs <- function(model_output, output_dir){
+ons_hh_model_outputs <- function(model_output, output_dir, timestamp){
   
   #Deatiled outputs
   detailed_unconstrained <- model_output$unconstrained %>%
@@ -47,7 +47,7 @@ ons_hh_model_outputs <- function(model_output, output_dir){
                             detailed_ce_pop = detailed_ce_pop,
                             household_summary = household_summary_sheet)
   
-  output_dir <- paste0(output_dir, "/households/")
+  output_dir <- paste0(output_dir, "/households_",timestamp,"/")
   dir.create(output_dir, showWarnings = FALSE)
   
   lapply(seq_along(output_dataframes),
@@ -96,7 +96,7 @@ dclg_hh_model_outputs <- function(model_output, output_dir){
                             detailed_hh_pop = hh_pop,
                             household_summary = household_summary_sheet)
   
-  output_dir <- paste0(output_dir, "/households/")
+  output_dir <- paste0(output_dir, "/households_",timestamp,"/")
   dir.create(output_dir, showWarnings = FALSE)
   
   lapply(seq_along(output_dataframes),
