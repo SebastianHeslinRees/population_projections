@@ -22,7 +22,7 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
   back_to_2001 <- list()
   min_year <- min(mort$year)
   for(y in 2001:(min_year -1)){
-    back_to_2001[[y]] <- filter(mort, year == max(mort$year)) %>%
+    back_to_2001[[y]] <- filter(mort, year == min_year) %>%
       mutate(year = y)
   }
   
@@ -45,7 +45,29 @@ low_2018 <- mortality_trend("mortality_low.csv", "2018_low", max_year, npp_data_
 
 #bind the variants together
 mort_trend <- rbind(principal_2016, high_2016, low_2016,
-                    principal_2018, high_2018, low_2018)%>%
+                    principal_2018, high_2018, low_2018)
+
+#bind the variants together
+mort_trend <- rbind(principal_2016, high_2016, low_2016,
+                    principal_2018, high_2018, low_2018) 
+
+#2012 data
+load("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
+rm(list=setdiff(ls(),c("mort_trend", "npp_mortality_trend")))
+
+trend_2012 <- npp_mortality_trend %>%
+  gather(variant, rate, c(High, Low, Principal)) %>%
+  mutate(sex = case_when(sex == "F" ~ "female",
+                         sex == "M" ~ "male")) %>%
+  select(names(mort_trend)) %>%
+  filter(year <= max(mort_trend$year)) %>%
+  mutate(variant = case_when(variant == "High" ~ "2014_high",
+                             variant == "Low"~ "2014_low",
+                             variant == "Principal" ~ "2014_principal"))
+
+
+mort_trend <- mort_trend %>%
+  rbind(trend_2012) %>%
   mutate(age = age + 1) %>%
   filter(age %in% c(0:90)) %>%
   arrange(variant, sex, age, year) %>%
@@ -53,6 +75,8 @@ mort_trend <- rbind(principal_2016, high_2016, low_2016,
   mutate(change = (rate - last_year)/last_year)%>%
   mutate(change = ifelse(year == min(year),0,change)) %>%
   select(-rate, -last_year)
+
+
 
 #write output
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)

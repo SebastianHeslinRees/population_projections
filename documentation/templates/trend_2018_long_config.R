@@ -1,10 +1,10 @@
 # config file for model runs
+
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
-
-n_proj_yr <- 20
-projection_name <- "test"
+n_proj_yr <- 31
+projection_name <- "2018_long"
 
 datestamp <- "2019-10-11"
 
@@ -17,7 +17,7 @@ dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migratio
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
 upc_path <- NULL
-outputs_dir = "outputs/trend/2018/"
+outputs_dir <- "outputs/trend/2018/"
 
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
@@ -34,15 +34,16 @@ fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
-int_out_years_to_avg <- 10
+int_out_years_to_avg <- 15
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2018
-int_in_years_to_avg <- 10
+int_in_years_to_avg <- 15
 int_in_flow_or_rate <- "flow"
 
-dom_mig_years_to_avg <- 10
+dom_mig_last_data_year <- 2018
+dom_mig_years_to_avg <- 15
 
 popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"
 births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
@@ -140,23 +141,12 @@ dom_rate_fns <- list(
                                                           col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                           col_component = "value",
                                                           rate_cap = NULL)),
-  list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
+  
+  list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = dom_mig_last_data_year,
                                                                       n_years_to_avg = dom_mig_years_to_avg,
                                                                       col_rate = "rate",
                                                                       rate_cap = 0.8))
 )
-
-
-constraint_fns <- list(
-  list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
-                                                               births_path = births_constraint_path,
-                                                               deaths_path = deaths_constraint_path,
-                                                               int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_out_constraint_path,
-                                                               cross_in_path = cross_in_constraint_path,
-                                                               cross_out_path = cross_out_constraint_path))
-
-  )
 
 #TODO figure out the best way to get a null value when we don't want to constraint
 constraint_fns <- list(list(fn = function() NULL, args = list()))
@@ -183,8 +173,8 @@ config_list <- list(
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
-  int_out_flow_or_rate = int_out_flow_or_rate,
   qa_areas_of_interest = qa_areas_of_interest,
+  int_out_flow_or_rate = int_out_flow_or_rate,
   write_excel  = write_excel,
   communal_est_pop_path = communal_est_pop_path,
   hh_rep_rates_path = hh_rep_rates_path,
@@ -201,7 +191,7 @@ rm(list = setdiff(ls(), "config_list"))
 if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
 projdir <- rprojroot::find_root(rprojroot::is_git_root)
 copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection_name)
-dir.create(copy_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(copy_dir, recursive = TRUE)
 this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 

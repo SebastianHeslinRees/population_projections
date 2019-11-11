@@ -3,8 +3,8 @@
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
                        dom_in, dom_out, dom_rate,
-                       first_proj_yr, n_proj_yr, constraints = NULL,
-                       int_out_flow_or_rate) {
+                       first_proj_yr, n_proj_yr, int_out_flow_or_rate,
+                       constraints = NULL, upc = NULL) {
   
   library(dplyr)
   library(assertthat)
@@ -155,18 +155,38 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
       mutate(dom_net = dom_in - dom_out)
     
-    next_yr_popn <- natural_change_popn %>% 
-      arrange(year, gss_code, sex, age) %>%
-      left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
-      left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
-      left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
-      mutate(popn = popn - int_out + int_in + dom_net) %>%
-      select(-c(int_in, int_out, dom_in, dom_out, dom_net)) %>%
-      # FIXME / TODO This setup creates negative populations - should we add
-      # deaths/int/domestic migration as soon as each is calculated?? For now
-      # I'm just setting -ve pops to zero and noting this in the pull request
-      # TODO warn on negative populations
-      mutate(popn = ifelse(popn < 0, 0, popn))
+    if(is.null(upc)){
+      
+      next_yr_popn <- natural_change_popn %>% 
+        arrange(year, gss_code, sex, age) %>%
+        left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
+        left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
+        left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
+        mutate(popn = popn - int_out + int_in + dom_net) %>%
+        select(-c(int_in, int_out, dom_in, dom_out, dom_net)) %>%
+        # FIXME / TODO This setup creates negative populations - should we add
+        # deaths/int/domestic migration as soon as each is calculated?? For now
+        # I'm just setting -ve pops to zero and noting this in the pull request
+        # TODO warn on negative populations
+        mutate(popn = ifelse(popn < 0, 0, popn))
+      
+    } else {
+      
+      next_yr_popn <- natural_change_popn %>% 
+        arrange(year, gss_code, sex, age) %>%
+        left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
+        left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
+        left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
+        left_join(upc, by = c("gss_code", "age", "sex")) %>%
+        tidyr::replace_na(list(upc = 0)) %>%
+        mutate(popn = popn - int_out + int_in + dom_net + upc) %>%
+        select(-c(int_in, int_out, dom_in, dom_out, dom_net, upc)) %>%
+        # FIXME / TODO This setup creates negative populations - should we add
+        # deaths/int/domestic migration as soon as each is calculated?? For now
+        # I'm just setting -ve pops to zero and noting this in the pull request
+        # TODO warn on negative populations
+        mutate(popn = ifelse(popn < 0, 0, popn))
+    }
     
     validate_population(next_yr_popn, col_data = "popn",
                         comparison_pop = curr_yr_popn,

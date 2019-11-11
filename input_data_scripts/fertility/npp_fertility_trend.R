@@ -21,10 +21,11 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
   back_to_2001 <- list()
   min_year <- min(fert$year)
   for(y in 2001:(min_year - 1)){
-    back_to_2001[[y]] <- filter(fert, year == max(fert$year)) %>% mutate(year = y)
+    back_to_2001[[y]] <- filter(fert, year == min_year) %>% mutate(year = y)
   }
   
   fert <- rbind(data.table::rbindlist(back_to_2001), fert)
+  
   
   additional_ages <- list()
   for(a in 47:49){
@@ -50,7 +51,24 @@ low_2018 <- fertility_trend("/fertility_low.csv", "2018_low", max_year, npp_data
 
 #bind the variants together
 fert_trend <- rbind(principal_2016, high_2016, low_2016,
-                    principal_2018, high_2018, low_2018) %>%
+                    principal_2018, high_2018, low_2018) 
+
+#2012 data
+load("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
+rm(list=setdiff(ls(),c("fert_trend", "npp_fertility_trend")))
+
+trend_2012 <- select(npp_fertility_trend, year, age, High.2012, Low.2012, Principal.2012) %>%
+  gather(variant, rate, c(High.2012, Low.2012, Principal.2012)) %>%
+  mutate(sex = "female") %>%
+  select(names(fert_trend)) %>%
+  filter(year <= max(fert_trend$year)) %>%
+  mutate(variant = case_when(variant == "High.2012" ~ "2012_high",
+                             variant == "Low.2012"~ "2012_low",
+                             variant == "Principal.2012" ~ "2012_principal"))
+
+
+fert_trend <- fert_trend %>%
+  rbind(trend_2012) %>%
   arrange(variant, sex, age, year) %>%
   mutate(last_year = lag(rate)) %>%
   mutate(change = (rate - last_year)/last_year)%>%
