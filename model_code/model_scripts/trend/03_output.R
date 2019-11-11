@@ -29,7 +29,8 @@ output_projection <- function(projection, output_dir, timestamp, write_excel) {
     
   }
   
-  lapply(seq_along(projection), 
+  #TODO Hard-coding the 7 here is a risk
+  lapply(seq(7), 
          function(i) make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))) %>%
     invisible()
   

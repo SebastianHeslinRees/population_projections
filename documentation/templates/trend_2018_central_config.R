@@ -17,7 +17,7 @@ dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migratio
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
 upc_path <- NULL
-outputs_dir = "outputs/trend/2018/"
+outputs_dir <- "outputs/trend/2018/"
 
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
@@ -175,6 +175,7 @@ config_list <- list(
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
+  int_out_flow_or_rate = int_out_flow_or_rate,
   write_excel  = write_excel,
   communal_est_pop_path = communal_est_pop_path,
   ons_stage1_file_path = ons_stage1_file_path,
