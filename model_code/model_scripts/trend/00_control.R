@@ -72,7 +72,7 @@ run_trend_model <- function(config_list) {
   dom_in <- get_component(filepath = config_list$dom_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
-  if(is.na(config_list$upc_path)){
+  if(is.null(config_list$upc_path)){
     upc <- NULL
   } else { 
     upc <- readRDS(config_list$upc_path)
