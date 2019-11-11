@@ -180,7 +180,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
         left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
         left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
         left_join(upc, by = c("gss_code", "age", "sex")) %>%
-        replace_na(list(upc = 0)) %>%
+        tidyr::replace_na(list(upc = 0)) %>%
         mutate(popn = popn - int_out + int_in + dom_net + upc) %>%
         select(-c(int_in, int_out, dom_in, dom_out, dom_net, upc)) %>%
         # FIXME / TODO This setup creates negative populations - should we add
