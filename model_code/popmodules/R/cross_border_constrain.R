@@ -26,8 +26,9 @@ cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint,
     group_by(year, gss_out, sex, age) %>%
     summarise(cross_out = sum(cross_out)) %>%
     ungroup() %>%
+    mutate(country = "E") %>%
     get_scaling_factors(out_constraint, col_popn="cross_out") %>%
-    select(-cross_out)
+    select(-cross_out, -country)
 
   scaled_out <- out_flow %>%
     left_join(out_scaling, by=c("year","gss_out","sex","age")) %>%
@@ -42,8 +43,9 @@ cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint,
     group_by(year, gss_in, sex, age) %>%
     summarise(cross_in = sum(cross_in))%>%
     ungroup() %>%
+    mutate(country = "E") %>%
     get_scaling_factors(in_constraint, col_popn="cross_in") %>%
-    select(-cross_in)
+    select(-cross_in, -country)
 
   scaled_in <- in_flow %>%
     left_join(in_scaling, by=c("year","gss_in","sex","age")) %>%

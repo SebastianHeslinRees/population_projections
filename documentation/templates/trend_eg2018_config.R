@@ -1,9 +1,9 @@
 # config file for model runs
-
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
-n_proj_yr <- 2
+
+n_proj_yr <- 20
 projection_name <- "test"
 
 datestamp <- "2019-10-11"
@@ -20,25 +20,25 @@ upc_path <- NULL
 outputs_dir = "outputs/trend/2018/"
 
 mortality_years_to_avg <- 5
-mortality_avg_or_trend <- "average"
-mortality_last_data_year <- 2016
+mortality_avg_or_trend <- "trend"
+mortality_last_data_year <- 2018
 mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 1
 fertility_avg_or_trend <- "average"
-fertility_last_data_year <- 2016
+fertility_last_data_year <- 2018
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
-int_out_last_data_year <- 2016
+int_out_last_data_year <- 2018
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
 
-int_in_last_data_year <- 2016
+int_in_last_data_year <- 2018
 int_in_years_to_avg <- 10
 int_in_flow_or_rate <- "flow"
 
@@ -183,6 +183,7 @@ config_list <- list(
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
+  int_out_flow_or_rate = int_out_flow_or_rate,
   qa_areas_of_interest = qa_areas_of_interest,
   write_excel  = write_excel,
   communal_est_pop_path = communal_est_pop_path,
@@ -200,7 +201,7 @@ rm(list = setdiff(ls(), "config_list"))
 if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
 projdir <- rprojroot::find_root(rprojroot::is_git_root)
 copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection_name)
-dir.create(copy_dir, recursive = TRUE)
+dir.create(copy_dir, recursive = TRUE, showWarnings = FALSE)
 this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 
