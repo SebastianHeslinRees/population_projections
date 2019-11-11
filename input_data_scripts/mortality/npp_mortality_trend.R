@@ -60,6 +60,7 @@ trend_2012 <- npp_mortality_trend %>%
   mutate(sex = case_when(sex == "F" ~ "female",
                          sex == "M" ~ "male")) %>%
   select(names(mort_trend)) %>%
+  filter(year <= max(mort_trend$year)) %>%
   mutate(variant = case_when(variant == "High" ~ "2014_high",
                              variant == "Low"~ "2014_low",
                              variant == "Principal" ~ "2014_principal"))
