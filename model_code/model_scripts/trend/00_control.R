@@ -141,7 +141,8 @@ run_trend_model <- function(config_list) {
   projection$ons_households <- ons_household_model(population = projection$population,
                                         stage1_file_path = config_list$ons_stage1_file_path,
                                         stage2_file_path = config_list$ons_stage2_file_path,
-                                        communal_est_pop_path = config_list$communal_est_pop_path)
+                                        communal_est_pop_path = config_list$communal_est_pop_path,
+                                        first_proj_yr = config_list$first_proj_yr)
 
   projection$dclg_households <- dclg_household_model(population = projection$population,
                                                      stage1_file_path = config_list$dclg_stage1_file_path,

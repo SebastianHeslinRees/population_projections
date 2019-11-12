@@ -80,7 +80,17 @@ rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_r
 
 rates <- filter(rates, age_group != "85_over") %>%
   rbind(rounded_rates)
-  
+
+# split city into city and westminster into two GSS codes with the same rates
+rates <- filter(rates, gss_code=="E09000001") %>%
+  mutate(gss_code = "E09000033") %>%
+  rbind(rates)
+
+# same for cornwall and scilly
+rates <- filter(rates, gss_code=="E06000053") %>%
+  mutate(gss_code = "E06000052") %>%
+  rbind(rates)
+
 rm(list=setdiff(ls(),c("rates","merged_lookup","ons_data_location")))
 
 
@@ -91,10 +101,6 @@ ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.cs
          sex = case_when(sex == "Female" ~ "female",
                          sex == "Male" ~ "male")) %>%
   select(-district) %>%
-  rename(merged_gss_code = gss_code) %>%
-  left_join(merged_lookup, by="merged_gss_code") %>%
-  mutate(gss_code = ifelse(is.na(gss_code),merged_gss_code,gss_code)) %>%
-  select(-merged_gss_code) %>%
   popmodules::recode_gss_to_2011(col_aggregation= c("gss_code","age_group","sex","year"))
 
 hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
@@ -104,10 +110,6 @@ hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_femal
          sex = case_when(sex == "Female" ~ "female",
                          sex == "Male" ~ "male")) %>%
   select(-district) %>%
-  rename(merged_gss_code = gss_code) %>%
-  left_join(merged_lookup, by="merged_gss_code") %>%
-  mutate(gss_code = ifelse(is.na(gss_code),merged_gss_code,gss_code)) %>%
-  select(-merged_gss_code) %>%
   popmodules::recode_gss_to_2011(col_aggregation= c("gss_code","age_group","sex","year"))
 
 ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
