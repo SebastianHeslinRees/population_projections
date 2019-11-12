@@ -143,7 +143,7 @@ run_trend_model <- function(config_list) {
                                         stage2_file_path = config_list$ons_stage2_file_path,
                                         communal_est_pop_path = config_list$communal_est_pop_path)
 
-  dclg_households <- dclg_household_model(population, config_list$dclg_stage1_file_path, config_list$dclg_stage2_file_path)
+  projection$dclg_households <- dclg_household_model(population, config_list$dclg_stage1_file_path, config_list$dclg_stage2_file_path)
  
   
   ## write the output data
