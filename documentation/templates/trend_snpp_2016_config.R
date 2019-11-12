@@ -16,6 +16,7 @@ system.time({
   dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds")
   dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
   dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
+  upc_path <- NULL
   outputs_dir = "outputs/trend/2018/"
   
   mortality_years_to_avg <- 5
@@ -25,7 +26,7 @@ system.time({
   mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
   mortality_npp_variant <- "2016_principal"
   
-  fertility_years_to_avg <- 1
+  fertility_years_to_avg <- 5
   fertility_avg_or_trend <- "average"
   fertility_last_data_year <- 2016
   fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
@@ -41,6 +42,7 @@ system.time({
   int_in_years_to_avg <- 5
   int_in_flow_or_rate <- "flow"
   
+  dom_mig_last_data_year <- 2018
   dom_mig_years_to_avg <- 5
   
   popn_constraint_path <- "input_data/constraints/npp_2016_population_constraint.rds"
@@ -50,6 +52,12 @@ system.time({
   int_out_constraint_path <- "input_data/constraints/npp_2016_international_out_constraint.rds"
   cross_in_constraint_path <- "input_data/constraints/npp_2016_cross_border_in_constraint.rds"
   cross_out_constraint_path <- "input_data/constraints/npp_2016_cross_border_out_constraint.rds"
+  
+  ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates.rds"
+  ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016.rds"
+  communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population.rds"
+  dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
+  dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
   
   write_excel <- FALSE
 
@@ -174,10 +182,15 @@ system.time({
     dom_rate_fns = dom_rate_fns,
     constraint_fns = constraint_fns,
     qa_areas_of_interest = qa_areas_of_interest,
+    write_excel  = write_excel,
+    communal_est_pop_path = communal_est_pop_path,
+    ons_stage1_file_path = ons_stage1_file_path,
+    ons_stage2_file_path = ons_stage2_file_path,
+    dclg_stage1_file_path = dclg_stage1_file_path,
+    dclg_stage2_file_path = dclg_stage2_file_path,
     int_out_flow_or_rate = int_out_flow_or_rate,
     projection_name = projection_name,
-    timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
-    write_excel  = write_excel
+    timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
   )
   
   rm(list = setdiff(ls(), "config_list"))

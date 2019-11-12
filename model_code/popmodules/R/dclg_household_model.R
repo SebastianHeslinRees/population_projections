@@ -24,7 +24,7 @@ dclg_household_model <- function(population, stage1_file_path, stage2_file_path)
 #' Implementation of the DCLG 2014 Stage 1 Household Model
 #'
 #' Produce household projections from an input population
-#' projection using the 2016 ONS household projection methodology
+#' projection using the 2014 DCLG household projection methodology
 #'
 #' @param population A data frame containing population data.
 #' @param stage1_file_path String. Path to file containing DCLG
@@ -106,10 +106,11 @@ dclg_stage_1 <- function(population, stage1_file_path){
 #' Implementation of the DCLG 2014 Stage 2 Household Model
 #'
 #' Produce household projections from an input population
-#' projection using the 2016 ONS household projection methodology
+#' projection using the 2014 DCLG household projection methodology
 #'
-#' @param stage2_file_path A data frame containing DCLG headship rates.
-#' @param stage1_file_path String. DCLG stage 1 model outputs
+#' @param stage2_file_path String. File path to a dataframe containing
+#'   DCLG headship rates.
+#' @param stage1_output A list of DCLG stage 1 model outputs
 #'
 #' @return A list containing 5 dataframes: unconstrained and constrained
 #'   household projections, household and communal establishment populations,

@@ -3,7 +3,7 @@
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
-n_proj_yr <- 31
+n_proj_yr <- 32
 projection_name <- "2018_central"
 
 datestamp <- "2019-10-11"
@@ -26,7 +26,7 @@ mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
-fertility_years_to_avg <- 1
+fertility_years_to_avg <- 5
 fertility_avg_or_trend <- "average"
 fertility_last_data_year <- 2018
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
@@ -53,10 +53,11 @@ int_out_constraint_path <- "input_data/constraints/npp_2018_international_out_co
 cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
 cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
 
-hh_rep_rates_path <- "input_data/household_model/ons_household_representative_rates.rds"
+ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates.rds"
+ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016.rds"
 communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population.rds"
-stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
-stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
+dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
+dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
 write_excel <- FALSE
 
@@ -177,9 +178,10 @@ config_list <- list(
   int_out_flow_or_rate = int_out_flow_or_rate,
   write_excel  = write_excel,
   communal_est_pop_path = communal_est_pop_path,
-  hh_rep_rates_path = hh_rep_rates_path,
-  stage1_file_path = stage1_file_path,
-  stage2_file_path = stage2_file_path,
+  ons_stage1_file_path = ons_stage1_file_path,
+  ons_stage2_file_path = ons_stage2_file_path,
+  dclg_stage1_file_path = dclg_stage1_file_path,
+  dclg_stage2_file_path = dclg_stage2_file_path,
   projection_name = projection_name,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
 )

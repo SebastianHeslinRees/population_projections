@@ -40,10 +40,11 @@ run_trend_model <- function(config_list) {
                        "qa_areas_of_interest",
                        "projection_name",
                        "write_excel",
-                       "hh_rep_rates_path",
+                       "ons_stage1_file_path",
+                       "ons_stage2_file_path",
                        "communal_est_pop_path",
-                       "stage1_file_path",
-                       "stage2_file_path",
+                       "dclg_stage1_file_path",
+                       "dclg_stage2_file_path",
                        "timestamp")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
@@ -137,12 +138,14 @@ run_trend_model <- function(config_list) {
   
   ## household models
   message('running household models')
-  projection$ons_households <- ons_household_model(popn = projection$population,
-                                        hh_rep_rates_path = config_list$hh_rep_rates_path,
-                                        communal_est_pop_path = config_list$communal_est_pop_path)
-  
-  projection$dclg_households <- dclg_household_model(population, config_list$stage1_file_path, config_list$stage2_file_path)
-  
+  projection$ons_households <- ons_household_model(population = projection$population,
+                                        stage1_file_path = config_list$ons_stage1_file_path,
+                                        stage2_file_path = config_list$ons_stage2_file_path,
+                                        communal_est_pop_path = config_list$communal_est_pop_path,
+                                        first_proj_yr = config_list$first_proj_yr)
+
+  projection$dclg_households <- dclg_household_model(population, config_list$dclg_stage1_file_path, config_list$dclg_stage2_file_path)
+ 
   
   ## write the output data
   message("running outputs")
