@@ -52,7 +52,7 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
   #       Same proportion 75+
   #       Prison population updated upto and inc 2016
   
-  population_age_groups <- population_into_age_groups(population, age_groups = c(0, 16,seq(19,89,5),Inf),
+  population_age_groups <- population_into_age_groups(population, age_groups = c(0, 15, seq(19,89,5), Inf),
                                                       labels = c("0_15","16_19","20_24","25_29","30_34","35_39","40_44",
                                                                  "45_49","50_54","55_59","60_64","65_69",
                                                                  "70_74","75_79","80_84","85_89","90+"),
