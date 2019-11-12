@@ -66,7 +66,7 @@ merged_lookup <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Model
 rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_female.csv"), header = T),
                        data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_male.csv"), header = T)) %>%
   filter(age_group %in% c("85_89","90+")) %>%
-  tidyr::pivot_longer(5:45, names_to = "year", values_to = "rounded_rate") %>%
+  tidyr::pivot_longer(5:45, names_to = "year", values_to = "HRR") %>%
   mutate(year = as.numeric(year),
          sex = case_when(sex == "Female" ~ "female",
                          sex == "Male" ~ "male")) %>%
@@ -76,21 +76,10 @@ rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_r
   mutate(gss_code = ifelse(is.na(gss_code),merged_gss_code,gss_code)) %>%
   select(-merged_gss_code) %>%
   popmodules::recode_gss_to_2011(col_aggregation= c("gss_code","age_group","sex","year"), fun=list(mean)) %>%
-  group_by(gss_code, sex, year) %>%
-  mutate(total = sum(rounded_rate)) %>%
-  ungroup() %>%
-  mutate(ratio = rounded_rate/total) %>%
-  select(-rounded_rate, -total) %>%
   filter(year %in% unique(rates$year) & gss_code %in% unique(rates$gss_code))
 
-rates_to_split <- filter(rates, age_group == "85_over") %>% rename(orig_rate = HRR) %>% select(-age_group)
-
-split <- left_join(rounded_rates, rates_to_split, by=c("gss_code","year","sex")) %>%
-  mutate(HRR = orig_rate * ratio) %>%
-  select(names(rates))
-
 rates <- filter(rates, age_group != "85_over") %>%
-  rbind(split)
+  rbind(rounded_rates)
   
 rm(list=setdiff(ls(),c("rates","merged_lookup","ons_data_location")))
 
