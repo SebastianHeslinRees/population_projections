@@ -26,7 +26,7 @@ system.time({
   mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
   mortality_npp_variant <- "2016_principal"
   
-  fertility_years_to_avg <- 1
+  fertility_years_to_avg <- 5
   fertility_avg_or_trend <- "average"
   fertility_last_data_year <- 2016
   fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
