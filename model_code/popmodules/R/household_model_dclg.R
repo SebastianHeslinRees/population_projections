@@ -12,7 +12,7 @@
 #'   outputs.
 #' @export
 
-dclg_household_model <- function(population, stage1_file_path, stage2_file_path){
+household_model_dclg <- function(population, stage1_file_path, stage2_file_path){
   
   stage_1 <- dclg_stage_1(population, stage1_file_path)
   stage_2 <- dclg_stage_2(stage2_file_path, stage_1)
@@ -41,7 +41,7 @@ dclg_stage_1 <- function(population, stage1_file_path){
   ### Group sya pop into 5 year bands up to 85+
   popn_5yr_bands <-  population %>%
     filter(gss_code %in% unique(stage1_data$gss_code)) %>%
-    population_into_age_groups(age_groups=c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,Inf),
+    population_into_age_groups(age_groups=c(0,4,9,14,19,24,29,34,39,44,49,54,59,64,69,74,79,84,Inf),
                                                 labels=c("0_4","5_9","10_14","15_19","20_24","25_29","30_34","35_39","40_44",
                                                          "45_49","50_54","55_59","60_64","65_69","70_74","75_79","80_84","85&"),
                                                 popn_col="popn") %>%
@@ -91,14 +91,32 @@ dclg_stage_1 <- function(population, stage1_file_path){
                                       scaled_hh_popn * hh_rep_rates,
                                       0))
   
-  ### Total households by borough and year
+  ### Make better outputs
   total_households <- scaled_households %>%
-    group_by(gss_code, year) %>%
+    group_by(year, gss_code) %>%
     summarise(stage_1_households = sum(scaled_households)) %>%
     ungroup()
   
-  return(list(scaled_households = scaled_households,
-              total_households = total_households))
+  detailed_households <- select(scaled_households, year, gss_code, household_type,
+                                sex, age_group,
+                                households = scaled_households,
+                                household_population = scaled_hh_popn,
+                                communal_establishment_population = scaled_ce_popn)
+  
+  household_population <- scaled_households %>%
+    group_by(year, gss_code, sex, age_group) %>%
+    summarise(household_population = sum(scaled_hh_popn)) %>%
+    ungroup()
+  
+  ce_population <- scaled_households %>%
+    group_by(year, gss_code, sex, age_group) %>%
+    summarise(communal_establishment_population = sum(scaled_ce_popn)) %>%
+    ungroup()
+  
+  return(list(detailed_households = detailed_households,
+              total_households = total_households,
+              household_population = household_population,
+              communal_establishment_population = ce_population))
   
 }
 
@@ -121,10 +139,11 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
   
   headship_rates <- readRDS(stage2_file_path)
   
-  scaled_households <- stage1_output$scaled_households
+  stage1_detailed_households <- stage1_output$detailed_households
+  household_popn <- stage1_output$household_population
   stg1_total_households <- stage1_output$total_households
   
-  headship_rates <- extend_data(headship_rates, max(scaled_households$year))
+  headship_rates <- extend_data(headship_rates, max(stage1_detailed_households$year))
   
   recoding_ages <- c("0_4" = "0_14",
                      "5_9" = "0_14",
@@ -144,21 +163,21 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
                      "75_79" = "75_84",
                      "80_84" = "75_84")
   
-  child_hh_pop <- scaled_households %>%
+  child_hh_pop <- household_popn %>%
     filter(gss_code %in% unique(headship_rates$gss_code)) %>%
     filter(age_group %in% c("0_4","5_9","10_14"))%>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(hh_popn = sum(scaled_hh_popn)) %>%
+    summarise(hh_popn = sum(household_population)) %>%
     ungroup()
   
-  adult_hh_pop <- scaled_households %>%
+  adult_hh_pop <- household_popn %>%
     filter(gss_code %in% unique(headship_rates$gss_code)) %>%
     filter(!age_group %in% c("0_4","5_9","10_14")) %>%
     #filter(substr(gss_code,1,1)=="E") %>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(hh_popn = sum(scaled_hh_popn)) %>%
+    summarise(hh_popn = sum(household_population)) %>%
     ungroup()
   
   stage2_unconstrained <- left_join(adult_hh_pop, headship_rates, by=c("gss_code","year","age_group")) %>%
@@ -180,21 +199,21 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
   household_population <- rbind(adult_hh_pop, child_hh_pop) %>%
     rename(household_popn = hh_popn)
   
-  households_stage_2_ages <- scaled_households %>%
+  households_stage_2_ages <- stage1_detailed_households %>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
     group_by(gss_code, year, age_group) %>%
     summarise(households = sum(households)) %>%
     ungroup()
   
-  ce_popn <- scaled_households %>%
+  ce_popn <- stage1_output$communal_establishment_population %>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(ce_pop = sum(scaled_ce_popn))
+    summarise(communal_establishment_population = sum(communal_establishment_population))
   
     return(list(unconstrained = stage2_unconstrained,
               constrained = stage2_constrained,
+              detailed_households = households_stage_2_ages,
               household_population = household_population,
-              communal_establishment = ce_popn,
-              households_by_age = households_stage_2_ages))
+              communal_establishment_population = ce_popn))
          
 }

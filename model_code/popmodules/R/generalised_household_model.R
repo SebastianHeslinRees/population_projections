@@ -16,7 +16,7 @@ apply_household_rates <- function(household_population, household_rates, rates_c
 
 population_into_age_groups <- function(population, age_groups, labels, popn_col){
   
-  population <- population %>%
+  pop <- population %>%
     mutate(age_group = cut(age,
                            breaks = age_groups,
                            include.lowest = T,
@@ -24,14 +24,14 @@ population_into_age_groups <- function(population, age_groups, labels, popn_col)
     mutate(age_group = as.character(age_group)) %>%
     select(-age)
   
-  cols <- names(population)[!names(population) %in% popn_col]
+  cols <- names(pop)[!names(pop) %in% popn_col]
   
-  population <- population %>%
+  pop <- pop %>%
     group_by_at(cols) %>%
     summarise_all(.funs=list(sum)) %>%
     ungroup()
   
-  return(population)
+  return(pop)
   
 }
 
