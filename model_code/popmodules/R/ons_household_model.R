@@ -9,13 +9,15 @@
 #'   household inputs.
 #' @param communal_est_pop_path String. Path to file containing communal
 #'   establishment population rates for the each year of the projection period.
+#' @param first_proj_yr Numeric. First year of the model projection. Elderly
+#'   communal populations are adjusted after this date.
 #'
 #' @return A list containing 2 lists: Stage 1 outputs and Stage 2 outputs.
 #' @export
 
-ons_household_model <- function(population, stage1_file_path, stage2_file_path, communal_est_pop_path){
+ons_household_model <- function(population, stage1_file_path, stage2_file_path, communal_est_pop_path, first_proj_yr){
 
-  stage_1 <- ons_stage_1(population, stage1_file_path, communal_est_pop_path)
+  stage_1 <- ons_stage_1(population, stage1_file_path, communal_est_pop_path, first_proj_yr)
   stage_2 <- ons_stage_2(stage2_file_path, stage_1)
 
   return(list(stage_1 = stage_1, stage_2 = stage_2))
@@ -32,21 +34,27 @@ ons_household_model <- function(population, stage1_file_path, stage2_file_path, 
 #'   representative rates for the each year of the projection period.
 #' @param communal_est_pop_path String. Path to file containing communal
 #'   establishment population rates for the each year of the projection period.
+#' @param first_proj_yr Numeric. First year of the model projection. Elderly
+#'   communal populations are adjusted after this date.
 #'
 #' @return A list containing 4 dataframes: Unconstrained and constrained
 #'   household projections, communal establishment and household populations for
 #'   the projection period.
 #' @export
 
-ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
+ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_proj_yr){
 
   district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
 
   household_rates <- readRDS(hh_rep_rates_path)
 
-  population <- aggregate_geography(popn) %>%
+  #population <- aggregate_geography(popn) %>%
+  #  create_regional_data(district_to_region)
+  
+  population <- filter(popn, gss_code %in% unique(household_rates$gss_code)) %>% # filter to England, basically
     create_regional_data(district_to_region)
-
+    
+  
   #       Same number as 2011 for 0-74
   #       Same proportion 75+
   #       Prison population updated upto and inc 2016
@@ -57,10 +65,10 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
                                                                  "70_74","75_79","80_84","85_89","90+"),
                                                       popn_col = "popn")
 
-
   communal_establishment <- get_communal_establishment_popn(communal_est_pop_path,
                                                             population_age_groups,
-                                                            rates_ages = c("75_79","80_84","85_89","90+"))
+                                                            rates_ages = c("75_79","80_84","85_89","90+"),
+                                                            first_proj_yr = first_proj_yr)
 
   household_population <- get_household_popn(population_age_groups, communal_establishment)
 
@@ -153,7 +161,7 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
 
 #-----------------------------------------------------
 
-aggregate_geography <- function(population){
+aggregate_geography <- function(population, col_aggregation = c("gss_code", "sex", "age", "year")){
 
   population <- filter(population, substr(gss_code,1,1)=="E")
 
@@ -162,7 +170,7 @@ aggregate_geography <- function(population){
     mutate(gss_code = recode(gss_code,
                              "E09000033" = "E09000001",
                              "E06000052" = "E06000053")) %>%
-    group_by(gss_code, sex, age, year) %>%
+    group_by_at(col_aggregation) %>%
     summarise(popn = sum(popn)) %>%
     ungroup()
 
@@ -172,7 +180,7 @@ aggregate_geography <- function(population){
 
 #-----------------------------------------------------
 
-get_communal_establishment_popn <- function(communal_est_pop_path, population, rates_ages) {
+get_communal_establishment_popn <- function(communal_est_pop_path, population, rates_ages, first_proj_yr) {
 
   ce <- readRDS(communal_est_pop_path)
 
@@ -182,7 +190,7 @@ get_communal_establishment_popn <- function(communal_est_pop_path, population, r
   older_ce <- list()
   younger_ce <- list()
 
-  for(yr in c(max(ce$year):max(population$year))){
+  for(yr in first_proj_yr:max(population$year)){
 
     older_ce[[yr]] <- filter(population, year == yr, age_group %in% rates_ages) %>%
       left_join(proportional, by=c("gss_code","sex","age_group")) %>%
@@ -194,6 +202,7 @@ get_communal_establishment_popn <- function(communal_est_pop_path, population, r
   }
 
   ce <- select(ce, -ce_rate) %>%
+    filter(year < first_proj_yr) %>%
     rbind(data.table::rbindlist(older_ce),
           data.table::rbindlist(younger_ce))
 
@@ -259,8 +268,9 @@ constrain_district_hh <- function(unconstrained_la, constrained_regional, distri
 create_regional_data <- function(population, district_to_region) {
 
   reg <- left_join(population, district_to_region, by="gss_code") %>%
-    group_by(gss_code = region_gss_code, year, sex, age) %>%
+    group_by(region_gss_code, year, sex, age) %>%
     summarise(popn = sum(popn)) %>%
+    rename(gss_code = region_gss_code) %>%
     ungroup()
 
   eng <- mutate(reg, gss_code = "E92000001") %>%
