@@ -79,9 +79,20 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
   
   #Districts constrained to regions
   constrained_district <- constrain_district_hh(unconstrained_la, constrained_regional, district_to_region)
+  constrained <- data.frame(rbind(england_proj, constrained_regional, constrained_district))
   
-  return(list(unconstrained = data.frame(household_projection),
-              constrained = data.frame(rbind(england_proj, constrained_regional, constrained_district)),
+  
+  #Pretty-up outputs
+  household_population <- rename(household_population, household_population = household_popn)
+  communal_establishment <- rename(communal_establishment, communal_establishment_population = ce_pop)
+  
+  detailed_households <- left_join(constrained, household_population, by = c("gss_code", "sex", "year", "age_group")) %>%
+    left_join(communal_establishment, by = c("gss_code", "sex", "year", "age_group"))
+   
+  
+  return(list(detailed_households = detailed_households,
+              unconstrained = data.frame(household_projection),
+              constrained = constrained,
               household_population = data.frame(household_population),
               communal_establishment_population = data.frame(communal_establishment)))  
 }
@@ -99,7 +110,7 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
 #'   household projections.
 #' @export
 
-ons_stage_2 <- function(stage_2_file_path, stage1_output){
+ons_stage_2 <- function(stage2_file_path, stage1_output){
 
   household_popn <- stage1_output$household_population
   stg1_total_households <- stage1_output$constrained
@@ -116,17 +127,17 @@ ons_stage_2 <- function(stage_2_file_path, stage1_output){
   hh_rates_male <- filter(headship_rates, household_type == "One person households: Male")
   
   hh_pop_total <- group_by(household_popn, gss_code, year, age_group) %>%
-    summarise(household_popn = sum(household_popn)) %>%
+    summarise(household_popn = sum(household_population)) %>%
     ungroup()
   
   hh_pop_female <- filter(household_popn, sex == "female") %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(household_popn = sum(household_popn)) %>%
+    summarise(household_popn = sum(household_population)) %>%
     ungroup()
   
   hh_pop_male <- filter(household_popn, sex == "male") %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(household_popn = sum(household_popn)) %>%
+    summarise(household_popn = sum(household_population)) %>%
     ungroup()
   
   unconstrained_total <- left_join(hh_rates_no_sex, hh_pop_total, by = c("gss_code", "year", "age_group"))
@@ -146,8 +157,11 @@ ons_stage_2 <- function(stage_2_file_path, stage1_output){
     mutate(scaling = ifelse(total_unconstrained == 0, 0, stg1_total / total_unconstrained)) %>%
     mutate(constrained = unconstrained * scaling)
   
-  return(list(unconstrained = unconstrained_hh,
-              constrained = constrained_hh))
+  constrained <- select(constrained_hh, year, gss_code, household_type, age_group, households = constrained)
+  unconstrained <- select(constrained_hh, year, gss_code, household_type, age_group, households = unconstrained)
+  
+  return(list(unconstrained = unconstrained,
+              constrained = constrained))
   
 }
 
