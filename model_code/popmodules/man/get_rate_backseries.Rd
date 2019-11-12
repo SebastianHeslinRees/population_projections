@@ -7,7 +7,7 @@
 get_rate_backseries(component_mye_path, popn_mye_path, births_mye_path,
   years_backseries, col_partial_match = NULL,
   col_aggregation = c("year", "gss_code", "age", "sex"),
-  col_component = NULL)
+  col_component = NULL, rate_cap = 1)
 }
 \arguments{
 \item{component_mye_path}{Path to the mid-year estimates of the desired
@@ -33,6 +33,9 @@ character vector. e.g. in origin-destination data,
 \code{component_mye_path} data frame. Need not be specified when one of
 "births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in",
 "dom_out", "dom_net".}
+
+\item{rate_cap}{Numeric. Upper limits to values in the \code{col_component}
+column. NULL applies no limits. Default 1.}
 }
 \value{
 A data frame containing rates for the component of change (in the
