@@ -98,7 +98,7 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path){
 #'   household projections.
 #' @export
 
-ons_stage_2 <- function(stage_2_file_path, stage1_output){
+ons_stage_2 <- function(stage2_file_path, stage1_output){
 
   household_popn <- stage1_output$household_population
   stg1_total_households <- stage1_output$constrained

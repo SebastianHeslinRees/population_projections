@@ -16,6 +16,7 @@ system.time({
   dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds")
   dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
   dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
+  upc_path <- NULL
   outputs_dir = "outputs/trend/2018/"
   
   mortality_years_to_avg <- 5
@@ -41,6 +42,7 @@ system.time({
   int_in_years_to_avg <- 5
   int_in_flow_or_rate <- "flow"
   
+  dom_mig_last_data_year <- 2018
   dom_mig_years_to_avg <- 5
   
   popn_constraint_path <- "input_data/constraints/npp_2016_population_constraint.rds"
