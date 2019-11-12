@@ -15,7 +15,7 @@
 #' @return A list containing 2 lists: Stage 1 outputs and Stage 2 outputs.
 #' @export
 
-ons_household_model <- function(population, stage1_file_path, stage2_file_path, communal_est_pop_path, first_proj_yr){
+household_model_ons <- function(population, stage1_file_path, stage2_file_path, communal_est_pop_path, first_proj_yr){
 
   stage_1 <- ons_stage_1(population, stage1_file_path, communal_est_pop_path, first_proj_yr)
   stage_2 <- ons_stage_2(stage2_file_path, stage_1)

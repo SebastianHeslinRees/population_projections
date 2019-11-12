@@ -12,7 +12,7 @@
 #'   outputs.
 #' @export
 
-dclg_household_model <- function(population, stage1_file_path, stage2_file_path){
+household_model_dclg <- function(population, stage1_file_path, stage2_file_path){
   
   stage_1 <- dclg_stage_1(population, stage1_file_path)
   stage_2 <- dclg_stage_2(stage2_file_path, stage_1)
