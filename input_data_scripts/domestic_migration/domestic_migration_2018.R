@@ -40,7 +40,7 @@ if(FALSE) { # tidyverse equivalent
 }
 
 message("Saving domestic origin-destination flows. This may take a while")
-saveRDS(domestic, file = paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds"))
+saveRDS(domestic, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))
 
 
 
@@ -97,6 +97,8 @@ if(FALSE) {
     mutate(dom_net = dom_in - dom_out)
 }
 
-saveRDS(dom_out_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds"))
-saveRDS(dom_in_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds"))
-saveRDS(dom_net, file = paste0("input_data/domestic_migration/2018/domestic_migration_net_", datestamp, ".rds"))
+saveRDS(dom_out_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_out.rds"))
+saveRDS(dom_in_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_in.rds"))
+saveRDS(dom_net, file = paste0("input_data/domestic_migration/2018/domestic_migration_net.rds"))
+
+

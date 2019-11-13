@@ -10,18 +10,33 @@ output_projection <- function(projection, output_dir, timestamp, write_excel) {
   dir.create(csv_dir)
   
   make_csvs <- function(data, name_stub){
-    
+   
     data_col <- names(data)[ncol(data)]
     cols <- setdiff(names(data), data_col)
+    cols <- c("gss_code", "gss_name", cols[cols!="gss_code"])
     
-    female <- filter(data, sex == "female")
-    male <- filter(data, sex == "male")
+    data <- left_join(data, get_gss_names(), by="gss_code") %>%
+      filter(year >= 2011) %>%
+      select_at(c(cols, data_col))
+    
+    female <- filter(data, sex == "female") %>%
+      rename(rounded = data_col) %>%
+      mutate(rounded = round(rounded, 3)) %>%
+      pivot_wider(names_from = year, values_from = rounded)
+
+    male <- filter(data, sex == "male")  %>%
+      rename(rounded = data_col) %>%
+      mutate(rounded = round(rounded, 3))%>%
+      pivot_wider(names_from = year, values_from = rounded)
+    
     persons <- data %>%
       mutate(sex = "persons") %>%
       rename(value = !!data_col) %>%
       group_by_at(cols) %>%
-      summarise(!!data_col := sum(value)) %>%
-      ungroup()
+      summarise(value = sum(value)) %>%
+      ungroup() %>%
+      mutate(value = round(value, 3))%>%
+      pivot_wider(names_from = year, values_from = value)
     
     data.table::fwrite(female, paste0(name_stub,"_female.csv"))
     data.table::fwrite(male, paste0(name_stub,"_male.csv"))
@@ -54,5 +69,5 @@ output_projection <- function(projection, output_dir, timestamp, write_excel) {
   #                          data.frame(config = paste(names(config_list)[[i]], config_list[[i]], sep=": ")))
   # }
   # data.table::fwrite(config_output, paste0(output_dir, "config.txt"), col.names = FALSE)
-
+  
 }

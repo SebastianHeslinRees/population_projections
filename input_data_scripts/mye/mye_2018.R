@@ -168,15 +168,16 @@ datestamp <- Sys.Date()
 
 dir.create("input_data/mye/2018", showWarnings = FALSE, recursive = TRUE)
 
-saveRDS(births, file = paste0("input_data/mye/2018/births_ons_", datestamp, ".rds"))
-saveRDS(deaths, file = paste0("input_data/mye/2018/deaths_ons_", datestamp, ".rds"))
-saveRDS(population, file = paste0("input_data/mye/2018/population_ons_", datestamp, ".rds"))
-saveRDS(international_in, file = paste0("input_data/mye/2018/international_in_ons_", datestamp, ".rds"))
-saveRDS(international_out, file = paste0("input_data/mye/2018/international_out_ons_", datestamp, ".rds"))
-saveRDS(international_net, file = paste0("input_data/mye/2018/international_net_ons_", datestamp, ".rds"))
+saveRDS(births, file = paste0("input_data/mye/2018/births_ons.rds"))
+saveRDS(deaths, file = paste0("input_data/mye/2018/deaths_ons.rds"))
+saveRDS(population, file = paste0("input_data/mye/2018/population_ons.rds"))
+saveRDS(international_in, file = paste0("input_data/mye/2018/international_in_ons.rds"))
+saveRDS(international_out, file = paste0("input_data/mye/2018/international_out_ons.rds"))
+saveRDS(international_net, file = paste0("input_data/mye/2018/international_net_ons.rds"))
 #saveRDS(domestic_in, file = paste0("input_data/mye/2018/domestic_in_ons_", datestamp, ".rds"))
 #saveRDS(domestic_out, file = paste0("input_data/mye/2018/domestic_out_ons_", datestamp, ".rds"))
 #saveRDS(domestic_net, file = paste0("input_data/mye/2018/domestic_net_ons_", datestamp, ".rds"))
-saveRDS(upc, file = paste0("input_data/mye/2018/upc_ons_", datestamp, ".rds"))
+saveRDS(upc, file = paste0("input_data/mye/2018/upc_ons.rds"))
 
 rm(list=ls())
+

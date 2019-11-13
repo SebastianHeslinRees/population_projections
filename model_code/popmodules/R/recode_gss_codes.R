@@ -23,7 +23,7 @@
 #' @export
 
 
-recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=list(sum)){
+recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=list(sum), aggregate_data = TRUE){
 
 
   #TODO Add something that flags or deals with 2019 changes to LA codes
@@ -82,10 +82,15 @@ recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=lis
   # FIXME: using data.table here means that the input df is changed by
   # reference, i.e. if you set x <- recode_gss_to_2011(z), then both x and z
   # will contain the recoded data frame. Is this ok? What should we do about it? --CF
+
   data.table::setDT(df)
   df[gss_code %in% names(recoding), gss_code := recode(gss_code, !!!recoding)]
-  df <- df[, lapply(.SD, fun[[1]]), by = col_aggregation]
-  data.table::setkeyv(df, col_aggregation)
+
+  if(aggregate_data == T){
+    df <- df[, lapply(.SD, fun[[1]]), by = col_aggregation]
+    data.table::setkeyv(df, col_aggregation)
+  }
+
   data.table::setDF(df)
   df <- rename(df, !!col_geog := "gss_code")
 

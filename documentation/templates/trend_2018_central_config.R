@@ -6,16 +6,14 @@ first_proj_yr <- 2019
 n_proj_yr <- 32
 projection_name <- "2018_central"
 
-datestamp <- "2019-10-11"
-
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-12.rds")
-deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons_",datestamp,".rds")
-births_mye_path <-  paste0("input_data/mye/2018/births_ons_",datestamp,".rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-12.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-12.rds")
-dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds")
-dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
-dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_ons_", datestamp, ".rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
+births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
+dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
+dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
+dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
 upc_path <- NULL
 outputs_dir <- "outputs/trend/2018/"
 

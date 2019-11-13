@@ -50,3 +50,8 @@ $RECYCLE.BIN/
 
 # Destop files from Mac
 .DS_Store
+
+# Excel-specific files
+*.bas
+*.bat
+*temp_file.xlsm

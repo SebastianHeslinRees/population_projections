@@ -84,6 +84,10 @@ household_model_outputs <- function(model_output, model, output_dir, timestamp, 
       x <- left_join(x, get_gss_names(), by="gss_code") %>%
         select(col_order)
 
+      #round data for output
+      idx <- sapply(x, class)=="numeric"
+      x[, idx] <- lapply(x[, idx], round, digits=3)
+
       data.table::fwrite(x, paste0(output_dir,"/datastore_",timestamp,"/",model,"_",nm, ".csv"))
 
     }

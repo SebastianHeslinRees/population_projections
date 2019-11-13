@@ -3,7 +3,6 @@ library(dplyr)
 new_data_folder <- "Q:/Teams/D&PA/Demography/Projections/2019_development/input_data/mye/2018/"
 existing_data_folder <- "input_data/mye/2018/"
 out_new_data_folder <- "input_data/mye/2018"
-input_datestamp <- "2019-10-11"
 
 ####Population####
 
@@ -14,7 +13,7 @@ gla_popn <- readRDS(paste0(new_data_folder,"adj_mye_popn_2001_2018_ldn.rds")) %>
   select(-source)
 
 #Existing data
-ons_popn <- readRDS(paste0(existing_data_folder,"population_ons_",input_datestamp,".rds"))
+ons_popn <- readRDS(paste0(existing_data_folder,"population_ons.rds"))
 
 #Replace ONS estimates with GLA estimates for London
 switch <- filter(ons_popn, substr(gss_code,1,3)=="E09") %>%
@@ -38,9 +37,9 @@ gla_int_out <- select(gla_international, gss_code, year, sex, age, int_out)
 gla_int_net <- select(gla_international, gss_code, year, sex, age, int_net)
 
 #Existing data
-ons_int_in <- readRDS(paste0(existing_data_folder,"international_in_ons_",input_datestamp,".rds"))
-ons_int_out <- readRDS(paste0(existing_data_folder,"international_out_ons_",input_datestamp,".rds"))
-ons_int_net <- readRDS(paste0(existing_data_folder,"international_net_ons_",input_datestamp,".rds"))
+ons_int_in <- readRDS(paste0(existing_data_folder,"international_in_ons.rds"))
+ons_int_out <- readRDS(paste0(existing_data_folder,"international_out_ons.rds"))
+ons_int_net <- readRDS(paste0(existing_data_folder,"international_net_ons.rds"))
 
 
 #Replace ONS estimates with GLA estimates for London
