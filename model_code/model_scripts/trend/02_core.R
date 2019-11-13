@@ -157,6 +157,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
       mutate(dom_net = dom_in - dom_out)
     
+    
     if(is.null(upc)){
       
       next_yr_popn <- natural_change_popn %>% 
@@ -164,14 +165,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
         left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
         left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
         left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
-        mutate(popn = popn - int_out + int_in + dom_net) %>%
-        select(-c(int_in, int_out, dom_in, dom_out, dom_net)) %>%
-        # FIXME / TODO This setup creates negative populations - should we add
-        # deaths/int/domestic migration as soon as each is calculated?? For now
-        # I'm just setting -ve pops to zero and noting this in the pull request
-        # TODO warn on negative populations
-        mutate(popn = ifelse(popn < 0, 0, popn))
-      
+        mutate(next_popn = popn - int_out + int_in + dom_net)
+
     } else {
       
       next_yr_popn <- natural_change_popn %>% 
@@ -181,14 +176,38 @@ trend_core <- function(population, births, deaths, int_out, int_in,
         left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
         left_join(upc, by = c("gss_code", "age", "sex")) %>%
         tidyr::replace_na(list(upc = 0)) %>%
-        mutate(popn = popn - int_out + int_in + dom_net + upc) %>%
-        select(-c(int_in, int_out, dom_in, dom_out, dom_net, upc)) %>%
-        # FIXME / TODO This setup creates negative populations - should we add
-        # deaths/int/domestic migration as soon as each is calculated?? For now
-        # I'm just setting -ve pops to zero and noting this in the pull request
-        # TODO warn on negative populations
-        mutate(popn = ifelse(popn < 0, 0, popn))
+        mutate(next_popn = popn - int_out + int_in + dom_net + upc)
     }
+    
+    # FIXME / TODO This setup creates negative populations - should we add
+    # deaths/int/domestic migration as soon as each is calculated?? For now
+    # I'm just setting -ve pops to zero and noting this in the pull request
+    
+    if(any(next_yr_popn$next_popn < 0)) {
+      ix <- next_yr_popn$next_popn < 0
+      sum_negative <- sum(next_yr_popn$next_popn[ix])
+      
+      warning(paste0(capture.output({
+        print(paste("Negative populations were created in the", my_year, "loop, summing to", sum_negative))
+      
+        if(sum(ix) < 20) {
+          print("Values:")
+          print(next_yr_popn[ix,])
+        } else {
+          print("First 20 values:")
+          print(next_yr_popn[ix,][1:20,])
+          print("Levels affected:")
+          sapply(c("gss_code", "age", "sex"), function(col) {
+            print("col:")
+            print(unique(next_yr_popn[ix, col]))
+          })
+        }
+      }), collapse = "\n"))
+
+      next_yr_popn <- mutate(next_yr_popn, next_popn = ifelse(next_popn < 0, 0, next_popn))
+    }
+    
+    next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn = next_popn)
     
     validate_population(next_yr_popn, col_data = "popn",
                         comparison_pop = curr_yr_popn,
@@ -261,7 +280,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   
   assert_that(int_out_flow_or_rate %in% c("flow", "rate"),
               msg = "the config variable int_out_flow_or_rate must be either 'flow' or 'rate'")
-  popmodules::validate_population(int_out_rate, col_data = ifelse(int_out_flow_or_rate == "flow", "int_out", "rate"))
+  popmodules::validate_population(int_out_rate, col_data = ifelse(int_out_flow_or_rate == "flow", "int_out", "int_out"))
   popmodules::validate_population(int_in_proj, col_data = "int_in")
   #TODO add check for completeness of dom_rate
   popmodules::validate_population(dom_rate, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
@@ -288,7 +307,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   assert_that(max(fertility$rate) <= 1 & min(fertility$rate) >= 0, msg = "projected fertility contains rates outside the range 0-1")
   assert_that(max(mortality$rate) <= 1 & min(mortality$rate) >= 0, msg = "projected mortality contains rates outside the range 0-1")
   if(int_out_flow_or_rate == "rate") {
-    assert_that(max(int_out_rate$rate) <= 1 & min(int_out_rate$rate) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
+    assert_that(max(int_out_rate$int_out) <= 1 & min(int_out_rate$int_out) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
   }
   assert_that(max(dom_rate$rate) <= 1 & min(dom_rate$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
   

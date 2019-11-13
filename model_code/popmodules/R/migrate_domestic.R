@@ -54,8 +54,8 @@
 #'   Default TRUE.
 #' @param missing_levels_rate Logical. Setting this to TRUE will allow implicity
 #'   missing origin-destination flows and assume that they are zero. A warning
-#'   will still be thrown if there is zero outmigration for an entire
-#'   aggregation level in a geography. These geographies will **not** be
+#'   will not be thrown if there is zero outmigration for an entire
+#'   aggregation level in a geography and these geographies will **not** be
 #'   included in the output data frame, meaning you may need to call
 #'   \code{tidyr::complete} on the results (after aggregation to in/out/net
 #'   flows). Note that if this is set to FALSE, your origin-destination flows
@@ -135,7 +135,7 @@ migrate_domestic <- function(popn,
   validate_migrate_domestic_input(popn, mign_rate, col_aggregation, col_gss_destination,
                                   col_popn, col_rate, col_flow,
                                   pop1_is_subset, many2one, missing_levels_rate, col_origin_destination)
-  
+
   # identify origin and destination columns if we don't have them
   # TODO: make the function require the origin and destination columns to simplify the code?
   if(identical(col_origin_destination, NA)) {
@@ -302,7 +302,7 @@ validate_migrate_domestic_input <- function(popn,
   # If we weren't told the origin-destination data columns, figure them out and validate
   # TODO this might be quite slow: see if it shows up in a profvis analysis
   # TODO what is the disadvantage of being strict about specifying origin-destination cols? ML thinks it would increase speed and readability
-  
+
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }
@@ -329,6 +329,7 @@ validate_migrate_domestic_input <- function(popn,
 
     try_join <- FALSE
 
+
     tryCatch({
       mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels]))
       validate_population(mign_validation,
@@ -341,11 +342,14 @@ validate_migrate_domestic_input <- function(popn,
         warning(paste("migrate_domestic threw a warning while validating the migration inputs:\n", w))
       },
        error = function(e) {
-         warning(paste("migrate_domestic threw an error while validating the migration inputs.",
-                       "It's being converted to a warning because most origin-destination flows have",
-                       "some missing levels and the function expects that.",
-                       "Note that validate_population will fail if run on the output.",
-                       "\n\nError (converted to warning):\n", e))
+         # TODO come back and think about how best to validate an incomplete domestic migration matrix
+         # This throws too many warnings to be useful
+
+         # warning(paste("migrate_domestic threw an error while validating the migration inputs.",
+         #               "It's being converted to a warning because most origin-destination flows have",
+         #               "some missing levels and the function expects that.",
+         #               "Note that validate_population will fail if run on the output.",
+         #               "\n\nError (converted to warning):\n", e))
        })
 
     if(try_join) {
