@@ -6,15 +6,15 @@ Call run_open
 Application.DisplayAlerts = False
 Worksheets("Sheet1").Delete
 Application.DisplayAlerts = True
-wkb.SaveAs fileName:="M:\Projects\population_projections\outputs\trend\2018\2018_central_test\\datastore_19-11-13_1156\dclg_households"
+wkb.SaveAs fileName:="M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_1250\dclg_households"
 wkb.Close SaveChanges:=False
 End Sub
 Sub run_open()
-Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\\datastore_19-11-13_1156\dclg_stage1_households.csv", "stage 1 households")
-Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\\datastore_19-11-13_1156\dclg_stage2_households.csv", "stage 2 households")
-Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\\datastore_19-11-13_1156\dclg_detailed_hh_pop.csv", "household popn")
-Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\\datastore_19-11-13_1156\dclg_detailed_ce_pop.csv", "communal est popn")
-Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\\datastore_19-11-13_1156\dclg_household_summary.csv", "summary")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_1250\dclg_stage1_households.csv", "stage 1 households")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_1250\dclg_stage2_households.csv", "stage 2 households")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_1250\dclg_detailed_hh_pop.csv", "household popn")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_1250\dclg_detailed_ce_pop.csv", "communal est popn")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_1250\dclg_household_summary.csv", "summary")
 End Sub
 Sub open_copy_csv(fileName, tabName)
 Dim wbkS As Workbook

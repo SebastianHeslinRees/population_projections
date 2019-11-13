@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 32
-projection_name <- "2018_central_test"
+projection_name <- "2018_central"
 
 datestamp <- "2019-10-11"
 

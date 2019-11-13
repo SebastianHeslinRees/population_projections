@@ -159,7 +159,6 @@ run_trend_model <- function(config_list) {
   
   output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   household_model_outputs(projection$ons_households, model = "ons", output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
-  
   household_model_outputs(projection$dclg_households, model = "dclg", output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   
   ## output the QA
