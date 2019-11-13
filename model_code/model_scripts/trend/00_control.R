@@ -174,7 +174,7 @@ run_trend_model <- function(config_list) {
                                   dom_in_proj_fp = paste0(output_dir,"/dom_in_",config_list$timestamp,".rds"),
                                   dom_out_proj_fp = paste0(output_dir,"/dom_out_",config_list$timestamp,".rds"),
                                   births_proj_fp = paste0(output_dir,"/births_",config_list$timestamp,".rds"),
-                                  output_files_dir = paste0(output_dir,"population_qa_",config_list$timestamp,"_files/"),
+                                  output_files_dir = paste0(output_dir,"population_qa",config_list$timestamp,"_files/"),
                                   first_proj_yr = config_list$first_proj_yr))
   
   return(projection)
