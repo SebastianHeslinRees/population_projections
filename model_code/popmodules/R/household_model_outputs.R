@@ -1,30 +1,34 @@
-household_model_outputs <- function(model_output, model, output_dir, timestamp, write_excel=FALSE){
+household_model_outputs <- function(model_output, model, output_dir, timestamp, write_excel){
 
   if(model == "dclg"){ col_aggregation <- c("gss_code", "year", "sex", "age_group", "household_type")}
   if(model == "ons"){ col_aggregation <- c("gss_code", "year", "sex", "age_group")}
 
   stage_1_sheet <- model_output$stage_1$detailed_households %>%
+    filter(year >= 2011) %>%
     group_by_at(col_aggregation) %>%
     summarise(households = sum(households)) %>%
     ungroup() %>%
     tidyr::pivot_wider(names_from = year, values_from = households)
-  
+
   stage_2_sheet <- model_output$stage_2$constrained %>%
+    filter(year >= 2011) %>%
     group_by(gss_code, year, age_group, household_type) %>%
     summarise(households = sum(households)) %>%
     ungroup() %>%
     tidyr::pivot_wider(names_from = year, values_from = households)
-  
+
   ce_pop <- model_output$stage_1$communal_establishment_population %>%
+    filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
     summarise(ce_popn = sum(communal_establishment_population)) %>%
     tidyr::pivot_wider(names_from = year, values_from = ce_popn)
-  
+
   hh_pop <- model_output$stage_1$household_population %>%
+    filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
     summarise(hh_popn = sum(household_population)) %>%
     tidyr::pivot_wider(names_from = year, values_from = hh_popn)
-  
+
   household_summary_sheet <- model_output$stage_1$detailed_households %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year) %>%
@@ -33,38 +37,78 @@ household_model_outputs <- function(model_output, model, output_dir, timestamp, 
               communal_establishment_population = sum(communal_establishment_population)) %>%
     ungroup() %>%
     mutate(average_households_size = households_population / households)
-  
+
   output_dataframes <- list(stage1_households = stage_1_sheet,
                             stage2_households = stage_2_sheet,
                             detailed_ce_pop = ce_pop,
                             detailed_hh_pop = hh_pop,
                             household_summary = household_summary_sheet)
-  
+
   hh_output_dir <- paste0(output_dir, "/households_",timestamp,"/")
   dir.create(hh_output_dir, showWarnings = FALSE)
-  
+
   lapply(seq_along(output_dataframes),
          function(i) data.table::fwrite(output_dataframes[[i]],
                                         paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))) %>%
     invisible()
-  
+
   if(write_excel){
-      
-      datastore_folder <- rprojroot::find_root_file(output_dir, criterion = rprojroot::is_git_root)
-      datastore_folder <- gsub("/", "\\\\", datastore_folder)
-      templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
-      templates_folder <- gsub("/", "\\\\", templates_folder)
-      run_excel_vba <- data.frame(a = paste0("start Excel.exe \"", templates_folder, "\\excel_household_template.xlsm"))
-      data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_households_vba.bat", col.names=F, quote=F)
-      
-      bas_file <- "documentation/templates/datastore_households_VBA.bas"
-      vba <- create_households_VBA_script(datastore_folder, hh_output_dir, model)
-      data.table::fwrite(vba, bas_file, col.names=F, quote=F)
-      file.remove("documentation/templates/temp_file.xlsm")
-      shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_households_vba.bat",
-                                           criterion = rprojroot::is_git_root))
+
+    #Falls over if it tries to write an excel file while the previous excel process is still ongoing
+    Sys.sleep(10)
+
+    datastore_csv <- function(x, nm){
+
+      x <- as.data.frame(x)
+
+      col_order <- c("gss_code","gss_name",names(x)[names(x)!="gss_code"])
+      sort_order <- intersect(names(x), c("gss_code", "year", "sex", "age_group", "household_type"))
+
+      x <- filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
+
+      if(!"E12000007" %in% x$gss_code){
+
+        x <- mutate(x, gss_code = "E12000007") %>%
+          group_by_at(sort_order) %>%
+          summarise_all(.funs=list(sum)) %>%
+          ungroup() %>%
+          rbind(x)
+      }
+
+      if("age_group" %in% sort_order){
+        x <- mutate(x, age_group = recode(age_group, "0_4" = "00_04", "5_9" = "05_09", "85&" = "85+"))
+      }
+
+      x <- dplyr::arrange_at(x, sort_order)
+
+      x <- left_join(x, get_gss_names(), by="gss_code") %>%
+        select(col_order)
+
+      data.table::fwrite(x, paste0(output_dir,"/datastore_",timestamp,"/",model,"_",nm, ".csv"))
+
+    }
+
+    lapply(seq_along(output_dataframes),
+           function(i) datastore_csv(output_dataframes[[i]], names(output_dataframes[i]))) %>%
+      invisible()
+
+
+    datastore_folder <- rprojroot::find_root_file(paste0(output_dir,"/datastore_",timestamp), criterion = rprojroot::is_git_root)
+    datastore_folder <- gsub("/", "\\\\", datastore_folder)
+    templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
+    templates_folder <- gsub("/", "\\\\", templates_folder)
+    #household_folder <- rprojroot::find_root_file(hh_output_dir, criterion = rprojroot::is_git_root)
+    #household_folder <- gsub("/", "\\\\", household_folder)
+
+    run_excel_vba <- data.frame(a = paste0("start Excel.exe \"", templates_folder, "\\excel_household_template.xlsm"))
+    data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_households_vba.bat", col.names=F, quote=F)
+    bas_file <- "documentation/templates/datastore_households_VBA.bas"
+
+    vba <- create_households_VBA_script(datastore_folder, model)
+    data.table::fwrite(vba, bas_file, col.names=F, quote=F)
+    file.remove("documentation/templates/temp_file.xlsm")
+    shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_households_vba.bat",
+                                         criterion = rprojroot::is_git_root))
   }
-  
-  
 }
 

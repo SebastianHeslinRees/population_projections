@@ -160,51 +160,52 @@ create_VBA_script <- function(output_dir, file_name){
 
 #--------------------------------------
 
-create_households_VBA_script <- function(output_dir, hh_output_dir, model){
-  
+create_households_VBA_script <- function(datastore_dir, model){
+
   x <- data.frame(a = c(
-    
+
     "Attribute VB_Name = \"datastoreVBA_households\"",
-    
+
     "Sub run_it()",
-    
+
     "Set This_wkb = Application.ThisWorkbook",
     "Set wkb = Workbooks.Add",
     "Call run_open",
-    
+
     "Application.DisplayAlerts = False",
     "Worksheets(\"Sheet1\").Delete",
     "Application.DisplayAlerts = True",
-    
-    paste0("wkb.SaveAs fileName:=\"",output_dir,"\\",model,"_households\""),
+
+    paste0("wkb.SaveAs fileName:=\"",datastore_dir,"\\",model,"_households\""),
     "wkb.Close SaveChanges:=False",
-    
+
     "End Sub",
-    
+
     "Sub run_open()",
 
-    paste0("Call open_copy_csv(\"",hh_output_dir,"\\",model,"_stage1_households.csv\", \"stage 1 households\")"),
-    paste0("Call open_copy_csv(\"",hh_output_dir,"\\",model,"_stage2_households.csv\", \"stage 2 households\")"),
-    paste0("Call open_copy_csv(\"",hh_output_dir,"\\",model,"_detailed_hh_pop.csv\", \"household popn\")"),
-    paste0("Call open_copy_csv(\"",hh_output_dir,"\\",model,"_detailed_ce_pop.csv\", \"communal est popn\")"),
-    paste0("Call open_copy_csv(\"",hh_output_dir,"\\",model,"_household_summary.csv\", \"summary\")"),
-    
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_stage1_households.csv\", \"stage 1 households\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_stage2_households.csv\", \"stage 2 households\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_detailed_hh_pop.csv\", \"household popn\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_detailed_ce_pop.csv\", \"communal est popn\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_household_summary.csv\", \"summary\")"),
+
     "End Sub",
+
     "Sub open_copy_csv(fileName, tabName)",
-    
+
     "Dim wbkS As Workbook",
     "Dim wshS As Worksheet",
     "Dim wshT As Worksheet",
-    
+
     "Set wshT = Worksheets.Add(After:=Worksheets(Worksheets.Count))",
     "Set wbkS = Workbooks.Open(fileName:=fileName)",
     "Set wshS = wbkS.Worksheets(1)",
-    
+
     "wshS.UsedRange.Copy Destination:=wshT.Range(\"A1\")",
     "wshT.Name = tabName",
     "wbkS.Close SaveChanges:=False",
-    
+
     "End Sub"))
-  
+
 }
 
