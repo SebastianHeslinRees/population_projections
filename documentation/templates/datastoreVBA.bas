@@ -6,14 +6,14 @@ Call run_open
 Application.DisplayAlerts = False
 Worksheets("Sheet1").Delete
 Application.DisplayAlerts = True
-wkb.SaveAs fileName:="M:/Projects/population_projections/outputs/trend/2018/datastore\datastore_file.xlsx"
+wkb.SaveAs fileName:="M:\Projects\population_projections\outputs\trend\2018\2018_central_test\datastore_19-11-13_1156\datastore_19-11-13_1156.xlsx"
 wkb.Close SaveChanges:=False
 End Sub
 Sub run_open()
-Call open_copy_csv("M:/Projects/population_projections/outputs/trend/2018/datastore\persons.csv", "persons")
-Call open_copy_csv("M:/Projects/population_projections/outputs/trend/2018/datastore\females.csv", "females")
-Call open_copy_csv("M:/Projects/population_projections/outputs/trend/2018/datastore\males.csv", "males")
-Call open_copy_csv("M:/Projects/population_projections/outputs/trend/2018/datastore\components.csv", "components of change")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\datastore_19-11-13_1156\persons.csv", "persons")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\datastore_19-11-13_1156\females.csv", "females")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\datastore_19-11-13_1156\males.csv", "males")
+Call open_copy_csv("M:\Projects\population_projections\outputs\trend\2018\2018_central_test\datastore_19-11-13_1156\components.csv", "components of change")
 End Sub
 Sub open_copy_csv(fileName, tabName)
 Dim wbkS As Workbook

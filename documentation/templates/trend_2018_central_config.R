@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 32
-projection_name <- "2018_central"
+projection_name <- "2018_central_test"
 
 datestamp <- "2019-10-11"
 
@@ -59,7 +59,7 @@ communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_
 dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
 dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
-write_excel <- FALSE
+write_excel <- TRUE
 
 
 
@@ -200,4 +200,4 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 run_trend_model(config_list)
-
+A
