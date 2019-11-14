@@ -11,3 +11,6 @@ source("input_data_scripts/constraints/npp_2016_constraint.R")
 source("input_data_scripts/constraints/npp_2018_constraint.R")
 source("input_data_scripts/households/household_model_inputs.R")
 source("input_data_scripts/mye/gla_mye_2018.R")
+
+dir.create("input_data/lookup", showWarnings = FALSE)
+file.copy("Q:/Teams/D&PA/Demography/Projections/2019_development/input_data/lookup/lad18_code_to_name.csv", "input_data/lookup/")
