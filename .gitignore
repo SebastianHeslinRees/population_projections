@@ -52,6 +52,6 @@ $RECYCLE.BIN/
 .DS_Store
 
 # Excel-specific files
-*.bas
-*.bat
-*temp_file.xlsm
+.bas
+.bat
+temp_file.xlsm
