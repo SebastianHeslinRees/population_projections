@@ -37,8 +37,7 @@ smooth_fertility <- function(asfr.structure, reproducible = TRUE){
   if (reproducible == T) {
     set.seed(42)
   }
-  library(minpack.lm) ; library(dplyr) ; library(data.table)
-  
+ 
   age_range_to_fit <- 15:44 # ons data only covers this range
   age_range_to_model <- 15:49 # need the output to cover this range
   

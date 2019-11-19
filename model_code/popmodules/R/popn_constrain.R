@@ -102,15 +102,6 @@ popn_constrain <- function(popn,
     rbind(dont_scale) %>%
     select(-country)
 
-  # Validate output
-  # ---------------
-  # TODO: Should this be taking the output dataframe?
-  # validate_popn_constrain_output(popn,
-  #                                col_aggregation,
-  #                                col_popn,
-  #                                scaled_popn,
-  #                                missing_levels_popn,
-  #                                missing_levels_constraint)
 
   return(scaled_popn)
 }

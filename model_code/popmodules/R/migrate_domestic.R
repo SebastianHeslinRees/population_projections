@@ -109,11 +109,6 @@
 #' @export
 #'
 
-# TODO: get rid of tibbles everywhere in codebase. They can be really slow.
-# TODO: simply the col_aggregation concept in this function.
-# TODO: case: deal with origin and destination data being at different resolutions?
-# TODO: deal with origin destination data being coarser than the input
-# TODO: add nesting functionality :O
 # TODO: add functionality to deal with incomplete input populations or rates
 # (currently it checks that the rate is complete at all levels that are also in
 # the input popn, but doesn't need origin-destination data to be complete)
@@ -137,7 +132,7 @@ migrate_domestic <- function(popn,
                                   pop1_is_subset, many2one, missing_levels_rate, col_origin_destination)
 
   # identify origin and destination columns if we don't have them
-  # TODO: make the function require the origin and destination columns to simplify the code?
+  # TODO: make the function require the origin and destination columns to simplify the code? or remove this complexity altogether???? or add gss_origin as input
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }

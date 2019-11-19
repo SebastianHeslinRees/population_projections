@@ -3,10 +3,6 @@ get_component <- function(filepath, max_yr) {
   component <- readRDS(filepath) %>%
     filter(year <= max_yr)
   
-  # TODO: check that there is data in here
-  # TODO: validate MYE component
-  # TODO: test that the compontent contains max_yr
-  
   return(component)
   
 }
@@ -28,25 +24,23 @@ evaluate_fns_list <- function(fns_args_list) {
   
   # run the functions in the chain to get the e.g. mortality rates
   
-  ## the first creates an initial mortality dataframe
+  ## the first creates an initial dataframe
   subject <- do.call(fns_args_list[[1]]$fn, fns_args_list[[1]]$args)
   n_fns_remaining <- length(fns_args_list) - 1
   
-  ## the rest take in mortality as their first argument
+  ## the rest take in component as their first argument
   if (n_fns_remaining > 0) {
-  for (i in 1:n_fns_remaining) {
-    ind <- i + 1
-    
-    # add mortality on as the first argument to the function
-    # TODO make this less ugly
-    n_args <- length(fns_args_list[[ind]]$args)
-    all_args <- fns_args_list[[ind]]$args
-    all_args[[n_args + 1]] <- subject
-    all_args <- all_args[c(n_args + 1, 1:n_args)]
-    
-    subject <- do.call(fns_args_list[[ind]]$fn, all_args)
-    # TODO validate this df
-  }
+    for (i in 1:n_fns_remaining) {
+      ind <- i + 1
+      
+      # add component on as the first argument to the function
+      n_args <- length(fns_args_list[[ind]]$args)
+      all_args <- fns_args_list[[ind]]$args
+      all_args[[n_args + 1]] <- subject
+      all_args <- all_args[c(n_args + 1, 1:n_args)]
+      
+      subject <- do.call(fns_args_list[[ind]]$fn, all_args)
+    }
   }
   return(subject)
 }

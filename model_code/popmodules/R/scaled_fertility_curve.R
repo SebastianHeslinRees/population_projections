@@ -30,7 +30,6 @@
 scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
                                    n_years_to_avg, avg_or_trend, data_col="births", output_col){
 
-  #TODO change the validation to an lapply
   validate_scaled_fertility_curve_filetype(popn_mye_path, births_mye_path, target_curves_filepath)
   
   population <- data.frame(readRDS(popn_mye_path))
@@ -83,9 +82,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     rename(!!output_col := jump_off_rate)
   
   return(jump_off_rates)
- 
-  # TODO should there be a check here that jump_off_rates values are reasonable?
-   
+
 }
 
 #--------------------------------------------------------------------

@@ -30,7 +30,6 @@
 scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_path, target_curves_filepath,
                                    last_data_year, n_years_to_avg, avg_or_trend, data_col="deaths", output_col){
 
-  #TODO change the validation to an lapply
   validate_scaled_mortality_curve_filetype(popn_mye_path, births_mye_path, deaths_mye_path, target_curves_filepath)
 
   population <- data.frame(readRDS(popn_mye_path))
@@ -44,7 +43,6 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
   #Deaths denominator
   population <- population %>%
     popmodules::popn_age_on(births=births) %>%
-    # TODO do we want to do this select here?  Could be confusing if we want to keep more cols
     select(gss_code, year, sex, age, popn) %>%
     arrange(gss_code, year, sex, age)
 
@@ -65,7 +63,7 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, sex, scaling)
-  #browser()
+
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling")
   }
@@ -83,8 +81,6 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     rename(!!output_col := jump_off_rate)
 
   return(jump_off_rates)
-
-  # TODO should there be a check here that jump_off_rates values are reasonable?
 
 }
 

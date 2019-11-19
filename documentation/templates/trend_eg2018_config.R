@@ -58,6 +58,7 @@ dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
 dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
 write_excel <- FALSE
+write_QA <- TRUE
 
 
 
@@ -175,6 +176,7 @@ config_list <- list(
   qa_areas_of_interest = qa_areas_of_interest,
   int_out_flow_or_rate = int_out_flow_or_rate,
   write_excel  = write_excel,
+  write_QA = write_QA,
   communal_est_pop_path = communal_est_pop_path,
   ons_stage1_file_path = ons_stage1_file_path,
   ons_stage2_file_path = ons_stage2_file_path,
@@ -194,6 +196,7 @@ copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection
 dir.create(copy_dir, recursive = TRUE)
 this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
+
 
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")

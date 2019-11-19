@@ -29,7 +29,6 @@
 #'
 #' @examples
 #'
-#'
 #' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 #' mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 #'
@@ -45,8 +44,6 @@
 #'
 #' @export
 #'
-
-# TODO: add a by argument to the function, with default c("gss_code", "sex", "age", "year")
 
 component_from_popn_rate <- function(popn,
                                   component_rate,

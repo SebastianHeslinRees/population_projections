@@ -83,7 +83,6 @@
 #  but for frequent operations on large datasets, it could be sped up if we
 # just don't subset inside this function.
 
-# TODO add nesting!
 
 popn_apply_rate <- function(popn,
                             popn_rate,

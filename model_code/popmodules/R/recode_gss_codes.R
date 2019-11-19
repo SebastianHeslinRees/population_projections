@@ -25,9 +25,6 @@
 
 recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=list(sum), aggregate_data = TRUE){
 
-
-  #TODO Add something that flags or deals with 2019 changes to LA codes
-
   df <- ungroup(df) %>%
     rename("gss_code" = col_geog)
 
