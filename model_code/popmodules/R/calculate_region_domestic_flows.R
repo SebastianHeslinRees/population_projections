@@ -11,7 +11,6 @@
 #'   for the projection period
 #'
 #' @import dplyr
-#' @importFrom magrittr %>%
 #'
 #' @export
 
