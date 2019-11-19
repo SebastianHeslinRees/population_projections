@@ -6,7 +6,6 @@ Call run_open
 Application.DisplayAlerts = False
 Worksheets("Sheet1").Delete
 Application.DisplayAlerts = True
-wkb.SaveAs fileName:="M:\Projects\population_projections\outputs\trend\2018\2018_long\\datastore_19-11-13_2144\dclg_households"
 wkb.Close SaveChanges:=False
 End Sub
 Sub run_open()
