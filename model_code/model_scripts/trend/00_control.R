@@ -2,7 +2,6 @@ run_trend_model <- function(config_list) {
 
   library(tidyverse)
   library(popmodules)
-  source("model_code/model_scripts/trend/01_get_inputs.R")
   source("model_code/model_scripts/trend/02_core.R")
   source("model_code/model_scripts/trend/03_output.R")
   
