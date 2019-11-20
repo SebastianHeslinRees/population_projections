@@ -217,8 +217,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   proj_natural_change <- data.frame(data.table::rbindlist(proj_natural_change, use.names=TRUE))
-  proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE)) %>%
-    filter(sex == "female", age %in% 15:49) #TODO move to output
+  proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE))
   
   message(" ")
  
