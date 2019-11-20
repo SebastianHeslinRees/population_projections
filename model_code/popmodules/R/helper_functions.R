@@ -81,9 +81,9 @@
     if(!is.factor(source_col) & is.factor(target_col)) {
       col_class <- class(source_col)
       if(col_class == "numeric") {
-        dftarget[[names(icol)]] <- as.numeric(levels(target_col)[target_col])
+        dftarget[[icol]] <- as.numeric(levels(target_col)[target_col])
       } else {
-        dftarget[[names(icol)]] <- as.character(target_col)
+        dftarget[[icol]] <- as.character(target_col)
       }
     }
 
