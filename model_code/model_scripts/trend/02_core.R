@@ -45,10 +45,19 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     # change rates are for changes that occured in the 12 months up to 30th June
     # age is the age the cohort is at 30th June
     aged_popn <- curr_yr_popn %>%
-      age_on() 
+      age_on()
     
-    # TODO calculate the births from the popn/aged_on_popn combo
-    births_by_mother <- popn_apply_rate(aged_popn,
+    at_risk <- curr_yr_popn %>%
+      mutate(age = age+1) %>%
+      left_join(curr_yr_popn, by=c("gss_code","year","sex","age")) %>%
+      mutate(popn = (popn.x + popn.y)/2)       %>%
+      mutate(popn = ifelse(is.na(popn),0,popn),
+             year = year +1) %>%
+      select(gss_code, year, sex, age, popn) %>%
+      arrange(gss_code, year, sex, age) %>%
+      filter(age <=90)
+    
+    births_by_mother <- popn_apply_rate(at_risk,
                               filter(fertility, year == my_year, age!=0),
                               col_out = "births",
                               many2one = FALSE)
