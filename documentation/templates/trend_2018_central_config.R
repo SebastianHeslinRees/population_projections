@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 32
-projection_name <- "2018_central_test"
+projection_name <- "2018_central"
 
 popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
