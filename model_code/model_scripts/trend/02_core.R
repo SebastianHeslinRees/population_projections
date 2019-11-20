@@ -7,6 +7,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   library(dplyr)
   library(assertthat)
   library(popmodules)
+  library(dtplyr)
   
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility, mortality, int_out_rate, int_in_proj, dom_rate,
@@ -126,15 +127,17 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                                               col_flow = "flow")
     }
     
-    dom_out <- domestic_flow %>%
+    dom_out <- lazy_dt(domestic_flow) %>%
       group_by(year, gss_out, sex, age) %>%
       summarise(dom_out = sum(flow)) %>%
+      as.data.frame() %>%
       rename(gss_code = gss_out)%>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0))
     
-    dom_in <- domestic_flow %>%
+    dom_in <- lazy_dt(domestic_flow) %>%
       group_by(year, gss_in, sex, age) %>%
       summarise(dom_in = sum(flow)) %>%
+      as.data.frame()%>%
       rename(gss_code = gss_in)%>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_in=0))
     
