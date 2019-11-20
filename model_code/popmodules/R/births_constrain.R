@@ -15,6 +15,9 @@
 #'
 #' @return A data frame of scaled births by mother's year of age.
 #'
+#' @import dplyr
+#' @importFrom testthat expect_equal
+#'
 #' @export
 
 births_constrain <- function(births, constraint){

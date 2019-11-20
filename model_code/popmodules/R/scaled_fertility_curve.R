@@ -20,7 +20,6 @@
 #' @return A data frame of mortality probabilities or fertility rates by LA, year, sex and age with the same age structure
 #' as the target curves and overall rates scaled so that they are consistent with past births.
 #'
-#' @import purrr
 #' @import dplyr
 #' @import assertthat
 #'
@@ -31,26 +30,26 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
                                    n_years_to_avg, avg_or_trend, data_col="births", output_col){
 
   validate_scaled_fertility_curve_filetype(popn_mye_path, births_mye_path, target_curves_filepath)
-  
+
   population <- data.frame(readRDS(popn_mye_path))
   births <- data.frame(readRDS(births_mye_path))
   target_curves <- readRDS(target_curves_filepath) %>% select(-year)
-  
+
   validate_scaled_fertility_curve_input(population, births, target_curves, last_data_year, n_years_to_avg,
                                         avg_or_trend, data_col, output_col)
-  
+
   population <- births_denominator(population)
-  
+
   births <- group_by(births, year, gss_code) %>%
     summarise(births = sum(births))
-  
+
   population <- filter(population, sex == "female", age %in% unique(target_curves$age))
-  
+
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-  
+
   scaling_backseries <- left_join(target_curves, population, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
     group_by(year, gss_code) %>%
@@ -62,25 +61,25 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, scaling)
-  
+
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
                                                              col_aggregation = "gss_code")
   }
-  
+
   if(avg_or_trend == "average"){
     averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, n_years_to_avg, last_data_year, data_col="scaling",
                                                                col_aggregation = "gss_code")
   }
 
   validate_population(averaged_scaling_factors, col_aggregation = c("year", "gss_code"), col_data = "scaling")
-   
+
   jump_off_rates <- target_curves %>%
     left_join(averaged_scaling_factors, by = "gss_code") %>%
     mutate(jump_off_rate = scaling * rate) %>%
     select(gss_code, year, sex, age, jump_off_rate) %>%
     rename(!!output_col := jump_off_rate)
-  
+
   return(jump_off_rates)
 
 }
@@ -90,10 +89,10 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
 #Function for creating birth denominator population
 
 births_denominator <- function(population) {
-  
+
   assert_that(is.data.frame(population),
               msg="births_denominator expects population to be a dataframe")
-  
+
   population <- mutate(population, year=year+1) %>%
     filter(year != max(year)) %>%
     left_join(population, by=c("gss_code","year","sex","age")) %>%
@@ -101,7 +100,7 @@ births_denominator <- function(population) {
     mutate(popn = ifelse(is.na(popn),0,popn)) %>%
     select(gss_code, year, sex, age, popn) %>%
     arrange(gss_code, year, sex, age)
-  
+
   return(population)
 }
 
@@ -111,7 +110,7 @@ births_denominator <- function(population) {
 
 validate_scaled_fertility_curve_input <- function(population, births, target_curves, last_data_year, n_years_to_avg,
                                                   avg_or_trend, data_col, output_col){
-  
+
   # test input parameters are of the correct type
   assert_that(is.data.frame(population),
               msg="scaled_fertility_curve expects that population is a data frame")
@@ -131,27 +130,27 @@ validate_scaled_fertility_curve_input <- function(population, births, target_cur
               msg="scaled_fertility_curve expects that output_col is a character")
   assert_that(data_col %in% names(births),
               msg="scaled_fertility_curve expects that data_col is a column in births dataframe")
-  
+
   validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn")
   validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births")
   validate_population(target_curves, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate")
-  
+
   invisible(TRUE)
 }
 
 #---------------------------------------------
 
 validate_scaled_fertility_curve_filetype <- function(path_1, path_2, path_3) {
-  
+
   for(i in c(path_1, path_2, path_3)){
     filepath <- i
     file_ext <- tolower(strsplit(basename(filepath), split="\\.")[[1]][[2]])
-    
+
     assertthat::assert_that(file_ext == "rds",
                             msg = paste(i,": file must be a .rds file"))
   }
-  
+
   invisible(TRUE)
-  
+
 }
 

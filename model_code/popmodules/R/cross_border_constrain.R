@@ -5,13 +5,17 @@
 #' back to the flow data resulting in sacled flows.
 #'
 #' @param domestic_flow A data frame containing origin-destination flows
-#' @param constraint A data frame containing cross-border totals data at the same
+#' @param in_constraint A data frame containing cross-border inflows at the same
 #'   resolution or lower.
-#' @param col_flow String. Name of column in \code{domestic_flow} containing population
-#'   counts. Default "flow"
+#' @param out_constraint A data frame containing cross-border outflows at the
+#'   same resolution or lower.
+#' @param col_flow String. Name of column in \code{domestic_flow} containing
+#'   population counts. Default "flow"
 #'
-#' @return A data frame of scaled domestic flows by authority, sex and
-#'   single year of age.
+#' @return A data frame of scaled domestic flows by authority, sex and single
+#'   year of age.
+#'
+#' @import dplyr
 #'
 #' @export
 

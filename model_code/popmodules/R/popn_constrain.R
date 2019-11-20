@@ -31,8 +31,7 @@
 #'   for each distinct level of the input \code{popn} dataframe
 #'
 #' @import assertthat
-#' @importFrom magrittr %>%
-#' @importFrom dplyr left_join mutate select_at group_by_at rename add_tally sym syms
+#' @import dplyr
 #'
 #' @examples
 #'
@@ -56,7 +55,8 @@
 #'
 #' scaled <- popn_constrain(popn,
 #'                          constraint,
-#'                          col_aggregation = c("year"="xyear", "gss_code", "sex"="xsex", "age"="xage"),
+#'                          col_aggregation = c("year"="xyear", "gss_code",
+#'                                              "sex"="xsex", "age"="xage"),
 #'                          col_popn = c("popn"="xpopn"),
 #'                          pop1_is_subset = FALSE,
 #'                          missing_levels_popn = FALSE,
@@ -86,7 +86,7 @@ popn_constrain <- function(popn,
   #validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn,
   #                              pop1_is_subset, missing_levels_popn, missing_levels_constraint)
 
-  popn <- mutate(popn, country = substr(gss_code,1,1))  
+  popn <- mutate(popn, country = substr(gss_code,1,1))
   do_scale <- filter(popn, country %in% unique(constraint$country))
   dont_scale <- filter(popn, !country %in% unique(constraint$country))
 

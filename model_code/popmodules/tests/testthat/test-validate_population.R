@@ -217,7 +217,7 @@ test_that("validate_population throws an error when the comparison population ha
 
 
 test_that("validate_population can handle comparison populations with unused factor levels", {
-  skip("too much faff, maybe impletment later")
+  skip("too much faff, maybe implement later")
   pop_in <- data.frame( area=factor(c("a","b"), levels=c("a","b","c")))
 
   expect_warning(

@@ -30,6 +30,10 @@ increased by \code{timestep} years. Default 1.}
 levels for the population's ages. This is an optional validation tool that
 runs an extra check to make sure all expected levels are present. Default
 NULL.}
+
+\item{births}{Data frame. Births data at the same aggregation levels as
+\code{popn} but coded to the lowest age band that can be joined to the
+output with code{rbind}. Default \code{NULL}.}
 }
 \value{
 A data frame containing the population with age advanced by one time

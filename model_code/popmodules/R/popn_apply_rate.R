@@ -46,8 +46,7 @@
 #'   for each distinct level of the input \code{col_aggregation} columns.
 #'
 #' @import assertthat
-#' @importFrom magrittr %>%
-#' @importFrom dplyr left_join mutate select sym syms
+#' @import dplyr
 #'
 #' @examples
 #'

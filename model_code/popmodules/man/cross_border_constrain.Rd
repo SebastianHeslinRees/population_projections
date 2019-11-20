@@ -10,15 +10,18 @@ cross_border_constrain(domestic_flow, in_constraint, out_constraint,
 \arguments{
 \item{domestic_flow}{A data frame containing origin-destination flows}
 
-\item{col_flow}{String. Name of column in \code{domestic_flow} containing population
-counts. Default "flow"}
-
-\item{constraint}{A data frame containing cross-border totals data at the same
+\item{in_constraint}{A data frame containing cross-border inflows at the same
 resolution or lower.}
+
+\item{out_constraint}{A data frame containing cross-border outflows at the
+same resolution or lower.}
+
+\item{col_flow}{String. Name of column in \code{domestic_flow} containing
+population counts. Default "flow"}
 }
 \value{
-A data frame of scaled domestic flows by authority, sex and
-  single year of age.
+A data frame of scaled domestic flows by authority, sex and single
+  year of age.
 }
 \description{
 A wrapper for \code{get_scaling_factor} which prepares origin-destination

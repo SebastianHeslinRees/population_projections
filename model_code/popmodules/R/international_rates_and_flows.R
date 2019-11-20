@@ -22,8 +22,7 @@
 #' @return A data frame of international migration probabilities.
 #'
 #' @import dplyr
-#' @import assertthat
-#' @import data.table
+#' @importFrom assertthat assert_that
 #'
 #' @export
 

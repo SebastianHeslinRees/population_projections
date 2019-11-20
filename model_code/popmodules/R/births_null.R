@@ -18,8 +18,7 @@
 #'   \code{col_aggregation} columns, a column named births with value
 #'   \code{const} and a column named \code{col_age} with value 0.
 #'
-#' @import assertthat
-#' @importFrom magrittr %>%
+#' @importFrom assertthat assert_that
 #' @importFrom stats complete.cases
 #'
 #' @examples

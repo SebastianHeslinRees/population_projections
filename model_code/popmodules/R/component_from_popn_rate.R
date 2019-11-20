@@ -25,7 +25,7 @@
 #' @return A data frame of the component with one row for each distinct value of the
 #'   input \code{col_aggregation} column.
 #'
-#' @import assertthat
+#' @importFrom assertthat assert_that
 #'
 #' @examples
 #'

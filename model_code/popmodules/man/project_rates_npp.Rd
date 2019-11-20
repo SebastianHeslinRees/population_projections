@@ -17,11 +17,11 @@ Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility
 
 \item{first_proj_yr}{Integer. The first projection year.}
 
+\item{n_proj_yr}{Integer. Number of years to project}
+
 \item{npp_var}{Character. NPP trend variant. Either \code{2018_principal},
 \code{2018_high}, \code{2018_low},  \code{2016_principal}, \code{2016_high}, or
 \code{2016_low}. Defaults to \code{2018_principal}.}
-
-\item{n_proj_year}{Integer. Number of years to project}
 }
 \value{
 A data frame of fertility probabilities for all projection years.

@@ -1,20 +1,24 @@
 #' Recode LA GSS Codes to 2011 geography
 #'
-#' Switches any non-2011 gss codes to Census 2011 gss codes
-#' Uses a hard-coded list of changes
+#' Switches any non-2011 gss codes to Census 2011 gss codes Uses a hard-coded
+#' list of changes
 #'
 #' Aggregates data where rows with the same gss code are present
 #'
-#' User must define the column containing the gss_code and the columns to
-#' group by
+#' User must define the column containing the gss_code and the columns to group
+#' by
 #'
 #' @param df A data frame containing gss_codes and data.
+#' @param col_geog A character vector. The column which contains gss codes
+#'   (defaults to \code{gss_code}).
 #' @param col_aggregation A string or character vector giving column names for
 #'   levels of data aggregations: e.g. geographic area, age/age band, sex.
-#' @param col_geog A character vector. The column which contains gss codes
-#' (defaults to \code{gss_code})
-#' @param fun A list. A function to summarise the data. Must be provided in a list.
-#' Defaults to \code{list(sum)}
+#' @param fun A list. A function to summarise the data. Must be provided in a
+#'   list. Defaults to \code{list(sum)}.
+#' @param aggregate_data Logical. Whether to reaggregate the data after
+#'   recoding. If TRUE, all other columns will be combined using the new levels
+#'   and the function specified ny \code{fun}. If FALSE nothing will be done and
+#'   any newly duplicated levels will remain.
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'

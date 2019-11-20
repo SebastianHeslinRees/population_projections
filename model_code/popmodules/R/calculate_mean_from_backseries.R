@@ -12,7 +12,7 @@
 #' international migration flows/rates.
 #'
 #' @import dplyr
-#' @import assertthat
+#' @importFrom assertthat assert_that
 #'
 #' @export
 
@@ -33,7 +33,7 @@ calculate_mean_from_backseries <- function(data_backseries, n_years_to_avg, last
 
   assert_that(all(back_years %in% data_backseries$year),
               msg = "calculate_mean_from_backseries expects the backseries dataframe to contain the data years specified by n_years_to_avg and last_data_year")
-  
+
   averaged <- data_backseries %>%
     rename(value = data_col) %>%
     filter(year %in% back_years) %>%

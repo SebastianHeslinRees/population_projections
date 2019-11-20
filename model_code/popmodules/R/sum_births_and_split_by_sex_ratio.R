@@ -4,6 +4,7 @@
 #'
 #'
 #' @import assertthat
+#' @import dplyr
 #'
 #' @export
 

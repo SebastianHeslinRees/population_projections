@@ -47,8 +47,7 @@
 #' @return A data frame containing rates for the component of change (in the
 #'   "rate" column)
 #'
-#' @importFrom dplyr mutate filter rename select left_join group_by ungroup
-#' @importFrom magrittr %>%
+#' @import dplyr
 #' @importFrom assertthat assert_that
 #'
 #' @export

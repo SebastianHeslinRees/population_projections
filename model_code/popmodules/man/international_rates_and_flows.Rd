@@ -6,7 +6,7 @@
 \usage{
 international_rates_and_flows(popn_mye_path, births_mye_path, flow_or_rate,
   component_path, last_data_year, n_years_to_avg, data_col, first_proj_yr,
-  n_proj_yr, rate_cap = 0.8)
+  n_proj_yr, rate_cap)
 }
 \arguments{
 \item{popn_mye_path}{Character. The path to the mye backseries population.}

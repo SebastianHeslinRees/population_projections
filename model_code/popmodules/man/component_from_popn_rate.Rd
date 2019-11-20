@@ -44,7 +44,6 @@ If component would result in a negative population, an error will be thrown
 }
 \examples{
 
-
 popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 mortality <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 

@@ -20,7 +20,6 @@
 #' @return A data frame of mortality probabilities rates by LA, year, sex and age with the same age structure
 #' as the target curves and overall rates scaled so that they are consistent with past deaths.
 #'
-#' @import purrr
 #' @import dplyr
 #' @import assertthat
 #'

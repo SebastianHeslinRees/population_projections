@@ -18,6 +18,8 @@
 #'   with one row for each level of the input population for each distinct level of the
 #'   input \code{col_aggregation} columns.
 #'
+#' @import dplyr
+#'
 #' @export
 
 get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "sex", "age", "country"), col_popn,
