@@ -9,31 +9,31 @@ smooth_fertility(asfr.structure, reproducible = TRUE)
 \arguments{
 \item{asfr.structure}{A dataframe containing the age specific fertility rates.  Ages must be in the range
 15 to 44. must contain columns \code{gss_code} which contains the geography, \code{sex} which contains sex
-encoded as "female" or "female"/"male", \code{age} which contains ages 15 to 44 and \code{fert_rate} which 
+encoded as "female" or "female"/"male", \code{age} which contains ages 15 to 44 and \code{fert_rate} which
 contains the fertility rate}
 
-\item{reproducible}{If \code{TRUE} sets a seed so that the random fitting process is reproducible. 
+\item{reproducible}{If \code{TRUE} sets a seed so that the random fitting process is reproducible.
 Default \code{TRUE}.}
 }
 \value{
 a list with elements \code{data}, \code{LA_status} and \code{resid_sum}. \code{data} contains
 the smoothed fertility dataframe with ages 15:49.  \code{LA_status} indicates whether a fit was found
-for each LA on the first pass, second pass, or no fit found. \code{resid_sum} contains the sum of the 
+for each LA on the first pass, second pass, or no fit found. \code{resid_sum} contains the sum of the
 squares of the residulas for each LA
 }
 \description{
-Fits the Hadwiger mixture model curves (Chandola et al. 1999) to 'fertility rates by age and geography' 
+Fits the Hadwiger mixture model curves (Chandola et al. 1999) to 'fertility rates by age and geography'
 data and returns fertility rates calculated from the fitted curves.
 }
 \details{
-A Levenberg-Marquardt Nonlinear Least-Squares algorithm is used to fit a curve to each geographic level, 
-with starting points chosen based on previously fitted curves from 2011, and convergence tests as 
-described here: https://cran.r-project.org/web/packages/minpack.lm/minpack.lm.pdf using the package 
-defaults for convergence conditions. The parameters of the fitted curve are then used to calculate new 
+A Levenberg-Marquardt Nonlinear Least-Squares algorithm is used to fit a curve to each geographic level,
+with starting points chosen based on previously fitted curves from 2011, and convergence tests as
+described here: https://cran.r-project.org/web/packages/minpack.lm/minpack.lm.pdf using the package
+defaults for convergence conditions. The parameters of the fitted curve are then used to calculate new
 rates for each age.
 
-If convergence does not happen within 200 iterations, a grid search method is used to run the 
-Levenberg-Marquardt Nonlinear Least-Squares algorithm with a range of starting values in order to find the 
+If convergence does not happen within 200 iterations, a grid search method is used to run the
+Levenberg-Marquardt Nonlinear Least-Squares algorithm with a range of starting values in order to find the
 best fit.
 
 If no fit is found then the data for that local authority is left unchanged.

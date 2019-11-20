@@ -57,8 +57,8 @@ Default TRUE.}
 
 \item{missing_levels_rate}{Logical. Setting this to TRUE will allow implicity
 missing origin-destination flows and assume that they are zero. A warning
-will still be thrown if there is zero outmigration for an entire
-aggregation level in a geography. These geographies will **not** be
+will not be thrown if there is zero outmigration for an entire
+aggregation level in a geography and these geographies will **not** be
 included in the output data frame, meaning you may need to call
 \code{tidyr::complete} on the results (after aggregation to in/out/net
 flows). Note that if this is set to FALSE, your origin-destination flows

@@ -10,17 +10,22 @@
 #' @param rate_col Character. The column in the jump_off_rates dataframe containing the rates.
 #' @param rate_trajectory_filepath Character. The filepath for the national-level ASMR/ASFR trajectory.
 #' @param first_proj_yr Integer. The first projection year.
-#' @param n_proj_year Integer. Number of years to project
+#' @param n_proj_yr Integer. Number of years to project
 #' @param npp_var Character. NPP trend variant. Either \code{2018_principal},
 #'   \code{2018_high}, \code{2018_low},  \code{2016_principal}, \code{2016_high}, or
 #'   \code{2016_low}. Defaults to \code{2018_principal}.
 #'
 #' @return A data frame of fertility probabilities for all projection years.
 #' @import dplyr
-#' @import assertthat
+#' @importFrom assertthat assert_that
 #' @export
 
-project_rates_npp <- function(jump_off_rates, rate_col, rate_trajectory_filepath, first_proj_yr, n_proj_yr, npp_var="2018_principal"){
+project_rates_npp <- function(jump_off_rates,
+                              rate_col,
+                              rate_trajectory_filepath,
+                              first_proj_yr,
+                              n_proj_yr,
+                              npp_var="2018_principal"){
 
   rate_trajectory <- readRDS(rate_trajectory_filepath)
 

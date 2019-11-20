@@ -12,7 +12,8 @@
 #' international migration flows/rates.
 #'
 #' @import dplyr
-#' @import assertthat
+#' @importFrom assertthat assert_that
+#' @importFrom purrr map map_dbl
 #'
 #' @export
 
@@ -33,7 +34,7 @@ calculate_rate_by_regression <- function(data_backseries, n_years_regression, la
   back_years <- c((last_data_year - n_years_regression + 1):last_data_year)
   assert_that(all(back_years %in% data_backseries$year),
               msg = "calculate_rate_by_regression expects the backseries dataframe to contain the data years specified by n_years_regression and last_data_year")
-  
+
   regression <- function(df){
     lm(value ~ year, data=df)
   }

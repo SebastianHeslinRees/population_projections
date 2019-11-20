@@ -6,7 +6,7 @@
 #'
 #' @return A data frame containing the past years and the projection years
 #'
-#' @import assertthat
+#' @importFrom assertthat assert_that
 #'
 #' @export
 

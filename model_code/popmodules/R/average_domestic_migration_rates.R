@@ -1,21 +1,23 @@
 #' Calculate average origin-destination domestic migration rates based on past
 #' data
 #'
-#' [description]
+#' Given a dataframe of domestic migration rates calculate the mean rate over a given number of years.
+#' If the sum of the outrates for any age/sex/LA combination is greater than a defined cap then scale
+#' all rates so that sum is equal to the cap.
 #'
-#' @param origin_destination_rates Dataframe. Origin-destination flows by geography, year, sex and age.
+#' @param origin_destination_rates dataframe. Origin-destination flows by geography, year, sex and age.
 #' @param last_data_year numeric. The last year of data on which to calculate
 #'   averages.
 #' @param n_years_to_avg numeric. The number of years to use in calculating averages.
-#' @param col_rate Character. The column in the \code{origin_destinatation_flows} dataframe containing the rates
-#' @param rate_cap Numeric. A value which calculated rates cannot exceed. Where rates exceed \code{rate_cap} they are limited to the value of \code{rate_cap}.
+#' @param col_rate character. The column in the \code{origin_destinatation_flows} dataframe containing the rates
+#' @param rate_cap numeric. A value which calculated rates cannot exceed. Where rates exceed \code{rate_cap}
+#'   they are limited to the value of \code{rate_cap}.
 #'
 #' @return A data frame of origin-destination migration probabilities by LA, year, sex and age.
 #'
-#' @import purrr
 #' @import dplyr
 #' @import assertthat
-#' @import data.table
+#' @importFrom data.table setDT setkey
 #'
 #' @export
 
@@ -39,7 +41,7 @@ average_domestic_migration_rates <- function(origin_destination_rates,
   origin_destination_rates <- origin_destination_rates[year %in% backseries_years, ]
   origin_destination_rates <- origin_destination_rates[, .(rate = sum(rate)/n_years_to_avg),
                                                        .(gss_out, gss_in, age, sex)]
-  setkey(origin_destination_rates, gss_out, sex, age)
+  data.table::setkey(origin_destination_rates, gss_out, sex, age)
 
   # tidyverse equivalent
   if(FALSE) {
@@ -51,11 +53,11 @@ average_domestic_migration_rates <- function(origin_destination_rates,
   }
 
   outflow_sums <- origin_destination_rates[, .(total_rate = sum(rate)), .(gss_out, age, sex)]
-  setkey(outflow_sums, gss_out, sex, age)
+  data.table::setkey(outflow_sums, gss_out, sex, age)
 
   if(any(outflow_sums$total_rate > rate_cap)) {
     ix <- outflow_sums$total_rate > rate_cap
-    n <- sum(outflow_sums$total_rate[ix])
+    n <- sum(ix)
 
     warning(paste0(capture.output({
       print(paste(c("After averaging the backseries, average_domestic_migration rates created rates with sums exceeding the cap of", rate_cap,
@@ -89,7 +91,7 @@ average_domestic_migration_rates <- function(origin_destination_rates,
     names(origin_destination_rates)[i] <- col_rate
   }
 
-  return(as.data.frame(origin_destination_rates))
+  return(data.table::setDF(origin_destination_rates))
 
 }
 

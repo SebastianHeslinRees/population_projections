@@ -2,7 +2,6 @@ context("project_forward_flat")
 library(popmodules)
 library(testthat)
 library(dplyr)
-library(tidyr)
 
 df_w_yr <- data.frame(year = c(2001, 2002),
                       gss_code = c("E0901", "E0902"),

@@ -18,7 +18,7 @@
 #'   \code{col_aggregation} columns, a column named deaths with value
 #'   \code{const} and a column named age with value 0.
 #'
-#' @import assertthat
+#' @importFrom assertthat assert_that
 #' @importFrom stats complete.cases
 #'
 #' @export

@@ -22,14 +22,13 @@
 #' @return A data frame of international migration probabilities.
 #'
 #' @import dplyr
-#' @import assertthat
-#' @import data.table
+#' @importFrom assertthat assert_that
 #'
 #' @export
 
 international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
                                           component_path, last_data_year, n_years_to_avg, data_col,
-                                          first_proj_yr, n_proj_yr, rate_cap = 0.8) {
+                                          first_proj_yr, n_proj_yr, rate_cap) {
 
   component <- readRDS(component_path)
 
@@ -46,7 +45,7 @@ international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_o
       mutate(rate = ifelse(popn == 0, 0, value/popn)) %>%
       select(gss_code, year, sex, age, rate)
 
-    #TODO: Does this need a report?
+    #TODO: Flag capping - same as domestic
     rates <- calculate_mean_from_backseries(rate_backseries, n_years_to_avg, last_data_year, "rate",
                                             col_aggregation = c("gss_code","sex","age")) %>%
       mutate(rate = ifelse(rate > rate_cap, rate_cap, rate))
@@ -83,8 +82,6 @@ international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_o
       select(year, gss_code, sex, age, data_col)
 
   }
-
-  validate_population(output_df)
 
   return(output_df)
 

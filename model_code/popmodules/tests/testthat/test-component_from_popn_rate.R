@@ -100,11 +100,12 @@ test_that("component_from_popn_rate warns when factor levels don't match the inp
   expect_equivalent(temp, deaths)
 })
 
-test_that("component_from_popn_rate warns with an empty input", {
+test_that("component_from_popn_rate fails with an empty input", {
   pop_in <- pop[NULL,]
-  deaths_out <- deaths[NULL,]
-  expect_warning( temp <- component_from_popn_rate(pop_in, mort, col_aggregation = "area", col_popn = "popn", col_rate = "rate", col_component = "deaths") )
-  expect_equivalent(temp, deaths_out)
+  mort_in <- mort[NULL,]
+  expect_warning(expect_error(component_from_popn_rate(pop_in, mort, col_aggregation = "area", col_popn = "popn", col_rate = "rate", col_component = "deaths") ))
+  expect_warning(expect_error(component_from_popn_rate(pop, mort_in, col_aggregation = "area", col_popn = "popn", col_rate = "rate", col_component = "deaths") ))
+  expect_warning(component_from_popn_rate(pop_in, mort_in, col_aggregation = "area", col_popn = "popn", col_rate = "rate", col_component = "deaths") )
 })
 
 test_that("component_from_popn_rate handles mappings between column names in the population and component rate data frames", {

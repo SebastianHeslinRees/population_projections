@@ -29,7 +29,7 @@ household_model_ons <- function(population, stage1_file_path, stage2_file_path, 
 #' Produce household projections from an input population projection using the
 #' 2016 ONS household projection methodology.
 #'
-#' @param population A data frame containing population data.
+#' @param popn A data frame containing population data.
 #' @param hh_rep_rates_path String. Path to file containing household
 #'   representative rates for the each year of the projection period.
 #' @param communal_est_pop_path String. Path to file containing communal
@@ -40,7 +40,8 @@ household_model_ons <- function(population, stage1_file_path, stage2_file_path, 
 #' @return A list containing 4 dataframes: Unconstrained and constrained
 #'   household projections, communal establishment and household populations for
 #'   the projection period.
-#' @export
+#'
+#' @import dplyr
 
 ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_proj_yr){
 
@@ -50,11 +51,11 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
 
   #population <- aggregate_geography(popn) %>%
   #  create_regional_data(district_to_region)
-  
+
   population <- filter(popn, gss_code %in% unique(household_rates$gss_code)) %>% # filter to England, basically
     create_regional_data(district_to_region)
-    
-  
+
+
   #       Same number as 2011 for 0-74
   #       Same proportion 75+
   #       Prison population updated upto and inc 2016
@@ -87,15 +88,15 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
   #Districts constrained to regions
   constrained_district <- constrain_district_hh(unconstrained_la, constrained_regional, district_to_region)
   constrained <- data.frame(rbind(england_proj, constrained_regional, constrained_district))
-  
+
   #Pretty-up outputs
   household_population <- rename(household_population, household_population = household_popn)
   communal_establishment <- rename(communal_establishment, communal_establishment_population = ce_pop)
-  
+
   detailed_households <- left_join(constrained, household_population, by = c("gss_code", "sex", "year", "age_group")) %>%
     left_join(communal_establishment, by = c("gss_code", "sex", "year", "age_group"))
-   
-  
+
+
   return(list(detailed_households = detailed_households,
               unconstrained = data.frame(household_projection),
               constrained = constrained,
@@ -114,7 +115,8 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
 #'
 #' @return A list containing 2 dataframes: unconstrained and constrained
 #'   household projections.
-#' @export
+#'
+#' @import dplyr
 
 ons_stage_2 <- function(stage2_file_path, stage1_output){
 
@@ -165,10 +167,10 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
 
   constrained <- select(constrained_hh, year, gss_code, household_type, age_group, households = constrained)
   unconstrained <- select(constrained_hh, year, gss_code, household_type, age_group, households = unconstrained)
-  
+
   return(list(unconstrained = unconstrained,
               constrained = constrained))
-  
+
 }
 
 

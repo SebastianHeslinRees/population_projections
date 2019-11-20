@@ -46,8 +46,7 @@
 #'   for each distinct level of the input \code{col_aggregation} columns.
 #'
 #' @import assertthat
-#' @importFrom magrittr %>%
-#' @importFrom dplyr left_join mutate select sym syms
+#' @import dplyr
 #'
 #' @examples
 #'
@@ -83,7 +82,6 @@
 #  but for frequent operations on large datasets, it could be sped up if we
 # just don't subset inside this function.
 
-# TODO add nesting!
 
 popn_apply_rate <- function(popn,
                             popn_rate,

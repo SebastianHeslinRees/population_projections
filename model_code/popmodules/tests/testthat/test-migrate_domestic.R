@@ -361,7 +361,7 @@ test_that("migrate_domestic can deal with missing levels in the migration data w
 test_that("migrate domestic can handle nested geographic data, applying rates to a coarser resolution", {
   skip("TODO implement nesting in the validate and apply rate methods")
   popn_in <- tidyr::crossing(popn, gss_finer = c("d","e"))
-  output_out <- dplyr::crossing(output, gss_finer = c("d","e"))
+  output_out <- tidyr::crossing(output, gss_finer = c("d","e"))
   expect_error(migrate_domestic(popn_in, mign_rate, col_aggregation = c("year","gss_code"="gss_out","gss_finer","age","sex")))
   expect_equivalent(migrate_domestic(popn_in,
                                      mign_rate,

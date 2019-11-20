@@ -9,20 +9,23 @@ average_domestic_migration_rates(origin_destination_rates, last_data_year,
   n_years_to_avg, col_rate = "rate", rate_cap = 0.8)
 }
 \arguments{
-\item{origin_destination_rates}{Dataframe. Origin-destination flows by geography, year, sex and age.}
+\item{origin_destination_rates}{dataframe. Origin-destination flows by geography, year, sex and age.}
 
 \item{last_data_year}{numeric. The last year of data on which to calculate
 averages.}
 
 \item{n_years_to_avg}{numeric. The number of years to use in calculating averages.}
 
-\item{col_rate}{Character. The column in the \code{origin_destinatation_flows} dataframe containing the rates}
+\item{col_rate}{character. The column in the \code{origin_destinatation_flows} dataframe containing the rates}
 
-\item{rate_cap}{Numeric. A value which calculated rates cannot exceed. Where rates exceed \code{rate_cap} they are limited to the value of \code{rate_cap}.}
+\item{rate_cap}{numeric. A value which calculated rates cannot exceed. Where rates exceed \code{rate_cap}
+they are limited to the value of \code{rate_cap}.}
 }
 \value{
 A data frame of origin-destination migration probabilities by LA, year, sex and age.
 }
 \description{
-[description]
+Given a dataframe of domestic migration rates calculate the mean rate over a given number of years.
+If the sum of the outrates for any age/sex/LA combination is greater than a defined cap then scale
+all rates so that sum is equal to the cap.
 }

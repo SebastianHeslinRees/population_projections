@@ -45,7 +45,7 @@
 #'   can be called within a dplyr pipe or as a one-line validity test
 #'
 #' @importFrom assertthat assert_that
-#' @import rlang
+#' @import dplyr
 #' @export
 
 # TODO: include a logical gss parameter that validates gss coding

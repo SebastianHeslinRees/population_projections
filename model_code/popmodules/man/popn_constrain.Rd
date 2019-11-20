@@ -72,7 +72,8 @@ constraint <- expand.grid(xyear=2000, xage=20:21, xsex=c("f","m"), xpopn = 400)
 
 scaled <- popn_constrain(popn,
                          constraint,
-                         col_aggregation = c("year"="xyear", "gss_code", "sex"="xsex", "age"="xage"),
+                         col_aggregation = c("year"="xyear", "gss_code",
+                                             "sex"="xsex", "age"="xage"),
                          col_popn = c("popn"="xpopn"),
                          pop1_is_subset = FALSE,
                          missing_levels_popn = FALSE,

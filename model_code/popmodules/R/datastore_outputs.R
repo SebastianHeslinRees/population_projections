@@ -1,5 +1,8 @@
-# TODO document!!
+#' Datastore outputs
+#'
+#' @import dplyr
 #' @export
+# TODO document!!
 datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
                               output_dir, file_name, output_date, write_excel){
 
@@ -56,7 +59,6 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
 
-  #TODO: Make this better
   gss_names <- get_gss_names()
 
   components <- left_join(popn, gss_names, by="gss_code") %>%

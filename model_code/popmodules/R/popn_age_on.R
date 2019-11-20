@@ -39,14 +39,15 @@
 #'   levels for the population's ages. This is an optional validation tool that
 #'   runs an extra check to make sure all expected levels are present. Default
 #'   NULL.
+#' @param births Data frame. Births data at the same aggregation levels as
+#'   \code{popn} but coded to the lowest age band that can be joined to the
+#'   output with code{rbind}. Default \code{NULL}.
 #'
 #' @return A data frame containing the population with age advanced by one time
 #'   step (or age band). The lowest age will not be present in this output. Rows
 #'   are arranged iby \code{col_aggregation}, in that order.
 #'
 #' @import assertthat
-#' @importFrom magrittr %>%
-#' @import data.table
 #'
 #' @export
 
@@ -65,8 +66,6 @@ popn_age_on <- function(popn,
   # TODO Set this up so with an additional parameters data_combine_method, a
   # named list of functions describing how to how to combine data when they are
   # merged into the top age band - currently it is always with done with sum()
-
-  # TODO Set this up to work with nesting aggregation levels
 
   # Validate inputs
   # ---------------
@@ -111,7 +110,7 @@ popn_age_on <- function(popn,
       popn[, (col_year) := get(col_year) + timestep]
     }
 
-    aged <- copy(popn)
+    aged <- data.table::copy(popn)
 
     # If age is numeric, increment age
     if(is.numeric(popn[[col_age]])) {
@@ -246,23 +245,6 @@ popn_age_on <- function(popn,
                               aged,
                               col_aggregation,
                               col_age)
-
-
-
-
-
-  if(FALSE){
-
-    #TODO Why can't this function look like this?
-
-    aged <- popn %>%
-      mutate(year = year +1,
-             age = ifelse(age == 90, 90, age +1)) %>%
-      group_by_at(col_aggregation) %>%
-      summarise(popn = sum(popn)) %>%
-      ungroup()
-
-  }
 
 
   #Add births

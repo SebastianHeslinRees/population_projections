@@ -1,3 +1,8 @@
+#' Household model outputs
+#'
+#' @import dplyr
+#' @export
+# TODO document
 household_model_outputs <- function(model_output, model, output_dir, timestamp, write_excel){
 
   if(model == "dclg"){ col_aggregation <- c("gss_code", "year", "sex", "age_group", "household_type")}

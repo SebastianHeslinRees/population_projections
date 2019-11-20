@@ -1,5 +1,3 @@
-# TODO make this take a list? 
-
 trend_core <- function(population, births, deaths, int_out, int_in,
                        fertility, mortality, int_out_rate, int_in_proj,
                        dom_in, dom_out, dom_rate,
@@ -26,16 +24,11 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
   
-  # set up output lists. Done in lists for speed and rbind done after projection.
-  # TODO name the list elements with the years?
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_int_out <- list(int_out %>% filter(year < first_proj_yr))
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
   proj_deaths <- list(deaths %>% filter(year < first_proj_yr))
   proj_births <- list(births %>% filter(year < first_proj_yr))
-  # TODO: would we rather calculate domestic migration backseries for the input (this is done in
-  # input_data_scripts/domestic_migration_2018.R, it just needs to be recoded to
-  # 2011 geographies and read in at the start)
   proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
   proj_dom_in <- list(dom_in %>% filter(year < first_proj_yr))
   proj_natural_change <- list()
@@ -46,10 +39,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     cat('\r',paste("  Projecting year",my_year))
     flush.console()
-    
-    # TODO pass births, deaths, migration function in via list along with their arguments to make the core more flexible.
-    # Would remove need for hard coded internation out migration method switch
-    
+
     # aged on population is used due to definitions of MYE to ensure the correct denominator
     # population in population at 30th June
     # change rates are for changes that occured in the 12 months up to 30th June
@@ -94,7 +84,6 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       deaths <- popn_constrain(popn=deaths, constraint = constraints$deaths_constraint, col_popn = "deaths")
     }
     
-    #TODO do this better
     natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
       mutate(popn = popn - deaths) %>%
       select(-deaths)
@@ -127,9 +116,6 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                                col_popn = "int_in")
     }
     
-    # TODO adapt this to write out gss-to-gss flows by SYA
-    # TODO adapt this to work with time-varying migration rates
-    
     domestic_flow <- natural_change_popn %>%
       calc_dom_mign(mign_rate = dom_rate,
                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
@@ -149,23 +135,17 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                                               col_flow = "flow")
     }
     
-    #TODO Look at whether its worth doing this in data.table
     dom_out <- domestic_flow %>%
       group_by(year, gss_out, sex, age) %>%
       summarise(dom_out = sum(flow)) %>%
-      rename(gss_code = gss_out)
+      rename(gss_code = gss_out)%>%
+      tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0))
     
     dom_in <- domestic_flow %>%
       group_by(year, gss_in, sex, age) %>%
       summarise(dom_in = sum(flow)) %>%
-      rename(gss_code = gss_in)
-    
-    #TODO Do we need to do this in the model core - inconsistent with what we do for international
-    dom_net <- left_join(dom_out, dom_in, by = c("year", "gss_code", "sex", "age")) %>%
-      tidyr::replace_na(list(dom_out = 0, dom_in = 0)) %>%
-      tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0, dom_in=0)) %>%
-      mutate(dom_net = dom_in - dom_out)
-    
+      rename(gss_code = gss_in)%>%
+      tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_in=0))
     
     if(is.null(upc)){
       
@@ -173,8 +153,9 @@ trend_core <- function(population, births, deaths, int_out, int_in,
         arrange(year, gss_code, sex, age) %>%
         left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
         left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
-        left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
-        mutate(next_popn = popn - int_out + int_in + dom_net)
+        left_join(dom_out, by = c("year", "gss_code", "age", "sex")) %>% 
+        left_join(dom_in, by = c("year", "gss_code", "age", "sex")) %>% 
+        mutate(next_popn = popn - int_out + int_in - dom_out + dom_in)
 
     } else {
       
@@ -182,10 +163,11 @@ trend_core <- function(population, births, deaths, int_out, int_in,
         arrange(year, gss_code, sex, age) %>%
         left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
         left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
-        left_join(dom_net, by = c("year", "gss_code", "age", "sex")) %>% 
+        left_join(dom_out, by = c("year", "gss_code", "age", "sex")) %>% 
+        left_join(dom_in, by = c("year", "gss_code", "age", "sex")) %>% 
         left_join(upc, by = c("gss_code", "age", "sex")) %>%
         tidyr::replace_na(list(upc = 0)) %>%
-        mutate(next_popn = popn - int_out + int_in + dom_net + upc)
+        mutate(next_popn = popn - int_out + int_in - dom_out + dom_in + upc)
     }
     
     # FIXME / TODO This setup creates negative populations - should we add
@@ -222,14 +204,6 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                         comparison_pop = curr_yr_popn,
                         col_comparison = c("gss_code","sex","age"))
     
-    if(!is.null(constraints)){
-      warning("skipping an important test - FIXME")
-      #testthat::expect_equal(popn_constrain(popn = next_yr_popn,
-      #                                      constraint = constraints$population_constraint,
-      #                                      col_popn = "popn"),
-      #                       next_yr_popn)
-    }
-    
     proj_popn[[length(proj_popn)+1]] <- next_yr_popn
     proj_deaths[[length(proj_deaths)+1]] <- deaths
     proj_births[[length(proj_births)+1]] <- births
@@ -241,7 +215,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     proj_births_by_mother[[length(proj_dom_in)+1]] <- births_by_mother
     
     curr_yr_popn <- next_yr_popn
-  }
+  
+    }
   
   proj_popn   <- data.frame(data.table::rbindlist(proj_popn, use.names=TRUE))
   proj_deaths <- data.frame(data.table::rbindlist(proj_deaths, use.names=TRUE))
@@ -252,16 +227,20 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   proj_natural_change <- data.frame(data.table::rbindlist(proj_natural_change, use.names=TRUE))
   proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE)) %>%
-    filter(sex == "female", age %in% 15:49)
+    filter(sex == "female", age %in% 15:49) #TODO move to output
   
   message(" ")
  
   #For int_out and domestic the rate is constant so there is no need to output all years
   int_out_rate <- filter(int_out_rate, year <= first_proj_yr)
   
-  return(list(population = proj_popn, deaths = proj_deaths, births = proj_births,
-              int_out = proj_int_out, int_in = proj_int_in,
-              dom_out = proj_dom_out, dom_in = proj_dom_in,
+  return(list(population = proj_popn,
+              deaths = proj_deaths,
+              births = proj_births,
+              int_out = proj_int_out,
+              int_in = proj_int_in,
+              dom_out = proj_dom_out,
+              dom_in = proj_dom_in,
               births_by_mothers_age = proj_births_by_mother,
               natural_change = proj_natural_change,
               fertility_rates = fertility,
