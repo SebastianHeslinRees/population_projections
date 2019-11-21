@@ -59,7 +59,7 @@ dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
 dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
 write_excel <- FALSE
-
+write_QA <- FALSE
 
 #-------------------------------------------------
 
@@ -156,9 +156,6 @@ constraint_fns <- list(
   
 )
 
-#TODO figure out the best way to get a null value when we don't want to constraint
-#constraint_fns <- list(list(fn = function() NULL, args = list()))
-
 qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
@@ -190,7 +187,8 @@ config_list <- list(
   int_out_flow_or_rate = int_out_flow_or_rate,
   projection_name = projection_name,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
-  upc_path = upc_path
+  upc_path = upc_path,
+  write_QA = write_QA
 )
 
 rm(list = setdiff(ls(), "config_list"))
