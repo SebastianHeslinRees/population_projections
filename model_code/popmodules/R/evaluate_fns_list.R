@@ -1,29 +1,25 @@
-
-get_component <- function(filepath, max_yr) {
-  component <- readRDS(filepath) %>%
-    filter(year <= max_yr)
-  
-  return(component)
-  
-}
-
+#' Evaluate a chain of functions passed as a list 
+#'
+#' Each element of the arugment \code{fns_args_list} is a list.
+#' These function lists must contain a function \code{fn} and
+#' a list \code{args} of arguments. The output of one function will
+#' be passed to the next as it's first argument (like a dplyr pipe).
+#'
+#' @param fns_args_list List of functions and their arguments
+#'
+#' @return The output from the final function in the funs_args_list
+#' 
+#' @example 
+#'  funs_args_list <- list(
+#'   list(fn = function1, args = list(arg1_1, arg1_2, ....)),
+#'   list(fn = function2, args = list(arg2_1, arg2_2, ....)),
+#'   .....
+#' )
+#' 
+#' @export
 
 evaluate_fns_list <- function(fns_args_list) {
-  
-  # fns_args_list should contain a list of functions and the arguments each function takes
-  # these should be in the order that they should be run and in the format:
-  # each function should create or modify the same df, eg. mortality or fertility (called subject here)
-  #
-  # funs_args_list <- list(
-  #   list(fn = function1, args = list(arg1_1, arg1_2, ....)),
-  #   list(fn = function2, args = list(arg2_1, arg2_2, ....)),
-  #   .....
-  # )
-  #
-  
-  
-  # run the functions in the chain to get the e.g. mortality rates
-  
+
   ## the first creates an initial dataframe
   subject <- do.call(fns_args_list[[1]]$fn, fns_args_list[[1]]$args)
   n_fns_remaining <- length(fns_args_list) - 1

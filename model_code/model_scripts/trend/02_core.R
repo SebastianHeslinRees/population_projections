@@ -11,15 +11,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                              first_proj_yr, n_proj_yr, int_out_flow_or_rate)
-  
-  
-  # Load core functions
-  #age_on <- popmodules::age_on_sya
-  age_on <- popmodules::popn_age_on
-  calc_deaths <- popmodules::component_from_popn_rate
-  calc_int_out <- popmodules::component_from_popn_rate
-  calc_dom_mign <- popmodules::migrate_domestic
-  
+
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
@@ -45,8 +37,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     # change rates are for changes that occured in the 12 months up to 30th June
     # age is the age the cohort is at 30th June
     aged_popn <- curr_yr_popn %>%
-      age_on()
-    
+      popn_age_on() 
+
     at_risk <- curr_yr_popn %>%
       mutate(age = age+1) %>%
       left_join(curr_yr_popn, by=c("gss_code","year","sex","age")) %>%
@@ -72,7 +64,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
     validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
-    deaths <- calc_deaths(popn = aged_popn_w_births,
+    deaths <- component_from_popn_rate(popn = aged_popn_w_births,
                           component_rate = filter(mortality, year == my_year),
                           col_popn = "popn",
                           col_rate = "rate",
@@ -92,7 +84,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       #TODO cosmetic but the df is called int_out_rate when its not always a rate
       int_out <- int_out_rate %>% filter(year == my_year)
     } else {
-      int_out <- calc_int_out(popn = natural_change_popn,
+      int_out <- component_from_popn_rate(popn = natural_change_popn,
                               component_rate = filter(int_out_rate, year == my_year),
                               col_popn = "popn",
                               col_rate = "int_out",
@@ -117,7 +109,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     }
     
     domestic_flow <- natural_change_popn %>%
-      calc_dom_mign(mign_rate = dom_rate,
+      migrate_domestic(mign_rate = dom_rate,
                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
                     col_gss_destination = "gss_in",
                     col_popn = "popn",
