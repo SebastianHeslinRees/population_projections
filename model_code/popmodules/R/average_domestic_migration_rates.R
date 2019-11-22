@@ -57,7 +57,7 @@ average_domestic_migration_rates <- function(origin_destination_rates,
 
   if(any(outflow_sums$total_rate > rate_cap)) {
     ix <- outflow_sums$total_rate > rate_cap
-    n <- sum(outflow_sums$total_rate[ix])
+    n <- sum(ix)
 
     warning(paste0(capture.output({
       print(paste(c("After averaging the backseries, average_domestic_migration rates created rates with sums exceeding the cap of", rate_cap,

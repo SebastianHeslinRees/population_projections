@@ -7,7 +7,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   library(dplyr)
   library(assertthat)
   library(popmodules)
-  
+
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                              first_proj_yr, n_proj_yr, int_out_flow_or_rate)
@@ -38,9 +38,18 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     # age is the age the cohort is at 30th June
     aged_popn <- curr_yr_popn %>%
       popn_age_on() 
+
+    at_risk <- curr_yr_popn %>%
+      mutate(age = age+1) %>%
+      left_join(curr_yr_popn, by=c("gss_code","year","sex","age")) %>%
+      mutate(popn = (popn.x + popn.y)/2)       %>%
+      mutate(popn = ifelse(is.na(popn),0,popn),
+             year = year +1) %>%
+      select(gss_code, year, sex, age, popn) %>%
+      arrange(gss_code, year, sex, age) %>%
+      filter(age <=90)
     
-    # TODO calculate the births from the popn/aged_on_popn combo
-    births_by_mother <- popn_apply_rate(aged_popn,
+    births_by_mother <- popn_apply_rate(at_risk,
                               filter(fertility, year == my_year, age!=0),
                               col_out = "births",
                               many2one = FALSE)
@@ -118,15 +127,17 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                                               col_flow = "flow")
     }
     
-    dom_out <- domestic_flow %>%
+    dom_out <- dtplyr::lazy_dt(domestic_flow) %>%
       group_by(year, gss_out, sex, age) %>%
       summarise(dom_out = sum(flow)) %>%
+      as.data.frame() %>%
       rename(gss_code = gss_out)%>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0))
     
-    dom_in <- domestic_flow %>%
+    dom_in <- dtplyr::lazy_dt(domestic_flow) %>%
       group_by(year, gss_in, sex, age) %>%
       summarise(dom_in = sum(flow)) %>%
+      as.data.frame()%>%
       rename(gss_code = gss_in)%>%
       tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_in=0))
     
@@ -209,8 +220,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   proj_natural_change <- data.frame(data.table::rbindlist(proj_natural_change, use.names=TRUE))
-  proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE)) %>%
-    filter(sex == "female", age %in% 15:49) #TODO move to output
+  proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE))
   
   message(" ")
  

@@ -128,7 +128,7 @@ run_trend_model <- function(config_list) {
  
   ## write the output data
   message("running outputs")
-  output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel, n_csv_elements=7)
+  output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel, n_csv_elements=8)
   household_model_outputs(projection$ons_households, model = "ons", output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   household_model_outputs(projection$dclg_households, model = "dclg", output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   
