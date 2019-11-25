@@ -50,8 +50,6 @@
 #'
 #' @examples
 #'
-#' library(generalpop)
-#'
 #' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 #' rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 #'
