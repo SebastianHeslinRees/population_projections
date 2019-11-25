@@ -4,11 +4,11 @@
 \alias{recode_gss_to_2011}
 \title{Recode LA GSS Codes to 2011 geography}
 \usage{
-recode_gss_to_2011(df, col_geog = "gss_code", col_aggregation,
+recode_gss_to_2011(df_in, col_geog = "gss_code", col_aggregation,
   fun = list(sum), aggregate_data = TRUE)
 }
 \arguments{
-\item{df}{A data frame containing gss_codes and data.}
+\item{df_in}{A data frame containing gss_codes and data.}
 
 \item{col_geog}{A character vector. The column which contains gss codes
 (defaults to \code{gss_code}).}

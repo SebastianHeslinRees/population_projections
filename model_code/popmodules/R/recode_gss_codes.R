@@ -8,7 +8,7 @@
 #' User must define the column containing the gss_code and the columns to group
 #' by
 #'
-#' @param df A data frame containing gss_codes and data.
+#' @param df_in A data frame containing gss_codes and data.
 #' @param col_geog A character vector. The column which contains gss codes
 #'   (defaults to \code{gss_code}).
 #' @param col_aggregation A string or character vector giving column names for
@@ -27,9 +27,10 @@
 #' @export
 
 
-recode_gss_to_2011 <- function(df, col_geog="gss_code", col_aggregation, fun=list(sum), aggregate_data = TRUE){
+recode_gss_to_2011 <- function(df_in, col_geog="gss_code", col_aggregation, fun=list(sum), aggregate_data = TRUE){
 
-  df <- ungroup(df) %>%
+  df <- data.table::copy(df_in) %>% # otherwise the function can modify by reference
+    ungroup() %>%
     rename("gss_code" = col_geog)
 
   i <- which(col_aggregation == col_geog)
