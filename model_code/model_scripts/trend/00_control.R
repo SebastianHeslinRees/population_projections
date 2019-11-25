@@ -4,6 +4,7 @@ run_trend_model <- function(config_list) {
   library(popmodules)
   source("model_code/model_scripts/trend/02_core.R")
   source("model_code/model_scripts/trend/03_output.R")
+  source("model_code/model_scripts/trend/arrange_trend_core_outputs.R")
   
   expected_config <- c("first_proj_yr", 
                        "n_proj_yr",
@@ -122,17 +123,21 @@ run_trend_model <- function(config_list) {
                              first_proj_yr, config_list$n_proj_yr, config_list$int_out_flow_or_rate)
   
   
-  
   ## run the core
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
     
+    curr_yr_fertility <- filter(fertility_rates, year == projection_year, age!=0)
+    curr_yr_mortality <- filter(mortality_rates, year == projection_year)
+    curr_yr_int_out_rates <- filter(int_out_rates, year == projection_year)
+    curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
+    
     projection[[projection_year]] <- trend_core(
       start_population = curr_yr_popn, 
-      fertility_rates = fertility_rates, 
-      mortality_rates = mortality_rates,
-      int_out_rates = int_out_rates,
-      int_in_flows = int_in_flows,
+      fertility_rates = curr_yr_fertility, 
+      mortality_rates = curr_yr_mortality,
+      int_out_rates = curr_yr_int_out_rates,
+      int_in_flows = curr_yr_int_in_flows,
       domestic_rates = domestic_rates,
       int_out_flow_or_rate = config_list$int_out_flow_or_rate,
       constraints = constraints,
@@ -142,7 +147,7 @@ run_trend_model <- function(config_list) {
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
   
-  projection <- arrange_trend_core_output(projection,
+  projection <- arrange_trend_core_outputs(projection,
                                  population, births, deaths, int_out, int_in, dom_in, dom_out,
                                  fertility_rates, mortality_rates,
                                  int_out_rates, int_in_flows, domestic_rates,

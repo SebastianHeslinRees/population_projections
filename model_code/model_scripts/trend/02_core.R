@@ -61,7 +61,7 @@ trend_core <- function(start_population,
     filter(age <=90)
   
   births_by_mother <- popn_apply_rate(at_risk,
-                                      filter(fertility_rates, year == projection_year, age!=0),
+                                      fertility_rates,
                                       col_out = "births",
                                       many2one = FALSE)
   
@@ -76,7 +76,7 @@ trend_core <- function(start_population,
   validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(start_population, year=year+1))
   
   deaths <- component_from_popn_rate(popn = aged_popn_w_births,
-                                     component_rate = filter(mortality_rates, year == projection_year),
+                                     component_rate = mortality_rates,
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_component = "deaths")
@@ -91,12 +91,9 @@ trend_core <- function(start_population,
     mutate(popn = popn - deaths) %>%
     select(-deaths)
   
-  if(int_out_flow_or_rate=="flow"){
-    #TODO cosmetic but the df is called int_out_rates when its not always a rate
-    int_out <- int_out_rates %>% filter(year == projection_year)
-  } else {
+  if(int_out_flow_or_rate=="rate"){
     int_out <- component_from_popn_rate(popn = natural_change_popn,
-                                        component_rate = filter(int_out_rates, year == projection_year),
+                                        component_rate = int_out_rates,
                                         col_popn = "popn",
                                         col_rate = "int_out",
                                         col_component = "int_out")
@@ -110,7 +107,7 @@ trend_core <- function(start_population,
                               col_popn = "int_out")
   }
   
-  int_in <- int_in_flows %>% filter(year == projection_year)
+  int_in <- int_in_flows
   validate_population(int_in, col_data = "int_in")
   validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
   
