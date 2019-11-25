@@ -116,8 +116,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
                     col_rate = "rate", 
                     col_flow = "flow", 
                     pop1_is_subset = FALSE, 
-                    many2one = FALSE, 
-                    missing_levels_rate = TRUE) %>%
+                    many2one = FALSE) %>%
       mutate(year = my_year)
     
     if(!is.null(constraints)){

@@ -36,7 +36,6 @@ mign_out_no_sex <- unique(dplyr::select(mign_out, -sex))
 #                             col_flow = "flow",
 #                             pop1_is_subset = FALSE,
 #                             many2one = FALSE,
-#                             missing_levels_rate = TRUE,
 #                             col_origin_destination = NA) {
 
 test_that("migrate_domestic creates the expected output", {
@@ -49,7 +48,6 @@ test_that("migrate_domestic creates the expected output", {
                                      col_flow = "flow",
                                      pop1_is_subset = FALSE,
                                      many2one = FALSE,
-                                     missing_levels_rate = TRUE,
                                      col_origin_destination = NA),
                     mign_out)
 
@@ -254,8 +252,7 @@ test_that("migrate_domestic throws an error with explicit missing aggregation va
 test_that("migrate_domestic throws an error/warning with implicit missing aggregation values", {
   mign_in <- mign_rate[-1,]
   output_out <- mign_out[-2,]
-  expect_error(migrate_domestic(popn, mign_in, missing_levels_rate = FALSE))
-  expect_warning(temp <- migrate_domestic(popn, mign_in, missing_levels_rate = TRUE))
+  expect_warning(temp <- migrate_domestic(popn, mign_in))
   expect_equivalent(temp, output_out)
 
   popn_in <- popn[-1,]
@@ -334,8 +331,7 @@ test_that("migrate_domestic can deal with missing levels in the migration data w
   output_out <- output_out[-1,]
   output_out <- dplyr::arrange(output_out, age, sex, gss_out)
 
-  expect_error(migrate_domestic(popn, mign_in, missing_levels_rate=FALSE))
-  expect_equivalent(migrate_domestic(popn, mign_in, missing_levels_rate=TRUE),
+  expect_equivalent(migrate_domestic(popn, mign_in),
                     output_out)
 
   mign_in <- tidyr::crossing(mign_in, fill=c("d","e"))
@@ -343,17 +339,11 @@ test_that("migrate_domestic can deal with missing levels in the migration data w
     dplyr::arrange(age, sex, gss_out, gss_in, fill) %>%
     dplyr::select(year, gss_out, sex, age, gss_in, fill, flow)
 
-  expect_error(migrate_domestic(popn,
-                                mign_in,
-                                col_gss_destination = c("gss_in","fill"),
-                                col_origin_destination = c("gss_out", "gss_in"),
-                                missing_levels_rate=FALSE))
 
   expect_equivalent(migrate_domestic(popn,
                                      mign_in,
                                      col_gss_destination = c("gss_in","fill"),
-                                     col_origin_destination = c("gss_out", "gss_in"),
-                                     missing_levels_rate=TRUE),
+                                     col_origin_destination = c("gss_out", "gss_in")),
                     output_out)
 })
 

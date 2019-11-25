@@ -8,7 +8,7 @@ migrate_domestic(popn, mign_rate, col_aggregation = c("year", gss_code =
   "gss_out", "sex", "age"), col_gss_destination = "gss_in",
   col_popn = "popn", col_rate = "rate", col_flow = "flow",
   pop1_is_subset = FALSE, many2one = FALSE,
-  missing_levels_rate = TRUE, col_origin_destination = NA)
+  col_origin_destination = NA)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}
@@ -46,24 +46,14 @@ migration rates. Default "rate"}
 \item{col_flow}{String. Name of column to write output flows to. Default
 "flow".}
 
-\item{pop1_is_subset}{Logical. If the two input data frames cover the same
-domain and you expect every level of \code{mign_rate} to be matched to by a
-level in \code{popn} set this to TRUE, and this will be checked. Default
-FALSE.}
+\item{pop1_is_subset}{Logical. Passed to \code{popn_apply_rate}. If the two
+input data frames cover the same domain and you expect every level of
+\code{mign_rate} to be matched to by a level in \code{popn} set this to
+TRUE, and this will be checked. Default FALSE.}
 
-\item{many2one}{Logical. Setting to FALSE will check that no more than
-one level from \code{popn} matches to each level of \code{mign_rate}.
-Default TRUE.}
-
-\item{missing_levels_rate}{Logical. Setting this to TRUE will allow implicity
-missing origin-destination flows and assume that they are zero. A warning
-will not be thrown if there is zero outmigration for an entire
-aggregation level in a geography and these geographies will **not** be
-included in the output data frame, meaning you may need to call
-\code{tidyr::complete} on the results (after aggregation to in/out/net
-flows). Note that if this is set to FALSE, your origin-destination flows
-must contain rates from each geography to itself. When FALSE an error will
-be thrown if missing levels are detected. Default TRUE.}
+\item{many2one}{Logical. Passed to \code{popn_apply_rate}. Setting to FALSE
+will check that no more than one level from \code{popn} matches to each
+level of \code{mign_rate}. Default TRUE.}
 
 \item{col_origin_destination}{Character vector. Names of the origin and
 destination columns in \code{mign_rate}. Only required when
@@ -84,6 +74,12 @@ The output data frame will use the column names of the migration dataset for
 the origin and destination columns (if origin columns differ). This means
 that, with default column names, the population's \code{gss_code} column will
 be renamed to \code{gss_out}.
+
+The function assumes implicity missing origin-destination flows are zero. It
+permits zero outmigration for an entire aggregation level, and this level
+will **not** be included in the output data frame, meaning you may need to
+call \code{tidyr::complete} on the results (after aggregation to in/out/net
+flows).
 
 The function tries to maintain tibbles, factors and grouping to match the
 inputs, with the input population taking precedence when there is a conflict.
@@ -121,7 +117,6 @@ migrate_domestic(popn,
                  col_flow = "flow",
                  pop1_is_subset = FALSE,
                  many2one = TRUE,
-                 missing_levels_rate = TRUE,
                  col_origin_destination = NA)
 
 # equivalent to
