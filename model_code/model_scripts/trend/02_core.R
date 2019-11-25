@@ -176,7 +176,6 @@ trend_core <- function(start_population,
   
   # FIXME / TODO This setup creates negative populations - For now
   # I'm just setting -ve pops to zero and noting this in the pull request
-  
   if(any(next_yr_popn$next_popn < 0)) {
     ix <- next_yr_popn$next_popn < 0
     sum_negative <- sum(next_yr_popn$next_popn[ix])

@@ -47,8 +47,8 @@ run_trend_model <- function(config_list) {
   validate_paths <- lapply(seq(file_list),
                            function(i) {
                              if(!is.null(file_list[[i]])){
-                               asserttthat::assert_that(file.exists(file_list[[i]]),
-                                                        msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specific path"))
+                               assertthat::assert_that(file.exists(file_list[[i]]),
+                                                       msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specific path"))
                                file_ext <- tolower(strsplit(file_list[[i]], split="\\.")[[1]][[2]])
                                assertthat::assert_that(file_ext == "rds",
                                                        msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile is not .rds format"))
@@ -114,29 +114,35 @@ run_trend_model <- function(config_list) {
   int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
   domestic_rates <- domestic_rates %>% select(gss_out, gss_in, age, sex, rate)
   
-  validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
-                             fertility_rates, mortality_rates, int_out_rates, int_in_flows, domestic_rates,
-                             first_proj_yr, n_proj_yr, int_out_flow_or_rate)
   
   # set up projection
+  first_proj_yr <- config_list$first_proj_yr
+  n_proj_yr <- config_list$n_proj_yr
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
+  int_out_flow_or_rate <- config_list$int_out_flow_or_rate
+  
+  
+  validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                             fertility_rates, mortality_rates, int_out_rates, int_in_flows, domestic_rates,
+                             first_proj_yr, n_proj_yr, config_list$int_out_flow_or_rate)
   
   ## run the core
+  projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
     
-    projection[[year]] <- trend_core(
+    projection[[projection_year]] <- trend_core(
       start_population = curr_yr_popn, 
       fertility_rates = fertility_rates, 
       mortality_rates = mortality_rates,
       int_out_rates = int_out_rates,
       int_in_flows = int_in_flows,
-      domestic_rates = deomstic_rates,
-      int_out_flow_or_rate = int_out_flow_or_rate,
+      domestic_rates = domestic_rates,
+      int_out_flow_or_rate = config_list$int_out_flow_or_rate,
       constraints = constraints,
       upc = upc,
       projection_year = projection_year)
-    
+
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
   
