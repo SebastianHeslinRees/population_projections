@@ -15,6 +15,12 @@ project_forward_flat <- function(df, last_proj_yr) {
   hold_yr <- max(df$year)
   first_proj_yr <- hold_yr+1
 
+  if(hold_yr >= last_proj_yr) {
+    warning(paste0("project_forward_flat was given a dataframe finishing in year", hold_yr,
+                   "and asked to project forward to", last_proj_yr, "- returning input unchanged."))
+    return(df)
+  }
+
   # filter to the hold year
   hold_data <- dplyr::filter(df, year == hold_yr)
 
