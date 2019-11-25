@@ -29,8 +29,6 @@
 scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
                                    n_years_to_avg, avg_or_trend, data_col="births", output_col){
 
-  validate_scaled_fertility_curve_filetype(popn_mye_path, births_mye_path, target_curves_filepath)
-
   population <- data.frame(readRDS(popn_mye_path))
   births <- data.frame(readRDS(births_mye_path))
   target_curves <- readRDS(target_curves_filepath) %>% select(-year)
@@ -138,19 +136,4 @@ validate_scaled_fertility_curve_input <- function(population, births, target_cur
   invisible(TRUE)
 }
 
-#---------------------------------------------
-
-validate_scaled_fertility_curve_filetype <- function(path_1, path_2, path_3) {
-
-  for(i in c(path_1, path_2, path_3)){
-    filepath <- i
-    file_ext <- tolower(strsplit(basename(filepath), split="\\.")[[1]][[2]])
-
-    assertthat::assert_that(file_ext == "rds",
-                            msg = paste(i,": file must be a .rds file"))
-  }
-
-  invisible(TRUE)
-
-}
 

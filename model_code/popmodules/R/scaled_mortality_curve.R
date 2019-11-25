@@ -29,8 +29,6 @@
 scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_path, target_curves_filepath,
                                    last_data_year, n_years_to_avg, avg_or_trend, data_col="deaths", output_col){
 
-  validate_scaled_mortality_curve_filetype(popn_mye_path, births_mye_path, deaths_mye_path, target_curves_filepath)
-
   population <- data.frame(readRDS(popn_mye_path))
   births <- data.frame(readRDS(births_mye_path))
   deaths <- data.frame(readRDS(deaths_mye_path))
@@ -119,20 +117,4 @@ validate_scaled_mortality_curve_inputs <- function(population, births, deaths, t
   invisible(TRUE)
 
   }
-
-#----------------------------------------------
-
-validate_scaled_mortality_curve_filetype <- function(path_1, path_2, path_3, path_4) {
-
-  for(filepath in c(path_1, path_2, path_3, path_4)){
-
-    file_ext <- tolower(strsplit(basename(filepath), split="\\.")[[1]][[2]])
-
-    assertthat::assert_that(file_ext == "rds",
-                            msg = paste(filepath,": file must be a .rds file"))
-  }
-
-  invisible(TRUE)
-
-}
 
