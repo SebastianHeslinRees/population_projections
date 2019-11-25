@@ -182,7 +182,7 @@ migrate_domestic <- function(popn,
               msg = "migrate_domestic flows exceeding the population size")
   # TODO surely there's some other validation we should do here
 
-  return(migration)
+  return(as.data.frame(migration))
 }
 
 

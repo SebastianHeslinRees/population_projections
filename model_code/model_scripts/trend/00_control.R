@@ -97,16 +97,14 @@ run_trend_model <- function(config_list) {
   domestic_rates <- evaluate_fns_list(config_list$dom_rate_fns)
   constraints <- evaluate_fns_list(config_list$constraint_fns)
   
-  #Prop backeries
+  #Prep backeries
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
   births <- births %>% select(year, gss_code, age, sex, births)
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
-  #TODO Figure out why the core outputs these in a different order to other components
-  #For now just switch the order here
-  dom_out <- dom_out %>% select(year, gss_code, sex, age, dom_out)
-  dom_in <- dom_in %>% select(year, gss_code, sex, age, dom_in)
+  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out)
+  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in)
   
   fertility_rates <- fertility_rates %>% select(year, gss_code, age, sex, rate)
   mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
@@ -114,18 +112,16 @@ run_trend_model <- function(config_list) {
   int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
   domestic_rates <- domestic_rates %>% select(gss_out, gss_in, age, sex, rate)
   
+  first_proj_yr <- config_list$first_proj_yr
+  last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
+  curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
   
   # set up projection
-  first_proj_yr <- config_list$first_proj_yr
-  n_proj_yr <- config_list$n_proj_yr
-  last_proj_yr <-  first_proj_yr + n_proj_yr -1
-  curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
-  int_out_flow_or_rate <- config_list$int_out_flow_or_rate
-  
-  
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility_rates, mortality_rates, int_out_rates, int_in_flows, domestic_rates,
-                             first_proj_yr, n_proj_yr, config_list$int_out_flow_or_rate)
+                             first_proj_yr, config_list$n_proj_yr, config_list$int_out_flow_or_rate)
+  
+  
   
   ## run the core
   projection <- list()
@@ -146,7 +142,7 @@ run_trend_model <- function(config_list) {
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
   
-  projection <- tidying_function(projection,
+  projection <- arrange_trend_core_output(projection,
                                  population, births, deaths, int_out, int_in, dom_in, dom_out,
                                  fertility_rates, mortality_rates,
                                  int_out_rates, int_in_flows, domestic_rates,

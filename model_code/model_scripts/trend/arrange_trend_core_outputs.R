@@ -1,4 +1,4 @@
-tidying_function <- function(projection,
+arrange_trend_core_outputs <- function(projection,
                              population, births, deaths, int_out, int_in, dom_in, dom_out,
                              fertility_rates, mortality_rates,
                              int_out_rates, int_in_flows, domestic_rates,

@@ -142,14 +142,14 @@ trend_core <- function(start_population,
     summarise(dom_out = sum(flow)) %>%
     as.data.frame() %>%
     rename(gss_code = gss_out)%>%
-    tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_out=0))
+    tidyr::complete(year, gss_code, age=0:90, sex, fill=list(dom_out=0))
   
   dom_in <- dtplyr::lazy_dt(domestic_flow) %>%
     group_by(year, gss_in, sex, age) %>%
     summarise(dom_in = sum(flow)) %>%
     as.data.frame()%>%
     rename(gss_code = gss_in)%>%
-    tidyr::complete(year, gss_code, sex, age=0:90, fill=list(dom_in=0))
+    tidyr::complete(year, gss_code, age=0:90, sex, fill=list(dom_in=0))
   
   if(is.null(upc)){
     
