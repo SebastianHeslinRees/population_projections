@@ -4,10 +4,11 @@
 \alias{smooth_fertility}
 \title{Smooth a fertility curve}
 \usage{
-smooth_fertility(asfr.structure, reproducible = TRUE)
+smooth_fertility(asfr_structure, reproducible = TRUE,
+  age_range_to_model = c(15:49))
 }
 \arguments{
-\item{asfr.structure}{A dataframe containing the age specific fertility rates.  Ages must be in the range
+\item{asfr_structure}{A dataframe containing the age specific fertility rates.  Ages must be in the range
 15 to 44. must contain columns \code{gss_code} which contains the geography, \code{sex} which contains sex
 encoded as "female" or "female"/"male", \code{age} which contains ages 15 to 44 and \code{fert_rate} which
 contains the fertility rate}
