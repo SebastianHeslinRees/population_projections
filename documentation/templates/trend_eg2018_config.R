@@ -33,7 +33,7 @@ fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 2
-int_out_flow_or_rate <- "rate"
+int_out_method <- "rate"
 int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2018
@@ -106,10 +106,10 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
+int_out_fns <- list(
   list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
                                                                  births_mye_path = births_mye_path,
-                                                                 flow_or_rate = int_out_flow_or_rate,
+                                                                 flow_or_rate = int_out_method,
                                                                  component_path = int_out_mye_path,
                                                                  last_data_year = int_out_last_data_year,
                                                                  n_years_to_avg = int_out_years_to_avg,
@@ -169,12 +169,12 @@ config_list <- list(
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
-  int_out_rate_fns = int_out_rate_fns,
+  int_out_fns = int_out_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
-  int_out_flow_or_rate = int_out_flow_or_rate,
+  int_out_method = int_out_method,
   write_excel  = write_excel,
   write_QA = write_QA,
   communal_est_pop_path = communal_est_pop_path,

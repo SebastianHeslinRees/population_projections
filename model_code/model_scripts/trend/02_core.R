@@ -8,13 +8,13 @@
 #' @param fertility_rates A data frame. A set of age-secific fertility rates to be applied to the population
 #' @param mortality_rates A data frame. A set of age/sex-specific mortality probabilities to be
 #'   applied to the population
-#' @param int_out_rates A data frame. A set of international out migration rates to be applied to
+#' @param int_out_flows_rates A data frame. A set of international out migration rates to be applied to
 #'   the population, or a set of international out flow totals to be subtracted from the population
 #' @param int_in_flows A data frame. A set of international in migration flows to be added to
 #'   the population
 #' @param domestic_rates. A data frame. A set of orgin-destination migration rates by age and sex
 #'   to be applied to the population
-#' @param int_out_flow_or_rate. A string. A switch to define whether international out migration is
+#' @param int_out_method. A string. A switch to define whether international out migration is
 #'   a rate or a flow. Either \code{rate} or \code{flow}
 #' @param constarints A list. A set of national-level constraints for each component. If the projection
 #'   is to be run unconstrained this is set to NULL. Default \code{NULL}
@@ -33,9 +33,9 @@
 
 trend_core <- function(start_population, 
                        fertility_rates, mortality_rates,
-                       int_out_rates, int_in_flows,
+                       int_out_flows_rates, int_in_flows,
                        domestic_rates,
-                       int_out_flow_or_rate,
+                       int_out_method,
                        constraints = NULL, upc = NULL,
                        projection_year) {
   
@@ -91,13 +91,14 @@ trend_core <- function(start_population,
     mutate(popn = popn - deaths) %>%
     select(-deaths)
   
-  if(int_out_flow_or_rate=="rate"){
+  if(int_out_method=="rate"){
     int_out <- component_from_popn_rate(popn = natural_change_popn,
-                                        component_rate = int_out_rates,
+                                        component_rate = int_out_flows_rates,
                                         col_popn = "popn",
                                         col_rate = "int_out",
                                         col_component = "int_out")
-  }
+  } 
+  
   validate_population(int_out, col_data = "int_out")
   validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
   
