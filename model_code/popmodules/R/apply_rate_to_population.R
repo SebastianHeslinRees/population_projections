@@ -53,7 +53,7 @@
 #' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 #' rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
 #'
-#' component <- popn_apply_rate(popn,
+#' component <- apply_rate_to_population(popn,
 #'                              rate,
 #'                              col_aggregation = c("year", "gss_code", "sex", "age"),
 #'                              col_popn = "popn",
@@ -66,7 +66,7 @@
 #'                              missing_levels_rate = FALSE)
 #'
 #' # Due to default parameter values, this is equivalent to
-#' component <- popn_apply_rate(popn, rate)
+#' component <- apply_rate_to_population(popn, rate)
 #'
 #' @export
 #'
@@ -76,12 +76,12 @@
 # TODO Would it be useful to add an option to return the output as the input +
 # an extra column, rather than the current version which strips down to
 # aggregation levels + an extra column? Of course you can just use
-#     left_join(input, popn_apply_rate(input, rate))
+#     left_join(input, apply_rate_to_population(input, rate))
 #  but for frequent operations on large datasets, it could be sped up if we
 # just don't subset inside this function.
 
 
-popn_apply_rate <- function(popn,
+apply_rate_to_population <- function(popn,
                             popn_rate,
                             col_aggregation = c("year", "gss_code", "sex", "age"),
                             col_popn = "popn",
@@ -95,7 +95,7 @@ popn_apply_rate <- function(popn,
 
   # Validate input
   # --------------
-  validate_popn_apply_rate_input(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
+  validate_apply_rate_to_population_input(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
                                  pop1_is_subset, many2one, additional_rate_levels,
                                  missing_levels_popn, missing_levels_rate)
 
@@ -148,7 +148,7 @@ popn_apply_rate <- function(popn,
 
   # Validate output
   # ---------------
-  validate_popn_apply_rate_output(popn,
+  validate_apply_rate_to_population_output(popn,
                                   col_aggregation,
                                   col_out,
                                   output,
@@ -165,35 +165,35 @@ popn_apply_rate <- function(popn,
 
 
 # Check the function input is valid
-validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
+validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
                                            pop1_is_subset, many2one, additional_rate_levels,
                                            missing_levels_popn, missing_levels_rate) {
 
   # Type checking
   assert_that(is.data.frame(popn),
-              msg = "popn_apply_rate needs a data frame as input")
+              msg = "apply_rate_to_population needs a data frame as input")
   assert_that(is.data.frame(popn_rate),
-              msg = "popn_apply_rate needs a data frame of popn_rate data")
+              msg = "apply_rate_to_population needs a data frame of popn_rate data")
   assert_that(is.character(col_aggregation),
-              msg = "popn_apply_rate needs a string or character vector as the col_aggregation parameter")
+              msg = "apply_rate_to_population needs a string or character vector as the col_aggregation parameter")
   assert_that(is.string(col_popn),
-              msg = "popn_apply_rate needs a string as the col_popn parameter")
+              msg = "apply_rate_to_population needs a string as the col_popn parameter")
   assert_that(is.string(col_rate),
-              msg = "popn_apply_rate needs a string as the col_rate parameter")
+              msg = "apply_rate_to_population needs a string as the col_rate parameter")
   assert_that(is.string(col_out),
-              msg = "popn_apply_rate needs a string as the col_out parameter")
+              msg = "apply_rate_to_population needs a string as the col_out parameter")
   assert_that(is.string(col_out),
-              msg = "popn_apply_rate needs a string as the col_out parameter")
+              msg = "apply_rate_to_population needs a string as the col_out parameter")
   assert_that(rlang::is_bool(pop1_is_subset),
-              msg = "popn_apply_rate needs a logical value as the pop1_is_subset parameter")
+              msg = "apply_rate_to_population needs a logical value as the pop1_is_subset parameter")
   assert_that(rlang::is_bool(many2one),
-              msg = "popn_apply_rate needs a logical value as the many2one parameter")
+              msg = "apply_rate_to_population needs a logical value as the many2one parameter")
   assert_that(identical(additional_rate_levels, NA) | is.character(additional_rate_levels),
               msg = "additional_rate_levels should be NA or a character vector")
   assert_that(rlang::is_bool(missing_levels_popn),
-              msg = "popn_apply_rate needs a logical value for missing_levels_popn")
+              msg = "apply_rate_to_population needs a logical value for missing_levels_popn")
   assert_that(rlang::is_bool(missing_levels_rate),
-              msg = "popn_apply_rate needs a logical value for missing_levels_rate")
+              msg = "apply_rate_to_population needs a logical value for missing_levels_rate")
 
 
   # Other checks
@@ -209,34 +209,34 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
   col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and popn_rate aggregation levels
 
   assert_that(!col_popn %in% names(col_aggregation),
-              msg = "popn_apply_rate was given a population count column name that is also a named aggregation column")
+              msg = "apply_rate_to_population was given a population count column name that is also a named aggregation column")
   assert_that(!col_rate %in% all_rate_cols,
-              msg = "popn_apply_rate was given a rate column name that is also a named aggregation column")
+              msg = "apply_rate_to_population was given a rate column name that is also a named aggregation column")
   assert_that(all(names(col_aggregation) %in% names(popn)),
-              msg = "in popn_apply_rate, all columns named in col_aggregation must be columns in the popn table")
+              msg = "in apply_rate_to_population, all columns named in col_aggregation must be columns in the popn table")
   assert_that(!any(duplicated(names(col_aggregation))),
-              msg = "duplicated population column names were provided to popn_apply_rate")
+              msg = "duplicated population column names were provided to apply_rate_to_population")
   assert_that(!any(duplicated(as.character(col_aggregation))),
-              msg = "duplicated popn_rate column names were provided to popn_apply_rate")
+              msg = "duplicated popn_rate column names were provided to apply_rate_to_population")
   assert_that(any(col_aggregation %in% names(popn_rate)),
-              msg = "in popn_apply_rate, no aggregation column names were found in popn_rate - at least one must be present")
+              msg = "in apply_rate_to_population, no aggregation column names were found in popn_rate - at least one must be present")
   assert_that(!col_rate %in% names(col_aggregation),
-              msg = "popn_apply_rate can't have a col_rate that is also a named aggregation column in the input")
+              msg = "apply_rate_to_population can't have a col_rate that is also a named aggregation column in the input")
   assert_that(is.numeric(popn[[col_popn]]),
-              msg = paste("popn_apply_rate needs a numeric column in the specified population count col:", col_popn))
+              msg = paste("apply_rate_to_population needs a numeric column in the specified population count col:", col_popn))
   assert_that(is.numeric(popn_rate[[col_rate]]),
-              msg = paste("popn_apply_rate needs a numeric column in the specified popn_rate rate col:", col_rate))
+              msg = paste("apply_rate_to_population needs a numeric column in the specified popn_rate rate col:", col_rate))
   assert_that(!col_out %in% names(col_aggregation),
-              msg = paste("popn_apply_rate can't handle an output count column with the same name as one of the aggregation columns",
+              msg = paste("apply_rate_to_population can't handle an output count column with the same name as one of the aggregation columns",
                           "\nOutput column:", col_out,
                           "\nAggregation columns:", col_aggregation))
 
 
   if(any(popn_rate[[col_rate]] < 0)) {
-    warning("popn_apply_rate was passed negative rates")
+    warning("apply_rate_to_population was passed negative rates")
   }
   if(col_out %in% names(popn)) {
-    warning(paste("popn_apply_rate is writing output count to a column name that was also in the input:", col_out,
+    warning(paste("apply_rate_to_population is writing output count to a column name that was also in the input:", col_out,
                   "\nThe output will contain the output in this column, so be careful with subsequent joins or binds."))
   }
 
@@ -254,7 +254,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
   }
 
   assert_that(length(join_by) > 0,
-              msg = "popn_apply_rate must share some aggregation column names with the input popn_rate, or a column mapping must be included in the col_aggregation parameter")
+              msg = "apply_rate_to_population must share some aggregation column names with the input popn_rate, or a column mapping must be included in the col_aggregation parameter")
 
   validate_population(popn,
                       col_aggregation = names(col_aggregation),
@@ -286,7 +286,7 @@ validate_popn_apply_rate_input <- function(popn, popn_rate, col_aggregation, col
 
 # Check the function output isn't doing anything unexpected
 
-validate_popn_apply_rate_output <- function(popn, col_aggregation, col_out, output, one2many, additional_rate_levels, missing_levels_popn, missing_levels_rate) {
+validate_apply_rate_to_population_output <- function(popn, col_aggregation, col_out, output, one2many, additional_rate_levels, missing_levels_popn, missing_levels_rate) {
 
   col_aggregation <- .convert_to_named_vector(col_aggregation)
 

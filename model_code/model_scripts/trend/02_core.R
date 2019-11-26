@@ -7,11 +7,11 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   library(dplyr)
   library(assertthat)
   library(popmodules)
-
+  
   validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
                              fertility, mortality, int_out_rate, int_in_proj, dom_rate,
                              first_proj_yr, n_proj_yr, int_out_flow_or_rate)
-
+  
   # set up projection
   last_proj_yr <-  first_proj_yr + n_proj_yr -1
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
@@ -31,14 +31,14 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     
     cat('\r',paste("  Projecting year",my_year))
     flush.console()
-
+    
     # aged on population is used due to definitions of MYE to ensure the correct denominator
     # population in population at 30th June
     # change rates are for changes that occured in the 12 months up to 30th June
     # age is the age the cohort is at 30th June
     aged_popn <- curr_yr_popn %>%
       popn_age_on() 
-
+    
     at_risk <- curr_yr_popn %>%
       mutate(age = age+1) %>%
       left_join(curr_yr_popn, by=c("gss_code","year","sex","age")) %>%
@@ -49,10 +49,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       arrange(gss_code, year, sex, age) %>%
       filter(age <=90)
     
-    births_by_mother <- popn_apply_rate(at_risk,
-                              filter(fertility, year == my_year, age!=0),
-                              col_out = "births",
-                              many2one = FALSE)
+    births_by_mother <- apply_rate_to_population(at_risk,
+                                                 filter(fertility, year == my_year, age!=0),
+                                                 col_out = "births",
+                                                 many2one = FALSE)
     
     if(!is.null(constraints)){
       births_by_mother <- births_constrain(births=births_by_mother, constraint=constraints$births_constraint)
@@ -65,10 +65,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(curr_yr_popn, year=year+1))
     
     deaths <- component_from_popn_rate(popn = aged_popn_w_births,
-                          component_rate = filter(mortality, year == my_year),
-                          col_popn = "popn",
-                          col_rate = "rate",
-                          col_component = "deaths")
+                                       component_rate = filter(mortality, year == my_year),
+                                       col_popn = "popn",
+                                       col_rate = "rate",
+                                       col_component = "deaths")
     validate_population(deaths, col_data = "deaths", comparison_pop = mutate(curr_yr_popn, year=year+1))
     validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
     
@@ -85,10 +85,10 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       int_out <- int_out_rate %>% filter(year == my_year)
     } else {
       int_out <- component_from_popn_rate(popn = natural_change_popn,
-                              component_rate = filter(int_out_rate, year == my_year),
-                              col_popn = "popn",
-                              col_rate = "int_out",
-                              col_component = "int_out")
+                                          component_rate = filter(int_out_rate, year == my_year),
+                                          col_popn = "popn",
+                                          col_rate = "int_out",
+                                          col_component = "int_out")
     }
     validate_population(int_out, col_data = "int_out")
     validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
@@ -109,14 +109,14 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     }
     
     domestic_flow <- natural_change_popn %>%
-      migrate_domestic(mign_rate = dom_rate,
-                    col_aggregation = c("gss_code"="gss_out", "sex", "age"),
-                    col_gss_destination = "gss_in",
-                    col_popn = "popn",
-                    col_rate = "rate", 
-                    col_flow = "flow", 
-                    pop1_is_subset = FALSE, 
-                    many2one = FALSE) %>%
+      apply_domestic_migration_rates(mign_rate = dom_rate,
+                                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
+                                     col_gss_destination = "gss_in",
+                                     col_popn = "popn",
+                                     col_rate = "rate", 
+                                     col_flow = "flow", 
+                                     pop1_is_subset = FALSE, 
+                                     many2one = FALSE) %>%
       mutate(year = my_year)
     
     if(!is.null(constraints)){
@@ -149,7 +149,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
         left_join(dom_out, by = c("year", "gss_code", "age", "sex")) %>% 
         left_join(dom_in, by = c("year", "gss_code", "age", "sex")) %>% 
         mutate(next_popn = popn - int_out + int_in - dom_out + dom_in)
-
+      
     } else {
       
       next_yr_popn <- natural_change_popn %>% 
@@ -173,7 +173,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
       
       warning(paste0(capture.output({
         print(paste("Negative populations were created in the", my_year, "loop, summing to", sum_negative))
-      
+        
         if(sum(ix) < 20) {
           print("Values:")
           print(next_yr_popn[ix,])
@@ -187,7 +187,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
           })
         }
       }), collapse = "\n"))
-
+      
       next_yr_popn <- mutate(next_yr_popn, next_popn = ifelse(next_popn < 0, 0, next_popn))
     }
     
@@ -208,8 +208,8 @@ trend_core <- function(population, births, deaths, int_out, int_in,
     proj_births_by_mother[[length(proj_dom_in)+1]] <- births_by_mother
     
     curr_yr_popn <- next_yr_popn
-  
-    }
+    
+  }
   
   proj_popn   <- data.frame(data.table::rbindlist(proj_popn, use.names=TRUE))
   proj_deaths <- data.frame(data.table::rbindlist(proj_deaths, use.names=TRUE))
@@ -222,7 +222,7 @@ trend_core <- function(population, births, deaths, int_out, int_in,
   proj_births_by_mother <- data.frame(data.table::rbindlist(proj_births_by_mother, use.names=TRUE))
   
   message(" ")
- 
+  
   #For int_out and domestic the rate is constant so there is no need to output all years
   int_out_rate <- filter(int_out_rate, year <= first_proj_yr)
   
