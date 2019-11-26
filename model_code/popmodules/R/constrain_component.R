@@ -39,11 +39,11 @@
 
 # TODO add nesting!
 
-popn_constrain <- function(popn,
-                           constraint,
-                           col_aggregation = c("year", "sex", "age", "country"),
-                           col_popn,
-                           col_constraint = col_popn){
+constrain_component <- function(popn,
+                                 constraint,
+                                 col_aggregation = c("year", "sex", "age", "country"),
+                                 col_popn,
+                                 col_constraint = col_popn){
   
   country <- ifelse("country" %in% col_aggregation, TRUE, FALSE)
   
@@ -51,7 +51,7 @@ popn_constrain <- function(popn,
   
   cols <- names(popn)
   
- #if different countries have different scaling
+  #if different countries have different scaling
   if(country){
     if(!"country" %in% names(popn)){
       popn <- mutate(popn, country = substr(gss_code,1,1))
@@ -77,7 +77,7 @@ popn_constrain <- function(popn,
     data.frame() %>%
     rbind(dont_scale) %>%
     select(cols)
-
+  
   return(scaled_popn)
 }
 
