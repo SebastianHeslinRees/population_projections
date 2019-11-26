@@ -142,9 +142,9 @@ dom_rate_fns <- list(
                                                          rate_cap = NULL)),
   
   list(fn = popmodules::calculate_mean_domestic_rates, args = list(last_data_year = dom_mig_last_data_year,
-                                                                      n_years_to_avg = dom_mig_years_to_avg,
-                                                                      col_rate = "rate",
-                                                                      rate_cap = 0.8))
+                                                                   n_years_to_avg = dom_mig_years_to_avg,
+                                                                   col_rate = "rate",
+                                                                   rate_cap = 0.8))
 )
 
 #TODO figure out the best way to get a null value when we don't want to constraint
