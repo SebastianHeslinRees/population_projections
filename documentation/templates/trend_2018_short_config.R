@@ -147,8 +147,18 @@ dom_rate_fns <- list(
                                                                    rate_cap = 0.8))
 )
 
-#TODO figure out the best way to get a null value when we don't want to constraint
-constraint_fns <- list(list(fn = function() NULL, args = list()))
+constraint_fns <- list(
+  list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
+                                                               births_path = births_constraint_path,
+                                                               deaths_path = deaths_constraint_path,
+                                                               int_in_path = int_in_constraint_path,
+                                                               int_out_path = int_out_constraint_path,
+                                                               cross_in_path = cross_in_constraint_path,
+                                                               cross_out_path = cross_out_constraint_path))
+)
+
+#constraint_fns <- list(list(fn = function() NULL, args = list()))
+#TODO figure out the best way to get a null value when we don't want to constrain
 
 qa_areas_of_interest <- list("London", "E09000001")
 
