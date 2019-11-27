@@ -124,5 +124,19 @@ test_that("international_rates_and_flows: error in rate calc", {
   expect_equivalent(x, out_traj)
 })
 
+
+test_that("international_rates_and_flows: error in rate calc", {
+  expect_warning(international_rates_and_flows(popn_mye_path=popn_path,
+                                               births_mye_path=births_path,
+                                               flow_or_rate="rate",
+                                               component_path=int_out_path,
+                                               last_data_year=2005,
+                                               n_years_to_avg=3,
+                                               data_col="int_out",
+                                               first_proj_yr=2006,
+                                               n_proj_yr=6,
+                                               rate_cap = 0.01))
+})
+
 #x <- international_flows(component=int_in, last_data_year=2005, years_to_avg=3, flow_col="int_in", n_proj_years=5)
 #y <- left_join(x, in_flow, by = c("year", "gss_code", "age", "sex")) %>% mutate(diff = int_in.x - int_in.y)

@@ -47,7 +47,8 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
 
   district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
 
-  household_rates <- readRDS(hh_rep_rates_path)
+  household_rates <- readRDS(hh_rep_rates_path) %>%
+    project_forward_flat(max(popn$year))
 
   #population <- aggregate_geography(popn) %>%
   #  create_regional_data(district_to_region)
@@ -70,9 +71,10 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
                                                             population_age_groups,
                                                             rates_ages = c("75_79","80_84","85_89","90+"),
                                                             first_proj_yr = first_proj_yr)
-
+  
   household_population <- get_household_popn(population_age_groups, communal_establishment)
-
+  
+  
   household_projection <- apply_household_rates(household_population, household_rates,
                                                 rates_col="HRR", hh_pop_col="household_popn")
 
@@ -124,7 +126,7 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
   stg1_total_households <- stage1_output$constrained
 
   headship_rates <- readRDS(stage2_file_path) %>%
-    extend_data(max(household_popn$year)) %>%
+    project_forward_flat(max(household_popn$year)) %>%
     filter(gss_code %in% unique(household_popn$gss_code))
 
 

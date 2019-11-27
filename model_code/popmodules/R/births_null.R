@@ -23,7 +23,6 @@
 #'
 #' @examples
 #'
-#' library(births)
 #' pop <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), popn = 100)
 #'
 #' pop_births <- births_null(pop,
@@ -35,7 +34,7 @@
 #' pop_births <- births_null(pop)
 #'
 #' @export
-#'
+
 births_null <- function(pop,
                         col_aggregation = c("year", "gss_code", "age", "sex"),
                         const = 0,
@@ -46,7 +45,7 @@ births_null <- function(pop,
   col_aggregation <- names(pop)[ names(pop) %in% col_aggregation ] # reorder to match column ordering in pop
 
   births <- dplyr::group_by_at(pop, .vars = col_aggregation) %>%
-    dplyr::summarise(births = const, {{col_age}} := 0) %>%
+    dplyr::summarise(births = const, !!sym(col_age) := 0) %>%
     dplyr::ungroup()
 
   validate_births_output(pop, col_aggregation, births, col_age)

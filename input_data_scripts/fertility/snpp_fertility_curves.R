@@ -1,6 +1,7 @@
 #Fertility Curves
 library(dplyr)
 library(tidyr)
+library(dtplyr)
 library(data.table)
 library(popmodules)
 
@@ -10,10 +11,12 @@ over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP
 
 #Data for English LAs
 ons_fert <- data.table::fread(fert_curve_file) %>%
-  gather(year, fert_rate, 4:28) %>%
+  pivot_longer(cols=4:28, names_to = "year", values_to = "fert_rate") %>%
+  lazy_dt() %>%
   filter(year == 2017) %>%
   mutate(sex = "female") %>%
-  select(gss_code, sex, age, fert_rate)
+  select(gss_code, sex, age, fert_rate) %>%
+  data.frame()
 
 #Data for Wales, Scotland and NI
 national_fert <- data.table::fread(national_file) %>%
@@ -41,8 +44,7 @@ ons_fert <- rbind(ons_fert, national_fert, wales) %>%
                                  fun = list(mean)) %>%
   as.data.frame()
 
-# Rename col and sex to "F" is so that the fit_fertility_rates function can work
-# TODO change the fit_fertility_rates function to accept "fert_rate" and "female"
+#smooth curves
 ons_fert <- ons_fert %>%
   filter(age < 45)
 smoothed_curves <- smooth_fertility(ons_fert)$data %>%

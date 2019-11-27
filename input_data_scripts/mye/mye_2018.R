@@ -120,7 +120,7 @@ international_out <- filter(mye_coc, component == "international_out") %>% selec
 international_net <- filter(mye_coc, component == "international_net") %>% select(-component) %>% rename(int_net = value)
 
 #Domestic here does not include Scotland and NI
-#THis is processed this from the domestic migration dataset in domestic_migration_2018.R
+#This is processed this from the domestic migration dataset in domestic_migration_2018.R
 # domestic_in <- filter(mye_coc, component == "internal_in") %>% select(-component) %>% rename(dom_in = value)
 # domestic_out <- filter(mye_coc, component == "internal_out") %>% select(-component) %>% rename(dom_out = value)
 # domestic_net <- filter(mye_coc, component == "internal_net") %>% select(-component) %>% rename(dom_net = value)

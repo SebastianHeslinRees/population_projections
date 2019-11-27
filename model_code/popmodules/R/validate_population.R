@@ -67,7 +67,7 @@ validate_population <- function( population,
   col_aggregation <- col_aggregation[ col_aggregation %in% names(population) ]
   col_data <- col_data[ col_data %in% names(population) ]  # works with col_data = NA
 
-  test_population <- dplyr::select(population, c({{col_aggregation}}, {{col_data}}))
+  test_population <- dplyr::select_at(population, c(col_aggregation, col_data))
 
   # For some reason things took ages with tibbles, so convert to data frame
   test_population <- as.data.frame(test_population)

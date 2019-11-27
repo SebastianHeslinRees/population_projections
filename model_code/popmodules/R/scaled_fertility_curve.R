@@ -22,6 +22,8 @@
 #'
 #' @import dplyr
 #' @import assertthat
+#' @importFrom data.table setnames
+#' @importFrom dtplyr lazy_dt
 #'
 #' @export
 
@@ -36,29 +38,34 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
   validate_scaled_fertility_curve_input(population, births, target_curves, last_data_year, n_years_to_avg,
                                         avg_or_trend, data_col, output_col)
 
-  population <- births_denominator(population)
+  births <- lazy_dt(births) %>%
+    group_by(year, gss_code) %>%
+    summarise(births = sum(births)) %>%
+    as.data.frame()
 
-  births <- group_by(births, year, gss_code) %>%
-    summarise(births = sum(births))
-
-  population <- filter(population, sex == "female", age %in% unique(target_curves$age))
+  population <-  lazy_dt(population) %>%
+    filter(sex == "female", age %in% unique(target_curves$age))
+    
 
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-
-  scaling_backseries <- left_join(target_curves, population, by = c("gss_code", "age", "sex")) %>%
+  scaling_backseries <- lazy_dt(target_curves) %>%
+    left_join(population, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
     group_by(year, gss_code) %>%
     summarise(curve_count = sum(curve_count)) %>%
-    ungroup() %>%
+    ungroup() %>% 
+    as.data.frame() %>%   # dtplyr needs to take a break part way through
+    lazy_dt() %>%
     left_join(births, by = c("gss_code", "year")) %>%
     rename(actual = data_col) %>%
     mutate(scaling = ifelse(curve_count == 0,
                             0,
                             actual / curve_count)) %>%
-    select(gss_code, year, scaling)
+    select(gss_code, year, scaling) %>%
+    as.data.frame()
 
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
@@ -88,6 +95,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
 
 births_denominator <- function(population) {
 
+  #Not used at them moment
   assert_that(is.data.frame(population),
               msg="births_denominator expects population to be a dataframe")
 

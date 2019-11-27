@@ -72,8 +72,6 @@
 #'
 #' @examples
 #'
-#' library(dplyr)
-#' library(popmodules)
 #' popn <- expand.grid(year = 2000,
 #'                     gss_code=c("a","b"),
 #'                     sex=c("female","male"),
@@ -85,8 +83,8 @@
 #'                          gss_in=c("a","b"),
 #'                          sex=c("female","male"),
 #'                          age=20:21) %>%
-#'    filter(gss_out != gss_in) %>%
-#'    mutate(rate = 0.1))
+#'    dplyr::filter(gss_out != gss_in) %>%
+#'    dplyr::mutate(rate = 0.1))
 #'
 #' migrate_domestic(popn,
 #'                  mign_rate,

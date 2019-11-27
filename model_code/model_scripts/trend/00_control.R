@@ -143,15 +143,15 @@ run_trend_model <- function(config_list) {
       constraints = constraints,
       upc = upc,
       projection_year = projection_year)
-
+    
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
   
   projection <- arrange_trend_core_outputs(projection,
-                                 population, births, deaths, int_out, int_in, dom_in, dom_out,
-                                 fertility_rates, mortality_rates,
-                                 int_out_flows_rates, int_in_flows, domestic_rates,
-                                 first_proj_yr, last_proj_yr)
+                                           population, births, deaths, int_out, int_in, dom_in, dom_out,
+                                           fertility_rates, mortality_rates,
+                                           int_out_flows_rates, int_in_flows, domestic_rates,
+                                           first_proj_yr, last_proj_yr)
   
   
   ## household models

@@ -15,7 +15,7 @@
 #'
 #' If no fit is found then the data for that local authority is left unchanged.
 #'
-#' @param asfr.structure A dataframe containing the age specific fertility rates.  Ages must be in the range
+#' @param asfr_structure A dataframe containing the age specific fertility rates.  Ages must be in the range
 #' 15 to 44. must contain columns \code{gss_code} which contains the geography, \code{sex} which contains sex
 #' encoded as "female" or "female"/"male", \code{age} which contains ages 15 to 44 and \code{fert_rate} which
 #' contains the fertility rate
@@ -30,20 +30,15 @@
 #' @importFrom data.table rbindlist
 #' @export
 
-smooth_fertility <- function(asfr.structure, reproducible = TRUE){
-  # TODO input data checks e.g. age should be 15:44
-  # TODO keep other aggregation columns
-  # TODO be able to specify column names for age, geography, sex and fertility rate
-  # TODO be able to specify sex encoding
+smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_model=c(15:49)){
+
+  validate_smooth_fertility(asfr_structure)
+
   if (reproducible == T) {
     set.seed(42)
   }
 
-  age_range_to_fit <- 15:44 # ons data only covers this range
-  age_range_to_model <- 15:49 # need the output to cover this range
-
-  data<-asfr.structure %>%
-    filter(sex=="female" & age %in% age_range_to_fit)
+  data <- asfr_structure
 
   # starting values for initial fitting pass. Chosen by looking at Mixture_Hadwigers_using2011population_UPDATED_Revised_Base_Rates.csv
   m<-0.424
@@ -82,10 +77,10 @@ smooth_fertility <- function(asfr.structure, reproducible = TRUE){
 
   # Run the first pass fit over all GSS codes
   LAs <- unique(data$gss_code)
-  coefs<-list()
-  success_GSS<-list()
-  resids<-list()
-  i=1
+  coefs <- list()
+  success_GSS <- list()
+  resids <- list()
+  i <- 1
 
   for (GSS in LAs){
 
@@ -133,25 +128,25 @@ smooth_fertility <- function(asfr.structure, reproducible = TRUE){
 
   }
   #calculate the sum of the residuals
-  resid_sum<-unlist(lapply(resids, function(x){sum(x^2)}))
-  failed_GSS<-failed_LAs[!failed_LAs %in% success_GSS2]
+  resid_sum <- unlist(lapply(resids, function(x){sum(x^2)}))
+  failed_GSS <- failed_LAs[!failed_LAs %in% success_GSS2]
 
   combine_data <- function(i){
-    df<-getPred('curve_function',coefs[[i]],age_range_to_model) %>%
+    df <- getPred('curve_function',coefs[[i]],age_range_to_model) %>%
       cbind.data.frame(age=age_range_to_model) %>%
       cbind.data.frame(gss_code=rep(names(coefs)[[i]],length(age_range_to_model))) %>%
       setnames(".","fert_rate")
     return(df)
   }
 
-  laa<-combine_data(1)
+  laa <- combine_data(1)
 
   smoothed_data <- lapply(seq_along(coefs),combine_data) %>%
     rbindlist() %>%
     mutate(sex="female",ID=paste0(age,gss_code,sex)) %>%
     mutate(fert_rate=ifelse(fert_rate<0,0,fert_rate))
 
-  new.asfr.structure <- asfr.structure %>%
+  new.asfr_structure <- asfr_structure %>%
     mutate(ID=paste0(age,gss_code,sex)) %>%
     filter(!ID %in% smoothed_data$ID) %>%
     rbind(smoothed_data) %>%
@@ -159,7 +154,7 @@ smooth_fertility <- function(asfr.structure, reproducible = TRUE){
 
   LA_status <- list(fitted_pass1=unlist(success_GSS), fitted_pass2=unlist(success_GSS2), not_fitted=unlist(failed_GSS))
 
-  result <- list(data=new.asfr.structure, LA_status=LA_status, resid_sum=resid_sum)
+  result <- list(data=new.asfr_structure, LA_status=LA_status, resid_sum=resid_sum)
 
   if (reproducible == T) {
     # 'unset' the seed
@@ -256,3 +251,29 @@ nlsLM2 <- function(formula, data=parent.frame(), start, jac=NULL,
   result
 }
 
+#------------------------
+
+validate_smooth_fertility <- function(asfr_structure){
+
+
+  assertthat::assert_that("gss_code" %in% names(asfr_structure),
+                        msg = "in smooth_fertility, the asfr_structure dataframe must have a column named gss_code")
+
+
+  assertthat::assert_that("sex" %in% names(asfr_structure),
+                        msg = "in smooth_fertility, the asfr_structure dataframe must have a column named sex")
+
+  assertthat::assert_that("age" %in% names(asfr_structure),
+                        msg = "in smooth_fertility, the asfr_structure dataframe must have a column named age")
+
+  assertthat::assert_that("fert_rate" %in% names(asfr_structure),
+                        msg = "in smooth_fertility, the asfr_structure dataframe must have a column named rate")
+
+  assertthat::assert_that(setequal(asfr_structure$age, 15:44),
+                          msg = "in smooth_fertility, the asfr_structure$age must be 15:44")
+
+  assertthat::assert_that(setequal(asfr_structure$sex, "female"),
+                          msg = "in smooth_fertility, the asfr_structure$sex must be female only")
+
+  invisible()
+}
