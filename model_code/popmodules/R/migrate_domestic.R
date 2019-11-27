@@ -313,7 +313,7 @@ validate_migrate_domestic_input <- function(popn,
 
 
   tryCatch({
-    mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels]))
+    mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels])) %>% as.data.frame()
     validate_population(mign_validation,
                         col_aggregation = unname(validation_agg_levels),
                         col_data = NA,

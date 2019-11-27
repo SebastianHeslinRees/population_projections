@@ -219,7 +219,8 @@ get_communal_establishment_popn <- function(communal_est_pop_path, population, r
   ce <- select(ce, -ce_rate) %>%
     filter(year < first_proj_yr) %>%
     rbind(data.table::rbindlist(older_ce),
-          data.table::rbindlist(younger_ce))
+          data.table::rbindlist(younger_ce)) %>%
+    as.data.frame()
 
   return(ce)
 }

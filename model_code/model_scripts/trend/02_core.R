@@ -38,7 +38,7 @@ trend_core <- function(start_population,
                        int_out_method,
                        constraints = NULL, upc = NULL,
                        projection_year) {
-  
+ 
   # run projection
   cat('\r',paste("  Projecting year",projection_year))
   flush.console()
@@ -50,17 +50,17 @@ trend_core <- function(start_population,
   aged_popn <- start_population %>%
     popn_age_on() 
   
-  at_risk <- start_population %>%
-    mutate(age = age+1) %>%
-    left_join(start_population, by=c("gss_code","year","sex","age")) %>%
-    mutate(popn = (popn.x + popn.y)/2)       %>%
-    mutate(popn = ifelse(is.na(popn),0,popn),
-           year = year +1) %>%
-    select(gss_code, year, sex, age, popn) %>%
-    arrange(gss_code, year, sex, age) %>%
-    filter(age <=90)
+  # at_risk <- start_population %>%
+  #   mutate(age = age+1) %>%
+  #   left_join(start_population, by=c("gss_code","year","sex","age")) %>%
+  #   mutate(popn = (popn.x + popn.y)/2)       %>%
+  #   mutate(popn = ifelse(is.na(popn),0,popn),
+  #          year = year +1) %>%
+  #   select(gss_code, year, sex, age, popn) %>%
+  #   arrange(gss_code, year, sex, age) %>%
+  #   filter(age <=90)
   
-  births_by_mother <- popn_apply_rate(at_risk,
+  births_by_mother <- popn_apply_rate(aged_popn,
                                       fertility_rates,
                                       col_out = "births",
                                       many2one = FALSE)
@@ -73,14 +73,14 @@ trend_core <- function(start_population,
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
   
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
-  validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(start_population, year=year+1))
+  validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   
   deaths <- component_from_popn_rate(popn = aged_popn_w_births,
                                      component_rate = mortality_rates,
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_component = "deaths")
-  validate_population(deaths, col_data = "deaths", comparison_pop = mutate(start_population, year=year+1))
+  validate_population(deaths, col_data = "deaths", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
   
   if(!is.null(constraints)){
