@@ -47,7 +47,7 @@ run_trend_model <- function(config_list) {
   validate_paths <- lapply(seq(file_list),
          function(i) {
            if(!is.null(file_list[[i]])){
-             asserttthat::assert_that(file.exists(file_list[[i]]),
+             assertthat::assert_that(file.exists(file_list[[i]]),
                                      msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specific path"))
              file_ext <- tolower(strsplit(file_list[[i]], split="\\.")[[1]][[2]])
              assertthat::assert_that(file_ext == "rds",
