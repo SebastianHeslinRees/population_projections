@@ -11,7 +11,7 @@
 #'  must also be present
 #' @param labels String. The labels to be used in the \code{age_group} column
 #'   in the output. Must be the sanem length as age_groups.
-#' @param data_cols. String. A vector conating the names of any columns
+#' @param data_cols. String. A vector with the names of any columns
 #'   containing data to be aggegated
 #' @param include.lowest Logical. Passed to \code{cut}. Does the variable \code{age_groups}
 #' include the lowest age. If set to FALSE the function will assume the first bin conatins any
