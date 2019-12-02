@@ -91,7 +91,9 @@ trend_core <- function(start_population,
     mutate(popn = popn - deaths) %>%
     select(-deaths)
   
-  if(int_out_method=="rate"){
+  if(int_out_method=="flow"){
+    int_out <- int_out_flows_rates
+  } else {
     int_out <- component_from_popn_rate(popn = natural_change_popn,
                                         component_rate = int_out_flows_rates,
                                         col_popn = "popn",
