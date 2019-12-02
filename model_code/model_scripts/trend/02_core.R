@@ -61,7 +61,7 @@ trend_core <- function(start_population,
   #   filter(age <=90)
   
   births_by_mother <- popn_apply_rate(aged_popn,
-                                      fertility_rates,
+                                      filter(fertility_rates, age != 0),
                                       col_out = "births",
                                       many2one = FALSE)
   
