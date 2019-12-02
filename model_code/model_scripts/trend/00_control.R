@@ -136,7 +136,7 @@ run_trend_model <- function(config_list) {
       start_population = curr_yr_popn, 
       fertility_rates = curr_yr_fertility, 
       mortality_rates = curr_yr_mortality,
-      int_out = curr_yr_int_out,
+      int_out_flows_rates = curr_yr_int_out,
       int_in_flows = curr_yr_int_in_flows,
       domestic_rates = domestic_rates,
       int_out_method = config_list$int_out_method,
