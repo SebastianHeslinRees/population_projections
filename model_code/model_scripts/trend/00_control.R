@@ -213,7 +213,6 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
               msg = "the config variable int_out_method must be either 'flow' or 'rate'")
   popmodules::validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
   popmodules::validate_population(int_in_flows, col_data = "int_in")
-  #TODO add check for completeness of domestic_rates
   popmodules::validate_population(domestic_rates, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
   
   # check that the rates join onto the population
