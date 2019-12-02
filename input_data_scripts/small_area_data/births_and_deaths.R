@@ -2,6 +2,9 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 
+#TODO is there any point having the model data save all births and deaths back to 2001, they're big files as a result
+#TODO conventions around naming of age groups (01_05 or 1_5, 85+)
+
 #paths
 lsoa_births_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2018/lsoa_births_2001to2018.rds"
 lsoa_deaths_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2018/lsoa_deaths_2001to2018.rds"
@@ -22,6 +25,7 @@ lsoa_births <- readRDS(lsoa_births_path) %>%
   filter(gss_code_lsoa != "E01019077")
 
 ward_births <- left_join(lsoa_births, lsoa_to_ward, by="gss_code_lsoa") %>%
+  dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, age_group) %>%
   summarise(births = sum(births)) %>%
   as.data.frame()
@@ -49,7 +53,7 @@ ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
   summarise(deaths = sum(deaths)) %>%
   as.data.frame()
 
-
+saveRDS(ward_deaths, "input_data/small_area_model/ward_deaths_2001_2018.rds")
 
 
                             
