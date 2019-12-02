@@ -1,12 +1,12 @@
 
 #Data paths
-
 census_dwellings_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/ward inputs/census_dwellings.rds"
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2011_2017.rds"
 ward_communal_est_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-#ward_ldd_path <- 
+ 
 
 #TODO TEMP
+#ward_ldd_path <-
 load("Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/housing data/2016 SHLAA.Rdata")
 ldd_units <- filter(ward_dev, year %in% 2012:2017) %>%
   rename(additional_units = new_homes)
@@ -46,23 +46,13 @@ test <- adults_per_dwelling %>%
   mutate(change = adults_per_dwelling - lag(adults_per_dwelling))
 summary(test$change)
 
-
 filter(test, sqrt(change^2) > 0.1) %>% arrange(gss_code_ward, year) %>% View()
 
 
-
-
-#-----------
-
-
-#Fertility rates
-
-#Mortality_rates
-
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
-aveRDS(adults_per_dwelling, "input_data/small_area_model/ward_adults_per_dwelling.rds")
-saveRDS(birth_data, "input_data/small_area_model/ward_births_1992_2017.rds")
+saveRDS(adults_per_dwelling, "input_data/small_area_model/ward_adults_per_dwelling.rds")
+
 
 
 
