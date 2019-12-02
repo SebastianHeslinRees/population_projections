@@ -25,7 +25,7 @@
 #' @return A list where each element is a data frame containing either projected population or
 #' projected components of change.
 #'
-#' @iport popmodules
+#' @import popmodules
 #' @import dplyr
 #' @import assertthat
 #'
