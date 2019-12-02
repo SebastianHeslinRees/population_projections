@@ -47,7 +47,7 @@ dclg_stage_1 <- function(population, stage1_file_path){
     population_into_age_groups(age_groups=c(0,4,9,14,19,24,29,34,39,44,49,54,59,64,69,74,79,84,Inf),
                                                 labels=c("0_4","5_9","10_14","15_19","20_24","25_29","30_34","35_39","40_44",
                                                          "45_49","50_54","55_59","60_64","65_69","70_74","75_79","80_84","85&"),
-                                                popn_col="popn") %>%
+                                                data_cols="popn") %>%
     rename(popn_5yr_bands = popn)
 
   ### Join all dclg inputs together
@@ -147,7 +147,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
   household_popn <- stage1_output$household_population
   stg1_total_households <- stage1_output$total_households
 
-  headship_rates <- extend_data(headship_rates, max(stage1_detailed_households$year))
+  headship_rates <- project_forward_flat(headship_rates, max(stage1_detailed_households$year))
 
   recoding_ages <- c("0_4" = "0_14",
                      "5_9" = "0_14",
