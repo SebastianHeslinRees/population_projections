@@ -127,7 +127,7 @@ run_trend_model <- function(config_list) {
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
     
-    curr_yr_fertility <- filter(fertility_rates, year == projection_year, age!=0)
+    curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
