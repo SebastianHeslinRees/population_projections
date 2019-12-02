@@ -66,7 +66,7 @@ trend_core <- function(start_population,
                                       many2one = FALSE)
   
   if(!is.null(constraints)){
-    births_by_mother <- births_constrain(births=births_by_mother, constraint=constraints$births_constraint)
+    births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
   }
   
   birthratio_m2f <- 1.05 
@@ -84,7 +84,7 @@ trend_core <- function(start_population,
   validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
   
   if(!is.null(constraints)){
-    deaths <- popn_constrain(popn=deaths, constraint = constraints$deaths_constraint, col_popn = "deaths")
+    deaths <- constrain_component(popn=deaths, constraint = constraints$deaths_constraint, col_popn = "deaths")
   }
   
   natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
@@ -106,7 +106,7 @@ trend_core <- function(start_population,
   
   
   if(!is.null(constraints)){
-    int_out <- popn_constrain(popn=int_out, constraint = constraints$international_out_constraint,
+    int_out <- constrain_component(popn=int_out, constraint = constraints$international_out_constraint,
                               col_popn = "int_out")
   }
   
@@ -115,7 +115,7 @@ trend_core <- function(start_population,
   validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
   
   if(!is.null(constraints)){
-    int_in <- popn_constrain(popn=int_in, constraint = constraints$international_in_constraint,
+    int_in <- constrain_component(popn=int_in, constraint = constraints$international_in_constraint,
                              col_popn = "int_in")
   }
   
@@ -131,7 +131,7 @@ trend_core <- function(start_population,
     mutate(year = projection_year)
   
   if(!is.null(constraints)){
-    domestic_flow <- cross_border_constrain(domestic_flow = domestic_flow,
+    domestic_flow <- constrain_cross_border(domestic_flow = domestic_flow,
                                             in_constraint = constraints$cross_border_in_constraint,
                                             out_constraint = constraints$cross_border_out_constraint,
                                             col_flow = "flow")

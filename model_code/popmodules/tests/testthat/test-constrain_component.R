@@ -10,14 +10,14 @@ constraint <- expand.grid(year=2000, age=20:21, sex=c("female","male"), popn=400
 output <- expand.grid(year=2000, age=20:21, gss_code=c("E01","E02"), sex=c("female","male"), popn = 200, stringsAsFactors = FALSE) %>%
   rbind(expand.grid(year=2000, age=20:21, gss_code="S03", sex=c("female","male"), popn = 100, stringsAsFactors = FALSE))
 
-x <- popn_constrain(popn,
+x <- constrain_component(popn,
                     constraint,
                     col_aggregation = c("year", "sex", "age", "country"),
                     col_popn = "popn",
                     col_constraint = "popn")
 x
-test_that("popn_constrain can scale up and down", {
-  expect_equivalent(popn_constrain(popn,
+test_that("constrain_component can scale up and down", {
+  expect_equivalent(constain_component(popn,
                                    constraint,
                                    col_aggregation = c("year", "sex", "age", "country"),
                                    col_popn = "popn",
@@ -25,14 +25,14 @@ test_that("popn_constrain can scale up and down", {
                     output)
   
   #test default parameters
-  expect_equivalent(popn_constrain(popn, constraint, col_popn="popn"),
+  expect_equivalent(constrain_component(popn, constraint, col_popn="popn"),
                     output)
   
   #test scale down
   constraint_in <- dplyr::mutate(constraint, popn = popn/4)
   output_out <- dplyr::mutate(output, popn = ifelse(substr(gss_code,1,1)=="E", popn/4, popn))
   
-  expect_equivalent(popn_constrain(popn, constraint_in, col_popn = "popn"),
+  expect_equivalent(constrain_component(popn, constraint_in, col_popn = "popn"),
                     output_out)
 })
 
@@ -40,8 +40,8 @@ test_that("popn_constrain can scale up and down", {
 output <-  mutate(output, popn = 400/3) %>%
   arrange(sex, gss_code, age)
 
-test_that("popn_constrain can scale up and down", {
-  expect_equivalent(popn_constrain(popn,
+test_that("constrain_component can scale up and down", {
+  expect_equivalent(constrain_component(popn,
                                    constraint,
                                    col_aggregation = c("year", "sex", "age"),
                                    col_popn = "popn",
@@ -52,8 +52,8 @@ test_that("popn_constrain can scale up and down", {
 #Test it can hangle a single number
 constraint <- data.frame(year = 2000, popn = 2400)
 output <- mutate(output, popn = 200)
-test_that("popn_constrain can scale up and down", {
-  expect_equivalent(popn_constrain(popn,
+test_that("constrain_component can scale up and down", {
+  expect_equivalent(constrain_component(popn,
                                    constraint=constraint,
                                    col_aggregation = "year",
                                    col_popn = "popn",
@@ -62,20 +62,20 @@ test_that("popn_constrain can scale up and down", {
 })
 
 #Force errors
-test_that("popn_constrain should throw an error", {
-  expect_error(popn_constrain(popn,
+test_that("constrain_component should throw an error", {
+  expect_error(constrain_component(popn,
                               constraint=constraint,
                               col_aggregation = c("year","age"),
                               col_popn = "popn",
                               col_constraint = "popn"))
   
-  expect_error(popn_constrain(popn,
+  expect_error(constrain_component(popn,
                               constraint=constraint,
                               col_aggregation = "year",
                               col_popn = "trevor",
                               col_constraint = "popn"))
   
-  expect_error(popn_constrain(popn,
+  expect_error(constrain_component(popn,
                               constraint=constraint,
                               col_aggregation = "year",
                               col_popn = "popn",
@@ -91,13 +91,13 @@ test_that("popn_constrain should throw an error", {
     rbind(expand.grid(year=2000, age=20:21, gss_code="S03", sex=c("female","male"), popn = 400, stringsAsFactors = FALSE)) %>%
     arrange(sex, gss_code, age)
   
-  x <- popn_constrain(popn_cty,
+  x <- constrain_component(popn_cty,
                       constraint_cty,
                       col_aggregation = c("year", "sex", "age", "country"),
                       col_popn = "popn",
                       col_constraint = "popn")
   
-  test_that("popn_constrain can handle multiple countries", {
+  test_that("constrain_component can handle multiple countries", {
     expect_equivalent(x, output_cty)
   })
   

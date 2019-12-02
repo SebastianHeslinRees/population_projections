@@ -1,4 +1,4 @@
-#' Scale one population to match the totals of another
+#' Scale a set of cross-border flows to match the totals of another
 #'
 #' A wrapper for \code{get_scaling_factor} which prepares origin-destination
 #' flow data, constraining flows out of England to match the target data frame
@@ -25,7 +25,7 @@
 #'
 #' @export
 
-cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint, col_flow = "flow"){
+constrain_cross_border <- function(domestic_flow, in_constraint, out_constraint, col_flow = "flow"){
   
   cols <- names(domestic_flow)
   
@@ -49,8 +49,8 @@ cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint,
   
   #validate
   assert_that((nrow(out_flow)+nrow(in_flow)+nrow(dont_scale))==nrow(domestic_flow),
-              msg="cross_border_constrain has lost some rows while figuring out what needs to be scaled")
-  
+              msg="constrain_cross_border has lost some rows while figuring out what needs to be scaled")
+
   #Out Flow
   out_scaling <- lazy_dt(out_flow) %>%
     rename(cross_out = col_flow) %>%
@@ -68,7 +68,7 @@ cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint,
     select(-!!sym(col_flow)) %>%
     rename(!!col_flow := scaled) %>%
     select(cols)
-  
+
   #In flow
   in_scaling <- lazy_dt(in_flow) %>%
     rename(cross_in = col_flow) %>%
@@ -93,10 +93,10 @@ cross_border_constrain <- function(domestic_flow, in_constraint, out_constraint,
     arrange(gss_out, gss_in)
   
   #validate
-  assert_that(nrow(out_flow)==nrow(scaled_out), msg="cross_border_constrain has lost some rows while calculating out flows")
-  assert_that(nrow(in_flow)==nrow(scaled_in), msg="cross_border_constrain has lost some rows while calculating inflows")
-  assert_that(nrow(scaled_flows)==nrow(domestic_flow), msg="cross_border_constrain has lost some rows")
-  
+  assert_that(nrow(out_flow)==nrow(scaled_out), msg="constrain_cross_border has lost some rows while calculating out flows")
+  assert_that(nrow(in_flow)==nrow(scaled_in), msg="constrain_cross_border has lost some rows while calculating inflows")
+  assert_that(nrow(scaled_flows)==nrow(domestic_flow), msg="constrain_cross_border has lost some rows")
+
   return(scaled_flows)
   
 }
