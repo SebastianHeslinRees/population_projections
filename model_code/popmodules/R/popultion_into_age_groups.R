@@ -2,7 +2,11 @@
 #'
 #' Given an input population by sya the function will assign each age
 #' to a defined age group using \code{base::cut} and then group and
-#' summarise the data using \code{dplyr} functions
+#' summarise the data using \code{dplyr} functions, summing each column
+#' specified in \code{data_cols} by age group.
+#' 
+#' Note: all columns not specified in \code{data_cols} are assumed to be
+#' aggregation levels.
 #'
 #' @param population A data frame containing population data by single year of age
 #' @param age_groups A numeric vector of breaks in the age data. The breaks are defined
