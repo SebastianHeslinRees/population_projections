@@ -98,7 +98,7 @@ run_trend_model <- function(config_list) {
   domestic_rates <- evaluate_fns_list(config_list$dom_rate_fns)
   constraints <- evaluate_fns_list(config_list$constraint_fns)
   
-  #Prep backeries
+  #Prep backseries
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
   births <- births %>% select(year, gss_code, age, sex, births)
