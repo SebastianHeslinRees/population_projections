@@ -204,7 +204,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_population(int_out, col_data = "int_out")
   popmodules::validate_population(int_in, col_data = "int_in")
   popmodules::validate_population(dom_out, col_data = c("dom_out"), test_complete = TRUE, test_unique = TRUE)
-  popmodules::validate_population(dom_in, col_aggregation = c("year","gss_code","sex","age"), col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
+  popmodules::validate_population(dom_in, col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
   
   popmodules::validate_population(fertility_rates, col_data = "rate")
   popmodules::validate_population(mortality_rates, col_data = "rate")
