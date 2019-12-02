@@ -16,7 +16,7 @@
 #'   to be applied to the population
 #' @param int_out_method. A string. A switch to define whether international out migration is
 #'   a rate or a flow. Either \code{rate} or \code{flow}
-#' @param constarints A list. A set of national-level constraints for each component. If the projection
+#' @param constraints A list. A set of national-level constraints for each component. If the projection
 #'   is to be run unconstrained this is set to NULL. Default \code{NULL}
 #' @param upc A data frame. Unattributable population change component. If no UPC is being applied this
 #'   is set to NULL. Default \code{NULL}
