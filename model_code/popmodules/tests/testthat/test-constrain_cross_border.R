@@ -12,8 +12,8 @@ domestic_flow <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"),
                              stringsAsFactors = FALSE) %>%
   filter(gss_out!=gss_in)
 
-x_1 <- cross_border_constrain(domestic_flow, in_constraint_1, out_constraint_1, col_flow = "flow")
-x_2 <- cross_border_constrain(domestic_flow, in_constraint_2, out_constraint_2, col_flow = "flow")
+x_1 <- constrain_cross_border(domestic_flow, in_constraint_1, out_constraint_1, col_flow = "flow")
+x_2 <- constrain_cross_border(domestic_flow, in_constraint_2, out_constraint_2, col_flow = "flow")
 
 output_1 <- domestic_flow %>%
   mutate(cb = ifelse(substr(gss_out,1,1)=="E" & substr(gss_in,1,1)=="E",TRUE,FALSE)) %>%
@@ -28,7 +28,7 @@ output_1 <- output_1 %>%
   select(names(domestic_flow))%>%
   arrange(gss_out, gss_in)
 
-test_that("cross_border_constrain can scale up and down",{
+test_that("constrain_cross_border can scale up and down",{
   expect_equivalent(x_1, output_1)
   expect_equivalent(x_2, output_2)
 })

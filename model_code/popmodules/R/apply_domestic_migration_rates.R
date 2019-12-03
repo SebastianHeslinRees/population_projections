@@ -180,7 +180,7 @@ apply_domestic_migration_rates <- function(popn,
               msg = "apply_domestic_migration_rates flows exceeding the population size")
   # TODO surely there's some other validation we should do here
 
-  return(migration)
+  return(as.data.frame(migration))
 }
 
 
@@ -311,7 +311,7 @@ validate_apply_domestic_migration_rates_input <- function(popn,
 
 
   tryCatch({
-    mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels]))
+    mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels])) %>% as.data.frame()
     validate_population(mign_validation,
                         col_aggregation = unname(validation_agg_levels),
                         col_data = NA,

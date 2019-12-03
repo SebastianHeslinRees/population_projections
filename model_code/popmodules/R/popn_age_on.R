@@ -263,7 +263,7 @@ popn_age_on <- function(popn,
 
   }
 
-  return(aged)
+  return(as.data.frame(aged))
 
 }
 

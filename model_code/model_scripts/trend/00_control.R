@@ -4,6 +4,7 @@ run_trend_model <- function(config_list) {
   library(popmodules)
   source("model_code/model_scripts/trend/02_core.R")
   source("model_code/model_scripts/trend/03_output.R")
+  source("model_code/model_scripts/trend/arrange_trend_core_outputs.R")
   
   expected_config <- c("first_proj_yr", 
                        "n_proj_yr",
@@ -19,11 +20,11 @@ run_trend_model <- function(config_list) {
                        "outputs_dir", 
                        "mortality_fns", 
                        "fertility_fns",
-                       "int_out_rate_fns",
+                       "int_out_fns",
                        "int_in_fns",
                        "dom_rate_fns",
                        "constraint_fns",
-                       "int_out_flow_or_rate",
+                       "int_out_method",
                        "qa_areas_of_interest",
                        "projection_name",
                        "write_excel",
@@ -45,15 +46,15 @@ run_trend_model <- function(config_list) {
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
   validate_paths <- lapply(seq(file_list),
-         function(i) {
-           if(!is.null(file_list[[i]])){
-             assertthat::assert_that(file.exists(file_list[[i]]),
-                                     msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specific path"))
-             file_ext <- tolower(strsplit(file_list[[i]], split="\\.")[[1]][[2]])
-             assertthat::assert_that(file_ext == "rds",
-                                     msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile is not .rds format"))
-            }
-           })
+                           function(i) {
+                             if(!is.null(file_list[[i]])){
+                               assertthat::assert_that(file.exists(file_list[[i]]),
+                                                       msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specific path"))
+                               file_ext <- tolower(strsplit(file_list[[i]], split="\\.")[[1]][[2]])
+                               assertthat::assert_that(file_ext == "rds",
+                                                       msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile is not .rds format"))
+                             }
+                           })
   rm(file_list, validate_paths)      
   
   
@@ -89,45 +90,69 @@ run_trend_model <- function(config_list) {
   
   
   # get the projected rates
-  # strings together 'building blocks' which can be swapped out and replaced in config file
   message("get projected rates")
-  fertility <- evaluate_fns_list(config_list$fertility_fns) %>%
-    complete_fertility(population)
-  
-  mortality <- evaluate_fns_list(config_list$mortality_fns)
-  
-  int_out_rate <- evaluate_fns_list(config_list$int_out_rate_fns) 
-  
-  int_in_proj <- evaluate_fns_list(config_list$int_in_fns)
-  
-  dom_rate <- evaluate_fns_list(config_list$dom_rate_fns)
-  
+  fertility_rates <- evaluate_fns_list(config_list$fertility_fns) %>% complete_fertility(population)
+  mortality_rates <- evaluate_fns_list(config_list$mortality_fns)
+  int_out_flows_rates <- evaluate_fns_list(config_list$int_out_fns) 
+  int_in_flows <- evaluate_fns_list(config_list$int_in_fns)
+  domestic_rates <- evaluate_fns_list(config_list$dom_rate_fns)
   constraints <- evaluate_fns_list(config_list$constraint_fns)
   
-  
+  #Prep backseries
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
   births <- births %>% select(year, gss_code, age, sex, births)
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
-  #TODO Figure out why the core outputs these in a different order to other components
-  #For now just switch the order here
-  dom_out <- dom_out %>% select(year, gss_code, sex, age, dom_out)
-  dom_in <- dom_in %>% select(year, gss_code, sex, age, dom_in)
+  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out)
+  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in)
   
-  fertility <- fertility %>% select(year, gss_code, age, sex, rate)
-  mortality <- mortality %>% select(year, gss_code, age, sex, rate)
-  int_out_rate <- int_out_rate %>% select(year, gss_code, age, sex, int_out)
-  int_in_proj <- int_in_proj %>% select(year, gss_code, age, sex, int_in)
-  dom_rate <- dom_rate %>% select(gss_out, gss_in, age, sex, rate)
+  fertility_rates <- fertility_rates %>% select(year, gss_code, age, sex, rate)
+  mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
+  int_out_flows_rates <- int_out_flows_rates %>% select(year, gss_code, age, sex, int_out)
+  int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
+  domestic_rates <- domestic_rates %>% select(gss_out, gss_in, age, sex, rate)
+  
+  first_proj_yr <- config_list$first_proj_yr
+  last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
+  curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
+  
+  # set up projection
+  validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                             fertility_rates, mortality_rates, int_out_flows_rates, int_in_flows, domestic_rates,
+                             first_proj_yr, config_list$n_proj_yr, config_list$int_out_method)
+  
   
   ## run the core
-  projection <- trend_core(population, births, deaths, int_out, int_in, 
-                           fertility, mortality, int_out_rate, int_in_proj,
-                           dom_in, dom_out, dom_rate,
-                           config_list$first_proj_yr, config_list$n_proj_yr,
-                           config_list$int_out_flow_or_rate,
-                           constraints, upc)
+  projection <- list()
+  for(projection_year in first_proj_yr:last_proj_yr){
+    
+    curr_yr_fertility <- filter(fertility_rates, year == projection_year)
+    curr_yr_mortality <- filter(mortality_rates, year == projection_year)
+    curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
+    curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
+    
+    projection[[projection_year]] <- trend_core(
+      start_population = curr_yr_popn, 
+      fertility_rates = curr_yr_fertility, 
+      mortality_rates = curr_yr_mortality,
+      int_out_flows_rates = curr_yr_int_out,
+      int_in_flows = curr_yr_int_in_flows,
+      domestic_rates = domestic_rates,
+      int_out_method = config_list$int_out_method,
+      constraints = constraints,
+      upc = upc,
+      projection_year = projection_year)
+    
+    curr_yr_popn <- projection[[projection_year]][['population']]
+  }
+  
+  projection <- arrange_trend_core_outputs(projection,
+                                           population, births, deaths, int_out, int_in, dom_in, dom_out,
+                                           fertility_rates, mortality_rates,
+                                           int_out_flows_rates, int_in_flows, domestic_rates,
+                                           first_proj_yr, last_proj_yr)
+  
   
   ## household models
   message('running household models')
@@ -165,4 +190,56 @@ run_trend_model <- function(config_list) {
   }
   
   return(projection)
+}
+
+
+# do checks on the input data
+validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
+                                       fertility_rates, mortality_rates, int_out_flows_rates, int_in_flows, domestic_rates,
+                                       first_proj_yr, n_proj_yr, int_out_method) {
+  
+  popmodules::validate_population(population, col_data = "popn")
+  popmodules::validate_population(births, col_data = "births")
+  popmodules::validate_population(deaths, col_data = "deaths")
+  popmodules::validate_population(int_out, col_data = "int_out")
+  popmodules::validate_population(int_in, col_data = "int_in")
+  popmodules::validate_population(dom_out, col_data = c("dom_out"), test_complete = TRUE, test_unique = TRUE)
+  popmodules::validate_population(dom_in, col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
+  
+  popmodules::validate_population(fertility_rates, col_data = "rate")
+  popmodules::validate_population(mortality_rates, col_data = "rate")
+  
+  assert_that(int_out_method %in% c("flow", "rate"),
+              msg = "the config variable int_out_method must be either 'flow' or 'rate'")
+  popmodules::validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
+  popmodules::validate_population(int_in_flows, col_data = "int_in")
+  popmodules::validate_population(domestic_rates, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+  
+  # check that the rates join onto the population
+  ## TODO make the aggregations columns flexible. Make this more elegant.
+  popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  # TODO fix these checks for domestic_rates double geography.  Currently the below both fail
+  #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
+  
+  # check that the coverage of years is correct
+  last_proj_yr <- first_proj_yr + n_proj_yr -1
+  assert_that((first_proj_yr - 1) %in% unique(population$year), msg = paste0("the population backseries doesn't contain the projection jump-off year (", first_proj_yr-1,")"))
+  assert_that(all(first_proj_yr:last_proj_yr %in% fertility_rates$year), msg = "the projected fertility_rates data doesn't contain all the projection years")
+  assert_that(all(first_proj_yr:last_proj_yr %in% mortality_rates$year), msg = "the projected mortality_rates data doesn't contain all the projection years")
+  assert_that(all(first_proj_yr:last_proj_yr %in% int_out_flows_rates$year), msg = "the projected int_out_flows_rates data doesn't contain all the projection years")
+  assert_that(all(first_proj_yr:last_proj_yr %in% int_in_flows$year), msg = "the projected int_in data doesn't contain all the projection years")
+  
+  # check that the rates values are always between 0 and 1 
+  assert_that(max(fertility_rates$rate) <= 1 & min(fertility_rates$rate) >= 0, msg = "projected fertility_rates contains rates outside the range 0-1")
+  assert_that(max(mortality_rates$rate) <= 1 & min(mortality_rates$rate) >= 0, msg = "projected mortality_rates contains rates outside the range 0-1")
+  if(int_out_method == "rate") {
+    assert_that(max(int_out_flows_rates$int_out) <= 1 & min(int_out_flows_rates$int_out) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
+  }
+  assert_that(max(domestic_rates$rate) <= 1 & min(domestic_rates$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
+  
+  invisible(TRUE)
 }

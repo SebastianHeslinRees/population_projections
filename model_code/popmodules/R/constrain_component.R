@@ -25,33 +25,33 @@
 #' popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
 #' constraint <- expand.grid(year=2000, age=20:21, sex=c("f","m"), country = "a", popn = 400)
 #'
-#' scaled <- popn_constrain(popn,
+#' scaled <- constrain_component(popn,
 #'                          constraint,
 #'                          col_aggregation = c("year", "sex", "age", "country"),
 #'                          col_popn = "popn",
 #'                          col_constraint = "popn")
 #'
 #' Due to default parameter values, this is equivalent to
-#' scaled <- popn_constrain(popn, constraint)
+#' scaled <- constrain_component(popn, constraint)
 #'
 #' @export
 #'
 
 # TODO add nesting!
 
-popn_constrain <- function(popn,
-                           constraint,
-                           col_aggregation = c("year", "sex", "age", "country"),
-                           col_popn,
-                           col_constraint = col_popn){
+constrain_component <- function(popn,
+                                 constraint,
+                                 col_aggregation = c("year", "sex", "age", "country"),
+                                 col_popn,
+                                 col_constraint = col_popn){
   
   country <- ifelse("country" %in% col_aggregation, TRUE, FALSE)
   
-  validate_popn_constrain_input(popn, constraint, col_aggregation, col_popn, col_constraint, country)
+  validate_constrain_component_input(popn, constraint, col_aggregation, col_popn, col_constraint, country)
   
   cols <- names(popn)
   
- #if different countries have different scaling
+  #if different countries have different scaling
   if(country){
     if(!"country" %in% names(popn)){
       popn <- mutate(popn, country = substr(gss_code,1,1))
@@ -77,7 +77,7 @@ popn_constrain <- function(popn,
     data.frame() %>%
     rbind(dont_scale) %>%
     select(cols)
-
+  
   return(scaled_popn)
 }
 
@@ -86,7 +86,7 @@ popn_constrain <- function(popn,
 
 
 # Check the function input is valid
-validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col_popn, col_constraint, country) {
+validate_constrain_component_input <- function(popn, constraint, col_aggregation, col_popn, col_constraint, country) {
   
   all_constraint_cols <- intersect(unname(col_aggregation), names(constraint))
   
@@ -98,49 +98,49 @@ validate_popn_constrain_input <- function(popn, constraint, col_aggregation, col
   assert_that(col_constraint %in% names(constraint),
               msg="in popn_contraint col_constraint must be a column in constraint dataframe")
   assert_that(!names(col_popn) %in% names(col_aggregation),
-              msg = "popn_constrain was given a population count column name that is also a named aggregation column in the population data frame")
+              msg = "constrain_component was given a population count column name that is also a named aggregation column in the population data frame")
   assert_that(!unname(col_popn) %in% all_constraint_cols,
-              msg = "popn_constrain was given a population count column name that is also a named aggregation column in the constraint data frame")
+              msg = "constrain_component was given a population count column name that is also a named aggregation column in the constraint data frame")
   assert_that(all(col_aggregation %in% names(constraint)),
-              msg = "in popn_constrain some columns in col_aggregation not found in constraint")
+              msg = "in constrain_component some columns in col_aggregation not found in constraint")
   if(country){
     assert_that("country" %in% names(constraint),
-                msg = "in popn_constrain a country column must be present in the constraint dataframe if country=TRUE")
+                msg = "in constrain_component a country column must be present in the constraint dataframe if country=TRUE")
   }
   assert_that(all(names(col_aggregation)[names(col_aggregation) != "country"] %in% names(popn)),
-              msg = "in popn_constrain, all columns named in col_aggregation must be columns in the popn table")
+              msg = "in constrain_component, all columns named in col_aggregation must be columns in the popn table")
   assert_that(!any(duplicated(names(col_aggregation))),
-              msg = "duplicated population column names were provided to popn_constrain")
+              msg = "duplicated population column names were provided to constrain_component")
   assert_that(!any(duplicated(unname(col_aggregation))),
-              msg = "duplicated constraint column names were provided to popn_constrain")
+              msg = "duplicated constraint column names were provided to constrain_component")
   assert_that(any(col_aggregation %in% names(constraint)),
-              msg = "in popn_constrain, no aggregation column names were found in constraint - at least one must be present")
+              msg = "in constrain_component, no aggregation column names were found in constraint - at least one must be present")
   assert_that(is.numeric(popn[[names(col_popn)]]),
-              msg = paste("popn_constrain needs a numeric column in the specified population count col:", names(col_popn)))
+              msg = paste("constrain_component needs a numeric column in the specified population count col:", names(col_popn)))
   assert_that(is.numeric(constraint[[col_popn]]),
-              msg = paste("popn_constrain needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
+              msg = paste("constrain_component needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
   
   join_by <- col_aggregation[ col_aggregation %in% names(constraint) ]
   if(anyDuplicated(data.table::as.data.table(constraint[join_by]))) {
-    stop("popn_constrain was given a population that maps to multiple levels in the constraint population")
+    stop("constrain_component was given a population that maps to multiple levels in the constraint population")
   }
   
   assert_that(length(join_by) > 0,
-              msg = "popn_constrain must share some aggregation column names with the input constraint, or a column mapping must be included in the col_aggregation parameter")
+              msg = "constrain_component must share some aggregation column names with the input constraint, or a column mapping must be included in the col_aggregation parameter")
   
   
   
   # Type checking
   assert_that(is.data.frame(popn),
-              msg = "popn_constrain needs popn to be a dataframe")
+              msg = "constrain_component needs popn to be a dataframe")
   assert_that(is.data.frame(constraint),
-              msg = "popn_constrain needs constraint data to be a dataframe")
+              msg = "constrain_component needs constraint data to be a dataframe")
   assert_that(is.character(col_aggregation),
-              msg = "popn_constrain needs the col_aggregation parameter to be a string")
+              msg = "constrain_component needs the col_aggregation parameter to be a string")
   assert_that(is.string(col_popn),
-              msg = "popn_constrain needs a string as the col_popn parameter")
+              msg = "constrain_component needs a string as the col_popn parameter")
   assert_that(is.string(col_constraint),
-              msg = "popn_constrain needs a string as the col_constraint parameter")
+              msg = "constrain_component needs a string as the col_constraint parameter")
   
   invisible(TRUE)
 }

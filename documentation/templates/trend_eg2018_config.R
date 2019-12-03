@@ -6,11 +6,11 @@ first_proj_yr <- 2019
 n_proj_yr <- 2
 projection_name <- "test"
 
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-14.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-14.rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-14.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
@@ -33,7 +33,7 @@ fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 2
-int_out_flow_or_rate <- "rate"
+int_out_method <- "rate"
 int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2018
@@ -58,7 +58,7 @@ dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
 dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
 write_excel <- FALSE
-write_QA <- TRUE
+write_QA <- FALSE
 
 
 
@@ -107,10 +107,10 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
+int_out_fns <- list(
   list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                births_mye_path = births_mye_path,
-                                                                               flow_or_rate = int_out_flow_or_rate,
+                                                                               flow_or_rate = int_out_method,
                                                                                component_path = int_out_mye_path,
                                                                                last_data_year = int_out_last_data_year,
                                                                                n_years_to_avg = int_out_years_to_avg,
@@ -159,8 +159,9 @@ constraint_fns <- list(
                                                                cross_out_path = cross_out_constraint_path))
 )
 
-#constraint_fns <- list(list(fn = function() NULL, args = list()))
+
 #TODO figure out the best way to get a null value when we don't want to constrain
+#constraint_fns <- list(list(fn = function() NULL, args = list()))
 
 qa_areas_of_interest <- list("London", "E09000001")
 
@@ -180,12 +181,12 @@ config_list <- list(
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
-  int_out_rate_fns = int_out_rate_fns,
+  int_out_fns = int_out_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
-  int_out_flow_or_rate = int_out_flow_or_rate,
+  int_out_method = int_out_method,
   write_excel  = write_excel,
   write_QA = write_QA,
   communal_est_pop_path = communal_est_pop_path,
