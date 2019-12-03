@@ -59,7 +59,7 @@ constrain_cross_border <- function(domestic_flow, in_constraint, out_constraint,
     ungroup() %>%
     mutate(country = "E") %>%
     as.data.frame() %>%
-    get_scaling_factors(out_constraint, col_popn="cross_out") %>%
+    calculate_scaling_factors(out_constraint, col_popn="cross_out") %>%
     select(-cross_out, -country)
   
   scaled_out <- out_flow %>%
@@ -77,7 +77,7 @@ constrain_cross_border <- function(domestic_flow, in_constraint, out_constraint,
     ungroup() %>%
     mutate(country = "E") %>%
     as.data.frame() %>%
-    get_scaling_factors(in_constraint, col_popn="cross_in") %>%
+    calculate_scaling_factors(in_constraint, col_popn="cross_in") %>%
     select(-cross_in, -country)
   
   scaled_in <- in_flow %>%
