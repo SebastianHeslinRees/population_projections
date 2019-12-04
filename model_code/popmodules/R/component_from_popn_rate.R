@@ -60,7 +60,7 @@ component_from_popn_rate <- function(popn,
   # Calculate component
   # ----------------
   # This will deal with most checks on the input and output
-  component <- popn_apply_rate(popn,
+  component <- apply_rate_to_population(popn,
                             component_rate,
                             col_aggregation,
                             col_popn,
@@ -136,7 +136,7 @@ validate_component_from_popn_rate_input <- function(popn, component_rate, col_ag
               msg = "component_from_popn_rate must share some aggregation column names with the input component rate, or a column mapping must be included in the col_aggregation parameter")
 
 
-  # Other checks (by the more expensive validatepop functions) are done within popn_apply_rates
+  # Other checks (by the more expensive validatepop functions) are done within apply_rate_to_population
 
   invisible(TRUE)
 }

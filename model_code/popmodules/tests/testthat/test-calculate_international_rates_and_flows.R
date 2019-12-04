@@ -93,7 +93,7 @@ in_traj <- data.table::rbindlist(in_traj) %>% select(names(int_in)) %>%
 
 #-----------------------------------
 
-x <- international_rates_and_flows(popn_mye_path=popn_path,
+x <-  calculate_international_rates_and_flows(popn_mye_path=popn_path,
                                    births_mye_path=births_path,
                                    flow_or_rate="flow",
                                    component_path=int_in_path,
@@ -103,14 +103,14 @@ x <- international_rates_and_flows(popn_mye_path=popn_path,
                                    first_proj_yr=2006,
                                    n_proj_yr=6,
                                    rate_cap = NULL)
-test_that("international_rates_and_flows error in flow calc", {
+test_that(" calculate_international_rates_and_flows error in flow calc", {
   expect_equivalent(x, in_traj)
 })
 
 
 #------------------------------------
 
-x <- international_rates_and_flows(popn_mye_path=popn_path,
+x <-  calculate_international_rates_and_flows(popn_mye_path=popn_path,
                                    births_mye_path=births_path,
                                    flow_or_rate="rate",
                                    component_path=int_out_path,
@@ -120,13 +120,13 @@ x <- international_rates_and_flows(popn_mye_path=popn_path,
                                    first_proj_yr=2006,
                                    n_proj_yr=6,
                                    rate_cap = 0.8)
-test_that("international_rates_and_flows: error in rate calc", {
+test_that(" calculate_international_rates_and_flows: error in rate calc", {
   expect_equivalent(x, out_traj)
 })
 
 
-test_that("international_rates_and_flows: error in rate calc", {
-  expect_warning(international_rates_and_flows(popn_mye_path=popn_path,
+test_that(" calculate_international_rates_and_flows: error in rate calc", {
+  expect_warning( calculate_international_rates_and_flows(popn_mye_path=popn_path,
                                                births_mye_path=births_path,
                                                flow_or_rate="rate",
                                                component_path=int_out_path,

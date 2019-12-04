@@ -60,26 +60,26 @@ run_trend_model <- function(config_list) {
   
   # get the MYEs
   message("get components")
-  population <- get_component(filepath = config_list$popn_mye_path, 
+  population <- get_component_from_file(filepath = config_list$popn_mye_path, 
                               max_yr = config_list$first_proj_yr - 1)
   
-  deaths <- get_component(filepath = config_list$deaths_mye_path, 
+  deaths <- get_component_from_file(filepath = config_list$deaths_mye_path, 
                           max_yr = config_list$first_proj_yr - 1)
   
-  births <- get_component(filepath = config_list$births_mye_path,
+  births <- get_component_from_file(filepath = config_list$births_mye_path,
                           max_yr = config_list$first_proj_yr - 1) %>%
     filter(age == 0)
   
-  int_out <- get_component(filepath = config_list$int_out_mye_path,
+  int_out <- get_component_from_file(filepath = config_list$int_out_mye_path,
                            max_yr = config_list$first_proj_yr - 1)
   
-  int_in <- get_component(filepath = config_list$int_in_mye_path,
+  int_in <- get_component_from_file(filepath = config_list$int_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
-  dom_out <- get_component(filepath = config_list$dom_out_mye_path,
+  dom_out <- get_component_from_file(filepath = config_list$dom_out_mye_path,
                            max_yr = config_list$first_proj_yr - 1)
   
-  dom_in <- get_component(filepath = config_list$dom_in_mye_path,
+  dom_in <- get_component_from_file(filepath = config_list$dom_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
   
   if(is.null(config_list$upc_path)){

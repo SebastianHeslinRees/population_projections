@@ -23,7 +23,7 @@
 #'
 #' @export
 #'
-deaths_null <- function(pop,
+null_deaths <- function(pop,
                         col_aggregation = c("year", "gss_code", "age", "sex"),
                         col_popn="popn",
                         const = 0,
@@ -38,10 +38,10 @@ deaths_null <- function(pop,
   # Check for negative population
   ix_negative <- deaths[["deaths"]] > deaths[[col_popn]]
   if(any(ix_negative) & error_negative_pop) {
-    stop(paste("deaths_null created more deaths than population in", sum(ix_negative), "rows"))
+    stop(paste("null_deaths created more deaths than population in", sum(ix_negative), "rows"))
   }
   if(any(ix_negative) & !error_negative_pop) {
-    warning(paste("deaths_null created more deaths than population in", sum(ix_negative), "rows.",
+    warning(paste("null_deaths created more deaths than population in", sum(ix_negative), "rows.",
                   "Adjusting deaths to prevent negative population"))
     deaths[ix_negative, "deaths"] <- deaths[ix_negative, col_popn]
   }
@@ -63,27 +63,27 @@ deaths_null <- function(pop,
 validate_deaths_input <- function(pop, col_aggregation, col_popn, const, error_negative_pop) {
 
   assert_that(is.data.frame(pop),
-              msg = "deaths_null needs a data frame as input")
+              msg = "null_deaths needs a data frame as input")
   assert_that(is.character(col_aggregation),
-              msg = "deaths_null needs a string or character vector as the col_aggregation parameter")
+              msg = "null_deaths needs a string or character vector as the col_aggregation parameter")
   assert_that(is.string(col_popn),
-              msg = "deaths_null needs a string as the col_popn parameter")
+              msg = "null_deaths needs a string as the col_popn parameter")
   assert_that(is.numeric(const) && length(const) == 1,
-              msg = "deaths_null needs a single numeric value as the const parameter")
+              msg = "null_deaths needs a single numeric value as the const parameter")
   assert_that(const >= 0,
-              msg = "deaths_null needs a positive value of the const parameter")
+              msg = "null_deaths needs a positive value of the const parameter")
   assert_that(is.logical(error_negative_pop),
-              msg = "deaths_null needs a TRUE/FALSE value for the error_negative_pop parameter")
+              msg = "null_deaths needs a TRUE/FALSE value for the error_negative_pop parameter")
   assert_that(!col_popn %in% col_aggregation,
-              msg = "deaths_null was given a population col_popn column that is also a named aggregation column")
+              msg = "null_deaths was given a population col_popn column that is also a named aggregation column")
   assert_that(!"deaths" %in% col_aggregation,
-              msg = "deaths_null can't handle an aggregation column called also deaths. If this is really important to you, update the function to give a customisable name to the output deaths column.")
+              msg = "null_deaths can't handle an aggregation column called also deaths. If this is really important to you, update the function to give a customisable name to the output deaths column.")
   if("deaths" %in% names(pop)) {
-    warning("deaths is already a column name in the input to deaths_null. The output will contain the calculated deaths instead and this will probably muck up subsequent joins or binds!!")
+    warning("deaths is already a column name in the input to null_deaths. The output will contain the calculated deaths instead and this will probably muck up subsequent joins or binds!!")
   }
 
   if(any(duplicated(col_aggregation))) {
-    warning("duplicated column names were provided to deaths_null: these will be removed")
+    warning("duplicated column names were provided to null_deaths: these will be removed")
     col_aggregation <- unique(col_aggregation)
   }
 
@@ -95,7 +95,7 @@ validate_deaths_input <- function(pop, col_aggregation, col_popn, const, error_n
                       check_negative_values = TRUE)
 
   if(nrow(pop) == 0) {
-    warning("deaths_null was given an empty input table")
+    warning("null_deaths was given an empty input table")
   }
 
   # If we were working with a mortality dataset as well, we would validate its aggregation levels

@@ -107,29 +107,29 @@ system.time({
   #-----------------------------------------------------
   
   int_out_rate_fns <- list(
-    list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                   births_mye_path = births_mye_path,
-                                                                   flow_or_rate = int_out_flow_or_rate,
-                                                                   component_path = int_out_mye_path,
-                                                                   last_data_year = int_out_last_data_year,
-                                                                   n_years_to_avg = int_out_years_to_avg,
-                                                                   data_col = "int_out",
-                                                                   first_proj_yr = first_proj_yr,
-                                                                   n_proj_yr = n_proj_yr,
-                                                                   rate_cap = int_out_rate_cap))
+    list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                                 births_mye_path = births_mye_path,
+                                                                                 flow_or_rate = int_out_flow_or_rate,
+                                                                                 component_path = int_out_mye_path,
+                                                                                 last_data_year = int_out_last_data_year,
+                                                                                 n_years_to_avg = int_out_years_to_avg,
+                                                                                 data_col = "int_out",
+                                                                                 first_proj_yr = first_proj_yr,
+                                                                                 n_proj_yr = n_proj_yr,
+                                                                                 rate_cap = int_out_rate_cap))
   )
   
   
   int_in_fns <- list(
-    list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                   births_mye_path = births_mye_path,
-                                                                   flow_or_rate = int_in_flow_or_rate,
-                                                                   component_path = int_in_mye_path,
-                                                                   last_data_year = int_in_last_data_year,
-                                                                   n_years_to_avg = int_in_years_to_avg,
-                                                                   data_col = "int_in",
-                                                                   first_proj_yr = first_proj_yr,
-                                                                   n_proj_yr = n_proj_yr))
+    list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                                 births_mye_path = births_mye_path,
+                                                                                 flow_or_rate = int_in_flow_or_rate,
+                                                                                 component_path = int_in_mye_path,
+                                                                                 last_data_year = int_in_last_data_year,
+                                                                                 n_years_to_avg = int_in_years_to_avg,
+                                                                                 data_col = "int_in",
+                                                                                 first_proj_yr = first_proj_yr,
+                                                                                 n_proj_yr = n_proj_yr))
   )
   
   dom_rate_fns <- list(
@@ -139,12 +139,14 @@ system.time({
                                                            years_backseries = (first_proj_yr - dom_mig_years_to_avg):(first_proj_yr - 1),
                                                            col_partial_match = c("gss_out","gss_in"),
                                                            col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
-                                                           col_component = "value")),
-    list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
-                                                                        n_years_to_avg = dom_mig_years_to_avg,
-                                                                        col_rate = "rate"))
+                                                           col_component = "value",
+                                                           rate_cap = NULL)),
+    
+    list(fn = popmodules::calculate_mean_domestic_rates, args = list(last_data_year = dom_mig_last_data_year,
+                                                                     n_years_to_avg = dom_mig_years_to_avg,
+                                                                     col_rate = "rate",
+                                                                     rate_cap = 0.8))
   )
-  
   
   constraint_fns <- list(
     list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
@@ -154,7 +156,6 @@ system.time({
                                                                  int_out_path = int_out_constraint_path,
                                                                  cross_in_path = cross_in_constraint_path,
                                                                  cross_out_path = cross_out_constraint_path))
-    
   )
   
   #TODO figure out the best way to get a null value when we don't want to constraint

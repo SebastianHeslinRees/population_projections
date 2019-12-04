@@ -22,8 +22,11 @@
 #'
 #' @export
 
-get_scaling_factors <- function(popn, constraint, col_aggregation = c("year", "sex", "age", "country"), col_popn,
-                                col_constraint = col_popn) {
+calculate_scaling_factors <- function(popn,
+                                      constraint,
+                                      col_aggregation = c("year", "sex", "age", "country"),
+                                      col_popn,
+                                      col_constraint = col_popn) {
 
   # Standardise data
   # ----------------

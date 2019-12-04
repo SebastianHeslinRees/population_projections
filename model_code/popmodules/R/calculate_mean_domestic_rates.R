@@ -21,7 +21,7 @@
 #'
 #' @export
 
-average_domestic_migration_rates <- function(origin_destination_rates,
+calculate_mean_domestic_rates <- function(origin_destination_rates,
                                              last_data_year,
                                              n_years_to_avg,
                                              col_rate = "rate",
@@ -104,18 +104,18 @@ average_domestic_migration_rates <- function(origin_destination_rates,
 check_average_domestic_rate_input <- function(origin_destination_rates, last_data_year, n_years_to_avg, col_rate) {
 
   assert_that(is.data.frame(origin_destination_rates),
-              msg="average_domestic_migration_rates expects that origin_destination_rates is a data frame")
+              msg="calculate_mean_domestic_migration_rates expects that origin_destination_rates is a data frame")
   assert_that(is.count(last_data_year),
-              msg="average_domestic_migration_rates expects that last_data_year is a numeric")
+              msg="calculate_mean_domestic_migration_rates expects that last_data_year is a numeric")
   assert_that(is.count(n_years_to_avg),
-              msg="average_domestic_migration_rates expects that n_years_to_avg is a numeric")
+              msg="calculate_mean_domestic_migration_rates expects that n_years_to_avg is a numeric")
   assert_that(is.character(col_rate),
-              msg="average_domestic_migration_rates expects that col_rate is a character")
+              msg="calculate_mean_domestic_migration_rates expects that col_rate is a character")
   assert_that(col_rate %in% names(origin_destination_rates),
-              msg="average_domestic_migration_rates expects that col_rate is a column in component_data dataframe")
+              msg="calculate_mean_domestic_migration_rates expects that col_rate is a column in component_data dataframe")
 
   backseries_years <- (last_data_year - n_years_to_avg + 1):last_data_year
   assert_that(all(backseries_years %in% origin_destination_rates$year),
-              msg = paste(c("average_domestic_migration_rates expects these years to be present in the origin-destination data:",
+              msg = paste(c("calculate_mean_domestic_migration_rates expects these years to be present in the origin-destination data:",
                             backseries_years), collapse=" "))
 }

@@ -25,17 +25,17 @@
 #'
 #' pop <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), popn = 100)
 #'
-#' pop_births <- births_null(pop,
+#' pop_births <- null_births(pop,
 #'                           colname_aggregation = c("year", "gss_code", "age", "sex"),
 #'                           const = 0,
 #'                           col_age = "age")
 #'
 #' # equivalent to
-#' pop_births <- births_null(pop)
+#' pop_births <- null_births(pop)
 #'
 #' @export
 
-births_null <- function(pop,
+null_births <- function(pop,
                         col_aggregation = c("year", "gss_code", "age", "sex"),
                         const = 0,
                         col_age = "age") {
@@ -62,27 +62,27 @@ births_null <- function(pop,
 validate_births_input <- function(pop, col_aggregation, const, col_age) {
 
   assert_that(is.data.frame(pop),
-              msg = "births_null needs a data frame as input")
+              msg = "null_births needs a data frame as input")
   assert_that(is.character(col_aggregation),
-              msg = "births_null needs a character vector as the col_aggregation parameter")
+              msg = "null_births needs a character vector as the col_aggregation parameter")
   assert_that(is.numeric(const) && length(const) == 1,
-              msg = "births_null needs a single numeric value as the const parameter")
+              msg = "null_births needs a single numeric value as the const parameter")
   assert_that(const >= 0,
-              msg = "births_null needs a positive value of the const parameter")
+              msg = "null_births needs a positive value of the const parameter")
   assert_that(is.string(col_age),
-              msg = "births_null needs a string as the col_age parameter")
+              msg = "null_births needs a string as the col_age parameter")
   assert_that(all(col_aggregation %in% names(pop)),
-              msg = paste(c("births_null was given column name(s) not present in the input population data",
+              msg = paste(c("null_births was given column name(s) not present in the input population data",
                             "\nColumn names provided:",col_aggregation,
                             "\nColumn names of input population:",names(pop)),
                           collapse=" "))
   assert_that(!"births" %in% col_aggregation,
-              msg = "births cannot currently be used as an aggregation column in births_null: the name is reserved for output. If this is really important to you, update the function to give a customisable name to the output births column.")
+              msg = "births cannot currently be used as an aggregation column in null_births: the name is reserved for output. If this is really important to you, update the function to give a customisable name to the output births column.")
   if("births" %in% names(pop)) {
-    warning("births is a column name in the input to births_null: the output births column will contain calculated births and will probably mess with any binds or joins!!")
+    warning("births is a column name in the input to null_births: the output births column will contain calculated births and will probably mess with any binds or joins!!")
   }
   if(any(duplicated(col_aggregation))) {
-    warning("duplicated column names were provided to births_null: these will be removed")
+    warning("duplicated column names were provided to null_births: these will be removed")
     col_aggregation <- unique(col_aggregation)
   }
 
@@ -92,7 +92,7 @@ validate_births_input <- function(pop, col_aggregation, const, col_age) {
                       test_unique = TRUE)
 
   if(nrow(pop) == 0) {
-    warning("births_null was given an empty input table")
+    warning("null_births was given an empty input table")
   }
 
   # If we were working with a fertility dataset as well, we would validate its aggregation levels

@@ -26,9 +26,9 @@
 #'
 #' @export
 
-international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
-                                          component_path, last_data_year, n_years_to_avg, data_col,
-                                          first_proj_yr, n_proj_yr, rate_cap) {
+calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
+                                                        component_path, last_data_year, n_years_to_avg, data_col,
+                                                        first_proj_yr, n_proj_yr, rate_cap) {
   
   component <- readRDS(component_path)
   
@@ -55,7 +55,7 @@ international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_o
       n <- sum(ix)
       
       warning(paste0(capture.output({
-        print(paste(c("In averaging the backseries, international_rates_and_flows created rates exceeding the cap of", rate_cap,
+        print(paste(c("In averaging the backseries, calculate_international_rates_and_flows created rates exceeding the cap of", rate_cap,
                       "at", n, "aggregation levels - these will be changed to", rate_cap),
                     collapse = " "))
         if(sum(ix) < 30) {
@@ -89,7 +89,7 @@ international_rates_and_flows <- function(popn_mye_path, births_mye_path, flow_o
     back_years <- c((last_data_year - n_years_to_avg + 1):last_data_year)
     
     assert_that(all(back_years %in% unique(component$year)),
-                msg=("in international_rates_and_flows backyears must be present in component data"))
+                msg=("in calculate_international_rates_and_flows backyears must be present in component data"))
     
     flows <- component %>%
       rename(value = data_col) %>%
