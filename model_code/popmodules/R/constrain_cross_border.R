@@ -6,12 +6,10 @@
 #' frame in \code{out_constraint}.
 #'
 #' @param domestic_flow A data frame containing origin-destination flows
-#' @param in_constraint A data frame containing cross-border totals data at the same
-#'   resolution or lower.
-#' @param out_constraint A data frame containing cross-border totals data at the same
-#'   resolution or lower.
-#' @param out_constraint A data frame containing cross-border outflows at the
-#'   same resolution or lower.
+#' @param in_constraint A data frame containing cross-border inflow totals at
+#'   the same resolution or lower.
+#' @param out_constraint A data frame containing cross-border outflow totals at
+#'   the same resolution or lower.
 #' @param col_flow String. Name of column in \code{domestic_flow} containing
 #'   population counts. Default "flow"
 #'
