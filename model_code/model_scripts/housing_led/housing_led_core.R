@@ -26,29 +26,42 @@ housing_led_core <- function(start_population = curr_yr_popn,
 
 
   #2. Calculate household population
+  #There might be something in the household model function that does this
 
   #3. Calculate trend AHS
+  #Population divided by households
 
   #4. AHS Decision Tree
+  #This will be new
 
   #5. Target population
+  #Probably apply_rate_to_population
 
   #6. Constrain births, deaths & international
+  #Constrain functions should work here - might need some additional functionality
 
   #7. Add components from step 6 to domestic from step 1 & start population
+  #Perhaps there's a need for a build_population_from_components function - we do something similar
+  #at the end of the trend core at in step 10 here as well
 
   #8. Compare population from step 7 to target from step 5. Difference = domestic adjustment
-
   #9. Adjust domestic
+  #Is this a function to do both steps in one - ie identify adjustment and apply it
 
   #10. Add components from step 6 to domestic from step 9 & start population
+  #see 7
 
   #11. Constrain total population
 
   #12. Compare population from step 11 to population from step 10. Difference = domestic adjustment
-
   #13. Adjust domestic
+  #see 8 & 9
 
   return()
+
+  #Things we want to return:
+  # final pop and components
+  # ahs used
+  # report on the ahs choice made
 
 }

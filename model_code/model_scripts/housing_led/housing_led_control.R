@@ -6,10 +6,7 @@
 #Pass to core as a named list
 birth_constraint
 death_constraint
-international_in_constraint
 international_out_constraint
-domestic_in_constraint
-domestic_out_constraint
 population_constraint
 
 #other data
