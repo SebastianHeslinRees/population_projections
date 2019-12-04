@@ -4,7 +4,7 @@
 #' to a defined age group using \code{base::cut} and then group and
 #' summarise the data using \code{dplyr} functions, summing each column
 #' specified in \code{data_cols} by age group.
-#' 
+#'
 #' Note: all columns not specified in \code{data_cols} are assumed to be
 #' aggregation levels.
 #'
@@ -19,16 +19,16 @@
 #'   containing data to be aggegated
 #' @param include.lowest Logical. Passed to \code{cut}. Does the variable \code{age_groups}
 #' include the lowest age. If set to FALSE the function will assume the first bin conatins any
-#' value less than and including the stated value. Default \code{TRUE} 
+#' value less than and including the stated value. Default \code{TRUE}
 #'
 #' @return A data frame of population data grouped by age group
 #'
 #' @importFrom stats complete.cases
 #' @importFrom dtplyr lazy_dt
-#' 
-#' @example 
+#'
+#' @examples
 #' sya_popn <- expand.grid(gss_code = "C-3P0", year = 2001:2005, sex = c("female","male"), age = 0:90, popn = 10)
-#' 
+#'
 #' age_group_popn <- population_into_age_groups(population = sya_popn,
 #'                                              age_groups = c(0, 15, seq(19,89,5), Inf),
 #'                                              labels = c("0_15","16_19","20_24","25_29","30_34","35_39","40_44",
@@ -37,7 +37,7 @@
 #'                                              data_cols = "popn")
 
 population_into_age_groups <- function(population, age_groups, labels, data_cols, include.lowest=T){
-  
+
   pop <- population %>%
     mutate(age_group = cut(age,
                            breaks = age_groups,
@@ -45,15 +45,15 @@ population_into_age_groups <- function(population, age_groups, labels, data_cols
                            labels = labels)) %>%
     mutate(age_group = as.character(age_group)) %>%
     select(-age)
-  
+
   cols <- names(pop)[!names(pop) %in% data_cols]
-  
+
   pop <- lazy_dt(pop) %>%
     group_by_at(cols) %>%
     summarise_all(.funs=list(sum)) %>%
     ungroup() %>%
     as.data.frame()
-  
+
   return(pop)
-  
+
 }
