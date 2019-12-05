@@ -75,12 +75,12 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
   household_population <- get_household_popn(population_age_groups, communal_establishment)
   
 
-  household_projection <- popn_apply_rate(popn = household_population,
-                                           popn_rate = household_rates,
-                                           col_aggregation = c("gss_code", "sex", "year", "age_group"),
-                                           col_popn = "household_popn",
-                                           col_rate = "HRR",
-                                           col_out = "households")
+  household_projection <- apply_rate_to_population(popn = household_population,
+                                                   popn_rate = household_rates,
+                                                   col_aggregation = c("gss_code", "sex", "year", "age_group"),
+                                                   col_popn = "household_popn",
+                                                   col_rate = "HRR",
+                                                   col_out = "households")
 
 #Constrain regions to England, LAs to regions
 unconstrained_regional <- filter(household_projection, substr(gss_code,1,3)=="E12")

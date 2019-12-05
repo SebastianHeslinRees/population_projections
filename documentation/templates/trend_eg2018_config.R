@@ -6,11 +6,11 @@ first_proj_yr <- 2019
 n_proj_yr <- 2
 projection_name <- "test"
 
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-14.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-14.rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-14.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
@@ -64,6 +64,7 @@ write_QA <- FALSE
 
 #-------------------------------------------------
 
+
 mortality_fns <- list(
   
   
@@ -107,29 +108,29 @@ fertility_fns <- list(
 #-----------------------------------------------------
 
 int_out_fns <- list(
-  list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                 births_mye_path = births_mye_path,
-                                                                 flow_or_rate = int_out_method,
-                                                                 component_path = int_out_mye_path,
-                                                                 last_data_year = int_out_last_data_year,
-                                                                 n_years_to_avg = int_out_years_to_avg,
-                                                                 data_col = "int_out",
-                                                                 first_proj_yr = first_proj_yr,
-                                                                 n_proj_yr = n_proj_yr,
-                                                                 rate_cap = int_out_rate_cap))
+  list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                               births_mye_path = births_mye_path,
+                                                                               flow_or_rate = int_out_method,
+                                                                               component_path = int_out_mye_path,
+                                                                               last_data_year = int_out_last_data_year,
+                                                                               n_years_to_avg = int_out_years_to_avg,
+                                                                               data_col = "int_out",
+                                                                               first_proj_yr = first_proj_yr,
+                                                                               n_proj_yr = n_proj_yr,
+                                                                               rate_cap = int_out_rate_cap))
 )
 
 
 int_in_fns <- list(
-  list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                 births_mye_path = births_mye_path,
-                                                                 flow_or_rate = int_in_flow_or_rate,
-                                                                 component_path = int_in_mye_path,
-                                                                 last_data_year = int_in_last_data_year,
-                                                                 n_years_to_avg = int_in_years_to_avg,
-                                                                 data_col = "int_in",
-                                                                 first_proj_yr = first_proj_yr,
-                                                                 n_proj_yr = n_proj_yr))
+  list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                               births_mye_path = births_mye_path,
+                                                                               flow_or_rate = int_in_flow_or_rate,
+                                                                               component_path = int_in_mye_path,
+                                                                               last_data_year = int_in_last_data_year,
+                                                                               n_years_to_avg = int_in_years_to_avg,
+                                                                               data_col = "int_in",
+                                                                               first_proj_yr = first_proj_yr,
+                                                                               n_proj_yr = n_proj_yr))
 )
 
 dom_rate_fns <- list(
@@ -142,10 +143,10 @@ dom_rate_fns <- list(
                                                          col_component = "value",
                                                          rate_cap = NULL)),
   
-  list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = dom_mig_last_data_year,
-                                                                      n_years_to_avg = dom_mig_years_to_avg,
-                                                                      col_rate = "rate",
-                                                                      rate_cap = 0.8))
+  list(fn = popmodules::calculate_mean_domestic_rates, args = list(last_data_year = dom_mig_last_data_year,
+                                                                   n_years_to_avg = dom_mig_years_to_avg,
+                                                                   col_rate = "rate",
+                                                                   rate_cap = 0.8))
 )
 
 constraint_fns <- list(

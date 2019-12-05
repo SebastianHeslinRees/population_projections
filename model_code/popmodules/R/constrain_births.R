@@ -1,14 +1,13 @@
 #' Scale one population to match the totals of another
 #'
-#' A wrapper for \code{get_scaling_factor} which prepares births data
-#' to feed into the function and which appliued the function's output
-#' back to the bith data resulting in sacled births.
+#' A wrapper for \code{calculate_scaling_factors} which prepares births data to
+#' feed into the function and which appliued the function's output back to the
+#' bith data resulting in sacled births.
 #'
-#' The NPP births constraint is provided for ages 15-46 while the
-#' model produces births for ages 15-49. This function wrangles the
-#' input birth data so that it can be scaled using the \code{get_scaling_factor}
-#' function.
-#'
+#' The NPP births constraint is provided for ages 15-46 while the model produces
+#' births for ages 15-49. This function wrangles the input birth data so that it
+#' can be scaled using the \code{calculate_scaling_factors} function.
+#' 
 #' @param births A data frame containing births by mother's age data.
 #' @param constraint A data frame containing births data at the same
 #'   resolution or lower.
@@ -44,8 +43,8 @@ constrain_births <- function(births, constraint){
     summarise(births = sum(births)) %>%
     ungroup()
   
-  scaling <- get_scaling_factors(scaling, constraint, col_popn="births",
-                                 col_aggregation = c("year","sex","age","country")) %>%
+  scaling <- calculate_scaling_factors(scaling, constraint, col_popn="births",
+                                       col_aggregation = c("year","sex","age","country")) %>%
     select(-births)%>%
     mutate(scaling = ifelse(is.na(scaling), 0, scaling))
   
