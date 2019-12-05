@@ -1,9 +1,3 @@
-hma_list <- list(a = c(1:3), b=c(4:6))
-
-constraint <- data.frame(hma=c("a","b"), births=c(50,50))
-
-popn <- data.frame(gss_code = 1:10, births = 11:20)
-
 #' Scale one population to match the totals of another in a houseing market area
 #'
 #' Given a cohort population and a data frame of target marginal population
@@ -53,7 +47,7 @@ constrain_to_hma <- function(popn, constraint, hma_list,
     select(names(popn)) %>%
     data.frame() %>%
     rbind(dont_scale) %>%
-    select(cols)
+    select(names(popn))
   
   return(scaled_popn)
   

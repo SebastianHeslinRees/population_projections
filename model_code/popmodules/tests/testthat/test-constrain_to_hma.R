@@ -9,7 +9,7 @@ popn <- data.frame(gss_code = 1:10, births = rep(2,10))
 
 test_output <- data.frame(gss_code = 1:10, births = c(rep(20,6),rep(2,4)))
 
-test_that("constraint_to_hma creates the expected output", {
+test_that("constraint_to_hma fails to create the expected output", {
 testthat::expect_equal(
   constrain_to_hma(popn, constraint, hma_list,
                    col_aggregation = "hma",
