@@ -32,20 +32,14 @@ constrain_to_hma <- function(popn, constraint, hma_list,
     tidyr::unnest(cols=c("hma","gss_code")) %>%
     as.data.frame()
   
-  do_scale <- filter(popn, gss_code %in% hma_df$gss_code) %>%
-    left_join(hma_df, by="gss_code")
-  
   dont_scale <- filter(popn, !gss_code %in% hma_df$gss_code)
   
-  scaling_factors <- calculate_scaling_factors(do_scale, constraint,
-                                               col_aggregation = col_aggregation,
-                                               col_popn = col_popn,
-                                               col_constraint = col_constraint)
-  
-  scaled_popn <- scaling_factors %>%
-    mutate(!!sym(col_popn) := !!sym(col_popn) * scaling) %>%
-    select(names(popn)) %>%
-    data.frame() %>%
+  scaled_popn <- filter(popn, gss_code %in% hma_df$gss_code) %>%
+    left_join(hma_df, by="gss_code") %>%
+    constrain_component(constraint = constraint,
+                        col_aggregation = col_aggregation,
+                        col_popn = col_popn,
+                        col_constraint = col_constraint) %>%
     rbind(dont_scale) %>%
     select(names(popn))
   
