@@ -42,6 +42,7 @@ trend_core <- function(start_population,
   # run projection
   cat('\r',paste("  Projecting year",projection_year))
   flush.console()
+
   
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
@@ -50,6 +51,7 @@ trend_core <- function(start_population,
   aged_popn <- start_population %>%
     popn_age_on() 
   
+
   # at_risk <- start_population %>%
   #   mutate(age = age+1) %>%
   #   left_join(start_population, by=c("gss_code","year","sex","age")) %>%
@@ -60,18 +62,18 @@ trend_core <- function(start_population,
   #   arrange(gss_code, year, sex, age) %>%
   #   filter(age <=90)
   
-  births_by_mother <- popn_apply_rate(aged_popn,
-                                      filter(fertility_rates, age != 0),
-                                      col_out = "births",
-                                      many2one = FALSE)
-  
+  births_by_mother <- apply_rate_to_population(aged_popn,
+                                               filter(fertility_rates, age != 0),
+                                               col_out = "births",
+                                               many2one = FALSE)
+
   if(!is.null(constraints)){
     births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
   }
   
   birthratio_m2f <- 1.05 
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
-  
+
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
   validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   
@@ -120,14 +122,14 @@ trend_core <- function(start_population,
   }
   
   domestic_flow <- natural_change_popn %>%
-    migrate_domestic(mign_rate = domestic_rates,
-                     col_aggregation = c("gss_code"="gss_out", "sex", "age"),
-                     col_gss_destination = "gss_in",
-                     col_popn = "popn",
-                     col_rate = "rate", 
-                     col_flow = "flow", 
-                     pop1_is_subset = FALSE, 
-                     many2one = FALSE) %>%
+    apply_domestic_migration_rates(mign_rate = domestic_rates,
+                                   col_aggregation = c("gss_code"="gss_out", "sex", "age"),
+                                   col_gss_destination = "gss_in",
+                                   col_popn = "popn",
+                                   col_rate = "rate", 
+                                   col_flow = "flow", 
+                                   pop1_is_subset = FALSE, 
+                                   many2one = FALSE) %>%
     mutate(year = projection_year)
   
   if(!is.null(constraints)){

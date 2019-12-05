@@ -12,7 +12,7 @@
 #' 
 #' @export
 
-get_component <- function(filepath, max_yr) {
+get_component_from_file <- function(filepath, max_yr) {
   
   component <- readRDS(filepath) %>%
     filter(year <= max_yr) %>%

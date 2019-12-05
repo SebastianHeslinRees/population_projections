@@ -67,9 +67,9 @@ constrain_component <- function(popn,
     
   }
   
-  scaling_factors <- get_scaling_factors(do_scale, constraint,
-                                         col_aggregation = col_aggregation,
-                                         col_popn=col_popn)
+  scaling_factors <- calculate_scaling_factors(do_scale, constraint,
+                                               col_aggregation = col_aggregation,
+                                               col_popn=col_popn)
   
   scaled_popn <- scaling_factors %>%
     mutate(!!sym(col_popn) := !!sym(col_popn) * scaling) %>%
