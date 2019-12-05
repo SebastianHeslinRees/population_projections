@@ -21,6 +21,7 @@ expected_config <- c(constraint_data_fns,
                      dev_trajectory_path,
                      ahs_trajectory_path,
                      dwelling_ratio_path,
+                     hma_list,
                      first_proj_yr)
 
 #The control will mostly be for reading-in data
@@ -111,6 +112,7 @@ for(projection_year in first_proj_yr:final_proj_yr){
                                                     average_household_size,
                                                     development_trajectory,
                                                     dwelling2household_ratio,
+                                                    hma_list = config_list$hma_list,
                                                     projection_year = projection_year)
   
 }
