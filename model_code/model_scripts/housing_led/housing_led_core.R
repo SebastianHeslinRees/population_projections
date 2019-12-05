@@ -40,8 +40,8 @@ housing_led_core <- function(start_population,
     summarise(popn = sum(popn)) %>%
     left_join(ce, by=c("gss_code","year")) %>%
     mutate(household_popn = popn - communal_est_popn) %>%
-    as.data.frame()
-  .check_negative_populations("houshold_popn") %>%
+    as.data.frame() %>%
+    .check_negative_populations("houshold_popn") %>%
     select(-popn, -communal_est_popn)
   
   #3. Calculate trend AHS
@@ -64,16 +64,29 @@ housing_led_core <- function(start_population,
                                      col_aggregation = c("year","gss_code"))
   
   #6. Constrain births, deaths & international
-  #Constrain functions should work here - might need some additional functionality
-  births <- x
+  #So that total match at the borough level
+
+  #TODO I don't think this will work at the moment
+  births <- constrain_component(popn = trend_projection['births'],
+                                constraint = constraints['births_constraint'],
+                                col_aggregation = c("year","gss_code"),
+                                col_popn = "births",
+                                col_constraint = "births")
   
-  deaths <- x
+  deaths <- constrain_component(popn = trend_projection['deaths'],
+                                constraint = constraints['death_constraint'],
+                                col_aggregation = c("year","gss_code"),
+                                col_popn = "deaths",
+                                col_constraint = "deaths")
   
-  int_out <- x
+  int_out <- constrain_component(popn = trend_projection['int_out'],
+                                 constraint = constraints['int_out_constraint'],
+                                 col_aggregation = c("year","gss_code"),
+                                 col_popn = "int_out",
+                                 col_constraint = "int_out")
+  
   
   #7. Add components from step 6 to domestic from step 1 & start population
-  #Perhaps there's a need for a build_population_from_components function - we do something similar
-  #at the end of the trend core at in step 10 here as well
   step_7 <- construct_popn_from_components(start_population,
                                            births,
                                            deaths,
@@ -87,39 +100,49 @@ housing_led_core <- function(start_population,
     summarise(popn = sum(popn)) %>%
     as.data.frame()
   
-  #8. Compare population from step 7 to target from step 5. Difference = domestic adjustment
+  #8. Compare population from step 7 to target from step 5.
+  #   Difference = domestic adjustment
+  #   Adjust domestic
+  adjusted_domestic <- adjust_domestic_migration(popn = step_7, target = target,
+                                                 dom_in = trend_projection['dom_in'],
+                                                 dom_out = trend_projection['dom_out'])
   
-  #10. Add components from step 6 to domestic from step 9 & start population
-  #see 7
-  step_10 <- construct_popn_from_components(start_population,
+  #9. Add components from step 6 to domestic from step 8 & start population
+  step_9 <- construct_popn_from_components(start_population,
                                             births,
                                             deaths,
                                             int_in,
                                             int_out,
-                                            dom_in,
-                                            dom_out,
+                                            adujusted_domestic['dom_in'],
+                                            adjusteed_domestic['dom_out'],
                                             upc = NULL) %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code) %>%
-    summarise(popn = sum(reconstructed_popn)) %>%
+    summarise(popn = sum(popn)) %>%
     as.data.frame()
   
-  #11. Constrain total population
-  popn <- constrain_to_hma(popn = trend_projection["population"],
-                           constraint = constraints['population_constraint'],
-                           hma_list = hma_list,
-                           col_aggregation = c("year","hma"),
-                           col_popn = "births")
+  #10. Constrain total population
+  constrained_popn <- constrain_to_hma(popn = step_9,
+                                       constraint = constraints['population_constraint'],
+                                       hma_list = hma_list,
+                                       col_aggregation = c("year","hma"),
+                                       col_popn = "popn")
   
-  #12. Compare population from step 11 to population from step 10. Difference = domestic adjustment
-  #13. Adjust domestic
-  #see 8 & 9
+  #11. Compare population from step 10 to population from step 9.
+  #    Difference = domestic adjustment
+  #    Adjust domestic
+  final_domestic <- adjust_domestic_migration(popn = step_9, target = constrained_popn,
+                                              dom_in = trend_projection['dom_in'],
+                                              dom_out = trend_projection['dom_out'])
   
-  return()
   
-  #Things we want to return:
-  # final pop and components
-  # ahs used
-  # report on the ahs choice made
-  
+  return(list(population = constrained_popn,
+              births = births,
+              death = deaths,
+              int_in = int_in,
+              int_out = int_out,
+              dom_in = final_domestic$dom_in,
+              dom_out = final_domestic$dom_out,
+              ahs = ahs,
+              ahs_choice))
 }
