@@ -65,25 +65,35 @@ housing_led_core <- function(start_population,
   
   #6. Constrain births, deaths & international
   #So that total match at the borough level
-
-  #TODO I don't think this will work at the moment
-  births <- constrain_component(popn = trend_projection['births'],
-                                constraint = constraints['births_constraint'],
-                                col_aggregation = c("year","gss_code"),
-                                col_popn = "births",
-                                col_constraint = "births")
   
-  deaths <- constrain_component(popn = trend_projection['deaths'],
-                                constraint = constraints['death_constraint'],
-                                col_aggregation = c("year","gss_code"),
-                                col_popn = "deaths",
-                                col_constraint = "deaths")
+  #TODO This is a messy way to acheive this
+  borough_constraint_gss <- constraints['population']$gss_code
   
-  int_out <- constrain_component(popn = trend_projection['int_out'],
-                                 constraint = constraints['int_out_constraint'],
-                                 col_aggregation = c("year","gss_code"),
-                                 col_popn = "int_out",
-                                 col_constraint = "int_out")
+  births <- trend_projection['births'] %>%
+    filter(gss_code %in% borough_constraint_gss) %>%
+    constrain_component(
+      constraint = constraints['births_constraint'],
+      col_aggregation = c("year","gss_code"),
+      col_popn = "births",
+      col_constraint = "births") %>%
+    rbind(filter(trend_projection['births'], !gss_code %in% borough_constraint_gss))
+  
+  deaths <- trend_projection['deaths'] %>%
+    filter(gss_code %in% borough_constraint_gss) %>%
+    constrain_component(constraint = constraints['death_constraint'],
+                        col_aggregation = c("year","gss_code"),
+                        col_popn = "deaths",
+                        col_constraint = "deaths") %>%
+    rbind(filter(trend_projection['deaths'], !gss_code %in% borough_constraint_gss))
+  
+  int_out <- rend_projection['int_out'] %>%
+    filter(gss_code %in% borough_constraint_gss) %>%
+    constrain_component(popn = trend_projection['int_out'],
+                        constraint = constraints['int_out_constraint'],
+                        col_aggregation = c("year","gss_code"),
+                        col_popn = "int_out",
+                        col_constraint = "int_out") %>%
+    rbind(filter(trend_projection['int_out'], !gss_code %in% borough_constraint_gss))
   
   
   #7. Add components from step 6 to domestic from step 1 & start population
@@ -109,13 +119,13 @@ housing_led_core <- function(start_population,
   
   #9. Add components from step 6 to domestic from step 8 & start population
   step_9 <- construct_popn_from_components(start_population,
-                                            births,
-                                            deaths,
-                                            int_in,
-                                            int_out,
-                                            adujusted_domestic['dom_in'],
-                                            adjusteed_domestic['dom_out'],
-                                            upc = NULL) %>%
+                                           births,
+                                           deaths,
+                                           int_in,
+                                           int_out,
+                                           adujusted_domestic['dom_in'],
+                                           adjusteed_domestic['dom_out'],
+                                           upc = NULL) %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code) %>%
     summarise(popn = sum(popn)) %>%
