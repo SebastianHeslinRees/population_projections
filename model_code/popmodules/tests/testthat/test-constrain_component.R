@@ -17,7 +17,7 @@ x <- constrain_component(popn,
                     col_constraint = "popn")
 x
 test_that("constrain_component can scale up and down", {
-  expect_equivalent(constain_component(popn,
+  expect_equivalent(constrain_component(popn,
                                    constraint,
                                    col_aggregation = c("year", "sex", "age", "country"),
                                    col_popn = "popn",
@@ -100,5 +100,37 @@ test_that("constrain_component should throw an error", {
   test_that("constrain_component can handle multiple countries", {
     expect_equivalent(x, output_cty)
   })
+  
+  #-----
+  #borough constraints
+  test_pop <- expand.grid(gss_code = c("a","b","c"), year = 2019,
+                          sex = c("male","female"), age = 0:4,
+                          popn = 10, stringsAsFactors = F) %>%
+    as.data.frame()
+  
+  test_const <- expand.grid(gss_code = c("a","b"), year = 2019,
+                            total_popn = 200,
+                            stringsAsFactors = F) %>%
+    as.data.frame()
+  
+  test_out <- test_pop <- expand.grid(gss_code = c("a","b","c"), year = 2019,
+                                      sex = c("male","female"), age = 0:4,
+                                               stringsAsFactors = F) %>%
+    as.data.frame() %>% mutate(popn = ifelse(gss_code == "c", 10, 20)) %>%
+    arrange(gss_code, sex, age)
+  
+  expect_equivalent(
+    test_pop %>%
+    filter(gss_code %in% test_const$gss_code) %>%
+    constrain_component(constraint = test_const,
+                        col_aggregation = c("year","gss_code"),
+                        col_popn = "popn",
+                        col_constraint = "total_popn") %>%
+    rbind(filter(test_pop, !gss_code %in% test_const$gss_code)) %>%
+      arrange(gss_code, sex, age),
+    test_out)
+  
+  
+  
   
   

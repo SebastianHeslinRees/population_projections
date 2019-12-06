@@ -30,7 +30,7 @@ calculate_scaling_factors <- function(popn,
 
   # Standardise data
   # ----------------
-
+  cols <- names(popn)
   # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
   col_aggregation <- .convert_to_named_vector(col_aggregation)
   # and reorder it to match popn's column ordering
@@ -45,11 +45,12 @@ calculate_scaling_factors <- function(popn,
   # Deal with possible duplicate data column names
   col_popn_new <- paste0(col_popn, ".x")
   col_constraint_new <- paste0(col_constraint, ".y")
-  rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
-  rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
+  popn <- rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
+  constraint <- rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
 
   #Calculate scaling rates
   scaling <- popn %>%
+    dtplyr::lazy_dt() %>%
     left_join(constraint, by = join_by) %>%
     group_by_at(join_by) %>%
     mutate(popn_total = sum(!!sym(col_popn_new)),
@@ -58,7 +59,7 @@ calculate_scaling_factors <- function(popn,
     ungroup() %>%
     data.frame() %>%
     rename(!!col_popn := !!sym(col_popn_new)) %>%
-    select(names(popn), scaling)
+    select(cols, scaling)
 
   return(scaling)
 }
