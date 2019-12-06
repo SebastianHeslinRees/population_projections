@@ -26,4 +26,4 @@ Imports:
 Suggests: 
     testthat (>= 2.1.0),
     minpack.lm
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

@@ -4,8 +4,13 @@
 \alias{household_model_outputs}
 \title{Household model outputs}
 \usage{
-household_model_outputs(model_output, model, output_dir, timestamp,
-  write_excel)
+household_model_outputs(
+  model_output,
+  model,
+  output_dir,
+  timestamp,
+  write_excel
+)
 }
 \description{
 Household model outputs

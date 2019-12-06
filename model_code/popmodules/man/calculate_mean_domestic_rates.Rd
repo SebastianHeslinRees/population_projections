@@ -5,8 +5,13 @@
 \title{Calculate average origin-destination domestic migration rates based on past
 data}
 \usage{
-calculate_mean_domestic_rates(origin_destination_rates, last_data_year,
-  n_years_to_avg, col_rate = "rate", rate_cap = 0.8)
+calculate_mean_domestic_rates(
+  origin_destination_rates,
+  last_data_year,
+  n_years_to_avg,
+  col_rate = "rate",
+  rate_cap = 0.8
+)
 }
 \arguments{
 \item{origin_destination_rates}{dataframe. Origin-destination flows by geography, year, sex and age.}

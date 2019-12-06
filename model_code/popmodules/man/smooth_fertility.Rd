@@ -4,8 +4,11 @@
 \alias{smooth_fertility}
 \title{Smooth a fertility curve}
 \usage{
-smooth_fertility(asfr_structure, reproducible = TRUE,
-  age_range_to_model = c(15:49))
+smooth_fertility(
+  asfr_structure,
+  reproducible = TRUE,
+  age_range_to_model = c(15:49)
+)
 }
 \arguments{
 \item{asfr_structure}{A dataframe containing the age specific fertility

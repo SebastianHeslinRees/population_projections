@@ -5,9 +5,17 @@
 \title{Calculate average mortality probabilities based on past data and assign to
 first projection year}
 \usage{
-scaled_mortality_curve(popn_mye_path, births_mye_path, deaths_mye_path,
-  target_curves_filepath, last_data_year, n_years_to_avg, avg_or_trend,
-  data_col = "deaths", output_col)
+scaled_mortality_curve(
+  popn_mye_path,
+  births_mye_path,
+  deaths_mye_path,
+  target_curves_filepath,
+  last_data_year,
+  n_years_to_avg,
+  avg_or_trend,
+  data_col = "deaths",
+  output_col
+)
 }
 \arguments{
 \item{popn_mye_path}{Character. Path to the MYE population data}

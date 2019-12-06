@@ -4,8 +4,13 @@
 \alias{population_into_age_groups}
 \title{Aggregate a single-year-of-age population into age groups}
 \usage{
-population_into_age_groups(population, age_groups, labels, data_cols,
-  include.lowest = T)
+population_into_age_groups(
+  population,
+  age_groups,
+  labels,
+  data_cols,
+  include.lowest = T
+)
 }
 \arguments{
 \item{population}{A data frame containing population data by single year of
