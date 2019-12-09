@@ -27,7 +27,7 @@ fert_rates_path <- "outputs/trend/2018/2018_central/fertility_rates_19-11-13_205
 mort_rates_path <- "outputs/trend/2018/2018_central/mortality_rates_19-11-13_2056.rds"
 int_out_path <- "outputs/trend/2018/2018_central/int_out_rates_19-11-13_2056.rds"
 int_in_path <- "outputs/trend/2018/2018_central/int_in_19-11-13_2056.rds"
-domestc_rates_path <- "outputs/trend/2018/2018_central/domestic_rates_19-11-13_2056.rds"
+domestic_rates_path <- "outputs/trend/2018/2018_central/domestic_rates_19-11-13_2056.rds"
 
 communal_est_path <- "outputs/trend/2018/2018_central/ons_communal_est_popn_19-11-13_2056.rds"
 dev_trajectory_path <- NA
@@ -55,7 +55,7 @@ component_rates_fns <- list(
            mortality_rates = mort_rates_path,
            int_out_flows_rates = int_out_path,
            int_in_flows = int_in_path,
-           domestic_rates = domestc_rates_path))))
+           domestic_rates = domestic_rates_path))))
 
 #x <- evaluate_fns_list(constraint_data_fns)
 config_list <- list(population_backseries_path = population_backseries_path,
