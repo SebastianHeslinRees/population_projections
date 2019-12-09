@@ -176,31 +176,10 @@ trend_core <- function(start_population,
       mutate(next_popn = popn - int_out + int_in - dom_out + dom_in + upc)
   }
   
-  # FIXME / TODO This setup creates negative populations - For now
-  # I'm just setting -ve pops to zero and noting this in the pull request
-  if(any(next_yr_popn$next_popn < 0)) {
-    ix <- next_yr_popn$next_popn < 0
-    sum_negative <- sum(next_yr_popn$next_popn[ix])
-    
-    warning(paste0(capture.output({
-      print(paste("Negative populations were created in the", projection_year, "loop, summing to", sum_negative))
-      
-      if(sum(ix) < 20) {
-        print("Values:")
-        print(next_yr_popn[ix,])
-      } else {
-        print("First 20 values:")
-        print(next_yr_popn[ix,][1:20,])
-        print("Levels affected:")
-        sapply(c("gss_code", "age", "sex"), function(col) {
-          print("col:")
-          print(unique(next_yr_popn[ix, col]))
-        })
-      }
-    }), collapse = "\n"))
-    
-    next_yr_popn <- mutate(next_yr_popn, next_popn = ifelse(next_popn < 0, 0, next_popn))
-  }
+  # FIXME
+  # TODO This setup creates negative populations
+  # For now just setting -ve pops to zero
+  next_yr_popn <- check_negative_values(next_yr_popn, "next_popn", set_to_zero = TRUE)
   
   next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn = next_popn)
   
