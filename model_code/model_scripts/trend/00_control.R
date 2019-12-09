@@ -49,7 +49,7 @@ run_trend_model <- function(config_list) {
                            function(i) {
                              if(!is.null(file_list[[i]])){
                                assertthat::assert_that(file.exists(file_list[[i]]),
-                                                       msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specific path"))
+                                                       msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile does not exist at specified path"))
                                file_ext <- tolower(strsplit(file_list[[i]], split="\\.")[[1]][[2]])
                                assertthat::assert_that(file_ext == "rds",
                                                        msg = paste0(names(file_list)[[i]], ": ", file_list[[i]], "\nFile is not .rds format"))
@@ -155,6 +155,7 @@ run_trend_model <- function(config_list) {
   
   
   ## household models
+  message('')
   message('running household models')
   projection$ons_households <- household_model_ons(population = projection$population,
                                                    stage1_file_path = config_list$ons_stage1_file_path,
