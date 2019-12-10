@@ -148,13 +148,13 @@ dom_rate_fns <- list(
 )
 
 constraint_fns <- list(
-  list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
-                                                               births_path = births_constraint_path,
-                                                               deaths_path = deaths_constraint_path,
-                                                               int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_out_constraint_path,
-                                                               cross_in_path = cross_in_constraint_path,
-                                                               cross_out_path = cross_out_constraint_path))
+  list(fn = popmodules::get_data_from_file, args = list(files= list(population_constraint = popn_constraint_path,
+                                                                    births_constraint = births_constraint_path,
+                                                                    deaths_constraint = deaths_constraint_path,
+                                                                    international_in_constraint = int_in_constraint_path,
+                                                                    international_out_constraint = int_out_constraint_path,
+                                                                    cross_border_in_constraint = cross_in_constraint_path,
+                                                                    cross_border_out_constraint = cross_out_constraint_path)))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
@@ -206,4 +206,3 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
-
