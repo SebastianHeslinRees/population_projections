@@ -155,7 +155,7 @@ ahs_cap <- NULL
 config_list$ahs_cap_year <- 2020
 
 first_proj_yr <- 2019
-final_proj_yr <- 2020
+final_proj_yr <- 2031
 
 for(projection_year in first_proj_yr:final_proj_yr){
   
@@ -188,5 +188,11 @@ for(projection_year in first_proj_yr:final_proj_yr){
 }
 
 projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
+output_dir <- "outputs/housing_led/2018/test/"
 
-I
+dir.create(output_dir, recursive = T)
+
+lapply(seq_along(projection),
+       function(i) saveRDS(projection[[i]],
+                                      paste0(output_dir, names(projection)[i], ".rds"))) %>%
+  invisible()
