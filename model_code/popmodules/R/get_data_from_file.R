@@ -1,6 +1,6 @@
 #' Read data from files into a named list
 #'
-#' @param args Named list or named vector where the value is the file path and the
+#' @param files Named list or named vector where the value is the file path and the
 #'  name is the name of the list element to write the data to
 #'
 #' @return List of dataframes
@@ -25,5 +25,4 @@ get_data_from_file <- function(args) {
   return(x)
 
 }
-
 
