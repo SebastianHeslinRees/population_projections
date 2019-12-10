@@ -106,7 +106,7 @@ communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
   summarise(communal_est_popn = sum(communal_establishment_population)) %>%
   as.data.frame()
 
-average_household_size <- readRDS(config_list$ahs_trajectory_path)
+average_household_size <- readRDS(config_list$ahs_trajectory_path) %>% as.data.frame()
 development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
 dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data.frame()
 
@@ -155,7 +155,7 @@ ahs_cap <- NULL
 config_list$ahs_cap_year <- 2020
 
 first_proj_yr <- 2019
-final_proj_yr <- 2031
+final_proj_yr <- 2021
 
 for(projection_year in first_proj_yr:final_proj_yr){
   

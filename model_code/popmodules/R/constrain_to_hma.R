@@ -48,7 +48,8 @@ constrain_to_hma <- function(popn, constraint, hma_list,
                         col_popn = col_popn,
                         col_constraint = col_constraint) %>%
     select(names(popn)) %>%
-    rbind(dont_scale) 
+    rbind(dont_scale) %>%
+    as.data.frame()
   
   return(scaled_popn)
   

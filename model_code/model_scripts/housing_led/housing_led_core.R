@@ -14,7 +14,7 @@ housing_led_core <- function(start_population,
                              projection_year,
                              ahs_cap_year,
                              ahs_cap){
-  
+
   #1. Run the trend model for one year
   trend_projection <- trend_core(start_population,
                                  fertility_rates, mortality_rates,
