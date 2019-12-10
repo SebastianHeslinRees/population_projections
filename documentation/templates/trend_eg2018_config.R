@@ -150,7 +150,7 @@ dom_rate_fns <- list(
 )
 
 constraint_fns <- list(
-  list(fn = popmodules::get_data_from_file, args = list(args = list(population_constraint = popn_constraint_path,
+  list(fn = popmodules::get_data_from_file, args = list(files= list(population_constraint = popn_constraint_path,
                                                         births_constraint = births_constraint_path,
                                                         deaths_constraint = deaths_constraint_path,
                                                         international_in_constraint = int_in_constraint_path,
@@ -213,4 +213,3 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
-
