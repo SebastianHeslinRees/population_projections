@@ -13,7 +13,7 @@ housing_led_core <- function(start_population,
                              dwelling2household_ratio,
                              hma_list,
                              projection_year = projection_year){
-  
+  browser()
   #1. Run the trend model for one year
   trend_projection <- trend_core(start_population,
                                  fertility_rates, mortality_rates,
@@ -70,7 +70,7 @@ housing_led_core <- function(start_population,
     left_join(ce, by=c("gss_code","year")) %>%
     mutate(household_popn = popn - communal_est_popn) %>%
     as.data.frame() %>%
-    #.check_negative_populations("houshold_popn") %>%
+    #check_negative_populations("houshold_popn") %>%
     select(-popn, -communal_est_popn)
   
   #4. Calculate trend AHS

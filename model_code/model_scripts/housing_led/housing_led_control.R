@@ -1,3 +1,5 @@
+devtools::load_all('model_code/popmodules')
+
 create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
   
   for(i in seq(dfs)){
@@ -30,9 +32,9 @@ int_in_path <- "outputs/trend/2018/2018_central/int_in_19-11-13_2056.rds"
 domestic_rates_path <- "outputs/trend/2018/2018_central/domestic_rates_19-11-13_2056.rds"
 
 communal_est_path <- "outputs/trend/2018/2018_central/ons_communal_est_popn_19-11-13_2056.rds"
-dev_trajectory_path <- NA
-ahs_trajectory_path <- NA
-dwelling_ratio_path <- NA
+dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
+ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
+dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_census.rds"
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
@@ -98,10 +100,10 @@ final_proj_yr <- max(population$year)
 
 #other data
 #use get_component
-communal_establishment_population <- readRDS(config_list$communal_est_path)#, max_yr = final_proj_yr)
-#average_household_size <- get_component(config_list$ahs_trajectory_path, max_yr = final_proj_yr)
-#development_trajectory <- get_component(config_list$dev_trajectory_path, max_yr = final_proj_yr)
-#dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data.frame()
+communal_establishment_population <- readRDS(config_list$communal_est_path)
+average_household_size <- readRDS(config_list$ahs_trajectory_path)
+development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
+dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data.frame()
 
 #For trend model
 #TODO Is this  good idea? Means passing 1 less variable and potentially
@@ -127,10 +129,14 @@ upc = NULL
 curr_yr_popn <- filter(population, year == first_proj_yr-1)
 
 #TODO import trend model package
-source('~/Documents/git/population_projections/model_code/model_scripts/trend/02_core.R')
-source('~/Documents/git/population_projections/model_code/model_scripts/housing_led/housing_led_core.R')
+source('model_code/model_scripts/trend/02_core.R')
+source('model_code/model_scripts/housing_led/housing_led_core.R')
 
 projection <- list()
+
+#for testing only
+projection_year <- 2019
+
 for(projection_year in first_proj_yr:final_proj_yr){
   
   curr_yr_fertility <- filter(component_rates$fertility_rates, year == projection_year)
@@ -147,10 +153,10 @@ for(projection_year in first_proj_yr:final_proj_yr){
                                                     int_out_method = config_list$int_out_method,
                                                     npp_constraints = NULL, upc = NULL,
                                                     constraints = constraints,
-                                                    communal_establishment_population,
-                                                    average_household_size,
-                                                    development_trajectory,
-                                                    dwelling2household_ratio,
+                                                    communal_establishment_population = communal_establishment_population,
+                                                    average_household_size = average_household_size,
+                                                    development_trajectory = development_trajectory,
+                                                    dwelling2household_ratio = dwelling2household_ratio,
                                                     hma_list = config_list$hma_list,
                                                     projection_year = projection_year)
   
