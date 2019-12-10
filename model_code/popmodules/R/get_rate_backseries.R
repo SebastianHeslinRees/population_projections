@@ -112,17 +112,12 @@ get_rate_backseries <- function(component_mye_path,
 
 
   # Fill missing values as zero
-  # TODO throw error instead if there are NAs?
+  # TODO throw error or write a message if there are NAs?
   ix <- is.na(component[[col_component]])
   component[ix, col_component] <- 0
 
   # Set negative values to zero
-  if(any(component[,col_component] < 0)) {
-    warning(paste("get_rate_backseries found negative counts in the components in", component_mye_path,
-                  "- these will be set to zero"))
-    component[[col_component]] <- ifelse(component[[col_component]] < 0, 0, component[[col_component]])
-  }
-
+  component <- check_negative_values(component, col_component, set_to_zero = TRUE)
 
   # TODO Figure out if this is necessary
   # levels <- col_aggregation[ !col_aggregation %in% col_partial_match]
