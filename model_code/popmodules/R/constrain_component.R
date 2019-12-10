@@ -13,7 +13,7 @@
 #'   counts. Default "popn".
 #' @param col_constraint String. Name of column in \code{constraint} containing population
 #'   counts. Default col_popn.
-#'   
+#'
 #' @return A data frame of component counts calculated as input popn * rate, with one row
 #'   for each distinct level of the input \code{popn} dataframe
 #'
@@ -38,35 +38,36 @@
 #'
 
 # TODO add nesting!
+# TODO deal with the case when a zero population is scaled up - currently returns zero
 
 constrain_component <- function(popn,
                                  constraint,
                                  col_aggregation = c("year", "sex", "age", "country"),
                                  col_popn,
                                  col_constraint = col_popn){
-  
+
   country <- ifelse("country" %in% col_aggregation, TRUE, FALSE)
-  
+
   validate_constrain_component_input(popn, constraint, col_aggregation, col_popn, col_constraint, country)
-  
+
   cols <- names(popn)
-  
+
   #if different countries have different scaling
   if(country){
     if(!"country" %in% names(popn)){
       popn <- mutate(popn, country = substr(gss_code,1,1))
     }
-    
+
     do_scale <- filter(popn, country %in% unique(constraint$country))
     dont_scale <- filter(popn, !country %in% unique(constraint$country))
-    
+
   } else {
-    
+
     do_scale <- popn
     dont_scale <- popn[NULL, ]
-    
+
   }
-  
+
   scaling_factors <- calculate_scaling_factors(do_scale, constraint,
                                                col_aggregation = col_aggregation,
                                                col_popn=col_popn,
@@ -78,7 +79,7 @@ constrain_component <- function(popn,
     data.frame() %>%
     rbind(dont_scale) %>%
     select(cols)
-  
+
   return(scaled_popn)
 }
 
@@ -88,12 +89,12 @@ constrain_component <- function(popn,
 
 # Check the function input is valid
 validate_constrain_component_input <- function(popn, constraint, col_aggregation, col_popn, col_constraint, country) {
-  
+
   all_constraint_cols <- intersect(unname(col_aggregation), names(constraint))
-  
+
   col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and constraint aggregation levels
   col_popn <- .convert_to_named_vector(col_popn)
-  
+
   assert_that(col_popn %in% names(popn),
               msg="in popn_contraint col_popn must be a column in popn dataframe")
   assert_that(col_constraint %in% names(constraint),
@@ -120,17 +121,17 @@ validate_constrain_component_input <- function(popn, constraint, col_aggregation
               msg = paste("constrain_component needs a numeric column in the specified population count col:", names(col_popn)))
   assert_that(is.numeric(constraint[[col_constraint]]),
               msg = paste("constrain_component needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
-  
+
   join_by <- col_aggregation[ col_aggregation %in% names(constraint) ]
   if(anyDuplicated(data.table::as.data.table(constraint[join_by]))) {
     stop("constrain_component was given a population that maps to multiple levels in the constraint population")
   }
-  
+
   assert_that(length(join_by) > 0,
               msg = "constrain_component must share some aggregation column names with the input constraint, or a column mapping must be included in the col_aggregation parameter")
-  
-  
-  
+
+
+
   # Type checking
   assert_that(is.data.frame(popn),
               msg = "constrain_component needs popn to be a dataframe")
@@ -142,6 +143,6 @@ validate_constrain_component_input <- function(popn, constraint, col_aggregation
               msg = "constrain_component needs a string as the col_popn parameter")
   assert_that(is.string(col_constraint),
               msg = "constrain_component needs a string as the col_constraint parameter")
-  
+
   invisible(TRUE)
 }

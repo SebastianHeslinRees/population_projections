@@ -6,11 +6,11 @@ first_proj_yr <- 2019
 n_proj_yr <- 2
 projection_name <- "test"
 
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-14.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-14.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-14.rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
@@ -150,13 +150,13 @@ dom_rate_fns <- list(
 )
 
 constraint_fns <- list(
-  list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
-                                                               births_path = births_constraint_path,
-                                                               deaths_path = deaths_constraint_path,
-                                                               int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_out_constraint_path,
-                                                               cross_in_path = cross_in_constraint_path,
-                                                               cross_out_path = cross_out_constraint_path))
+  list(fn = popmodules::get_data_from_file, args = list(files= list(population_constraint = popn_constraint_path,
+                                                        births_constraint = births_constraint_path,
+                                                        deaths_constraint = deaths_constraint_path,
+                                                        international_in_constraint = int_in_constraint_path,
+                                                        international_out_constraint = int_out_constraint_path,
+                                                        cross_border_in_constraint = cross_in_constraint_path,
+                                                        cross_border_out_constraint = cross_out_constraint_path)))
 )
 
 
