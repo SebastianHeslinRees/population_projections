@@ -14,7 +14,7 @@
 #'
 #' g <- get_data_from_file_2(args = a)
 
-get_data_from_file <- function(args) {
+get_data_from_file <- function(files) {
 
   x <- list()
 
@@ -25,4 +25,3 @@ get_data_from_file <- function(args) {
   return(x)
 
 }
-
