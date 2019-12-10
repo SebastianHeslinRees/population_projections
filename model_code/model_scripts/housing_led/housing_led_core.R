@@ -9,11 +9,12 @@ housing_led_core <- function(start_population,
                              constraints,
                              communal_establishment_population,
                              average_household_size,
-                             development_trajectory,
-                             dwelling2household_ratio,
+                             households,
                              hma_list,
-                             projection_year = projection_year){
-  browser()
+                             projection_year,
+                             ahs_cap_year,
+                             ahs_cap){
+  
   #1. Run the trend model for one year
   trend_projection <- trend_core(start_population,
                                  fertility_rates, mortality_rates,
@@ -56,18 +57,10 @@ housing_led_core <- function(start_population,
     rbind(filter(trend_projection[['int_out']], !gss_code %in% borough_constraint_gss))
   
   #3. Calculate household population
-  #There is something in the ons household model functions that does this
-  #Is it worth making this a functions - its so simple
-  #group this here or when it gets read in?
-  ce <- dtplyr::lazy_dt(communal_establishment_population) %>%
-    group_by(gss_code, year) %>%
-    summarise(communal_est_popn = sum(communal_establishment_population)) %>%
-    data.frame()
-  
   household_population <- dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%
     summarise(popn = sum(popn)) %>%
-    left_join(ce, by=c("gss_code","year")) %>%
+    left_join(communal_establishment_population, by=c("gss_code","year")) %>%
     mutate(household_popn = popn - communal_est_popn) %>%
     as.data.frame() %>%
     #check_negative_populations("houshold_popn") %>%
@@ -75,26 +68,54 @@ housing_led_core <- function(start_population,
   
   #4. Calculate trend AHS
   #Population divided by households
-  # curr_yr_trend_ahs <- left_join(household_population, households, by=c("year","gss_code")) %>%
-  #   mutate(trend_ahs = household_popn/households) %>%
-  #   selecy(-household_popn, -households)
+  curr_yr_trend_ahs <- left_join(households, household_population, by=c("year","gss_code")) %>%
+    mutate(trend = household_popn/households) %>%
+    select(-household_popn, -households)
   
-  #Somethings that sets cap here
+  #Initially the ahs_cap is passed as NULL
+  #In the year where the cap is set the variable is changed to be a dataframe of ahs values
+  #The core outputs the ahs_cap variable and the next year's ahs_cap is set as that output
+  #in the control. So it will be NULL before the cap year and then the same dataframe following
+  #the cap year
+ 
+  if(ahs_cap_year == projection_year){
+    ahs_cap <- curr_yr_trend_ahs
+  }
   
-  #5. AHS Decision Tree
-  #This will be new
+  if(is.null(ahs_cap)){
+    #before the cap year always select the trend
+    ahs <- select(curr_yr_trend_ahs, year, gss_code, ahs = trend)
+    ahs_choice <- mutate(ahs, ahs_choice = "trend") %>% select(-ahs)
+  } else {
+    average_household_size <- average_household_size %>%
+      filter(gss_code %in% curr_yr_trend_ahs$gss_code) %>%
+      rename(input = ahs) %>%
+      left_join(curr_yr_trend_ahs, by = c("year","gss_code")) %>%
+      left_join(ahs_cap, by = "gss_code") %>%
+      mutate(ahs_choice = case_when(cap < trend ~ "cap",
+                                    cap < input ~ "cap",
+                                    trend > input ~ "trend",
+                                    input > trend ~ "input",
+                                    TRUE ~ "trend"),
+             ahs = case_when(cap < trend ~ cap,
+                             cap < input ~ cap,
+                             trend > input ~ trend,
+                             input > trend ~ input,
+                             TRUE ~ trend))
+    
+    ahs_choice <- select(average_household_size, year, gss_code, ahs_choice)
+    ahs <- select(average_household_size, year, gss_code, ahs)
+  }
+  
   
   #6. Target population
   #Probably apply_rate_to_population
-  # target <- apply_rate_to_population(households, ahs,
-  #                                    col_popn = "households",
-  #                                    col_rate = "ahs",
-  #                                    col_out = "target_popn",
-  #                                    col_aggregation = c("year","gss_code"))
-  
-  target <- mutate(household_population, target_popn = household_popn *1.1) %>%
-    select(-household_popn) %>%
-    filter(stringr::str_detect(gss_code, "E09"))
+  target <- apply_rate_to_population(households, average_household_size,
+                                     col_popn = "households",
+                                     col_rate = "ahs",
+                                     col_out = "target_popn",
+                                     col_aggregation = c("year","gss_code"),
+                                     pop1_is_subset = TRUE)
   
   #7. Add components from step 2 to domestic from step 1 & start population
   step_7 <- construct_popn_from_components(start_population,
@@ -121,7 +142,6 @@ housing_led_core <- function(start_population,
                               col_aggregation = c("year","gss_code"),
                               col_popn = "popn",
                               col_target = "target_popn")
-  rbind(filter(step_7, !gss_code %in% target$gss_code))
   
   #9. Add components from step 6 to domestic from step 8 & start population
   step_9 <- construct_popn_from_components(start_population,
@@ -150,6 +170,8 @@ housing_led_core <- function(start_population,
                                               col_aggregation = c("year","gss_code","sex","age"),
                                               col_popn = "popn", col_target = "popn")
   
+  #TODO Look into this more
+  constrained_popn <- check_negative_population(constrained_popn, "popn")
   
   return(list(population = constrained_popn,
               births = births,
@@ -159,5 +181,6 @@ housing_led_core <- function(start_population,
               dom_in = final_domestic[['dom_in']],
               dom_out = final_domestic[['dom_out']],
               ahs = "ahs",
-              ahs_choice= "ahs_choice"))
+              ahs_choice = "ahs_choice",
+              ahs_cap = ahs_cap))
 }

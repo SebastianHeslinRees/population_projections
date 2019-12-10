@@ -31,7 +31,7 @@ int_out_path <- "outputs/trend/2018/2018_central/int_out_rates_19-11-13_2056.rds
 int_in_path <- "outputs/trend/2018/2018_central/int_in_19-11-13_2056.rds"
 domestic_rates_path <- "outputs/trend/2018/2018_central/domestic_rates_19-11-13_2056.rds"
 
-communal_est_path <- "outputs/trend/2018/2018_central/ons_communal_est_popn_19-11-13_2056.rds"
+communal_est_path <- "outputs/trend/2018/2018_central/households_19-11-13_2056/ons_communal_est_population.rds"
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
 dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_census.rds"
@@ -100,7 +100,12 @@ final_proj_yr <- max(population$year)
 
 #other data
 #use get_component
-communal_establishment_population <- readRDS(config_list$communal_est_path)
+communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
+  dtplyr::lazy_dt() %>%
+  group_by(gss_code, year) %>%
+  summarise(communal_est_popn = sum(communal_establishment_population)) %>%
+  as.data.frame()
+
 average_household_size <- readRDS(config_list$ahs_trajectory_path)
 development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
 dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data.frame()
@@ -135,7 +140,19 @@ source('model_code/model_scripts/housing_led/housing_led_core.R')
 projection <- list()
 
 #for testing only
-projection_year <- 2019
+projection_year <- first_proj_yr
+
+#development_trajectory = development_trajectory,
+household_trajectory <- left_join(development_trajectory, dwelling2household_ratio, by="gss_code") %>%
+  group_by(gss_code) %>%
+  mutate(cumulative_dwellings = cumsum(new_homes)) %>%
+  ungroup() %>%
+  mutate(projected_stock = cumulative_dwellings+census_dwellings) %>%
+  mutate(households = projected_stock / ratio) %>%
+  select(gss_code, year, households)
+
+ahs_cap <- NULL
+config_list$ahs_cap_year <- 2020
 
 for(projection_year in first_proj_yr:final_proj_yr){
   
@@ -143,6 +160,8 @@ for(projection_year in first_proj_yr:final_proj_yr){
   curr_yr_mortality <- filter(component_rates$mortality_rates, year == projection_year)
   curr_yr_int_out <- filter(component_rates$int_out, year == projection_year)
   curr_yr_int_in_flows <- component_rates$int_in %>% filter(year == projection_year)
+  curr_yr_ahs <- filter(average_household_size, year == projection_year)
+  curr_yr_households <- filter(household_trajectory, year == projection_year)
   
   projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                     fertility_rates = curr_yr_fertility, 
@@ -154,12 +173,14 @@ for(projection_year in first_proj_yr:final_proj_yr){
                                                     npp_constraints = NULL, upc = NULL,
                                                     constraints = constraints,
                                                     communal_establishment_population = communal_establishment_population,
-                                                    average_household_size = average_household_size,
-                                                    development_trajectory = development_trajectory,
-                                                    dwelling2household_ratio = dwelling2household_ratio,
+                                                    average_household_size = curr_yr_ahs,
+                                                    households = curr_yr_households,
                                                     hma_list = config_list$hma_list,
-                                                    projection_year = projection_year)
+                                                    projection_year = projection_year,
+                                                    ahs_cap_year = config_list$ahs_cap_year,
+                                                    ahs_cap = ahs_cap)
   
+  ahs_cap <- projection[[projection_year]][['ahs_cap']]
   curr_yr_popn <- projection[[projection_year]][['population']]
 }
 
