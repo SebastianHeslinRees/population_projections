@@ -154,11 +154,14 @@ household_trajectory <- left_join(development_trajectory, dwelling2household_rat
 ahs_cap <- NULL
 config_list$ahs_cap_year <- 2020
 
+first_proj_yr <- 2019
+final_proj_yr <- 2020
+
 for(projection_year in first_proj_yr:final_proj_yr){
   
   curr_yr_fertility <- filter(component_rates$fertility_rates, year == projection_year)
   curr_yr_mortality <- filter(component_rates$mortality_rates, year == projection_year)
-  curr_yr_int_out <- filter(component_rates$int_out, year == projection_year)
+  curr_yr_int_out <- mutate(component_rates$int_out, year = projection_year)
   curr_yr_int_in_flows <- component_rates$int_in %>% filter(year == projection_year)
   curr_yr_ahs <- filter(average_household_size, year == projection_year)
   curr_yr_households <- filter(household_trajectory, year == projection_year)
@@ -184,5 +187,6 @@ for(projection_year in first_proj_yr:final_proj_yr){
   curr_yr_popn <- projection[[projection_year]][['population']]
 }
 
+projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
 
-
+I

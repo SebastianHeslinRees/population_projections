@@ -79,10 +79,10 @@ housing_led_core <- function(start_population,
   #the cap year
  
   if(ahs_cap_year == projection_year){
-    ahs_cap <- curr_yr_trend_ahs
+    ahs_cap <- curr_yr_trend_ahs %>% rename(cap = trend) %>% select(-year)
   }
   
-  if(is.null(ahs_cap)){
+  if(projection_year <= ahs_cap_year){
     #before the cap year always select the trend
     ahs <- select(curr_yr_trend_ahs, year, gss_code, ahs = trend)
     ahs_choice <- mutate(ahs, ahs_choice = "trend") %>% select(-ahs)
@@ -171,7 +171,7 @@ housing_led_core <- function(start_population,
                                               col_popn = "popn", col_target = "popn")
   
   #TODO Look into this more
-  constrained_popn <- check_negative_population(constrained_popn, "popn")
+  constrained_popn <- check_negative_values(constrained_popn, "popn")
   
   return(list(population = constrained_popn,
               births = births,
@@ -180,7 +180,7 @@ housing_led_core <- function(start_population,
               int_out = int_out,
               dom_in = final_domestic[['dom_in']],
               dom_out = final_domestic[['dom_out']],
-              ahs = "ahs",
-              ahs_choice = "ahs_choice",
+              ahs = ahs,
+              ahs_choice = ahs_choice,
               ahs_cap = ahs_cap))
 }
