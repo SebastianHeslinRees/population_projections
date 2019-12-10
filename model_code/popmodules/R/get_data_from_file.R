@@ -18,7 +18,7 @@ get_data_from_file <- function(files) {
 
   x <- list()
 
-  for(i in seq(args)){
+  for(i in seq(files)){
     x[[names(args)[[i]]]] <- readRDS(args[[i]])
   }
 
