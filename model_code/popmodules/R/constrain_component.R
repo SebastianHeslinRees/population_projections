@@ -70,8 +70,9 @@ constrain_component <- function(popn,
 
   scaling_factors <- calculate_scaling_factors(do_scale, constraint,
                                                col_aggregation = col_aggregation,
-                                               col_popn=col_popn)
-
+                                               col_popn=col_popn,
+                                               col_constraint = col_constraint)
+  
   scaled_popn <- scaling_factors %>%
     mutate(!!sym(col_popn) := !!sym(col_popn) * scaling) %>%
     select(names(popn)) %>%
@@ -118,7 +119,7 @@ validate_constrain_component_input <- function(popn, constraint, col_aggregation
               msg = "in constrain_component, no aggregation column names were found in constraint - at least one must be present")
   assert_that(is.numeric(popn[[names(col_popn)]]),
               msg = paste("constrain_component needs a numeric column in the specified population count col:", names(col_popn)))
-  assert_that(is.numeric(constraint[[col_popn]]),
+  assert_that(is.numeric(constraint[[col_constraint]]),
               msg = paste("constrain_component needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
 
   join_by <- col_aggregation[ col_aggregation %in% names(constraint) ]
