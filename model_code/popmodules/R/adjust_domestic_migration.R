@@ -62,22 +62,21 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
   gross_in_adjustment <- domestic_adjustment %>%
     mutate(net_dom_adjustment = ifelse(net_dom_adjustment > 0, net_dom_adjustment, 0))
   gross_out_adjustment <- domestic_adjustment %>%
-    mutate(net_dom_adjustment = ifelse(net_dom_adjustment < 0, net_dom_adjustment, 0))
+    mutate(net_dom_adjustment = ifelse(net_dom_adjustment < 0, -1 * net_dom_adjustment, 0))
 
   dom_in_target <- dom_in %>%
     group_by_at(col_aggregation) %>%
     summarise(dom_in_orig = sum(dom_in)) %>%
     ungroup() %>%
     left_join(gross_in_adjustment, by = col_aggregation) %>%
-    mutate(dom_in_target = ifelse(is.na(net_dom_adjustment), dom_in_orig,
-                              dom_in_orig + net_dom_adjustment))  %>%
+    mutate(dom_in_target = dom_in_orig + net_dom_adjustment)  %>%
     select(c(col_aggregation, dom_in_target))
 
   dom_out_target <- dom_out %>%
     group_by_at(col_aggregation) %>%
     summarise(dom_out_orig = sum(dom_out)) %>%
     ungroup() %>%
-    left_join(gross_in_adjustment, by = col_aggregation) %>%
+    left_join(gross_out_adjustment, by = col_aggregation) %>%
     mutate(dom_out_target = dom_out_orig + net_dom_adjustment)  %>%
     select(c(col_aggregation, dom_out_target))
 

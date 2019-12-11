@@ -12,12 +12,12 @@ dom_in <- dplyr::rename(popn, dom_in = popn)
 dom_out <- dplyr::rename(popn, dom_out = popn)
 
 output <- list(
-  dom_in <- data.frame(gss_code = letters[1:6],
+  dom_in = data.frame(gss_code = letters[1:6],
                        borough = c(1,1,2,2,3,3),
-                       dom_in = c(1,1,2,2,0,0)),
-  dom_out <- data.frame(gss_code = letters[1:6],
+                       dom_in = c(1,1,2,2,1,1)),
+  dom_out = data.frame(gss_code = letters[1:6],
                         borough = c(1,1,2,2,3,3),
-                        dom_out = c(1,1,1,1,1,1))
+                        dom_out = c(1,1,1,1,2,2))
 )
 
 test_that("adjust_domestic_migration works", {
