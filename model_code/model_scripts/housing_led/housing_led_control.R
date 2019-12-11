@@ -18,20 +18,10 @@ create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
 
 
 #config
-population_backseries_path <- "outputs/trend/2018/2018_central/population_19-11-13_2056.rds"
+trend_path <- "outputs/trend/2018/2018_central/"
+trend_datestamp <- "19-11-13_2056"
+communal_est_file <- "ons_communal_est_population.rds"
 
-birth_constraint_path <- "outputs/trend/2018/2018_central/births_19-11-13_2056.rds"
-death_constraint_path <- "outputs/trend/2018/2018_central/deaths_19-11-13_2056.rds"
-int_out_constraint_path <- "outputs/trend/2018/2018_central/int_out_19-11-13_2056.rds"
-popn_constraint_path <- "outputs/trend/2018/2018_central/population_19-11-13_2056.rds"
-
-fert_rates_path <- "outputs/trend/2018/2018_central/fertility_rates_19-11-13_2056.rds"
-mort_rates_path <- "outputs/trend/2018/2018_central/mortality_rates_19-11-13_2056.rds"
-int_out_path <- "outputs/trend/2018/2018_central/int_out_rates_19-11-13_2056.rds"
-int_in_path <- "outputs/trend/2018/2018_central/int_in_19-11-13_2056.rds"
-domestic_rates_path <- "outputs/trend/2018/2018_central/domestic_rates_19-11-13_2056.rds"
-
-communal_est_path <- "outputs/trend/2018/2018_central/households_19-11-13_2056/ons_communal_est_population.rds"
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
 dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_census.rds"
@@ -39,51 +29,35 @@ dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_cen
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
 
+
 constraint_data_fns <- list(
   list(fn = popmodules::get_data_from_file,
        args = list(
          list(
-           birth_constraint = birth_constraint_path,
-           death_constraint = death_constraint_path,
-           international_out_constraint = int_out_constraint_path))),
+           birth_constraint = paste0(trend_path,"births_",trend_datestamp,".rds"),
+           death_constraint = paste0(trend_path,"deaths_",trend_datestamp,".rds"),
+           international_out_constraint = paste0(trend_path,"int_out_",trend_datestamp,".rds")))),
   list(fn = create_constraints,
        args = list(col_aggregation = c("year","gss_code"))))
 
 component_rates_fns <- list(
   list(fn = popmodules::get_data_from_file,
-       args= list(
-         list(
-           fertility_rates = fert_rates_path,
-           mortality_rates = mort_rates_path,
-           int_out_flows_rates = int_out_path,
-           int_in_flows = int_in_path,
-           domestic_rates = domestic_rates_path))))
+       args= list(list(
+           fertility_rates = paste0(trend_path,"fertility_rates_",trend_datestamp,".rds"),
+           mortality_rates = paste0(trend_path,"mortality_rates_",trend_datestamp,".rds"),
+           int_out_flows_rates = paste0(trend_path,"int_out_rates_",trend_datestamp,".rds"),
+           int_in_flows = paste0(trend_path,"int_in_",trend_datestamp,".rds"),
+           domestic_rates = paste0(trend_path,"domestic_rates_",trend_datestamp,".rds")))))
 
-#x <- evaluate_fns_list(constraint_data_fns)
-config_list <- list(population_backseries_path = population_backseries_path,
-                    constraint_data_fns = constraint_data_fns,
-                    component_rates_fns = component_rates_fns,
-                    communal_est_path = communal_est_path,
-                    dev_trajectory_path = dev_trajectory_path,
-                    ahs_trajectory_path = ahs_trajectory_path,
-                    dwelling_ratio_path = dwelling_ratio_path,
-                    hma_list = hma_list,
-                    first_proj_yr = first_proj_yr)
-
-
+config_list <- list()
+config_list$constraint_data_fns <- constraint_data_fns
+config_list$component_rates_fns <- component_rates_fns
+config_list$communal_est_path <- paste0(trend_path,"households_",trend_datestamp,"/",communal_est_file)
 
 #control
 housing_led_control <- function(config_list){}
 
-expected_config <- c(population_backseries_path,
-                     constraint_data_fns,
-                     component_rates_fns,
-                     communal_est_path,
-                     dev_trajectory_path,
-                     ahs_trajectory_path,
-                     dwelling_ratio_path,
-                     hma_list,
-                     first_proj_yr)
+expected_config <- c()
 
 #The control will mostly be for reading-in data
 #And managing the return from the core loop
@@ -94,7 +68,7 @@ constraints <- evaluate_fns_list(config_list$constraint_data_fns)
 #component rates
 component_rates <- evaluate_fns_list(config_list$component_rates_fns)
 
-population <- readRDS(population_backseries_path)
+population <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds"))
 constraints$population_constraint <- population
 final_proj_yr <- max(population$year)
 
@@ -194,5 +168,5 @@ dir.create(output_dir, recursive = T)
 
 lapply(seq_along(projection),
        function(i) saveRDS(projection[[i]],
-                                      paste0(output_dir, names(projection)[i], ".rds"))) %>%
+                           paste0(output_dir, names(projection)[i], ".rds"))) %>%
   invisible()
