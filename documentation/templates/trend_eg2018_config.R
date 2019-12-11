@@ -213,4 +213,5 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
+log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
 
