@@ -4,10 +4,16 @@
 \alias{get_rate_backseries}
 \title{Divide a component of change by population to give historical rates}
 \usage{
-get_rate_backseries(component_mye_path, popn_mye_path, births_mye_path,
-  years_backseries, col_partial_match = NULL,
+get_rate_backseries(
+  component_mye_path,
+  popn_mye_path,
+  births_mye_path,
+  years_backseries,
+  col_partial_match = NULL,
   col_aggregation = c("year", "gss_code", "age", "sex"),
-  col_component = NULL, rate_cap = 1)
+  col_component = NULL,
+  rate_cap = 1
+)
 }
 \arguments{
 \item{component_mye_path}{Path to the mid-year estimates of the desired

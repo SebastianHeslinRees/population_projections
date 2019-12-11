@@ -14,6 +14,7 @@ construct_popn_from_components <- function(start_population,
   #it can then be used in the trend core at lines 158-178
   
   constructed <- start_population %>%
+    as.data.frame() %>%
     popn_age_on(births = births) %>%
     dtplyr::lazy_dt() %>%
     left_join(deaths, by = col_aggregation) %>%

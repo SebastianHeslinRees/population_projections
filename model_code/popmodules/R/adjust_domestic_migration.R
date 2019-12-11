@@ -69,7 +69,8 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
     summarise(dom_in_orig = sum(dom_in)) %>%
     ungroup() %>%
     left_join(gross_in_adjustment, by = col_aggregation) %>%
-    mutate(dom_in_target = dom_in_orig + net_dom_adjustment)  %>%
+    mutate(dom_in_target = ifelse(is.na(net_dom_adjustment), dom_in_orig,
+                              dom_in_orig + net_dom_adjustment))  %>%
     select(c(col_aggregation, dom_in_target))
 
   dom_out_target <- dom_out %>%

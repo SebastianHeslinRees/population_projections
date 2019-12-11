@@ -5,8 +5,12 @@
 \title{Template births function that returns a fixed number of births (default zero)
 for each aggregation level, and sets their age to zero}
 \usage{
-null_births(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
-  const = 0, col_age = "age")
+null_births(
+  pop,
+  col_aggregation = c("year", "gss_code", "age", "sex"),
+  const = 0,
+  col_age = "age"
+)
 }
 \arguments{
 \item{pop}{A data frame containing population data}

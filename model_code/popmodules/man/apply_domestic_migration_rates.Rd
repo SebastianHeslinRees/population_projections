@@ -4,11 +4,18 @@
 \alias{apply_domestic_migration_rates}
 \title{Apply origin-destination migration rates to a population}
 \usage{
-apply_domestic_migration_rates(popn, mign_rate,
+apply_domestic_migration_rates(
+  popn,
+  mign_rate,
   col_aggregation = c("year", gss_code = "gss_out", "sex", "age"),
-  col_gss_destination = "gss_in", col_popn = "popn",
-  col_rate = "rate", col_flow = "flow", pop1_is_subset = FALSE,
-  many2one = FALSE, col_origin_destination = NA)
+  col_gss_destination = "gss_in",
+  col_popn = "popn",
+  col_rate = "rate",
+  col_flow = "flow",
+  pop1_is_subset = FALSE,
+  many2one = FALSE,
+  col_origin_destination = NA
+)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}

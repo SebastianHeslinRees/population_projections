@@ -4,9 +4,14 @@
 \alias{component_from_popn_rate}
 \title{Apply component rates to a population.}
 \usage{
-component_from_popn_rate(popn, component_rate,
+component_from_popn_rate(
+  popn,
+  component_rate,
   col_aggregation = c("year", "gss_code", "sex", "age"),
-  col_popn = "popn", col_rate = "rate", col_component = "component")
+  col_popn = "popn",
+  col_rate = "rate",
+  col_component = "component"
+)
 }
 \arguments{
 \item{popn}{A data frame containing population data}
