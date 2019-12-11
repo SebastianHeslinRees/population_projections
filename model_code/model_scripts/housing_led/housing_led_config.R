@@ -11,6 +11,7 @@ dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_cen
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
+ahs_cap_year <- 2020
 
 #-----------------
 #Component Constraints
@@ -41,8 +42,13 @@ config_list <- list(
   communal_est_path = paste0(trend_path,"households_",trend_datestamp,"/",communal_est_file),
   hma_constraint = readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")),
   hma_list = hma_list,
+  dev_trajectory_path = dev_trajectory_path,
+  ahs_trajectory_path = ahs_trajectory_path,
+  dwelling_ratio_path = dwelling_ratio_path,
+  ahs_cap_year = ahs_cap_year,
   trend_path = trend_path,
-  trend_datestamp = trend_datestamp)
+  trend_datestamp = trend_datestamp,
+  first_proj_yr = first_proj_yr)
 
 #---------------------
 #run projection

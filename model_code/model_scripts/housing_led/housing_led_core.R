@@ -151,10 +151,10 @@ housing_led_core <- function(start_population,
                                            adjusted_domestic[['dom_in']],
                                            adjusted_domestic[['dom_out']],
                                            upc = NULL)
-  
+ 
   #10. Constrain total population
   constrained_popn <- constrain_to_hma(popn = step_9,
-                                       constraint = constraints[['population_constraint']],
+                                       constraint = hma_constraint,
                                        hma_list = hma_list,
                                        col_aggregation = c("year","hma","sex","age"),
                                        col_popn = "popn",

@@ -36,12 +36,12 @@ hma_list <- hma_list %>%
 hma_constraint <- readRDS(paste0(config_list$trend_path, "population_", config_list$trend_datestamp,".rds")) %>%
   dtplyr::lazy_dt() %>%
   filter(gss_code %in% hma_list$gss_code) %>%
+  left_join(hma_list, by="gss_code") %>%
   group_by_at(c("year","hma","sex","age")) %>%
   summarise(popn := sum(popn)) %>%
   as.data.frame()
 
 #other data
-#use get_component
 communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
   dtplyr::lazy_dt() %>%
   group_by(gss_code, year) %>%
@@ -56,6 +56,8 @@ dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data
 #TODO Is this  good idea? Means passing 1 less variable and potentially
 #avoids a mismatch between methods and data but could it create problems?
 int_out_method <- ifelse(max(component_rates[['int_out_flows_rates']]$int_out)>1 , "flow", "rate") 
+
+#TODO Sort this out so it can take dataframes here
 npp_constraints = NULL
 upc = NULL
 
@@ -73,14 +75,10 @@ upc = NULL
 #use_offset_method <- FALSE
 ################
 
-curr_yr_popn <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")) %>%
-  filter(population, year == first_proj_yr-1)
-
-final_proj_yr <- max(hma_constraint$year)
-
 #TODO import trend model package
 source('model_code/model_scripts/trend/02_core.R')
 source('model_code/model_scripts/housing_led/housing_led_core.R')
+source('model_code/model_scripts/housing_led/arrange_housing_led_core_outputs.R')
 
 #development_trajectory = development_trajectory,
 household_trajectory <- left_join(development_trajectory, dwelling2household_ratio, by="gss_code") %>%
@@ -91,10 +89,14 @@ household_trajectory <- left_join(development_trajectory, dwelling2household_rat
   mutate(households = projected_stock / ratio) %>%
   select(gss_code, year, households)
 
-ahs_cap <- NULL
-config_list$ahs_cap_year <- 2020
+#Starting population
+curr_yr_popn <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")) %>%
+  filter(year == first_proj_yr-1)
 
-first_proj_yr <- 2019
+#Other varibales
+ahs_cap <- NULL
+first_proj_yr <- config_list$first_proj_yr
+final_proj_yr <- max(hma_constraint$year)
 final_proj_yr <- 2021
 
 projection <- list()
@@ -130,6 +132,7 @@ for(projection_year in first_proj_yr:final_proj_yr){
   ahs_cap <- projection[[projection_year]][['ahs_cap']]
   curr_yr_popn <- projection[[projection_year]][['population']]
 }
+
 
 projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
 output_dir <- "outputs/housing_led/2018/test/"
