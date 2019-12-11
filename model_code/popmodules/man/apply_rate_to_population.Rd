@@ -4,11 +4,19 @@
 \alias{apply_rate_to_population}
 \title{Apply rates to a population.}
 \usage{
-apply_rate_to_population(popn, popn_rate, col_aggregation = c("year",
-  "gss_code", "sex", "age"), col_popn = "popn", col_rate = "rate",
-  col_out = "component", pop1_is_subset = FALSE, many2one = TRUE,
-  additional_rate_levels = NA, missing_levels_popn = FALSE,
-  missing_levels_rate = FALSE)
+apply_rate_to_population(
+  popn,
+  popn_rate,
+  col_aggregation = c("year", "gss_code", "sex", "age"),
+  col_popn = "popn",
+  col_rate = "rate",
+  col_out = "component",
+  pop1_is_subset = FALSE,
+  many2one = TRUE,
+  additional_rate_levels = NA,
+  missing_levels_popn = FALSE,
+  missing_levels_rate = FALSE
+)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}

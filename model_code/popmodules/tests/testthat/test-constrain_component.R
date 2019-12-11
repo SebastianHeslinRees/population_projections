@@ -133,6 +133,3 @@ test_that("constrain_component should throw an error", {
       arrange(gss_code, sex, age),
     test_out)
 
-
-
-

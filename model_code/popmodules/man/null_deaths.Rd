@@ -5,8 +5,13 @@
 \title{Template deaths function that returns a fixed number of deaths (default zero)
 for each aggregation level.}
 \usage{
-null_deaths(pop, col_aggregation = c("year", "gss_code", "age", "sex"),
-  col_popn = "popn", const = 0, error_negative_pop = TRUE)
+null_deaths(
+  pop,
+  col_aggregation = c("year", "gss_code", "age", "sex"),
+  col_popn = "popn",
+  const = 0,
+  error_negative_pop = TRUE
+)
 }
 \arguments{
 \item{pop}{A data frame containing population data}

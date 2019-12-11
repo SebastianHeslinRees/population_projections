@@ -26,6 +26,7 @@
 constrain_to_hma <- function(popn, constraint, hma_list,
                              col_aggregation = c("year","hma","sex","age"),
                              col_popn, col_constraint = col_popn){
+
   if("hma" %in% names(popn)) {
     warning("constrain_to_hma ignoring hma column in input popn")
     popn <- select(popn, -hma)
@@ -34,6 +35,7 @@ constrain_to_hma <- function(popn, constraint, hma_list,
     warning("constrain_to_hma ignoring hma column in input constraint")
     constraint <- select(constraint, -hma)
   }
+
   hma_df <- hma_list %>% 
     tibble::enframe("hma","gss_code") %>% 
     tidyr::unnest(cols=c("hma","gss_code")) %>%
@@ -55,7 +57,8 @@ constrain_to_hma <- function(popn, constraint, hma_list,
                         col_popn = col_popn,
                         col_constraint = col_constraint) %>%
     select(names(popn)) %>%
-    rbind(dont_scale) 
+    rbind(dont_scale) %>%
+    as.data.frame()
   
   return(scaled_popn)
   

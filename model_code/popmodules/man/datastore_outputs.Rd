@@ -4,8 +4,19 @@
 \alias{datastore_outputs}
 \title{Datastore outputs}
 \usage{
-datastore_outputs(population, births, deaths, int_in, int_out, dom_in,
-  dom_out, output_dir, file_name, output_date, write_excel)
+datastore_outputs(
+  population,
+  births,
+  deaths,
+  int_in,
+  int_out,
+  dom_in,
+  dom_out,
+  output_dir,
+  file_name,
+  output_date,
+  write_excel
+)
 }
 \description{
 Datastore outputs

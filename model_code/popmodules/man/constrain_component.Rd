@@ -4,8 +4,13 @@
 \alias{constrain_component}
 \title{Scale one population to match the totals of another}
 \usage{
-constrain_component(popn, constraint, col_aggregation = c("year", "sex",
-  "age", "country"), col_popn, col_constraint = col_popn)
+constrain_component(
+  popn,
+  constraint,
+  col_aggregation = c("year", "sex", "age", "country"),
+  col_popn,
+  col_constraint = col_popn
+)
 }
 \arguments{
 \item{popn}{A data frame containing population data.}

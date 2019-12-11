@@ -4,8 +4,14 @@
 \alias{project_rates_npp}
 \title{Project mortality/fertility rates forward based on a national trend}
 \usage{
-project_rates_npp(jump_off_rates, rate_col, rate_trajectory_filepath,
-  first_proj_yr, n_proj_yr, npp_var = "2018_principal")
+project_rates_npp(
+  jump_off_rates,
+  rate_col,
+  rate_trajectory_filepath,
+  first_proj_yr,
+  n_proj_yr,
+  npp_var = "2018_principal"
+)
 }
 \arguments{
 \item{jump_off_rates}{Dataframe. A set of LA/age/sex rates for the first projection year

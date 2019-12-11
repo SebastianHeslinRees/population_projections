@@ -4,8 +4,13 @@
 \alias{calculate_mean_from_backseries}
 \title{Calculate averagesbased on past data}
 \usage{
-calculate_mean_from_backseries(data_backseries, n_years_to_avg,
-  last_data_year, data_col, col_aggregation = c("gss_code", "sex"))
+calculate_mean_from_backseries(
+  data_backseries,
+  n_years_to_avg,
+  last_data_year,
+  data_col,
+  col_aggregation = c("gss_code", "sex")
+)
 }
 \arguments{
 \item{data_backseries}{Dataframe. A set of rates or flows by LA, sex and age}

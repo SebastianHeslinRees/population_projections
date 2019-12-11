@@ -4,8 +4,12 @@
 \alias{constrain_cross_border}
 \title{Scale a set of cross-border flows to match the totals of another}
 \usage{
-constrain_cross_border(domestic_flow, in_constraint, out_constraint,
-  col_flow = "flow")
+constrain_cross_border(
+  domestic_flow,
+  in_constraint,
+  out_constraint,
+  col_flow = "flow"
+)
 }
 \arguments{
 \item{domestic_flow}{A data frame containing origin-destination flows}

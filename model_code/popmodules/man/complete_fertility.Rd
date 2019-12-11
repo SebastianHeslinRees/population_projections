@@ -4,9 +4,15 @@
 \alias{complete_fertility}
 \title{Complete the sex and age of a fertility dataframe}
 \usage{
-complete_fertility(fertility, population, col_sex_fert = "sex",
-  col_sex_popn = col_sex_fert, col_age_fert = "age",
-  col_age_popn = col_age_fert, col_rate = "rate")
+complete_fertility(
+  fertility,
+  population,
+  col_sex_fert = "sex",
+  col_sex_popn = col_sex_fert,
+  col_age_fert = "age",
+  col_age_popn = col_age_fert,
+  col_rate = "rate"
+)
 }
 \arguments{
 \item{fertility}{A dataframe containing fertility data. Any age column must be numeric.}
