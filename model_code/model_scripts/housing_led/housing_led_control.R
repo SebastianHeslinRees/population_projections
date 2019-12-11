@@ -1,4 +1,4 @@
-devtools::load_all('model_code/popmodules')
+run_housing_led_model <- function(config_list){}
 
 create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
   
@@ -17,60 +17,28 @@ create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
 }
 
 
-#config
-trend_path <- "outputs/trend/2018/2018_central/"
-trend_datestamp <- "19-11-13_2056"
-communal_est_file <- "ons_communal_est_population.rds"
-
-dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
-ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
-dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_census.rds"
-
-hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
-first_proj_yr <- 2019
-
-
-constraint_data_fns <- list(
-  list(fn = popmodules::get_data_from_file,
-       args = list(
-         list(
-           birth_constraint = paste0(trend_path,"births_",trend_datestamp,".rds"),
-           death_constraint = paste0(trend_path,"deaths_",trend_datestamp,".rds"),
-           international_out_constraint = paste0(trend_path,"int_out_",trend_datestamp,".rds")))),
-  list(fn = create_constraints,
-       args = list(col_aggregation = c("year","gss_code"))))
-
-component_rates_fns <- list(
-  list(fn = popmodules::get_data_from_file,
-       args= list(list(
-           fertility_rates = paste0(trend_path,"fertility_rates_",trend_datestamp,".rds"),
-           mortality_rates = paste0(trend_path,"mortality_rates_",trend_datestamp,".rds"),
-           int_out_flows_rates = paste0(trend_path,"int_out_rates_",trend_datestamp,".rds"),
-           int_in_flows = paste0(trend_path,"int_in_",trend_datestamp,".rds"),
-           domestic_rates = paste0(trend_path,"domestic_rates_",trend_datestamp,".rds")))))
-
-config_list <- list()
-config_list$constraint_data_fns <- constraint_data_fns
-config_list$component_rates_fns <- component_rates_fns
-config_list$communal_est_path <- paste0(trend_path,"households_",trend_datestamp,"/",communal_est_file)
-
-#control
-housing_led_control <- function(config_list){}
-
+#validate
 expected_config <- c()
-
-#The control will mostly be for reading-in data
-#And managing the return from the core loop
-
-#For constraining
-constraints <- evaluate_fns_list(config_list$constraint_data_fns)
 
 #component rates
 component_rates <- evaluate_fns_list(config_list$component_rates_fns)
 
-population <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds"))
-constraints$population_constraint <- population
-final_proj_yr <- max(population$year)
+#For constraining
+constraints <- evaluate_fns_list(config_list$constraint_data_fns) %>%
+  create_constraints()
+
+#housing market area constraint
+hma_list <- hma_list %>% 
+  tibble::enframe("hma","gss_code") %>% 
+  tidyr::unnest(cols=c("hma","gss_code")) %>%
+  as.data.frame()
+
+hma_constraint <- readRDS(paste0(config_list$trend_path, "population_", config_list$trend_datestamp,".rds")) %>%
+  dtplyr::lazy_dt() %>%
+  filter(gss_code %in% hma_list$gss_code) %>%
+  group_by_at(c("year","hma","sex","age")) %>%
+  summarise(popn := sum(popn)) %>%
+  as.data.frame()
 
 #other data
 #use get_component
@@ -87,7 +55,7 @@ dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data
 #For trend model
 #TODO Is this  good idea? Means passing 1 less variable and potentially
 #avoids a mismatch between methods and data but could it create problems?
-config_list$int_out_method <- ifelse(max(component_rates[['int_out_flows_rates']]$int_out)>1 , "flow", "rate") 
+int_out_method <- ifelse(max(component_rates[['int_out_flows_rates']]$int_out)>1 , "flow", "rate") 
 npp_constraints = NULL
 upc = NULL
 
@@ -105,16 +73,14 @@ upc = NULL
 #use_offset_method <- FALSE
 ################
 
-curr_yr_popn <- filter(population, year == first_proj_yr-1)
+curr_yr_popn <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")) %>%
+  filter(population, year == first_proj_yr-1)
+
+final_proj_yr <- max(hma_constraint$year)
 
 #TODO import trend model package
 source('model_code/model_scripts/trend/02_core.R')
 source('model_code/model_scripts/housing_led/housing_led_core.R')
-
-projection <- list()
-
-#for testing only
-projection_year <- first_proj_yr
 
 #development_trajectory = development_trajectory,
 household_trajectory <- left_join(development_trajectory, dwelling2household_ratio, by="gss_code") %>%
@@ -131,6 +97,8 @@ config_list$ahs_cap_year <- 2020
 first_proj_yr <- 2019
 final_proj_yr <- 2021
 
+projection <- list()
+
 for(projection_year in first_proj_yr:final_proj_yr){
   
   curr_yr_fertility <- filter(component_rates$fertility_rates, year == projection_year)
@@ -139,6 +107,7 @@ for(projection_year in first_proj_yr:final_proj_yr){
   curr_yr_int_in_flows <- component_rates$int_in %>% filter(year == projection_year)
   curr_yr_ahs <- filter(average_household_size, year == projection_year)
   curr_yr_households <- filter(household_trajectory, year == projection_year)
+  curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
   
   projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                     fertility_rates = curr_yr_fertility, 
@@ -146,13 +115,14 @@ for(projection_year in first_proj_yr:final_proj_yr){
                                                     int_out_flows_rates = curr_yr_int_out,
                                                     int_in_flows = curr_yr_int_in_flows,
                                                     domestic_rates = component_rates$domestic_rates,
-                                                    int_out_method = config_list$int_out_method,
+                                                    int_out_method = int_out_method,
                                                     npp_constraints = NULL, upc = NULL,
-                                                    constraints = constraints,
+                                                    component_constraints = component_constraints,
+                                                    hma_constraint = curr_yr_hma_constraint,
                                                     communal_establishment_population = communal_establishment_population,
                                                     average_household_size = curr_yr_ahs,
                                                     households = curr_yr_households,
-                                                    hma_list = config_list$hma_list,
+                                                    hma_list = hma_list,
                                                     projection_year = projection_year,
                                                     ahs_cap_year = config_list$ahs_cap_year,
                                                     ahs_cap = ahs_cap)

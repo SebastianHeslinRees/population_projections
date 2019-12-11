@@ -27,28 +27,27 @@ constrain_to_hma <- function(popn, constraint, hma_list,
                              col_aggregation = c("year","hma","sex","age"),
                              col_popn, col_constraint = col_popn){
 
-  if("hma" %in% names(popn)) {
-    warning("constrain_to_hma ignoring hma column in input popn")
-    popn <- select(popn, -hma)
-  }
-  if("hma" %in% names(constraint)) {
-    warning("constrain_to_hma ignoring hma column in input constraint")
-    constraint <- select(constraint, -hma)
-  }
+  
+  #I've move the commented bits to the control
+  # hma_df <- hma_list %>%
+  #   tibble::enframe("hma","gss_code") %>%
+  #   tidyr::unnest(cols=c("hma","gss_code")) %>%
+  #   as.data.frame()
+  # 
+  # constraint <- constraint %>%
+  #   filter(gss_code %in% hma_df$gss_code) %>%
+  #   left_join(hma_df, by="gss_code") %>%
+  #   dtplyr::lazy_dt() %>%
+  #   group_by_at(col_aggregation) %>%
+  #   summarise(!!col_constraint := sum(!!sym(col_constraint))) %>%
+  #   as.data.frame()
+  
+  dont_scale <- filter(popn, !gss_code %in% hma_list$gss_code)
+  
+  scaled_popn <- filter(popn, gss_code %in% hma_list$gss_code) %>%
+    left_join(hma_list, by="gss_code") %>%
 
-  hma_df <- hma_list %>%
-    tibble::enframe("hma","gss_code") %>%
-    tidyr::unnest(cols=c("hma","gss_code")) %>%
-    as.data.frame()
-
-  constraint <- left_join(hma_df, constraint, by="gss_code") %>% # remove areas outside of HMAs
-    dtplyr::lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
-    summarise(!!col_constraint := sum(!!sym(col_constraint))) %>%
-    as.data.frame()
-
-  scaled_popn <- left_join(popn, hma_df, by="gss_code") %>%
-    constrain_component(constraint = constraint,
+  constrain_component(constraint = constraint,
                         col_aggregation = col_aggregation,
                         col_popn = col_popn,
                         col_constraint = col_constraint,
