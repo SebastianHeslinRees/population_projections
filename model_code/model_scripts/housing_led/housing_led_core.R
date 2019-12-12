@@ -5,7 +5,8 @@ housing_led_core <- function(start_population,
                              int_in_flows,
                              domestic_rates,
                              int_out_method,
-                             npp_constraints = NULL, upc = NULL,
+                             npp_constraints = NULL,
+                             upc = NULL,
                              component_constraints,
                              hma_constraints,
                              communal_establishment_population,
@@ -15,7 +16,7 @@ housing_led_core <- function(start_population,
                              projection_year,
                              ahs_cap_year,
                              ahs_cap){
-
+  
   #1. Run the trend model for one year
   trend_projection <- trend_core(start_population,
                                  fertility_rates, mortality_rates,
@@ -76,7 +77,7 @@ housing_led_core <- function(start_population,
   #The core outputs the ahs_cap variable and the next year's ahs_cap is set as that output
   #in the control. So it will be NULL before the cap year and then the same dataframe following
   #the cap year
- 
+  
   if(ahs_cap_year == projection_year){
     ahs_cap <- curr_yr_trend_ahs %>% rename(cap = trend) %>% select(-year)
   }
@@ -118,13 +119,12 @@ housing_led_core <- function(start_population,
   
   #7. Add components from step 2 to domestic from step 1 & start population
   step_7 <- construct_popn_from_components(start_population,
-                                           births,
-                                           deaths,
-                                           trend_projection[['int_in']],
-                                           int_out,
-                                           trend_projection[['dom_in']],
-                                           trend_projection[['dom_out']],
-                                           upc = NULL) %>%
+                                           addition_data = list(births,
+                                                                trend_projection[['int_in']],
+                                                                trend_projection[['dom_in']]),
+                                           subtraction_data = list(deaths,
+                                                                   int_out,
+                                                                   trend_projection[['dom_out']])) %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code) %>%
     summarise(popn = sum(popn)) %>%
@@ -144,14 +144,13 @@ housing_led_core <- function(start_population,
   
   #9. Add components from step 6 to domestic from step 8 & start population
   step_9 <- construct_popn_from_components(start_population,
-                                           births,
-                                           deaths,
-                                           trend_projection[['int_in']],
-                                           int_out,
-                                           adjusted_domestic[['dom_in']],
-                                           adjusted_domestic[['dom_out']],
-                                           upc = NULL)
- 
+                                           addition_data = list(births,
+                                                                trend_projection[['int_in']],
+                                                                adjusted_domestic[['dom_in']]),
+                                           subtraction_data = list(deaths,
+                                                                   int_out,
+                                                                   adjusted_domestic[['dom_out']]))
+  
   #10. Constrain total population
   constrained_popn <- constrain_to_hma(popn = step_9,
                                        constraint = hma_constraint,

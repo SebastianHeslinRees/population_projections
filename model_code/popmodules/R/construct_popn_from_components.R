@@ -1,51 +1,135 @@
-#' Age on a population and add components to it
+#' Add components to a starting population
 #'
 #' Shortcut function to combine population components
 #'
 #' @param start_population Data frame with initial population. All subsequent inputs should be at the same resolution.
-#' @param births Data frame with 0-year-olds. Births in column 'births'.
-#' @param deaths Data frame with deaths. Deaths in column 'deaths'.
-#' @param int_in Data frame with international inflows. Flows in column 'int_in'.
-#' @param int_out Data frame with international outflows. Flows in column 'int_out'.
-#' @param dom_in Data frame with domestic inflows. Flows in column 'dom_in'.
-#' @param dom_out Data frame with domestic outflows. Flows in column ''dom_out'
-#' @param upc Data frame with unattributed population change. Currently unused/
+#' @param addition_data a List of component dataframes contain data to be added to the start population
+#' @param subtraction_data a List of component dataframes contain data to be subtracted from the start population
 #' @param col_aggregation Aggregation columns common to all the above to join on.
 #'
-#' @return Aged on data frame with all components added.
+#' @return A data frame with all components added.
 #'
 #' @import dplyr
+#' @import assertthat
+#' @importFrom dtplyr lazy_dt
 #'
 #' @export
 #'
 construct_popn_from_components <- function(start_population,
-                                                 births,
-                                                 deaths,
-                                                 int_in,
-                                                 int_out,
-                                                 dom_in,
-                                                 dom_out,
-                                                 upc = NULL,
-                                                 col_aggregation = c("year","gss_code","sex","age")){
-
-  #TODO check that required columns are present
-  #TODO make flexible so that it can take whatever components dataframes you give it
-  #it can then be used in the trend core at lines 158-178
-  #TODO include UPC!
-
-  constructed <- start_population %>%
+                                           addition_data,
+                                           subtraction_data,
+                                           col_aggregation = c("year","gss_code","sex","age")){
+  
+  validate_constrcut_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation)
+  
+  nm <- last(names(start_population))
+  
+  start_population <- mutate(start_population, var = "start") %>%
+    rename(popn = last(names(start_population))) %>%
+    select(col_aggregation, "var", "popn")
+  
+  for(i in seq(addition_data)){
+    addition_data[[i]] <- tidyr::pivot_longer(addition_data[[i]],
+                                              ncol(addition_data[[i]]),
+                                              names_to = "var",
+                                              values_to = "popn") %>%
+      select(col_aggregation, "var", "popn")
+  }
+  
+  for(i in seq(subtraction_data)){
+    subtraction_data[[i]] <- tidyr::pivot_longer(subtraction_data[[i]],
+                                                 ncol(subtraction_data[[i]]),
+                                                 names_to = "var",
+                                                 values_to = "popn") %>%
+      mutate(popn = popn*-1) %>%
+      select(col_aggregation, "var", "popn")
+  }
+  
+  constructed <- rbind(start_population,
+                       data.table::rbindlist(addition_data),
+                       data.table::rbindlist(subtraction_data)) %>%
+    lazy_dt() %>%
+    group_by_at(col_aggregation) %>%
+    summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
-    popn_age_on(births = births) %>%
-    dtplyr::lazy_dt() %>%
-    left_join(deaths, by = col_aggregation) %>%
-    left_join(int_in, by = col_aggregation) %>%
-    left_join(int_out, by = col_aggregation) %>%
-    left_join(dom_in, by = col_aggregation) %>%
-    left_join(dom_out, by = col_aggregation) %>%
-    mutate(constructed_popn = popn - deaths + int_in - int_out + dom_in - dom_out) %>%
-    select(c(col_aggregation, popn = constructed_popn)) %>%
-    as.data.frame()
-
+    select(col_aggregation, "popn")
+  
   return(constructed)
+  
+}
 
+validate_constrcut_popn_from_component_input <- function(start_population,
+                                                         addition_data,
+                                                         subtraction_data,
+                                                         col_aggregation){
+  #validation
+  #are addition and subratction lists
+  assertthat::assert_that(is.list(addition_data),
+                          msg="In construct_popn_from_components addition_data must be a list of dataframes")
+  assertthat::assert_that(is.list(subtraction_data),
+                          msg="In construct_popn_from_components subtraction_data must be a list of dataframes")
+  
+  #are the elemenets of those lists dataframes
+  assertthat::assert_that(is.data.frame(start_population),
+                          msg = "construct_popn_from_components: start_population must be a dataframe")
+  
+  assertthat::assert_that(
+    all(
+      as.logical(
+        lapply(addition_data, FUN = function(x) is.data.frame(x))
+      )
+    ),
+    msg = "construct_popn_from_components: All elements the addition_data list must be dataframes"
+  )
+  
+  assertthat::assert_that(
+    all(
+      as.logical(
+        lapply(subtraction_data, FUN = function(x) is.data.frame(x))
+      )
+    ),
+    msg = "construct_popn_from_components: All elements the subtraction_data list must be dataframes"
+  )
+  
+  #is the final colmn of each df numeric
+  assertthat::assert_that(
+    all(
+      as.logical(
+        lapply(addition_data, FUN = function(x) is.numeric(x[[ncol(x)]]))
+      )
+    ),
+    msg = "construct_popn_from_components: The final column in every addition_data dataframe must be numeric"
+  )
+  
+  assertthat::assert_that(
+    all(
+      as.logical(
+        lapply(subtraction_data, FUN = function(x) is.numeric(x[[ncol(x)]]))
+      )
+    ),
+    msg = "construct_popn_from_components: The final column in every subtraction_data dataframe must be numeric"
+    
+  )
+  
+  #every data frame contains col_aggregation fields
+  
+  assertthat::assert_that(
+    all(
+      as.logical(
+        lapply(addition_data, FUN = function(x) all(col_aggregation %in% names(x)))
+      )
+    ),
+    msg = "construct_popn_from_components: one or more col_aggregation columns not found in one of the addition_data dataframes"
+  )
+  
+  assertthat::assert_that(
+    all(
+      as.logical(
+        lapply(subtraction_data, FUN = function(x) all(col_aggregation %in% names(x)))
+      )
+    ),
+    msg = "construct_popn_from_components: one or more col_aggregation columns not found in one of the subtraction_data dataframes"
+    
+  )
+  
 }
