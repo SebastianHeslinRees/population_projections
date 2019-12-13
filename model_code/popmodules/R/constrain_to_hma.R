@@ -28,20 +28,11 @@ constrain_to_hma <- function(popn, constraint, hma_list,
                              col_popn, col_constraint = col_popn){
 
   
-  #I've move the commented bits to the control
-  # hma_df <- hma_list %>%
-  #   tibble::enframe("hma","gss_code") %>%
-  #   tidyr::unnest(cols=c("hma","gss_code")) %>%
-  #   as.data.frame()
-  # 
-  # constraint <- constraint %>%
-  #   filter(gss_code %in% hma_df$gss_code) %>%
-  #   left_join(hma_df, by="gss_code") %>%
-  #   dtplyr::lazy_dt() %>%
-  #   group_by_at(col_aggregation) %>%
-  #   summarise(!!col_constraint := sum(!!sym(col_constraint))) %>%
-  #   as.data.frame()
-  
+  if("hma" %in% names(popn)) {
+    warning("constrain_to_hma ignoring hma column in input popn")
+    popn <- select(popn, -hma)
+  }
+
   dont_scale <- filter(popn, !gss_code %in% hma_list$gss_code)
   
   scaled_popn <- filter(popn, gss_code %in% hma_list$gss_code) %>%

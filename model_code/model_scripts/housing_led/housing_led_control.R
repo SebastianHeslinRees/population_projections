@@ -24,7 +24,7 @@ run_housing_led_model <- function(config_list){
   component_rates <- evaluate_fns_list(config_list$component_rates_fns)
   
   #For constraining
-  constraints <- evaluate_fns_list(config_list$constraint_data_fns) %>%
+  component_constraints <- evaluate_fns_list(config_list$constraint_data_fns) %>%
     create_constraints()
   
   #housing market area constraint
@@ -34,11 +34,11 @@ run_housing_led_model <- function(config_list){
     as.data.frame()
   
   hma_constraint <- readRDS(paste0(config_list$trend_path, "population_", config_list$trend_datestamp,".rds")) %>%
-    dtplyr::lazy_dt() %>%
     filter(gss_code %in% hma_list$gss_code) %>%
+    dtplyr::lazy_dt() %>%
     left_join(hma_list, by="gss_code") %>%
     group_by_at(c("year","hma","sex","age")) %>%
-    summarise(popn := sum(popn)) %>%
+    summarise(popn = sum(popn)) %>%
     as.data.frame()
   
   #other data
@@ -124,11 +124,12 @@ run_housing_led_model <- function(config_list){
                                                       hma_constraint = curr_yr_hma_constraint,
                                                       communal_establishment_population = communal_establishment_population,
                                                       average_household_size = curr_yr_ahs,
-                                                      households = curr_yr_households,
+                                                      household_data = curr_yr_households,
                                                       hma_list = hma_list,
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,
-                                                      ahs_cap = ahs_cap)
+                                                      ahs_cap = ahs_cap,
+                                                      ldd_max_yr = config_list$ldd_max_yr)
     
     ahs_cap <- projection[[projection_year]][['ahs_cap']]
     curr_yr_popn <- projection[[projection_year]][['population']]

@@ -12,6 +12,7 @@ dwelling_ratio_path <- "input_data/housing_led_model/dwellings_to_households_cen
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
 ahs_cap_year <- 2020
+ldd_max_yr <- 2019
 
 #-----------------
 #Component Constraints
@@ -48,9 +49,11 @@ config_list <- list(
   ahs_cap_year = ahs_cap_year,
   trend_path = trend_path,
   trend_datestamp = trend_datestamp,
-  first_proj_yr = first_proj_yr)
+  first_proj_yr = first_proj_yr,
+  ldd_max_yr = ldd_max_yr)
 
 #---------------------
 #run projection
+source('model_code/model_scripts/housing_led/housing_led_control.R')
 projection <- run_housing_led_model(config_list)
-
+C
