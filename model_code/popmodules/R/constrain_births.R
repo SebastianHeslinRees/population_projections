@@ -1,13 +1,18 @@
-#' Scale one population to match the totals of another
+#' Scale births to match national totals by sex and age
 #'
 #' A wrapper for \code{calculate_scaling_factors} which prepares births data to
-#' feed into the function and which appliued the function's output back to the
-#' bith data resulting in sacled births.
+#' feed into the function and then calculates scaled births.
+#'
+#' Constraints are applied to sex, age and country (which is inferred from
+#' gss_code), with each combination of these variables (where available)
+#' constrained to the NPP national total.
 #'
 #' The NPP births constraint is provided for ages 15-46 while the model produces
-#' births for ages 15-49. This function wrangles the input birth data so that it
-#' can be scaled using the \code{calculate_scaling_factors} function.
-#' 
+#' births for ages 15-49. This function wrangles the input birth to bin together
+#' all births from ages higher than the NPP constraints in the highest bin. (It
+#' does the same for ages lower, but throws an error if it sees any because
+#' there shouldn't be any.)
+#'
 #' @param births A data frame containing births by mother's age data.
 #' @param constraint A data frame containing births data at the same
 #'   resolution or lower.
@@ -15,67 +20,39 @@
 #' @return A data frame of scaled births by mother's year of age.
 #'
 #' @import dplyr
+#' @import assertthat
 #' @importFrom testthat expect_equal
 #'
 #' @export
 
 constrain_births <- function(births, constraint){
-  
+
   births <- births %>%
     select(year, gss_code, sex, age, births)
-  
+
   max_constraint_age <- max(constraint$age)
-  
+  min_constraint_age <- min(constraint$age)
+
   births <- mutate(births, country = substr(gss_code,1,1))
-  
-  do_scale <- filter(births, country %in% unique(constraint$country))
-  dont_scale <- filter(births, !country %in% unique(constraint$country)) %>%
-    select(-country)
-  
-  #group ages in births that are >= max age in constraint
-  scaling <- filter(do_scale, age >= max_constraint_age) %>%
-    mutate(age = max_constraint_age) %>%
-    group_by(year, gss_code, sex, age, country) %>%
-    summarise(births = sum(births)) %>%
-    ungroup()%>%
-    rbind(filter(do_scale, age < max_constraint_age)) %>%
-    group_by(year, sex, age, country) %>%
-    summarise(births = sum(births)) %>%
-    ungroup()
-  
-  scaling <- calculate_scaling_factors(scaling, constraint, col_popn="births",
-                                       col_aggregation = c("year","sex","age","country")) %>%
-    select(-births)%>%
-    mutate(scaling = ifelse(is.na(scaling), 0, scaling))
-  
-  
-  #split out the max age
-  max_age_scaling <- filter(scaling, age == max_constraint_age) %>%
-    select(-age)
-  
-  #split out the < max age
-  other_scaling <- filter(scaling, age < max_constraint_age)
-  
-  #Apply the max age rate to ages >= max age
-  max_age_scaled <- filter(do_scale, age >= max_constraint_age) %>%
-    left_join(max_age_scaling, by=c("year", "sex","country")) %>%
-    mutate(popn_scaled = scaling * births) %>%
-    select(year, gss_code, sex, age, popn_scaled)
-  
-  #Apply age-specific rates to everyone else
-  other_scaled <- filter(do_scale, age < max_constraint_age) %>%
-    left_join(other_scaling, by=c("year","sex","age","country")) %>%
-    mutate(popn_scaled = scaling * births) %>%
-    select(year, gss_code, sex, age, popn_scaled)
-  
-  #rejoin everything
-  scaled <- rbind(other_scaled, max_age_scaled) %>%
-    rename(births = popn_scaled) %>%
-    rbind(dont_scale) %>%
-    arrange(gss_code)
-  
-  testthat::expect_equal(nrow(scaled),nrow(births))
-  
-  return(scaled)
-  
+  if(!"country" %in% names(constraint) & "gss_code" %in% names(constraint)) {
+    constraint <- mutate(constraint, country = substr(gss_code,1,1))
+  }
+
+  #group ages in births that are >= max age and <= min age
+  # (first check there are no births below the minimum constraint age - there shouldn't be, though the code would be fine if there were...)
+  assert_that(sum(filter(births, age < min_constraint_age)$births) == 0)
+
+  births <- mutate(births, age_band = case_when(age < min_constraint_age ~ min_constraint_age,
+                                                age > max_constraint_age ~ max_constraint_age,
+                                                TRUE ~ age))
+
+  scaling <- calculate_scaling_factors(births, constraint, col_popn="births",
+                                       col_aggregation = c("year","sex","age_band"="age","country"),
+                                       rows_to_constrain = births$country %in% unique(constraint$country) & sex == "female") %>%
+    mutate(births = births * scaling) %>%
+    select(year, gss_code, sex, age, births)
+
+  assert_that(all(complete.cases(births)))
+
+  return(births)
 }

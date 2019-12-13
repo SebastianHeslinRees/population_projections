@@ -15,7 +15,7 @@
 #'   counts. Default "popn".
 #' @param col_constraint String. Name of column in \code{constraint} containing population
 #'   counts. Default col_popn.
-#'   
+#'
 #' @return A data frame of component counts calculated as input popn * rate, with one row
 #'   for each distinct level of the input \code{popn} dataframe
 #'
@@ -36,30 +36,26 @@ constrain_to_hma <- function(popn, constraint, hma_list,
     constraint <- select(constraint, -hma)
   }
 
-  hma_df <- hma_list %>% 
-    tibble::enframe("hma","gss_code") %>% 
+  hma_df <- hma_list %>%
+    tibble::enframe("hma","gss_code") %>%
     tidyr::unnest(cols=c("hma","gss_code")) %>%
     as.data.frame()
-  
-  constraint <- filter(constraint, gss_code %in% hma_df$gss_code) %>%
-    left_join(hma_df, by="gss_code") %>%
+
+  constraint <- left_join(hma_df, constraint, by="gss_code") %>% # remove areas outside of HMAs
     dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
     summarise(!!col_constraint := sum(!!sym(col_constraint))) %>%
     as.data.frame()
-  
-  dont_scale <- filter(popn, !gss_code %in% hma_df$gss_code)
-  
-  scaled_popn <- filter(popn, gss_code %in% hma_df$gss_code) %>%
-    left_join(hma_df, by="gss_code") %>%
+
+  scaled_popn <- left_join(popn, hma_df, by="gss_code") %>%
     constrain_component(constraint = constraint,
                         col_aggregation = col_aggregation,
                         col_popn = col_popn,
-                        col_constraint = col_constraint) %>%
+                        col_constraint = col_constraint,
+                        rows_to_constrain = popn$gss_code %in% hma_df$gss_code) %>%
     select(names(popn)) %>%
-    rbind(dont_scale) %>%
     as.data.frame()
-  
+
   return(scaled_popn)
-  
+
 }

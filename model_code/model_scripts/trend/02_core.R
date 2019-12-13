@@ -86,7 +86,13 @@ trend_core <- function(start_population,
   validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE) 
   
   if(!is.null(constraints)){
-    deaths <- constrain_component(popn=deaths, constraint = constraints$deaths_constraint, col_popn = "deaths")
+    deaths$country <- substr(deaths$gss_code, 1, 1)
+    deaths <- constrain_component(popn=deaths,
+                                  constraint = constraints$deaths_constraint,
+                                  col_aggregation = c("year", "sex", "age", "country"),
+                                  col_popn = "deaths",
+                                  rows_to_constrain = deaths$country %in% constraints$deaths_constraint$country)
+    deaths$country <- NULL
   }
   
   natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
@@ -108,8 +114,13 @@ trend_core <- function(start_population,
   
   
   if(!is.null(constraints)){
-    int_out <- constrain_component(popn=int_out, constraint = constraints$international_out_constraint,
-                              col_popn = "int_out")
+    int_out$country <- substr(int_out$gss_code, 1, 1)
+    int_out <- constrain_component(popn=int_out,
+                                   constraint = constraints$international_out_constraint,
+                                   col_aggregation = c("year", "sex", "age", "country"),
+                                   col_popn = "int_out",
+                                   rows_to_constrain = int_out$country %in% constraints$international_out_constraint$country)
+    int_out$country <- NULL
   }
   
   int_in <- int_in_flows
@@ -117,8 +128,14 @@ trend_core <- function(start_population,
   validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
   
   if(!is.null(constraints)){
-    int_in <- constrain_component(popn=int_in, constraint = constraints$international_in_constraint,
-                             col_popn = "int_in")
+    int_in$country <- substr(int_in$gss_code, 1, 1)
+    int_in <- constrain_component(popn=int_in,
+                                  constraint = constraints$international_in_constraint,
+                                  col_aggregation = c("year", "sex", "age", "country"),
+                                  col_popn = "int_in",
+                                  rows_to_constrain = int_in$country %in% constraints$international_in_constraint$country)
+    
+    int_in$country <- NULL
   }
   
   domestic_flow <- natural_change_popn %>%

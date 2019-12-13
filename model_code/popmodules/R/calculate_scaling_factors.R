@@ -26,6 +26,7 @@
 #'   input \code{col_aggregation} columns.
 #'
 #' @import dplyr
+#' @import assertthat
 #'
 #' @export
 
@@ -69,25 +70,39 @@ calculate_scaling_factors <- function(popn,
   #Calculate scaling rates
   scaling <- popn %>%
     mutate(do_scale__ = !!enquo(rows_to_constrain)) %>%
-    dtplyr::lazy_dt() %>%
+    #dtplyr::lazy_dt() %>%
     left_join(constraint, by = col_aggregation) %>%
     group_by_at(names(col_aggregation)) %>%
     mutate(popn_total__ = sum(!!sym(col_popn_new)),
            scaling = case_when(!do_scale__  ~ 1,
+                               is.na(!!sym(col_constraint_new)) ~ -999,  # case_when doesn't like NAs
                                popn_total__ == 0  ~ 0,
                                TRUE  ~ !!sym(col_constraint_new)/popn_total__),
-           mixed_scaling_check = max(do_scale__) == min(do_scale__),
-           scalemax = max(do_scale__),
-           scalemin = min(do_scale__)) %>%
+           mixed_scaling_check = max(do_scale__) == min(do_scale__)) %>%
     ungroup() %>%
     data.frame()
 
-  assertthat::assert_that(all(complete.cases(scaling)),
-                          msg = "Something went wrong and calculate_scaling_factors created NAs")
   assertthat::assert_that(all(scaling$mixed_scaling_check),
                           msg = "calculate_scaling_factors was asked to aggregate to levels containing mixtures of geographies to be included and excluded from the rescaling")
 
-  ix <- scaling$do_scale__ & scaling$popn_total__ == 0 & scaling[[col_constraint_new]] != 0
+  ix <- scaling$scaling == -999
+  if(any(ix)) {
+    missing_levels <- filter(scaling, ix) %>%
+      select(-!!col_popn_new, -!!col_constraint_new, -popn_total__, -do_scale__, -mixed_scaling_check, -scaling)
+    warning(paste0(capture.output({
+      print(paste("calculate_scaling_factors: not all levels in the input were matched to levels in the constraint.",
+                   "This isn't a problem, but for best practice you should filter these rows out with the rows_to_constrain parameter."))
+      print("Levels affected:")
+      print(sapply(missing_levels, unique))
+    }), sep = "\n"))
+
+    scaling[ix, "scaling"] <- 1
+  }
+
+  ix <- scaling$do_scale__ &
+    scaling$popn_total__ == 0 &
+    !is.na(scaling[[col_constraint_new]]) &
+    scaling[[col_constraint_new]] != 0
 
   if(any(ix)) {
     unable_to_scale <- dtplyr::lazy_dt(scaling) %>%
@@ -100,7 +115,7 @@ calculate_scaling_factors <- function(popn,
 
     warning(paste0(capture.output({
       print(paste0("calculate_scaling_factors was asked to scale populations of zero to non-zero sizes at ",
-                   nrow(total_unscaled), " aggregation levels, with target populations summing to ",
+                   nrow(unable_to_scale), " aggregation levels, with target populations summing to ",
                    total_unscaled, ". These populations will be unscaled and ",
                    "the output will be short by this many people."))
       if(nrow(unable_to_scale) < 30) {
