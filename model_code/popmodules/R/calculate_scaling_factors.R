@@ -80,7 +80,7 @@ calculate_scaling_factors <- function(popn,
                                TRUE  ~ !!sym(col_constraint_new)/popn_total__),
            mixed_scaling_check = max(do_scale__) == min(do_scale__)) %>%
     ungroup() %>%
-    data.frame()
+    as.data.frame()
 
   assertthat::assert_that(all(scaling$mixed_scaling_check),
                           msg = "calculate_scaling_factors was asked to aggregate to levels containing mixtures of geographies to be included and excluded from the rescaling")

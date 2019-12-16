@@ -46,13 +46,15 @@ constrain_births <- function(births, constraint){
                                                 age > max_constraint_age ~ max_constraint_age,
                                                 TRUE ~ age))
 
+  constraint <- rename(constraint, age_band = age)
+  
   scaling <- calculate_scaling_factors(births, constraint, col_popn="births",
-                                       col_aggregation = c("year","sex","age_band"="age","country"),
-                                       rows_to_constrain = births$country %in% unique(constraint$country) & sex == "female") %>%
+                                       col_aggregation = c("year","sex","age_band","country"),
+                                       rows_to_constrain = births$country %in% unique(constraint$country) & births$sex == "female") %>%
     mutate(births = births * scaling) %>%
     select(year, gss_code, sex, age, births)
 
   assert_that(all(complete.cases(births)))
 
-  return(births)
+  return(scaling)
 }
