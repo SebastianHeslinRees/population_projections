@@ -27,7 +27,7 @@ construct_popn_from_components <- function(start_population,
   
   start_population <- mutate(start_population, var = "start") %>%
     rename(popn = last(names(start_population))) %>%
-    select(col_aggregation, "var", "popn")
+    select_at(c(col_aggregation, "var", "popn"))
   
   for(i in seq(addition_data)){
     addition_data[[i]] <- tidyr::pivot_longer(addition_data[[i]],
