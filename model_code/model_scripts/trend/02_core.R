@@ -61,7 +61,6 @@ trend_core <- function(start_population,
   #   select(gss_code, year, sex, age, popn) %>%
   #   arrange(gss_code, year, sex, age) %>%
   #   filter(age <=90)
-  browser()
   births_by_mother <- apply_rate_to_population(aged_popn,
                                                filter(fertility_rates, age != 0),
                                                col_out = "births",
