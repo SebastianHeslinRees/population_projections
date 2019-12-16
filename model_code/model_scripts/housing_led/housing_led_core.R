@@ -40,14 +40,7 @@ housing_led_core <- function(start_population,
   #2. Constrain births, deaths & international
   #So that totals match at the borough level
   
-  births <- trend_projection[['births']] %>%
-    constrain_component(
-      constraint = component_constraints[['birth_constraint']],
-      col_aggregation = c("year","gss_code"),
-      col_popn = "births",
-      col_constraint = "births",
-      rows_to_constrain = trend_projection$births$gss_code %in% borough_constraint_gss)
-
+  births <- component_constraints[['birth_constraint']]
   
   deaths <- trend_projection[['deaths']] %>%
     constrain_component(constraint = constraints[['death_constraint']],

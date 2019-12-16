@@ -41,6 +41,9 @@ run_housing_led_model <- function(config_list){
     summarise(popn = sum(popn)) %>%
     as.data.frame()
   
+  #check
+  assertthat::assert_that(config_list$final_proj_yr <= max(config_list$hma_constraint$year))
+  
   #other data
   communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
     dtplyr::lazy_dt() %>%
@@ -96,8 +99,7 @@ run_housing_led_model <- function(config_list){
   #Other varibales
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
-  final_proj_yr <- max(hma_constraint$year)
-  final_proj_yr <- 2021
+  final_proj_yr <- config_list$final_proj_yr
   
   projection <- list()
   
@@ -136,7 +138,7 @@ run_housing_led_model <- function(config_list){
   }
   
   projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
-  output_dir <- "outputs/housing_led/2018/test/"
+  output_dir <- paste0("outputs/housing_led/2018/",config_list$projection_name)
   
   dir.create(output_dir, recursive = T)
   
