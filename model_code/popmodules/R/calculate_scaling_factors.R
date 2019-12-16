@@ -61,7 +61,7 @@ calculate_scaling_factors <- function(popn,
     warning(paste("calculate_scaling_factors is aggregating the input constraints up to the requested levels.",
                   "\nAlso, feel free to delete this warning in the source code if we're getting it too often, I'm just curious."))
     constraint <- lazy_dt(constraint) %>%
-      group_by_at(col_aggregation) %>%
+      group_by_at(unname(col_aggregation)) %>%
       summarise(!!sym(col_constraint_new) := sum(!!sym(col_constraint_new))) %>%
       ungroup() %>%
       data.frame()
