@@ -32,30 +32,28 @@ housing_led_core <- function(start_population,
   borough_constraint_gss <- unique(constraints[['population_constraint']]$gss_code)
   
   births <- trend_projection[['births']] %>%
-    filter(gss_code %in% borough_constraint_gss) %>%
     constrain_component(
       constraint = constraints[['birth_constraint']],
       col_aggregation = c("year","gss_code"),
       col_popn = "births",
-      col_constraint = "births") %>%
-    rbind(filter(trend_projection[['births']], !gss_code %in% borough_constraint_gss))
+      col_constraint = "births",
+      rows_to_constrain = trend_projection$births$gss_code %in% borough_constraint_gss)
+
   
   deaths <- trend_projection[['deaths']] %>%
-    filter(gss_code %in% borough_constraint_gss) %>%
     constrain_component(constraint = constraints[['death_constraint']],
                         col_aggregation = c("year","gss_code"),
                         col_popn = "deaths",
-                        col_constraint = "deaths") %>%
-    rbind(filter(trend_projection[['deaths']], !gss_code %in% borough_constraint_gss))
+                        col_constraint = "deaths",
+                        rows_to_constrain = trend_projection$deaths$gss_code %in% borough_constraint_gss)
   
   int_out <- trend_projection[['int_out']] %>%
-    filter(gss_code %in% borough_constraint_gss) %>%
     constrain_component(constraint = constraints[['international_out_constraint']],
                         col_aggregation = c("year","gss_code"),
                         col_popn = "int_out",
-                        col_constraint = "int_out") %>%
-    rbind(filter(trend_projection[['int_out']], !gss_code %in% borough_constraint_gss))
-  
+                        col_constraint = "int_out",
+                        rows_to_constrain = trend_projection$int_out$gss_code %in% borough_constraint_gss)
+
   #3. Calculate household population
   household_population <- dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%

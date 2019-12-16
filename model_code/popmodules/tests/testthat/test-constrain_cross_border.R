@@ -1,11 +1,15 @@
-in_constraint_1 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_in=400, country = "E", stringsAsFactors = FALSE)
-out_constraint_1 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_out=400, country = "E", stringsAsFactors = FALSE)
+library(testthat)
+library(popmodules)
+library(dplyr)
 
-in_constraint_2 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_in=100, country = "E", stringsAsFactors = FALSE)
-out_constraint_2 <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"), cross_out=100, country = "E", stringsAsFactors = FALSE)
+in_constraint_1 <- expand.grid(year=2000, age=c(20:21), sex=c("female","male"), cross_in=400, country = "E", stringsAsFactors = FALSE)
+out_constraint_1 <- expand.grid(year=2000, age=c(20:21), sex=c("female","male"), cross_out=400, country = "E", stringsAsFactors = FALSE)
+
+in_constraint_2 <- expand.grid(year=2000, age=c(20:21), sex=c("female","male"), cross_in=100, country = "E", stringsAsFactors = FALSE)
+out_constraint_2 <- expand.grid(year=2000, age=c(20:21), sex=c("female","male"), cross_out=100, country = "E", stringsAsFactors = FALSE)
 
 
-domestic_flow <- expand.grid(year=2000, age=c(20:21), sex=c("male","female"),
+domestic_flow <- expand.grid(year=2000, age=c(20:21), sex=c("female","male"),
                              gss_out = c("E01", "E02", "S01"),
                              gss_in = c("E01", "E02", "S01"),
                              flow = 100,
@@ -22,11 +26,11 @@ output_1 <- domestic_flow %>%
 output_2 <- output_1 %>%
   mutate(flow = ifelse(cb==TRUE,100,50)) %>%
   select(names(domestic_flow))%>%
-  arrange(gss_out, gss_in)
+  arrange(gss_in, gss_out, sex, age)
 
 output_1 <- output_1 %>%
   select(names(domestic_flow))%>%
-  arrange(gss_out, gss_in)
+  arrange(gss_in, gss_out, sex, age)
 
 test_that("constrain_cross_border can scale up and down",{
   expect_equivalent(x_1, output_1)

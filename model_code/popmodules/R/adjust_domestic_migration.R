@@ -57,7 +57,7 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
     mutate(net_dom_adjustment = !!sym(col_target_new) - !!sym(col_popn_new)) %>%
     select(c(col_aggregation, net_dom_adjustment))
 
-  #if the change is poisitive then its an addition to in migration
+  #if the change is positive then it's an addition to in migration
   #if negative then add to out migration
   gross_in_adjustment <- domestic_adjustment %>%
     mutate(net_dom_adjustment = ifelse(net_dom_adjustment > 0, net_dom_adjustment, 0))
@@ -88,13 +88,15 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                          constraint = dom_in_target,
                                          col_aggregation = col_aggregation,
                                          col_popn = "dom_in",
-                                         col_constraint = "dom_in_target")
+                                         col_constraint = "dom_in_target",
+                                         rows_to_constrain = TRUE)
 
   adjusted_dom_out <- constrain_component(popn = dom_out,
                                           constraint = dom_out_target,
                                           col_aggregation = col_aggregation,
                                           col_popn = "dom_out",
-                                          col_constraint = "dom_out_target")
+                                          col_constraint = "dom_out_target",
+                                          rows_to_constrain = TRUE)
 
   return(list(dom_in = adjusted_dom_in,
               dom_out = adjusted_dom_out))
