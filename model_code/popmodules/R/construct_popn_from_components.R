@@ -59,7 +59,7 @@ construct_popn_from_components <- function(start_population,
   
 }
 
-validate_constrcut_popn_from_component_input <- function(start_population,
+validate_construct_popn_from_component_input <- function(start_population,
                                                          addition_data,
                                                          subtraction_data,
                                                          col_aggregation){
