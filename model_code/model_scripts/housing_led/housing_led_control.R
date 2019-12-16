@@ -28,7 +28,7 @@ run_housing_led_model <- function(config_list){
     create_constraints()
   
   #housing market area constraint
-  hma_list <- hma_list %>% 
+  hma_list <- config_list$hma_list %>% 
     tibble::enframe("hma","gss_code") %>% 
     tidyr::unnest(cols=c("hma","gss_code")) %>%
     as.data.frame()
