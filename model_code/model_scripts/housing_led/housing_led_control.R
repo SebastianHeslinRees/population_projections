@@ -28,7 +28,7 @@ run_housing_led_model <- function(config_list){
     create_constraints()
   
   #housing market area constraint
-  hma_list <- hma_list %>% 
+  hma_list <- config_list$hma_list %>% 
     tibble::enframe("hma","gss_code") %>% 
     tidyr::unnest(cols=c("hma","gss_code")) %>%
     as.data.frame()
@@ -40,6 +40,9 @@ run_housing_led_model <- function(config_list){
     group_by_at(c("year","hma","sex","age")) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame()
+  
+  #check
+  assertthat::assert_that(config_list$final_proj_yr <= max(config_list$hma_constraint$year))
   
   #other data
   communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
@@ -143,7 +146,7 @@ run_housing_led_model <- function(config_list){
   }
   
   projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
-  output_dir <- "outputs/housing_led/2018/test/"
+  output_dir <- paste0("outputs/housing_led/2018/",config_list$projection_name)
   
   dir.create(output_dir, recursive = T)
   

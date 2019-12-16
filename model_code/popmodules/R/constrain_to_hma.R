@@ -33,8 +33,14 @@ constrain_to_hma <- function(popn, constraint, hma_list,
     popn <- select(popn, -hma)
   }
 
-  dont_scale <- filter(popn, !gss_code %in% hma_list$gss_code)
-  
+if(!"hma" %in% names(constraint)) {
+  constraint <- left_join(hma_df, constraint, by="gss_code") %>% # remove areas outside of HMAs
+     dtplyr::lazy_dt() %>%
+     group_by_at(col_aggregation) %>%
+     summarise(!!col_constraint := sum(!!sym(col_constraint))) %>%
+     as.data.frame() 
+}
+
   scaled_popn <- filter(popn, gss_code %in% hma_list$gss_code) %>%
     left_join(hma_list, by="gss_code") %>%
 

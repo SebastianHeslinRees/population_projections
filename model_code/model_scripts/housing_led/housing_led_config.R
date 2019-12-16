@@ -1,6 +1,7 @@
 devtools::load_all('model_code/popmodules')
 
 #Setup
+projection_name <- "test"
 trend_path <- "outputs/trend/2018/2018_central/"
 trend_datestamp <- "19-11-13_2056"
 communal_est_file <- "ons_communal_est_population.rds"
@@ -11,6 +12,7 @@ ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
+final_proj_yr <- 2022
 ahs_cap_year <- 2020
 final_proj_yr <- 2022
 ldd_max_yr <- 2019
@@ -39,6 +41,7 @@ component_rates_fns <- list(
 #-------------------
 #Setup config list
 config_list <- list(
+  projection_name = projection_name,
   constraint_data_fns = constraint_data_fns,
   component_rates_fns = component_rates_fns,
   communal_est_path = paste0(trend_path,"households_",trend_datestamp,"/",communal_est_file),

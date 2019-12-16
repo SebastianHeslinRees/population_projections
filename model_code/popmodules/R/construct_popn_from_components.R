@@ -20,14 +20,13 @@ construct_popn_from_components <- function(start_population,
                                            subtraction_data,
                                            col_aggregation = c("year","gss_code","sex","age")){
   
-  #TODO In validate check the gss_code are consistent in all dfs
-  validate_constrcut_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation)
+  validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation)
   
   nm <- last(names(start_population))
   
   start_population <- mutate(start_population, var = "start") %>%
     rename(popn = last(names(start_population))) %>%
-    select(col_aggregation, "var", "popn")
+    select_at(c(col_aggregation, "var", "popn"))
   
   for(i in seq(addition_data)){
     addition_data[[i]] <- tidyr::pivot_longer(addition_data[[i]],
@@ -59,7 +58,7 @@ construct_popn_from_components <- function(start_population,
   
 }
 
-validate_constrcut_popn_from_component_input <- function(start_population,
+validate_construct_popn_from_component_input <- function(start_population,
                                                          addition_data,
                                                          subtraction_data,
                                                          col_aggregation){
@@ -77,7 +76,7 @@ validate_constrcut_popn_from_component_input <- function(start_population,
   assertthat::assert_that(
     all(
       as.logical(
-        lapply(addition_data, FUN = function(x) is.data.frame(x))
+        sapply(addition_data, is.data.frame)
       )
     ),
     msg = "construct_popn_from_components: All elements the addition_data list must be dataframes"
