@@ -20,7 +20,6 @@ construct_popn_from_components <- function(start_population,
                                            subtraction_data,
                                            col_aggregation = c("year","gss_code","sex","age")){
   
-  #TODO In validate check the gss_code are consistent in all dfs
   validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation)
   
   nm <- last(names(start_population))
@@ -77,7 +76,7 @@ validate_construct_popn_from_component_input <- function(start_population,
   assertthat::assert_that(
     all(
       as.logical(
-        lapply(addition_data, FUN = function(x) is.data.frame(x))
+        sapply(addition_data, is.data.frame)
       )
     ),
     msg = "construct_popn_from_components: All elements the addition_data list must be dataframes"
