@@ -27,15 +27,17 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2="gss_code"){
   y <- setdiff(df_2, df_1)
   
   if(nrow(rbind(x,y))==0){
-    message(paste("same geography in",nm_1,"&",nm_2))
+    return(TRUE)
   }
   
   if(nrow(x)>0){
     message(paste(nrow(x),"codes in",nm_1,"not in",nm_2))
+    return(FALSE)
   }
   
   if(nrow(y)>0){
     message(paste(nrow(y),"codes in",nm_2,"not in",nm_1))
+    return(FALSE)
   }
   
 }

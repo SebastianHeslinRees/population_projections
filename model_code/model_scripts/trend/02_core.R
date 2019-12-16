@@ -170,34 +170,25 @@ trend_core <- function(start_population,
     tidyr::complete(year, gss_code, age=0:90, sex, fill=list(dom_in=0))
   
   if(is.null(upc)){
-    
-    next_yr_popn <- natural_change_popn %>% 
-      arrange(year, gss_code, sex, age) %>%
-      left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
-      left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
-      left_join(dom_out, by = c("year", "gss_code", "age", "sex")) %>% 
-      left_join(dom_in, by = c("year", "gss_code", "age", "sex")) %>% 
-      mutate(next_popn = popn - int_out + int_in - dom_out + dom_in)
-    
+ 
+    next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
+                                                   addition_data = list(int_in, dom_in),
+                                                   subtraction_data = list(int_out, dom_out),
+                                                   col_aggregation = c("year", "gss_code", "age", "sex")) 
   } else {
     
-    next_yr_popn <- natural_change_popn %>% 
-      arrange(year, gss_code, sex, age) %>%
-      left_join(int_out, by = c("year", "gss_code", "age", "sex")) %>%
-      left_join(int_in, by = c("year", "gss_code", "age", "sex")) %>% 
-      left_join(dom_out, by = c("year", "gss_code", "age", "sex")) %>% 
-      left_join(dom_in, by = c("year", "gss_code", "age", "sex")) %>% 
-      left_join(upc, by = c("gss_code", "age", "sex")) %>%
-      tidyr::replace_na(list(upc = 0)) %>%
-      mutate(next_popn = popn - int_out + int_in - dom_out + dom_in + upc)
+    next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
+                                                   addition_data = list(int_in, dom_in, upc),
+                                                   subtraction_data = list(int_out, dom_out),
+                                                   col_aggregation = c("year", "gss_code", "age", "sex")) 
   }
   
   # FIXME
   # TODO This setup creates negative populations
   # For now just setting -ve pops to zero
-  next_yr_popn <- check_negative_values(next_yr_popn, "next_popn", set_to_zero = TRUE)
+  next_yr_popn <- check_negative_values(next_yr_popn, "popn", set_to_zero = TRUE)
   
-  next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn = next_popn)
+  next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn)
   
   validate_population(next_yr_popn, col_data = "popn",
                       comparison_pop = start_population,
