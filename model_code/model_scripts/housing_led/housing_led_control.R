@@ -90,7 +90,7 @@ run_housing_led_model <- function(config_list){
   dwelling_trajectory <- filter(ldd_backseries, year == config_list$ldd_max_yr) %>%
     rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>% 
     group_by(gss_code) %>%
-    mutate(dwellings = cumsum(new_homes)) %>%
+    mutate(dwellings = cumsum(units)) %>%
     ungroup() %>%
     select(year, gss_code, dwellings)
   
