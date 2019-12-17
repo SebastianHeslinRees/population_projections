@@ -1,16 +1,9 @@
 housing_led_core <- function(start_population,
-                             fertility_rates,
-                             mortality_rates,
-                             int_out_flows_rates,
-                             int_in_flows,
-                             domestic_rates,
-                             int_out_method,
-                             npp_constraints = NULL,
-                             upc = NULL,
+                             trend_projection,
                              component_constraints,
                              hma_constraint,
                              communal_establishment_population,
-                             average_household_size,
+                             external_ahs,
                              household_data,
                              ldd_households,
                              hma_list,
@@ -19,18 +12,8 @@ housing_led_core <- function(start_population,
                              ahs_cap,
                              ldd_max_yr){
   
-  #GSS codes present in housing trajectory
+  #1. GSS codes present in housing trajectory
   constrain_gss <- unique(household_data$gss_code)
-  
-  #1. Run the trend model for one year
-  trend_projection <- trend_core(start_population,
-                                 fertility_rates, mortality_rates,
-                                 int_out_flows_rates, int_in_flows,
-                                 domestic_rates,
-                                 int_out_method = int_out_method,
-                                 constraints = npp_constraints,
-                                 upc = upc,
-                                 projection_year)
   
   areas_with_no_housing_data <- lapply(trend_projection, function(x) filter(x, !x$gss_code %in% constrain_gss)) 
   trend_projection <- lapply(trend_projection, function(x) filter(x, x$gss_code %in% constrain_gss))
@@ -39,7 +22,6 @@ housing_led_core <- function(start_population,
   
   #2. Constrain births, deaths & international
   #So that totals match at the borough level
-  
   births <- component_constraints[['birth_constraint']]
   
   deaths <- trend_projection[['deaths']] %>%
@@ -55,7 +37,19 @@ housing_led_core <- function(start_population,
                         col_popn = "int_out",
                         col_constraint = "int_out",
                         rows_to_constrain = trend_projection$int_out$gss_code %in% borough_constraint_gss)
-
+  
+  initial_population <- aged_on_population %>%
+    construct_popn_from_components(addition_data = list(births,
+                                                        trend_projection[['int_in']],
+                                                        trend_projection[['dom_in']]),
+                                   subtraction_data = list(deaths,
+                                                           int_out,
+                                                           trend_projection[['dom_out']])) %>%
+    dtplyr::lazy_dt() %>%
+    group_by(year, gss_code) %>%
+    summarise(popn = sum(popn)) %>%
+    as.data.frame()
+  
   #3. Calculate household population
   household_population <- dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%
@@ -97,30 +91,30 @@ housing_led_core <- function(start_population,
     }
   } else {
     if(is.null(ahs_cap)){
-      #after LDD but before cap is set select the higher of the trend or input ahs
-      average_household_size <- average_household_size %>%
+      #after LDD but before cap is set select the higher of the trend or external ahs
+      average_household_size <- external_ahs %>%
         filter(gss_code %in% constrain_gss) %>%
-        rename(input = ahs) %>%
+        rename(external = ahs) %>%
         left_join(curr_yr_trend_ahs, by = c("year","gss_code")) %>%
-        mutate(ahs_choice = case_when(trend > input ~ "trend",
-                                      input > trend ~ "input"),
-               ahs = case_when(trend > input ~ trend,
-                               input > trend ~ input))
+        mutate(ahs_choice = case_when(trend > external ~ "trend",
+                                      external > trend ~ "external"),
+               ahs = case_when(trend > external ~ trend,
+                               external > trend ~ external))
     } else {
-      average_household_size <- average_household_size %>%
+      average_household_size <- external_ahs %>%
         filter(gss_code %in% constrain_gss) %>%
-        rename(input = ahs) %>%
+        rename(external = ahs) %>%
         left_join(curr_yr_trend_ahs, by = c("year","gss_code")) %>%
         left_join(ahs_cap, by = "gss_code") %>%
         mutate(ahs_choice = case_when(cap < trend ~ "cap",
-                                      cap < input ~ "cap",
-                                      trend > input ~ "trend",
-                                      input > trend ~ "input",
+                                      cap < external ~ "cap",
+                                      trend > external ~ "trend",
+                                      external > trend ~ "external",
                                       TRUE ~ "trend"),
                ahs = case_when(cap < trend ~ cap,
-                               cap < input ~ cap,
-                               trend > input ~ trend,
-                               input > trend ~ input,
+                               cap < external ~ cap,
+                               trend > external ~ trend,
+                               external > trend ~ external,
                                TRUE ~ trend))
     }
   }
@@ -130,50 +124,40 @@ housing_led_core <- function(start_population,
   
   #6. Target population
   #Probably apply_rate_to_population
-  target <- apply_rate_to_population(household_data, average_household_size,
-                                     col_popn = "households",
-                                     col_rate = "ahs",
-                                     col_out = "target_popn",
-                                     col_aggregation = c("year","gss_code"),
-                                     pop1_is_subset = TRUE)
+  target_population <- apply_rate_to_population(household_data, average_household_size,
+                                                col_popn = "households",
+                                                col_rate = "ahs",
+                                                col_out = "target_popn",
+                                                col_aggregation = c("year","gss_code"),
+                                                pop1_is_subset = TRUE)
   
-  #7. Add components from step 2 to domestic from step 1 & start population
-  step_7 <- construct_popn_from_components(start_population = aged_on_population,
-                                           addition_data = list(births,
-                                                                trend_projection[['int_in']],
-                                                                trend_projection[['dom_in']]),
-                                           subtraction_data = list(deaths,
-                                                                   int_out,
-                                                                   trend_projection[['dom_out']])) %>%
-    dtplyr::lazy_dt() %>%
-    group_by(year, gss_code) %>%
-    summarise(popn = sum(popn)) %>%
-    as.data.frame()
+  #7. This point is intentionaly left blank
   
-  #8. Compare population from step 7 to target from step 5.
+  
+  #8. Compare population from step 3 to target from step 5.
   #   Difference = domestic adjustment
   #   Adjust domestic
-  adjusted_domestic <- adjust_domestic_migration(popn = step_7,
-                                                 target = target,
-                                                 dom_in = trend_projection[['dom_in']],
-                                                 dom_out = trend_projection[['dom_out']],
-                                                 col_aggregation = c("year","gss_code"),
-                                                 col_popn = "popn",
-                                                 col_target = "target_popn")
+  adjusted_domestic_migration <- adjust_domestic_migration(popn = initial_population,
+                                                           target = target_population,
+                                                           dom_in = trend_projection[['dom_in']],
+                                                           dom_out = trend_projection[['dom_out']],
+                                                           col_aggregation = c("year","gss_code"),
+                                                           col_popn = "popn",
+                                                           col_target = "target_popn")
   
   #9. Add components from step 6 to domestic from step 8 & start population
   #Join the non-adjusted population data back to the adjusted
-  step_9 <- construct_popn_from_components(start_population = aged_on_population,
-                                           addition_data = list(births,
-                                                                trend_projection[['int_in']],
-                                                                adjusted_domestic[['dom_in']]),
-                                           subtraction_data = list(deaths,
-                                                                   int_out,
-                                                                   adjusted_domestic[['dom_out']])) %>%
+  adjusted_population <- aged_on_population %>%
+    construct_popn_from_components(addition_data = list(births,
+                                                        trend_projection[['int_in']],
+                                                        adjusted_domestic_migration[['dom_in']]),
+                                   subtraction_data = list(deaths,
+                                                           int_out,
+                                                           adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
   
   #10. Constrain total population
-  constrained_popn <- constrain_to_hma(popn = step_9,
+  constrained_population <- constrain_to_hma(popn = adjusted_population,
                                        constraint = hma_constraint,
                                        hma_list = hma_list,
                                        col_aggregation = c("year","hma","sex","age"),
@@ -184,31 +168,30 @@ housing_led_core <- function(start_population,
   births <- rbind(births, areas_with_no_housing_data[['births']])
   deaths <- rbind(deaths, areas_with_no_housing_data[['deaths']])
   int_out <- rbind(int_out, areas_with_no_housing_data[['int_out']])
-  dom_in <- rbind(adjusted_domestic[['dom_in']], areas_with_no_housing_data[['dom_in']])
-  dom_out <- rbind(adjusted_domestic[['dom_out']], areas_with_no_housing_data[['dom_out']])
+  dom_in <- rbind(adjusted_domestic_migration[['dom_in']], areas_with_no_housing_data[['dom_in']])
+  dom_out <- rbind(adjusted_domestic_migration[['dom_out']], areas_with_no_housing_data[['dom_out']])
   
   #11. Compare population from step 10 to population from step 9.
   #    Difference = domestic adjustment
   #    Adjust domestic
-  final_domestic <- adjust_domestic_migration(popn = step_9,
-                                              target = constrained_popn,
+  final_domestic_migration <- adjust_domestic_migration(popn = adjusted_population,
+                                              target = constrained_population,
                                               dom_in = dom_in,
                                               dom_out = dom_out,
                                               col_aggregation = c("year","gss_code","sex","age"),
                                               col_popn = "popn",
                                               col_target = "popn")
   
-  #TODO Look into this more
-  #More validation needed here?
-  constrained_popn <- check_negative_values(constrained_popn, "popn")
+  #TODO More validation needed here?
+  constrained_population <- check_negative_values(constrained_population, "popn")
   
-  return(list(population = constrained_popn,
+  return(list(population = constrained_population,
               births = births,
               death = deaths,
               int_in = trend_projection[['int_in']],
               int_out = int_out,
-              dom_in = final_domestic[['dom_in']],
-              dom_out = final_domestic[['dom_out']],
+              dom_in = final_domestic_migration[['dom_in']],
+              dom_out = final_domestic_migration[['dom_out']],
               ahs = ahs,
               ahs_choice = ahs_choice,
               ahs_cap = ahs_cap))

@@ -2,13 +2,14 @@ devtools::load_all('model_code/popmodules')
 
 #Setup
 projection_name <- "test"
-trend_path <- "outputs/trend/2018/2018_central/"
-trend_datestamp <- "19-11-13_2056"
+external_trend_path <- "outputs/trend/2018/2018_central/"
+external_trend_datestamp <- "19-11-13_2056"
 communal_est_file <- "ons_communal_est_population.rds"
 trend_households_file <- "ons_stage_1_households.rds"
+ldd_backseries_path <- "xxx"
 
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
-ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
+external_ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
@@ -23,36 +24,38 @@ constraint_data_fns <- list(
   list(fn = popmodules::get_data_from_file,
        args = list(
          list(
-           birth_constraint = paste0(trend_path,"births_",trend_datestamp,".rds"),
-           death_constraint = paste0(trend_path,"deaths_",trend_datestamp,".rds"),
-           international_out_constraint = paste0(trend_path,"int_out_",trend_datestamp,".rds")))))
+           birth_constraint = paste0(external_trend_path,"births_",external_trend_datestamp,".rds"),
+           death_constraint = paste0(external_trend_path,"deaths_",external_trend_datestamp,".rds"),
+           international_out_constraint = paste0(external_trend_path,"int_out_",external_trend_datestamp,".rds")))))
 
 #------------------
 #Component Rates
 component_rates_fns <- list(
   list(fn = popmodules::get_data_from_file,
        args= list(list(
-         fertility_rates = paste0(trend_path,"fertility_rates_",trend_datestamp,".rds"),
-         mortality_rates = paste0(trend_path,"mortality_rates_",trend_datestamp,".rds"),
-         int_out_flows_rates = paste0(trend_path,"int_out_rates_",trend_datestamp,".rds"),
-         int_in_flows = paste0(trend_path,"int_in_",trend_datestamp,".rds"),
-         domestic_rates = paste0(trend_path,"domestic_rates_",trend_datestamp,".rds")))))
+         fertility_rates = paste0(external_trend_path,"fertility_rates_",external_trend_datestamp,".rds"),
+         mortality_rates = paste0(external_trend_path,"mortality_rates_",external_trend_datestamp,".rds"),
+         int_out_flows_rates = paste0(external_trend_path,"int_out_rates_",external_trend_datestamp,".rds"),
+         int_in_flows = paste0(external_trend_path,"int_in_",external_trend_datestamp,".rds"),
+         domestic_rates = paste0(external_trend_path,"domestic_rates_",external_trend_datestamp,".rds")))))
 
-#-------------------
+
+
+#------------------
 #Setup config list
 config_list <- list(
   projection_name = projection_name,
   constraint_data_fns = constraint_data_fns,
   component_rates_fns = component_rates_fns,
-  communal_est_path = paste0(trend_path,"households_",trend_datestamp,"/",communal_est_file),
-  hma_constraint = readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")),
+  communal_est_file = communal_est_file,
   hma_list = hma_list,
   dev_trajectory_path = dev_trajectory_path,
-  ahs_trajectory_path = ahs_trajectory_path,
-  trend_households_path = paste0(trend_path,"households_",trend_datestamp,"/",trend_households_file),
+  external_ahs_trajectory_path = external_ahs_trajectory_path,
+  trend_households_file = trend_households_file,
+  ldd_backseries_path = ldd_backseries_path,
   ahs_cap_year = ahs_cap_year,
-  trend_path = trend_path,
-  trend_datestamp = trend_datestamp,
+  external_trend_path = external_trend_path,
+  external_trend_datestamp = external_trend_datestamp,
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
   ldd_max_yr = ldd_max_yr)
