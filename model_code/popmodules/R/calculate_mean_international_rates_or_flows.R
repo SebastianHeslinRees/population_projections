@@ -31,7 +31,7 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
                                                         first_proj_yr, n_proj_yr, rate_cap) {
   
   component <- readRDS(component_path)
-  
+
   if(flow_or_rate == "rate"){
     
     population <- readRDS(popn_mye_path) %>%
