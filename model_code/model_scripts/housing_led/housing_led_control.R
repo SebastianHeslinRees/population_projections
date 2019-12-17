@@ -17,8 +17,27 @@ run_housing_led_model <- function(config_list){
   }
   
   
+  external_trend_households_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$trend_households_file)
+  external_communal_est_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$communal_est_file)
+  
   #validate
-  expected_config <- c()
+  expected_config <- c("projection_name",
+                       "constraint_data_fns",
+                       "component_rates_fns",
+                       "communal_est_file",
+                       "hma_list",
+                       "dev_trajectory_path",
+                       "external_ahs_trajectory_path",
+                       "trend_households_file",
+                       "ldd_backseries_path",
+                       "ahs_cap_year",
+                       "external_trend_path",
+                       "external_trend_datestamp",
+                       "first_proj_yr",
+                       "final_proj_yr",
+                       "ldd_max_yr")
+  
+  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   #component rates
   component_rates <- evaluate_fns_list(config_list$component_rates_fns)
@@ -33,7 +52,7 @@ run_housing_led_model <- function(config_list){
     tidyr::unnest(cols=c("hma","gss_code")) %>%
     as.data.frame()
   
-  hma_constraint <- readRDS(paste0(config_list$trend_path, "population_", config_list$trend_datestamp,".rds")) %>%
+  hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population_", config_list$external_trend_datestamp,".rds")) %>%
     filter(gss_code %in% hma_list$gss_code) %>%
     dtplyr::lazy_dt() %>%
     left_join(hma_list, by="gss_code") %>%
@@ -45,17 +64,17 @@ run_housing_led_model <- function(config_list){
   assertthat::assert_that(config_list$final_proj_yr <= max(config_list$hma_constraint$year))
   
   #other data
-  communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
+  communal_establishment_population <- readRDS(communal_est_path) %>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
     summarise(communal_est_popn = sum(communal_establishment_population)) %>%
     as.data.frame()
   
-  average_household_size <- readRDS(config_list$ahs_trajectory_path) %>% as.data.frame()
+  external_ahs <- readRDS(config_list$external_ahs_trajectory_path) %>% as.data.frame()
   development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
   
   #housing trajectory
-  trend_households <- readRDS(config_list$trend_households_path) %>%
+  external_trend_households <- readRDS(external_trend_households_path) %>%
     filter(year <= config_list$ldd_max_yr)%>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
@@ -64,26 +83,30 @@ run_housing_led_model <- function(config_list){
   
   #TODO I need to decide what we're pre-processing and what we're doing in the control
   #TODO This is missing census data for the base stock so the numbers make no sense
-  dwelling_trajectory <- development_trajectory %>% 
-    group_by(gss_code) %>%
-    mutate(cumulative_dwellings = cumsum(new_homes)) %>%
-    ungroup() %>%
-    #mutate(projected_stock = cumulative_dwellings+census_dwellings) %>%
-    select(year, gss_code, cumulative_dwellings)
   
-  dwelling2household_ratio <- filter(trend_households,
+  #census stock in 2011 + LDD development upto 2019
+  ldd_backseries <- readRDS(config_list$ldd_backseries_path)
+  
+  dwelling_trajectory <- filter(ldd_backseries, year == config_list$ldd_max_yr) %>%
+    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>% 
+    group_by(gss_code) %>%
+    mutate(dwellings = cumsum(new_homes)) %>%
+    ungroup() %>%
+    select(year, gss_code, dwellings)
+  
+  dwelling2household_ratio <- filter(external_trend_households,
                                      year <= config_list$ldd_max_yr,
                                      year %in% dwelling_trajectory$year,
                                      gss_code %in% dwelling_trajectory$gss_code) %>%
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
-    mutate(dw2hh_ratio = households/cumulative_dwellings) %>%
+    mutate(dw2hh_ratio = households/dwellings) %>%
     select(year, gss_code, dw2hh_ratio) %>%
     project_forward_flat(config_list$final_proj_yr)
   
   #development_trajectory
   household_trajectory <- dwelling_trajectory %>% 
     left_join(dwelling2household_ratio, by=c("year", "gss_code")) %>%
-    mutate(households = cumulative_dwellings * dw2hh_ratio) %>%
+    mutate(households = dwellings * dw2hh_ratio) %>%
     select(gss_code, year, households)
   
   #For trend model
@@ -101,7 +124,7 @@ run_housing_led_model <- function(config_list){
   source('model_code/model_scripts/housing_led/arrange_housing_led_core_outputs.R')
   
   #Starting population
-  curr_yr_popn <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")) %>%
+  curr_yr_popn <- readRDS(paste0(external_trend_path, "population_", external_trend_datestamp,".rds")) %>%
     filter(year == first_proj_yr-1)
   
   #Other varibales
@@ -117,23 +140,27 @@ run_housing_led_model <- function(config_list){
     curr_yr_mortality <- filter(component_rates$mortality_rates, year == projection_year)
     curr_yr_int_out <- mutate(component_rates$int_out, year = projection_year)
     curr_yr_int_in_flows <- component_rates$int_in %>% filter(year == projection_year)
-    curr_yr_ahs <- filter(average_household_size, year == projection_year)
+    curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households <- filter(household_trajectory, year == projection_year)
     curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
     
+    trend_projection <- trend_core(start_population = curr_yr_popn,
+                                   fertility_rates = curr_yr_fertility, 
+                                   mortality_rates = curr_yr_mortality,
+                                   int_out_flows_rates = curr_yr_int_out,
+                                   int_in_flows = curr_yr_int_in_flows,
+                                   domestic_rates = component_rates$domestic_rates,
+                                   int_out_method = int_out_method,
+                                   constraints = npp_constraints,
+                                   upc = upc,
+                                   projection_year)
+    
     projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
-                                                      fertility_rates = curr_yr_fertility, 
-                                                      mortality_rates = curr_yr_mortality,
-                                                      int_out_flows_rates = curr_yr_int_out,
-                                                      int_in_flows = curr_yr_int_in_flows,
-                                                      domestic_rates = component_rates$domestic_rates,
-                                                      int_out_method = int_out_method,
-                                                      npp_constraints = NULL,
-                                                      upc = NULL,
+                                                      trend_projection = trend_projection,
                                                       component_constraints = component_constraints,
                                                       hma_constraint = curr_yr_hma_constraint,
                                                       communal_establishment_population = communal_establishment_population,
-                                                      average_household_size = curr_yr_ahs,
+                                                      external_ahs = curr_yr_ahs,
                                                       household_data = curr_yr_households,
                                                       hma_list = hma_list,
                                                       projection_year = projection_year,
