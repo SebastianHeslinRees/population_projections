@@ -15,38 +15,13 @@ hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
 final_proj_yr <- 2022
 ahs_cap_year <- 2020
-final_proj_yr <- 2022
 ldd_max_yr <- 2019
-
-#-----------------
-#Component Constraints
-constraint_data_fns <- list(
-  list(fn = popmodules::get_data_from_file,
-       args = list(
-         list(
-           birth_constraint = paste0(external_trend_path,"births_",external_trend_datestamp,".rds"),
-           death_constraint = paste0(external_trend_path,"deaths_",external_trend_datestamp,".rds"),
-           international_out_constraint = paste0(external_trend_path,"int_out_",external_trend_datestamp,".rds")))))
-
-#------------------
-#Component Rates
-component_rates_fns <- list(
-  list(fn = popmodules::get_data_from_file,
-       args= list(list(
-         fertility_rates = paste0(external_trend_path,"fertility_rates_",external_trend_datestamp,".rds"),
-         mortality_rates = paste0(external_trend_path,"mortality_rates_",external_trend_datestamp,".rds"),
-         int_out_flows_rates = paste0(external_trend_path,"int_out_rates_",external_trend_datestamp,".rds"),
-         int_in_flows = paste0(external_trend_path,"int_in_",external_trend_datestamp,".rds"),
-         domestic_rates = paste0(external_trend_path,"domestic_rates_",external_trend_datestamp,".rds")))))
-
 
 
 #------------------
 #Setup config list
 config_list <- list(
   projection_name = projection_name,
-  constraint_data_fns = constraint_data_fns,
-  component_rates_fns = component_rates_fns,
   communal_est_file = communal_est_file,
   hma_list = hma_list,
   dev_trajectory_path = dev_trajectory_path,
