@@ -22,8 +22,6 @@ run_housing_led_model <- function(config_list){
   
   #validate
   expected_config <- c("projection_name",
-                       "constraint_data_fns",
-                       "component_rates_fns",
                        "communal_est_file",
                        "hma_list",
                        "dev_trajectory_path",
