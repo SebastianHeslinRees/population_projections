@@ -53,7 +53,38 @@ run_housing_led_model <- function(config_list){
   
   average_household_size <- readRDS(config_list$ahs_trajectory_path) %>% as.data.frame()
   development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
-  dwelling2household_ratio <- readRDS(config_list$dwelling_ratio_path) %>% as.data.frame()
+  
+  #housing trajectory
+  trend_households <- readRDS(config_list$trend_households_path) %>%
+    filter(year <= config_list$ldd_max_yr)%>%
+    dtplyr::lazy_dt() %>%
+    group_by(gss_code, year) %>%
+    summarise(households = sum(households)) %>%
+    as.data.frame()
+  
+  #TODO I need to decide what we're pre-processing and what we're doing in the control
+  #TODO This is missing census data for the base stock so the numbers make no sense
+  dwelling_trajectory <- development_trajectory %>% 
+    group_by(gss_code) %>%
+    mutate(cumulative_dwellings = cumsum(new_homes)) %>%
+    ungroup() %>%
+    #mutate(projected_stock = cumulative_dwellings+census_dwellings) %>%
+    select(year, gss_code, cumulative_dwellings)
+  
+  dwelling2household_ratio <- filter(trend_households,
+                                     year <= config_list$ldd_max_yr,
+                                     year %in% dwelling_trajectory$year,
+                                     gss_code %in% dwelling_trajectory$gss_code) %>%
+    left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
+    mutate(dw2hh_ratio = households/cumulative_dwellings) %>%
+    select(year, gss_code, dw2hh_ratio) %>%
+    project_forward_flat(config_list$final_proj_yr)
+  
+  #development_trajectory
+  household_trajectory <- dwelling_trajectory %>% 
+    left_join(dwelling2household_ratio, by=c("year", "gss_code")) %>%
+    mutate(households = cumulative_dwellings * dw2hh_ratio) %>%
+    select(gss_code, year, households)
   
   #For trend model
   #TODO Is this  good idea? Means passing 1 less variable and potentially
@@ -64,33 +95,10 @@ run_housing_led_model <- function(config_list){
   npp_constraints = NULL
   upc = NULL
   
-  #general
-  #offset_or_ratio_method
-  #this added by BC on 10/05/2019.  Previously file only contained single set of ratios - these could be valid for only the DCLG or ONS model.
-  #The ratio file needs updating whenever the population estimates, past housing data, or household formation assumptions change
-  #Have also added the ability to use the alternative methodlogy (which previously was the standard approach) for reconciling population change and dwelling change since 2011
-  #Now can choose between the *ratio* method and the *offset* method
-  #the choice of dclg or ons consistent data should be done automatically now.  The choice between ratio and offset approach is for now hardcoded
-  #TODO remove hardcoding of ratio/offset method and have this defined in the model run scripts
-  #a script is now in the input folder to create the input file
-  #choose method
-  ####HARDCODED###
-  #use_offset_method <- FALSE
-  ################
-  
   #TODO import trend model package
   source('model_code/model_scripts/trend/02_core.R')
   source('model_code/model_scripts/housing_led/housing_led_core.R')
   source('model_code/model_scripts/housing_led/arrange_housing_led_core_outputs.R')
-  
-  #development_trajectory = development_trajectory,
-  household_trajectory <- left_join(development_trajectory, dwelling2household_ratio, by="gss_code") %>%
-    group_by(gss_code) %>%
-    mutate(cumulative_dwellings = cumsum(new_homes)) %>%
-    ungroup() %>%
-    mutate(projected_stock = cumulative_dwellings+census_dwellings) %>%
-    mutate(households = projected_stock / ratio) %>%
-    select(gss_code, year, households)
   
   #Starting population
   curr_yr_popn <- readRDS(paste0(trend_path, "population_", trend_datestamp,".rds")) %>%
