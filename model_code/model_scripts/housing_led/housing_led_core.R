@@ -22,21 +22,27 @@ housing_led_core <- function(start_population,
   
   #2. Constrain births, deaths & international
   #So that totals match at the borough level
-  births <- component_constraints[['birth_constraint']]
+  births <- component_constraints[['birth_constraint']] %>%
+    filter(gss_code %in% constrain_gss, year == projection_year) %>%
+    mutate(female = births/1.05,
+           male = births*1.05,
+           age = 0) %>%
+    select(-births) %>%
+    pivot_longer(c("female","male"), names_to = "sex", values_to="births")
   
   deaths <- trend_projection[['deaths']] %>%
-    constrain_component(constraint = constraints[['death_constraint']],
+    constrain_component(constraint = component_constraints[['death_constraint']],
                         col_aggregation = c("year","gss_code"),
                         col_popn = "deaths",
                         col_constraint = "deaths",
-                        rows_to_constrain = trend_projection$deaths$gss_code %in% borough_constraint_gss)
+                        rows_to_constrain = trend_projection$deaths$gss_code %in% constrain_gss)
   
   int_out <- trend_projection[['int_out']] %>%
-    constrain_component(constraint = constraints[['international_out_constraint']],
+    constrain_component(constraint = component_constraints[['international_out_constraint']],
                         col_aggregation = c("year","gss_code"),
                         col_popn = "int_out",
                         col_constraint = "int_out",
-                        rows_to_constrain = trend_projection$int_out$gss_code %in% borough_constraint_gss)
+                        rows_to_constrain = trend_projection$int_out$gss_code %in% constrain_gss)
   
   initial_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(births,
@@ -155,14 +161,14 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
-  
+ 
   #10. Constrain total population
   constrained_population <- constrain_to_hma(popn = adjusted_population,
-                                       constraint = hma_constraint,
-                                       hma_list = hma_list,
-                                       col_aggregation = c("year","hma","sex","age"),
-                                       col_popn = "popn",
-                                       col_constraint = "popn")
+                                             constraint = hma_constraint,
+                                             hma_list = hma_list,
+                                             col_aggregation = c("year","hma","sex","age"),
+                                             col_popn = "popn",
+                                             col_constraint = "popn")
   
   #Join the non-adjusted components data back to the adjusted
   births <- rbind(births, areas_with_no_housing_data[['births']])
@@ -175,12 +181,12 @@ housing_led_core <- function(start_population,
   #    Difference = domestic adjustment
   #    Adjust domestic
   final_domestic_migration <- adjust_domestic_migration(popn = adjusted_population,
-                                              target = constrained_population,
-                                              dom_in = dom_in,
-                                              dom_out = dom_out,
-                                              col_aggregation = c("year","gss_code","sex","age"),
-                                              col_popn = "popn",
-                                              col_target = "popn")
+                                                        target = constrained_population,
+                                                        dom_in = dom_in,
+                                                        dom_out = dom_out,
+                                                        col_aggregation = c("year","gss_code","sex","age"),
+                                                        col_popn = "popn",
+                                                        col_target = "popn")
   
   #TODO More validation needed here?
   constrained_population <- check_negative_values(constrained_population, "popn")
