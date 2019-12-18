@@ -1,3 +1,8 @@
+interested_in_gss <- c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002","E12000007","E92000001")
+interested_in_yrs <- 2016:2018
+
+####
+
 popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
@@ -28,40 +33,39 @@ dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
 dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
 
-a <- function(x){
+a <- function(x, interested_in_yrs=interested_in_yrs, interested_in_gss=interested_in_gss){
   
   x <- readRDS(x) %>%
-    filter(year %in% 2017:2018,
-           gss_code %in% c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002","E12000007","E92000001"))
+    filter(year %in% interested_in_yrs,
+           gss_code %in% interested_in_gss)
   
   return(x)
 }
 
-pop <- readRDS(popn_mye_path) %>%
-  filter(year %in% 2016:2018,
-         gss_code %in% c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002",
-                         "E12000007","E92000001"))
+pop <- a(popn_mye_path)
 deaths <- a(deaths_mye_path)
 births <- a(births_mye_path)
 int_in <- a(int_in_mye_path)
 int_out <- a(int_out_mye_path)
 
 dom <- readRDS(dom_origin_destination_path) %>%
-  filter(year %in% 2017:2018,
-         gss_in %in% c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002"),
-         gss_out %in% c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002"))
+  filter(year %in% interested_in_yrs,
+         gss_in %in% interested_in_gss,
+         gss_out %in% interested_in_gss)
 
 dom_in <- group_by(dom, year, gss_code = gss_in, sex, age) %>%
   summarise(dom_in = sum(value)) %>%
   as.data.frame() %>%
-  tidyr::complete(year = 2017:2018, gss_code = c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002"),
+  tidyr::complete(year = interested_in_yrs,
+                  gss_code = unique(int_out$gss_code),
                   sex = c("male","female"),
                   age = 0:90, fill = list(dom_in = 0))
 
 dom_out <- group_by(dom, year, gss_code = gss_out, sex, age) %>%
   summarise(dom_out = sum(value)) %>%
   as.data.frame()%>%
-  tidyr::complete(year = 2017:2018, gss_code = c("E09000001","E09000002","E09000003","W06000001","S92000003","N92000002"),
+  tidyr::complete(year = interested_in_yrs,
+                  gss_code = unique(int_out$gss_code),
                   sex = c("male","female"),
                   age = 0:90, fill = list(dom_out = 0))
 
