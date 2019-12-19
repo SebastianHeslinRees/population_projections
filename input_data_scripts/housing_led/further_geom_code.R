@@ -8,6 +8,9 @@ library(lwgeom)
 ################################################################################
 ##################### Determine final permission polygons ######################
 
+# Code from Libby Rogers, 2019-12-18 . Cheers!
+
+dir.create("input_data/housing_led_model", warnings = FALSE")
 perm_poly_file <- "N:/LDD/GIS download/ldd_nightly_download.gdb"
 ldd_unit_flow_file <- "N:/LDD/Unit flow analysis/output_data/IMA/2019_12/0_ldd_development_unit_flow.Rda"
 # Remove polygons which superseed earlier permissions
