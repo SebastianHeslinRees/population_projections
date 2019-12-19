@@ -10,7 +10,7 @@ lsoa_to_borough <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookup
   select(gss_code_lsoa, gss_code = gss_code_borough)
 
 #base census dwellings
-lsoa_census_dwellings <- data.table::fread("input_data/housing_led_model/LSOA_DWELLINGS_CENSUS.CSV")
+lsoa_census_dwellings <- data.table::fread("Q:/Teams/D&PA/Data/census_tables/housing_led_model/LSOA_DWELLINGS_CENSUS.CSV")
 
 #ldd data
 load("//glashare/public/LDD/Unit flow analysis/output_data/IMA/2019_12/0_ldd_development_unit_flow.Rda")
