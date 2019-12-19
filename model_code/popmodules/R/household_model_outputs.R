@@ -52,6 +52,16 @@ household_model_outputs <- function(model_output, model, output_dir, timestamp, 
   hh_output_dir <- paste0(output_dir, "/households_",timestamp,"/")
   dir.create(hh_output_dir, showWarnings = FALSE)
   
+  #add authority names
+  names_lookup <- data.table::fread('input_data/lookup/lad18_code_to_name.csv')
+  for(i in seq(output_dataframes)){
+    nm <- setdiff(names(output_dataframes[[i]]),"gss_code")
+    
+    output_dataframes[[i]] <- left_join(output_dataframes[[i]], names_lookup, by="gss_code") %>%
+      select(c(gss_code, gss_name, !!nm))
+  }
+  
+  
   #CSV
   lapply(seq_along(output_dataframes),
          function(i) data.table::fwrite(output_dataframes[[i]],
