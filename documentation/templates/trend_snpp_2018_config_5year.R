@@ -34,7 +34,7 @@ fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 5
-int_out_flow_or_rate <- "flow"
+int_out_method <- "flow"
 int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2018
@@ -105,10 +105,10 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
+int_out_fns <- list(
   list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                births_mye_path = births_mye_path,
-                                                                               flow_or_rate = int_out_flow_or_rate,
+                                                                               flow_or_rate = int_out_method,
                                                                                component_path = int_out_mye_path,
                                                                                last_data_year = int_out_last_data_year,
                                                                                n_years_to_avg = int_out_years_to_avg,
@@ -175,7 +175,7 @@ config_list <- list(
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
-  int_out_rate_fns = int_out_rate_fns,
+  int_out_fns = int_out_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
@@ -186,7 +186,7 @@ config_list <- list(
   ons_stage2_file_path = ons_stage2_file_path,
   dclg_stage1_file_path = dclg_stage1_file_path,
   dclg_stage2_file_path = dclg_stage2_file_path,
-  int_out_flow_or_rate = int_out_flow_or_rate,
+  int_out_method = int_out_method,
   projection_name = projection_name,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
   upc_path = upc_path,
@@ -207,3 +207,5 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
+log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
+
