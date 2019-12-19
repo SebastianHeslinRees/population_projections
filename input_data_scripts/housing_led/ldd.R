@@ -79,6 +79,7 @@ cumulative_units <- additional_units %>%
   left_join(lsoa_census_dwellings, by = "gss_code_lsoa") %>%
   mutate(units = cum_units + dwellings)
 
+lsoa_units <- select(cumulative_units, year, gss_code_lsoa, units)
 #group it into differnet geographies
 ward_units <- left_join(cumulative_units, lsoa_to_ward, by="gss_code_lsoa") %>%
   group_by(year, gss_code_ward) %>%
