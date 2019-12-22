@@ -4,8 +4,12 @@
 \alias{calculate_region_domestic_flows}
 \title{Calculate domestic in, out and net migration for a group of LAs}
 \usage{
-calculate_region_domestic_flows(domestic_rates, nat_chng_popn,
-  gss_code_list, region_name)
+calculate_region_domestic_flows(
+  domestic_rates,
+  nat_chng_popn,
+  gss_code_list,
+  region_name
+)
 }
 \arguments{
 \item{domestic_rates}{A data frame containing a rates of domestic migration

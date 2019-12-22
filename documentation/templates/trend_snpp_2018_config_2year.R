@@ -34,7 +34,7 @@ fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 5
-int_out_flow_or_rate <- "flow"
+int_out_method <- "flow"
 int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2018
@@ -105,30 +105,30 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
-  list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                 births_mye_path = births_mye_path,
-                                                                 flow_or_rate = int_out_flow_or_rate,
-                                                                 component_path = int_out_mye_path,
-                                                                 last_data_year = int_out_last_data_year,
-                                                                 n_years_to_avg = int_out_years_to_avg,
-                                                                 data_col = "int_out",
-                                                                 first_proj_yr = first_proj_yr,
-                                                                 n_proj_yr = n_proj_yr,
-                                                                 rate_cap = int_out_rate_cap))
+int_out_fns <- list(
+  list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                               births_mye_path = births_mye_path,
+                                                                               flow_or_rate = int_out_method,
+                                                                               component_path = int_out_mye_path,
+                                                                               last_data_year = int_out_last_data_year,
+                                                                               n_years_to_avg = int_out_years_to_avg,
+                                                                               data_col = "int_out",
+                                                                               first_proj_yr = first_proj_yr,
+                                                                               n_proj_yr = n_proj_yr,
+                                                                               rate_cap = int_out_rate_cap))
 )
 
 
 int_in_fns <- list(
-  list(fn = popmodules::international_rates_and_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                 births_mye_path = births_mye_path,
-                                                                 flow_or_rate = int_in_flow_or_rate,
-                                                                 component_path = int_in_mye_path,
-                                                                 last_data_year = int_in_last_data_year,
-                                                                 n_years_to_avg = int_in_years_to_avg,
-                                                                 data_col = "int_in",
-                                                                 first_proj_yr = first_proj_yr,
-                                                                 n_proj_yr = n_proj_yr))
+  list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
+                                                                               births_mye_path = births_mye_path,
+                                                                               flow_or_rate = int_in_flow_or_rate,
+                                                                               component_path = int_in_mye_path,
+                                                                               last_data_year = int_in_last_data_year,
+                                                                               n_years_to_avg = int_in_years_to_avg,
+                                                                               data_col = "int_in",
+                                                                               first_proj_yr = first_proj_yr,
+                                                                               n_proj_yr = n_proj_yr))
 )
 
 dom_rate_fns <- list(
@@ -138,22 +138,23 @@ dom_rate_fns <- list(
                                                          years_backseries = (first_proj_yr - dom_mig_years_to_avg):(first_proj_yr - 1),
                                                          col_partial_match = c("gss_out","gss_in"),
                                                          col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
-                                                         col_component = "value")),
-  list(fn = popmodules::average_domestic_migration_rates, args = list(last_data_year = first_proj_yr-1,
-                                                                      n_years_to_avg = dom_mig_years_to_avg,
-                                                                      col_rate = "rate"))
+                                                         col_component = "value",
+                                                         rate_cap = NULL)),
+  
+  list(fn = popmodules::calculate_mean_domestic_rates, args = list(last_data_year = dom_mig_last_data_year,
+                                                                   n_years_to_avg = dom_mig_years_to_avg,
+                                                                   col_rate = "rate",
+                                                                   rate_cap = 0.8))
 )
 
-
 constraint_fns <- list(
-  list(fn = popmodules::get_constraints_from_file, args = list(popn_path = popn_constraint_path,
-                                                               births_path = births_constraint_path,
-                                                               deaths_path = deaths_constraint_path,
-                                                               int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_out_constraint_path,
-                                                               cross_in_path = cross_in_constraint_path,
-                                                               cross_out_path = cross_out_constraint_path))
-  
+  list(fn = popmodules::get_data_from_file, args = list(files= list(population_constraint = popn_constraint_path,
+                                                                    births_constraint = births_constraint_path,
+                                                                    deaths_constraint = deaths_constraint_path,
+                                                                    international_in_constraint = int_in_constraint_path,
+                                                                    international_out_constraint = int_out_constraint_path,
+                                                                    cross_border_in_constraint = cross_in_constraint_path,
+                                                                    cross_border_out_constraint = cross_out_constraint_path)))
 )
 
 qa_areas_of_interest <- list("London", "E09000001")
@@ -173,7 +174,7 @@ config_list <- list(
   outputs_dir = outputs_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
-  int_out_rate_fns = int_out_rate_fns,
+  int_out_fns = int_out_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
@@ -184,7 +185,7 @@ config_list <- list(
   ons_stage2_file_path = ons_stage2_file_path,
   dclg_stage1_file_path = dclg_stage1_file_path,
   dclg_stage2_file_path = dclg_stage2_file_path,
-  int_out_flow_or_rate = int_out_flow_or_rate,
+  int_out_method = int_out_method,
   projection_name = projection_name,
   timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
   upc_path = upc_path,
@@ -205,4 +206,5 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
+log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
 

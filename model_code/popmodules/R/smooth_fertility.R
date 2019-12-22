@@ -1,30 +1,38 @@
 #' Smooth a fertility curve
 #'
-#' Fits the Hadwiger mixture model curves (Chandola et al. 1999) to 'fertility rates by age and geography'
-#' data and returns fertility rates calculated from the fitted curves.
+#' Fits the Hadwiger mixture model curves (Chandola et al. 1999) to 'fertility
+#' rates by age and geography' data and returns fertility rates calculated from
+#' the fitted curves.
 #'
-#' A Levenberg-Marquardt Nonlinear Least-Squares algorithm is used to fit a curve to each geographic level,
-#' with starting points chosen based on previously fitted curves from 2011, and convergence tests as
-#' described here: https://cran.r-project.org/web/packages/minpack.lm/minpack.lm.pdf using the package
-#' defaults for convergence conditions. The parameters of the fitted curve are then used to calculate new
-#' rates for each age.
+#' A Levenberg-Marquardt Nonlinear Least-Squares algorithm is used to fit a
+#' curve to each geographic level, with starting points chosen based on
+#' previously fitted curves from 2011, and convergence tests as described here:
+#' https://cran.r-project.org/web/packages/minpack.lm/minpack.lm.pdf using the
+#' package defaults for convergence conditions. The parameters of the fitted
+#' curve are then used to calculate new rates for each age.
 #'
-#' If convergence does not happen within 200 iterations, a grid search method is used to run the
-#' Levenberg-Marquardt Nonlinear Least-Squares algorithm with a range of starting values in order to find the
-#' best fit.
+#' If convergence does not happen within 200 iterations, a grid search method is
+#' used to run the Levenberg-Marquardt Nonlinear Least-Squares algorithm with a
+#' range of starting values in order to find the best fit.
 #'
 #' If no fit is found then the data for that local authority is left unchanged.
 #'
-#' @param asfr_structure A dataframe containing the age specific fertility rates.  Ages must be in the range
-#' 15 to 44. must contain columns \code{gss_code} which contains the geography, \code{sex} which contains sex
-#' encoded as "female" or "female"/"male", \code{age} which contains ages 15 to 44 and \code{fert_rate} which
-#' contains the fertility rate
-#' @param reproducible If \code{TRUE} sets a seed so that the random fitting process is reproducible.
-#' Default \code{TRUE}.
-#' @return a list with elements \code{data}, \code{LA_status} and \code{resid_sum}. \code{data} contains
-#' the smoothed fertility dataframe with ages 15:49.  \code{LA_status} indicates whether a fit was found
-#' for each LA on the first pass, second pass, or no fit found. \code{resid_sum} contains the sum of the
-#' squares of the residulas for each LA
+#' @param asfr_structure A dataframe containing the age specific fertility
+#'   rates.  Ages must be in the range 15 to 44. must contain columns
+#'   \code{gss_code} which contains the geography, \code{sex} which contains sex
+#'   encoded as "female" or "female"/"male", \code{age} which contains ages 15
+#'   to 44 and \code{fert_rate} which contains the fertility rate.
+#' @param reproducible If \code{TRUE} sets a seed so that the random fitting
+#'   process is reproducible. Default \code{TRUE}.
+#' @param age_range_to_model Integer vector. (Consecutive) ages to include in
+#'   the output. Default \code{c(15:49)}.
+#'
+#' @return a list with elements \code{data}, \code{LA_status} and
+#'   \code{resid_sum}. \code{data} contains the smoothed fertility dataframe
+#'   with ages given by \code{age_range_to_model}.  \code{LA_status} indicates
+#'   whether a fit was found for each LA on the first pass, second pass, or no
+#'   fit found. \code{resid_sum} contains the sum of the squares of the
+#'   residuals for each LA.
 #'
 #' @import dplyr
 #' @importFrom data.table rbindlist

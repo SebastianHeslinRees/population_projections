@@ -48,7 +48,8 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
   district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
 
   household_rates <- readRDS(hh_rep_rates_path) %>%
-    project_forward_flat(max(popn$year))
+    project_forward_flat(max(popn$year)) %>%
+    filter(year <= max(popn$year))
 
   #population <- aggregate_geography(popn) %>%
   #  create_regional_data(district_to_region)
@@ -65,45 +66,47 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
                                                       labels = c("0_15","16_19","20_24","25_29","30_34","35_39","40_44",
                                                                  "45_49","50_54","55_59","60_64","65_69",
                                                                  "70_74","75_79","80_84","85_89","90+"),
-                                                      popn_col = "popn")
+                                                      data_cols = "popn")
 
   communal_establishment <- get_communal_establishment_popn(communal_est_pop_path,
                                                             population_age_groups,
                                                             rates_ages = c("75_79","80_84","85_89","90+"),
                                                             first_proj_yr = first_proj_yr)
-  
+
   household_population <- get_household_popn(population_age_groups, communal_establishment)
-  
-  
-  household_projection <- apply_household_rates(household_population, household_rates,
-                                                rates_col="HRR", hh_pop_col="household_popn")
+
+  household_projection <- apply_rate_to_population(popn = household_population,
+                                                   popn_rate = household_rates,
+                                                   col_aggregation = c("gss_code", "sex", "year", "age_group"),
+                                                   col_popn = "household_popn",
+                                                   col_rate = "HRR",
+                                                   col_out = "households")
+
+#Constrain regions to England, LAs to regions
+unconstrained_regional <- filter(household_projection, substr(gss_code,1,3)=="E12")
+england_proj <- filter(household_projection, substr(gss_code,1,3)=="E92")
+unconstrained_la <- filter(household_projection, !substr(gss_code,1,3) %in% c("E12","E92"))
+
+#Regional constrained to England
+constrained_regional <- constrain_regional_hh(unconstrained_regional, england_proj)
+
+#Districts constrained to regions
+constrained_district <- constrain_district_hh(unconstrained_la, constrained_regional, district_to_region)
+constrained <- data.frame(rbind(england_proj, constrained_regional, constrained_district))
+
+#Pretty-up outputs
+household_population <- rename(household_population, household_population = household_popn)
+communal_establishment <- rename(communal_establishment, communal_establishment_population = ce_pop)
+
+detailed_households <- left_join(constrained, household_population, by = c("gss_code", "sex", "year", "age_group")) %>%
+  left_join(communal_establishment, by = c("gss_code", "sex", "year", "age_group"))
 
 
-  #Constrain regions to England, LAs to regions
-  unconstrained_regional <- filter(household_projection, substr(gss_code,1,3)=="E12")
-  england_proj <- filter(household_projection, substr(gss_code,1,3)=="E92")
-  unconstrained_la <- filter(household_projection, !substr(gss_code,1,3) %in% c("E12","E92"))
-
-  #Regional constrained to England
-  constrained_regional <- constrain_regional_hh(unconstrained_regional, england_proj)
-
-  #Districts constrained to regions
-  constrained_district <- constrain_district_hh(unconstrained_la, constrained_regional, district_to_region)
-  constrained <- data.frame(rbind(england_proj, constrained_regional, constrained_district))
-
-  #Pretty-up outputs
-  household_population <- rename(household_population, household_population = household_popn)
-  communal_establishment <- rename(communal_establishment, communal_establishment_population = ce_pop)
-
-  detailed_households <- left_join(constrained, household_population, by = c("gss_code", "sex", "year", "age_group")) %>%
-    left_join(communal_establishment, by = c("gss_code", "sex", "year", "age_group"))
-
-
-  return(list(detailed_households = detailed_households,
-              unconstrained = data.frame(household_projection),
-              constrained = constrained,
-              household_population = data.frame(household_population),
-              communal_establishment_population = data.frame(communal_establishment)))
+return(list(detailed_households = detailed_households,
+            unconstrained = data.frame(household_projection),
+            constrained = constrained,
+            household_population = data.frame(household_population),
+            communal_establishment_population = data.frame(communal_establishment)))
 }
 
 #' Implementation of the ONS 2016 Stage 2 Household Model
@@ -131,7 +134,7 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
 
 
   hh_rates_no_sex <- filter(headship_rates, !household_type %in%
-                                   c("One person households: Male", "One person households: Female"))
+                              c("One person households: Male", "One person households: Female"))
 
   hh_rates_female <- filter(headship_rates, household_type == "One person households: Female")
   hh_rates_male <- filter(headship_rates, household_type == "One person households: Male")
@@ -221,7 +224,8 @@ get_communal_establishment_popn <- function(communal_est_pop_path, population, r
   ce <- select(ce, -ce_rate) %>%
     filter(year < first_proj_yr) %>%
     rbind(data.table::rbindlist(older_ce),
-          data.table::rbindlist(younger_ce))
+          data.table::rbindlist(younger_ce)) %>%
+    as.data.frame()
 
   return(ce)
 }
@@ -232,7 +236,8 @@ get_household_popn <- function(population, communal_establishment){
 
   household_population <- left_join(population, communal_establishment, by=c("gss_code","year","sex","age_group")) %>%
     mutate(household_popn = popn - ce_pop) %>%
-    select(-popn, -ce_pop)
+    select(-popn, -ce_pop) %>%
+    check_negative_values("household_popn")
 
   return(household_population)
 }

@@ -4,8 +4,13 @@
 \alias{calculate_rate_by_regression}
 \title{Use linear regression to calculate future values based on past data}
 \usage{
-calculate_rate_by_regression(data_backseries, n_years_regression,
-  last_data_year, data_col, col_aggregation = c("gss_code", "sex"))
+calculate_rate_by_regression(
+  data_backseries,
+  n_years_regression,
+  last_data_year,
+  data_col,
+  col_aggregation = c("gss_code", "sex")
+)
 }
 \arguments{
 \item{data_backseries}{Dataframe. A set of values by LA, sex and age}

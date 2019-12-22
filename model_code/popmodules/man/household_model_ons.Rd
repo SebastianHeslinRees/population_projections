@@ -4,8 +4,13 @@
 \alias{household_model_ons}
 \title{Run the 2016 ONS household model}
 \usage{
-household_model_ons(population, stage1_file_path, stage2_file_path,
-  communal_est_pop_path, first_proj_yr)
+household_model_ons(
+  population,
+  stage1_file_path,
+  stage2_file_path,
+  communal_est_pop_path,
+  first_proj_yr
+)
 }
 \arguments{
 \item{population}{A data frame containing population data.}

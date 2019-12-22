@@ -4,9 +4,15 @@
 \alias{validate_join_population}
 \title{Check one population is contained within another}
 \usage{
-validate_join_population(pop1, pop2, cols_common_aggregation = c("year",
-  "gss_code", "age", "sex"), pop1_is_subset = TRUE, many2one = TRUE,
-  one2many = TRUE, warn_unused_shared_cols = TRUE)
+validate_join_population(
+  pop1,
+  pop2,
+  cols_common_aggregation = c("year", "gss_code", "age", "sex"),
+  pop1_is_subset = TRUE,
+  many2one = TRUE,
+  one2many = TRUE,
+  warn_unused_shared_cols = TRUE
+)
 }
 \arguments{
 \item{pop1, pop2}{Data frames.}
