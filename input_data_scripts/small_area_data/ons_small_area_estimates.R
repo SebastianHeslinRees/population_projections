@@ -2,13 +2,16 @@ library(dplyr)
 library(stringr)
 library(data.table)
 
+#data paths
 lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_estimates/lsoa/machine_readable/by_indiviudal_year"
-lsoa_to_ward <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds")
 mye_pop_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
-ward_to_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds")
 
+#lookups
+ward_to_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds")
+lsoa_to_ward <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds")
 london_wards <- filter(ward_to_district, str_detect(gss_code_district, "E09"))$gss_code_ward
 
+#process data for different years/sexes into signle dataframe
 lsoa_data <- list()
 for(yr in 2011:2017){
   f <- readRDS(paste0(lsoa_dir,"/sape_lsoa_mid_",yr,"_f.rds")) %>%
