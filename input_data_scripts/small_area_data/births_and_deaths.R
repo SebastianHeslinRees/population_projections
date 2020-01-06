@@ -9,7 +9,9 @@ library(stringr)
 lsoa_births_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2018/lsoa_births_2001to2018.rds"
 lsoa_deaths_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2018/lsoa_deaths_2001to2018.rds"
 lsoa_to_ward_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds"
-
+ward_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds") %>%
+  rename(gss_code = gss_code_district) %>%
+  rbind(data.frame(gss_code_ward = "E09000001", gss_code = "E09000001", stringsAsFactors = FALSE))
 
 #lookup
 #NB: There are 5 wards in Isles of Scilly but only 1 LSOA (E01019077)
@@ -25,6 +27,7 @@ lsoa_births <- readRDS(lsoa_births_path) %>%
   filter(gss_code_lsoa != "E01019077")
 
 ward_births <- left_join(lsoa_births, lsoa_to_ward, by="gss_code_lsoa") %>%
+  .aggregate_city_wards("births" ) %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, age_group) %>%
   summarise(births = sum(births)) %>%
@@ -48,6 +51,7 @@ lsoa_deaths <- readRDS(lsoa_deaths_path) %>%
   filter(gss_code_lsoa != "E01019077")
 
 ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
+  .aggregate_city_wards("deaths") %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, sex, age_group) %>%
   summarise(deaths = sum(deaths)) %>%
@@ -55,7 +59,3 @@ ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
 
 saveRDS(ward_deaths, "input_data/small_area_model/ward_deaths_2001_2018.rds")
 
-
-                            
-                            
-                            

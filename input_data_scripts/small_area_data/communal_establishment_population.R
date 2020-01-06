@@ -1,65 +1,59 @@
 #Data paths
-census_ward_ce_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/ward inputs/base_institutional_popn.rds"
-census_ward_pop_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/ward inputs/base_population.rds"
-ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2011_2017.rds"
-ons_comm_est_path <- "input_data/household_model/ons_communal_establishment_population.rds"
+census_ward_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_CMWD11.rds"
+#census_ward_pop_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/ward inputs/base_population.rds"
+ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+#ons_comm_est_path <- "input_data/household_model/ons_communal_establishment_population.rds"
 
-
+merged_to_electoral_ward <- data.table::fread("Q:/Teams/D&PA/Census/Lookups/EW/2011 Ward to Merged Ward.csv")
 #The population at mid-year is different than at census day
 #The cnesus total population is compared to the ward estimates at mid-year
 #Scaling factors are derived to convert the census population
 #These are applied to the census ce population to bring it up to mid-year
-census_population <- readRDS(census_ward_pop_path) %>%
-  mutate(sex = case_when(sex == "F" ~ "female",
-                         sex == "M" ~ "male")) %>%
-  rename(census_pop = total_population)
+census_ward_ce <- readRDS(census_ward_ce_path) %>%
+  filter(C_RESIDENCE_TYPE == 2,
+         C_SEX != 0,
+         C_AGE != 0) %>%
+  left_join(merged_to_electoral_ward, by=c("GEOGRAPHY_CODE"="MERGED WARD")) %>%
+  filter(substr(LA,1,3)=="E09") %>%
+  rename(gss_code_ward = WARD) %>%
+  .aggregate_city_wards(data_col = "OBS_VALUE") %>%
+  select(gss_code_ward, sex = C_SEX_NAME, age_group = C_AGE_NAME, ce_popn = OBS_VALUE) %>%
+  mutate(sex = case_when(sex == "Males" ~ "male",
+                         sex == "Females" ~ "female")) %>%
+  mutate(min_age = substr(age_group, 5, 6),
+         f = nchar(age_group),
+         max_age = ifelse(min_age == "85", 90, substr(age_group, f-1, f)),
+         min_age = as.numeric(min_age),
+         max_age = as.numeric(max_age)) %>%
+  select(-f)
 
-ward_estaimates <- readRDS(ward_estimates_path) %>%
-  filter(year == 2011) %>%
-  filter(gss_code_borough != "E09000001")
+groups <- unique(census_ward_ce$age_group)
 
-ward_scaling_1 <- ward_estaimates %>%
-  left_join(census_population, by=c("gss_code_borough","gss_code_ward","sex","age")) %>%
-  mutate(factor = ifelse(census_pop == 0, 0, popn / census_pop)) %>%
-  select(-census_pop, -popn)
+ward_estimates <- readRDS(ward_estimates_path) %>% filter(year == 2011)
+distributed <- list()
 
-base_ce_estimates <- readRDS(census_ward_ce_path)%>%
-  mutate(sex = case_when(sex == "F" ~ "female",
-                         sex == "M" ~ "male")) %>%
-  left_join(ward_scaling_1, by=c("gss_code_borough","gss_code_ward","sex","age")) %>%
-  mutate(base_ce = factor*institutional_population) %>%
-  select(-factor, -institutional_population)
+for(i in 1:length(groups)){
   
+  a <- filter(census_ward_ce, age_group == groups[[i]])
+  
+  min <- unique(a$min_age)
+  max <- unique(a$max_age)
+  
+  distributed[[i]] <- distribute_age_band(popn_1=a, popn_2=ward_estimates,
+                           popn_1_col="ce_popn", popn_2_col="popn",
+                           min_age=min, max_age=max,
+                           col_aggregation=c("gss_code_ward","sex"))      
+}
 
-#The ward-level ce pop estimates are scaled to agree with the
-#borough-level data from ONS for all years
-ons_borough_ce <- readRDS(ons_comm_est_path) %>%
-  filter(year %in% 2011:2017 & stringr::str_detect(gss_code, "E09")) %>%
-  filter(gss_code != "E09000001") %>%
-  rename(gss_code_borough = gss_code)
+ward_ce_by_sya <- data.table::rbindlist(distributed) %>%
+  select(gss_code_ward, sex, age, ce_popn)
 
-ward_age_groups <- base_ce_estimates %>%
-  mutate(age_group = cut(age, breaks=c(0, 15, seq(19, 89, 5), Inf),
-                         labels = unique(ons_borough_ce$age_group),
-                         include.lowest = T),
-         age_group = as.character(age_group)) %>%
-  select(-year)
+# sum(filter(ward_ce_by_sya, gss_code_ward == "E05000026")$ce_popn)
+# sum(filter(census_ward_ce, gss_code_ward == "E05000026")$ce_popn)
 
-ward_comm_est_popn <- ward_age_groups %>%
-  group_by(gss_code_borough, sex, age_group) %>%
-  summarise(base_ce = sum(base_ce)) %>%
-  left_join(ons_borough_ce, by = c("gss_code_borough", "sex", "age_group")) %>%
-  mutate(factor = ifelse(ce_pop == 0, 0, ce_pop/base_ce)) %>%
-  select(-ce_pop, -base_ce) %>%
-  left_join(ward_age_groups, by=c("gss_code_borough","sex","age_group")) %>%
-  mutate(ce_pop = factor*base_ce) %>%
-  select(gss_code_borough, gss_code_ward, year, sex, age, ce_pop)
-
-
-assertthat::assert_that(sum(ward_comm_est_popn$ce_pop)==sum(ons_borough_ce$ce_pop))
 
 #--------------
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
-saveRDS(ward_comm_est_popn, "input_data/small_area_model/ward_communal_establishment_population.rds")
+saveRDS(ward_ce_by_sya, "input_data/small_area_model/ward_communal_establishment_population.rds")

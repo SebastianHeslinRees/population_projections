@@ -90,3 +90,26 @@
   }
   return(dftarget)
 }
+
+
+.aggregate_city_wards <- function(df, data_col){
+
+  col_aggreagtion <- setdiff(names(df), data_col)
+  
+  city_wards <- ward_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds") %>%
+    filter(gss_code_district == "E09000001")
+  
+  city <- dtplyr::lazy_dt(df) %>%
+    filter(gss_code_ward %in% city_wards$gss_code_ward) %>%
+    mutate(gss_code_ward == "E09000001") %>%
+    group_by_at(col_aggreagtion) %>%
+    summarise(value = sum(!!sym(data_col))) %>%
+    as.data.frame() %>%
+    rename(!!data_col := value)
+  
+  out_df <- filter(df, !gss_code_ward %in% city_wards$gss_code_ward) %>%
+    rbind(city)
+  
+  return(out_df)
+  
+}
