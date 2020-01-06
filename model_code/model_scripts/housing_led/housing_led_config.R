@@ -6,7 +6,7 @@ external_trend_path <- "outputs/trend/2018/2018_central/"
 external_trend_datestamp <- "19-11-13_2056"
 communal_est_file <- "ons_communal_est_population.rds"
 trend_households_file <- "ons_stage_1_households.rds"
-ldd_backseries_path <- "xxx"
+ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
 
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 external_ahs_trajectory_path <- "input_data/housing_led_model/dclg_ahs.rds"
@@ -33,10 +33,13 @@ config_list <- list(
   external_trend_datestamp = external_trend_datestamp,
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
-  ldd_max_yr = ldd_max_yr)
+  ldd_max_yr = ldd_max_yr,
+  timestamp = format(Sys.time(), "%y-%m-%d_%H%M"))
 
 #---------------------
 #run projection
 source('model_code/model_scripts/housing_led/housing_led_control.R')
 projection <- run_housing_led_model(config_list)
+log_warnings(paste0("outputs/housing_led/2018/",config_list$projection_name,"/warnings_",config_list$timestamp,".txt"))
+
 

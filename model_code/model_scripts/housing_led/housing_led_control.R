@@ -33,7 +33,8 @@ run_housing_led_model <- function(config_list){
                        "external_trend_datestamp",
                        "first_proj_yr",
                        "final_proj_yr",
-                       "ldd_max_yr")
+                       "ldd_max_yr",
+                       "timestamp")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -67,17 +68,17 @@ run_housing_led_model <- function(config_list){
     as.data.frame()
   
   #check
-  assertthat::assert_that(config_list$final_proj_yr <= max(config_list$hma_constraint$year))
+  assertthat::assert_that(config_list$final_proj_yr <= max(hma_constraint$year))
   
   #other data
-  communal_establishment_population <- readRDS(communal_est_path) %>%
+  communal_establishment_population <- readRDS(external_communal_est_path) %>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
     summarise(communal_est_popn = sum(communal_establishment_population)) %>%
     as.data.frame()
   
   external_ahs <- readRDS(config_list$external_ahs_trajectory_path) %>% as.data.frame()
-  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
+  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050) 
   
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
@@ -91,12 +92,13 @@ run_housing_led_model <- function(config_list){
   #TODO This is missing census data for the base stock so the numbers make no sense
   
   #census stock in 2011 + LDD development upto 2019
-  ldd_backseries <- readRDS(config_list$ldd_backseries_path)
+  ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
+    select(names(development_trajectory))
   
   dwelling_trajectory <- filter(ldd_backseries, year == config_list$ldd_max_yr) %>%
     rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>% 
     group_by(gss_code) %>%
-    mutate(dwellings = cumsum(new_homes)) %>%
+    mutate(dwellings = cumsum(units)) %>%
     ungroup() %>%
     select(year, gss_code, dwellings)
   
@@ -128,6 +130,7 @@ run_housing_led_model <- function(config_list){
   source('model_code/model_scripts/trend/02_core.R')
   source('model_code/model_scripts/housing_led/housing_led_core.R')
   source('model_code/model_scripts/housing_led/arrange_housing_led_core_outputs.R')
+  source('model_code/model_scripts/housing_led/output_housing_led_projection.R')
   
   #Starting population
   curr_yr_popn <- readRDS(paste0(external_trend_path, "population_", external_trend_datestamp,".rds")) %>%
@@ -149,7 +152,7 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households <- filter(household_trajectory, year == projection_year)
     curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
-    
+   
     trend_projection <- trend_core(start_population = curr_yr_popn,
                                    fertility_rates = curr_yr_fertility, 
                                    mortality_rates = curr_yr_mortality,
@@ -178,14 +181,11 @@ run_housing_led_model <- function(config_list){
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
   
+  message(" ")
+  
   projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
-  output_dir <- paste0("outputs/housing_led/2018/",config_list$projection_name)
   
-  dir.create(output_dir, recursive = T)
-  
-  lapply(seq_along(projection),
-         function(i) saveRDS(projection[[i]],
-                             paste0(output_dir, names(projection)[i], ".rds"))) %>%
-    invisible()
+  output_dir <- paste0("outputs/housing_led/2018/",config_list$projection_name,"/")
+  output_housing_led_projection(projection, output_dir, config_list$timestamp)
   
 }
