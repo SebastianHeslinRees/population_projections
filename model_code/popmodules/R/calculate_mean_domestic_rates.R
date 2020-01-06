@@ -100,7 +100,8 @@ calculate_mean_domestic_rates <- function(origin_destination_rates,
     origin_destination_rates %>%
       dtplyr::lazy_dt() %>%
       select(gss_out, age, sex) %>%
-      unique()
+      unique() %>%
+      as.data.frame()
     )
   
   
