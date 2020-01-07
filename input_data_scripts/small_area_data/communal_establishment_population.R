@@ -1,11 +1,10 @@
 #Data paths
 census_ward_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_CMWD11.rds"
-#census_ward_pop_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/ward inputs/base_population.rds"
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
-#ons_comm_est_path <- "input_data/household_model/ons_communal_establishment_population.rds"
 
-merged_to_electoral_ward <- data.table::fread("Q:/Teams/D&PA/Census/Lookups/EW/2011 Ward to Merged Ward.csv")
-#The population at mid-year is different than at census day
+#lookup
+merged_to_electoral_ward <- readRDS("input_data/lookup/2011_merged_ward_to_electoral_ward.rds")#The population at mid-year is different than at census day
+
 #The cnesus total population is compared to the ward estimates at mid-year
 #Scaling factors are derived to convert the census population
 #These are applied to the census ce population to bring it up to mid-year
@@ -39,10 +38,10 @@ for(i in 1:length(groups)){
   min <- unique(a$min_age)
   max <- unique(a$max_age)
   
-  distributed[[i]] <- distribute_age_band(popn_1=a, popn_2=ward_estimates,
-                           popn_1_col="ce_popn", popn_2_col="popn",
-                           min_age=min, max_age=max,
-                           col_aggregation=c("gss_code_ward","sex"))      
+  distributed[[i]] <- distribute_within_age_band(popn_1=a, popn_2=ward_estimates,
+                                                 popn_1_col="ce_popn", popn_2_col="popn",
+                                                 min_age=min, max_age=max,
+                                                 col_aggregation=c("gss_code_ward","sex"))      
 }
 
 ward_ce_by_sya <- data.table::rbindlist(distributed) %>%

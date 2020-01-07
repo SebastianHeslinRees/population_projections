@@ -2,9 +2,7 @@ library(data.table)
 library(dplyr)
 library(tidyr)
 
-#TODO Communal Establishment population needs to be removed before rates are calculated
-
-#Set this to the location of the final borough components
+#Set these to the location of the final borough components
 mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
@@ -24,11 +22,9 @@ ward_popn_path <- "input_data/small_area_model/ward_population_estimates_2010_20
 ward_ce_popn_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 
 #lookup
-ward_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds") %>%
-        rename(gss_code = gss_code_district) %>%
-        rbind(data.frame(gss_code_ward = "E09000001", gss_code = "E09000001", stringsAsFactors = FALSE))
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
 
-#DOMESTIC OUT
+####DOMESTIC OUT####
 #Data come from the census
 #Data only goes to age 75 so ages 75-90 are modelled using borough distribution
 
@@ -42,8 +38,8 @@ domestic_out <- data.table::fread(ward_dom_out_path, header = T) %>%
         as.data.frame()
 
 domestic_out <- filter(domestic_out, age == 75) %>%
-        left_join(ward_district, by="gss_code_ward") %>%
-        distribute_age_band(popn_2 = borough_domestic_out,
+        left_join(ward_to_district, by="gss_code_ward") %>%
+        distribute_within_age_band(popn_2 = borough_domestic_out,
                             popn_1_col = "domestic_out_migrants",
                             popn_2_col = "dom_out",
                             min_age=75, max_age=90,
@@ -53,14 +49,14 @@ domestic_out <- filter(domestic_out, age == 75) %>%
 
 #Scale from census to MYE
 domestic_out <- domestic_out %>%
-        left_join(ward_district, by="gss_code_ward") %>%
+        left_join(ward_to_district, by="gss_code_ward") %>%
         constrain_component(constraint = borough_domestic_out,
                             col_aggregation = c("gss_code","sex","age"),
                             col_popn = "domestic_out_migrants",
                             col_constraint = "dom_out")
 rm(borough_domestic_out)
 
-#DOMESTIC IN
+####DOMESTIC IN####
 borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011)
 
 domestic_in <- data.table::fread(ward_dom_in_path, header = T) %>%
@@ -71,8 +67,8 @@ domestic_in <- data.table::fread(ward_dom_in_path, header = T) %>%
         as.data.frame()
 
 domestic_in <- filter(domestic_in, age == 75) %>%
-        left_join(ward_district, by="gss_code_ward") %>%
-        distribute_age_band(popn_2 = borough_domestic_in,
+        left_join(ward_to_district, by="gss_code_ward") %>%
+        distribute_within_age_band(popn_2 = borough_domestic_in,
                             popn_1_col = "domestic_in_migrants",
                             popn_2_col = "dom_in",
                             min_age=75, max_age=90,
@@ -82,14 +78,14 @@ domestic_in <- filter(domestic_in, age == 75) %>%
 
 #Scale from census to MYE
 domestic_in <- domestic_in %>%
-        left_join(ward_district, by="gss_code_ward") %>%
+        left_join(ward_to_district, by="gss_code_ward") %>%
         constrain_component(constraint = borough_domestic_in,
                             col_aggregation = c("gss_code","sex","age"),
                             col_popn = "domestic_in_migrants",
                             col_constraint = "dom_in")
 rm(borough_domestic_in)
 
-#INTERNATIONAL OUT
+####NTERNATIONAL OUT####
 #Data from census on % of the borough's non-uk-born pop in each ward in that borough
 #Apply that percentage to the international out flow for 2011 from the MYE CoC
 
@@ -101,7 +97,7 @@ foreign_born <- data.table::fread(census_foreign_born_path) %>%
         pivot_longer(cols = c(male, female),
                      names_to = "sex",
                      values_to = "nonUKborn") %>%
-        left_join(ward_district, by="gss_code_ward") %>%
+        left_join(ward_to_district, by="gss_code_ward") %>%
         .aggregate_city_wards("nonUKborn") %>%
         as.data.frame() %>%
         group_by(gss_code, sex) %>%
@@ -119,7 +115,7 @@ international_out <- readRDS(borough_int_out_path) %>%
 
 rm(foreign_born)
 
-#INTERNATIONAL IN
+####INTERNATIONAL IN####
 borough_international_in <- readRDS(borough_int_in_path) %>% filter(year == 2011)
 
 ward_all_in <- data.table::fread(ward_in_migration_path, header = T) %>%
@@ -139,8 +135,8 @@ ward_int_in <- domestic_in %>%
         check_negative_values("international")
 
 ward_int_in <- filter(ward_int_in, age == 75) %>%
-        left_join(ward_district, by="gss_code_ward") %>%
-        distribute_age_band(popn_2 = borough_international_in,
+        left_join(ward_to_district, by="gss_code_ward") %>%
+        distribute_within_age_band(popn_2 = borough_international_in,
                             popn_1_col = "international",
                             popn_2_col = "int_in",
                             min_age=75, max_age=90,
@@ -149,7 +145,7 @@ ward_int_in <- filter(ward_int_in, age == 75) %>%
         rbind(filter(ward_int_in, age != 75))
 
 international_in <- ward_int_in %>%
-        left_join(ward_district, by="gss_code_ward") %>%
+        left_join(ward_to_district, by="gss_code_ward") %>%
         constrain_component(constraint = borough_international_in,
                             col_aggregation = c("gss_code","sex","age"),
                             col_popn = "international",
@@ -157,7 +153,7 @@ international_in <- ward_int_in %>%
 
 rm(borough_international_in, ward_int_in, ward_all_in)
 
-#Out migration rates
+####Out migration rates####
 ward_births_2011 <- readRDS(ward_births_path) %>% filter(year == 2011) %>%
         group_by(year, gss_code_ward) %>%
         summarise(births = sum(births)) %>%
@@ -168,11 +164,6 @@ ward_births_2011 <- readRDS(ward_births_path) %>% filter(year == 2011) %>%
         select(-births) %>%
         pivot_longer(c("male", "female"), values_to = "popn", names_to = "sex") %>%
         select(year, gss_code_ward, sex, age, popn)
-        
-# ward_deaths_2011 <- readRDS(ward_deaths_path) %>% filter(year == 2011)%>%
-#         group_by(year, gss_code_ward) %>%
-#         summarise(deaths = sum(deaths)) %>%
-#         as.data.frame()
 
 ward_popn_2010 <- readRDS(ward_popn_path) %>% filter(year == 2010) %>%
         select(-gss_code_borough)
@@ -185,7 +176,8 @@ denominators <- ward_popn_2010 %>%
         rbind(ward_births_2011) %>%
         left_join(ward_ce_popn, by = c("gss_code_ward","sex","age")) %>%
         mutate(popn = popn - ce_popn) %>%
-        select(-ce_popn)
+        select(-ce_popn) %>%
+        check_negative_values("popn")
 
 out_migration_rates <- left_join(domestic_out, international_out,
                                  by=c("gss_code_ward","sex","age")) %>%
@@ -196,7 +188,7 @@ out_migration_rates <- left_join(domestic_out, international_out,
         select(gss_code_ward, sex, age, out_migration_rate)
 
 
-#In migration distribution
+####In migration distribution####
 in_migration_characteristics <- left_join(domestic_in, international_in,
                                           by=c("gss_code_ward","sex","age")) %>%
         mutate(all_in_migration = domestic_in_migrants + international) %>%

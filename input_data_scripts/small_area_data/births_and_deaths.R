@@ -8,14 +8,11 @@ library(stringr)
 #paths
 lsoa_births_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2018/lsoa_births_2001to2018.rds"
 lsoa_deaths_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2018/lsoa_deaths_2001to2018.rds"
-lsoa_to_ward_path <- "Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds"
-ward_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds") %>%
-  rename(gss_code = gss_code_district) %>%
-  rbind(data.frame(gss_code_ward = "E09000001", gss_code = "E09000001", stringsAsFactors = FALSE))
 
 #lookup
+lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+
 #NB: There are 5 wards in Isles of Scilly but only 1 LSOA (E01019077)
-lsoa_to_ward <- readRDS(lsoa_to_ward_path)
 
 #births
 lsoa_births <- readRDS(lsoa_births_path) %>%

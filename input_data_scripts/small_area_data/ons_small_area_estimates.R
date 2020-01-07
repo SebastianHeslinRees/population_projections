@@ -7,10 +7,9 @@ lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_e
 mye_pop_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 
 #lookups
-ward_to_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds") %>%
-  rename(gss_code = gss_code_district)
-lsoa_to_ward <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds")
-london_wards <- c(filter(ward_to_district, str_detect(gss_code, "E09"))$gss_code_ward,"E09000001")
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
+lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))$gss_code_ward
 
 #process data for different years/sexes into signle dataframe
 lsoa_data <- list()
