@@ -155,13 +155,14 @@ apply_domestic_migration_rates <- function(popn,
                                missing_levels_popn = FALSE,
                                missing_levels_rate = TRUE)
 
-  unmatched_levels <- is.na(migration[[col_flow]])
-  if(sum(unmatched_levels) > 0) {
-    warning(paste(c("apply_domestic_migration_rates found", sum(unmatched_levels), "aggregation levels with no net outmigration.",
-                    "These levels will be absent from the output.",
-                    "\nAggregation levels:", names(col_aggregation)), collapse=" "))
-    migration <- filter(migration, !unmatched_levels)
-  }
+  # moving this warning to the rates' creation 
+   unmatched_levels <- is.na(migration[[col_flow]])
+   if(sum(unmatched_levels) > 0) {
+  #   warning(paste(c("apply_domestic_migration_rates found", sum(unmatched_levels), "aggregation levels with no net outmigration.",
+  #                   "These levels will be absent from the output.",
+  #                   "\nAggregation levels:", names(col_aggregation)), collapse=" "))
+     migration <- filter(migration, !unmatched_levels)
+   }
 
   # rename input gss column to match origin column
   old_name <- names(col_aggregation)[col_aggregation == col_origin_destination[1]]
