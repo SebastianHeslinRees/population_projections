@@ -96,7 +96,10 @@
 
   col_aggreagtion <- setdiff(names(df), data_col)
   
-  city_wards <- ward_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/ward to district.rds") %>%
+  assertthat::assert_that(!"E09000001" %in% df$gss_code_ward,
+                          msg="ward data already contains aggregated total for City of London")
+  
+  city_wards <- ward_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
     filter(gss_code_district == "E09000001")
   
   city <- dtplyr::lazy_dt(df) %>%
