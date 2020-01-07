@@ -22,3 +22,4 @@ source('input_data_scripts/small_area_model/births_and_deaths.R')
 source('input_data_scripts/small_area_model/dwellings.R')
 source('input_data_scripts/small_area_model/ward_migration_data.R')
 
+source('model_code/popmoudles/tests/testthat/test-ward_model_inputs.R')

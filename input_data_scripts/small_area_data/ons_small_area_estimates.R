@@ -50,7 +50,7 @@ borough_scaling_factors <- dtplyr::lazy_dt(ward_data)  %>%
 scaled_ward_data <- ward_data  %>%
   left_join(borough_scaling_factors, by=c("gss_code", "year", "sex", "age")) %>%
   mutate(popn = popn*scaling_factor) %>%
-  select(year, gss_code_borough=gss_code, gss_code_ward, sex, age, popn)
+  select(year, gss_code, gss_code_ward, sex, age, popn)
 
 
 #Save
