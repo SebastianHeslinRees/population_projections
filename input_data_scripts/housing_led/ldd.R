@@ -152,5 +152,6 @@ borough_units <- left_join(cumulative_units, lsoa_to_borough, by="gss_code_lsoa"
 
 #save it all
 saveRDS(borough_units, "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
-saveRDS(ward_units, "input_data/housing_led_model/ldd_backseries_dwellings_ward.rds")
-saveRDS(msoa_units, "input_data/housing_led_model/ldd_backseries_dwellings_msoa.rds")
+saveRDS(ward_units, "input_data/small_area_model/ldd_backseries_dwellings_ward.rds")
+saveRDS(msoa_units, "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds")
+◘

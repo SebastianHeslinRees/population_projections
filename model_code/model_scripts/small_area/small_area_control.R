@@ -7,7 +7,7 @@
 #Calculate the geometric mean of all the scaling factors
 #Apply it to the borough projected fertility rates
 
-read_small_area_inputs <- funtion(path){
+read_small_area_inputs <- function(path){
   df <- readRDS(path)
   if("gss_code_ward" %in% names(df)){df <- rename(df, gss_code_small_area = gss_code_ward)}
   if("gss_code_msoa" %in% names(df)){df <- rename(df, gss_code_small_area = gss_code_msoa)}
@@ -15,30 +15,44 @@ read_small_area_inputs <- funtion(path){
 }
 
 #Read Data
-popn_estimates <- read_small_area_inputs()
-communal_est_popn  <- read_small_area_inputs()
-out_migration_rates <- read_small_area_inputs()
-in_migration_characteristics <- read_small_area_inputs()
-births <- read_small_area_inputs()
-deaths <- read_small_area_inputs()
-ldd_data
-dwelling_trajectory
-birth_constraint
-death_constraint
-popn_constraint
-last_data_year
-fertility_rates
-mortality_rates
-first_proj_yr
-final_proj_year
+popn_estimates <- read_small_area_inputs('input_data/small_area_model/ward_population_estimates_2010_2017.rds')
+communal_est_popn  <- read_small_area_inputs('input_data/small_area_model/ward_communal_establishment_population.rds')
+out_migration_rates <- read_small_area_inputs('input_data/small_area_model/ward_out_migration_rates.rds')
+in_migration_characteristics <- read_small_area_inputs('input_data/small_area_model/ward_in_migration_characteristics.rds')
+births <- read_small_area_inputs('input_data/small_area_model/ward_births_2001_2018.rds')
+deaths <- read_small_area_inputs('input_data/small_area_model/ward_deaths_2001_2018.rds')
+ldd_data <- readRDS('input_data/small_area_model/ldd_backseries_dwellings_ward.rds')
+dwelling_trajectory <- readRDS('input_data/small_area_model/ward_shlaa_trajectory.rds')
+
+ward_to_district <- read_small_area_inputs("~/Projects/population_projections/input_data/lookup/2011_ward_to_district.rds")
+
+births_past <- readRDS("input_data/mye/2018/births_ons.rds") %>% select(year, gss_code, age, sex, births) %>% filter(age==0)
+deaths_past <- readRDS("input_data/mye/2018/deaths_ons.rds") %>% select(year, gss_code, age, sex, deaths)
+popn_past <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>% select(year, gss_code, age, sex, popn)
+
+birth_constraint <- readRDS("outputs/housing_led/2018/test/births_19-12-18_1534.rds") %>% filter(substr(gss_code,1,3)=="E09") %>%
+  rbind(births_past)
+death_constraint <- readRDS("outputs/housing_led/2018/test/deaths_19-12-18_1534.rds") %>% filter(substr(gss_code,1,3)=="E09") %>%
+  rbind(deaths_past)
+popn_constraint <- readRDS("outputs/housing_led/2018/test/population_19-12-18_1534.rds") %>% filter(substr(gss_code,1,3)=="E09") %>%
+  rbind(popn_past)
+
+fertility_rates <- readRDS("outputs/trend/2018/2018_central/fertility_rates_19-11-13_2056.rds") %>% filter(substr(gss_code,1,3)=="E09")
+mortality_rates <- readRDS("outputs/trend/2018/2018_central/mortality_rates_19-11-13_2056.rds") %>% filter(substr(gss_code,1,3)=="E09")
+
+last_data_year <- 2018
+first_proj_yr <- 2018
+final_proj_year <- 2021
+birth_rate_n_years_to_avg <- 5
 
 #Jump off year borough totals should match constraint - check?
 
 #Projection loop
-curr_yr_popn <- filter(popn_estimates, year == projection_year-1)
+curr_yr_popn <- filter(popn_estimates, year == first_proj_yr-1)
 projection <- list()
 
-for(projection_year in first_proj_yr:final_proj_year){
+#for(projection_year in first_proj_yr:final_proj_year){
+projection_year <- first_proj_yr
   
   curr_yr_popn_constraint <- filter(popn_constraint, year == projection_year)
   curr_yr_birth_constraint <- filter(birth_constraint, year == projection_year)
@@ -46,27 +60,49 @@ for(projection_year in first_proj_yr:final_proj_year){
   
   if(projection_year == last_data_year+1){
     
-    data_years <- unique(births$year)
+    #TODO make it work with age groups
+    #TODO make sure the columns that need to be numeric are numeric in the input scripts
+    #TODO PROBLEM! Rates are only produced out of the trend model for projected years
+    #In fact, do we want to create scaling factors for the 2019 rates for consistency?
+    births <- births %>%
+      group_by(year, gss_code_small_area) %>%
+      summarise(births = sum(births)) %>%
+      as.data.frame() %>%
+      mutate(year = as.numeric(year))
     
-    fert_scaling <- popn_age_on(popn_estimates) %>%
+    fertility_rates_2019 <- filter(fertility_rates, year == 2019) %>% select(-year)
+    
+    
+    data_years <- (max(births$year)-birth_rate_n_years_to_avg+1):max(births$year)
+
+    fert_scaling <- popn_age_on(as.data.frame(popn_estimates),
+                                col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
       filter(year %in% data_years) %>%
-      apply_rate_to_population(popn_rate = fertility_rates,
-                               col_aggregation = c("year","gss_code"),
-                               col_popn = "popn",
-                               col_rate = "fert_rate",
-                               col_out = "births") %>%
-      calculate_scaling_factors( constraint = births_constraint,
-                                 col_aggregation = c("year","gss_code"),
-                                 col_popn = "births",
+      # apply_rate_to_population(popn_rate = fertility_rates_2019,
+      #                          col_aggregation = c(nesting("gss_code","gss_code_small_area"),"sex","age"),
+      #                          col_popn = "popn",
+      #                          col_rate = "rate",
+      #                          col_out = "births")
+      left_join(fertility_rates_2019, by=c("gss_code","sex","age")) %>%
+      mutate(births = rate*popn) %>%
+      group_by(year, gss_code, gss_code_small_area) %>%
+      summarise(births_from_rate = sum(births)) %>%
+      as.data.frame()%>%
+      calculate_scaling_factors(constraint = births,
+                                 col_aggregation = c("year","gss_code_small_area"),
+                                 col_popn = "births_from_rate",
                                  col_constraint = "births",
                                  rows_to_constrain = TRUE) %>%
       dtplyr::lazy_dt() %>%
       group_by(gss_code_small_area) %>%
       summarise(scaling = EnvStats::geoMean(scaling)) %>%
-      as.data.frame()
+      as.data.frame() %>%
+      left_join(ward_to_district, by="gss_code_small_area")
     
-    small_area_fertility_rates <- apply_rate_to_population(popn = fertility_rates,
-                                                           popn_rate = fert_scaling)
+    #TODO apply_rate_to_population()
+    small_area_fertility_rates <- left_join(fertility_rates, fert_scaling, by=c("gss_code")) %>%
+      mutate(fert_rate = scaling*rate)
+     
   }
   
   if(projection_year > last_data_year){
