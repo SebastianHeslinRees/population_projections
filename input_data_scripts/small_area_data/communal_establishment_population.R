@@ -14,9 +14,10 @@ census_ward_ce <- readRDS(census_ward_ce_path) %>%
          C_AGE != 0) %>%
   left_join(merged_to_electoral_ward, by=c("GEOGRAPHY_CODE"="MERGED WARD")) %>%
   filter(substr(LA,1,3)=="E09") %>%
-  rename(gss_code_ward = WARD) %>%
-  .aggregate_city_wards(data_col = "OBS_VALUE") %>%
-  select(gss_code_ward, sex = C_SEX_NAME, age_group = C_AGE_NAME, ce_popn = OBS_VALUE) %>%
+  mutate(gss_code_ward = ifelse(LA == "E09000001", "E09000001", WARD)) %>%
+  group_by(gss_code_ward, sex = C_SEX_NAME, age_group = C_AGE_NAME) %>%
+  summarise(ce_popn = sum(OBS_VALUE)) %>%
+  as.data.frame() %>%
   mutate(sex = case_when(sex == "Males" ~ "male",
                          sex == "Females" ~ "female")) %>%
   mutate(min_age = substr(age_group, 5, 6),
@@ -50,7 +51,7 @@ ward_ce_by_sya <- data.table::rbindlist(distributed) %>%
 # sum(filter(ward_ce_by_sya, gss_code_ward == "E05000026")$ce_popn)
 # sum(filter(census_ward_ce, gss_code_ward == "E05000026")$ce_popn)
 
-
+if(length(unique(ward_ce_by_sya$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 #--------------
 
 #Save

@@ -22,7 +22,8 @@ ward_popn_path <- "input_data/small_area_model/ward_population_estimates_2010_20
 ward_ce_popn_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 
 #lookup
-ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
+        select(-ward_name)
 
 ####DOMESTIC OUT####
 #Data come from the census
@@ -154,7 +155,10 @@ international_in <- ward_int_in %>%
 rm(borough_international_in, ward_int_in, ward_all_in)
 
 ####Out migration rates####
-ward_births_2011 <- readRDS(ward_births_path) %>% filter(year == 2011) %>%
+london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))$gss_code_ward
+
+ward_births_2011 <- readRDS(ward_births_path) %>%
+        filter(year == 2011, gss_code_ward %in% london_wards) %>%
         group_by(year, gss_code_ward) %>%
         summarise(births = sum(births)) %>%
         as.data.frame() %>%
@@ -166,7 +170,7 @@ ward_births_2011 <- readRDS(ward_births_path) %>% filter(year == 2011) %>%
         select(year, gss_code_ward, sex, age, popn)
 
 ward_popn_2010 <- readRDS(ward_popn_path) %>% filter(year == 2010) %>%
-        select(-gss_code_borough)
+        select(-gss_code)
 
 ward_ce_popn <- readRDS(ward_ce_popn_path)
 
@@ -181,8 +185,8 @@ denominators <- ward_popn_2010 %>%
 
 out_migration_rates <- left_join(domestic_out, international_out,
                                  by=c("gss_code_ward","sex","age")) %>%
+        filter(gss_code_ward %in% london_wards) %>%
         mutate(out_migrants = domestic_out_migrants + international_out_migrants) %>%
-        .aggregate_city_wards("out_migrants") %>%
         left_join(denominators, by=c("gss_code_ward","sex","age")) %>%
         mutate(out_migration_rate = out_migrants/popn) %>%
         select(gss_code_ward, sex, age, out_migration_rate)
@@ -192,7 +196,6 @@ out_migration_rates <- left_join(domestic_out, international_out,
 in_migration_characteristics <- left_join(domestic_in, international_in,
                                           by=c("gss_code_ward","sex","age")) %>%
         mutate(all_in_migration = domestic_in_migrants + international) %>%
-        .aggregate_city_wards("all_in_migration") 
         group_by(gss_code_ward, sex) %>%
         mutate(total_migration = sum(all_in_migration),
                migration_distribution = all_in_migration/total_migration) %>%

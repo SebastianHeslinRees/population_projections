@@ -7,9 +7,12 @@ lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_e
 mye_pop_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 
 #lookups
-ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
+  select(-ward_name)
 lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
-london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))$gss_code_ward
+
+london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))
+london_wards <- london_wards$gss_code_ward
 
 #process data for different years/sexes into signle dataframe
 lsoa_data <- list()
@@ -38,6 +41,8 @@ ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   summarise(popn = sum(popn)) %>%
   as.data.frame() %>%
   mutate(age = as.numeric(substr(age,1,2))) 
+
+if(length(unique(ward_data$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
 borough_scaling_factors <- dtplyr::lazy_dt(ward_data)  %>%
   group_by(gss_code, year, sex, age) %>%

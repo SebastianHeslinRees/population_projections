@@ -11,6 +11,10 @@ lsoa_deaths_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_dea
 
 #lookup
 lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
+  select(-ward_name)
+london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))
+london_wards <- london_wards$gss_code_ward
 
 #NB: There are 5 wards in Isles of Scilly but only 1 LSOA (E01019077)
 
@@ -24,11 +28,14 @@ lsoa_births <- readRDS(lsoa_births_path) %>%
   filter(gss_code_lsoa != "E01019077")
 
 ward_births <- left_join(lsoa_births, lsoa_to_ward, by="gss_code_lsoa") %>%
+  filter(gss_code_ward %in% london_wards) %>%
   .aggregate_city_wards("births" ) %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, age_group) %>%
   summarise(births = sum(births)) %>%
   as.data.frame()
+
+if(length(unique(ward_births$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
 saveRDS(ward_births, "input_data/small_area_model/ward_births_2001_2018.rds")
 
@@ -48,11 +55,14 @@ lsoa_deaths <- readRDS(lsoa_deaths_path) %>%
   filter(gss_code_lsoa != "E01019077")
 
 ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
+  filter(gss_code_ward %in% london_wards) %>%
   .aggregate_city_wards("deaths") %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, sex, age_group) %>%
   summarise(deaths = sum(deaths)) %>%
   as.data.frame()
+
+if(length(unique(ward_deaths$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
 saveRDS(ward_deaths, "input_data/small_area_model/ward_deaths_2001_2018.rds")
 
