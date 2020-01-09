@@ -209,11 +209,12 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 
 
 # Run the model
+# TODO Get the household model working as a toy model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
 log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
 
-test_population_output <- readRDS("input_data/test_data/test_population_output.rds")
+test_population_output <- readRDS("model_code/model_tests/test_outputs/test_trend_population_output.rds")
 expect_equal(projection[[1]], test_population_output)
 
-
+message("Trend model test successful")
