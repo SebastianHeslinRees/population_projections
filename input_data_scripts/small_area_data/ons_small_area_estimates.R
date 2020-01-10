@@ -17,7 +17,7 @@ london_wards <- london_wards$gss_code_ward
 
 #process data for different years/sexes into signle dataframe
 lsoa_data <- list()
-for(yr in 2010:2017){
+for(yr in 2010:most_recent_data_year) {
   f <- readRDS(paste0(lsoa_dir,"/sape_lsoa_mid_",yr,"_f.rds")) %>%
     mutate(year = as.numeric(substr(mye_year,5,8)),
            sex = "female") %>%
