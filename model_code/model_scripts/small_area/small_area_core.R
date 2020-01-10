@@ -1,5 +1,17 @@
 #TODO: Description
 
+start_population = curr_yr_popn
+births = births
+deaths = deaths
+popn_constraint = curr_yr_popn_constraint
+birth_constraint = curr_yr_birth_constraint
+death_constraint = curr_yr_death_constraint
+fertility_rates = curr_yr_fertility
+mortality_rates = curr_yr_mortality
+adults_per_dwelling = curr_yr_adults_per_dwelling
+dwellings = curr_yr_dwellings
+
+
 small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             out_migration_rates, in_migration_characteristics,
                             popn_constraint, birth_constraint, death_constraint,
@@ -20,83 +32,121 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                                        popn_rate = fertility_rates)
   }
   
-  mF <- 105/205
-  fF <- 100/205
+  birth_ratio_m2f <- 105/205
   
   curr_yr_births <- left_join(curr_yr_births, ward_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint=curr_yr_birth_constraint,
-                           col_aggregation = c("year", "gss_code"),
+                           col_aggregation = "gss_code",
                            col_popn = "births") %>%
-    mutate(male = births * mF,
-           female = births * fF) %>%
+    mutate(male = births * birth_ratio_m2f,
+           female = births * (1-birth_ratio_m2f)) %>%
     select(-births) %>%
     pivot_longer(cols = c(male, female), names_to = "sex", values_to = "popn") %>%
     mutate(age = 0) %>%
     select(names(start_population)) %>%
     as.data.frame()
   
-  popn_w_births <- rbind(start_population, curr_yr_births)
+  popn_w_births <- rbind(aged_on_popn, curr_yr_births) %>%
+    arrange(gss_code_small_area, sex, age)
   
   ####Mortality####
   if(projection_year <= max(deaths$year)){
-    deaths <- filter(deaths, year == projection_year)
+    curr_yr_deaths <- filter(deaths, year == projection_year)
   } else {
-    deaths <- apply_rate_to_population(popn = popn_w_births,
-                                       popn_rate = mortality_rates)
+    curr_yr_deaths <- popn_w_births %>%
+      # apply_rate_to_population(popn_rate = mortality_rates, col_popn = "popn",
+      #                          col_rate = "rate",
+      #                          col_out = "initial_deaths",
+      #                          col_aggreagtion("gss_code","sex","age")) %>%
+      left_join(curr_yr_mortality, by=c("gss_code","sex","age")) %>%
+      mutate(deaths = rate*popn) %>%
+      group_by(year, gss_code, gss_code_small_area) %>%
+      summarise(deaths_from_rate = sum(deaths)) %>%
+      as.data.frame()%>%
+      calculate_scaling_factors(constraint = deaths,
+                                col_aggregation = c("year","gss_code_small_area"),
+                                col_popn = "deaths_from_rate",
+                                col_constraint = "deaths",
+                                rows_to_constrain = TRUE) %>%
+      dtplyr::lazy_dt() %>%
+      group_by(gss_code_small_area) %>%
+      summarise(scaling = EnvStats::geoMean(scaling)) %>%
+      as.data.frame() %>%
+      left_join(ward_to_district, by="gss_code_small_area") %>%
+      left_join(curr_yr_mortality, by="gss_code") %>%
+      mutate(scaled_rate = rate*scaling) %>%
+      left_join(popn_w_births, by = c("gss_code","gss_code_small_area","sex","age")) %>%
+      mutate(scaled_deaths = popn * scaled_rate) %>%
+      select(gss_code_small_area, sex, age, deaths = scaled_deaths)
   }
   
-  deaths <- constrain_component()
+  curr_yr_deaths <- left_join(curr_yr_deaths, ward_to_district, by="gss_code_small_area") %>%
+    constrain_component(constraint = curr_yr_death_constraint,
+                        col_aggregation = c("gss_code","sex","age"),
+                        col_popn = "deaths") %>%
+    select(gss_code_small_area, sex, age, deaths) %>%
+    as.data.frame()
   
   #Age on population
-  natural_change_popn <- start_populationn %>%
-    construct_popn_from_components(addition_data = list(births),
-                                   subtraction_data = list(deaths),
-                                   col_aggregation = c("year","gss_code_small_area","sex","age"))
+  natural_change_popn <- left_join(popn_w_births, curr_yr_deaths, by=c("gss_code_small_area","sex","age")) %>%
+    mutate(popn = popn - deaths) %>%
+    select(-deaths)
   
   #Apply outmigration rates
-  out_migration <- apply_rate_to_population(popn = natural_change_popn,
-                                            popn_rate = out_migration_rates)
+  # out_migration <- apply_rate_to_population(popn = natural_change_popn,
+  #                                           popn_rate = out_migration_rates,
+  #                                           col_popn = "popn",
+  #                                           col_rate = "out_migration_rate",
+  #                                           col_aggregation = c("gss_code_small_area","sex","age"))
   
-  popn_post_out_migration <- left_join(natural_change_popn, out_migration) %>%
-    mutate(popn = popn - out_mig)
+  out_migration <- left_join(natural_change_popn, out_migration_rates, by=c("gss_code_small_area","sex","age")) %>%
+    mutate(out_migrants = out_migration_rate*popn) 
+  
+  popn_post_out_migration <- out_migration%>%
+    mutate(popn = popn - out_migrants) %>%
+    select(gss_code_small_area, sex, age, popn)
   
   #Compare the adult popn at this point to the target adults
   #target adults = adults_per_dwelling * dwellings
   #The difference is migration inflow
-  target_adults <- left_join(adults_per_dwelling, dwellings, by=c("year","gss_code_small_area")) %>%
-    mutate(target = dwellings*adults_per_dwelling)
+  target_adults <- left_join(adults_per_dwelling, dwellings, by=c("gss_code_small_area")) %>%
+    mutate(target = units*adults_per_dwelling)
   
-  inflow_total <- dtplyr::lazydt(popn_post_out_migration) %>%
+  inflow_total <- dtplyr::lazy_dt(popn_post_out_migration) %>%
     filter(age >= 18) %>%
-    group_by(year, gss_code_small_area) %>%
+    group_by(gss_code_small_area) %>%
     summarise(adults = sum(popn)) %>%
     as.data.frame() %>%
-    left_join(target_adults, by=c("year","gss_code_small_area")) %>%
+    left_join(target_adults, by=c("gss_code_small_area")) %>%
     mutate(inflow = adults - target) %>%
     select(year, gss_code_small_area, inflow)
   
   #apply in-migration characteristics rates to inflow
-  in_migration <- apply_rate_to_population(popn = inflow_total,
-                                           popn_rate = in_migration_characteristics)
+  # apply_rate_to_population(popn = inflow_total, popn_rate = in_migration_characteristics)
+  in_migration <- left_join(in_migration_characteristics, inflow_total, by="gss_code_small_area") %>%
+    mutate(in_migrants = final_dist * inflow)
   
   #Add in-migration
   #Add communal establishment popn back in
-  unconstrined_popn <- left_join(popn_post_out_migration, in_migration) %>%
-    mutate(household_popn = popn + in_mig) %>%
+  unconstrined_popn <- left_join(popn_post_out_migration, in_migration, by = c("gss_code_small_area", "sex", "age")) %>%
+    mutate(household_popn = popn + in_migrants) %>%
     select(-popn) %>%
-    left_join(communal_est_popn) %>%
+    left_join(communal_est_popn, by = c("gss_code_small_area", "sex", "age")) %>%
     mutate(popn = household_popn + ce_popn)
   
   #constrain borough populations to match constraint
-  constrained_popn <- constrain_component(popn = unconstrined_popn,
-                                          constraint = borough_popn_constraint)
+  constrained_popn <- left_join(unconstrined_popn, ward_to_district, by="gss_code_small_area") %>%
+    as.data.frame() %>%
+    constrain_component(constraint = curr_yr_popn_constraint,
+                                          col_popn = "popn",
+                                          col_aggregation = c("gss_code","sex","age"))
   
-  final_popn <- select(popn, year, gss_code_small_area, sex, age, popn)
+  final_popn <- select(constrained_popn, year, gss_code_small_area, sex, age, popn)
   
   final_migration <- rename(natural_change_popn, nat_chng = popn) %>%
-    left_join(final_popn, by=c("year","gss_code_small_area","sex","age")) %>%
+    left_join(final_popn, by=c("gss_code_small_area","sex","age")) %>%
     mutate(migration = popn - nat_chng) %>%
-    select(year, gss_code_area, sex, age, migration)
+    select(gss_code_area, sex, age, migration)
   
   return(list(population = final_popn,
               births = births,
