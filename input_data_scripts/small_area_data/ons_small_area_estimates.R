@@ -2,6 +2,7 @@ library(dplyr)
 library(stringr)
 library(data.table)
 
+most_recent_data_year <- 2017
 #data paths
 lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_estimates/lsoa/machine_readable/by_indiviudal_year"
 mye_pop_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
