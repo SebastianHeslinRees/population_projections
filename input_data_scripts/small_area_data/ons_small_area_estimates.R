@@ -1,6 +1,7 @@
 library(dplyr)
 library(stringr)
 library(data.table)
+devtools::load_all('model_code/popmodules')
 
 most_recent_data_year <- 2017
 #data paths
