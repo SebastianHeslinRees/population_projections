@@ -46,7 +46,8 @@ for(i in 1:length(groups)){
 }
 
 ward_ce_by_sya <- data.table::rbindlist(distributed) %>%
-  select(gss_code_ward, sex, age, ce_popn)
+  select(gss_code_ward, sex, age, ce_popn) %>%
+  as.data.frame()
 
 # sum(filter(ward_ce_by_sya, gss_code_ward == "E05000026")$ce_popn)
 # sum(filter(census_ward_ce, gss_code_ward == "E05000026")$ce_popn)

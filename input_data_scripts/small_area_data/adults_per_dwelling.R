@@ -3,19 +3,24 @@
 #Data paths
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
 ward_communal_est_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-ward_ldd_path <- "input_data/housing_led_model/ldd_backseries_dwellings_ward.rds"
+ward_ldd_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
+borough_ldd_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
 
 #Load previously processed LDD, ward pop and communal est pop data
 #LDD data has been converted to total dwelling stock by ward by year
-ldd_units <- readRDS(ward_ldd_path) %>%
-  filter(year %in% 2012:2017)
+ldd_units <- readRDS(borough_ldd_path) %>%
+  filter(gss_code == "E09000001") %>%
+  rename(gss_code_ward = gss_code) %>%
+  rbind(readRDS(ward_ldd_path) %>% filter(year %in% 2012:2017))
+
 ward_popn <- readRDS(ward_estimates_path) %>%
   filter(year %in% 2012:2017)
+
 ward_ce <- readRDS(ward_communal_est_path)
 
 #Adults per dwelling
 base_household_adults <- ward_popn %>%
- # filter(gss_code != "E09000001") %>%
+  # filter(gss_code != "E09000001") %>%
   left_join(ward_ce, by = c("gss_code_ward", "sex", "age")) %>%
   mutate(household_popn = popn - ce_popn) %>%
   filter(age >= 18) %>%
@@ -24,7 +29,8 @@ base_household_adults <- ward_popn %>%
   as.data.frame()
 
 adults_per_dwelling <- left_join(base_household_adults, ldd_units, by = c("gss_code_ward","year")) %>%
-  mutate(adults_per_dwelling = adults / units)
+  mutate(adults_per_dwelling = adults / units) %>%
+  select(year, gss_code_ward, adults_per_dwelling)
 
 #Some data checks - delete when happy
 # test <- adults_per_dwelling %>%

@@ -33,7 +33,8 @@ ward_births <- left_join(lsoa_births, lsoa_to_ward, by="gss_code_lsoa") %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, age_group) %>%
   summarise(births = sum(births)) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  mutate(year = as.numeric(year))
 
 if(length(unique(ward_births$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 

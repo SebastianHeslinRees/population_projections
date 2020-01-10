@@ -41,10 +41,10 @@ domestic_out <- data.table::fread(ward_dom_out_path, header = T) %>%
 domestic_out <- filter(domestic_out, age == 75) %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         distribute_within_age_band(popn_2 = borough_domestic_out,
-                            popn_1_col = "domestic_out_migrants",
-                            popn_2_col = "dom_out",
-                            min_age=75, max_age=90,
-                            col_aggregation=c("gss_code","sex")) %>%
+                                   popn_1_col = "domestic_out_migrants",
+                                   popn_2_col = "dom_out",
+                                   min_age=75, max_age=90,
+                                   col_aggregation=c("gss_code","sex")) %>%
         select(names(domestic_out)) %>%
         rbind(filter(domestic_out, age != 75))
 
@@ -70,10 +70,10 @@ domestic_in <- data.table::fread(ward_dom_in_path, header = T) %>%
 domestic_in <- filter(domestic_in, age == 75) %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         distribute_within_age_band(popn_2 = borough_domestic_in,
-                            popn_1_col = "domestic_in_migrants",
-                            popn_2_col = "dom_in",
-                            min_age=75, max_age=90,
-                            col_aggregation=c("gss_code","sex")) %>%
+                                   popn_1_col = "domestic_in_migrants",
+                                   popn_2_col = "dom_in",
+                                   min_age=75, max_age=90,
+                                   col_aggregation=c("gss_code","sex")) %>%
         select(names(domestic_in)) %>%
         rbind(filter(domestic_in, age != 75))
 
@@ -138,10 +138,10 @@ ward_int_in <- domestic_in %>%
 ward_int_in <- filter(ward_int_in, age == 75) %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         distribute_within_age_band(popn_2 = borough_international_in,
-                            popn_1_col = "international",
-                            popn_2_col = "int_in",
-                            min_age=75, max_age=90,
-                            col_aggregation=c("gss_code","sex")) %>%
+                                   popn_1_col = "international",
+                                   popn_2_col = "int_in",
+                                   min_age=75, max_age=90,
+                                   col_aggregation=c("gss_code","sex")) %>%
         select(names(ward_int_in)) %>%
         rbind(filter(ward_int_in, age != 75))
 
@@ -188,8 +188,10 @@ out_migration_rates <- left_join(domestic_out, international_out,
         filter(gss_code_ward %in% london_wards) %>%
         mutate(out_migrants = domestic_out_migrants + international_out_migrants) %>%
         left_join(denominators, by=c("gss_code_ward","sex","age")) %>%
-        mutate(out_migration_rate = out_migrants/popn) %>%
-        select(gss_code_ward, sex, age, out_migration_rate)
+        mutate(out_migration_rate = ifelse(popn == 0, 0, out_migrants/popn))%>%
+        select(gss_code_ward, sex, age, out_migration_rate) %>%
+        arrange(gss_code_ward, sex, age) %>%
+        as.data.frame()
 
 
 ####In migration distribution####
@@ -207,8 +209,10 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
         mutate(scaling = 1/aggregate_dist) %>%
         mutate(scaled_dist = scaling*adult_dist) %>%
         mutate(final_dist = ifelse(age >= 18, scaled_dist, migration_distribution)) %>%
-        select(gss_code_ward, sex, age, final_dist)
-#TODO rename(xxxx = final_dist) #don't know what this variabl should e called yet
+        select(gss_code_ward, sex, age, final_dist) %>%
+        rename(out_migration_rate = final_dist) %>%
+        arrange(gss_code_ward, sex, age) %>%
+        as.data.frame()
 
 #Save
 saveRDS(in_migration_characteristics, "input_data/small_area_model/ward_in_migration_characteristics.rds")
