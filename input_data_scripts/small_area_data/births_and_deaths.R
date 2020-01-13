@@ -20,6 +20,7 @@ london_wards <- london_wards$gss_code_ward
 
 #births
 lsoa_births <- readRDS(lsoa_births_path) %>%
+  filter(sex == "persons") %>%
   pivot_longer(c("a24_under","a25to34","a35_over"), names_to = "age_group", values_to = "births") %>%
   mutate(age_group = case_when(age_group == "a24_under" ~ "15_24",
                                age_group == "a25to34" ~ "25_34",
@@ -66,4 +67,3 @@ ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
 if(length(unique(ward_deaths$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
 saveRDS(ward_deaths, "input_data/small_area_model/ward_deaths_2001_2018.rds")
-
