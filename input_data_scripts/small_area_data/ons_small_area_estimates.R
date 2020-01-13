@@ -32,7 +32,6 @@ for(yr in 2010:most_recent_data_year) {
 }
 lsoa_data <- data.table::rbindlist(lsoa_data)
 
-#TODO Check this is doing what I think its doing
 ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>%
   filter(gss_code_ward %in% london_wards)   %>%
