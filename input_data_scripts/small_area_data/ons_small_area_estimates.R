@@ -37,6 +37,7 @@ ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>%
   filter(gss_code_ward %in% london_wards)   %>%
   left_join(ward_to_district, by="gss_code_ward") %>%
+  as.data.frame() %>%
   .aggregate_city_wards("popn") %>%
   group_by(year, gss_code_ward, gss_code, sex, age) %>%
   summarise(popn = sum(popn)) %>%
