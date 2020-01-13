@@ -18,8 +18,8 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             fertility_rates, mortality_rates,
                             dwellings, adults_per_dwelling,
                             projection_year){
-
-
+message(projection_year)
+#browser()
 ####Age on####
 #TODO Where does the communal population get removed?
 aged_on_popn <- popn_age_on(start_population,
@@ -33,8 +33,11 @@ if(projection_year <= max(births$year)){
     as.data.frame()
   
 } else {
-  curr_yr_births <- apply_rate_to_population(popn = aged_on_popn,
-                                             popn_rate = fertility_rates)
+  curr_yr_births <-left_join(aged_on_popn, fertility_rates, by=c("year","gss_code_small_area","age","sex")) %>%
+    mutate(births = rate * popn) %>%
+    group_by(year, gss_code_small_area) %>%
+    summarise(births = sum(births)) %>%
+    as.data.frame()
 }
 
 birth_ratio_m2f <- 105/205
@@ -83,17 +86,19 @@ if(projection_year <= max(deaths$year)){
                                  col_aggregation=c("gss_code","sex"))
   }
   
-  curr_yr_deaths <- data.table::rbindlist(x)
+  curr_yr_deaths <- data.table::rbindlist(x) %>%
+    select(-year)
   
   
 } else {
+  #browser()
   curr_yr_deaths <- popn_w_births %>%
     # TODO apply_rate_to_population() instead
-    left_join(curr_yr_mortality, by=c("gss_code","sex","age")) %>%
-    mutate(deaths = rate*popn) %>%
+    left_join(curr_yr_mortality, by=c("year","gss_code_small_area","sex","age")) %>%
+    mutate(deaths = mort_rate*popn) %>%
     group_by(year, gss_code, gss_code_small_area) %>%
     summarise(deaths_from_rate = sum(deaths)) %>%
-    as.data.frame()%>%
+    as.data.frame() %>%
     calculate_scaling_factors(constraint = deaths,
                               col_aggregation = c("year","gss_code_small_area"),
                               col_popn = "deaths_from_rate",
@@ -103,18 +108,19 @@ if(projection_year <= max(deaths$year)){
     group_by(gss_code_small_area) %>%
     summarise(scaling = EnvStats::geoMean(scaling)) %>%
     as.data.frame() %>%
-    left_join(ward_to_district, by="gss_code_small_area") %>%
-    left_join(curr_yr_mortality, by="gss_code") %>%
-    mutate(scaled_rate = rate*scaling) %>%
-    left_join(popn_w_births, by = c("gss_code","gss_code_small_area","sex","age")) %>%
+    #left_join(ward_to_district, by="gss_code_small_area") %>%
+    left_join(curr_yr_mortality, by="gss_code_small_area") %>%
+    mutate(scaled_rate = mort_rate*scaling) %>%
+    left_join(popn_w_births, by = c("gss_code_small_area","sex","age")) %>%
     mutate(scaled_deaths = popn * scaled_rate) %>%
     select(gss_code_small_area, gss_code, sex, age, deaths = scaled_deaths)
-}
-
-#TODO Add age
+  
+  }
+#browser()
+#TODO Check this is doing what it should
 curr_yr_deaths <- curr_yr_deaths %>%
   constrain_component(constraint = curr_yr_death_constraint,
-                      col_aggregation = c("gss_code","sex"),
+                      col_aggregation = c("gss_code","sex","age"),
                       col_popn = "deaths") %>%
   select(gss_code_small_area, sex, age, deaths) %>%
   as.data.frame()
@@ -177,7 +183,8 @@ constrained_popn <- left_join(unconstrined_popn, ward_to_district, by="gss_code_
                       col_popn = "popn",
                       col_aggregation = c("year","gss_code","sex","age"))
 
-final_popn <- select(constrained_popn, year, gss_code_small_area, sex, age, popn)
+final_popn <- constrained_popn %>%
+  select(year, gss_code, gss_code_small_area, sex, age, popn)
 
 final_migration <- rename(natural_change_popn, nat_chng = popn) %>%
   left_join(final_popn, by=c("gss_code_small_area","sex","age")) %>%
