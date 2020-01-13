@@ -60,7 +60,8 @@ scaled_ward_data <- ward_data  %>%
   mutate(popn = popn*scaling_factor) %>%
   select(year, gss_code, gss_code_ward, sex, age, popn) %>%
   arrange(year, gss_code, gss_code_ward, sex, age) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  validate_population(col_aggregation = c("gss_code_ward", "year", "sex", "age"), col_data = "popn")
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
