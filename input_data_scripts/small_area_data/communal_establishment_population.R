@@ -7,6 +7,7 @@ ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_20
 
 #lookup
 merged_to_electoral_ward <- readRDS("input_data/lookup/2011_merged_ward_to_electoral_ward.rds")#The population at mid-year is different than at census day
+city_merged_wards <- unique(filter(merged_to_electoral_ward, LA == "E09000001")$`MERGED WARD`)
 
 #The cnesus total population is compared to the ward estimates at mid-year
 #Scaling factors are derived to convert the census population
@@ -14,13 +15,22 @@ merged_to_electoral_ward <- readRDS("input_data/lookup/2011_merged_ward_to_elect
 census_ward_ce <- readRDS(census_ward_ce_path) %>%
   filter(C_RESIDENCE_TYPE == 2,
          C_SEX != 0,
-         C_AGE != 0) %>%
-  left_join(merged_to_electoral_ward, by=c("GEOGRAPHY_CODE"="MERGED WARD")) %>%
-  filter(substr(LA,1,3)=="E09") %>%
-  mutate(gss_code_ward = ifelse(LA == "E09000001", "E09000001", WARD)) %>%
+         C_AGE != 0)
+
+city_ce <- filter(census_ward_ce, GEOGRAPHY_CODE %in% city_merged_wards) %>%
+  mutate(gss_code_ward = "E09000001") %>%
   group_by(gss_code_ward, sex = C_SEX_NAME, age_group = C_AGE_NAME) %>%
   summarise(ce_popn = sum(OBS_VALUE)) %>%
+  as.data.frame()
+
+census_ward_ce <- census_ward_ce %>%
+  left_join(merged_to_electoral_ward, by=c("GEOGRAPHY_CODE"="MERGED WARD")) %>%
+  filter(substr(LA,1,3)=="E09") %>%
+  filter(LA != "E09000001") %>%
+  group_by(gss_code_ward = WARD, sex = C_SEX_NAME, age_group = C_AGE_NAME) %>%
+  summarise(ce_popn = sum(OBS_VALUE)) %>%
   as.data.frame() %>%
+  rbind(city_ce) %>%
   mutate(sex = case_when(sex == "Males" ~ "male",
                          sex == "Females" ~ "female")) %>%
   mutate(min_age = substr(age_group, 5, 6),
