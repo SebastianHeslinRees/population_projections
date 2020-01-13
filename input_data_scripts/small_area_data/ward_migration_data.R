@@ -210,7 +210,7 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
         mutate(scaled_dist = scaling*adult_dist) %>%
         mutate(final_dist = ifelse(age >= 18, scaled_dist, migration_distribution)) %>%
         select(gss_code_ward, sex, age, final_dist) %>%
-        rename(out_migration_rate = final_dist) %>%
+        rename(in_migration_rate = final_dist) %>%
         arrange(gss_code_ward, sex, age) %>%
         as.data.frame()
 
