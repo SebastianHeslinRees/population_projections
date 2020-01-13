@@ -41,7 +41,8 @@ ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   group_by(year, gss_code_ward, gss_code, sex, age) %>%
   summarise(popn = sum(popn)) %>%
   as.data.frame() %>%
-  mutate(age = as.numeric(substr(age,1,2))) 
+  mutate(age = as.numeric(substr(age,1,2))) %>%
+  validate_population(col_aggregation = c("year","gss_code_ward", "sex","age"), col_data = "popn")
 
 if(length(unique(ward_data$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
