@@ -6,6 +6,7 @@
 ####YEARS WITH NO DATA####
 #Calculate the geometric mean of all the scaling factors
 #Apply it to the borough projected fertility rates
+devtools::load_all('model_code/popmodules')
 
 read_small_area_inputs <- function(path){
   df <- readRDS(path)
@@ -23,9 +24,9 @@ births <- read_small_area_inputs('input_data/small_area_model/ward_births_2001_2
 deaths <- read_small_area_inputs('input_data/small_area_model/ward_deaths_2001_2018.rds')
 ldd_data <- read_small_area_inputs('input_data/small_area_model/ldd_backseries_dwellings_ward.rds')
 dwelling_trajectory <- read_small_area_inputs('input_data/small_area_model/ward_shlaa_trajectory.rds')
-adults_per_dwelling <- read_small_area_inputs("~/Projects/population_projections/input_data/small_area_model/ward_adults_per_dwelling.rds") 
+adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") 
 
-ward_to_district <- read_small_area_inputs("~/Projects/population_projections/input_data/lookup/2011_ward_to_district.rds")
+ward_to_district <- read_small_area_inputs("input_data/lookup/2011_ward_to_district.rds")
 
 births_past <- readRDS("input_data/mye/2018/births_ons.rds") %>% select(year, gss_code, age, sex, births) %>% filter(age==0)
 deaths_past <- readRDS("input_data/mye/2018/deaths_ons.rds") %>% select(year, gss_code, age, sex, deaths)

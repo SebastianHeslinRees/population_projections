@@ -16,8 +16,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             out_migration_rates, in_migration_characteristics,
                             popn_constraint, birth_constraint, death_constraint,
                             fertiltiy_rates, mortality_rates, projection_year){
- 
-  start_population <- as.data.frame(start_population)
+  
   
   ####Age on####
   #TODO Where does the communal population get removed?
@@ -26,22 +25,26 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   
   ####Fertility####
   if(projection_year <= max(births$year)){
-    curr_yr_births <- filter(births, year == projection_year)
+    curr_yr_births <- filter(births, year == projection_year) %>%
+      group_by(year, gss_code_small_area) %>%
+      summarise(births = sum(births)) %>%
+      as.data.frame()
+    
   } else {
     curr_yr_births <- apply_rate_to_population(popn = aged_on_popn,
-                                       popn_rate = fertility_rates)
+                                               popn_rate = fertility_rates)
   }
   
   birth_ratio_m2f <- 105/205
   
   curr_yr_births <- left_join(curr_yr_births, ward_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint=curr_yr_birth_constraint,
-                           col_aggregation = "gss_code",
-                           col_popn = "births") %>%
+                        col_aggregation = "gss_code",
+                        col_popn = "births") %>%
     mutate(male = births * birth_ratio_m2f,
            female = births * (1-birth_ratio_m2f)) %>%
     select(-births) %>%
-    pivot_longer(cols = c(male, female), names_to = "sex", values_to = "popn") %>%
+    tidyr::pivot_longer(cols = c(male, female), names_to = "sex", values_to = "popn") %>%
     mutate(age = 0) %>%
     select(names(start_population)) %>%
     as.data.frame()
@@ -52,12 +55,31 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   ####Mortality####
   if(projection_year <= max(deaths$year)){
     curr_yr_deaths <- filter(deaths, year == projection_year)
+    
+    age_groups <- unique(deaths$age_group)
+    for(i in 1:length(age_groups)){
+      mn <- substr(age_groups[i],1,2)
+      mn <- case_when(mn == "1_" ~ 1,
+                      mn == "5_" ~ 5,
+                      TRUE ~ as.numeric(mn))
+      
+      mx <- case_when(mn == 0 ~ 0,
+                      TRUE ~ mn+4)
+      
+      x[[i]] <- filter(curr_yr_deaths, age_group == age_groups[i]) %>%
+        distribute_within_age_band(popn_2 = death_constraint,
+                                   popn_1_col = "deaths",
+                                   popn_2_col = "deaths",
+                                   min_age = mn, max_age = mx,
+                                   col_aggregation=c("gss_code","sex"))
+    }
+    
+    curr_yr_deaths <- data.table::rbindlits(x)
+    
+    
   } else {
     curr_yr_deaths <- popn_w_births %>%
-      # apply_rate_to_population(popn_rate = mortality_rates, col_popn = "popn",
-      #                          col_rate = "rate",
-      #                          col_out = "initial_deaths",
-      #                          col_aggreagtion("gss_code","sex","age")) %>%
+      # TODO apply_rate_to_population() instead
       left_join(curr_yr_mortality, by=c("gss_code","sex","age")) %>%
       mutate(deaths = rate*popn) %>%
       group_by(year, gss_code, gss_code_small_area) %>%
@@ -80,11 +102,12 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
       select(gss_code_small_area, sex, age, deaths = scaled_deaths)
   }
   
+  #TODO Add age
   curr_yr_deaths <- left_join(curr_yr_deaths, ward_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint = curr_yr_death_constraint,
-                        col_aggregation = c("gss_code","sex","age"),
+                        col_aggregation = c("gss_code","sex"),
                         col_popn = "deaths") %>%
-    select(gss_code_small_area, sex, age, deaths) %>%
+    select(gss_code_small_area, sex, deaths) %>%
     as.data.frame()
   
   #Age on population
@@ -138,8 +161,8 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   constrained_popn <- left_join(unconstrined_popn, ward_to_district, by="gss_code_small_area") %>%
     as.data.frame() %>%
     constrain_component(constraint = curr_yr_popn_constraint,
-                                          col_popn = "popn",
-                                          col_aggregation = c("gss_code","sex","age"))
+                        col_popn = "popn",
+                        col_aggregation = c("gss_code","sex","age"))
   
   final_popn <- select(constrained_popn, year, gss_code_small_area, sex, age, popn)
   
