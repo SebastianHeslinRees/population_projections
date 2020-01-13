@@ -32,17 +32,17 @@ for(yr in 2010:most_recent_data_year) {
 }
 lsoa_data <- data.table::rbindlist(lsoa_data)
 
-#TODO Check this is doing what I think its doing
 ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>%
-  as.data.frame() %>%
   filter(gss_code_ward %in% london_wards)   %>%
   left_join(ward_to_district, by="gss_code_ward") %>%
+  as.data.frame() %>%
   .aggregate_city_wards("popn") %>%
   group_by(year, gss_code_ward, gss_code, sex, age) %>%
   summarise(popn = sum(popn)) %>%
   as.data.frame() %>%
-  mutate(age = as.numeric(substr(age,1,2))) 
+  mutate(age = as.numeric(substr(age,1,2))) %>%
+  validate_population(col_aggregation = c("year","gss_code_ward", "sex","age"), col_data = "popn")
 
 if(length(unique(ward_data$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
@@ -52,14 +52,16 @@ borough_scaling_factors <- dtplyr::lazy_dt(ward_data)  %>%
   as.data.frame() %>%
   left_join(readRDS(mye_pop_path), by=c("year", "gss_code","sex","age")) %>%
   mutate(scaling_factor = ifelse(popn == 0, 0, borough_popn / popn)) %>%
-  select(gss_code, year, sex, age, scaling_factor)
+  select(gss_code, year, sex, age, scaling_factor) %>%
+  validate_population(col_data = "scaling_factor")
 
 scaled_ward_data <- ward_data  %>%
   left_join(borough_scaling_factors, by=c("gss_code", "year", "sex", "age")) %>%
   mutate(popn = popn*scaling_factor) %>%
   select(year, gss_code, gss_code_ward, sex, age, popn) %>%
   arrange(year, gss_code, gss_code_ward, sex, age) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  validate_population(col_aggregation = c("gss_code_ward", "year", "sex", "age"), col_data = "popn")
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
