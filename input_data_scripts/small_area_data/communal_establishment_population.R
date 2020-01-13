@@ -1,3 +1,6 @@
+library(dplyr)
+devtools::load_all("model_code/popmodules")
+
 #Data paths
 census_ward_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_CMWD11.rds"
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
