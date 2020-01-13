@@ -35,7 +35,6 @@ lsoa_data <- data.table::rbindlist(lsoa_data)
 #TODO Check this is doing what I think its doing
 ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>%
-  as.data.frame() %>%
   filter(gss_code_ward %in% london_wards)   %>%
   left_join(ward_to_district, by="gss_code_ward") %>%
   .aggregate_city_wards("popn") %>%
