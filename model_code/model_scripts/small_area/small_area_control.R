@@ -7,6 +7,8 @@
 #Calculate the geometric mean of all the scaling factors
 #Apply it to the borough projected fertility rates
 devtools::load_all('model_code/popmodules')
+source('M:/Projects/population_projections/model_code/model_scripts/small_area/small_area_core.R')
+source('M:/Temp/distribute_within_age_band.R')
 
 read_small_area_inputs <- function(path){
   df <- readRDS(path)
@@ -59,8 +61,8 @@ dwelling_trajectory <- filter(dwelling_trajectory, !year %in% unique(ldd_data$ye
 curr_yr_popn <- filter(popn_estimates, year == first_proj_yr-1)
 projection <- list()
 
-#for(projection_year in first_proj_yr:final_proj_year){
-projection_year <- first_proj_yr
+for(projection_year in first_proj_yr:final_proj_year){
+#projection_year <- first_proj_yr
 
 curr_yr_popn_constraint <- filter(popn_constraint, year == projection_year)
 curr_yr_birth_constraint <- filter(birth_constraint, year == projection_year)
@@ -175,7 +177,7 @@ projection[[projection_year]] <- small_area_core(start_population = curr_yr_popn
                                                  mortality_rates = curr_yr_mortality,
                                                  dwellings = curr_yr_dwellings,
                                                  adults_per_dwelling = curr_yr_adults_per_dwelling,
-                                                 projection_year) 
+                                                 projection_year)
 
 curr_yr_popn <- projection[[projection_year]][['population']]
 
@@ -185,3 +187,5 @@ if(projection_year <= last_data_year){
 }
 
 }
+
+
