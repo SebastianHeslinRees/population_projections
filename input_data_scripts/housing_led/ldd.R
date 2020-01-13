@@ -8,6 +8,7 @@ lsoa_to_msoa <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/l
   select(gss_code_lsoa, gss_code_msoa)
 lsoa_to_borough <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%
   select(gss_code_lsoa, gss_code = gss_code_borough)
+ward_to_district <- readRDS("M:/Projects/population_projections/input_data/lookup/2011_ward_to_district.rds")
 
 #base census dwellings
 lsoa_census_dwellings <- data.table::fread("Q:/Teams/D&PA/Data/census_tables/housing_led_model/LSOA_DWELLINGS_CENSUS.CSV")
@@ -80,8 +81,11 @@ cumulative_units <- additional_units %>%
   mutate(units = cum_units + dwellings)
 
 lsoa_units <- select(cumulative_units, year, gss_code_lsoa, units)
+
 #group it into differnet geographies
 ward_units <- left_join(cumulative_units, lsoa_to_ward, by="gss_code_lsoa") %>%
+  left_join(ward_to_district, by = "gss_code_ward") %>%
+  mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>%
   group_by(year, gss_code_ward) %>%
   summarise(units = sum(units)) %>%
   ungroup() %>%
