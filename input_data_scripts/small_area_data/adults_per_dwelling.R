@@ -1,5 +1,9 @@
 #NB: Must run population, communal establishment, LDD scripts first
 
+library(dplyr)
+
+most_recent_data_year <- 2017
+
 #Data paths
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
 ward_communal_est_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
@@ -45,7 +49,6 @@ if(length(unique(adults_per_dwelling$gss_code_ward))!=625){message("Warning: Wro
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(adults_per_dwelling, "input_data/small_area_model/ward_adults_per_dwelling.rds")
-
 
 
 
