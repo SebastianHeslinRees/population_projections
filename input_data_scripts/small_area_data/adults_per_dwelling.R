@@ -18,7 +18,7 @@ ldd_units <- readRDS(borough_ldd_path) %>%
   rbind(readRDS(ward_ldd_path) %>% filter(year %in% 2012:most_recent_data_year))
 
 ward_popn <- readRDS(ward_estimates_path) %>%
-  filter(year %in% 2012:2017)
+  filter(year %in% 2012:most_recent_data_year)
 
 ward_ce <- readRDS(ward_communal_est_path)
 
@@ -49,7 +49,6 @@ if(length(unique(adults_per_dwelling$gss_code_ward))!=625){message("Warning: Wro
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(adults_per_dwelling, "input_data/small_area_model/ward_adults_per_dwelling.rds")
-
 
 
 
