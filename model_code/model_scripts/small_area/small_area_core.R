@@ -83,29 +83,26 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     }
     
     curr_yr_deaths <- data.table::rbindlist(x) %>%
-      as.data.frame() %>%
-      select(-year)
-    
+      as.data.frame() 
     
   } else {
     
     # TODO apply_rate_to_population() instead
     curr_yr_deaths <- popn_w_births %>%
-      left_join(curr_yr_mortality, by=c("year","gss_code_small_area","sex","age")) %>%
-      mutate(deaths = mort_rate*popn) %>%
-      select(-year)
+      left_join(curr_yr_mortality, by = c("year","gss_code_small_area","sex","age")) %>%
+      mutate(deaths = mort_rate*popn)
     
   }
-  
+ 
   #Constrain deaths
   curr_yr_deaths <- curr_yr_deaths %>%
     constrain_component(constraint = curr_yr_death_constraint,
-                        col_aggregation = c("gss_code","sex","age"),
+                        col_aggregation = c("year","gss_code","sex","age"),
                         col_popn = "deaths") %>%
-    select(gss_code_small_area, sex, age, deaths) %>%
+    select(year, gss_code, gss_code_small_area, sex, age, deaths) %>%
     as.data.frame()
 
-  natural_change_popn <- left_join(popn_w_births, curr_yr_deaths, by=c("gss_code_small_area","sex","age")) %>%
+  natural_change_popn <- left_join(popn_w_births, curr_yr_deaths, by=c("year","gss_code_small_area","sex","age")) %>%
     mutate(popn = popn - deaths) %>%
     select(-deaths)
   
@@ -163,13 +160,14 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     select(year, gss_code, gss_code_small_area, sex, age, popn)
   
   final_migration <- rename(natural_change_popn, nat_chng = popn) %>%
-    left_join(final_popn, by=c("gss_code_small_area","sex","age")) %>%
+    left_join(final_popn, by=c("year","gss_code_small_area","sex","age")) %>%
     mutate(migration = popn - nat_chng) %>%
-    select(gss_code_small_area, sex, age, migration)
+    select(year, gss_code, gss_code_small_area, sex, age, migration)
   
   return(list(population = final_popn,
-              births = births,
-              deaths = deaths,
-              migration = final_migration))
+              births = rename(curr_yr_births, births = popn),
+              deaths = curr_yr_deaths,
+              migration = final_migration,
+              assumed_development = dwellings))
 }
 

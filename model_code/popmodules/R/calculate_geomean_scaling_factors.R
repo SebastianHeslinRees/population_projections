@@ -22,7 +22,7 @@
 #' @return A dataframe of scaling factors by sex and age for each small area.
 #'
 #' @import dplyr
-#' @importFrom Envstats geoMean
+#' @importFrom EnvStats geoMean
 #'
 #' @export
 
@@ -46,7 +46,7 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
                               rows_to_constrain = TRUE) %>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code_small_area) %>%
-    summarise(scaling = geoMean(scaling)) %>%
+    summarise(scaling = EnvStats::geoMean(scaling)) %>%
     as.data.frame()
   
   return(scaling_dataframe)

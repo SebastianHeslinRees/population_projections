@@ -8,6 +8,9 @@
 #Apply it to the borough projected fertility rates
 devtools::load_all('model_code/popmodules')
 source('model_code/model_scripts/small_area/small_area_core.R')
+source('model_code/model_scripts/small_area/arrange_small_area_core_outputs.R')
+
+#TODO Remove once the branch with this function is merged in
 source('M:/Temp/distribute_within_age_band.R')
 #source('~/Dropbox/distribute_within_age_band.R')
 
@@ -58,7 +61,7 @@ mortality_rates <- readRDS("outputs/trend/2018/2018_central/mortality_rates_19-1
 #Random variables I needed to make things work 
 #TODO think about names
 last_data_year <- 2018
-first_proj_yr <- 2018
+first_proj_year <- 2018
 final_proj_year <- 2021
 birth_rate_n_years_to_avg <- 5
 death_rate_n_years_to_avg <- 5
@@ -71,11 +74,11 @@ dwelling_trajectory <- filter(dwelling_trajectory, !year %in% unique(ldd_data$ye
 #-------------------------
 
 #Projection loop
-curr_yr_popn <- filter(popn_estimates, year == first_proj_yr-1)
+curr_yr_popn <- filter(popn_estimates, year == first_proj_year-1)
 projection <- list()
 
-for(projection_year in first_proj_yr:final_proj_year){
-  #projection_year <- first_proj_yr
+for(projection_year in first_proj_year:final_proj_year){
+  #projection_year <- first_proj_year
   message(projection_year)
   
   curr_yr_popn_constraint <- filter(popn_constraint, year == projection_year)
@@ -190,3 +193,7 @@ for(projection_year in first_proj_yr:final_proj_year){
   }
   
 }
+
+projection <- arrange_small_area_core_outputs(projection, first_proj_year, final_proj_year)
+saveRDS(projection, "outputs/ward/test_projection.rds")
+
