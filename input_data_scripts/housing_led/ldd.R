@@ -8,7 +8,7 @@ lsoa_to_msoa <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/l
   select(gss_code_lsoa, gss_code_msoa)
 lsoa_to_borough <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%
   select(gss_code_lsoa, gss_code = gss_code_borough)
-ward_to_district <- readRDS("M:/Projects/population_projections/input_data/lookup/2011_ward_to_district.rds")
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
 
 #base census dwellings
 lsoa_census_dwellings <- data.table::fread("Q:/Teams/D&PA/Data/census_tables/housing_led_model/LSOA_DWELLINGS_CENSUS.CSV")
