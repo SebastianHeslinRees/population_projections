@@ -1,4 +1,30 @@
-#TODO Document
+#' Calculate a set of scaling factors to apply to fertility or mortality rates
+#'
+#' For a backseries of years, iven population for small areas and
+#' fertility/mortality rates for a higher geography, calculate a set of
+#' implied births/deaths. Compare these to observed births/deaths and
+#' create scaling facrots for the rates. Finally, calculate the geometric
+#' mean of the scaling factors.
+#'
+#' The function calculates the difference between a population and a (lower
+#' resolution) target, and then returns updated domestic in- and outmigration
+#' rates that include the residual.
+#'
+#' @param popn A data frame containing a population at small area (ward or msoa)
+#'   by sex and age.
+#' @param future_rates A data frame containing mortality or fertility rates at
+#'   local authority level by sex and age.
+#' @param data_years Numeric vector of years to average.
+#' @param constraint A dataframe of total births or deaths for each small area.
+#' @param constraint_data_col A string giving the column with data in the
+#'   constraint file.
+#'
+#' @return A dataframe of scaling factors by sex and age for each small area.
+#'
+#' @import dplyr
+#' @importFrom Envstats geoMean
+#'
+#' @export
 
 calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, constraint, constraint_data_col){
   
@@ -20,7 +46,7 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
                               rows_to_constrain = TRUE) %>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code_small_area) %>%
-    summarise(scaling = EnvStats::geoMean(scaling)) %>%
+    summarise(scaling = geoMean(scaling)) %>%
     as.data.frame()
   
   return(scaling_dataframe)
