@@ -18,7 +18,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             fertility_rates, mortality_rates, last_data_year,
                             dwellings, adults_per_dwelling,
                             projection_year){
-  
+
   ####Age on####
   aged_on_popn <- popn_age_on(start_population,
                               col_aggregation = c("year", "gss_code_small_area", "age", "sex"))

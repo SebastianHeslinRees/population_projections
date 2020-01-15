@@ -67,8 +67,22 @@ birth_rate_n_years_to_avg <- 5
 death_rate_n_years_to_avg <- 5
 
 #There should be some checks here that everything is present
-dwelling_trajectory <- filter(dwelling_trajectory, !year %in% unique(ldd_data$year)) %>%
-  rbind(ldd_data) %>%
+final_ldd_year <- max(ldd_data$year)
+
+last_ldd_year_data <- filter(ldd_data, year == final_ldd_year) %>%
+  select(-year)
+
+cumulative_future_dev <- dwelling_trajectory %>%
+  filter(year > final_ldd_year) %>%
+  group_by(gss_code_small_area) %>%
+  mutate(cum_units = cumsum(units)) %>%
+  as.data.frame() %>%
+  select(-units) %>%
+  left_join(last_ldd_year_data, by="gss_code_small_area") %>%
+  mutate(total_units = units + cum_units) %>%
+  select(year, gss_code_small_area, units = total_units)
+
+dwelling_trajectory <- rbind(ldd_data, cumulative_future_dev) %>%
   arrange(gss_code_small_area, year)
 
 #-------------------------
