@@ -9,7 +9,7 @@
 devtools::load_all('model_code/popmodules')
 source('model_code/model_scripts/small_area/small_area_core.R')
 source('M:/Temp/distribute_within_age_band.R')
-source('~/Dropbox/distribute_within_age_band.R')
+#source('~/Dropbox/distribute_within_age_band.R')
 
 read_small_area_inputs <- function(path){
   df <- readRDS(path)
@@ -55,7 +55,7 @@ rm(births_past, deaths_past, popn_past)
 fertility_rates <- readRDS("outputs/trend/2018/2018_central/fertility_rates_19-11-13_2056.rds") %>% filter(substr(gss_code,1,3)=="E09")
 mortality_rates <- readRDS("outputs/trend/2018/2018_central/mortality_rates_19-11-13_2056.rds") %>% filter(substr(gss_code,1,3)=="E09")
 
-#Random variable I needed to make things work 
+#Random variables I needed to make things work 
 #TODO think about names
 last_data_year <- 2018
 first_proj_yr <- 2018
@@ -88,7 +88,7 @@ for(projection_year in first_proj_yr:final_proj_year){
     #TODO make it work with age groups
     #Scaling factors for the 2019 rates and then applied to the fertility trajectory
     
-    curr_yr_births <- births %>%
+    curr_yr_births <- dtplyr::lazy_dt(births) %>%
       group_by(year, gss_code_small_area) %>%
       summarise(births = sum(births)) %>%
       as.data.frame() %>%
@@ -99,77 +99,56 @@ for(projection_year in first_proj_yr:final_proj_year){
     
     births_data_years <- (last_data_year-birth_rate_n_years_to_avg+1):last_data_year
     
-    fertility_scaling <- popn_age_on(as.data.frame(popn_estimates),
-                                     col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
-      filter(year %in% births_data_years) %>%
-      left_join(future_fertility_rates, by=c("gss_code","sex","age")) %>%
-      mutate(births_from_rate = rate*popn) %>%
-      group_by(year, gss_code, gss_code_small_area) %>%
-      summarise(births_from_rate = sum(births_from_rate)) %>%
-      as.data.frame()%>%
-      calculate_scaling_factors(constraint = curr_yr_births,
-                                col_aggregation = c("year","gss_code_small_area"),
-                                col_popn = "births_from_rate",
-                                col_constraint = "births",
-                                rows_to_constrain = TRUE) %>%
-      dtplyr::lazy_dt() %>%
-      group_by(gss_code_small_area) %>%
-      summarise(scaling = EnvStats::geoMean(scaling)) %>%
-      as.data.frame() %>%
-      left_join(ward_to_district, by="gss_code_small_area")
+    fertility_scaling <- calculate_geomean_scaling_factors(popn = popn_estimates,
+                                                           future_rates = future_fertility_rates,
+                                                           data_years = births_data_years,
+                                                           constraint = curr_yr_births,
+                                                           constraint_data_col = "births")
     
     #TODO apply_rate_to_population()
-    small_area_fertility_rates <- left_join(fertility_rates, fertility_scaling,
-                                            by=c("gss_code")) %>%
+    small_area_fertility_rates <- left_join(fertility_scaling, ward_to_district,
+                                            by="gss_code_small_area") %>%
+      left_join(fertility_rates, by=c("gss_code")) %>%
       mutate(fert_rate = scaling*rate)
     
     #------------------
     
-    curr_yr_deaths <- deaths %>%
+    curr_yr_deaths <- dtplyr::lazy_dt(deaths) %>%
       group_by(year, gss_code_small_area) %>%
       summarise(deaths = sum(deaths)) %>%
       as.data.frame() %>%
       mutate(year = as.numeric(year))
     
-    future_mortality_rates<- filter(mortality_rates, year == last_data_year+1) %>%
+    future_mortality_rates <- filter(mortality_rates, year == last_data_year+1) %>%
       select(-year)
     
     deaths_data_years <- (last_data_year-death_rate_n_years_to_avg+1):last_data_year
     
-    mortality_scaling <- popn_age_on(as.data.frame(popn_estimates),
-                                     col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
-      filter(year %in% deaths_data_years) %>%
-      left_join(future_mortality_rates, by=c("gss_code","sex","age")) %>%
-      mutate(deaths_from_rate = rate*popn) %>%
-      group_by(year, gss_code, gss_code_small_area) %>%
-      summarise(deaths_from_rate = sum(deaths_from_rate)) %>%
-      as.data.frame()%>%
-      calculate_scaling_factors(constraint = curr_yr_deaths,
-                                col_aggregation = c("year","gss_code_small_area"),
-                                col_popn = "deaths_from_rate",
-                                col_constraint = "deaths",
-                                rows_to_constrain = TRUE) %>%
-      dtplyr::lazy_dt() %>%
-      group_by(gss_code_small_area) %>%
-      summarise(scaling = EnvStats::geoMean(scaling)) %>%
-      as.data.frame() %>%
-      left_join(ward_to_district, by="gss_code_small_area")
-    
+    mortality_scaling <- calculate_geomean_scaling_factors(popn = popn_estimates,
+                                                           future_rates = future_mortality_rates,
+                                                           data_years = deaths_data_years,
+                                                           constraint = curr_yr_deaths,
+                                                           constraint_data_col = "deaths")
+ 
     #TODO apply_rate_to_population()
-    small_area_mortality_rates <- left_join(mortality_rates, mortality_scaling, by=c("gss_code")) %>%
-      mutate(mort_rate = scaling*rate) %>%
+    small_area_mortality_rates <- left_join(mortality_scaling, ward_to_district,
+                                            by="gss_code_small_area") %>%
+      left_join(mortality_rates, by=c("gss_code")) %>%
+      mutate(mort_rate = scaling*rate)%>%
       select(year, gss_code_small_area, sex, age, mort_rate)
+ 
   }
   
   #-----------------
   
+  #Set rates for current year
   
   if(projection_year > last_data_year){
     curr_yr_fertility <- filter(small_area_fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(small_area_mortality_rates, year == projection_year)
   } else {
     curr_yr_fertility <- NULL
-    curr_yr_mortality <- filter(mortality_rates, year == last_data_year) %>% select(-year)
+    curr_yr_mortality <- NULL
   }
   
   
