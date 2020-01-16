@@ -20,7 +20,9 @@ ldd_raw <- ldd_development_unit_flow %>%
          no_of_bedrooms, demolition, unit_line_flow)
 
 #Assign to lsoa
-polygon_split <- readRDS("input_data/housing_led_model/polygon_splits.rds") %>%
+polygon_split <- data.table::fread("input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv") %>%
+  as.data.frame() %>%
+  mutate(permission_id = as.character(permission_id)) %>%
   select(permission_id, lsoa11cd, area_prop)
 
 permissions_w_polygons <- select(ldd_raw, -lsoa11cd) %>%
