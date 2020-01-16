@@ -17,7 +17,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             popn_constraint, birth_constraint, death_constraint,
                             fertility_rates, mortality_rates, last_data_year,
                             dwellings, adults_per_dwelling,
-                            projection_year){
+                            projection_year, ward_to_district){
 
   ####Age on####
   aged_on_popn <- popn_age_on(start_population,
@@ -43,7 +43,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   
   #Constrain births
   curr_yr_births <- left_join(curr_yr_births, ward_to_district, by="gss_code_small_area") %>%
-    constrain_component(constraint=curr_yr_birth_constraint,
+    constrain_component(constraint = birth_constraint,
                         col_aggregation = "gss_code",
                         col_popn = "births") %>%
     sum_births_and_split_by_sex_ratio(geog_cols = c("gss_code","gss_code_small_area")) %>%
@@ -89,14 +89,14 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     
     # TODO apply_rate_to_population() instead
     curr_yr_deaths <- popn_w_births %>%
-      left_join(curr_yr_mortality, by = c("year","gss_code_small_area","sex","age")) %>%
+      left_join(mortality_rates, by = c("year","gss_code_small_area","sex","age")) %>%
       mutate(deaths = mort_rate*popn)
     
   }
  
   #Constrain deaths
   curr_yr_deaths <- curr_yr_deaths %>%
-    constrain_component(constraint = curr_yr_death_constraint,
+    constrain_component(constraint = death_constraint,
                         col_aggregation = c("year","gss_code","sex","age"),
                         col_popn = "deaths") %>%
     select(year, gss_code, gss_code_small_area, sex, age, deaths) %>%
@@ -152,7 +152,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   #constrain borough populations to match constraint
   constrained_popn <- left_join(unconstrined_popn, ward_to_district, by="gss_code_small_area") %>%
     as.data.frame() %>%
-    constrain_component(constraint = curr_yr_popn_constraint,
+    constrain_component(constraint = popn_constraint,
                         col_popn = "popn",
                         col_aggregation = c("year","gss_code","sex","age"))
   
