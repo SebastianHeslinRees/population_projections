@@ -193,7 +193,7 @@ housing_led_core <- function(start_population,
   
   return(list(population = constrained_population,
               births = births,
-              death = deaths,
+              deaths = deaths,
               int_in = trend_projection[['int_in']],
               int_out = int_out,
               dom_in = final_domestic_migration[['dom_in']],
