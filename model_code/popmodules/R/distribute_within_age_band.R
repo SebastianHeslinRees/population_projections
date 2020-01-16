@@ -42,7 +42,7 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
     left_join(distribution, by=c(col_aggregation))
   
   unable_to_scale <- distributed %>%
-    summarise(sum_popn_1 = sum(!!sum(popn_1_col)),
+    summarise(sum_popn_1 = sum(!!sym(popn_1_col)),
               max_age_dist = max(age_distribution)) %>%
     filter(max_age_dist == 0 & sum_popn_1 !=0)
   
