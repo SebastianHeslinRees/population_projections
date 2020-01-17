@@ -111,7 +111,7 @@ run_small_area_model <- function(config_list){
   projection <- list()
   
   for(projection_year in config_list$first_proj_yr:config_list$final_proj_yr){
-    browser()
+    
     cat('\r',paste("  Projecting year", projection_year))
     flush.console()
     
