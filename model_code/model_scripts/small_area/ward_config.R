@@ -1,4 +1,4 @@
-small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
 small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 small_area_births_backseries_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
 small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
@@ -42,4 +42,4 @@ rm(list = setdiff(ls(), "config_list"))
 
 source('M:/Projects/population_projections/model_code/model_scripts/small_area/small_area_control.R')
 ward_projection <- run_small_area_model(config_list)
-log_warnings(paste0("outputs/small_area/2018/",config_list$projection_name,"/warnings_",config_list$timestamp,".txt"))
+log_warnings(paste0("outputs/ward/",ward_config_list$projection_name,"_warnings.txt"))
