@@ -28,7 +28,7 @@ housing_led_core <- function(start_population,
            male = births*1.05,
            age = 0) %>%
     select(-births) %>%
-    pivot_longer(c("female","male"), names_to = "sex", values_to="births")
+    tidyr::pivot_longer(c("female","male"), names_to = "sex", values_to="births")
   
   deaths <- trend_projection[['deaths']] %>%
     constrain_component(constraint = component_constraints[['death_constraint']],
@@ -161,7 +161,7 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
- 
+
   #10. Constrain total population
   constrained_population <- constrain_to_hma(popn = adjusted_population,
                                              constraint = hma_constraint,
