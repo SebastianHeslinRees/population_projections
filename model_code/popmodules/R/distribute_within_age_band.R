@@ -24,7 +24,7 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
                                        col_aggregation=c("gss_code","sex")){
   
   assert_that(!"age" %in% col_aggregation,
-                msg = "In distribute_within_age_band, {age} cannot be specified in the col_aggreation variable")
+              msg = "In distribute_within_age_band, {age} cannot be specified in the col_aggreation variable")
   
   distribution <- filter(popn_2, age >= min_age) %>%
     filter(age <= max_age) %>%
@@ -39,7 +39,21 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
   }
   
   distributed <- popn_1 %>%
-    left_join(distribution, by=c(col_aggregation)) %>%
+    left_join(distribution, by=c(col_aggregation))
+  
+  unable_to_scale <- distributed %>%
+    summarise(sum_popn_1 = sum(!!sym(popn_1_col)),
+              max_age_dist = max(age_distribution)) %>%
+    filter(max_age_dist == 0 & sum_popn_1 !=0)
+  
+  if(nrow(unable_to_scale) != 0) {
+    warning("distribute_within_age_band was asked to scale populations of zero to non-zero sizes at ",
+            nrow(unable_to_scale), " aggregation levels, with target populations summing to ",
+            sum(unable_to_scale$sum_popn_1), ". These populations will be unscaled and ",
+            "the output will be short by this many people.")
+  }
+  
+  distributed <- distributed %>%
     mutate(!!popn_1_col := !!sym(popn_1_col)* age_distribution) %>%
     select(c(names(popn_1),"age"))%>%
     as.data.frame()

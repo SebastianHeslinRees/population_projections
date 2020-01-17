@@ -40,26 +40,26 @@ census_ward_ce <- census_ward_ce %>%
          max_age = as.numeric(max_age)) %>%
   select(-f)
 
-groups <- unique(census_ward_ce$age_group)
-
 ward_estimates <- readRDS(ward_estimates_path) %>% filter(year == 2011)
-distributed <- list()
 
-for(i in 1:length(groups)){
-  
-  a <- filter(census_ward_ce, age_group == groups[[i]])
-  
-  min <- unique(a$min_age)
-  max <- unique(a$max_age)
-  
-  distributed[[i]] <- distribute_within_age_band(popn_1=a, popn_2=ward_estimates,
-                                                 popn_1_col="ce_popn", popn_2_col="popn",
-                                                 min_age=min, max_age=max,
-                                                 col_aggregation=c("gss_code_ward","sex"))      
-}
+lower_bounds <- unique(census_ward_ce$min_age)
+upper_bounds <- unique(census_ward_ce$max_age)
+age_mapping <- data.frame(age = 0:90) %>%
+  mutate(min_age = sapply(age, function(x) max(lower_bounds[lower_bounds <= x])),
+         max_age = sapply(age, function(x) min(upper_bounds[upper_bounds >= x])),
+         age_group = paste("Age", min_age, "to", max_age),
+         age_group = case_when(age_group == "Age 15 to 15" ~ "Age 15",
+                               age_group == "Age 85 to 90" ~ "Age 85 and over",
+                               TRUE ~ age_group)) %>%
+  select(age, age_group)
 
-ward_ce_by_sya <- data.table::rbindlist(distributed) %>%
-  select(gss_code_ward, sex, age, ce_popn) %>%
+ward_estimates <- left_join(ward_estimates, age_mapping, by="age")
+
+ward_ce_by_sya <- constrain_component(ward_estimates, census_ward_ce,
+                               col_aggregation = c("gss_code_ward","sex","age_group"),
+                               col_popn = "popn",
+                               col_constraint = "ce_popn") %>%
+  select(gss_code_ward, sex, age, ce_popn = popn) %>%
   as.data.frame()
 
 # sum(filter(ward_ce_by_sya, gss_code_ward == "E05000026")$ce_popn)
