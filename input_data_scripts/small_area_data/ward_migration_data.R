@@ -4,11 +4,11 @@ library(tidyr)
 devtools::load_all("model_code/popmodules")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
+mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-14.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
-borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
-borough_int_in_path <- "input_data/mye/2018/international_in_gla_2019-11-13.rds"
+borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-14.rds"
+borough_int_in_path <- "input_data/mye/2018/international_in_gla_2019-11-14.rds"
 
 #census data
 census_foreign_born_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/LC2103EW_ward_country_of_birth.csv"
@@ -200,16 +200,9 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
                                           by=c("gss_code_ward","sex","age")) %>%
         mutate(all_in_migration = domestic_in_migrants + international) %>%
         group_by(gss_code_ward, sex) %>%
-        mutate(total_migration = sum(all_in_migration),
-               migration_distribution = all_in_migration/total_migration) %>%
+        mutate(adult_only = ifelse(age >= 18, all_in_migration, 0)) %>%
+        mutate(final_dist = all_in_migration / sum(adult_only)) %>%
         as.data.frame() %>%
-        mutate(adult_dist = ifelse(age >= 18, migration_distribution, 0)) %>%
-        group_by(gss_code_ward, sex) %>%
-        mutate(aggregate_dist = sum(adult_dist)) %>%
-        as.data.frame() %>%
-        mutate(scaling = 1/aggregate_dist) %>%
-        mutate(scaled_dist = scaling*adult_dist) %>%
-        mutate(final_dist = ifelse(age >= 18, scaled_dist, migration_distribution)) %>%
         select(gss_code_ward, sex, age, final_dist) %>%
         rename(in_migration_rate = final_dist) %>%
         arrange(gss_code_ward, sex, age) %>%
