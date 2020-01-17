@@ -28,7 +28,7 @@ housing_led_core <- function(start_population,
            male = births*1.05,
            age = 0) %>%
     select(-births) %>%
-    pivot_longer(c("female","male"), names_to = "sex", values_to="births")
+    tidyr::pivot_longer(c("female","male"), names_to = "sex", values_to="births")
   
   deaths <- trend_projection[['deaths']] %>%
     constrain_component(constraint = component_constraints[['death_constraint']],
