@@ -132,7 +132,6 @@ ward_int_in <- domestic_in %>%
         summarise(domestic = sum(domestic_in_migrants)) %>%
         data.frame() %>%
         left_join(ward_all_in, by=c("gss_code_ward","sex","age")) %>%
-        replace_na(list(domestic = 0)) %>%
         mutate(international = all_in_migrants - domestic) %>%
         check_negative_values("international")
 
