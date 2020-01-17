@@ -45,7 +45,7 @@ log_warnings(paste0("outputs/housing_led/2018/",config_list$projection_name,"/wa
 #----
 ####WARD MODEL
 
-small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
 small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 small_area_births_backseries_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
 small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
@@ -69,7 +69,7 @@ death_rate_n_years_to_avg <- 5
 projection_type <- "ward"
 projection_name <- paste0(projection_name,"_",projection_type)
 
-config_list_ward <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
+ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
                     small_area_communal_est_popn_path = small_area_communal_est_popn_path,
                     small_area_births_backseries_path = small_area_births_backseries_path,
                     small_area_deaths_backseries_path = small_area_deaths_backseries_path,
@@ -96,4 +96,4 @@ rm(list = setdiff(ls(), "ward_config_list"))
 
 source('M:/Projects/population_projections/model_code/model_scripts/small_area/small_area_control.R')
 ward_projection <- run_small_area_model(ward_config_list)
-log_warnings(paste0(copy_dir, "/warnings_", ward_config_list$timestamp, ".txt"))
+log_warnings(paste0("outputs/ward/",ward_config_list$projection_name,"_warnings.txt"))
