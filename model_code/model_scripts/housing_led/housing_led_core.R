@@ -161,7 +161,7 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
- 
+
   #10. Constrain total population
   constrained_population <- constrain_to_hma(popn = adjusted_population,
                                              constraint = hma_constraint,
