@@ -60,13 +60,13 @@ run_small_area_model <- function(config_list){
     select(year, gss_code, age, sex, popn)
   
   #TODO Change the housing-led model output names to make this easier (ie remove timestamp)
-  birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "/births_", config_list$housing_led_model_timestamp, ".rds")) %>%
+  birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "births_", config_list$housing_led_model_timestamp, ".rds")) %>%
     filter(substr(gss_code,1,3)=="E09") %>%
     rbind(births_past)
-  death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "/deaths_", config_list$housing_led_model_timestamp, ".rds")) %>%
+  death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "deaths_", config_list$housing_led_model_timestamp, ".rds")) %>%
     filter(substr(gss_code,1,3)=="E09") %>%
     rbind(deaths_past)
-  popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"/population_", config_list$housing_led_model_timestamp, ".rds")) %>%
+  popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"population_", config_list$housing_led_model_timestamp, ".rds")) %>%
     filter(substr(gss_code,1,3)=="E09") %>%
     rbind(popn_past)
   
@@ -111,7 +111,7 @@ run_small_area_model <- function(config_list){
   projection <- list()
   
   for(projection_year in config_list$first_proj_yr:config_list$final_proj_yr){
-    #projection_year <- first_proj_yr
+    browser()
     cat('\r',paste("  Projecting year", projection_year))
     flush.console()
     
