@@ -34,7 +34,8 @@ run_housing_led_model <- function(config_list){
                        "first_proj_yr",
                        "final_proj_yr",
                        "ldd_max_yr",
-                       "timestamp")
+                       "timestamp",
+                       "output_dir")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -133,8 +134,8 @@ run_housing_led_model <- function(config_list){
   source('model_code/model_scripts/housing_led/output_housing_led_projection.R')
   
   #Starting population
-  curr_yr_popn <- readRDS(paste0(external_trend_path, "population_", external_trend_datestamp,".rds")) %>%
-    filter(year == first_proj_yr-1)
+  curr_yr_popn <- readRDS(paste0(config_list$external_trend_path, "population_", config_list$external_trend_datestamp,".rds")) %>%
+    filter(year == config_list$first_proj_yr-1)
   
   #Other varibales
   ahs_cap <- NULL
@@ -185,7 +186,6 @@ run_housing_led_model <- function(config_list){
   
   projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
   
-  output_dir <- paste0("outputs/housing_led/2018/",config_list$projection_name,"/")
-  output_housing_led_projection(projection, output_dir, config_list$timestamp)
+  output_housing_led_projection(projection, config_list$output_dir, config_list$timestamp)
   
 }

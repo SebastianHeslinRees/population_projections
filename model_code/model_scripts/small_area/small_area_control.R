@@ -24,7 +24,8 @@ run_small_area_model <- function(config_list){
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "projection_type",
-                       "projection_name")
+                       "projection_name",
+                       "small_area_output_dir")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -231,6 +232,6 @@ run_small_area_model <- function(config_list){
   message(" ")
   
   projection <- arrange_small_area_core_outputs(projection, config_list$first_proj_yr, config_list$final_proj_yr)
-  saveRDS(projection, paste0("outputs/", config_list$projection_type, "/", config_list$projection_name, ".rds"))
+  saveRDS(projection, paste0(config_list$small_area_output_dir, config_list$projection_name, ".rds"))
   
 }
