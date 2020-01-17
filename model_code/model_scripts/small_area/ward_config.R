@@ -42,4 +42,4 @@ rm(list = setdiff(ls(), "config_list"))
 
 source('M:/Projects/population_projections/model_code/model_scripts/small_area/small_area_control.R')
 ward_projection <- run_small_area_model(config_list)
-log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
+log_warnings(paste0("outputs/small_area/2018/",config_list$projection_name,"/warnings_",config_list$timestamp,".txt"))

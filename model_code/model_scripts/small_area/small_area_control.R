@@ -13,14 +13,14 @@ run_small_area_model <- function(config_list){
                        "small_area_births_backseries_path",
                        "small_area_deaths_backseries_path",
                        "small_area_ldd_data_path",
-                       "small_area_development_trajectory",
+                       "small_area_dev_trajectory_path",
                        "housing_led_model_path",
                        "housing_led_model_timestamp",
                        "borough_fertility_rates_path",
                        "borough_mortality_rates_path",
                        "last_data_year",
-                       "first_proj_year",
-                       "final_proj_year",
+                       "first_proj_yr",
+                       "final_proj_yr",
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "projection_type",
@@ -46,7 +46,7 @@ run_small_area_model <- function(config_list){
   births <- read_small_area_inputs(config_list$small_area_births_backseries_path)
   deaths <- read_small_area_inputs(config_list$small_area_deaths_backseries_path)
   ldd_data <- read_small_area_inputs(config_list$small_area_ldd_data_path)
-  dwelling_trajectory <- read_small_area_inputs(config_list$small_area_development_trajectory)
+  dwelling_trajectory <- read_small_area_inputs(config_list$small_area_dev_trajectory_path)
   
   #----------
   
@@ -107,11 +107,11 @@ run_small_area_model <- function(config_list){
   #-------------------------
   
   #Projection loop
-  curr_yr_popn <- filter(popn_estimates, year == config_list$first_proj_year-1)
+  curr_yr_popn <- filter(popn_estimates, year == config_list$first_proj_yr-1)
   projection <- list()
   
-  for(projection_year in config_list$first_proj_year:config_list$final_proj_year){
-    #projection_year <- first_proj_year
+  for(projection_year in config_list$first_proj_yr:config_list$final_proj_yr){
+    #projection_year <- first_proj_yr
     cat('\r',paste("  Projecting year", projection_year))
     flush.console()
     
@@ -230,7 +230,7 @@ run_small_area_model <- function(config_list){
   }
   message(" ")
   
-  projection <- arrange_small_area_core_outputs(projection, config_list$first_proj_year, config_list$final_proj_year)
+  projection <- arrange_small_area_core_outputs(projection, config_list$first_proj_yr, config_list$final_proj_yr)
   saveRDS(projection, paste0("outputs/", config_list$projection_type, "/", config_list$projection_name, ".rds"))
   
 }
