@@ -156,7 +156,7 @@ international_in <- ward_int_in %>%
 rm(borough_international_in, ward_int_in, ward_all_in)
 
 ####Out migration rates####
-london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))$gss_code_ward
+london_wards <- filter(ward_to_district, grepl("E09", gss_code))$gss_code_ward
 
 ward_births_2011 <- readRDS(ward_births_path) %>%
         filter(year == 2011, gss_code_ward %in% london_wards) %>%
