@@ -88,7 +88,6 @@ run_trend_model <- function(config_list) {
     upc <- readRDS(config_list$upc_path)
   }
   
-  
   # get the projected rates
   message("get projected rates")
   fertility_rates <- evaluate_fns_list(config_list$fertility_fns) %>% complete_fertility(population)
@@ -152,7 +151,6 @@ run_trend_model <- function(config_list) {
                                            fertility_rates, mortality_rates,
                                            int_out_flows_rates, int_in_flows, domestic_rates,
                                            first_proj_yr, last_proj_yr)
-  
   
   ## household models
   message('')
