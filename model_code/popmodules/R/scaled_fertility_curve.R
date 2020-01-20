@@ -59,13 +59,13 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     ungroup() %>% 
     as.data.frame() %>%   # dtplyr needs to take a break part way through
     lazy_dt() %>%
-    left_join(births, by = c("gss_code", "year")) %>%
+    left_join(births, by = c("gss_code", "year"))  %>%
+    as.data.frame() %>%
     rename(actual = data_col) %>%
     mutate(scaling = ifelse(curve_count == 0,
                             0,
                             actual / curve_count)) %>%
-    select(gss_code, year, scaling) %>%
-    as.data.frame()
+    select(gss_code, year, scaling)
 
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
