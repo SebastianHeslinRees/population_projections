@@ -36,15 +36,13 @@ calculate_scaling_factors <- function(popn,
                                       col_popn,
                                       col_constraint = col_popn,
                                       rows_to_constrain = TRUE) {
-  
-  
   # Standardise data
   # ----------------
   validate_calculate_scaling_factors_input(popn, constraint, col_aggregation, col_popn, col_constraint)
   
   cols <- names(popn)
   col_overlap <- intersect(names(popn), names(constraint)) %>%
-    setdiff(col_aggregation)
+    setdiff(c(col_aggregation, col_popn))
   names(cols) <- ifelse(cols %in% col_overlap, paste0(cols, ".x"), cols)
   # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
   col_aggregation <- .convert_to_named_vector(col_aggregation)
@@ -77,10 +75,14 @@ calculate_scaling_factors <- function(popn,
     left_join(constraint, by = col_aggregation) %>%
     group_by_at(names(col_aggregation)) %>%
     mutate(popn_total__ = sum(!!sym(col_popn_new)),
-           scaling = case_when(!do_scale__  ~ 1,
-                               is.na(!!sym(col_constraint_new)) ~ -999,  # case_when doesn't like NAs
-                               popn_total__ == 0  ~ 0,
-                               TRUE  ~ !!sym(col_constraint_new)/popn_total__),
+           scaling = ifelse(!do_scale__, 1,
+                            ifelse(is.na(!!sym(col_constraint_new)), -999,  # case_when doesn't like NAs
+                                   ifelse(popn_total__ == 0, 0,
+                                          !!sym(col_constraint_new)/popn_total__))),
+           # scaling = case_when(!do_scale__  ~ 1,
+           #                     is.na(!!sym(col_constraint_new)) ~ -999,  # case_when doesn't like NAs
+           #                     popn_total__ == 0  ~ 0,
+           #                     TRUE  ~ !!sym(col_constraint_new)/popn_total__),
            mixed_scaling_check = max(do_scale__) == min(do_scale__)) %>%
     ungroup() %>%
     as.data.frame()

@@ -3,17 +3,19 @@ small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal
 small_area_births_backseries_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
 small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
 small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
-small_area_development_trajectory <- "input_data/small_area_model/ward_shlaa_trajectory.rds"
+small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory.rds"
 
-housing_led_model_path <- "outputs/housing_led/2018/test"
-housing_led_model_timestamp <- "20-01-16_1102"
+small_area_output_dir <- "outputs/housing_led/2018/ward_test"
+
+housing_led_model_path <- "outputs/housing_led/2018/test_05/"
+housing_led_model_timestamp <- "20-01-20_1026"
 
 borough_fertility_rates_path <- "outputs/trend/2018/2018_central/fertility_rates_19-11-13_2056.rds"
 borough_mortality_rates_path <- "outputs/trend/2018/2018_central/mortality_rates_19-11-13_2056.rds"
 
 last_data_year <- 2018
-first_proj_year <- 2018
-final_proj_year <- 2021
+first_proj_yr <- 2018
+final_proj_yr <- 2021
 birth_rate_n_years_to_avg <- 5
 death_rate_n_years_to_avg <- 5
 
@@ -25,18 +27,19 @@ config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_p
                     small_area_births_backseries_path = small_area_births_backseries_path,
                     small_area_deaths_backseries_path = small_area_deaths_backseries_path,
                     small_area_ldd_data_path = small_area_ldd_data_path,
-                    small_area_development_trajectory = small_area_development_trajectory,
+                    small_area_dev_trajectory_path = small_area_dev_trajectory_path,
                     housing_led_model_path = housing_led_model_path,
                     housing_led_model_timestamp = housing_led_model_timestamp,
                     borough_fertility_rates_path = borough_fertility_rates_path,
                     borough_mortality_rates_path = borough_mortality_rates_path,
                     last_data_year = last_data_year,
-                    first_proj_year = first_proj_year,
-                    final_proj_year = final_proj_year,
+                    first_proj_yr = first_proj_yr,
+                    final_proj_yr = final_proj_yr,
                     birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                     death_rate_n_years_to_avg = death_rate_n_years_to_avg,
                     projection_type = projection_type,
-                    projection_name = projection_name)
+                    projection_name = projection_name,
+                    small_area_output_dir = small_area_output_dir)
   
 rm(list = setdiff(ls(), "config_list"))
 

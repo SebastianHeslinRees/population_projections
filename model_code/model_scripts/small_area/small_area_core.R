@@ -40,11 +40,11 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
       summarise(births = sum(births)) %>%
       as.data.frame()
   }
-  
+  #browser()
   #Constrain births
   curr_yr_births <- left_join(curr_yr_births, ward_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint = birth_constraint,
-                        col_aggregation = "gss_code",
+                        col_aggregation = c("year","gss_code"),
                         col_popn = "births") %>%
     sum_births_and_split_by_sex_ratio(geog_cols = c("gss_code","gss_code_small_area")) %>%
     rename(popn = births)

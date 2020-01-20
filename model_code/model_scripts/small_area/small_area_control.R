@@ -234,4 +234,6 @@ run_small_area_model <- function(config_list){
   projection <- arrange_small_area_core_outputs(projection, config_list$first_proj_yr, config_list$final_proj_yr)
   saveRDS(projection, paste0(config_list$small_area_output_dir, config_list$projection_name, ".rds"))
   
+  return(projection)
+  
 }
