@@ -8,6 +8,7 @@ lsoa_to_msoa <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/l
   select(gss_code_lsoa, gss_code_msoa)
 lsoa_to_borough <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%
   select(gss_code_lsoa, gss_code = gss_code_borough)
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
 
 #base census dwellings
 lsoa_census_dwellings <- data.table::fread("Q:/Teams/D&PA/Data/census_tables/housing_led_model/LSOA_DWELLINGS_CENSUS.CSV")
@@ -20,7 +21,9 @@ ldd_raw <- ldd_development_unit_flow %>%
          no_of_bedrooms, demolition, unit_line_flow)
 
 #Assign to lsoa
-polygon_split <- readRDS("input_data/housing_led_model/polygon_splits.rds") %>%
+polygon_split <- data.table::fread("input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv") %>%
+  as.data.frame() %>%
+  mutate(permission_id = as.character(permission_id)) %>%
   select(permission_id, lsoa11cd, area_prop)
 
 permissions_w_polygons <- select(ldd_raw, -lsoa11cd) %>%
@@ -36,7 +39,7 @@ x <- rbind(permissions_w_polygons, permissions_no_polygons)
 #completions - date completed
 comps <- x %>%
   filter(demolition==FALSE,
-  status_line_flow == "comp") %>% 
+         status_line_flow == "comp") %>% 
   rename(gss_code_lsoa = lsoa11cd) %>%
   mutate(date = as.character(date_work_comp))
 
@@ -45,7 +48,7 @@ comps <- x %>%
 #dont filter by comp
 demos <- x %>%
   filter(demolition==TRUE,
-         status_line_flow != "lap") %>%
+         status_line_flow %in% c("comp","start")) %>%
   mutate(date = ifelse(!is.na(date_work_start),
                        as.character(date_work_start),
                        as.character(date_work_comp)),
@@ -80,8 +83,11 @@ cumulative_units <- additional_units %>%
   mutate(units = cum_units + dwellings)
 
 lsoa_units <- select(cumulative_units, year, gss_code_lsoa, units)
+
 #group it into differnet geographies
 ward_units <- left_join(cumulative_units, lsoa_to_ward, by="gss_code_lsoa") %>%
+  left_join(ward_to_district, by = "gss_code_ward") %>%
+  mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>%
   group_by(year, gss_code_ward) %>%
   summarise(units = sum(units)) %>%
   ungroup() %>%
@@ -154,4 +160,4 @@ borough_units <- left_join(cumulative_units, lsoa_to_borough, by="gss_code_lsoa"
 saveRDS(borough_units, "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
 saveRDS(ward_units, "input_data/small_area_model/ldd_backseries_dwellings_ward.rds")
 saveRDS(msoa_units, "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds")
-◘
+

@@ -74,6 +74,15 @@ household_model_outputs <- function(model_output, model, output_dir, timestamp, 
   saveRDS(model_output[['stage_1']][['communal_establishment_population']], paste0(hh_output_dir, model, "_", "communal_est_population.rds")) 
   saveRDS(model_output[['stage_2']][['constrained']], paste0(hh_output_dir, model, "_", "stage_2_households.rds"))
   
+  
+  ahs <- model_output[['stage_1']][['detailed_households']] %>%
+    dtplyr::lazy_dt() %>%
+    group_by(year, gss_code) %>%
+    summarise(ahs = sum(household_population)/sum(households)) %>%
+    as.data.frame()
+  
+  saveRDS(ahs, paste0(hh_output_dir, model, "_", "ahs.rds"))
+  
   if(write_excel){
     
     #Falls over if it tries to write an excel file while the previous excel process is still ongoing

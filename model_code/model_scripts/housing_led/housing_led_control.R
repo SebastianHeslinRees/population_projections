@@ -102,6 +102,11 @@ run_housing_led_model <- function(config_list){
     ungroup() %>%
     select(year, gss_code, dwellings)
   
+  dwelling_trajectory <- filter(ldd_backseries, year < config_list$ldd_max_yr) %>%
+    rename(dwellings = units) %>%
+    rbind(dwelling_trajectory) %>%
+    arrange(gss_code, year)
+  
   dwelling2household_ratio <- filter(external_trend_households,
                                      year <= config_list$ldd_max_yr,
                                      year %in% dwelling_trajectory$year,
