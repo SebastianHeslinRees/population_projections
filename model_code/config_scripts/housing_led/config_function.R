@@ -1,7 +1,8 @@
 run_bpo_projection <- function(projection_name,
                                dev_trajectory_path,
                                small_area_dev_trajectory_path,
-                               first_proj_yr){
+                               first_proj_yr,
+                               final_proj_yr){
   
   devtools::load_all('model_code/popmodules')
   
@@ -15,7 +16,6 @@ run_bpo_projection <- function(projection_name,
   external_ahs_trajectory_path <- paste0(external_trend_path,"households_",external_trend_datestamp,"/ons_ahs.rds")
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
-  final_proj_yr <- 2022
   ahs_cap_year <- 2019
   ldd_max_yr <- 2018
   
