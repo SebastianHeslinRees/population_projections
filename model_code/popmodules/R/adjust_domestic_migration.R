@@ -38,7 +38,8 @@
 
 adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                       col_aggregation = c("year","gss_code"),
-                                      col_popn, col_target){
+                                      col_popn, col_target,
+                                      rows_to_constrain = TRUE){
 
   validate_join_population(popn, target, cols_common_aggregation = col_aggregation,
                            many2one = TRUE, one2many = FALSE, warn_unused_shared_cols = FALSE)
@@ -98,14 +99,14 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                          col_aggregation = col_aggregation,
                                          col_popn = "dom_in",
                                          col_constraint = "dom_in_target",
-                                         rows_to_constrain = TRUE)
+                                         rows_to_constrain = rows_to_constrain)
 
   adjusted_dom_out <- constrain_component(popn = dom_out,
                                           constraint = dom_out_target,
                                           col_aggregation = col_aggregation,
                                           col_popn = "dom_out",
                                           col_constraint = "dom_out_target",
-                                          rows_to_constrain = TRUE)
+                                          rows_to_constrain = rows_to_constrain)
 
   return(list(dom_in = adjusted_dom_in,
               dom_out = adjusted_dom_out))

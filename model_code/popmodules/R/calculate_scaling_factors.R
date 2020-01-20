@@ -67,26 +67,19 @@ calculate_scaling_factors <- function(popn,
       ungroup() %>%
       data.frame()
   }
-  
-  #Calculate scaling rates
+
   scaling <- popn %>%
     mutate(do_scale__ = !!enquo(rows_to_constrain)) %>%
-    #dtplyr::lazy_dt() %>%
     left_join(constraint, by = col_aggregation) %>%
     group_by_at(names(col_aggregation)) %>%
     mutate(popn_total__ = sum(!!sym(col_popn_new)),
            scaling = ifelse(!do_scale__, 1,
-                            ifelse(is.na(!!sym(col_constraint_new)), -999,  # case_when doesn't like NAs
+                            ifelse(is.na(!!sym(col_constraint_new)), -999,
                                    ifelse(popn_total__ == 0, 0,
                                           !!sym(col_constraint_new)/popn_total__))),
-           # scaling = case_when(!do_scale__  ~ 1,
-           #                     is.na(!!sym(col_constraint_new)) ~ -999,  # case_when doesn't like NAs
-           #                     popn_total__ == 0  ~ 0,
-           #                     TRUE  ~ !!sym(col_constraint_new)/popn_total__),
            mixed_scaling_check = max(do_scale__) == min(do_scale__)) %>%
-    ungroup() %>%
     as.data.frame()
-  
+
   assertthat::assert_that(all(scaling$mixed_scaling_check),
                           msg = "calculate_scaling_factors was asked to aggregate to levels containing mixtures of geographies to be included and excluded from the rescaling")
   
@@ -131,13 +124,11 @@ calculate_scaling_factors <- function(popn,
         print(unable_to_scale[1:30,])
       }
     }), collapse = "\n"))
-    
-    
   }
-  
+
   scaling <- scaling %>%
     rename(!!col_popn := !!sym(col_popn_new)) %>%
-    select(!!names(cols), scaling) %>%
+    select(!!names(cols), scaling)  %>%
     setNames(c(cols, "scaling"))
   
   return(scaling)

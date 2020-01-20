@@ -186,7 +186,8 @@ housing_led_core <- function(start_population,
                                                         dom_out = dom_out,
                                                         col_aggregation = c("year","gss_code","sex","age"),
                                                         col_popn = "popn",
-                                                        col_target = "popn")
+                                                        col_target = "popn",
+                                                        rows_to_constrain = adjusted_population$gss_code %in% hma_list$gss_code)
   
   #TODO More validation needed here?
   constrained_population <- check_negative_values(constrained_population, "popn")
