@@ -1,6 +1,9 @@
-arrange_small_area_core_outputs <- function(projection, first_proj_yr, final_proj_yr){
+arrange_small_area_core_outputs <- function(projection, popn_backseries, first_proj_yr, final_proj_yr){
+ 
+  popn_backseries <- filter(popn_backseries, year %in% 2010:(first_proj_yr-1))
   
   proj_popn <- list()
+  proj_popn[[1]] <- popn_backseries
   proj_deaths <- list()
   proj_births <- list()
   proj_migration <- list()

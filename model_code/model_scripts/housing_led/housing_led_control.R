@@ -43,17 +43,17 @@ run_housing_led_model <- function(config_list){
   
   #component rates
   component_rates <- get_data_from_file(
-         list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates_",config_list$external_trend_datestamp,".rds"),
-              mortality_rates = paste0(config_list$external_trend_path,"mortality_rates_",config_list$external_trend_datestamp,".rds"),
-              int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_",config_list$external_trend_datestamp,".rds"),
-              int_in_flows = paste0(config_list$external_trend_path,"int_in_",config_list$external_trend_datestamp,".rds"),
-              domestic_rates = paste0(config_list$external_trend_path,"domestic_rates_",config_list$external_trend_datestamp,".rds")))
+    list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates_",config_list$external_trend_datestamp,".rds"),
+         mortality_rates = paste0(config_list$external_trend_path,"mortality_rates_",config_list$external_trend_datestamp,".rds"),
+         int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_",config_list$external_trend_datestamp,".rds"),
+         int_in_flows = paste0(config_list$external_trend_path,"int_in_",config_list$external_trend_datestamp,".rds"),
+         domestic_rates = paste0(config_list$external_trend_path,"domestic_rates_",config_list$external_trend_datestamp,".rds")))
   
   #For constraining
   component_constraints <- get_data_from_file(
-      list(birth_constraint = paste0(config_list$external_trend_path,"births_",config_list$external_trend_datestamp,".rds"),
-           death_constraint = paste0(config_list$external_trend_path,"deaths_",config_list$external_trend_datestamp,".rds"),
-           international_out_constraint = paste0(config_list$external_trend_path,"int_out_",config_list$external_trend_datestamp,".rds"))) %>%
+    list(birth_constraint = paste0(config_list$external_trend_path,"births_",config_list$external_trend_datestamp,".rds"),
+         death_constraint = paste0(config_list$external_trend_path,"deaths_",config_list$external_trend_datestamp,".rds"),
+         international_out_constraint = paste0(config_list$external_trend_path,"int_out_",config_list$external_trend_datestamp,".rds"))) %>%
     create_constraints()
   
   #housing market area constraint
@@ -160,7 +160,7 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households <- filter(household_trajectory, year == projection_year)
     curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
-   
+    
     trend_projection <- trend_core(start_population = curr_yr_popn,
                                    fertility_rates = curr_yr_fertility, 
                                    mortality_rates = curr_yr_mortality,
@@ -191,7 +191,11 @@ run_housing_led_model <- function(config_list){
   
   message(" ")
   message("Running outputs")
-  projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
+  projection <- arrange_housing_led_core_outputs(projection,
+                                                 first_proj_yr, final_proj_yr,
+                                                 config_list$external_trend_path,
+                                                 config_list$external_trend_datestamp)
+  
   output_housing_led_projection(projection, config_list$output_dir, config_list$timestamp)
   
 }
