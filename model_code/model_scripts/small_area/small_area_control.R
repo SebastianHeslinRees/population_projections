@@ -2,10 +2,6 @@ devtools::load_all('model_code/popmodules')
 source('model_code/model_scripts/small_area/small_area_core.R')
 source('model_code/model_scripts/small_area/arrange_small_area_core_outputs.R')
 
-#TODO Remove once the branch with this function is merged in
-source('M:/Temp/distribute_within_age_band.R')
-
-
 run_small_area_model <- function(config_list){
  
   expected_config <- c("small_area_popn_estimates_path",
@@ -232,6 +228,7 @@ run_small_area_model <- function(config_list){
   message(" ")
   
   projection <- arrange_small_area_core_outputs(projection, config_list$first_proj_yr, config_list$final_proj_yr)
+  dir.create(config_list$small_area_output_dir, recursive = TRUE, showWarnings = FALSE)
   saveRDS(projection, paste0(config_list$small_area_output_dir, config_list$projection_name, ".rds"))
   
   return(projection)
