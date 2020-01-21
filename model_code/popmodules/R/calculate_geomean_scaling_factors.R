@@ -1,6 +1,6 @@
 #' Calculate a set of scaling factors to apply to fertility or mortality rates
 #'
-#' For a backseries of years, iven population for small areas and
+#' For a backseries of years, given population for small areas and
 #' fertility/mortality rates for a higher geography, calculate a set of
 #' implied births/deaths. Compare these to observed births/deaths and
 #' create scaling facrots for the rates. Finally, calculate the geometric
@@ -22,16 +22,18 @@
 #' @return A dataframe of scaling factors by sex and age for each small area.
 #'
 #' @import dplyr
-#' @importFrom EnvStats geoMean
 #'
 #' @export
 
+# TODO tests
 calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, constraint, constraint_data_col){
+  
+  validate_geomean_scaling_factors_inputs(popn, future_rates, data_years, constraint, constraint_data_col)
   
   component_from_rate <- popn_age_on(as.data.frame(popn),
                                    col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
-    filter(year %in% data_years) %>%
     dtplyr::lazy_dt() %>%
+    filter(year %in% data_years) %>%
     left_join(future_rates, by=c("gss_code","sex","age")) %>%
     mutate(value_from_rate = rate*popn) %>%
     group_by(year, gss_code, gss_code_small_area) %>%
@@ -46,10 +48,30 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
                               rows_to_constrain = TRUE) %>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code_small_area) %>%
-    summarise(scaling = EnvStats::geoMean(scaling)) %>%
+    summarise(scaling = exp(mean(log(scaling)))) %>% # geometric mean (we know all +ve and no NAs)
     as.data.frame()
   
   return(scaling_dataframe)
 }
 
   
+
+validate_geomean_scaling_factors_inputs <- function(popn, future_rates, data_years, constraint, constraint_data_col) {
+  
+  col_aggregation <- c("year", "gss_code_small_area", "age", "sex")
+  
+  validate_population(popn, col_aggregation = c("year", "gss_code_small_area", "age", "sex"), col_data = "popn")
+  validate_population(future_rates, col_aggregation = c("gss_code", "age", "sex"), col_date = "rate")
+  validate_population(constraint, col_aggregation = c("year", "gss_code_small_area"), col_data = constraint_data_col)
+  validate_join_population(popn, future_rates, col_aggregation = c("gss_code", "age", "sex"), one2many=FALSE)
+
+  assertthat::assert_that(all(data_years %in% popn$year),
+                          msg = "calculate_geomean_scaling_factors was given a popn dataframe missing some expected years")
+  assertthat::assert_that(all(data_years %in% constraint$year),
+                          msg = "calculate_geomean_scaling_factors was given a popn dataframe missing some expected years")
+  validate_join_population(filter(popn, year %in% data_years), constraint, col_aggregation = c("year", "gss_code_small_area"), one2many=FALSE)
+  
+  # This is maybe too strict - we could just exclude zeroes from the calculation, but our backseries doesn't have any zeroes so ¯\_(ツ)_/¯
+  assert_that(!any(constraint[[constraint_data_col]] == 0),
+    msg = "calculate_geomean_scaling_factors was passed birth rates of zero")
+}
