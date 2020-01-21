@@ -1,5 +1,3 @@
-devtools::load_all('model_code/popmodules')
-
 #Setup
 projection_name <- "2018_based_shlaa_dev"
 external_trend_path <- "outputs/trend/2018/2018_central/"

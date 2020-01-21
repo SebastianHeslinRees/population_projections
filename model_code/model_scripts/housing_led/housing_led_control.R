@@ -1,5 +1,7 @@
 run_housing_led_model <- function(config_list){
   
+  message("Running borough model")
+  
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -188,9 +190,8 @@ run_housing_led_model <- function(config_list){
   }
   
   message(" ")
-  
+  message("Running outputs")
   projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
-  
   output_housing_led_projection(projection, config_list$output_dir, config_list$timestamp)
   
 }
