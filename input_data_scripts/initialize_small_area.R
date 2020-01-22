@@ -21,6 +21,7 @@ saveRDS(merged_to_electoral_ward, "input_data/lookup/2011_merged_ward_to_elector
 
 rm(ward_district_lookup, lsoa_to_ward_lookup, merged_to_electoral_ward)
 
+source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/communal_establishment_population.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')
