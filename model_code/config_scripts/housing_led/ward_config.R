@@ -14,7 +14,7 @@ external_trend_path <- "outputs/trend/2018/2018_central/"
 external_trend_datestamp <- "19-11-13_2056"
 
 housing_led_model_path <- paste0("outputs/housing_led/2018/",projection_name,"/")
-housing_led_model_timestamp <- "20-01-22_0951"
+housing_led_model_timestamp <- "20-01-22_1147"
 
 borough_fertility_rates_path <- paste0(external_trend_path,"fertility_rates_",
                                        external_trend_datestamp,".rds")

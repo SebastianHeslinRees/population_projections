@@ -102,7 +102,7 @@ run_bpo_projection <- function(projection_name,
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$small_area_output_dir,ward_config_list$projection_name,"_warnings.txt"))
-  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(config_list$housing_led_model_path, "run_time.txt"))
+  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
   
   message("Complete")
   

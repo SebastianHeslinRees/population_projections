@@ -131,14 +131,10 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     summarise(adults = sum(household_popn)) %>%
     as.data.frame() %>%
     left_join(target_adults, by=c("gss_code_small_area")) %>%
-    mutate(inflow = adults - target) %>%
+    mutate(inflow = target - adults) %>%
     select(year, gss_code_small_area, inflow)
   
   #apply in-migration characteristics rates to inflow
-  #TODO Remove rename once fixed in input scripts
-  in_migration_characteristics <- in_migration_characteristics %>%
-    rename(in_migration_rate = out_migration_rate)
-  
   in_migration <- left_join(in_migration_characteristics, inflow_total,
                             by="gss_code_small_area") %>%
     mutate(in_migrants = in_migration_rate * inflow)
