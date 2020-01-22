@@ -97,7 +97,8 @@ run_small_area_model <- function(config_list){
     select(year, gss_code_small_area, units = total_units)
   
   dwelling_trajectory <- rbind(ldd_data, cumulative_future_dev) %>%
-    arrange(gss_code_small_area, year)
+    arrange(gss_code_small_area, year) %>%
+    validate_population(col_aggregation = c("year","gss_code_small_area"), col_data = "units")
   
   rm(cumulative_future_dev)
   
