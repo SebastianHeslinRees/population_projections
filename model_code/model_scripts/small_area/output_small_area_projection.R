@@ -11,15 +11,29 @@ output_small_area_projection <- function(projection, output_dir, projection_name
   
   x <- list()
   for(i in 1:4){
+    col_nm <- last(names(projection[[i]]))
     x[[i]] <- projection[[i]] %>%
       left_join(lookup, by=c("gss_code","gss_code_small_area")) %>%
       left_join(borough_names, by = "gss_code") %>%
       rename(borough = gss_name) %>%
-      rename(!!code := gss_code_small_area)
+      rename(!!code := gss_code_small_area) %>%
+      select(year, gss_code, borough, code, name, sex, age, col_nm) %>%
+      arrange_at(c("year", "gss_code", code, "sex", "age"))
   }
   
+  x[[5]] <- projection[[5]] %>%
+    left_join(lookup, by=c("gss_code_small_area")) %>%
+    left_join(borough_names, by = "gss_code") %>%
+    rename(!!code := gss_code_small_area) %>%
+    rename(borough = gss_name) %>%
+    select(year, gss_code, borough, code, name, units) %>%
+    arrange_at(c("gss_code", code, "year"))
+  
+  names(x) <- names(projection)
   saveRDS(x, paste0(output_dir, projection_name, ".rds"))
 
+  
+  #Published Ouputs (csv)
   popn <- x[[1]]
   
   females <- filter(popn, sex == "female", year >= 2011) %>%

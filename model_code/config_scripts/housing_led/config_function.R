@@ -3,6 +3,7 @@ run_bpo_projection <- function(projection_name,
                                small_area_dev_trajectory_path,
                                first_proj_yr,
                                final_proj_yr){
+  tm <- Sys.time()
   #Setup
   external_trend_path <- "outputs/trend/2018/2018_central/"
   external_trend_datestamp <- "19-11-13_2056"
@@ -96,11 +97,12 @@ run_bpo_projection <- function(projection_name,
                            
                            small_area_output_dir = small_area_output_dir)
   
-  rm(list = setdiff(ls(), c("ward_config_list","borough_projection")))
+  rm(list = setdiff(ls(), c("ward_config_list","borough_projection","tm")))
   
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$small_area_output_dir,ward_config_list$projection_name,"_warnings.txt"))
+  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(config_list$housing_led_model_path, "run_time.txt"))
   
   message("Complete")
   

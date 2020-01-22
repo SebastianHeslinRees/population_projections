@@ -231,7 +231,8 @@ run_small_area_model <- function(config_list){
   
   message(" ")
   message("Running outputs")
-  projection <- arrange_small_area_core_outputs(projection, popn_estimates, config_list$first_proj_yr, config_list$final_proj_yr)
+  projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
+                                                config_list$first_proj_yr, config_list$final_proj_yr)
   
   output_small_area_projection(projection = projection,
                                output_dir = config_list$small_area_output_dir,

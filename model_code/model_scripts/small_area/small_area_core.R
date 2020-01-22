@@ -167,7 +167,6 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   return(list(population = final_popn,
               births = rename(curr_yr_births, births = popn),
               deaths = curr_yr_deaths,
-              migration = final_migration,
-              assumed_development = dwellings))
+              migration = final_migration))
 }
 

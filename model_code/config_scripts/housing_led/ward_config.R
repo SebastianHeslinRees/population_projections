@@ -1,4 +1,4 @@
-projection_name <- "test_06"
+projection_name <- "test_shlaa"
 first_proj_yr <- 2019
 final_proj_yr <- 2020
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
@@ -14,7 +14,7 @@ external_trend_path <- "outputs/trend/2018/2018_central/"
 external_trend_datestamp <- "19-11-13_2056"
 
 housing_led_model_path <- paste0("outputs/housing_led/2018/",projection_name,"/")
-housing_led_model_timestamp <- "20-01-21_1050"
+housing_led_model_timestamp <- "20-01-22_0951"
 
 borough_fertility_rates_path <- paste0(external_trend_path,"fertility_rates_",
                                        external_trend_datestamp,".rds")
@@ -27,8 +27,7 @@ death_rate_n_years_to_avg <- 5
 
 projection_type <- "ward"
 
-output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/")
-small_area_output_dir <- paste0(output_dir,projection_type,"/")
+small_area_output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/",projection_type,"/")
 
 ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
                          small_area_communal_est_popn_path = small_area_communal_est_popn_path,
