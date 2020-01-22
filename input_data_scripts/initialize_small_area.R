@@ -27,7 +27,7 @@ source('input_data_scripts/small_area_data/births_and_deaths.R')
 source('input_data_scripts/small_area_data/adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/ward_migration_data.R')
 
-#TEST
+#TESTS
 london_wards <- filter(ward_district_lookup, substr(gss_code,1,3) == "E09") %>%
   filter(gss_code != "E09000001")
 london_wards <- sort(c(unique(london_wards$gss_code_ward), "E09000001"))
