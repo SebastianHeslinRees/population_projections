@@ -28,7 +28,7 @@ death_rate_n_years_to_avg <- 5
 projection_type <- "ward"
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/")
-small_area_output_dir <- paste0(output_dir,projection_type,"/")
+small_area_output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/",projection_type,"/")
 
 ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
                          small_area_communal_est_popn_path = small_area_communal_est_popn_path,
@@ -61,5 +61,4 @@ source('model_code/model_scripts/small_area/small_area_control.R')
 
 ward_projection <- run_small_area_model(ward_config_list)
 log_warnings(paste0(ward_config_list$small_area_output_dir,ward_config_list$projection_name,"_warnings.txt"))
-
 
