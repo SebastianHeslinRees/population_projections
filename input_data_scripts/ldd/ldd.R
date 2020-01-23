@@ -54,7 +54,12 @@ demos <- x %>%
                        as.character(date_work_comp)),
          unit_line_flow = unit_line_flow*-1) %>%
   rename(gss_code_lsoa = lsoa11cd) %>%
-  select(names(comps))
+  select(names(comps)) %>%
+  #This is temporary fix to solve a problem in the underlying data
+  #Libby is looking into a more permanent and robust fix
+  filter(permission_id != 347048)
+
+
 
 #Assign to mid-year
 ldd_by_mid_year <- rbind(demos, comps) %>%
