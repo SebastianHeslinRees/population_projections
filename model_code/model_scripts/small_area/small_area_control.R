@@ -107,16 +107,17 @@ run_small_area_model <- function(config_list){
   #-------------------------
   
   # Validate inputs
-  validate_population(popn_estimates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"))
-  validate_population(adults_per_dwelling, col_aggregation = c("gss_code_small_area", "year"))
-  validate_population(out_migration_rates, col_aggregation = c("gss_code_small_area", "age", "sex"))
-  validate_population(in_migration_characteristics, col_aggregation = c("gss_code_small_area", "age", "sex"))
-  validate_population(birth_constraint, col_aggregation = c("gss_code", "age", "year", "sex"))
-  validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"))
-  validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"))
-  validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"))
-  validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"))
-  validate_population(dwelling_trajectory, col_aggregation = c("gss_code_small_area", "year"))
+  validate_population(popn_estimates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "popn")
+  # TODO add this back in when the rates are fixed
+  #validate_population(adults_per_dwelling, col_aggregation = c("gss_code_small_area", "year"), col_data = "adults_per_dwelling")
+  validate_population(out_migration_rates, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "out_migration_rate")
+  validate_population(in_migration_characteristics, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "in_migration_rate")
+  validate_population(birth_constraint, col_aggregation = c("gss_code", "age", "year", "sex"), col_data = "births")
+  validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "deaths")
+  validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "popn")
+  validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
+  validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
+  validate_population(dwelling_trajectory, col_aggregation = c("gss_code_small_area", "year"), col_data = "units")
   
   # Check geographies are all correct
   domain_small_area <- unique(popn_estimates$gss_code_small_area)
