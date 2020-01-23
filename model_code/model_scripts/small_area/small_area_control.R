@@ -106,46 +106,10 @@ run_small_area_model <- function(config_list){
   
   #-------------------------
   
-  # Validate inputs
-  validate_population(popn_estimates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "popn")
-  # TODO add this back in when the rates are fixed
-  #validate_population(adults_per_dwelling, col_aggregation = c("gss_code_small_area", "year"), col_data = "adults_per_dwelling")
-  validate_population(out_migration_rates, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "out_migration_rate")
-  validate_population(in_migration_characteristics, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "in_migration_rate")
-  validate_population(birth_constraint, col_aggregation = c("gss_code", "age", "year", "sex"), col_data = "births")
-  validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "deaths")
-  validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "popn")
-  validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
-  validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
-  validate_population(dwelling_trajectory, col_aggregation = c("gss_code_small_area", "year"), col_data = "units")
-  
-  # Check geographies are all correct
-  domain_small_area <- unique(popn_estimates$gss_code_small_area)
-  domain <- unique(popn_estimates$gss_code)
-  assert_that(all(domain_small_area %in% adults_per_dwelling$gss_code_small_area))
-  assert_that(all(domain_small_area %in% out_migration_rates$gss_code_small_area))
-  assert_that(all(domain_small_area %in% in_migration_characteristics$gss_code_small_area))
-  assert_that(all(domain %in% birth_constraint$gss_code))
-  assert_that(all(domain %in% death_constraint$gss_code))
-  assert_that(all(domain %in% fertility_rates$gss_code))
-  assert_that(all(domain %in% mortality_rates$gss_code))
-  assert_that(all(domain_small_area %in% dwelling_trajectory$gss_code_small_area))
-  
-  # Check years are all correct
-  past_years <- (config_list$first_proj_yr - 1):config_list$last_data_year
-  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
-  if(config_list$final_proj_yr > config_list$last_data_year) {
-    all_years <- c(past_years, proj_years)
-  } else {
-    all_years <- past_years
-  }
-  assert_that(all(all_years %in% birth_constraint$year))
-  assert_that(all(all_years %in% death_constraint$year))
-  assert_that(all(proj_years %in% fertility_rates$year))
-  assert_that(all(proj_years %in% mortality_rates$year))
-  assert_that(all(all_years %in% dwelling_trajectory$year))
-  
-  #------------------------
+  # Validate all these inputs
+  validate_small_area_input_components(popn_estimates, adults_per_dwelling, out_migration_rates, in_migration_characteristics,
+                                       birth_constraint, death_constraint, popn_constraint, fertility_rates,
+                                       mortality_rates, dwelling_trajectory, config_list)
   
   #Projection loop
   curr_yr_popn <- filter(popn_estimates, year == config_list$first_proj_yr-1)
@@ -219,12 +183,8 @@ run_small_area_model <- function(config_list){
       
       
       # Validate these new data frames
-      validate_population(small_area_fertility_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"))
-      validate_population(small_area_mortality_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"))
-      assert_that(all(domain %in% fertility_rates$gss_code))
-      assert_that(all(domain %in% mortality_rates$gss_code))
-      assert_that(all(proj_years %in% fertility_rates$year))
-      assert_that(all(proj_years %in% mortality_rates$year))
+      validate_small_area_fert_mort_components(popn_estimates, small_area_fertility_rates, small_area_mortality_rates,
+                                               fertility_rates, mortality_rates, config_list)
     }
     
     #-----------------
@@ -275,3 +235,80 @@ run_small_area_model <- function(config_list){
   return(projection)
   
 }
+
+
+
+# -------------------------------------------------------
+
+validate_small_area_input_components <- function(popn_estimates,
+                                                 adults_per_dwelling,
+                                                 out_migration_rates,
+                                                 in_migration_characteristics,
+                                                 birth_constraint,
+                                                 death_constraint,
+                                                 popn_constraint,
+                                                 fertility_rates,
+                                                 mortality_rates,
+                                                 dwelling_trajectory,
+                                                 config_list) {
+  # Validate inputs
+  validate_population(popn_estimates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "popn")
+  # TODO add this back in when the rates are fixed
+  #validate_population(adults_per_dwelling, col_aggregation = c("gss_code_small_area", "year"), col_data = "adults_per_dwelling")
+  validate_population(out_migration_rates, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "out_migration_rate")
+  validate_population(in_migration_characteristics, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "in_migration_rate")
+  validate_population(birth_constraint, col_aggregation = c("gss_code", "age", "year", "sex"), col_data = "births")
+  validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "deaths")
+  validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "popn")
+  validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
+  validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
+  validate_population(dwelling_trajectory, col_aggregation = c("gss_code_small_area", "year"), col_data = "units")
+  
+  # Check geographies are all correct
+  domain_small_area <- unique(popn_estimates$gss_code_small_area)
+  domain <- unique(popn_estimates$gss_code)
+  assert_that(all(domain_small_area %in% adults_per_dwelling$gss_code_small_area))
+  assert_that(all(domain_small_area %in% out_migration_rates$gss_code_small_area))
+  assert_that(all(domain_small_area %in% in_migration_characteristics$gss_code_small_area))
+  assert_that(all(domain %in% birth_constraint$gss_code))
+  assert_that(all(domain %in% death_constraint$gss_code))
+  assert_that(all(domain %in% fertility_rates$gss_code))
+  assert_that(all(domain %in% mortality_rates$gss_code))
+  assert_that(all(domain_small_area %in% dwelling_trajectory$gss_code_small_area))
+  
+  # Check years are all correct
+  past_years <- (config_list$first_proj_yr - 1):config_list$last_data_year
+  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
+  if(config_list$final_proj_yr > config_list$last_data_year) {
+    all_years <- c(past_years, proj_years)
+  } else {
+    all_years <- past_years
+  }
+  assert_that(all(all_years %in% birth_constraint$year))
+  assert_that(all(all_years %in% death_constraint$year))
+  assert_that(all(proj_years %in% fertility_rates$year))
+  assert_that(all(proj_years %in% mortality_rates$year))
+  assert_that(all(all_years %in% dwelling_trajectory$year))
+  
+}
+
+# -------------------------------------------------------
+
+validate_small_area_fert_mort_components <- function(popn_estimates,
+                                                     small_area_fertility_rates,
+                                                     small_area_mortality_rates,
+                                                     fertility_rates,
+                                                     mortality_rates,
+                                                     config_list) {
+  domain <- unique(popn_estimates$gss_code)
+  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
+  
+  validate_population(small_area_fertility_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "rate")
+  validate_population(small_area_mortality_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "rate")
+  assert_that(all(domain %in% fertility_rates$gss_code))
+  assert_that(all(domain %in% mortality_rates$gss_code))
+  assert_that(all(proj_years %in% fertility_rates$year))
+  assert_that(all(proj_years %in% mortality_rates$year)) 
+}
+  
+  
