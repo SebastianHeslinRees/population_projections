@@ -33,7 +33,8 @@ run_small_area_model <- function(config_list){
   }
   
   #Read Data
-  adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") 
+  adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") %>%
+    project_forward_flat(config_list$final_proj_yr)
   ward_to_district <- read_small_area_inputs("input_data/lookup/2011_ward_to_district.rds")
   out_migration_rates <- read_small_area_inputs('input_data/small_area_model/ward_out_migration_rates.rds')
   in_migration_characteristics <- read_small_area_inputs('input_data/small_area_model/ward_in_migration_characteristics.rds')
@@ -59,14 +60,14 @@ run_small_area_model <- function(config_list){
   
   #TODO Change the housing-led model output names to make this easier (ie remove timestamp)
   birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "births_", config_list$housing_led_model_timestamp, ".rds")) %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    rbind(births_past)
+    rbind(births_past) %>%
+    filter(substr(gss_code,1,3)=="E09")
   death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "deaths_", config_list$housing_led_model_timestamp, ".rds")) %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    rbind(deaths_past)
+    rbind(deaths_past) %>%
+    filter(substr(gss_code,1,3)=="E09")
   popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"population_", config_list$housing_led_model_timestamp, ".rds")) %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    rbind(popn_past)
+    rbind(popn_past) %>%
+    filter(substr(gss_code,1,3)=="E09")
   
   rm(births_past, deaths_past, popn_past)
   #------------
@@ -110,9 +111,9 @@ run_small_area_model <- function(config_list){
   validate_population(adults_per_dwelling, col_aggregation = c("gss_code_small_area", "year"))
   validate_population(out_migration_rates, col_aggregation = c("gss_code_small_area", "age", "sex"))
   validate_population(in_migration_characteristics, col_aggregation = c("gss_code_small_area", "age", "sex"))
-  validate_population(birth_constriant, col_aggregation = c("gss_code_small_area", "age_group", "year"))
-  validate_population(death_constraint, col_aggregation = c("gss_code_small_area", "age_group", "sex", "year"))
-  validate_population(popn_constraint, col_aggregation = c("gss_code_small_area", "age", "sex", "year"))
+  validate_population(birth_constraint, col_aggregation = c("gss_code", "age", "year", "sex"))
+  validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"))
+  validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"))
   validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"))
   validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"))
   validate_population(dwelling_trajectory, col_aggregation = c("gss_code_small_area", "year"))
@@ -123,8 +124,8 @@ run_small_area_model <- function(config_list){
   assert_that(all(domain_small_area %in% adults_per_dwelling$gss_code_small_area))
   assert_that(all(domain_small_area %in% out_migration_rates$gss_code_small_area))
   assert_that(all(domain_small_area %in% in_migration_characteristics$gss_code_small_area))
-  assert_that(all(domain_small_area %in% birth_constraint$gss_code_small_area))
-  assert_that(all(domain_small_area %in% death_constraint$gss_code_small_area))
+  assert_that(all(domain %in% birth_constraint$gss_code))
+  assert_that(all(domain %in% death_constraint$gss_code))
   assert_that(all(domain %in% fertility_rates$gss_code))
   assert_that(all(domain %in% mortality_rates$gss_code))
   assert_that(all(domain_small_area %in% dwelling_trajectory$gss_code_small_area))
@@ -158,6 +159,8 @@ run_small_area_model <- function(config_list){
     curr_yr_birth_constraint <- filter(birth_constraint, year == projection_year)
     curr_yr_death_constraint <- filter(death_constraint, year == projection_year)
     curr_yr_dwellings <- filter(dwelling_trajectory, year == projection_year)
+    curr_yr_adults_per_dwelling <- filter(adults_per_dwelling, year == projection_year) %>%
+      select(gss_code_small_area, adults_per_dwelling)
     
     if(projection_year == config_list$last_data_year+1){
       
@@ -233,19 +236,6 @@ run_small_area_model <- function(config_list){
     } else {
       curr_yr_fertility <- NULL
       curr_yr_mortality <- NULL
-    }
-    
-    
-    #---------------
-    
-    #Adults per dwelling
-    
-    if(projection_year > max(adults_per_dwelling$year)){
-      curr_yr_adults_per_dwelling <- filter(adults_per_dwelling, year == max(year)) %>%
-        select(gss_code_small_area, adults_per_dwelling)
-    } else {
-      curr_yr_adults_per_dwelling <- filter(adults_per_dwelling, year == projection_year) %>%
-        select(gss_code_small_area, adults_per_dwelling)
     }
     
     #---------------
