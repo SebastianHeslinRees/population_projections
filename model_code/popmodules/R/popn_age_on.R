@@ -363,7 +363,8 @@ validate_popn_age_on_input <- function(popn,
   col_non_numeric <- union(col_aggregation, col_non_numeric)
   if(!identical(col_aggregation, col_non_numeric)) {
     col_agg_without_age <- setdiff(col_aggregation, col_age)
-    test_unique <- dplyr::group_by_at(popn, col_agg_without_age) %>%
+    test_unique <- as.data.frame(popn) %>%
+      dplyr::group_by_at(col_agg_without_age) %>%
       dplyr::select(!!!syms(col_non_numeric), -!!sym(col_age))
 
     unique_levels_agg <- nrow(dplyr::summarise(test_unique)) # number of aggregation levels
