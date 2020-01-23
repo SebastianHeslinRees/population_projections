@@ -69,7 +69,9 @@ validate_geomean_scaling_factors_inputs <- function(popn, future_rates, data_yea
                           msg = "calculate_geomean_scaling_factors was given a popn dataframe missing some expected years")
   assertthat::assert_that(all(data_years %in% constraint$year),
                           msg = "calculate_geomean_scaling_factors was given a popn dataframe missing some expected years")
-  validate_join_population(filter(popn, year %in% (data_years-1)), constraint, cols_common_aggregation = c("year", "gss_code_small_area"), one2many=FALSE)
+  as.data.frame(popn) %>%
+    filter(year %in% (data_years-1)) %>%
+    validate_join_population(constraint, cols_common_aggregation = c("year", "gss_code_small_area"), one2many=FALSE)
   
   # This is maybe too strict - we could just exclude zeroes from the calculation, but our backseries doesn't have any zeroes so ¯\_(o-o)_/¯
   assertthat::assert_that(!any(constraint[[constraint_data_col]] == 0),
