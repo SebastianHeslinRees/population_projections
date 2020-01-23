@@ -31,7 +31,7 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
   validate_geomean_scaling_factors_inputs(popn, future_rates, data_years, constraint, constraint_data_col)
   
   component_from_rate <- popn_age_on(as.data.frame(popn),
-                                   col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
+                                     col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
     filter(year %in% data_years) %>%
     dtplyr::lazy_dt() %>%
     left_join(future_rates, by=c("gss_code","sex","age")) %>%
@@ -65,13 +65,13 @@ validate_geomean_scaling_factors_inputs <- function(popn, future_rates, data_yea
   validate_population(constraint, col_aggregation = c("year", "gss_code_small_area"), col_data = constraint_data_col)
   validate_join_population(popn, future_rates, cols_common_aggregation = c("gss_code", "age", "sex"), one2many=FALSE)
 
-  assertthat::assert_that(all(data_years %in% popn$year),
+  assertthat::assert_that(all(data_years %in% (popn$year+1)),  # +1 because we age on
                           msg = "calculate_geomean_scaling_factors was given a popn dataframe missing some expected years")
   assertthat::assert_that(all(data_years %in% constraint$year),
                           msg = "calculate_geomean_scaling_factors was given a popn dataframe missing some expected years")
-  validate_join_population(filter(popn, year %in% data_years), constraint, cols_common_aggregation = c("year", "gss_code_small_area"), one2many=FALSE)
+  validate_join_population(filter(popn, year %in% (data_years-1)), constraint, cols_common_aggregation = c("year", "gss_code_small_area"), one2many=FALSE)
   
   # This is maybe too strict - we could just exclude zeroes from the calculation, but our backseries doesn't have any zeroes so ¯\_(o-o)_/¯
-  assert_that(!any(constraint[[constraint_data_col]] == 0),
+  assertthat::assert_that(!any(constraint[[constraint_data_col]] == 0),
     msg = "calculate_geomean_scaling_factors was passed birth rates of zero")
 }
