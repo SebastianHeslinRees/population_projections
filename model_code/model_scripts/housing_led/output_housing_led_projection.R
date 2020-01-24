@@ -24,7 +24,6 @@ output_housing_led_projection <- function(projection, output_dir, timestamp){
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
   
   persons <- mutate(popn, sex = "persons") %>%
-    mutate(popn = round(popn, digits=2)) %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code, gss_name, sex, age) %>%
     summarise(popn = sum(popn)) %>%
