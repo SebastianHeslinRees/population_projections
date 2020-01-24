@@ -4,7 +4,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp){
 
   lapply(seq_along(projection),
          function(i) saveRDS(projection[[i]],
-                             paste0(output_dir, names(projection)[i],"_",timestamp,".rds"))) %>%
+                             paste0(output_dir, names(projection)[i],"_",timestamp,".rds")))
   
   names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
     as.data.frame()
