@@ -93,15 +93,17 @@ run_housing_led_model <- function(config_list){
   
   #TODO I need to decide what we're pre-processing and what we're doing in the control
   #TODO This is missing census data for the base stock so the numbers make no sense
-  browser()
+  
   #census stock in 2011 + LDD development upto 2019
   ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
+    filter(year <= ldd_max_yr) %>%
     select(names(development_trajectory))
   
-  assumed_development <- ldd_backseries %>%
-    rbind(filter(development_trajectory, year > config_list$ldd_max_yr))
+  additional_dwellings <- ldd_backseries %>%
+    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>%
+    arrange(gss_code, year)
     
-  dwelling_trajectory <- assumed_development %>%
+  dwelling_trajectory <- additional_dwellings %>%
     group_by(gss_code) %>%
     mutate(dwellings = cumsum(units)) %>%
     as.data.frame() %>%
@@ -197,7 +199,7 @@ run_housing_led_model <- function(config_list){
   output_housing_led_projection(projection,
                                 config_list$output_dir,
                                 config_list$timestamp,
-                                assumed_development,
-                                development_trajectory)
+                                additional_dwellings,
+                                dwelling_trajectory)
   
 }

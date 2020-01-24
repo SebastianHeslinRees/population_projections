@@ -1,15 +1,15 @@
 output_housing_led_projection <- function(projection, output_dir, timestamp,
-                                          assumed_development, housing_stock){
+                                          additional_dwellings, housing_stock){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
 
   lapply(seq_along(projection),
          function(i) saveRDS(projection[[i]],
                              paste0(output_dir, names(projection)[i],"_",timestamp,".rds")))
-  
+  #browser()
   names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
     as.data.frame()
-  popn <- left_join(projection[["popn"]], names_lookup, by="gss_code") %>%
+  popn <- left_join(projection[["population"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")
   
   females <- filter(popn, sex == "female") %>%
@@ -58,25 +58,28 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
            dom_in, dom_out, dom_net, total_change) %>%
     arrange(gss_code, year)
   
-  browser()
   stock <- housing_stock %>%
     left_join(names_lookup, by="gss_code") %>%
+    mutate(dwellings = round(dwellings, 2)) %>%
     arrange(gss_code, year) %>%
-    tidyr::pivot_wider(names_from = "year", values_from = "units")%>%
+    tidyr::pivot_wider(names_from = "year", values_from = "dwellings")%>%
     rename(borough = gss_name)
   
-  annual_dev <- assumed_development %>%
+  annual_dev <- additional_dwellings %>%
+    filter(year != 2011) %>%
     left_join(names_lookup, by="gss_code") %>%
     arrange(gss_code, year) %>%
+    mutate(units = round(units, 2)) %>%
     tidyr::pivot_wider(names_from = "year", values_from = "units") %>%
     rename(borough = gss_name)
   
+  dir.create(paste0(output_dir,"csv"), showWarnings = FALSE)
   csvs <- list(persons=persons, males=males, females=females, components=components,
                assumed_dev = annual_dev, housing_stock = stock)
   
   lapply(seq_along(csvs),
          function(i) data.table::fwrite(csvs[[i]],
-                                        paste0(output_dir, names(csvs)[i],"_",timestamp,".csv"))) %>%
+                                        paste0(output_dir, "csv/", names(csvs)[i],"_",timestamp,".csv"))) %>%
     invisible()
   
 }
