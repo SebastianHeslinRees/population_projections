@@ -8,7 +8,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp){
   
   names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
     as.data.frame()
-  popn <- left_join(projection[[1]], names_lookup, by="gss_code") %>%
+  popn <- left_join(projection[["popn"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")
   
   females <- filter(popn, sex == "female") %>%
