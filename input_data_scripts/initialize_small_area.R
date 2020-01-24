@@ -9,7 +9,8 @@ devtools::load_all('model_code/popmodules')
 #Lookups
 ward_district_lookup <- fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/2011_ward_to_district.csv") %>%
   rbind(data.frame(gss_code_ward = "E09000001", ward_name = "City of London", gss_code = "E09000001", stringsAsFactors = FALSE)) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  mutate(ward_name = gsub(",", "", .$ward_name))
 saveRDS(ward_district_lookup, "input_data/lookup/2011_ward_to_district.rds")
 
 lsoa_to_ward_lookup <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds") %>%

@@ -1,4 +1,5 @@
-output_housing_led_projection <- function(projection, output_dir, timestamp){
+output_housing_led_projection <- function(projection, output_dir, timestamp,
+                                          assumed_development, housing_stock){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
 
@@ -58,7 +59,22 @@ output_housing_led_projection <- function(projection, output_dir, timestamp){
            dom_in, dom_out, dom_net, total_change) %>%
     arrange(gss_code, year)
   
-  csvs <- list(persons=persons, males=males, females=females, components=components)
+  browser()
+  stock <- housing_stock %>%
+    left_join(names_lookup, by="gss_code") %>%
+    arrange(gss_code, year) %>%
+    tidyr::pivot_wider(names_from = "year", values_from = "units")%>%
+    rename(borough = gss_name)
+  
+  annual_dev <- assumed_development %>%
+    left_join(names_lookup, by="gss_code") %>%
+    arrange(gss_code, year) %>%
+    tidyr::pivot_wider(names_from = "year", values_from = "units") %>%
+    rename(borough = gss_name)
+  
+  csvs <- list(persons=persons, males=males, females=females, components=components,
+               assumed_dev = annual_dev, housing_stock = stock)
+  
   lapply(seq_along(csvs),
          function(i) data.table::fwrite(csvs[[i]],
                                         paste0(output_dir, names(csvs)[i],"_",timestamp,".csv"))) %>%
