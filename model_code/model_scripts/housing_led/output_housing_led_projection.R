@@ -28,6 +28,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp){
     group_by(year, gss_code, gss_name, sex, age) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
+    mutate(popn = round(popn, digits=2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
