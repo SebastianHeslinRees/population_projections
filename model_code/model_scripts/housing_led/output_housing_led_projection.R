@@ -60,7 +60,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp){
   csvs <- list(persons=persons, males=males, females=females, components=components)
   lapply(seq_along(csvs),
          function(i) data.table::fwrite(csvs[[i]],
-                                        paste0(output_dir, names(csvs)[i],"_",timestamp,".csv"))) %>%
+                                        paste0(output_dir, names(csvs)[i],"_",timestamp,".csv")))
     invisible()
   
 }
