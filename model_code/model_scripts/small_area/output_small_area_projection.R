@@ -9,32 +9,34 @@ output_small_area_projection <- function(projection, output_dir, projection_name
   code <- paste0("gss_code_",projection_type)
   name <- paste0(projection_type, "_name")
   
-  x <- list()
-  for(i in 1:4){
+  proj_output <- list()
+  for(i in names(projection)[1:4]){
     col_nm <- last(names(projection[[i]]))
-    x[[i]] <- projection[[i]] %>%
+    proj_output[[i]] <- projection[[i]] %>%
       left_join(lookup, by=c("gss_code","gss_code_small_area")) %>%
       left_join(borough_names, by = "gss_code") %>%
       rename(borough = gss_name) %>%
       rename(!!code := gss_code_small_area) %>%
-      select(year, gss_code, borough, code, name, sex, age, col_nm) %>%
+      select_at(c("year", "gss_code", "borough", code, name, "sex", "age", col_nm)) %>%
       arrange_at(c("year", "gss_code", code, "sex", "age"))
   }
   
-  x[[5]] <- projection[[5]] %>%
+  proj_output[["assumed_development"]] <- projection[["assumed_development"]] %>%
     left_join(lookup, by=c("gss_code_small_area")) %>%
     left_join(borough_names, by = "gss_code") %>%
     rename(!!code := gss_code_small_area) %>%
     rename(borough = gss_name) %>%
-    select(year, gss_code, borough, code, name, units) %>%
+    select_at(c("year", "gss_code", "borough", code, name, "units")) %>%
     arrange_at(c("gss_code", code, "year"))
   
-  names(x) <- names(projection)
-  saveRDS(x, paste0(output_dir, projection_name, ".rds"))
-
+  #saveRDS(proj_output, paste0(output_dir, projection_name, ".rds"))
+  
+  for(i in seq_along(proj_output)) {
+    saveRDS(projection[[i]], paste0(output_dir, names(proj_output)[i],".rds"))
+  }
   
   #Published Ouputs (csv)
-  popn <- x[[1]]
+  popn <- proj_output[["population"]]
   
   females <- filter(popn, sex == "female", year >= 2011) %>%
     mutate(popn = round(popn, 2)) %>%
@@ -47,19 +49,19 @@ output_small_area_projection <- function(projection, output_dir, projection_name
     select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
   
   persons <- mutate(popn, sex = "persons") %>%
-    mutate(popn = round(popn, 2)) %>%
     dtplyr::lazy_dt() %>%
     filter(year >= 2011) %>%
     group_by_at(c("year", "gss_code", "borough", code, name, "sex", "age")) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
+    mutate(popn = round(popn, 2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
   
   components <- list()
-  for(i in 1:4){
+  for(i in names(projection)[1:4]){
     nm <- last(names(projection[[i]]))
-    components[[i]] <- rename(x[[i]], value := !!sym(nm)) %>%
+    components[[i]] <- rename(proj_output[[i]], value := !!sym(nm)) %>%
       mutate(component = nm)
   }
  
@@ -82,6 +84,7 @@ output_small_area_projection <- function(projection, output_dir, projection_name
     select_at(c("year","gss_code","borough", code, name, "value", "component"))
 
   components <- data.table::rbindlist(components, use.names = TRUE) %>%
+    as.data.frame() %>%
     select_at(c("year","gss_code","borough", code, name, "value", "component")) %>%
     rbind(births, deaths) %>%
     dtplyr::lazy_dt() %>%
@@ -101,8 +104,7 @@ output_small_area_projection <- function(projection, output_dir, projection_name
     arrange_at(c("gss_code", code, "year"))
 
   csvs <- list(persons=persons, males=males, females=females, components=components)
-  lapply(seq_along(csvs),
-         function(i) data.table::fwrite(csvs[[i]],
-                                        paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))) %>%
-    invisible()
+  for(i in seq_along(csvs)) {
+    data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
+  }
 }
