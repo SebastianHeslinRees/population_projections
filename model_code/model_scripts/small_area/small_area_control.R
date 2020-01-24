@@ -36,7 +36,8 @@ run_small_area_model <- function(config_list){
   }
   
   #Read Data
-  adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") 
+  adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") %>%
+    project_forward_flat(config_list$final_proj_yr)
   ward_to_district <- read_small_area_inputs("input_data/lookup/2011_ward_to_district.rds")
   out_migration_rates <- read_small_area_inputs('input_data/small_area_model/ward_out_migration_rates.rds')
   in_migration_characteristics <- read_small_area_inputs('input_data/small_area_model/ward_in_migration_characteristics.rds')
@@ -48,6 +49,7 @@ run_small_area_model <- function(config_list){
   ldd_data <- read_small_area_inputs(config_list$small_area_ldd_data_path)
   dwelling_trajectory <- read_small_area_inputs(config_list$small_area_dev_trajectory_path)
   
+
   #----------
   
   #TODO should the housing led model output include the backseries for the components?
@@ -61,14 +63,14 @@ run_small_area_model <- function(config_list){
   
   #TODO Change the housing-led model output names to make this easier (ie remove timestamp)
   birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "births_", config_list$housing_led_model_timestamp, ".rds")) %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    rbind(births_past)
+    rbind(births_past) %>%
+    filter(substr(gss_code,1,3)=="E09")
   death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "deaths_", config_list$housing_led_model_timestamp, ".rds")) %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    rbind(deaths_past)
+    rbind(deaths_past) %>%
+    filter(substr(gss_code,1,3)=="E09")
   popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"population_", config_list$housing_led_model_timestamp, ".rds")) %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    rbind(popn_past)
+    rbind(popn_past) %>%
+    filter(substr(gss_code,1,3)=="E09")
   
   rm(births_past, deaths_past, popn_past)
   #------------
@@ -100,11 +102,17 @@ run_small_area_model <- function(config_list){
     select(year, gss_code_small_area, units = total_units)
   
   dwelling_trajectory <- rbind(ldd_data, cumulative_future_dev) %>%
-    arrange(gss_code_small_area, year)
+    arrange(gss_code_small_area, year) %>%
+    validate_population(col_aggregation = c("year","gss_code_small_area"), col_data = "units")
   
   rm(cumulative_future_dev)
   
   #-------------------------
+  
+  # Validate all these inputs
+  validate_small_area_input_components(popn_estimates, adults_per_dwelling, out_migration_rates, in_migration_characteristics,
+                                       birth_constraint, death_constraint, popn_constraint, fertility_rates,
+                                       mortality_rates, dwelling_trajectory, config_list)
   
   #Projection loop
   curr_yr_popn <- filter(popn_estimates, year == config_list$first_proj_yr-1)
@@ -119,6 +127,8 @@ run_small_area_model <- function(config_list){
     curr_yr_birth_constraint <- filter(birth_constraint, year == projection_year)
     curr_yr_death_constraint <- filter(death_constraint, year == projection_year)
     curr_yr_dwellings <- filter(dwelling_trajectory, year == projection_year)
+    curr_yr_adults_per_dwelling <- filter(adults_per_dwelling, year == projection_year) %>%
+      select(gss_code_small_area, adults_per_dwelling)
     
     if(projection_year == config_list$last_data_year+1){
       
@@ -174,6 +184,10 @@ run_small_area_model <- function(config_list){
         mutate(mort_rate = scaling*rate)%>%
         select(year, gss_code_small_area, sex, age, mort_rate)
       
+      
+      # Validate these new data frames
+      validate_small_area_fert_mort_components(popn_estimates, small_area_fertility_rates, small_area_mortality_rates,
+                                               fertility_rates, mortality_rates, config_list)
     }
     
     #-----------------
@@ -186,19 +200,6 @@ run_small_area_model <- function(config_list){
     } else {
       curr_yr_fertility <- NULL
       curr_yr_mortality <- NULL
-    }
-    
-    
-    #---------------
-    
-    #Adults per dwelling
-    
-    if(projection_year > max(adults_per_dwelling$year)){
-      curr_yr_adults_per_dwelling <- filter(adults_per_dwelling, year == max(year)) %>%
-        select(gss_code_small_area, adults_per_dwelling)
-    } else {
-      curr_yr_adults_per_dwelling <- filter(adults_per_dwelling, year == projection_year) %>%
-        select(gss_code_small_area, adults_per_dwelling)
     }
     
     #---------------
@@ -244,4 +245,75 @@ run_small_area_model <- function(config_list){
                                lookup = ward_to_district)
   
   return(projection)
+}
+
+validate_small_area_input_components <- function(popn_estimates,
+                                                 adults_per_dwelling,
+                                                 out_migration_rates,
+                                                 in_migration_characteristics,
+                                                 birth_constraint,
+                                                 death_constraint,
+                                                 popn_constraint,
+                                                 fertility_rates,
+                                                 mortality_rates,
+                                                 dwelling_trajectory,
+                                                 config_list) {
+  # Validate inputs
+  validate_population(popn_estimates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "popn")
+  # TODO add this back in when the rates are fixed
+  #validate_population(adults_per_dwelling, col_aggregation = c("gss_code_small_area", "year"), col_data = "adults_per_dwelling")
+  validate_population(out_migration_rates, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "out_migration_rate")
+  validate_population(in_migration_characteristics, col_aggregation = c("gss_code_small_area", "age", "sex"), col_data = "in_migration_rate")
+  validate_population(birth_constraint, col_aggregation = c("gss_code", "age", "year", "sex"), col_data = "births")
+  validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "deaths")
+  validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "popn")
+  validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
+  validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"), col_data = "rate")
+  validate_population(dwelling_trajectory, col_aggregation = c("gss_code_small_area", "year"), col_data = "units")
+  
+  # Check geographies are all correct
+  domain_small_area <- unique(popn_estimates$gss_code_small_area)
+  domain <- unique(popn_estimates$gss_code)
+  assert_that(all(domain_small_area %in% adults_per_dwelling$gss_code_small_area))
+  assert_that(all(domain_small_area %in% out_migration_rates$gss_code_small_area))
+  assert_that(all(domain_small_area %in% in_migration_characteristics$gss_code_small_area))
+  assert_that(all(domain %in% birth_constraint$gss_code))
+  assert_that(all(domain %in% death_constraint$gss_code))
+  assert_that(all(domain %in% fertility_rates$gss_code))
+  assert_that(all(domain %in% mortality_rates$gss_code))
+  assert_that(all(domain_small_area %in% dwelling_trajectory$gss_code_small_area))
+  
+  # Check years are all correct
+  past_years <- (config_list$first_proj_yr - 1):config_list$last_data_year
+  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
+  if(config_list$final_proj_yr > config_list$last_data_year) {
+    all_years <- c(past_years, proj_years)
+  } else {
+    all_years <- past_years
+  }
+  assert_that(all(all_years %in% birth_constraint$year))
+  assert_that(all(all_years %in% death_constraint$year))
+  assert_that(all(proj_years %in% fertility_rates$year))
+  assert_that(all(proj_years %in% mortality_rates$year))
+  assert_that(all(all_years %in% dwelling_trajectory$year))
+  
+}
+
+# -------------------------------------------------------
+
+validate_small_area_fert_mort_components <- function(popn_estimates,
+                                                     small_area_fertility_rates,
+                                                     small_area_mortality_rates,
+                                                     fertility_rates,
+                                                     mortality_rates,
+                                                     config_list) {
+  domain <- unique(popn_estimates$gss_code)
+  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
+  
+  validate_population(small_area_fertility_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "rate")
+  validate_population(small_area_mortality_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "rate")
+  assert_that(all(domain %in% fertility_rates$gss_code))
+  assert_that(all(domain %in% mortality_rates$gss_code))
+  assert_that(all(proj_years %in% fertility_rates$year))
+  assert_that(all(proj_years %in% mortality_rates$year)) 
 }

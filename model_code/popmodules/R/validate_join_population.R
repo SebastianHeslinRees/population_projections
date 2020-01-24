@@ -81,8 +81,8 @@ validate_join_population <- function(pop1,
   }
 
   # cut down to only the columns we're interested in
-  test_pop1 <- dplyr::select(pop1, names(cols_common_aggregation))
-  test_pop2 <- dplyr::select(pop2, unname(cols_common_aggregation))
+  test_pop1 <- dplyr::select(as.data.frame(pop1), names(cols_common_aggregation))
+  test_pop2 <- dplyr::select(as.data.frame(pop2), unname(cols_common_aggregation))
 
   # convert aggregation columns to factors with common levels
   # warn when factor levels don't match
@@ -188,10 +188,10 @@ validate_join_population_inputs <-function(pop1,
                         collapse = " "))
 
   # Check no missing values
-  if(any(!complete.cases(dplyr::select(pop1, names(cols_common_aggregation))))) {
+  if(any(!complete.cases(dplyr::select(as.data.frame(pop1), names(cols_common_aggregation))))) {
     warning("validate_join_population was given NA values in the aggregation levels of pop1")
   }
-  if(any(!complete.cases(dplyr::select(pop2, unname(cols_common_aggregation))))) {
+  if(any(!complete.cases(dplyr::select(as.data.frame(pop2), unname(cols_common_aggregation))))) {
     warning("validate_join_population was given NA values in the aggregation levels of pop2")
   }
 

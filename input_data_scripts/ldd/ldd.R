@@ -54,7 +54,12 @@ demos <- x %>%
                        as.character(date_work_comp)),
          unit_line_flow = unit_line_flow*-1) %>%
   rename(gss_code_lsoa = lsoa11cd) %>%
-  select(names(comps))
+  select(names(comps)) %>%
+  #This is temporary fix to solve a problem in the underlying data
+  #Libby is looking into a more permanent and robust fix
+  filter(permission_id != 347048)
+
+warning("Filtering out permission 347048 while waiting for a better fix")
 
 #Assign to mid-year
 ldd_by_mid_year <- rbind(demos, comps) %>%
@@ -160,4 +165,3 @@ borough_units <- left_join(cumulative_units, lsoa_to_borough, by="gss_code_lsoa"
 saveRDS(borough_units, "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
 saveRDS(ward_units, "input_data/small_area_model/ldd_backseries_dwellings_ward.rds")
 saveRDS(msoa_units, "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds")
-

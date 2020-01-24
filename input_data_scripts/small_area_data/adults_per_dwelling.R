@@ -2,7 +2,7 @@
 
 library(dplyr)
 
-most_recent_data_year <- 2017
+most_recent_data_year <- 2018
 
 #Data paths
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
@@ -12,10 +12,7 @@ borough_ldd_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borou
 
 #Load previously processed LDD, ward pop and communal est pop data
 #LDD data has been converted to total dwelling stock by ward by year
-ldd_units <- readRDS(borough_ldd_path) %>%
-  filter(gss_code == "E09000001") %>%
-  rename(gss_code_ward = gss_code) %>%
-  rbind(readRDS(ward_ldd_path)) %>% 
+ldd_units <- readRDS(ward_ldd_path) %>% 
   filter(year %in% 2012:most_recent_data_year)
 
 ward_popn <- readRDS(ward_estimates_path) %>%

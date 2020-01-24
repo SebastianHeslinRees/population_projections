@@ -5,12 +5,11 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
 
   lapply(seq_along(projection),
          function(i) saveRDS(projection[[i]],
-                             paste0(output_dir, names(projection)[i],"_",timestamp,".rds"))) %>%
-    invisible()
+                             paste0(output_dir, names(projection)[i],"_",timestamp,".rds")))
   
   names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
     as.data.frame()
-  popn <- left_join(projection[[1]], names_lookup, by="gss_code") %>%
+  popn <- left_join(projection[["popn"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")
   
   females <- filter(popn, sex == "female") %>%
@@ -26,11 +25,11 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
   
   persons <- mutate(popn, sex = "persons") %>%
-    mutate(popn = round(popn, digits=2)) %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code, gss_name, sex, age) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
+    mutate(popn = round(popn, digits=2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))

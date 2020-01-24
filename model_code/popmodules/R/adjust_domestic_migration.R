@@ -41,7 +41,7 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                       col_popn, col_target,
                                       rows_to_constrain = TRUE){
 
-  validate_join_population(popn, target, cols_common_aggregation = col_aggregation,
+  validate_join_population(popn[rows_to_constrain,], target, cols_common_aggregation = col_aggregation,
                            many2one = TRUE, one2many = FALSE, warn_unused_shared_cols = FALSE)
 
   #find diff between popn and target
@@ -112,5 +112,4 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
               dom_out = adjusted_dom_out))
 
 }
-
 

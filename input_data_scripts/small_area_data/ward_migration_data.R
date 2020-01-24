@@ -4,11 +4,11 @@ library(tidyr)
 devtools::load_all("model_code/popmodules")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-14.rds"
+mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
-borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-14.rds"
-borough_int_in_path <- "input_data/mye/2018/international_in_gla_2019-11-14.rds"
+borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
+borough_int_in_path <- "input_data/mye/2018/international_in_gla_2019-11-13.rds"
 borough_deaths_path <- "input_data/mye/2018/deaths_ons.rds"
 
 #census data
@@ -218,14 +218,15 @@ if(any(ix)) {
         warning(paste(sum(ix), "outmigration levels had rates > 0.8, these will be capped."))
 }        
 
-out_migration_rate <- mutate(out_migration_rate = ifelse(out_migration_rate > 0.8, 0.8, out_migration_rate))
+out_migration_rates <- out_migration_rates %>%
+        mutate(out_migration_rate = ifelse(out_migration_rate > 0.8, 0.8, out_migration_rate))
 
 
 ####In migration distribution####
 in_migration_characteristics <- left_join(domestic_in, international_in,
                                           by=c("gss_code_ward","sex","age")) %>%
         mutate(all_in_migration = domestic_in_migrants + international) %>%
-        group_by(gss_code_ward, sex) %>%
+        group_by(gss_code_ward) %>%
         mutate(adult_only = ifelse(age >= 18, all_in_migration, 0)) %>%
         mutate(final_dist = all_in_migration / sum(adult_only)) %>%
         as.data.frame() %>%

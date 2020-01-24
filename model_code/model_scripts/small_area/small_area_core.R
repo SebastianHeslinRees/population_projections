@@ -1,15 +1,42 @@
-#TODO: Description
-
-# start_population = curr_yr_popn
-# births = births
-# deaths = deaths
-# popn_constraint = curr_yr_popn_constraint
-# birth_constraint = curr_yr_birth_constraint
-# death_constraint = curr_yr_death_constraint
-# fertility_rates = curr_yr_fertility
-# mortality_rates = curr_yr_mortality
-# adults_per_dwelling = curr_yr_adults_per_dwelling
-# dwellings = curr_yr_dwellings
+#' Small area model core: calculate components of change and next year's
+#' population
+#'
+#' @param start_population Data frame. Initial population at small area
+#'   resolution.
+#' @param births Data frame. Historical births backseries at small area
+#'   resolution. Used when \code{projection_year} is \code{last_data_year} or
+#'   earlier.
+#' @param deaths Data frame. Historical deaths backseries at small area
+#'   resolution. Used when \code{projection_year} is \code{last_data_year} or
+#'   earlier.
+#' @param communal_est_popn Data frame. Static communal establishment population
+#'   at small area resolution.
+#' @param out_migration_rates Data frame. Static outmigration rates at small
+#'   area resolution.
+#' @param in_migration_characteristics Data frame. Static inmigration rates at
+#'   small area resolution. Rates should give the number of people by age and
+#'   sex that migrate to an area for each adult (over 18) that migrates to an
+#'   area (that is, the rates will sum to a bit more than 1 for each geography).
+#' @param popn_constraint Data frame. Population by borough to constrain the
+#'   output to.
+#' @param birth_constraint Data frame. Births by borough to constrain the output
+#'   to.
+#' @param death_constraint Data frame. Deaths by borough to constrain the output
+#'   to.
+#' @param fertility_rates NULL or data frame. Fertility rates at small area
+#'   resolution. Used when \code{projection_year} is after
+#'   \code{last_data_year}.
+#' @param mortality_rates NULL or data frame. Mortality rates at small area
+#'   resolution. Used when \code{projection_year} is after
+#'   \code{last_data_year}.
+#' @param last_data_year Integer. Year at which the model switches from using
+#'   historical births and deaths from \code{births} and \code{deaths} to
+#'   projected rates from \code{fertility_rates} and \code{mortality_rates}.
+#' @param dwellings Data frame. Number of dwellings at small area resolution.
+#' @param adults_per_dwelling Data frame. Ratio of adults to dwellings at small
+#'   area resolution.
+#' @param projection_year Integer. Uh, the projection year.
+#' @param ward_to_district Data frame. A lookup from ward to borough codes.
 
 
 small_area_core <- function(start_population, births, deaths, communal_est_popn,
@@ -40,7 +67,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
       summarise(births = sum(births)) %>%
       as.data.frame()
   }
-  #browser()
+
   #Constrain births
   curr_yr_births <- left_join(curr_yr_births, ward_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint = birth_constraint,
@@ -141,9 +168,8 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   
   #Add in-migration
   #Add communal establishment popn back in
-  unconstrined_popn <- left_join(household_popn, in_migration, by = c("gss_code_small_area", "sex", "age")) %>%
-    mutate(household_popn = household_popn + in_migrants) %>%
-    mutate(popn = household_popn + ce_popn)
+  unconstrined_popn <- left_join(popn_post_out_migration, in_migration, by = c("gss_code_small_area", "sex", "age")) %>%
+    mutate(popn = popn + in_migrants)
   
   #constrain borough populations to match constraint
   constrained_popn <- left_join(unconstrined_popn, ward_to_district, by="gss_code_small_area") %>%

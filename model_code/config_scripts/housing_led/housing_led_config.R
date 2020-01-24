@@ -13,6 +13,7 @@ hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
 final_proj_yr <- 2020
 ahs_cap_year <- 2019
+
 ldd_max_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/")
