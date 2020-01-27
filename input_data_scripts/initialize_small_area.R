@@ -24,7 +24,7 @@ rm(ward_district_lookup, lsoa_to_ward_lookup, merged_to_electoral_ward)
 
 #LDD Polygon splits file
 polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")
-saveRDS(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv")
+write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)
 rm(polygon_splits)
 
 source('input_data_scripts/ldd/ldd.R')
@@ -80,6 +80,5 @@ test_ward_inputs(out_migration_rates)
 test_ward_inputs(in_migration_characteristics)
 test_ward_inputs(births, c("year", "gss_code_ward", "age_group"))
 test_ward_inputs(deaths, c("year", "gss_code_ward", "sex", "age_group"))
-
 
 
