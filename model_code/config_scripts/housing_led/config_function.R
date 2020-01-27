@@ -3,9 +3,7 @@ run_bpo_projection <- function(projection_name,
                                small_area_dev_trajectory_path,
                                first_proj_yr,
                                final_proj_yr){
-  
-  devtools::load_all('model_code/popmodules')
-  
+  tm <- Sys.time()
   #Setup
   external_trend_path <- "outputs/trend/2018/2018_central/"
   external_trend_datestamp <- "19-11-13_2056"
@@ -44,17 +42,16 @@ run_bpo_projection <- function(projection_name,
   #run projection
   source('model_code/model_scripts/housing_led/housing_led_control.R')
   borough_projection <- run_housing_led_model(config_list)
-  log_warnings(paste0("outputs/housing_led/2018/",config_list$projection_name,"/warnings_",config_list$timestamp,".txt"))
+  log_warnings(paste0(config_list$output_dir,"/warnings_",config_list$timestamp,".txt"))
   
   #----
-  ####WARD MODEL
   
+  ####WARD MODEL
   small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
   small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
   small_area_births_backseries_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
   small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
   small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
-  
   
   housing_led_model_path <- paste0("outputs/housing_led/2018/",config_list$projection_name,"/")
   housing_led_model_timestamp <- config_list$timestamp
@@ -100,13 +97,16 @@ run_bpo_projection <- function(projection_name,
                            
                            small_area_output_dir = small_area_output_dir)
   
-  rm(list = setdiff(ls(), "ward_config_list"))
+  rm(list = setdiff(ls(), c("ward_config_list","borough_projection","tm")))
   
-  source('M:/Projects/population_projections/model_code/model_scripts/small_area/small_area_control.R')
-  dir.create(ward_config_list$small_area_output_dir, showWarnings = FALSE)
+  source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$small_area_output_dir,ward_config_list$projection_name,"_warnings.txt"))
+  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
   
-  message("complete")
+  message("Complete")
+  
+  return(list(borough_projection = borough_projection,
+              ward_projection = ward_projection))
   
 }

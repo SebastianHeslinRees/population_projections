@@ -158,7 +158,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     summarise(adults = sum(household_popn)) %>%
     as.data.frame() %>%
     left_join(target_adults, by=c("gss_code_small_area")) %>%
-    mutate(inflow = adults - target) %>%
+    mutate(inflow = target - adults) %>%
     select(year, gss_code_small_area, inflow)
   
   #apply in-migration characteristics rates to inflow
@@ -189,7 +189,6 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   return(list(population = final_popn,
               births = rename(curr_yr_births, births = popn),
               deaths = curr_yr_deaths,
-              migration = final_migration,
-              assumed_development = dwellings))
+              migration = final_migration))
 }
 
