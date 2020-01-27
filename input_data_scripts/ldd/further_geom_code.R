@@ -16,7 +16,7 @@ ldd_unit_flow_file <- "N:/LDD/Unit flow analysis/output_data/IMA/2019_12/0_ldd_d
 # Remove polygons which superseed earlier permissions
 # Should give us a better idea of where units were/will be actually built
 # This takes a while
-polys_in <- st_read(perm_poly_file, layer = "LDD_polygons_clean_from_pg",
+polys_in <- st_read(perm_poly_file, layer = "ldd_polygons_clean",
                  stringsAsFactors = FALSE)
 load(ldd_unit_flow_file) # ldd_development_unit_flow
 
