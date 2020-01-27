@@ -24,11 +24,11 @@ ldd_raw <- ldd_development_unit_flow %>%
 polygon_split <- data.table::fread("input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv") %>%
   as.data.frame() %>%
   mutate(permission_id = as.character(permission_id)) %>%
-  select(permission_id, lsoa11cd, area_prop)
+  select(permission_id, lsoa11cd, demolition, area_prop)
 
 permissions_w_polygons <- select(ldd_raw, -lsoa11cd) %>%
   filter(permission_id %in% polygon_split$permission_id) %>%
-  right_join(polygon_split, by="permission_id")
+  right_join(polygon_split, by=c("permission_id", "demolition"))
 
 permissions_no_polygons <- filter(ldd_raw, !permission_id %in% polygon_split$permission_id) %>%
   mutate(area_prop = 1) %>%
@@ -54,12 +54,11 @@ demos <- x %>%
                        as.character(date_work_comp)),
          unit_line_flow = unit_line_flow*-1) %>%
   rename(gss_code_lsoa = lsoa11cd) %>%
-  select(names(comps)) %>%
-  #This is temporary fix to solve a problem in the underlying data
-  #Libby is looking into a more permanent and robust fix
-  filter(permission_id != 347048)
-
-warning("Filtering out permission 347048 while waiting for a better fix")
+  select(names(comps)) # %>%
+  ##This is temporary fix to solve a problem in the underlying data
+  ##Libby is looking into a more permanent and robust fix
+  #filter(permission_id != 347048)
+  #warning("Filtering out permission 347048 while waiting for a better fix")
 
 #Assign to mid-year
 ldd_by_mid_year <- rbind(demos, comps) %>%
@@ -99,7 +98,7 @@ lsoa_units <- lsoa_census_dwellings %>%
 # 
 # lsoa_units <- select(cumulative_units, year, gss_code_lsoa, units)
 
-#group it into differnet geographies
+#group it into different geographies
 ward_units <- left_join(lsoa_units, lsoa_to_ward, by="gss_code_lsoa") %>%
   left_join(ward_to_district, by = "gss_code_ward") %>%
   mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>%
