@@ -96,18 +96,18 @@ run_housing_led_model <- function(config_list){
   
   #census stock in 2011 + LDD development upto 2019
   ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
+    filter(year <= ldd_max_yr) %>%
     select(names(development_trajectory))
   
-  dwelling_trajectory <- filter(ldd_backseries, year == config_list$ldd_max_yr) %>%
-    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>% 
+  additional_dwellings <- ldd_backseries %>%
+    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>%
+    arrange(gss_code, year)
+    
+  dwelling_trajectory <- additional_dwellings %>%
     group_by(gss_code) %>%
     mutate(dwellings = cumsum(units)) %>%
-    ungroup() %>%
-    select(year, gss_code, dwellings)
-  
-  dwelling_trajectory <- filter(ldd_backseries, year < config_list$ldd_max_yr) %>%
-    rename(dwellings = units) %>%
-    rbind(dwelling_trajectory) %>%
+    as.data.frame() %>%
+    select(year, gss_code, dwellings) %>%
     arrange(gss_code, year)
   
   dwelling2household_ratio <- filter(external_trend_households,
@@ -192,10 +192,15 @@ run_housing_led_model <- function(config_list){
   message(" ")
   message("Running outputs")
   projection <- arrange_housing_led_core_outputs(projection,
-                                                 first_proj_yr, final_proj_yr,
-                                                 config_list$external_trend_path,
-                                                 config_list$external_trend_datestamp)
+                                                 first_proj_yr,
+                                                 final_proj_yr)
   
-  output_housing_led_projection(projection, config_list$output_dir, config_list$timestamp)
+  output_housing_led_projection(projection,
+                                config_list$output_dir,
+                                config_list$timestamp,
+                                config_list$external_trend_path,
+                                config_list$external_trend_datestamp,
+                                additional_dwellings,
+                                dwelling_trajectory)
   
 }

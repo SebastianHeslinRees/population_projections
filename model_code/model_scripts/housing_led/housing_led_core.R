@@ -24,8 +24,8 @@ housing_led_core <- function(start_population,
   #So that totals match at the borough level
   births <- component_constraints[['birth_constraint']] %>%
     filter(gss_code %in% constrain_gss, year == projection_year) %>%
-    mutate(female = births/1.05,
-           male = births*1.05,
+    mutate(female = births*(100/205),
+           male = births*(105/205),
            age = 0) %>%
     select(-births) %>%
     tidyr::pivot_longer(c("female","male"), names_to = "sex", values_to="births")

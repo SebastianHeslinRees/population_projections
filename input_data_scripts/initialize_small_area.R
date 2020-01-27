@@ -8,7 +8,8 @@ library(tidyr)
 #Lookups
 ward_district_lookup <- fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/2011_ward_to_district.csv") %>%
   rbind(data.frame(gss_code_ward = "E09000001", ward_name = "City of London", gss_code = "E09000001", stringsAsFactors = FALSE)) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  mutate(ward_name = gsub(",", "", .$ward_name))
 saveRDS(ward_district_lookup, "input_data/lookup/2011_ward_to_district.rds")
 
 lsoa_to_ward_lookup <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds") %>%
@@ -20,6 +21,11 @@ merged_to_electoral_ward <- data.table::fread("Q:/Teams/D&PA/Census/Lookups/EW/2
 saveRDS(merged_to_electoral_ward, "input_data/lookup/2011_merged_ward_to_electoral_ward.rds")
 
 rm(ward_district_lookup, lsoa_to_ward_lookup, merged_to_electoral_ward)
+
+#LDD Polygon splits file
+polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")
+write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)
+rm(polygon_splits)
 
 source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
@@ -57,6 +63,5 @@ test_ward_inputs(out_migration_rates)
 test_ward_inputs(in_migration_characteristics)
 test_ward_inputs(births, c("year", "gss_code_ward", "age_group"))
 test_ward_inputs(deaths, c("year", "gss_code_ward", "sex", "age_group"))
-
 
 
