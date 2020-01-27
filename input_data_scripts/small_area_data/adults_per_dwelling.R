@@ -5,7 +5,7 @@ library(dplyr)
 most_recent_data_year <- 2018
 
 #Data paths
-ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+ward_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
 ward_communal_est_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 ward_ldd_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
 

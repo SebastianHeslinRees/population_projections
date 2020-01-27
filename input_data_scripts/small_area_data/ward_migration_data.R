@@ -4,7 +4,6 @@ library(tidyr)
 devtools::load_all("model_code/popmodules")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
 borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
@@ -20,7 +19,7 @@ ward_in_migration_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0
 #pre-processed ward model inputs
 ward_births_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
 ward_deaths_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
-ward_popn_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+ward_popn_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
 
 #lookup
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%

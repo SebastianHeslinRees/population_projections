@@ -40,7 +40,7 @@ london_wards <- filter(ward_district_lookup, substr(gss_code,1,3) == "E09") %>%
 london_wards <- sort(c(unique(london_wards$gss_code_ward), "E09000001"))
 
 adults_per_dwelling <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
-pop_est <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+pop_est <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
 ce_est <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 out_migration_rates <- "input_data/small_area_model/ward_out_migration_rates.rds"
 in_migration_characteristics <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
