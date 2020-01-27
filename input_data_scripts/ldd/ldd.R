@@ -83,7 +83,7 @@ lsoa_units <- lsoa_census_dwellings %>%
   as.data.frame() %>%
   mutate(year = 2011) %>%
   rename(add_units = dwellings) %>%
-  select(names(additional_units)) %>%
+  select_at(names(additional_units)) %>%
   rbind(additional_units) %>%
   group_by(year, gss_code_lsoa) %>%
   summarise(units = sum(add_units)) %>%

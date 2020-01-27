@@ -79,6 +79,5 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
   
   lapply(seq_along(csvs),
          function(i) data.table::fwrite(csvs[[i]],
-                                        paste0(output_dir, "csv/", names(csvs)[i],"_",timestamp,".csv")))
-  
+                                        paste0(output_dir, "csv/", names(csvs)[i],"_",timestamp,".csv")))  
 }
