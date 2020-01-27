@@ -1,5 +1,6 @@
 output_housing_led_projection <- function(projection, output_dir, timestamp,
-                                          external_trend_path, external_trend_datestamp){
+                                          external_trend_path, external_trend_datestamp,
+                                          additional_dwellings, housing_stock){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
 

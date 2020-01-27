@@ -192,13 +192,14 @@ run_housing_led_model <- function(config_list){
   message(" ")
   message("Running outputs")
   projection <- arrange_housing_led_core_outputs(projection,
-                                                 first_proj_yr, final_proj_yr,
-                                                 config_list$external_trend_path,
-                                                 config_list$external_trend_datestamp)
+                                                 first_proj_yr,
+                                                 final_proj_yr)
   
   output_housing_led_projection(projection,
                                 config_list$output_dir,
                                 config_list$timestamp,
+                                config_list$external_trend_path,
+                                config_list$external_trend_datestamp,
                                 additional_dwellings,
                                 dwelling_trajectory)
   
