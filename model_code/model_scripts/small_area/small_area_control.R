@@ -88,24 +88,16 @@ run_small_area_model <- function(config_list){
   #Create the cumulative development trajectory
   final_ldd_year <- max(ldd_data$year)
   
-  last_ldd_year_data <- filter(ldd_data, year == final_ldd_year) %>%
-    select(-year)
-  
-  cumulative_future_dev <- dwelling_trajectory %>%
+  dwelling_trajectory <- dwelling_trajectory %>%
     filter(year > final_ldd_year) %>%
+    rbind(ldd_data) %>%
     group_by(gss_code_small_area) %>%
-    mutate(cum_units = cumsum(units)) %>%
+    mutate(units = cumsum(units)) %>%
     as.data.frame() %>%
-    select(-units) %>%
-    left_join(last_ldd_year_data, by="gss_code_small_area") %>%
-    mutate(total_units = units + cum_units) %>%
-    select(year, gss_code_small_area, units = total_units)
-  
-  dwelling_trajectory <- rbind(ldd_data, cumulative_future_dev) %>%
+    select(year, gss_code_small_area, units) %>%
     arrange(gss_code_small_area, year) %>%
     validate_population(col_aggregation = c("year","gss_code_small_area"), col_data = "units")
-  
-  rm(cumulative_future_dev)
+
   
   #-------------------------
   
