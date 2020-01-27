@@ -26,6 +26,7 @@ birth_rate_n_years_to_avg <- 5
 death_rate_n_years_to_avg <- 5
 
 projection_type <- "ward"
+projection_name <- paste0(projection_name,"_",projection_type)
 
 small_area_output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/",projection_type,"/")
 
