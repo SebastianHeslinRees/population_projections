@@ -33,16 +33,17 @@ arrange_housing_led_core_outputs <- function(projection, first_proj_yr, final_pr
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   proj_ahs <- data.frame(data.table::rbindlist(proj_ahs, use.names=TRUE))
   proj_ahs_choice <- data.frame(data.table::rbindlist(proj_ahs_choice, use.names=TRUE))
+  
+  
+  projection <- list(population = proj_popn,
+                     births = proj_births,
+                     deaths = proj_deaths,
+                     int_out = proj_int_out,
+                     int_in = proj_int_in,
+                     dom_out = proj_dom_out,
+                     dom_in = proj_dom_in,
+                     ahs = proj_ahs,
+                     ahs_choice = proj_ahs_choice)
 
-  
-  return(list(population = proj_popn,
-              deaths = proj_deaths,
-              births = proj_births,
-              int_out = proj_int_out,
-              int_in = proj_int_in,
-              dom_out = proj_dom_out,
-              dom_in = proj_dom_in,
-              ahs = proj_ahs,
-              ahs_choice = proj_ahs_choice))
-  
+  return(projection)
 }

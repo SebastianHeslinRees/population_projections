@@ -51,6 +51,9 @@ constrain_component <- function(popn,
                                 col_popn,
                                 col_constraint = col_popn,
                                 rows_to_constrain = TRUE) {
+  
+  assertthat::assert_that(sum(is.na(filter(popn, rows_to_constrain)))==0,
+                              msg="in constrain_component, there are NA values present in the popn data frame")
 
   scaling_factors <- calculate_scaling_factors(popn, constraint,
                                                col_aggregation = col_aggregation,

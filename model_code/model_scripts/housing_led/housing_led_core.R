@@ -24,11 +24,11 @@ housing_led_core <- function(start_population,
   #So that totals match at the borough level
   births <- component_constraints[['birth_constraint']] %>%
     filter(gss_code %in% constrain_gss, year == projection_year) %>%
-    mutate(female = births/1.05,
-           male = births*1.05,
+    mutate(female = births*(100/205),
+           male = births*(105/205),
            age = 0) %>%
     select(-births) %>%
-    pivot_longer(c("female","male"), names_to = "sex", values_to="births")
+    tidyr::pivot_longer(c("female","male"), names_to = "sex", values_to="births")
   
   deaths <- trend_projection[['deaths']] %>%
     constrain_component(constraint = component_constraints[['death_constraint']],
@@ -161,7 +161,7 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
- 
+
   #10. Constrain total population
   constrained_population <- constrain_to_hma(popn = adjusted_population,
                                              constraint = hma_constraint,
@@ -186,7 +186,8 @@ housing_led_core <- function(start_population,
                                                         dom_out = dom_out,
                                                         col_aggregation = c("year","gss_code","sex","age"),
                                                         col_popn = "popn",
-                                                        col_target = "popn")
+                                                        col_target = "popn",
+                                                        rows_to_constrain = adjusted_population$gss_code %in% hma_list$gss_code)
   
   #TODO More validation needed here?
   constrained_population <- check_negative_values(constrained_population, "popn")

@@ -24,11 +24,11 @@ ldd_raw <- ldd_development_unit_flow %>%
 polygon_split <- data.table::fread("input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv") %>%
   as.data.frame() %>%
   mutate(permission_id = as.character(permission_id)) %>%
-  select(permission_id, lsoa11cd, area_prop)
+  select(permission_id, lsoa11cd, demolition, area_prop)
 
 permissions_w_polygons <- select(ldd_raw, -lsoa11cd) %>%
   filter(permission_id %in% polygon_split$permission_id) %>%
-  right_join(polygon_split, by="permission_id")
+  right_join(polygon_split, by=c("permission_id", "demolition"))
 
 permissions_no_polygons <- filter(ldd_raw, !permission_id %in% polygon_split$permission_id) %>%
   mutate(area_prop = 1) %>%
@@ -54,7 +54,11 @@ demos <- x %>%
                        as.character(date_work_comp)),
          unit_line_flow = unit_line_flow*-1) %>%
   rename(gss_code_lsoa = lsoa11cd) %>%
-  select(names(comps))
+  select(names(comps)) %>%
+  ##This is temporary fix to solve a problem in the underlying data
+  ##Libby is looking into a more permanent and robust fix
+  filter(permission_id != 347048)
+  warning("Filtering out permission 347048 while waiting for a better fix")
 
 #Assign to mid-year
 ldd_by_mid_year <- rbind(demos, comps) %>%
@@ -74,18 +78,28 @@ additional_units <- ldd_by_mid_year %>%
   tidyr::complete(year = 2011:2019, gss_code_lsoa = unique(lsoa_to_borough$gss_code_lsoa), fill = list(add_units = 0))
 
 #Calculate stock
-cumulative_units <- additional_units %>%
-  arrange(gss_code_lsoa, year) %>%
-  group_by(gss_code_lsoa) %>%
-  mutate(cum_units = cumsum(add_units)) %>%
-  ungroup() %>%
-  left_join(lsoa_census_dwellings, by = "gss_code_lsoa") %>%
-  mutate(units = cum_units + dwellings)
+lsoa_units <- lsoa_census_dwellings %>%
+  as.data.frame() %>%
+  mutate(year = 2011) %>%
+  rename(add_units = dwellings) %>%
+  select_at(names(additional_units)) %>%
+  rbind(additional_units) %>%
+  group_by(year, gss_code_lsoa) %>%
+  summarise(units = sum(add_units)) %>%
+  as.data.frame()
 
-lsoa_units <- select(cumulative_units, year, gss_code_lsoa, units)
+# cumulative_units <- additional_units %>%
+#   arrange(gss_code_lsoa, year) %>%
+#   group_by(gss_code_lsoa) %>%
+#   mutate(cum_units = cumsum(add_units)) %>%
+#   ungroup() %>%
+#   left_join(lsoa_census_dwellings, by = "gss_code_lsoa") %>%
+#   mutate(units = cum_units + dwellings)
+# 
+# lsoa_units <- select(cumulative_units, year, gss_code_lsoa, units)
 
-#group it into differnet geographies
-ward_units <- left_join(cumulative_units, lsoa_to_ward, by="gss_code_lsoa") %>%
+#group it into different geographies
+ward_units <- left_join(lsoa_units, lsoa_to_ward, by="gss_code_lsoa") %>%
   left_join(ward_to_district, by = "gss_code_ward") %>%
   mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>%
   group_by(year, gss_code_ward) %>%
@@ -93,13 +107,13 @@ ward_units <- left_join(cumulative_units, lsoa_to_ward, by="gss_code_lsoa") %>%
   ungroup() %>%
   as.data.frame()
 
-msoa_units <- left_join(cumulative_units, lsoa_to_msoa, by="gss_code_lsoa") %>%
+msoa_units <- left_join(lsoa_units, lsoa_to_msoa, by="gss_code_lsoa") %>%
   group_by(year, gss_code_msoa) %>%
   summarise(units = sum(units)) %>%
   ungroup() %>%
   as.data.frame()
 
-borough_units <- left_join(cumulative_units, lsoa_to_borough, by="gss_code_lsoa") %>%
+borough_units <- left_join(lsoa_units, lsoa_to_borough, by="gss_code_lsoa") %>%
   group_by(year, gss_code) %>%
   summarise(units = sum(units)) %>%
   ungroup() %>%

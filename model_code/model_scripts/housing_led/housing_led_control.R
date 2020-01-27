@@ -1,5 +1,7 @@
 run_housing_led_model <- function(config_list){
   
+  message("Running borough model")
+  
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -34,23 +36,24 @@ run_housing_led_model <- function(config_list){
                        "first_proj_yr",
                        "final_proj_yr",
                        "ldd_max_yr",
-                       "timestamp")
+                       "timestamp",
+                       "output_dir")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   #component rates
   component_rates <- get_data_from_file(
-         list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates_",config_list$external_trend_datestamp,".rds"),
-              mortality_rates = paste0(config_list$external_trend_path,"mortality_rates_",config_list$external_trend_datestamp,".rds"),
-              int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_",config_list$external_trend_datestamp,".rds"),
-              int_in_flows = paste0(config_list$external_trend_path,"int_in_",config_list$external_trend_datestamp,".rds"),
-              domestic_rates = paste0(config_list$external_trend_path,"domestic_rates_",config_list$external_trend_datestamp,".rds")))
+    list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates_",config_list$external_trend_datestamp,".rds"),
+         mortality_rates = paste0(config_list$external_trend_path,"mortality_rates_",config_list$external_trend_datestamp,".rds"),
+         int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_",config_list$external_trend_datestamp,".rds"),
+         int_in_flows = paste0(config_list$external_trend_path,"int_in_",config_list$external_trend_datestamp,".rds"),
+         domestic_rates = paste0(config_list$external_trend_path,"domestic_rates_",config_list$external_trend_datestamp,".rds")))
   
   #For constraining
   component_constraints <- get_data_from_file(
-      list(birth_constraint = paste0(config_list$external_trend_path,"births_",config_list$external_trend_datestamp,".rds"),
-           death_constraint = paste0(config_list$external_trend_path,"deaths_",config_list$external_trend_datestamp,".rds"),
-           international_out_constraint = paste0(config_list$external_trend_path,"int_out_",config_list$external_trend_datestamp,".rds"))) %>%
+    list(birth_constraint = paste0(config_list$external_trend_path,"births_",config_list$external_trend_datestamp,".rds"),
+         death_constraint = paste0(config_list$external_trend_path,"deaths_",config_list$external_trend_datestamp,".rds"),
+         international_out_constraint = paste0(config_list$external_trend_path,"int_out_",config_list$external_trend_datestamp,".rds"))) %>%
     create_constraints()
   
   #housing market area constraint
@@ -93,18 +96,18 @@ run_housing_led_model <- function(config_list){
   
   #census stock in 2011 + LDD development upto 2019
   ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
+    filter(year <= ldd_max_yr) %>%
     select(names(development_trajectory))
   
-  dwelling_trajectory <- filter(ldd_backseries, year == config_list$ldd_max_yr) %>%
-    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>% 
+  additional_dwellings <- ldd_backseries %>%
+    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>%
+    arrange(gss_code, year)
+    
+  dwelling_trajectory <- additional_dwellings %>%
     group_by(gss_code) %>%
     mutate(dwellings = cumsum(units)) %>%
-    ungroup() %>%
-    select(year, gss_code, dwellings)
-  
-  dwelling_trajectory <- filter(ldd_backseries, year < config_list$ldd_max_yr) %>%
-    rename(dwellings = units) %>%
-    rbind(dwelling_trajectory) %>%
+    as.data.frame() %>%
+    select(year, gss_code, dwellings) %>%
     arrange(gss_code, year)
   
   dwelling2household_ratio <- filter(external_trend_households,
@@ -138,8 +141,8 @@ run_housing_led_model <- function(config_list){
   source('model_code/model_scripts/housing_led/output_housing_led_projection.R')
   
   #Starting population
-  curr_yr_popn <- readRDS(paste0(external_trend_path, "population_", external_trend_datestamp,".rds")) %>%
-    filter(year == first_proj_yr-1)
+  curr_yr_popn <- readRDS(paste0(config_list$external_trend_path, "population_", config_list$external_trend_datestamp,".rds")) %>%
+    filter(year == config_list$first_proj_yr-1)
   
   #Other varibales
   ahs_cap <- NULL
@@ -157,7 +160,7 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households <- filter(household_trajectory, year == projection_year)
     curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
-   
+    
     trend_projection <- trend_core(start_population = curr_yr_popn,
                                    fertility_rates = curr_yr_fertility, 
                                    mortality_rates = curr_yr_mortality,
@@ -187,10 +190,17 @@ run_housing_led_model <- function(config_list){
   }
   
   message(" ")
+  message("Running outputs")
+  projection <- arrange_housing_led_core_outputs(projection,
+                                                 first_proj_yr,
+                                                 final_proj_yr)
   
-  projection <- arrange_housing_led_core_outputs(projection, first_proj_yr, final_proj_yr)
-  
-  output_dir <- paste0("outputs/housing_led/2018/",config_list$projection_name,"/")
-  output_housing_led_projection(projection, output_dir, config_list$timestamp)
+  output_housing_led_projection(projection,
+                                config_list$output_dir,
+                                config_list$timestamp,
+                                config_list$external_trend_path,
+                                config_list$external_trend_datestamp,
+                                additional_dwellings,
+                                dwelling_trajectory)
   
 }

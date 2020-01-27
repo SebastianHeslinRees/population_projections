@@ -38,9 +38,10 @@
 
 adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                       col_aggregation = c("year","gss_code"),
-                                      col_popn, col_target){
+                                      col_popn, col_target,
+                                      rows_to_constrain = TRUE){
 
-  validate_join_population(popn, target, cols_common_aggregation = col_aggregation,
+  validate_join_population(popn[rows_to_constrain,], target, cols_common_aggregation = col_aggregation,
                            many2one = TRUE, one2many = FALSE, warn_unused_shared_cols = FALSE)
 
   #find diff between popn and target
@@ -50,12 +51,15 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
   target <- rename(target, !!col_target_new := !!col_target)
 
   domestic_adjustment <- popn %>%
+    dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
     summarise(!!col_popn_new := sum(!!sym(col_popn_new))) %>%
-    ungroup() %>%
+    as.data.frame() %>%
+    dtplyr::lazy_dt() %>%
     left_join(target, by=col_aggregation) %>%
     mutate(net_dom_adjustment = !!sym(col_target_new) - !!sym(col_popn_new)) %>%
-    select(c(col_aggregation, net_dom_adjustment))
+    select(c(col_aggregation, net_dom_adjustment)) %>%
+    as.data.frame()
 
   #if the change is positive then it's an addition to in migration
   #if negative then add to out migration
@@ -65,20 +69,26 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
     mutate(net_dom_adjustment = ifelse(net_dom_adjustment < 0, -1 * net_dom_adjustment, 0))
 
   dom_in_target <- dom_in %>%
+    dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
     summarise(dom_in_orig = sum(dom_in)) %>%
-    ungroup() %>%
+    as.data.frame() %>%
+    dtplyr::lazy_dt() %>%
     left_join(gross_in_adjustment, by = col_aggregation) %>%
     mutate(dom_in_target = dom_in_orig + net_dom_adjustment)  %>%
-    select(c(col_aggregation, dom_in_target))
+    select(c(col_aggregation, dom_in_target)) %>%
+    as.data.frame()
 
   dom_out_target <- dom_out %>%
+    dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
     summarise(dom_out_orig = sum(dom_out)) %>%
-    ungroup() %>%
+    as.data.frame() %>%
+    dtplyr::lazy_dt() %>%
     left_join(gross_out_adjustment, by = col_aggregation) %>%
     mutate(dom_out_target = dom_out_orig + net_dom_adjustment)  %>%
-    select(c(col_aggregation, dom_out_target))
+    select(c(col_aggregation, dom_out_target)) %>%
+    as.data.frame()
 
   assert_that(all(complete.cases(dom_in_target)))
   assert_that(all(complete.cases(dom_out_target)))
@@ -89,18 +99,17 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                          col_aggregation = col_aggregation,
                                          col_popn = "dom_in",
                                          col_constraint = "dom_in_target",
-                                         rows_to_constrain = TRUE)
+                                         rows_to_constrain = rows_to_constrain)
 
   adjusted_dom_out <- constrain_component(popn = dom_out,
                                           constraint = dom_out_target,
                                           col_aggregation = col_aggregation,
                                           col_popn = "dom_out",
                                           col_constraint = "dom_out_target",
-                                          rows_to_constrain = TRUE)
+                                          rows_to_constrain = rows_to_constrain)
 
   return(list(dom_in = adjusted_dom_in,
               dom_out = adjusted_dom_out))
 
 }
-
 

@@ -1,5 +1,3 @@
-devtools::load_all('model_code/popmodules')
-
 #Setup
 projection_name <- "2018_based_shlaa_dev"
 external_trend_path <- "outputs/trend/2018/2018_central/"
@@ -13,11 +11,12 @@ external_ahs_trajectory_path <- paste0(external_trend_path, "households_", exter
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2019
-final_proj_yr <- 2050
+final_proj_yr <- 2020
 ahs_cap_year <- 2019
-ldd_max_yr <- 2019
 
+ldd_max_yr <- 2018
 
+output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/")
 #------------------
 #Setup config list
 config_list <- list(
@@ -34,7 +33,8 @@ config_list <- list(
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
   ldd_max_yr = ldd_max_yr,
-  timestamp = format(Sys.time(), "%y-%m-%d_%H%M"))
+  timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
+  output_dir = output_dir)
 
 #---------------------
 #run projection
