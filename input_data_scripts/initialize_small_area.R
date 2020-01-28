@@ -31,16 +31,20 @@ saveRDS(lsoa_to_msoa, "input_data/lookup/lsoa_to_msoa.rds")
 
 rm(ward_district_lookup, lsoa_to_ward_lookup, merged_to_electoral_ward, msoa_to_district, lsoa_to_msoa)
 
+#LDD Polygon splits file
+polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")	
+write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)	
+rm(polygon_splits)
+
 source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
+source('input_data_scripts/small_area_data/births_and_deaths.R')
 
 source('input_data_scripts/small_area_data/ward_communal_establishment_population.R')
-source('input_data_scripts/small_area_data/ward_births_and_deaths.R')
 source('input_data_scripts/small_area_data/ward_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/ward_migration_data.R')
 
 source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
-source('input_data_scripts/small_area_data/msoa_births_and_deaths.R')
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
 
@@ -61,10 +65,11 @@ test_ward_inputs <- function(data_path, col_aggregation=c("gss_code_ward", "sex"
   
   data <- readRDS(data_path)
   
+  #all wards are present
   assertthat::assert_that(setequal(data$gss_code_ward, london_wards))	
   popmodules::validate_population(data, col_aggregation = col_aggregation)
-
-  }
+  
+}
 
 test_ward_inputs(data_path = adults_per_dwelling, col_aggregation = c("gss_code_ward", "year")) 
 test_ward_inputs(pop_est, c("year", "gss_code_ward", "sex", "age"))
