@@ -12,7 +12,10 @@ ward_ldd_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
 #Load previously processed LDD, ward pop and communal est pop data
 #LDD data has been converted to total dwelling stock by ward by year
 ldd_units <- readRDS(ward_ldd_path) %>% 
-  filter(year %in% 2012:most_recent_data_year)
+  filter(year %in% 2011:most_recent_data_year) %>%
+  group_by(gss_code_ward) %>%
+  mutate(units = cumsum(units)) %>%
+  ungroup()
 
 ward_popn <- readRDS(ward_estimates_path) %>%
   filter(year %in% 2012:most_recent_data_year)
