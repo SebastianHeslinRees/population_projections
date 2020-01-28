@@ -61,27 +61,10 @@ test_ward_inputs <- function(data_path, col_aggregation=c("gss_code_ward", "sex"
   
   data <- readRDS(data_path)
   
-  #all wards are present
-  testthat::test_that("missing wards",{
-    expect_equal(sort(unique(data$gss_code_ward)), london_wards)})
-  
-  #no duplicates
-  testthat::test_that("duplicates found",{
-    expect_equal(nrow(group_by_at(data, col_aggregation) %>% 
-                        filter(n()>1)), 0)})
-  
-  #All values exist
-  a <- list()
-  for(i in 1:length(col_aggregation)){
-    var <- col_aggregation[[i]]
-    a[[var]] <- unique(data[[var]])
+  assertthat::assert_that(setequal(data$gss_code_ward, london_wards))	
+  popmodules::validate_population(data, col_aggregation = col_aggregation)
+
   }
-  a <- expand.grid(a)
-  
-  testthat::test_that("missing aggreagtion levels",{
-    
-    expect_equal(nrow(a),nrow(data))})
-}
 
 test_ward_inputs(data_path = adults_per_dwelling, col_aggregation = c("gss_code_ward", "year")) 
 test_ward_inputs(pop_est, c("year", "gss_code_ward", "sex", "age"))
