@@ -20,19 +20,29 @@ merged_to_electoral_ward <- data.table::fread("Q:/Teams/D&PA/Census/Lookups/EW/2
   as.data.frame()
 saveRDS(merged_to_electoral_ward, "input_data/lookup/2011_merged_ward_to_electoral_ward.rds")
 
-rm(ward_district_lookup, lsoa_to_ward_lookup, merged_to_electoral_ward)
+msoa_to_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/msoa to district.rds") %>%
+  rename(gss_code = gss_code_district) %>%
+  as.data.frame()
+saveRDS(msoa_to_district, "input_data/lookup/msoa_to_district.rds")
 
-#LDD Polygon splits file
-polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")
-write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)
-rm(polygon_splits)
+lsoa_to_msoa <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%
+  select(gss_code_lsoa, gss_code_msoa)
+saveRDS(lsoa_to_msoa, "input_data/lookup/lsoa_to_msoa.rds")
+
+rm(ward_district_lookup, lsoa_to_ward_lookup, merged_to_electoral_ward, msoa_to_district, lsoa_to_msoa)
 
 source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
-source('input_data_scripts/small_area_data/communal_establishment_population.R')
-source('input_data_scripts/small_area_data/births_and_deaths.R')
-source('input_data_scripts/small_area_data/adults_per_dwelling.R')
+
+source('input_data_scripts/small_area_data/ward_communal_establishment_population.R')
+source('input_data_scripts/small_area_data/ward_births_and_deaths.R')
+source('input_data_scripts/small_area_data/ward_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/ward_migration_data.R')
+
+source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
+source('input_data_scripts/small_area_data/msoa_births_and_deaths.R')
+source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
+source('input_data_scripts/small_area_data/msoa_migration_data.R')
 
 #TESTS
 london_wards <- filter(ward_district_lookup, substr(gss_code,1,3) == "E09") %>%
@@ -52,8 +62,25 @@ test_ward_inputs <- function(data_path, col_aggregation=c("gss_code_ward", "sex"
   data <- readRDS(data_path)
   
   #all wards are present
-  assertthat::assert_that(setequal(data$gss_code_ward, london_wards))
-  popmodules::validate_population(data, col_aggregation = col_aggregation)
+  testthat::test_that("missing wards",{
+    expect_equal(sort(unique(data$gss_code_ward)), london_wards)})
+  
+  #no duplicates
+  testthat::test_that("duplicates found",{
+    expect_equal(nrow(group_by_at(data, col_aggregation) %>% 
+                        filter(n()>1)), 0)})
+  
+  #All values exist
+  a <- list()
+  for(i in 1:length(col_aggregation)){
+    var <- col_aggregation[[i]]
+    a[[var]] <- unique(data[[var]])
+  }
+  a <- expand.grid(a)
+  
+  testthat::test_that("missing aggreagtion levels",{
+    
+    expect_equal(nrow(a),nrow(data))})
 }
 
 test_ward_inputs(data_path = adults_per_dwelling, col_aggregation = c("gss_code_ward", "year")) 
@@ -63,5 +90,3 @@ test_ward_inputs(out_migration_rates)
 test_ward_inputs(in_migration_characteristics)
 test_ward_inputs(births, c("year", "gss_code_ward", "age_group"))
 test_ward_inputs(deaths, c("year", "gss_code_ward", "sex", "age_group"))
-
-
