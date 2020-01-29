@@ -34,7 +34,7 @@ run_small_area_model <- function(config_list){
     if("gss_code_msoa" %in% names(df)){df <- rename(df, gss_code_small_area = gss_code_msoa)}
     return(df)
   }
-  
+
   #Read Data
   adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") %>%
     project_forward_flat(config_list$final_proj_yr)
