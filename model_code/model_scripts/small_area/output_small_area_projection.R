@@ -1,6 +1,6 @@
-output_small_area_projection <- function(projection, output_dir, projection_name,
+output_small_area_projection <- function(projection, output_dir, projection_type,
                                          births, deaths, first_proj_yr,
-                                         projection_type, lookup){
+                                         lookup){
 
   borough_names <- data.table::fread("input_data/lookup/lad18_code_to_name.csv")
   
@@ -29,10 +29,8 @@ output_small_area_projection <- function(projection, output_dir, projection_name
     select_at(c("year", "gss_code", "borough", code, name, "units")) %>%
     arrange_at(c("gss_code", code, "year"))
   
-  #saveRDS(proj_output, paste0(output_dir, projection_name, ".rds"))
-  
   for(i in seq_along(proj_output)) {
-    saveRDS(projection[[i]], paste0(output_dir, names(proj_output)[i],".rds"))
+    saveRDS(projection[[i]], paste0(output_dir, names(proj_output)[i],"_",projection_type,".rds"))
   }
   
   #Published Ouputs (csv)

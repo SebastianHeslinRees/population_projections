@@ -1,4 +1,4 @@
-output_housing_led_projection <- function(projection, output_dir, timestamp,
+output_housing_led_projection <- function(projection, output_dir,
                                           external_trend_path, external_trend_datestamp,
                                           additional_dwellings, housing_stock){
   
@@ -25,7 +25,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
   }
   
   for(i in seq_along(projection)) {
-    saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],"_",timestamp,".rds"))
+    saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],".rds"))
   }
   
   # Create extra tables to to ouput
@@ -55,7 +55,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
-  
+
   components <- list()
   # Rename last column (containing component data) in each output dataframe to
   # 'value' so we can rbind them
@@ -67,7 +67,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
       filter(substr(gss_code,1,3)=="E09")%>%
       group_by(year, gss_code, component) %>%
       summarise(value = sum(value)) %>%
-      as.data.frame()
+      as.data.frame() %>%
       mutate(value = round(value, digits=2))
   }
   
@@ -102,7 +102,7 @@ output_housing_led_projection <- function(projection, output_dir, timestamp,
                assumed_dev = annual_dev, housing_stock = stock)
   
   for(i in seq_along(csvs)) {
-    data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i],"_",timestamp,".csv"))
+    data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i],".csv"))
   }
 
 }

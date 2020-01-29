@@ -14,7 +14,6 @@ run_small_area_model <- function(config_list){
                        "small_area_ldd_data_path",
                        "small_area_dev_trajectory_path",
                        "housing_led_model_path",
-                       "housing_led_model_timestamp",
                        "borough_fertility_rates_path",
                        "borough_mortality_rates_path",
                        "last_data_year",
@@ -22,9 +21,7 @@ run_small_area_model <- function(config_list){
                        "final_proj_yr",
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
-                       "projection_type",
-                       "projection_name",
-                       "small_area_output_dir")
+                       "projection_type")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -62,13 +59,13 @@ run_small_area_model <- function(config_list){
     select(year, gss_code, age, sex, popn)
   
   #TODO Change the housing-led model output names to make this easier (ie remove timestamp)
-  birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "births_", config_list$housing_led_model_timestamp, ".rds")) %>%
+  birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "births.rds")) %>%
     rbind(births_past) %>%
     filter(substr(gss_code,1,3)=="E09")
-  death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "deaths_", config_list$housing_led_model_timestamp, ".rds")) %>%
+  death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "deaths.rds")) %>%
     rbind(deaths_past) %>%
     filter(substr(gss_code,1,3)=="E09")
-  popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"population_", config_list$housing_led_model_timestamp, ".rds")) %>%
+  popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"population.rds")) %>%
     rbind(popn_past) %>%
     filter(substr(gss_code,1,3)=="E09")
   
@@ -232,16 +229,17 @@ run_small_area_model <- function(config_list){
   
   message(" ")
   message("Running outputs")
+  small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
+  
   projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
                                                 config_list$first_proj_yr, config_list$final_proj_yr)
   
   output_small_area_projection(projection = projection,
-                               output_dir = config_list$small_area_output_dir,
-                               projection_name = config_list$projection_name,
-                               births,
-                               deaths,
+                               output_dir = small_area_output_dir,
+                               projection_type = config_list$projection_type,
+                               births = births,
+                               deaths = deaths,
                                first_proj_yr = config_list$first_proj_yr,
-                               projection_type=config_list$projection_type,
                                lookup = ward_to_district)
   
   return(projection)
