@@ -47,10 +47,10 @@ run_bpo_projection <- function(projection_name,
   #----
   
   ####WARD MODEL
-  small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
+  small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"
   small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-  small_area_births_backseries_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
-  small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
+  small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rds"
+  small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
   small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
   
   housing_led_model_path <- paste0("outputs/housing_led/2018/",config_list$projection_name,"/")

@@ -4,10 +4,10 @@ final_proj_yr <- 2020
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory.rds"
 
-small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
+small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"
 small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-small_area_births_backseries_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
-small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
+small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rds"
+small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
 small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
 
 external_trend_path <- "outputs/trend/2018/2018_central/"
