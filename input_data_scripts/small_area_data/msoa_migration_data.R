@@ -264,7 +264,10 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
         select(gss_code_msoa, sex, age, final_dist) %>%
         rename(in_migration_rate = final_dist) %>%
         arrange(gss_code_msoa, sex, age) %>%
-        as.data.frame()
+        as.data.frame() %>%
+        left_join(msoa_to_district, by="gss_code_msoa") %>%
+        filter(substr(gss_code,1,3)=="E09") %>%
+        select(-gss_code)
 
 #Save
 saveRDS(in_migration_characteristics, "input_data/small_area_model/msoa_in_migration_characteristics.rds")
