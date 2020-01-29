@@ -8,7 +8,6 @@ most_recent_data_year <- 2018
 msoa_estimates_path <- "input_data/small_area_model/msoa_population_estimates.rds"
 msoa_communal_est_path <- "input_data/small_area_model/msoa_communal_establishment_population.rds"
 msoa_ldd_path <- "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds"
-borough_ldd_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
 
 #Load previously processed LDD, msoa pop and communal est pop data
 #LDD data must be converted to total dwelling stock by msoa by year
@@ -49,5 +48,4 @@ if(length(unique(adults_per_dwelling$gss_code_msoa))!=983){message("Warning: Wro
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(adults_per_dwelling, "input_data/small_area_model/msoa_adults_per_dwelling.rds")
-
 
