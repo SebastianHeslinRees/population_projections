@@ -137,7 +137,6 @@ international_out <- readRDS(borough_int_out_path) %>%
 rm(foreign_born)
 
 ####INTERNATIONAL IN####
-####DOMESTIC IN####
 borough_international_in <- readRDS(borough_int_in_path) %>% filter(year == 2011)
 
 int_in_male <- data.table::fread(paste0(census_data_dir,msoa_int_in_male_path), header = T) %>%
