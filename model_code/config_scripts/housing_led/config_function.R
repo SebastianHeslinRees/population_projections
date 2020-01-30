@@ -86,6 +86,8 @@ run_bpo_projection <- function(projection_name,
                            birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                            death_rate_n_years_to_avg = death_rate_n_years_to_avg,
                            
+                           ldd_max_yr = config_list$ldd_max_yr,
+                           
                            projection_type = projection_type)
   
   rm(list = setdiff(ls(), c("ward_config_list","borough_projection","tm")))

@@ -4,9 +4,9 @@ source('model_code/model_scripts/small_area/arrange_small_area_core_outputs.R')
 source('model_code/model_scripts/small_area/output_small_area_projection.R')
 
 run_small_area_model <- function(config_list){
-
+  
   message(paste("Running",config_list$projection_type,"model"))
-
+  
   expected_config <- c("small_area_popn_estimates_path",
                        "small_area_communal_est_popn_path",
                        "small_area_births_backseries_path",
@@ -21,6 +21,7 @@ run_small_area_model <- function(config_list){
                        "final_proj_yr",
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
+                       "ldd_max_yr",
                        "projection_type")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
@@ -46,35 +47,17 @@ run_small_area_model <- function(config_list){
   ldd_data <- read_small_area_inputs(config_list$small_area_ldd_data_path)
   dwelling_trajectory <- read_small_area_inputs(config_list$small_area_dev_trajectory_path)
   
-
   #----------
-  
-  #TODO should the housing led model output include the backseries for the components?
-  #Would save having to read 2 file here and would probably be useful in other ways
-  births_past <- readRDS("input_data/mye/2018/births_ons.rds") %>%
-    select(year, gss_code, age, sex, births) %>% filter(age==0)
-  deaths_past <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
-    select(year, gss_code, age, sex, deaths)
-  popn_past <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>%
-    select(year, gss_code, age, sex, popn)
-  
-  #TODO Change the housing-led model output names to make this easier (ie remove timestamp)
+
   birth_constraint <- readRDS(paste0(config_list$housing_led_model_path, "births.rds")) %>%
-    rbind(births_past) %>%
     filter(substr(gss_code,1,3)=="E09")
   death_constraint <- readRDS(paste0(config_list$housing_led_model_path, "deaths.rds")) %>%
-    rbind(deaths_past) %>%
     filter(substr(gss_code,1,3)=="E09")
   popn_constraint <- readRDS(paste0(config_list$housing_led_model_path,"population.rds")) %>%
-    rbind(popn_past) %>%
     filter(substr(gss_code,1,3)=="E09")
-  
-  rm(births_past, deaths_past, popn_past)
+ 
   #------------
   
-  #TODO THink about a variable that sets the trend projection rather than setting specific paths
-  #This is also linked to how the borough-level and small area models interact
-  #i.e. how 'stand alone' should this model be or is it always run with the borough level model
   fertility_rates <- readRDS(config_list$borough_fertility_rates_path) %>%
     filter(substr(gss_code,1,3)=="E09")
   mortality_rates <- readRDS(config_list$borough_mortality_rates_path) %>%
@@ -83,26 +66,17 @@ run_small_area_model <- function(config_list){
   #-------------------------
   
   #Create the cumulative development trajectory
-  final_ldd_year <- max(ldd_data$year)
+  ldd_data <- filter(ldd_data, year <= config_list$ldd_max_yr) 
   
-  last_ldd_year_data <- filter(ldd_data, year == final_ldd_year) %>%
-    select(-year)
-  
-  cumulative_future_dev <- dwelling_trajectory %>%
-    filter(year > final_ldd_year) %>%
+  dwelling_trajectory <- dwelling_trajectory %>%
+    filter(year > config_list$ldd_max_yr) %>%
+    rbind(ldd_data) %>%
+    arrange(gss_code_small_area, year) %>%
     group_by(gss_code_small_area) %>%
     mutate(cum_units = cumsum(units)) %>%
     as.data.frame() %>%
-    select(-units) %>%
-    left_join(last_ldd_year_data, by="gss_code_small_area") %>%
-    mutate(total_units = units + cum_units) %>%
-    select(year, gss_code_small_area, units = total_units)
-  
-  dwelling_trajectory <- rbind(ldd_data, cumulative_future_dev) %>%
-    arrange(gss_code_small_area, year) %>%
+    select(year, gss_code_small_area, units = cum_units) %>%
     validate_population(col_aggregation = c("year","gss_code_small_area"), col_data = "units")
-  
-  rm(cumulative_future_dev)
   
   #-------------------------
   

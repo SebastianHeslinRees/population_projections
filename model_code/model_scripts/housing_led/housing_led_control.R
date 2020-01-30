@@ -95,7 +95,7 @@ run_housing_led_model <- function(config_list){
   
   #census stock in 2011 + LDD development upto 2019
   ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
-    filter(year <= ldd_max_yr) %>%
+    filter(year <= config_list$ldd_max_yr) %>%
     select(names(development_trajectory))
   
   additional_dwellings <- ldd_backseries %>%

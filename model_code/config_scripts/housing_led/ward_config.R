@@ -1,3 +1,5 @@
+devtools::load_all("model_code/popmodules")
+
 projection_name <- "2018_based_shlaa_dev"
 housing_led_model_timestamp <- "20-01-29_1603"
 
@@ -26,6 +28,7 @@ borough_mortality_rates_path <- paste0(external_trend_path,"mortality_rates_",
 last_data_year <- 2018
 birth_rate_n_years_to_avg <- 5
 death_rate_n_years_to_avg <- 5
+ldd_max_yr <- 2018
 
 projection_type <- "ward"
 
@@ -47,6 +50,8 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          
                          birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                          death_rate_n_years_to_avg = death_rate_n_years_to_avg,
+                         
+                         ldd_max_yr = ldd_max_yr,
                          
                          projection_type = projection_type)
 
