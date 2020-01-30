@@ -67,7 +67,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
       summarise(births = sum(births)) %>%
       as.data.frame()
   }
-browser()
+
   #Constrain births
   curr_yr_births <- left_join(curr_yr_births, small_area_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint = birth_constraint,
