@@ -112,10 +112,10 @@ calculate_scaling_factors <- function(popn,
     total_unscaled <- round(sum(unable_to_scale[[col_constraint_new]]),2)
     
     warning(paste0(capture.output({
-      print("calculate_scaling_factors was asked to scale populations of zero to non-zero sizes.")
-      print(paste0(nrow(unable_to_scale), " aggregation levels affected."))
+      print("calculate_scaling_factors was asked to scale populations of zero to non-zero sizes")
+      print(paste0(nrow(unable_to_scale), " aggregation levels affected"))
       print(paste0("Target populations sum to ", total_unscaled))
-      print("These populations will be unscaled and the output will be short by this many people.")
+      print("These populations will be unscaled and the output will be short by this many people")
       if(nrow(unable_to_scale) < 30) {
         print("Values:")
         print(unable_to_scale)
