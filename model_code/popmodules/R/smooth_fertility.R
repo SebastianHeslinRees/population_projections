@@ -36,6 +36,7 @@
 #'
 #' @import dplyr
 #' @importFrom data.table rbindlist
+#' @import minpack.lm
 #' @export
 
 smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_model=c(15:49)){

@@ -27,6 +27,7 @@
 #'
 #' @import dplyr
 #' @import assertthat
+#' @importFrom utils capture.output
 #'
 #' @export
 

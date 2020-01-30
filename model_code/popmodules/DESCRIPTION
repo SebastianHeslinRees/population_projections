@@ -25,7 +25,6 @@ Imports:
     rprojroot,
     dtplyr,
     purrr,
-    testthat
-Suggests: 
+    testthat,
     minpack.lm
 RoxygenNote: 7.0.2
