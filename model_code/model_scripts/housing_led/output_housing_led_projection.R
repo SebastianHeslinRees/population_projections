@@ -18,6 +18,7 @@ output_housing_led_projection <- function(projection, output_dir,
   for(x in names(backseries)){
     
     backseries[[x]] <- filter(backseries[[x]], year %in% 2011:(first_proj_yr-1))
+    projection[[x]] <- filter(projection[[x]], year >= first_proj_yr)
     
     projection[[x]] <- data.table::rbindlist(list(backseries[[x]], projection[[x]]),
                                              use.names = TRUE) %>%
@@ -84,6 +85,10 @@ output_housing_led_projection <- function(projection, output_dir,
            dom_in, dom_out, dom_net, total_change) %>%
     arrange(gss_code, year)
   
+  ahs <- left_join(projection[["ahs"]], projection[["ahs_choice"]],
+                   by = c("year", "gss_code")) %>%
+    arrange(year, gss_code)
+    
   stock <- housing_stock %>%
     left_join(names_lookup, by="gss_code") %>%
     mutate(dwellings = round(dwellings, 2)) %>%
@@ -101,10 +106,12 @@ output_housing_led_projection <- function(projection, output_dir,
   
   dir.create(paste0(output_dir,"csv"), showWarnings = FALSE)
   csvs <- list(persons=persons, males=males, females=females, components=components,
-               assumed_dev = annual_dev, housing_stock = stock)
+               assumed_dev = annual_dev, housing_stock = stock, ahs = ahs)
   
   for(i in seq_along(csvs)) {
+
     data.table::fwrite(csvs[[i]], paste0(output_dir, "csv/",names(csvs)[i],".csv"))
+
   }
 
 }

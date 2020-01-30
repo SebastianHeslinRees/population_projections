@@ -4,7 +4,6 @@ library(tidyr)
 devtools::load_all("model_code/popmodules")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
 borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
@@ -18,9 +17,9 @@ ward_dom_in_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0354_lo
 ward_in_migration_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0409_london_wards_in_migration_inc_international.csv"
 
 #pre-processed ward model inputs
-ward_births_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
-ward_deaths_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
-ward_popn_path <- "input_data/small_area_model/ward_population_estimates_2010_2017.rds"
+ward_births_path <- "input_data/small_area_model/ward_births.rds"
+ward_deaths_path <- "input_data/small_area_model/ward_deaths.rds"
+ward_popn_path <- "input_data/small_area_model/ward_population_estimates.rds"
 
 #lookup
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
@@ -216,6 +215,18 @@ out_migration_rates <- left_join(domestic_out, international_out,
 ix <- out_migration_rates$out_migration_rate > 0.8
 if(any(ix)) {
         warning(paste(sum(ix), "outmigration levels had rates > 0.8, these will be capped."))
+        
+        warning(paste0(capture.output({
+                print(paste0("Outmigration levels had rates > 0.8 at ",
+                             sum(ix), " aggregation levels. These will be capped."))
+                if(sum(ix) < 30) {
+                        print("Values:")
+                        print(out_migration_rates[ix,])
+                } else {
+                        print("First 30 values:")
+                        print(out_migration_rates[ix,][1:30,])
+                }
+        }), collapse = "\n"))
 }        
 
 out_migration_rates <- out_migration_rates %>%

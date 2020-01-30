@@ -32,7 +32,7 @@ run_small_area_model <- function(config_list){
     if("gss_code_msoa" %in% names(df)){df <- rename(df, gss_code_small_area = gss_code_msoa)}
     return(df)
   }
-  
+
   #Read Data
   adults_per_dwelling <- read_small_area_inputs("input_data/small_area_model/ward_adults_per_dwelling.rds") %>%
     project_forward_flat(config_list$final_proj_yr)
@@ -66,6 +66,7 @@ run_small_area_model <- function(config_list){
   #-------------------------
   
   #Create the cumulative development trajectory
+
   ldd_data <- filter(ldd_data, year <= config_list$ldd_max_yr) 
   
   dwelling_trajectory <- dwelling_trajectory %>%
@@ -77,7 +78,7 @@ run_small_area_model <- function(config_list){
     as.data.frame() %>%
     select(year, gss_code_small_area, units = cum_units) %>%
     validate_population(col_aggregation = c("year","gss_code_small_area"), col_data = "units")
-  
+
   #-------------------------
   
   # Validate all these inputs
@@ -127,7 +128,8 @@ run_small_area_model <- function(config_list){
       small_area_fertility_rates <- left_join(fertility_scaling, ward_to_district,
                                               by="gss_code_small_area") %>%
         left_join(fertility_rates, by=c("gss_code")) %>%
-        mutate(fert_rate = scaling*rate)
+        mutate(fert_rate = scaling*rate) %>%
+        select(year, gss_code_small_area, sex, age, fert_rate)
       
       #------------------
       
@@ -219,6 +221,9 @@ run_small_area_model <- function(config_list){
   return(projection)
 }
 
+
+#===============================================================================
+
 validate_small_area_input_components <- function(popn_estimates,
                                                  adults_per_dwelling,
                                                  out_migration_rates,
@@ -281,9 +286,9 @@ validate_small_area_fert_mort_components <- function(popn_estimates,
                                                      config_list) {
   domain <- unique(popn_estimates$gss_code)
   proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
-  
-  validate_population(small_area_fertility_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "rate")
-  validate_population(small_area_mortality_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "rate")
+
+  validate_population(small_area_fertility_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "fert_rate")
+  validate_population(small_area_mortality_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "mort_rate")
   assert_that(all(domain %in% fertility_rates$gss_code))
   assert_that(all(domain %in% mortality_rates$gss_code))
   assert_that(all(proj_years %in% fertility_rates$year))

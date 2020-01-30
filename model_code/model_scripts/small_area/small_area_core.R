@@ -62,7 +62,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
  
     curr_yr_births <-left_join(aged_on_popn, fertility_rates,
                                by=c("year","gss_code_small_area","age","sex")) %>%
-      mutate(births = rate * popn) %>%
+      mutate(births = fert_rate * popn) %>%
       group_by(year, gss_code_small_area) %>%
       summarise(births = sum(births)) %>%
       as.data.frame()
@@ -129,7 +129,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     select(year, gss_code, gss_code_small_area, sex, age, deaths) %>%
     as.data.frame()
 
-  natural_change_popn <- left_join(popn_w_births, curr_yr_deaths, by=c("year","gss_code_small_area","sex","age")) %>%
+  natural_change_popn <- left_join(popn_w_births, curr_yr_deaths, by=c("year","gss_code","gss_code_small_area","sex","age")) %>%
     mutate(popn = popn - deaths) %>%
     select(-deaths)
   
@@ -140,7 +140,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   popn_post_out_migration <- out_migration %>%
     mutate(popn = popn - out_migrants) %>%
     select(gss_code_small_area, sex, age, popn)
-  
+
   #Compare the adult household popn to the target adults
   #target adults = adults_per_dwelling * dwellings
   #Difference is migration inflow
@@ -168,11 +168,12 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   
   #Add in-migration
   #Add communal establishment popn back in
-  unconstrined_popn <- left_join(popn_post_out_migration, in_migration, by = c("gss_code_small_area", "sex", "age")) %>%
-    mutate(popn = popn + in_migrants)
+  unconstrained_popn <- left_join(popn_post_out_migration, in_migration, by = c("gss_code_small_area", "sex", "age")) %>%
+    mutate(popn = popn + in_migrants) %>% 
+    select(year, gss_code_small_area, sex, age, popn)
   
   #constrain borough populations to match constraint
-  constrained_popn <- left_join(unconstrined_popn, ward_to_district, by="gss_code_small_area") %>%
+  constrained_popn <- left_join(unconstrained_popn, ward_to_district, by="gss_code_small_area") %>%
     as.data.frame() %>%
     constrain_component(constraint = popn_constraint,
                         col_popn = "popn",
@@ -182,7 +183,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     select(year, gss_code, gss_code_small_area, sex, age, popn)
   
   final_migration <- rename(natural_change_popn, nat_chng = popn) %>%
-    left_join(final_popn, by=c("year","gss_code_small_area","sex","age")) %>%
+    left_join(final_popn, by=c("year","gss_code","gss_code_small_area","sex","age")) %>%
     mutate(migration = popn - nat_chng) %>%
     select(year, gss_code, gss_code_small_area, sex, age, migration)
   
