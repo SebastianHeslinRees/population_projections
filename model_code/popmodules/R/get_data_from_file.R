@@ -7,7 +7,7 @@
 #'
 #' @export
 #'
-#' @example
+#' @examples
 #'
 #' a <- list(cross_border_in_constraint = "input_data/constraints/npp_2016_cross_border_in_constraint.rds",
 #' cross_border_out_constraint = "input_data/constraints/npp_2016_cross_border_out_constraint.rds")

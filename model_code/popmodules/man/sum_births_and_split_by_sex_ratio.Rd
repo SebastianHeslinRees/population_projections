@@ -4,7 +4,11 @@
 \alias{sum_births_and_split_by_sex_ratio}
 \title{Sum a data frame with births by mother's age, and split babies by a sex ratio}
 \usage{
-sum_births_and_split_by_sex_ratio(births, birthratio_m2f = 1.05)
+sum_births_and_split_by_sex_ratio(
+  births,
+  birthratio_m2f = 1.05,
+  geog_cols = "gss_code"
+)
 }
 \description{
 Sum a data frame with births by mother's age, and split babies by a sex ratio

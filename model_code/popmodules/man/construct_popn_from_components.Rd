@@ -2,33 +2,26 @@
 % Please edit documentation in R/construct_popn_from_components.R
 \name{construct_popn_from_components}
 \alias{construct_popn_from_components}
-\title{Age on a population and add components to it}
+\title{Add components to a starting population}
 \usage{
-construct_popn_from_components(start_population, births, deaths, int_in,
-  int_out, dom_in, dom_out, upc = NULL, col_aggregation = c("year",
-  "gss_code", "sex", "age"))
+construct_popn_from_components(
+  start_population,
+  addition_data,
+  subtraction_data,
+  col_aggregation = c("year", "gss_code", "sex", "age")
+)
 }
 \arguments{
 \item{start_population}{Data frame with initial population. All subsequent inputs should be at the same resolution.}
 
-\item{births}{Data frame with 0-year-olds. Births in column 'births'.}
+\item{addition_data}{a List of component dataframes contain data to be added to the start population}
 
-\item{deaths}{Data frame with deaths. Deaths in column 'deaths'.}
-
-\item{int_in}{Data frame with international inflows. Flows in column 'int_in'.}
-
-\item{int_out}{Data frame with international outflows. Flows in column 'int_out'.}
-
-\item{dom_in}{Data frame with domestic inflows. Flows in column 'dom_in'.}
-
-\item{dom_out}{Data frame with domestic outflows. Flows in column ''dom_out'}
-
-\item{upc}{Data frame with unattributed population change. Currently unused/}
+\item{subtraction_data}{a List of component dataframes contain data to be subtracted from the start population}
 
 \item{col_aggregation}{Aggregation columns common to all the above to join on.}
 }
 \value{
-Aged on data frame with all components added.
+A data frame with all components added.
 }
 \description{
 Shortcut function to combine population components

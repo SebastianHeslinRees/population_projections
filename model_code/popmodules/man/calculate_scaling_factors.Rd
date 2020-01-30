@@ -9,7 +9,8 @@ calculate_scaling_factors(
   constraint,
   col_aggregation = c("year", "sex", "age", "country"),
   col_popn,
-  col_constraint = col_popn
+  col_constraint = col_popn,
+  rows_to_constrain = TRUE
 )
 }
 \arguments{
@@ -19,13 +20,21 @@ calculate_scaling_factors(
 resolution or lower.}
 
 \item{col_aggregation}{A string or character vector giving the join mapping between
-\code{popn} and \code{constraint}. Equivalent to \code{by} in \code{dplyr} joins}
+\code{popn} and \code{constraint}. Equivalent to \code{by} in \code{dplyr} joins.}
 
 \item{col_popn}{String. Name of column in \code{popn} containing population
 counts.}
 
 \item{col_constraint}{String. Name of column in \code{constraint} containing population
-counts. Defaults to col_popn.}
+counts. Defaults to the value of \code{col_popn}.}
+
+\item{rows_to_constrain}{Which rows of the input population are to be
+constrained. This can be provided as a logical vector (e.g. \code{TRUE} for
+all rows or \code{c(TRUE, TRUE, FALSE)} or using dplyr's non-standard
+evaluation, e.g. for a population with a \code{gss_code} column,
+\code{gss_code == "E090000001"} for City of London, or \code{grepl("^E09",
+gss_code)} for all of London. Note this can't be applied to the population
+column. Default TRUE.}
 }
 \value{
 A data frame of scaling factors calculated as target population/input population,

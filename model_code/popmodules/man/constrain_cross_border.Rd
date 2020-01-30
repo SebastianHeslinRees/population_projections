@@ -29,7 +29,7 @@ A data frame of scaled domestic flows by authority, sex and single
 }
 \description{
 A wrapper for \code{get_scaling_factor} which prepares origin-destination
-flow data, constraining flows out of England to match the target data frame
+flow data, constraining flows into of England to match the target data frame
 in \code{in_constraint} and flows out of England to another the target data
 frame in \code{out_constraint}.
 }

@@ -23,8 +23,9 @@ Imports:
     plyr (>= 1.8.4),
     tibble (>= 2.1.1),
     rprojroot,
-    dtplyr
+    dtplyr,
+    purrr,
+    testthat
 Suggests: 
-    testthat (>= 2.1.0),
     minpack.lm
 RoxygenNote: 7.0.2
