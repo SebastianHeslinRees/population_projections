@@ -17,7 +17,7 @@ run_trend_model <- function(config_list) {
                        "dom_in_mye_path",
                        "dom_origin_destination_path",
                        "upc_path",
-                       "outputs_dir", 
+                       "output_dir", 
                        "mortality_fns", 
                        "fertility_fns",
                        "int_out_fns",
@@ -39,8 +39,6 @@ run_trend_model <- function(config_list) {
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   #Create output directory
-  if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
-  output_dir <- paste0(config_list$outputs_dir, config_list$projection_name,"/")
   dir.create(output_dir, recursive = T, showWarnings = F)
   
   #Validate file paths
