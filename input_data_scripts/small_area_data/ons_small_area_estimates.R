@@ -58,7 +58,7 @@ borough_scaling_factors_ward <- dtplyr::lazy_dt(ward_data)  %>%
   summarise(borough_popn = sum(popn)) %>%
   as.data.frame() %>%
   left_join(readRDS(mye_pop_path), by=c("year", "gss_code","sex","age")) %>%
-  mutate(scaling_factor = ifelse(popn == 0, 0, popn / borough_popn)) %>%
+  mutate(scaling_factor = ifelse(borough_popn == 0, 0, popn / borough_popn)) %>%
   select(gss_code, year, sex, age, scaling_factor) %>%
   validate_population(col_data = "scaling_factor")
 
