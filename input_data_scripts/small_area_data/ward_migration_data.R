@@ -4,7 +4,6 @@ library(tidyr)
 devtools::load_all("model_code/popmodules")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
 borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
@@ -216,6 +215,18 @@ out_migration_rates <- left_join(domestic_out, international_out,
 ix <- out_migration_rates$out_migration_rate > 0.8
 if(any(ix)) {
         warning(paste(sum(ix), "outmigration levels had rates > 0.8, these will be capped."))
+        
+        warning(paste0(capture.output({
+                print(paste0("Outmigration levels had rates > 0.8 at ",
+                             sum(ix), " aggregation levels. These will be capped."))
+                if(sum(ix) < 30) {
+                        print("Values:")
+                        print(out_migration_rates[ix,])
+                } else {
+                        print("First 30 values:")
+                        print(out_migration_rates[ix,][1:30,])
+                }
+        }), collapse = "\n"))
 }        
 
 out_migration_rates <- out_migration_rates %>%

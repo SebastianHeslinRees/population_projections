@@ -1,3 +1,5 @@
+devtools::load_all("model_code/popmodules")
+
 projection_name <- "test_shlaa"
 first_proj_yr <- 2019
 final_proj_yr <- 2020

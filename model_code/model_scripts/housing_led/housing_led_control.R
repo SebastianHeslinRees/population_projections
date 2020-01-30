@@ -1,27 +1,7 @@
 run_housing_led_model <- function(config_list){
   
   message("Running borough model")
-  
-  create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
-    
-    for(i in seq(dfs)){
-      
-      nm <- last(names(dfs[[i]])) #names(dfs[[i]])[ncol(dfs[[i]])]
-      dfs[[i]] <- dfs[[i]] %>%
-        dtplyr::lazy_dt() %>%
-        group_by_at(col_aggregation) %>%
-        summarise(value = sum(!!sym(nm))) %>%
-        rename(!!nm := value) %>%
-        as.data.frame()
-    }
-    
-    return(dfs)
-  }
-  
-  
-  external_trend_households_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$trend_households_file)
-  external_communal_est_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$communal_est_file)
-  
+
   #validate
   expected_config <- c("projection_name",
                        "communal_est_file",
@@ -40,6 +20,25 @@ run_housing_led_model <- function(config_list){
                        "output_dir")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
+    
+  create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
+    
+    for(i in seq(dfs)){
+      
+      nm <- last(names(dfs[[i]])) #names(dfs[[i]])[ncol(dfs[[i]])]
+      dfs[[i]] <- dfs[[i]] %>%
+        dtplyr::lazy_dt() %>%
+        group_by_at(col_aggregation) %>%
+        summarise(value = sum(!!sym(nm))) %>%
+        rename(!!nm := value) %>%
+        as.data.frame()
+    }
+    
+    return(dfs)
+  }
+
+  external_trend_households_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$trend_households_file)
+  external_communal_est_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$communal_est_file)
   
   #component rates
   component_rates <- get_data_from_file(
@@ -96,7 +95,7 @@ run_housing_led_model <- function(config_list){
   
   #census stock in 2011 + LDD development upto 2019
   ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
-    filter(year <= ldd_max_yr) %>%
+    filter(year <= config_list$ldd_max_yr) %>%
     select(names(development_trajectory))
   
   additional_dwellings <- ldd_backseries %>%
