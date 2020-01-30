@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
 projection_name <- "2018_based_shlaa_dev"
-housing_led_model_timestamp <- "20-01-29_1603"
+housing_led_model_timestamp <- "20-01-30_1355"
 
 first_proj_yr <- 2019
 final_proj_yr <- 2020
@@ -59,4 +59,4 @@ rm(list = setdiff(ls(), "ward_config_list"))
 
 source('model_code/model_scripts/small_area/small_area_control.R')
 ward_projection <- run_small_area_model(ward_config_list)
-log_warnings(paste0(ward_config_list$small_area_output_dir,ward_config_list$projection_name,"_warnings.txt"))
+log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
