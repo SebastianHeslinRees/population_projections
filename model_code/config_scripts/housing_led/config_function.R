@@ -52,6 +52,11 @@ run_bpo_projection <- function(projection_name,
   small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
   small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
   
+  adults_per_dwelling_path <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
+  small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
+  out_migration_rates_path <- "input_data/small_area_model/ward_out_migration_rates.rds"
+  in_migration_characteristics_path <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
+  
   housing_led_model_path <- config_list$output_dir
  
   borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates_",
@@ -74,6 +79,11 @@ run_bpo_projection <- function(projection_name,
                            small_area_ldd_data_path = small_area_ldd_data_path,
                            small_area_dev_trajectory_path = small_area_dev_trajectory_path,
                            
+                           adults_per_dwelling_path = adults_per_dwelling_path,
+                           small_area_to_district_path = small_area_to_district_path,
+                           out_migration_rates_path = out_migration_rates_path,
+                           in_migration_characteristics_path = in_migration_characteristics_path,
+                           
                            housing_led_model_path = housing_led_model_path,
                            
                            borough_fertility_rates_path = borough_fertility_rates_path,
@@ -86,7 +96,7 @@ run_bpo_projection <- function(projection_name,
                            birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                            death_rate_n_years_to_avg = death_rate_n_years_to_avg,
                            
-                           ldd_max_yr = config_list$ldd_max_yr,
+                           ldd_max_yr = ldd_max_yr,
                            
                            projection_type = projection_type)
   
