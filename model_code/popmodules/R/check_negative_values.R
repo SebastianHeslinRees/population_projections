@@ -30,12 +30,13 @@ check_negative_values <- function(x, data_col, set_to_zero = TRUE){
                        "Warning only, returning dataframe unchanged.")
 
     n <- sum(ix)
-    total_negative <- sum(x[[data_col]][ix])
+    total_negative <- round(sum(x[[data_col]][ix]),2)
 
     warning(paste0(capture.output({
       print(paste0("Negative values of ", data_col, " found at ",
                    n, " aggregation levels summing to ",
-                   total_negative, ". ", zero_msg))
+                   total_negative, "."))
+      print(zero_msg)
       if(sum(ix) < 30) {
         print("Values:")
         print(x[ix,])

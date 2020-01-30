@@ -41,7 +41,7 @@ run_bpo_projection <- function(projection_name,
   #run projection
   source('model_code/model_scripts/housing_led/housing_led_control.R')
   borough_projection <- run_housing_led_model(config_list)
-  log_warnings(paste0(config_list$output_dir,"/warnings_",config_list$timestamp,".txt"))
+  log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   
   #----
   
