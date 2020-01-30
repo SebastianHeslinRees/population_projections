@@ -59,7 +59,7 @@ run_small_area_model <- function(config_list){
   deaths_past <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
     select(year, gss_code, age, sex, deaths) %>%
     filter(year < 2011)
-  popn_past <- readRDS("input_data/mye/2018/population_gla_2020-01-27.rds") %>%
+  popn_past <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>%
     select(year, gss_code, age, sex, popn) %>%
     filter(year < 2011)
   
