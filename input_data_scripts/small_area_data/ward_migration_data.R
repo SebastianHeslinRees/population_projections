@@ -17,9 +17,9 @@ ward_dom_in_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0354_lo
 ward_in_migration_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0409_london_wards_in_migration_inc_international.csv"
 
 #pre-processed ward model inputs
-ward_births_path <- "input_data/small_area_model/ward_births_2001_2018.rds"
-ward_deaths_path <- "input_data/small_area_model/ward_deaths_2001_2018.rds"
-ward_popn_path <- "input_data/small_area_model/ward_population_estimates_2010_2018.rds"
+ward_births_path <- "input_data/small_area_model/ward_births.rds"
+ward_deaths_path <- "input_data/small_area_model/ward_deaths.rds"
+ward_popn_path <- "input_data/small_area_model/ward_population_estimates.rds"
 
 #lookup
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
