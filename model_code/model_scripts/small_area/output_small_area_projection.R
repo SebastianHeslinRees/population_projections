@@ -30,7 +30,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     arrange_at(c("gss_code", code, "year"))
   
   for(i in seq_along(proj_output)) {
-    saveRDS(projection[[i]], paste0(output_dir, names(proj_output)[i],"_",projection_type,".rds"))
+    saveRDS(proj_output[[i]], paste0(output_dir, names(proj_output)[i],"_",projection_type,".rds"))
   }
   
   #Published Ouputs (csv)

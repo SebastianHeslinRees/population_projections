@@ -4,7 +4,7 @@ projection_name <- "test_shlaa"
 housing_led_model_timestamp <- "20-01-30_1549"
 
 first_proj_yr <- 2019
-final_proj_yr <- 2020
+final_proj_yr <- 2050
 
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory.rds"
