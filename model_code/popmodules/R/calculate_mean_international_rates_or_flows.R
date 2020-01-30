@@ -23,37 +23,38 @@
 #'
 #' @import dplyr
 #' @importFrom assertthat assert_that
+#' @importFrom utils capture.output
 #'
 #' @export
 
 calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
                                                         component_path, last_data_year, n_years_to_avg, data_col,
                                                         first_proj_yr, n_proj_yr, rate_cap) {
-  
+
   component <- readRDS(component_path)
 
   if(flow_or_rate == "rate"){
-    
+
     population <- readRDS(popn_mye_path) %>%
       popn_age_on(births = readRDS(births_mye_path)) %>%
       data.frame()
-    
+
     rate_backseries <- population %>%
       filter(year %in% unique(component$year)) %>%
       left_join(component, by=c("gss_code","year","sex","age")) %>%
       rename(value = data_col) %>%
       mutate(rate = ifelse(popn == 0, 0, value/popn)) %>%
       select(gss_code, year, sex, age, rate)
-    
-    
+
+
     rates <- calculate_mean_from_backseries(rate_backseries, n_years_to_avg, last_data_year, "rate",
-                                            col_aggregation = c("gss_code","sex","age")) 
-    
+                                            col_aggregation = c("gss_code","sex","age"))
+
     #Document any rates that are capped
     if(any(rates$rate > rate_cap)) {
       ix <- rates$rate > rate_cap
       n <- sum(ix)
-      
+
       warning(paste0(capture.output({
         print(paste(c("In averaging the backseries, calculate_international_rates_and_flows created rates exceeding the cap of", rate_cap,
                       "at", n, "aggregation levels - these will be changed to", rate_cap),
@@ -71,26 +72,26 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
           })
         }
       }), collapse = "\n"))
-      
+
       rates <- mutate(rates, rate = ifelse(rate > rate_cap, rate_cap, rate))
-      
+
     }
-    
-    
+
+
     last_proj_yr <- n_proj_yr + first_proj_yr - 1
-    
+
     output_df <- project_forward_flat(df = rates, last_proj_yr = last_proj_yr) %>%
       rename(!!data_col := rate) %>%
       select(year, gss_code, sex, age, data_col)
   }
-  
+
   if(flow_or_rate == "flow"){
-    
+
     back_years <- c((last_data_year - n_years_to_avg + 1):last_data_year)
-    
+
     assert_that(all(back_years %in% unique(component$year)),
                 msg=("in calculate_international_rates_and_flows backyears must be present in component data"))
-    
+
     flows <- component %>%
       rename(value = data_col) %>%
       filter(year %in% back_years) %>%
@@ -99,14 +100,14 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
       ungroup() %>%
       rename(!!data_col := value) %>%
       mutate(year = last_data_year+1)
-    
+
     last_proj_yr <- n_proj_yr + first_proj_yr - 1
-    
+
     output_df <- project_forward_flat(df = flows, last_proj_yr = last_proj_yr) %>%
       select(year, gss_code, sex, age, data_col)
-    
+
   }
-  
+
   return(as.data.frame(output_df))
-  
+
 }
