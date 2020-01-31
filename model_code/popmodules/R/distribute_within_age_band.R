@@ -22,7 +22,7 @@
 distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
                                        min_age, max_age,
                                        col_aggregation=c("gss_code","sex")){
-  
+
   assert_that(!"age" %in% col_aggregation,
               msg = "In distribute_within_age_band, {age} cannot be specified in the col_aggreation variable")
   
@@ -30,8 +30,8 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
     filter(age <= max_age) %>%
     group_by_at(col_aggregation) %>%
     mutate(popn_total = sum(!!sym(popn_2_col))) %>%
+    mutate(age_distribution = ifelse(popn_total == 0, 1/n(), !!sym(popn_2_col) / popn_total)) %>%
     as.data.frame() %>%
-    mutate(age_distribution = ifelse(popn_total == 0, 0, !!sym(popn_2_col) / popn_total)) %>%
     select(c(col_aggregation, age, age_distribution))
   
   if("age" %in% names(popn_1)){

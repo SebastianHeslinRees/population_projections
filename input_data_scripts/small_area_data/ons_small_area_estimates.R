@@ -56,10 +56,11 @@ if(length(unique(ward_data$gss_code_ward))!=625){message("Warning: Wrong number 
 
 borough_scaling_factors_ward <- dtplyr::lazy_dt(ward_data)  %>%
   group_by(gss_code, year, sex, age) %>%
-  summarise(borough_popn = sum(popn)) %>%
+  summarise(aggregated_popn = sum(popn)) %>%
   as.data.frame() %>%
   left_join(readRDS(mye_pop_path), by=c("year", "gss_code","sex","age")) %>%
-  mutate(scaling_factor = ifelse(borough_popn == 0, 0, popn / borough_popn)) %>%
+  rename(mye_popn = popn) %>%
+  mutate(scaling_factor = ifelse(aggregated_popn == 0, 0, mye_popn / aggregated_popn)) %>%
   select(gss_code, year, sex, age, scaling_factor) %>%
   validate_population(col_data = "scaling_factor")
 
@@ -87,10 +88,11 @@ if(length(unique(msoa_data$gss_code_msoa))!=983){message("Warning: Wrong number 
 
 borough_scaling_factors_msoa <- dtplyr::lazy_dt(msoa_data)  %>%
   group_by(gss_code, year, sex, age) %>%
-  summarise(borough_popn = sum(popn)) %>%
+  summarise(aggregated_popn = sum(popn)) %>%
   as.data.frame() %>%
   left_join(readRDS(mye_pop_path), by=c("year", "gss_code","sex","age")) %>%
-  mutate(scaling_factor = ifelse(popn == 0, 0, borough_popn / popn)) %>%
+  rename(mye_popn = popn) %>%
+  mutate(scaling_factor = ifelse(aggregated_popn == 0, 0, mye_popn / aggregated_popn)) %>%
   select(gss_code, year, sex, age, scaling_factor) %>%
   validate_population(col_data = "scaling_factor")
 
