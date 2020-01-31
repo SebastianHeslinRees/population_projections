@@ -36,7 +36,7 @@
 #' @param adults_per_dwelling Data frame. Ratio of adults to dwellings at small
 #'   area resolution.
 #' @param projection_year Integer. Uh, the projection year.
-#' @param ward_to_district Data frame. A lookup from ward to borough codes.
+#' @param small_area_to_district Data frame. A lookup from ward to borough codes.
 
 
 small_area_core <- function(start_population, births, deaths, communal_est_popn,
@@ -44,7 +44,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             popn_constraint, birth_constraint, death_constraint,
                             fertility_rates, mortality_rates, last_data_year,
                             dwellings, adults_per_dwelling,
-                            projection_year, ward_to_district){
+                            projection_year, small_area_to_district){
 
   ####Age on####
   aged_on_popn <- popn_age_on(start_population,
@@ -69,7 +69,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   }
 
   #Constrain births
-  curr_yr_births <- left_join(curr_yr_births, ward_to_district, by="gss_code_small_area") %>%
+  curr_yr_births <- left_join(curr_yr_births, small_area_to_district, by="gss_code_small_area") %>%
     constrain_component(constraint = birth_constraint,
                         col_aggregation = c("year","gss_code"),
                         col_popn = "births") %>%
@@ -83,7 +83,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   if(projection_year <= last_data_year){
     
     curr_yr_deaths <- filter(deaths, year == projection_year) %>%
-      left_join(ward_to_district, by = "gss_code_small_area")
+      left_join(small_area_to_district, by = "gss_code_small_area")
     
     age_groups <- unique(deaths$age_group)
     
@@ -147,6 +147,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   target_adults <- left_join(adults_per_dwelling, dwellings, by=c("gss_code_small_area")) %>%
     mutate(target = units*adults_per_dwelling)
 
+  #Note: negative can be created here but it isn't a problem
   household_popn <- popn_post_out_migration %>%
     left_join(communal_est_popn, by = c("gss_code_small_area", "sex", "age")) %>%
     mutate(household_popn = popn - ce_popn) %>%
@@ -173,7 +174,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     select(year, gss_code_small_area, sex, age, popn)
   
   #constrain borough populations to match constraint
-  constrained_popn <- left_join(unconstrained_popn, ward_to_district, by="gss_code_small_area") %>%
+  constrained_popn <- left_join(unconstrained_popn, small_area_to_district, by="gss_code_small_area") %>%
     as.data.frame() %>%
     constrain_component(constraint = popn_constraint,
                         col_popn = "popn",
@@ -192,4 +193,3 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
               deaths = curr_yr_deaths,
               migration = final_migration))
 }
-

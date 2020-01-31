@@ -17,7 +17,7 @@ run_bpo_projection <- function(projection_name,
   ahs_cap_year <- 2019
   ldd_max_yr <- 2018
   
-  output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/")
+  output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   
   #------------------
   #Setup config list
@@ -35,14 +35,13 @@ run_bpo_projection <- function(projection_name,
     first_proj_yr = first_proj_yr,
     final_proj_yr = final_proj_yr,
     ldd_max_yr = ldd_max_yr,
-    timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
     output_dir = output_dir)
   
   #---------------------
   #run projection
   source('model_code/model_scripts/housing_led/housing_led_control.R')
   borough_projection <- run_housing_led_model(config_list)
-  log_warnings(paste0(config_list$output_dir,"/warnings_",config_list$timestamp,".txt"))
+  log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   
   #----
   
@@ -53,9 +52,13 @@ run_bpo_projection <- function(projection_name,
   small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
   small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
   
-  housing_led_model_path <- paste0("outputs/housing_led/2018/",config_list$projection_name,"/")
-  housing_led_model_timestamp <- config_list$timestamp
+  adults_per_dwelling_path <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
+  small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
+  out_migration_rates_path <- "input_data/small_area_model/ward_out_migration_rates.rds"
+  in_migration_characteristics_path <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
   
+  housing_led_model_path <- config_list$output_dir
+ 
   borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates_",
                                          config_list$external_trend_datestamp,".rds")
   borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates_",
@@ -68,10 +71,7 @@ run_bpo_projection <- function(projection_name,
   death_rate_n_years_to_avg <- 5
   
   projection_type <- "ward"
-  projection_name <- paste0(projection_name,"_",projection_type)
 
-  small_area_output_dir <- paste0(config_list$output_dir,projection_type,"/")
-  
   ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
                            small_area_communal_est_popn_path = small_area_communal_est_popn_path,
                            small_area_births_backseries_path = small_area_births_backseries_path,
@@ -79,8 +79,12 @@ run_bpo_projection <- function(projection_name,
                            small_area_ldd_data_path = small_area_ldd_data_path,
                            small_area_dev_trajectory_path = small_area_dev_trajectory_path,
                            
+                           adults_per_dwelling_path = adults_per_dwelling_path,
+                           small_area_to_district_path = small_area_to_district_path,
+                           out_migration_rates_path = out_migration_rates_path,
+                           in_migration_characteristics_path = in_migration_characteristics_path,
+                           
                            housing_led_model_path = housing_led_model_path,
-                           housing_led_model_timestamp = housing_led_model_timestamp,
                            
                            borough_fertility_rates_path = borough_fertility_rates_path,
                            borough_mortality_rates_path = borough_mortality_rates_path,
@@ -92,18 +96,18 @@ run_bpo_projection <- function(projection_name,
                            birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                            death_rate_n_years_to_avg = death_rate_n_years_to_avg,
                            
-                           projection_type = projection_type,
-                           projection_name = projection_name,
+                           ldd_max_yr = ldd_max_yr,
                            
-                           small_area_output_dir = small_area_output_dir)
+                           projection_type = projection_type)
   
   rm(list = setdiff(ls(), c("ward_config_list","borough_projection","tm")))
   
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
-  log_warnings(paste0(ward_config_list$small_area_output_dir,ward_config_list$projection_name,"_warnings.txt"))
-  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
+  log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
   
+  #Finish
+  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
   message("Complete")
   
   return(list(borough_projection = borough_projection,

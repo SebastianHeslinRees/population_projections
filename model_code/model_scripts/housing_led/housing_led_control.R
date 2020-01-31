@@ -16,7 +16,6 @@ run_housing_led_model <- function(config_list){
                        "first_proj_yr",
                        "final_proj_yr",
                        "ldd_max_yr",
-                       "timestamp",
                        "output_dir")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
@@ -196,7 +195,6 @@ run_housing_led_model <- function(config_list){
   
   output_housing_led_projection(projection,
                                 config_list$output_dir,
-                                config_list$timestamp,
                                 config_list$external_trend_path,
                                 config_list$external_trend_datestamp,
                                 additional_dwellings,

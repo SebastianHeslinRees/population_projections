@@ -18,7 +18,8 @@ ahs_cap_year <- 2019
 
 ldd_max_yr <- 2018
 
-output_dir <- paste0("outputs/housing_led/2018/",projection_name,"/")
+output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+
 #------------------
 #Setup config list
 config_list <- list(
@@ -35,11 +36,10 @@ config_list <- list(
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
   ldd_max_yr = ldd_max_yr,
-  timestamp = format(Sys.time(), "%y-%m-%d_%H%M"),
   output_dir = output_dir)
 
 #---------------------
 #run projection
 source('model_code/model_scripts/housing_led/housing_led_control.R')
 projection <- run_housing_led_model(config_list)
-log_warnings(paste0("outputs/housing_led/2018/",config_list$projection_name,"/warnings_",config_list$timestamp,".txt"))
+log_warnings(paste0(output_dir,"warnings.txt"))
