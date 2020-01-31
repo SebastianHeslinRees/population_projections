@@ -48,6 +48,12 @@ domestic_out <- filter(domestic_out, age == 75) %>%
         select(names(domestic_out)) %>%
         rbind(filter(domestic_out, age != 75))
 
+#census to mid-year
+domestic_out <- left_join(domestic_out, ward_to_district, by="gss_code_ward") %>%
+        constrain_component(borough_domestic_out,
+                                     col_aggregation = c("gss_code","sex","age"),
+                                     col_popn = "domestic_out_migrants",
+                                     col_constraint = "dom_out")
 
 ####DOMESTIC IN####
 borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011)
@@ -69,6 +75,12 @@ domestic_in <- filter(domestic_in, age == 75) %>%
         select(names(domestic_in)) %>%
         rbind(filter(domestic_in, age != 75))
 
+#census to mid-year
+domestic_in <- left_join(domestic_in, ward_to_district, by="gss_code_ward") %>%
+        constrain_component(borough_domestic_in,
+                            col_aggregation = c("gss_code","sex","age"),
+                            col_popn = "domestic_in_migrants",
+                            col_constraint = "dom_in")
 
 ####NTERNATIONAL OUT####
 #Data from census on % of the borough's non-uk-born pop in each ward in that borough
@@ -193,7 +205,8 @@ ward_deaths_2011 <- left_join(borough_deaths, ward_to_district_citymerge, by="gs
         as.data.frame()
 
 
-ward_popn_2010 <- readRDS(ward_popn_path) %>% filter(year == 2010) %>%
+ward_popn_2010 <- readRDS(ward_popn_path) %>%
+        filter(year == 2010) %>%
         select(-gss_code)
 
 denominators <- ward_popn_2010 %>%
@@ -201,8 +214,9 @@ denominators <- ward_popn_2010 %>%
         popn_age_on(col_aggregation = c("year", "gss_code_ward", "sex", "age")) %>%
         rbind(ward_births_2011) %>%
         left_join(ward_deaths_2011, by = c("year","gss_code_ward","sex","age")) %>%
-        mutate(popn = popn - deaths) %>%
-        select(-deaths) %>%
+        rename(start_popn = popn) %>%
+        mutate(popn = start_popn - deaths) %>%
+        select(-deaths, -start_popn) %>%
         check_negative_values("popn")
 
 out_migration_rates <- left_join(domestic_out, international_out,
