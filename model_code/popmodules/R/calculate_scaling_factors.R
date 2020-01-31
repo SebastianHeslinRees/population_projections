@@ -57,16 +57,15 @@ calculate_scaling_factors <- function(popn,
   popn <- rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
   constraint <- rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
   
-  # constraint will almost always be aggregated to the right levels, but it doesn't hurt to make sure
-  # if(anyDuplicated(data.table::as.data.table(constraint[col_aggregation]))) {
+   if(anyDuplicated(data.table::as.data.table(constraint[col_aggregation]))) {
   #   warning(paste("calculate_scaling_factors is aggregating the input constraints up to the requested levels.",
   #                 "\nAlso, feel free to delete this warning in the source code if we're getting it too often, I'm just curious."))
-  #   constraint <- lazy_dt(constraint) %>%
-  #     group_by_at(unname(col_aggregation)) %>%
-  #     summarise(!!sym(col_constraint_new) := sum(!!sym(col_constraint_new))) %>%
-  #     ungroup() %>%
-  #     data.frame()
-  # }
+     constraint <- lazy_dt(constraint) %>%
+       group_by_at(unname(col_aggregation)) %>%
+       summarise(!!sym(col_constraint_new) := sum(!!sym(col_constraint_new))) %>%
+       ungroup() %>%
+       data.frame()
+   }
 
   scaling <- popn %>%
     mutate(do_scale__ = !!enquo(rows_to_constrain)) %>%
