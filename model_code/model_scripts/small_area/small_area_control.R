@@ -73,7 +73,7 @@ run_small_area_model <- function(config_list){
   #Create the cumulative development trajectory
 
   ldd_data <- filter(ldd_data, year <= config_list$ldd_max_yr) 
-  assertthat::assert_that(min(dwelling_trajectory$year) <= max(ldd_data$year) + 1)
+  assertthat::assert_that(min(dwelling_trajectory$year) <= config_list$ldd_max_yr + 1)
   
   dwelling_trajectory <- dwelling_trajectory %>%
     filter(year > config_list$ldd_max_yr) %>%
