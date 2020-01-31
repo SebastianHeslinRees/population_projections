@@ -39,7 +39,7 @@ run_trend_model <- function(config_list) {
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   #Create output directory
-  dir.create(output_dir, recursive = T, showWarnings = F)
+  dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
@@ -165,24 +165,24 @@ run_trend_model <- function(config_list) {
   
   ## write the output data
   message("running outputs")
-  output_projection(projection, output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel, n_csv_elements=8)
-  household_model_outputs(projection$ons_households, model = "ons", output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
-  household_model_outputs(projection$dclg_households, model = "dclg", output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
+  output_projection(projection, config_list$output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel, n_csv_elements=8)
+  household_model_outputs(projection$ons_households, model = "ons", config_list$output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
+  household_model_outputs(projection$dclg_households, model = "dclg", config_list$output_dir, timestamp = config_list$timestamp, write_excel = config_list$write_excel)
   
   ## output the QA
   if(config_list$write_QA){
     rmarkdown::render("model_code/qa/population_qa.Rmd",
                       output_file = paste0("population_qa",config_list$timestamp,".html"),
-                      output_dir = output_dir,
+                      output_dir = config_list$output_dir,
                       params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
-                                    popn_proj_fp = paste0(output_dir,"/population_",config_list$timestamp,".rds"),
-                                    deaths_proj_fp = paste0(output_dir,"/deaths_",config_list$timestamp,".rds"),
-                                    int_in_proj_fp = paste0(output_dir,"/int_in_",config_list$timestamp,".rds"),
-                                    int_out_proj_fp = paste0(output_dir,"/int_out_",config_list$timestamp,".rds"),
-                                    dom_in_proj_fp = paste0(output_dir,"/dom_in_",config_list$timestamp,".rds"),
-                                    dom_out_proj_fp = paste0(output_dir,"/dom_out_",config_list$timestamp,".rds"),
-                                    births_proj_fp = paste0(output_dir,"/births_",config_list$timestamp,".rds"),
-                                    output_files_dir = paste0(output_dir,"population_qa",config_list$timestamp,"_files/"),
+                                    popn_proj_fp = paste0(config_list$output_dir,"/population_",config_list$timestamp,".rds"),
+                                    deaths_proj_fp = paste0(config_list$output_dir,"/deaths_",config_list$timestamp,".rds"),
+                                    int_in_proj_fp = paste0(config_list$output_dir,"/int_in_",config_list$timestamp,".rds"),
+                                    int_out_proj_fp = paste0(config_list$output_dir,"/int_out_",config_list$timestamp,".rds"),
+                                    dom_in_proj_fp = paste0(config_list$output_dir,"/dom_in_",config_list$timestamp,".rds"),
+                                    dom_out_proj_fp = paste0(config_list$output_dir,"/dom_out_",config_list$timestamp,".rds"),
+                                    births_proj_fp = paste0(config_list$output_dir,"/births_",config_list$timestamp,".rds"),
+                                    output_files_dir = paste0(config_list$output_dir,"population_qa",config_list$timestamp,"_files/"),
                                     first_proj_yr = config_list$first_proj_yr))
   }
   
