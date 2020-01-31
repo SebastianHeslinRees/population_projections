@@ -147,6 +147,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   target_adults <- left_join(adults_per_dwelling, dwellings, by=c("gss_code_small_area")) %>%
     mutate(target = units*adults_per_dwelling)
 
+  #Note: negative can be created here but it isn't a problem
   household_popn <- popn_post_out_migration %>%
     left_join(communal_est_popn, by = c("gss_code_small_area", "sex", "age")) %>%
     mutate(household_popn = popn - ce_popn) %>%

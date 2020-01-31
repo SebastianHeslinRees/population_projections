@@ -109,6 +109,7 @@ ward_all_in <- data.table::fread(ward_in_migration_path, header = T) %>%
         mutate(age = as.numeric(age)) %>%
         select(gss_code_ward, sex, age, all_in_migrants)
 
+#Subtract the domestic from the total
 ward_int_in <- domestic_in %>%
         mutate(age = ifelse(age>75, 75, age)) %>%
         group_by(gss_code_ward, sex, age) %>%
@@ -118,6 +119,7 @@ ward_int_in <- domestic_in %>%
         mutate(international = all_in_migrants - domestic) %>%
         check_negative_values("international")
 
+#Distribute the over 75s to sya
 ward_int_in <- filter(ward_int_in, age == 75) %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         distribute_within_age_band(popn_2 = borough_international_in,
@@ -128,6 +130,7 @@ ward_int_in <- filter(ward_int_in, age == 75) %>%
         select(names(ward_int_in)) %>%
         rbind(filter(ward_int_in, age != 75))
 
+#constrain to the borough-level mye
 international_in <- ward_int_in %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         constrain_component(constraint = borough_international_in,
