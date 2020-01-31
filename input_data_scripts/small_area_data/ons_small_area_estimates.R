@@ -91,7 +91,7 @@ borough_scaling_factors_msoa <- dtplyr::lazy_dt(msoa_data)  %>%
   as.data.frame() %>%
   left_join(readRDS(mye_pop_path), by=c("year", "gss_code","sex","age")) %>%
   rename(mye_popn = popn) %>%
-  mutate(scaling_factor = ifelse(mye_popn == 0, 0, mye_popn / aggregated_popn)) %>%
+  mutate(scaling_factor = ifelse(aggregated_popn == 0, 0, mye_popn / aggregated_popn)) %>%
   select(gss_code, year, sex, age, scaling_factor) %>%
   validate_population(col_data = "scaling_factor")
 
