@@ -15,7 +15,7 @@ dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migratio
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
 upc_path <- NULL
-outputs_dir <- "outputs/trend/2018/"
+output_dir <- paste0("outputs/trend/2018/", projection_name, "/")
 
 mortality_years_to_avg <- 1
 mortality_avg_or_trend <- "average"
@@ -178,7 +178,7 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   dom_origin_destination_path = dom_origin_destination_path,
   upc_path = upc_path,
-  outputs_dir = outputs_dir,
+  output_dir = output_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   int_out_fns = int_out_fns,
@@ -202,9 +202,8 @@ rm(list = setdiff(ls(), "config_list"))
 
 # Save settings
 # TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
-if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
 projdir <- rprojroot::find_root(rprojroot::is_git_root)
-copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection_name)
+copy_dir <- paste0(projdir, "/", config_list$output_dir)
 dir.create(copy_dir, recursive = TRUE)
 this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))

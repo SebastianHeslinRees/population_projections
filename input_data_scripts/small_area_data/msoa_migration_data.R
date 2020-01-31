@@ -30,7 +30,8 @@ msoa_deaths_path <- "input_data/small_area_model/msoa_deaths.rds"
 msoa_popn_path <- "input_data/small_area_model/msoa_population_estimates.rds"
 
 #lookup
-msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") 
+msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>%
+        select(-msoa_name)
 
 ####DOMESTIC OUT####
 #Data come from the census
