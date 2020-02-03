@@ -198,6 +198,7 @@ run_housing_led_model <- function(config_list){
                                 config_list$external_trend_path,
                                 config_list$external_trend_datestamp,
                                 additional_dwellings,
-                                dwelling_trajectory)
+                                dwelling_trajectory,
+                                first_proj_yr)
   
 }
