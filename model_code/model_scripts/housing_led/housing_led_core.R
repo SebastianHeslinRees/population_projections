@@ -208,5 +208,6 @@ housing_led_core <- function(start_population,
               dom_out = final_domestic_migration[['dom_out']],
               ahs = ahs,
               ahs_choice = ahs_choice,
-              ahs_cap = ahs_cap))
+              ahs_cap = ahs_cap,
+              household_population = household_population))
 }

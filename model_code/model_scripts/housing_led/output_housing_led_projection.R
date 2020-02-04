@@ -1,6 +1,7 @@
 output_housing_led_projection <- function(projection, output_dir,
                                           external_trend_path, external_trend_datestamp,
                                           additional_dwellings, housing_stock,
+                                          household_trajectory,
                                           first_proj_yr){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
@@ -29,6 +30,7 @@ output_housing_led_projection <- function(projection, output_dir,
   for(i in seq_along(projection)) {
     saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],".rds"))
   }
+  saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
   # Create extra tables to to ouput
   names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
