@@ -194,7 +194,7 @@ past_net <- ward_pop %>%
   mutate(nat_chg = popn - housing_led_deaths) %>%
   left_join(ward_pop, by = c("gss_code", "gss_code_ward", "ethnic_group", "year", "sex", "age")) %>%
   mutate(housing_led_net_migration = housing_led_population - nat_chg) %>%
-  select("gss_code", "gss_code_ward", "ethnic_group", "year", "sex", "age", "housing_led_net_migration")
+  select(gss_code, gss_code_ward, ethnic_group, year, sex, age, housing_led_net_migration)
 
 ward_net <- readRDS(paste0(ward_path,"migration_ward.rds")) %>%
   wrd_func() %>%
