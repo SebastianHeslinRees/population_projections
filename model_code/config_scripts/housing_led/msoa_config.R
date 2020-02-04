@@ -1,10 +1,10 @@
 devtools::load_all("model_code/popmodules")
 
-projection_name <- "2018_based_shlaa_dev"
-housing_led_model_timestamp <- "20-01-30_1355"
+projection_name <- "shlaa_dev"
+housing_led_model_timestamp <- "20-01-31_1532"
 
 first_proj_yr <- 2019
-final_proj_yr <- 2020
+final_proj_yr <- 2050
 
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/msoa_shlaa_trajectory.rds"

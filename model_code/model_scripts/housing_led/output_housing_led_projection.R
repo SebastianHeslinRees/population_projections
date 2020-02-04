@@ -4,7 +4,7 @@ output_housing_led_projection <- function(projection, output_dir,
                                           first_proj_yr){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
-
+  
   # Add backseries to projection
   backseries <- get_data_from_file(
     list(population = paste0(external_trend_path,"population_",external_trend_datestamp,".rds"),
@@ -35,20 +35,43 @@ output_housing_led_projection <- function(projection, output_dir,
     as.data.frame()
   popn <- left_join(projection[["population"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")
+
+  london_totals <- function(data, col_aggregation=setdiff(names(data),data_col), data_col){
+    
+  assertthat::assert_that(all(c("gss_code", "gss_name") %in% names(data)))
+  assertthat::assert_that(all(grepl("E09", gss_code)))
+
+    x <- data %>%
+      mutate(gss_code = "E12000007") %>%
+      mutate(gss_name = "London (total)") %>%
+      dtplyr::lazy_dt() %>%
+      group_by_at(col_aggregation) %>%
+      summarise(!!data_col := sum(!!sym(data_col))) %>%
+      as.data.frame() %>%
+      select(names(data)) %>%
+      rbind(data) %>%
+      arrange(gss_code, year)
+    
+    return(x)
+    
+  }
   
   females <- filter(popn, sex == "female") %>%
+    london_totals(data_col = "popn") %>%
     mutate(popn = round(popn, digits=2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
   
   males <- filter(popn, sex == "male") %>%
+    london_totals(data_col = "popn") %>%
     mutate(popn = round(popn, digits=2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
   
   persons <- mutate(popn, sex = "persons") %>%
+    london_totals(data_col = "popn") %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code, gss_name, sex, age) %>%
     summarise(popn = sum(popn)) %>%
@@ -57,8 +80,9 @@ output_housing_led_projection <- function(projection, output_dir,
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
-
+  
   components <- list()
+
   # Rename last column (containing component data) in each output dataframe to
   # 'value' so we can rbind them
   for(x in names(projection)){
@@ -66,8 +90,9 @@ output_housing_led_projection <- function(projection, output_dir,
     if(!nm %in% c("ahs","ahs_choice")) {
       components[[x]] <- rename(projection[[x]], value := !!sym(nm)) %>%
         mutate(component = nm) %>%
-        dtplyr::lazy_dt() %>%
         filter(substr(gss_code,1,3)=="E09")%>%
+        london_totals(data_col = "value") %>%
+        dtplyr::lazy_dt() %>%
         group_by(year, gss_code, component) %>%
         summarise(value = sum(value)) %>%
         as.data.frame() %>%
@@ -89,15 +114,17 @@ output_housing_led_projection <- function(projection, output_dir,
   ahs <- left_join(projection[["ahs"]], projection[["ahs_choice"]],
                    by = c("year", "gss_code")) %>%
     arrange(year, gss_code)
-    
+  
   stock <- housing_stock %>%
+    london_totals(data_col = "dwellings") %>%
     left_join(names_lookup, by="gss_code") %>%
     mutate(dwellings = round(dwellings, 2)) %>%
     arrange(gss_code, year) %>%
     tidyr::pivot_wider(names_from = "year", values_from = "dwellings") %>%
     rename(borough = gss_name)
-  
+
   annual_dev <- additional_dwellings %>%
+    london_totals(data_col = "units") %>%
     filter(year != 2011) %>%
     left_join(names_lookup, by="gss_code") %>%
     arrange(gss_code, year) %>%
@@ -110,9 +137,9 @@ output_housing_led_projection <- function(projection, output_dir,
                assumed_dev = annual_dev, housing_stock = stock, ahs = ahs)
   
   for(i in seq_along(csvs)) {
-
+    
     data.table::fwrite(csvs[[i]], paste0(output_dir, "csv/",names(csvs)[i],".csv"))
-
+    
   }
-
+  
 }
