@@ -28,6 +28,7 @@
 #' @import dplyr
 #' @import assertthat
 #' @importFrom utils capture.output
+#' @importFrom stats setNames
 #'
 #' @export
 

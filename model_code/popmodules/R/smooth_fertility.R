@@ -37,6 +37,7 @@
 #' @import dplyr
 #' @importFrom data.table rbindlist
 #' @import minpack.lm
+#' @importFrom stats deviance nls.control residuals runif setNames
 #' @export
 
 smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_model=c(15:49)){
@@ -141,11 +142,10 @@ smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_m
   failed_GSS <- failed_LAs[!failed_LAs %in% success_GSS2]
 
   combine_data <- function(i){
-    df <- getPred('curve_function',coefs[[i]],age_range_to_model) %>%
-      cbind.data.frame(age=age_range_to_model) %>%
-      cbind.data.frame(gss_code=rep(names(coefs)[[i]],length(age_range_to_model))) %>%
-      setnames(".","fert_rate")
-    return(df)
+    data.frame(age = age_range_to_model,
+               gss_code=rep(names(coefs)[[i]],length(age_range_to_model)),
+               fert_rate = getPred('curve_function',coefs[[i]],age_range_to_model),
+               stringsAsFactors = FALSE)
   }
 
   laa <- combine_data(1)

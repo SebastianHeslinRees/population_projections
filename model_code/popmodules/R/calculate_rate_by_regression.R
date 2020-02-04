@@ -14,6 +14,7 @@
 #' @import dplyr
 #' @importFrom assertthat assert_that
 #' @importFrom purrr map map_dbl
+#' @importFrom stats lm
 #'
 #' @export
 
