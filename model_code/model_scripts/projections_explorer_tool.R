@@ -97,7 +97,7 @@ wrd_func <- function(data, yrs=c(2011:2050)){
     left_join(names_lookup, by="gss_code") %>%
     mutate(ethnic_group = "All persons") %>%
     select(gss_code, gss_code_ward,
-           ethnic_group, year, sex, age, nm) %>%
+           ethnic_group, year, sex, age, !!nm) %>%
     mutate(sex = substr(sex,1,1)) %>%
     filter(gss_code != "E09000001") %>%
     filter(year %in% yrs)
