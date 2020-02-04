@@ -33,7 +33,7 @@ process_projection <- function(x){
     filter(year %in% 2011:2050) %>%
     mutate(sex = substr(sex,1,1)) %>%
     select(gss_code, gss_code_ward,
-           ethnic_group, year, sex, age, nm)
+           ethnic_group, year, sex, age, !!nm)
   
   return(y)
 }
