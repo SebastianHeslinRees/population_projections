@@ -163,7 +163,6 @@ past_borough_deaths <- central[['dth']] %>%
   select(gss_code, year, sex, age, central_deaths) %>%
   mutate(sex = ifelse(sex == "m", "male", "female"))
 
-devtools::load_all("M:/Projects/population_projections/model_code/popmodules")
 past_deaths <- list()
 for(i in unique(past_ward_deaths$age_group)){
   
