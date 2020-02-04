@@ -55,7 +55,7 @@ scaled <- constrain_component(popn,
                          col_popn = "popn",
                          col_constraint = "popn")
 
-Due to default parameter values, this is equivalent to
+# Due to default parameter values, this is equivalent to
 scaled <- constrain_component(popn, constraint)
 
 }

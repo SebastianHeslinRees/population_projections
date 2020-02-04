@@ -26,6 +26,9 @@
 #'   counts in \code{popn}
 #' @param col_target A string with the name of the column containing population
 #'   counts in \code{target}
+#' @param rows_to_constrain A logical vector limiting the rows of \code{popn}
+#'   where this function is applied. Must be all TRUE or FALSE in each grouping
+#'   level specified by \code{col_aggregation}.
 #'
 #' @return A list of two data frames. \code{dom_in} contains the input domestic
 #'   inflows scaled to include the calculated positive residuals. \code{dom_out}

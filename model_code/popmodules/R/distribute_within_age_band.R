@@ -6,7 +6,7 @@
 #' @param popn_1 A data frame containing population data for an age group.
 #' @param popn_2 A data frame containing a population at sya covering the same age group.
 #' @param popn_1_col String. Name of column in \code{popn_1} containing the population data
-#' @param popn_1_col String. Name of column in \code{popn_2} containing the population data
+#' @param popn_2_col String. Name of column in \code{popn_2} containing the population data
 #' @param min_age Numeric. The minimum age of the age band.
 #' @param max_age Numeric. The maximim age of the age band.
 #' @param col_aggregation Character vector. The columns on whoich to join the two

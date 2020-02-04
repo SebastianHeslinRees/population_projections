@@ -37,9 +37,6 @@
 #'                          col_popn = "popn",
 #'                          col_constraint = "popn")
 #'
-#' Due to default parameter values, this is equivalent to
-#' scaled <- constrain_component(popn, constraint)
-#'
 #' @export
 #'
 

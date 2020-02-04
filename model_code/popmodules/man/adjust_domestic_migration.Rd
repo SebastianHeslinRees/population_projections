@@ -39,6 +39,10 @@ counts in \code{popn}}
 
 \item{col_target}{A string with the name of the column containing population
 counts in \code{target}}
+
+\item{rows_to_constrain}{A logical vector limiting the rows of \code{popn}
+where this function is applied. Must be all TRUE or FALSE in each grouping
+level specified by \code{col_aggregation}.}
 }
 \value{
 A list of two data frames. \code{dom_in} contains the input domestic

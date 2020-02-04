@@ -1,6 +1,10 @@
-#' Sum a data frame with births by mother's age, and split babies by a sex ratio
+#' Sum a data frame with births by mother's age, split babies by a sex ratio and
+#' set age to zero
 #'
-#'
+#' @param births Data frame constaining births by mother's age
+#' @param birthratio_m2f Ratio of male births to female births. Default 1.05
+#' @param geog_cols Character vector. Columns to group by when summing births.
+#'   Default "gss_code".
 #'
 #'
 #' @import assertthat

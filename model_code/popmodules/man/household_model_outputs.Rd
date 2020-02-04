@@ -12,6 +12,18 @@ household_model_outputs(
   write_excel
 )
 }
+\arguments{
+\item{model_output}{The household model output, as created by
+\code{household_model_ons} or \code{household_model_dclg}.}
+
+\item{model}{String. Either "ons" or "dclg".}
+
+\item{output_dir}{Location for output.}
+
+\item{timestamp}{String containing timestamp to use in output filename.}
+
+\item{write_excel}{Logical. Whether to output Excel .xls files.}
+}
 \description{
 Household model outputs
 }

@@ -1,8 +1,13 @@
 #' Datastore outputs
 #'
+#' @param population,births,deaths,int_in,int_out,dom_in,dom_out Data frames with population and component data.
+#' @param output_dir Path to output directory.
+#' @param file_name Output file
+#' @param output_date String. Date to include in output file
+#' @param write_excel Logical. Whether to create Excel output files.
+#'
 #' @import dplyr
 #' @export
-# TODO document!!
 datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
                               output_dir, file_name, output_date, write_excel){
 

@@ -19,7 +19,9 @@ distribute_within_age_band(
 
 \item{popn_2}{A data frame containing a population at sya covering the same age group.}
 
-\item{popn_1_col}{String. Name of column in \code{popn_2} containing the population data}
+\item{popn_1_col}{String. Name of column in \code{popn_1} containing the population data}
+
+\item{popn_2_col}{String. Name of column in \code{popn_2} containing the population data}
 
 \item{min_age}{Numeric. The minimum age of the age band.}
 
