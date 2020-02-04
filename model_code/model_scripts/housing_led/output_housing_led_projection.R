@@ -37,6 +37,9 @@ output_housing_led_projection <- function(projection, output_dir,
 
   london_totals <- function(data, col_aggregation=setdiff(names(data),data_col), data_col){
     
+  assertthat::assert_that(all(c("gss_code", "gss_name") %in% names(data)))
+  assertthat::assert_that(all(grepl("E09", gss_code)))
+
     x <- data %>%
       mutate(gss_code = "E12000007") %>%
       mutate(gss_name = "London (total)") %>%
