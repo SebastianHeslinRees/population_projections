@@ -115,6 +115,7 @@ run_housing_led_model <- function(config_list){
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
     mutate(dw2hh_ratio = households/dwellings) %>%
     select(year, gss_code, dw2hh_ratio) %>%
+    mutate(dw2hh_ratio = ifelse(year == config_list$ldd_max_yr & dw2hh_ratio > 1, 1, dw2hh_ratio)) %>%
     project_forward_flat(config_list$final_proj_yr)
   
   #development_trajectory

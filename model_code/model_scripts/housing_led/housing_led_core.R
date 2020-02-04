@@ -5,7 +5,6 @@ housing_led_core <- function(start_population,
                              communal_establishment_population,
                              external_ahs,
                              household_data,
-                             ldd_households,
                              hma_list,
                              projection_year,
                              ahs_cap_year,
@@ -64,7 +63,7 @@ housing_led_core <- function(start_population,
     left_join(communal_establishment_population, by=c("gss_code","year")) %>%
     mutate(household_popn = popn - communal_est_popn) %>%
     as.data.frame() %>%
-    check_negative_values("household_popn") %>%
+    validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code")) %>%
     select(-popn, -communal_est_popn)
   
   #4. Calculate trend AHS
@@ -126,7 +125,14 @@ housing_led_core <- function(start_population,
     }
   }
   
-  ahs_choice <- select(average_household_size, year, gss_code, ahs_choice)
+  if(!is.null(ahs_cap)){
+    ahs_choice <- select(average_household_size, year, gss_code, external, cap, trend, ahs_choice)
+  } else {
+    ahs_choice <- average_household_size %>%
+      mutate(cap = NA) %>%
+      select(year, gss_code, external, cap, trend, ahs_choice)
+  }
+  
   ahs <- select(average_household_size, year, gss_code, ahs)
   
   #6. Target population

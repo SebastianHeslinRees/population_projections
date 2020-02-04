@@ -37,9 +37,9 @@ output_housing_led_projection <- function(projection, output_dir,
     filter(substr(gss_code,1,3)=="E09")
 
   london_totals <- function(data, col_aggregation=setdiff(names(data),data_col), data_col){
-    
-  assertthat::assert_that(all(c("gss_code", "gss_name") %in% names(data)))
-  assertthat::assert_that(all(grepl("E09", gss_code)))
+  
+  assertthat::assert_that(all("gss_code" %in% names(data)))
+  assertthat::assert_that(all(grepl("E09", data$gss_code)))
 
     x <- data %>%
       mutate(gss_code = "E12000007") %>%
