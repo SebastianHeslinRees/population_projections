@@ -84,7 +84,7 @@
 #'                          sex=c("female","male"),
 #'                          age=20:21) %>%
 #'    dplyr::filter(gss_out != gss_in) %>%
-#'    dplyr::mutate(rate = 0.1))
+#'    dplyr::mutate(rate = 0.1)
 #'
 #' apply_domestic_migration_rates(popn,
 #'                  mign_rate,
@@ -155,7 +155,7 @@ apply_domestic_migration_rates <- function(popn,
                                missing_levels_popn = FALSE,
                                missing_levels_rate = TRUE)
 
-  # moving this warning to the rates' creation 
+  # moving this warning to the rates' creation
    unmatched_levels <- is.na(migration[[col_flow]])
    if(sum(unmatched_levels) > 0) {
   #   warning(paste(c("apply_domestic_migration_rates found", sum(unmatched_levels), "aggregation levels with no net outmigration.",

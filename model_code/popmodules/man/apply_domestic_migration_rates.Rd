@@ -111,7 +111,7 @@ mign_rate <- expand.grid(year = 2000,
                          sex=c("female","male"),
                          age=20:21) \%>\%
    dplyr::filter(gss_out != gss_in) \%>\%
-   dplyr::mutate(rate = 0.1))
+   dplyr::mutate(rate = 0.1)
 
 apply_domestic_migration_rates(popn,
                  mign_rate,
