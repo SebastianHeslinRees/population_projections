@@ -1,5 +1,5 @@
 library(dplyr)
-
+devtools::load_all("model_code/popmodules")
 
 #####Projection Paths and Timestamps####
 
@@ -250,4 +250,3 @@ pop_w_everything[is.na(pop_w_everything)] <- ""
 sum(is.na(pop_w_everything))
 
 data.table::fwrite(pop_w_everything, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool.csv")
-
