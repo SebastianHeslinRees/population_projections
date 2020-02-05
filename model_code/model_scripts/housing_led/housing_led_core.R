@@ -153,12 +153,12 @@ housing_led_core <- function(start_population,
   #8. Compare population from step 3 to target from step 5.
   #   Difference = domestic adjustment
   #   Adjust domestic
-  adjusted_domestic_migration <- adjust_domestic_migration(popn = initial_population,
+  adjusted_domestic_migration <- adjust_domestic_migration(popn = household_population,
                                                            target = target_population,
                                                            dom_in = trend_projection[['dom_in']],
                                                            dom_out = trend_projection[['dom_out']],
                                                            col_aggregation = c("year","gss_code"),
-                                                           col_popn = "popn",
+                                                           col_popn = "household_popn",
                                                            col_target = "target_popn")
   
   out_adjusted_dom <- left_join(adjusted_domestic_migration[[1]],
