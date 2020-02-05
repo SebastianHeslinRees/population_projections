@@ -109,7 +109,7 @@ output_housing_led_projection <- function(projection, output_dir,
            dom_net = round(dom_in - dom_out, 2),
            total_change = round(births - deaths + int_net + dom_net, 2),
            borough = gss_name) %>%
-    select(gss_code, borough, year, births, deaths, int_in, int_out, int_net,
+    select(gss_code, borough, year, popn, births, deaths, int_in, int_out, int_net,
            dom_in, dom_out, dom_net, total_change) %>%
     arrange(gss_code, year)
   

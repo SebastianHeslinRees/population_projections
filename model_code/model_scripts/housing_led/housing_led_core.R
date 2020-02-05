@@ -208,7 +208,7 @@ housing_led_core <- function(start_population,
   
   #TODO More validation needed here?
   constrained_population <- check_negative_values(constrained_population, "popn")
-  
+
   return(list(population = constrained_population,
               births = births,
               deaths = deaths,
