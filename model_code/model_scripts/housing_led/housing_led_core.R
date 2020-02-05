@@ -4,7 +4,8 @@ housing_led_core <- function(start_population,
                              hma_constraint,
                              communal_establishment_population,
                              external_ahs,
-                             household_data,
+                             households_1,
+                             households_2,
                              hma_list,
                              projection_year,
                              ahs_cap_year,
@@ -12,7 +13,7 @@ housing_led_core <- function(start_population,
                              ldd_max_yr){
   
   #1. GSS codes present in housing trajectory
-  constrain_gss <- unique(household_data$gss_code)
+  constrain_gss <- unique(households_1$gss_code)
   
   areas_with_no_housing_data <- lapply(trend_projection, function(x) filter(x, !x$gss_code %in% constrain_gss)) 
   trend_projection_national <- trend_projection
@@ -67,8 +68,9 @@ housing_led_core <- function(start_population,
     select(-popn, -communal_est_popn)
   
   #4. Calculate trend AHS
-  #Population divided by household_data
-  curr_yr_trend_ahs <- left_join(household_data, household_population, by=c("year","gss_code")) %>%
+  #Population divided by households_1
+  #2011 dw2hh ratio
+  curr_yr_trend_ahs <- left_join(households_1, household_population, by=c("year","gss_code")) %>%
     mutate(trend = household_popn/households) %>%
     select(-household_popn, -households)
   
@@ -137,7 +139,8 @@ housing_led_core <- function(start_population,
   
   #6. Target population
   #Probably apply_rate_to_population
-  target_population <- apply_rate_to_population(household_data, average_household_size,
+  #dw2hh 2018
+  target_population <- apply_rate_to_population(households_2, average_household_size,
                                                 col_popn = "households",
                                                 col_rate = "ahs",
                                                 col_out = "target_popn",
