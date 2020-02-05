@@ -70,6 +70,7 @@ run_housing_led_model <- function(config_list){
   
   #check
   assertthat::assert_that(config_list$final_proj_yr <= max(hma_constraint$year))
+
   
   #other data
   communal_establishment_population <- readRDS(external_communal_est_path) %>%
@@ -79,7 +80,7 @@ run_housing_led_model <- function(config_list){
     as.data.frame()
   
   external_ahs <- readRDS(config_list$external_ahs_trajectory_path) %>% as.data.frame()
-  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050) 
+  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
 
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
@@ -106,8 +107,7 @@ run_housing_led_model <- function(config_list){
     mutate(dwellings = cumsum(units)) %>%
     as.data.frame() %>%
     select(year, gss_code, dwellings) %>%
-    arrange(gss_code, year) %>%
-    mutate(dwellings = dwellings*0.8)
+    arrange(gss_code, year) 
   
   dwelling2household_ratio_adjusted <- filter(external_trend_households,
                                      year <= config_list$ldd_max_yr,
@@ -194,7 +194,7 @@ run_housing_led_model <- function(config_list){
                                                       communal_establishment_population = communal_establishment_population,
                                                       external_ahs = curr_yr_ahs,
                                                       households_1 = curr_yr_households_adjusted,
-                                                      households_2 = curr_yr_households_static ,
+                                                      households_2 = curr_yr_households_adjusted ,
                                                       hma_list = hma_list,
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,

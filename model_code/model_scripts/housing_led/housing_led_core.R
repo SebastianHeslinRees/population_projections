@@ -161,6 +161,11 @@ housing_led_core <- function(start_population,
                                                            col_popn = "popn",
                                                            col_target = "target_popn")
   
+  out_adjusted_dom <- left_join(adjusted_domestic_migration[[1]],
+                                adjusted_domestic_migration[[2]],
+                                by=c("year","gss_code","age","sex")) %>%
+    mutate(dom_net = dom_in-dom_out)
+  
   #9. Add components from step 6 to domestic from step 8 & start population
   #Join the non-adjusted population data back to the adjusted
   adjusted_population <- aged_on_population %>%
@@ -179,6 +184,8 @@ housing_led_core <- function(start_population,
                                              col_aggregation = c("year","hma","sex","age"),
                                              col_popn = "popn",
                                              col_constraint = "popn")
+  #Unconstrained Projection:
+  #constrained_population <- adjusted_population
   
   #Join the non-adjusted components data back to the adjusted
   births <- rbind(births, areas_with_no_housing_data[['births']])
@@ -212,5 +219,6 @@ housing_led_core <- function(start_population,
               ahs = ahs,
               ahs_choice = ahs_choice,
               ahs_cap = ahs_cap,
-              household_population = household_population))
+              household_population = household_population,
+              adjusted_domestic_migration = out_adjusted_dom))
 }
