@@ -33,13 +33,15 @@ constrain_to_hma <- function(popn, constraint, hma_list,
     popn <- select(popn, -hma)
   }
 
-  hma_map <- enframe(hma_list) %>% unnest(cols = value) %>% rename(hma = name, gss_code = value)
-  hma_map <- .match_factors(popn, hma_map, col_mapping = "gss_code")
+  if(!"data.frame" %in% class(hma_list)) {
+    hma_list <- tibble::enframe(hma_list, "hma", "gss_code") %>% tidyr::unnest(cols = c("hma","gss_code")) %>% as.data.frame
+  }
+  hma_list <- .match_factors(popn, hma_list, col_mapping = "gss_code")
 
   if(!"hma" %in% names(constraint)) {
     assertthat::assert_that("gss_code" %in% names(constraint))
 
-    constraint <- left_join(hma_map, constraint, by="gss_code") %>% # remove areas outside of HMAs
+    constraint <- left_join(hma_list, constraint, by="gss_code") %>% # remove areas outside of HMAs
       dtplyr::lazy_dt() %>%
       group_by_at(col_aggregation) %>%
       summarise(!!col_constraint := sum(!!sym(col_constraint))) %>%
@@ -47,12 +49,12 @@ constrain_to_hma <- function(popn, constraint, hma_list,
   }
 
   scaled_popn <- popn %>%
-    left_join(hma_map, by="gss_code") %>%
+    left_join(hma_list, by="gss_code") %>%
     constrain_component(constraint = constraint,
                         col_aggregation = col_aggregation,
                         col_popn = col_popn,
                         col_constraint = col_constraint,
-                        rows_to_constrain = popn$gss_code %in% hma_map$gss_code) %>%
+                        rows_to_constrain = popn$gss_code %in% hma_list$gss_code) %>%
     select(names(popn)) %>%
     as.data.frame()
 
