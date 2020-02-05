@@ -30,7 +30,10 @@ msoa_deaths_path <- "input_data/small_area_model/msoa_deaths.rds"
 msoa_popn_path <- "input_data/small_area_model/msoa_population_estimates.rds"
 
 #lookup
-msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") 
+msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>%
+        select(-msoa_name)
+london_msoas <- filter(msoa_to_district, grepl("E09", gss_code))$gss_code_msoa
+
 
 ####DOMESTIC OUT####
 #Data come from the census
@@ -58,7 +61,27 @@ dom_out_female <- data.table::fread(paste0(census_data_dir,msoa_dom_out_female_p
         select(gss_code_msoa, sex, age, domestic_out_migrants) %>%
         as.data.frame()
 
-domestic_out <- rbind(dom_out_female, dom_out_male)
+domestic_out <- rbind(dom_out_female, dom_out_male) %>%
+        filter(gss_code_msoa %in% london_msoas)
+
+#There are no 0 year olds in the msoa data
+#Take the borough 0 year olds and distribute to msoas
+#MSOA dist is the same as the 1 year old dist
+borough_zero_out <- borough_domestic_out %>%
+        filter(age == 0) %>%
+        rename(borough_flow = dom_out)
+
+age_0_out <- filter(domestic_out, age == 1)  %>%
+        left_join(msoa_to_district, by="gss_code_msoa") %>%
+        group_by(gss_code, sex) %>%
+        mutate(borough_total = sum(domestic_out_migrants)) %>%
+        data.frame() %>%
+        mutate(b_proportion = domestic_out_migrants / borough_total) %>%
+        mutate(age = 0) %>%
+        left_join(borough_zero_out, by=c("gss_code","sex","age")) %>%
+        mutate(modelled_flow = b_proportion * borough_flow) %>%
+        select(gss_code_msoa, sex, age, modelled_flow) %>%
+        setnames(names(domestic_out))
 
 domestic_out <- filter(domestic_out, age == 75) %>%
         left_join(msoa_to_district, by="gss_code_msoa") %>%
@@ -68,8 +91,16 @@ domestic_out <- filter(domestic_out, age == 75) %>%
                                    min_age=75, max_age=90,
                                    col_aggregation=c("gss_code","sex")) %>%
         select(names(domestic_out)) %>%
-        rbind(filter(domestic_out, age != 75))
+        rbind(filter(domestic_out, age != 75),
+              age_0_out) %>%
+        arrange(age, sex, gss_code_msoa)
 
+#census to mid-year
+domestic_out <- left_join(domestic_out, msoa_to_district, by="gss_code_msoa") %>%
+        constrain_component(borough_domestic_out,
+                            col_aggregation = c("gss_code","sex","age"),
+                            col_popn = "domestic_out_migrants",
+                            col_constraint = "dom_out")
 
 ####DOMESTIC IN####
 borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011)
@@ -94,7 +125,24 @@ dom_in_female <- data.table::fread(paste0(census_data_dir,msoa_dom_in_female_pat
         select(gss_code_msoa, sex, age, domestic_in_migrants) %>%
         as.data.frame()
 
-domestic_in <- rbind(dom_in_female, dom_in_male)
+domestic_in <- rbind(dom_in_female, dom_in_male) %>%
+        filter(gss_code_msoa %in% london_msoas)
+
+borough_zero_in <- borough_domestic_in %>%
+        filter(age == 0) %>%
+        rename(borough_flow = dom_in)
+
+age_0_in <- filter(domestic_in, age == 1)  %>%
+        left_join(msoa_to_district, by="gss_code_msoa") %>%
+        group_by(gss_code, sex) %>%
+        mutate(borough_total = sum(domestic_in_migrants)) %>%
+        data.frame() %>%
+        mutate(b_proportion = domestic_in_migrants / borough_total) %>%
+        mutate(age = 0) %>%
+        left_join(borough_zero_in, by=c("gss_code","sex","age")) %>%
+        mutate(modelled_flow = b_proportion * borough_flow) %>%
+        select(gss_code_msoa, sex, age, modelled_flow) %>%
+        setnames(names(domestic_in))
 
 domestic_in <- filter(domestic_in, age == 75) %>%
         left_join(msoa_to_district, by="gss_code_msoa") %>%
@@ -104,8 +152,16 @@ domestic_in <- filter(domestic_in, age == 75) %>%
                                    min_age=75, max_age=90,
                                    col_aggregation=c("gss_code","sex")) %>%
         select(names(domestic_in)) %>%
-        rbind(filter(domestic_in, age != 75))
+        rbind(filter(domestic_in, age != 75),
+              age_0_in) %>%
+        arrange(age, sex, gss_code_msoa)
 
+#census to mid-year
+domestic_in <- left_join(domestic_in, msoa_to_district, by="gss_code_msoa") %>%
+        constrain_component(borough_domestic_in,
+                            col_aggregation = c("gss_code","sex","age"),
+                            col_popn = "domestic_in_migrants",
+                            col_constraint = "dom_in")
 
 ####NTERNATIONAL OUT####
 #Data from census on % of the borough's non-uk-born pop in each msoa in that borough
@@ -159,7 +215,24 @@ int_in_female <- data.table::fread(paste0(census_data_dir,msoa_int_in_female_pat
         select(gss_code_msoa, sex, age, international_in_migrants) %>%
         as.data.frame()
 
-international_in <- rbind(int_in_female, int_in_male)
+international_in <- rbind(int_in_female, int_in_male) %>%
+        filter(gss_code_msoa %in% london_msoas)
+
+borough_zero_int_in <- borough_international_in %>%
+        filter(age == 0) %>%
+        rename(borough_flow = int_in)
+
+age_0_int_in <- filter(international_in, age == 1)  %>%
+        left_join(msoa_to_district, by="gss_code_msoa") %>%
+        group_by(gss_code, sex) %>%
+        mutate(borough_total = sum(international_in_migrants)) %>%
+        data.frame() %>%
+        mutate(b_proportion = international_in_migrants / borough_total) %>%
+        mutate(age = 0) %>%
+        left_join(borough_zero_int_in, by=c("gss_code","sex","age")) %>%
+        mutate(modelled_flow = b_proportion * borough_flow) %>%
+        select(gss_code_msoa, sex, age, modelled_flow) %>%
+        setnames(names(international_in))
 
 international_in <- filter(international_in, age == 75) %>%
         left_join(msoa_to_district, by="gss_code_msoa") %>%
@@ -169,12 +242,18 @@ international_in <- filter(international_in, age == 75) %>%
                                    min_age=75, max_age=90,
                                    col_aggregation=c("gss_code","sex")) %>%
         select(names(international_in)) %>%
-        rbind(filter(international_in, age != 75))
+        rbind(filter(international_in, age != 75),
+              age_0_int_in) %>%
+        arrange(age, sex, gss_code_msoa)
 
+#census to mid-year
+international_in <- left_join(international_in, msoa_to_district, by="gss_code_msoa") %>%
+        constrain_component(borough_international_in,
+                            col_aggregation = c("gss_code","sex","age"),
+                            col_popn = "international_in_migrants",
+                            col_constraint = "int_in")
 
 ####Out migration rates####
-london_msoas <- filter(msoa_to_district, grepl("E09", gss_code))$gss_code_msoa
-
 msoa_births_2011 <- readRDS(msoa_births_path) %>%
         filter(year == 2011, gss_code_msoa %in% london_msoas) %>%
         group_by(year, gss_code_msoa) %>%

@@ -70,7 +70,16 @@ calculate_scaling_factors <- function(popn,
 
   popn <- rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
   constraint <- rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
-
+  
+   if(anyDuplicated(data.table::as.data.table(constraint[col_aggregation]))) {
+  #   warning(paste("calculate_scaling_factors is aggregating the input constraints up to the requested levels.",
+  #                 "\nAlso, feel free to delete this warning in the source code if we're getting it too often, I'm just curious."))
+     constraint <- lazy_dt(constraint) %>%
+       group_by_at(unname(col_aggregation)) %>%
+       summarise(!!sym(col_constraint_new) := sum(!!sym(col_constraint_new))) %>%
+       ungroup() %>%
+       data.frame()
+   }
 
   scaling <- popn %>%
     mutate(do_scale__ = !!enquo(rows_to_constrain)) %>%
@@ -112,14 +121,14 @@ calculate_scaling_factors <- function(popn,
       group_by_at(names(col_aggregation)) %>%
       summarise(!!col_constraint_new := first(!!sym(col_constraint_new))) %>%
       data.frame()
-
-    total_unscaled <- sum(unable_to_scale[[col_constraint_new]])
-
+    
+    total_unscaled <- round(sum(unable_to_scale[[col_constraint_new]]),2)
+    
     warning(paste0(capture.output({
-      print(paste0("calculate_scaling_factors was asked to scale populations of zero to non-zero sizes at ",
-                   nrow(unable_to_scale), " aggregation levels, with target populations summing to ",
-                   total_unscaled, ". These populations will be unscaled and ",
-                   "the output will be short by this many people."))
+      print("calculate_scaling_factors was asked to scale populations of zero to non-zero sizes")
+      print(paste0(nrow(unable_to_scale), " aggregation levels affected"))
+      print(paste0("Target populations sum to ", total_unscaled))
+      print("These populations will be unscaled and the output will be short by this many people")
       if(nrow(unable_to_scale) < 30) {
         print("Values:")
         print(unable_to_scale)

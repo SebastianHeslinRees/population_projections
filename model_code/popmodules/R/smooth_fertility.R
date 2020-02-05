@@ -35,6 +35,7 @@
 #'   residuals for each LA.
 #'
 #' @import dplyr
+#' @import minpack.lm
 #' @importFrom data.table rbindlist
 #' @import minpack.lm
 #' @importFrom stats deviance nls.control residuals runif setNames
@@ -181,10 +182,6 @@ nlsLM2 <- function(formula, data=parent.frame(), start, jac=NULL,
                    upper=NULL, trace = FALSE, model=FALSE, ...){
 
   #nls.lm2<-function(par,lower=NULL, upper=NULL, fn, jac=NULL,control=nls.lm.control(), trace=FALSE, ...)
-
-
-
-  if (!requireNamespace("minpack.lm", quietly=TRUE)) stop("install the minpack.lm package before running smooth_fertility")
 
   #L <- list(par = par, lower = lower, upper = upper,
   #          fn = fn, jac=jac, control=control)

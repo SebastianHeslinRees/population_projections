@@ -16,6 +16,7 @@ housing_led_core <- function(start_population,
   constrain_gss <- unique(household_data$gss_code)
   
   areas_with_no_housing_data <- lapply(trend_projection, function(x) filter(x, !x$gss_code %in% constrain_gss)) 
+  trend_projection_national <- trend_projection
   trend_projection <- lapply(trend_projection, function(x) filter(x, x$gss_code %in% constrain_gss))
   aged_on_population <- filter(start_population, gss_code %in% constrain_gss) %>%
     popn_age_on()
@@ -195,7 +196,7 @@ housing_led_core <- function(start_population,
   return(list(population = constrained_population,
               births = births,
               deaths = deaths,
-              int_in = trend_projection[['int_in']],
+              int_in = trend_projection_national[['int_in']],
               int_out = int_out,
               dom_in = final_domestic_migration[['dom_in']],
               dom_out = final_domestic_migration[['dom_out']],

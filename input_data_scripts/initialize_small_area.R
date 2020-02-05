@@ -24,7 +24,9 @@ saveRDS(merged_to_electoral_ward, "input_data/lookup/2011_merged_ward_to_elector
 
 msoa_to_district <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/msoa to district.rds") %>%
   rename(gss_code = gss_code_district) %>%
-  as.data.frame()
+  left_join(data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/MSOA_names.csv"), by="gss_code_msoa") %>%
+  as.data.frame() %>%
+  select(gss_code_msoa, msoa_name, gss_code)
 saveRDS(msoa_to_district, "input_data/lookup/msoa_to_district.rds")
 
 lsoa_to_msoa <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%

@@ -4,7 +4,6 @@ library(tidyr)
 devtools::load_all("model_code/popmodules")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
 borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
@@ -49,6 +48,12 @@ domestic_out <- filter(domestic_out, age == 75) %>%
         select(names(domestic_out)) %>%
         rbind(filter(domestic_out, age != 75))
 
+#census to mid-year
+domestic_out <- left_join(domestic_out, ward_to_district, by="gss_code_ward") %>%
+        constrain_component(borough_domestic_out,
+                                     col_aggregation = c("gss_code","sex","age"),
+                                     col_popn = "domestic_out_migrants",
+                                     col_constraint = "dom_out")
 
 ####DOMESTIC IN####
 borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011)
@@ -70,6 +75,12 @@ domestic_in <- filter(domestic_in, age == 75) %>%
         select(names(domestic_in)) %>%
         rbind(filter(domestic_in, age != 75))
 
+#census to mid-year
+domestic_in <- left_join(domestic_in, ward_to_district, by="gss_code_ward") %>%
+        constrain_component(borough_domestic_in,
+                            col_aggregation = c("gss_code","sex","age"),
+                            col_popn = "domestic_in_migrants",
+                            col_constraint = "dom_in")
 
 ####NTERNATIONAL OUT####
 #Data from census on % of the borough's non-uk-born pop in each ward in that borough
@@ -110,6 +121,7 @@ ward_all_in <- data.table::fread(ward_in_migration_path, header = T) %>%
         mutate(age = as.numeric(age)) %>%
         select(gss_code_ward, sex, age, all_in_migrants)
 
+#Subtract the domestic from the total
 ward_int_in <- domestic_in %>%
         mutate(age = ifelse(age>75, 75, age)) %>%
         group_by(gss_code_ward, sex, age) %>%
@@ -119,6 +131,7 @@ ward_int_in <- domestic_in %>%
         mutate(international = all_in_migrants - domestic) %>%
         check_negative_values("international")
 
+#Distribute the over 75s to sya
 ward_int_in <- filter(ward_int_in, age == 75) %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         distribute_within_age_band(popn_2 = borough_international_in,
@@ -129,6 +142,7 @@ ward_int_in <- filter(ward_int_in, age == 75) %>%
         select(names(ward_int_in)) %>%
         rbind(filter(ward_int_in, age != 75))
 
+#constrain to the borough-level mye
 international_in <- ward_int_in %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
         constrain_component(constraint = borough_international_in,
@@ -191,7 +205,8 @@ ward_deaths_2011 <- left_join(borough_deaths, ward_to_district_citymerge, by="gs
         as.data.frame()
 
 
-ward_popn_2010 <- readRDS(ward_popn_path) %>% filter(year == 2010) %>%
+ward_popn_2010 <- readRDS(ward_popn_path) %>%
+        filter(year == 2010) %>%
         select(-gss_code)
 
 denominators <- ward_popn_2010 %>%
@@ -199,8 +214,9 @@ denominators <- ward_popn_2010 %>%
         popn_age_on(col_aggregation = c("year", "gss_code_ward", "sex", "age")) %>%
         rbind(ward_births_2011) %>%
         left_join(ward_deaths_2011, by = c("year","gss_code_ward","sex","age")) %>%
-        mutate(popn = popn - deaths) %>%
-        select(-deaths) %>%
+        rename(start_popn = popn) %>%
+        mutate(popn = start_popn - deaths) %>%
+        select(-deaths, -start_popn) %>%
         check_negative_values("popn")
 
 out_migration_rates <- left_join(domestic_out, international_out,
@@ -216,6 +232,18 @@ out_migration_rates <- left_join(domestic_out, international_out,
 ix <- out_migration_rates$out_migration_rate > 0.8
 if(any(ix)) {
         warning(paste(sum(ix), "outmigration levels had rates > 0.8, these will be capped."))
+        
+        warning(paste0(capture.output({
+                print(paste0("Outmigration levels had rates > 0.8 at ",
+                             sum(ix), " aggregation levels. These will be capped."))
+                if(sum(ix) < 30) {
+                        print("Values:")
+                        print(out_migration_rates[ix,])
+                } else {
+                        print("First 30 values:")
+                        print(out_migration_rates[ix,][1:30,])
+                }
+        }), collapse = "\n"))
 }        
 
 out_migration_rates <- out_migration_rates %>%
