@@ -51,11 +51,8 @@ constraint <- expand.grid(year=2000, age=20:21, sex=c("f","m"), country = "a", p
 
 scaled <- constrain_component(popn,
                          constraint,
-                         col_aggregation = c("year", "sex", "age", "country"),
+                         col_aggregation = c("year", "sex", "age"),
                          col_popn = "popn",
                          col_constraint = "popn")
-
-# Due to default parameter values, this is equivalent to
-scaled <- constrain_component(popn, constraint)
 
 }

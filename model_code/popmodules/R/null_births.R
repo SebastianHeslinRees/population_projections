@@ -26,7 +26,7 @@
 #' pop <- expand.grid(year = 2000, age=20:23, gss_code=c("a","b","c"), sex=c("f","m"), popn = 100)
 #'
 #' pop_births <- null_births(pop,
-#'                           colname_aggregation = c("year", "gss_code", "age", "sex"),
+#'                           col_aggregation = c("year", "gss_code", "age", "sex"),
 #'                           const = 0,
 #'                           col_age = "age")
 #'

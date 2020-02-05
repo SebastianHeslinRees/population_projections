@@ -33,7 +33,7 @@
 #'
 #' scaled <- constrain_component(popn,
 #'                          constraint,
-#'                          col_aggregation = c("year", "sex", "age", "country"),
+#'                          col_aggregation = c("year", "sex", "age"),
 #'                          col_popn = "popn",
 #'                          col_constraint = "popn")
 #'

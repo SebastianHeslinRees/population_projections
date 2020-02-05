@@ -19,10 +19,12 @@ a list \code{args} of arguments. The output of one function will
 be passed to the next as it's first argument (like a dplyr pipe).
 }
 \examples{
+\dontrun{
  funs_args_list <- list(
   list(fn = function1, args = list(arg1_1, arg1_2, ....)),
   list(fn = function2, args = list(arg2_1, arg2_2, ....)),
   .....
 )
+}
 
 }

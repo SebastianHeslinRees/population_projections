@@ -17,7 +17,7 @@ List of dataframes
 Read data from files into a named list
 }
 \examples{
-
+\dontrun{
 a <- list(
   cross_border_in_constraint =
     "input_data/constraints/npp_2016_cross_border_in_constraint.rds",
@@ -25,4 +25,5 @@ a <- list(
     "input_data/constraints/npp_2016_cross_border_out_constraint.rds")
 
 g <- get_data_from_file_2(files = a)
+}
 }

@@ -23,8 +23,9 @@ will produce those workbooks. Creates a population workbook, an ONS household
 workbook and a DCLG household workbook.
 }
 \examples{
+\dontrun{
 create_excels(dir = "outputs/trend/2018/2018_long/",
   stamp = "19-11-13_2144",
   file_name = "2018_long_trend.xlsx")
-
+}
 }
