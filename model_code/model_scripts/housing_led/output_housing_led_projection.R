@@ -89,7 +89,7 @@ output_housing_led_projection <- function(projection, output_dir,
   # 'value' so we can rbind them
   for(x in names(projection)){
     nm <- last(names(projection[[x]]))
-    if(!x %in% c("ahs","ahs_choice", "household_population", "trend_population")) {
+    if(x %in% c("population","births","deaths","int_out","int_in","dom_out","dom_in")){
       components[[x]] <- rename(projection[[x]], value := !!sym(nm)) %>%
         mutate(component = nm) %>%
         filter(substr(gss_code,1,3)=="E09")%>%

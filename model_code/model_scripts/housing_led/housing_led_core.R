@@ -184,8 +184,6 @@ housing_led_core <- function(start_population,
                                              col_aggregation = c("year","hma","sex","age"),
                                              col_popn = "popn",
                                              col_constraint = "popn")
-  #Unconstrained Projection:
-  #constrained_population <- adjusted_population
   
   #Join the non-adjusted components data back to the adjusted
   births <- rbind(births, areas_with_no_housing_data[['births']])
@@ -220,5 +218,6 @@ housing_led_core <- function(start_population,
               ahs_choice = ahs_choice,
               ahs_cap = ahs_cap,
               household_population = household_population,
-              adjusted_domestic_migration = out_adjusted_dom))
+              adjusted_domestic_migration = out_adjusted_dom,
+              unconstrained_population = adjusted_population))
 }
