@@ -204,7 +204,7 @@ run_housing_led_model <- function(config_list){
     ahs_cap <- projection[[projection_year]][['ahs_cap']]
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
-  #browser()
+  
   message(" ")
   message("Running outputs")
   projection <- arrange_housing_led_core_outputs(projection,
