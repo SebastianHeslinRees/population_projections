@@ -43,7 +43,6 @@ trend_core <- function(start_population,
   cat('\r',paste("  Projecting year",projection_year))
   flush.console()
 
-  
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
   # change rates are for changes that occured in the 12 months up to 30th June
