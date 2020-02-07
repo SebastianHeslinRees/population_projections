@@ -164,7 +164,6 @@ run_housing_led_model <- function(config_list){
                                          component_constraints,
                                          communal_establishment_population,
                                          external_ahs,
-                                         external_trend_households,
                                          dwelling_trajectory)
   
   for(projection_year in first_proj_yr:final_proj_yr){
@@ -231,10 +230,9 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
                                                    component_constraints,
                                                    communal_establishment_population,
                                                    external_ahs,
-                                                   external_trend_households,
                                                    dwelling_trajectory){
   
-  assertthat::assert_that(min(hma_constraint$year) <= final_proj_yr)
+  assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
@@ -242,18 +240,16 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
   assertthat::assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
   assertthat::assert_that(min(communal_establishment_population$year) <= first_proj_yr)
   assertthat::assert_that(min(external_ahs$year) <= first_proj_yr)
-  assertthat::assert_that(min(external_trend_households$year) <= first_proj_yr)
   assertthat::assert_that(min(dwelling_trajectory$year) <= first_proj_yr)
   
   assertthat::assert_that(max(hma_constraint$year) >= final_proj_yr)
-  assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= final_proj_year)
-  assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= final_proj_year)
-  assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= final_proj_year)
-  assertthat::assert_that(max(component_constraints[['death_constraint']]$year) >= final_proj_year)
-  assertthat::assert_that(max(component_constraints[['international_out_constraint']]$year) >= final_proj_year)
-  assertthat::assert_that(max(communal_establishment_population$year) >= final_proj_year)
-  assertthat::assert_that(max(external_ahs$year) >= final_proj_year)
-  assertthat::assert_that(max(external_trend_households$year) >= final_proj_year)
-  assertthat::assert_that(max(dwelling_trajectory$year) >= final_proj_year)
+  assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= final_proj_yr)
+  assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= final_proj_yr)
+  assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= final_proj_yr)
+  assertthat::assert_that(max(component_constraints[['death_constraint']]$year) >= final_proj_yr)
+  assertthat::assert_that(max(component_constraints[['international_out_constraint']]$year) >= final_proj_yr)
+  assertthat::assert_that(max(communal_establishment_population$year) >= final_proj_yr)
+  assertthat::assert_that(max(external_ahs$year) >= final_proj_yr)
+  assertthat::assert_that(max(dwelling_trajectory$year) >= final_proj_yr)
   
 }

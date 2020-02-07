@@ -84,14 +84,19 @@ housing_led_core <- function(start_population,
     ahs_cap <- curr_yr_trend_ahs %>% rename(cap = trend) %>% select(-year)
   }
   
+  average_household_size <- external_ahs %>%
+    filter(gss_code %in% constrain_gss) %>%
+    rename(external = ahs) %>%
+    left_join(curr_yr_trend_ahs, by = c("year","gss_code"))
+  
   if(projection_year <= ldd_max_yr){
     if(is.null(ahs_cap)){
       #before the max LDD data year always select the trend
-      average_household_size <- select(curr_yr_trend_ahs, year, gss_code, ahs = trend) %>%
-        mutate(ahs, ahs_choice = "trend")
+      average_household_size <- average_household_size %>%
+        mutate(cap = NA, ahs = trend, ahs_choice = "trend")
     } else {
-      average_household_size <- ahs_cap %>%
-        left_join(curr_yr_trend_ahs, by = c("year","gss_code")) %>%
+      average_household_size <- average_household_size %>%
+        left_join(ahs_cap, by = "gss_code") %>%
         mutate(ahs_choice = case_when(trend > cap ~ "cap",
                                       trend <= cap ~ "trend"),
                ahs = case_when(trend > cap ~ cap,
@@ -100,11 +105,9 @@ housing_led_core <- function(start_population,
   } else {
     if(is.null(ahs_cap)){
       #after LDD but before cap is set select the higher of the trend or external ahs
-      average_household_size <- external_ahs %>%
-        filter(gss_code %in% constrain_gss) %>%
-        rename(external = ahs) %>%
-        left_join(curr_yr_trend_ahs, by = c("year","gss_code")) %>%
-        mutate(ahs_choice = case_when(trend > external ~ "trend",
+      average_household_size <- average_household_size %>%
+        mutate(cap = NA,
+               ahs_choice = case_when(trend > external ~ "trend",
                                       external > trend ~ "external"),
                ahs = case_when(trend > external ~ trend,
                                external > trend ~ external))
@@ -127,14 +130,7 @@ housing_led_core <- function(start_population,
     }
   }
   
-  if(!is.null(ahs_cap)){
-    ahs_choice <- select(average_household_size, year, gss_code, external, cap, trend, ahs_choice)
-  } else {
-    ahs_choice <- average_household_size %>%
-      mutate(cap = NA) %>%
-      select(year, gss_code, external, cap, trend, ahs_choice)
-  }
-  
+  ahs_choice <- select(average_household_size, year, gss_code, external, cap, trend, ahs_choice)
   ahs <- select(average_household_size, year, gss_code, ahs)
   
   #6. Target population
