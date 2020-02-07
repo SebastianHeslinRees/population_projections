@@ -38,7 +38,7 @@ run_housing_led_model <- function(config_list){
   
   external_trend_households_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$trend_households_file)
   external_communal_est_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$communal_est_file)
-  browser()
+ 
   #component rates
   component_rates <- get_data_from_file(
     list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates_",config_list$external_trend_datestamp,".rds"),
@@ -157,8 +157,7 @@ run_housing_led_model <- function(config_list){
   
   projection <- list()
   trend_projection <- list()
-  
-  
+
   #check
   validate_housing_led_control_variables(first_proj_yr, final_proj_yr,
                                          hma_constraint, component_rates,
@@ -178,7 +177,7 @@ run_housing_led_model <- function(config_list){
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
     curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
-    browser()
+   
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility, 
                                                       mortality_rates = curr_yr_mortality,
@@ -224,6 +223,8 @@ run_housing_led_model <- function(config_list){
                                 household_trajectory_static,
                                 first_proj_yr)
 }
+
+#-------
 
 validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
                                                    hma_constraint, component_rates,
