@@ -28,6 +28,7 @@
 #' @importFrom stats complete.cases
 #' @importFrom dtplyr lazy_dt
 #'
+#' @export
 #' @examples
 #' sya_popn <- expand.grid(gss_code = "C-3P0",
 #'                         year = 2001:2005,

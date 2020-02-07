@@ -5,8 +5,16 @@
 \title{Calculate a residual between populations and convert to domestic migration
 flows}
 \usage{
-adjust_domestic_migration(popn, target, dom_in, dom_out,
-  col_aggregation = c("year", "gss_code"), col_popn, col_target)
+adjust_domestic_migration(
+  popn,
+  target,
+  dom_in,
+  dom_out,
+  col_aggregation = c("year", "gss_code"),
+  col_popn,
+  col_target,
+  rows_to_constrain = TRUE
+)
 }
 \arguments{
 \item{popn}{A data frame containing a population.}
@@ -31,6 +39,10 @@ counts in \code{popn}}
 
 \item{col_target}{A string with the name of the column containing population
 counts in \code{target}}
+
+\item{rows_to_constrain}{A logical vector limiting the rows of \code{popn}
+where this function is applied. Must be all TRUE or FALSE in each grouping
+level specified by \code{col_aggregation}.}
 }
 \value{
 A list of two data frames. \code{dom_in} contains the input domestic

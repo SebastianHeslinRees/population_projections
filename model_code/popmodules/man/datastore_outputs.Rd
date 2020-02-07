@@ -18,6 +18,17 @@ datastore_outputs(
   write_excel
 )
 }
+\arguments{
+\item{population, births, deaths, int_in, int_out, dom_in, dom_out}{Data frames with population and component data.}
+
+\item{output_dir}{Path to output directory.}
+
+\item{file_name}{Output file}
+
+\item{output_date}{String. Date to include in output file}
+
+\item{write_excel}{Logical. Whether to create Excel output files.}
+}
 \description{
 Datastore outputs
 }

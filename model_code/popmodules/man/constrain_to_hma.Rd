@@ -20,7 +20,7 @@ constrain_to_hma(
 resolution or lower.}
 
 \item{hma_list}{A named list where the name is an housing market area and the
-elements are the gss_codes inside that HMA}
+elements are vectors of the gss_codes inside that HMA}
 
 \item{col_aggregation}{A string or character vector giving the join mapping between
 \code{popn} and \code{constraint}. Equivalent to \code{by} in \code{dplyr} joins}

@@ -47,15 +47,15 @@ test_that("calculate_scaling_factors can scale up and down", {
   expect_equal(temp, output_out)
 })
 
-test_that("calculate_scaling_factors warns when the constraint isn't aggregated right (but it still works)", {
+test_that("calculate_scaling_factors handles the case when the constraint isn't yet aggregated", {
   constraint_in <- mutate(popn, popn = popn*2)
   output_out <- mutate(output, scaling = 2)
-  expect_warning(temp <- calculate_scaling_factors(popn,
-                                                   constraint_in,
-                                                   col_aggregation = c("year", "gss_code"),
-                                                   col_popn = "popn",
-                                                   col_constraint = "popn"))
-  expect_equal(temp, output_out)
+  expect_equal(calculate_scaling_factors(popn,
+                                         constraint_in,
+                                         col_aggregation = c("year", "gss_code"),
+                                         col_popn = "popn",
+                                         col_constraint = "popn"),
+                output_out)
 })
 
 

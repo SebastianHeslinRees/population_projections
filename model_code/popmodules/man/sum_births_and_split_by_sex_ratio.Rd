@@ -2,10 +2,24 @@
 % Please edit documentation in R/sum_births_and_split_by_sex_ratio.R
 \name{sum_births_and_split_by_sex_ratio}
 \alias{sum_births_and_split_by_sex_ratio}
-\title{Sum a data frame with births by mother's age, and split babies by a sex ratio}
+\title{Sum a data frame with births by mother's age, split babies by a sex ratio and
+set age to zero}
 \usage{
-sum_births_and_split_by_sex_ratio(births, birthratio_m2f = 1.05)
+sum_births_and_split_by_sex_ratio(
+  births,
+  birthratio_m2f = 1.05,
+  geog_cols = "gss_code"
+)
+}
+\arguments{
+\item{births}{Data frame constaining births by mother's age}
+
+\item{birthratio_m2f}{Ratio of male births to female births. Default 1.05}
+
+\item{geog_cols}{Character vector. Columns to group by when summing births.
+Default "gss_code".}
 }
 \description{
-Sum a data frame with births by mother's age, and split babies by a sex ratio
+Sum a data frame with births by mother's age, split babies by a sex ratio and
+set age to zero
 }

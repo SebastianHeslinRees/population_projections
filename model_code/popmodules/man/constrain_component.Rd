@@ -9,7 +9,8 @@ constrain_component(
   constraint,
   col_aggregation = c("year", "sex", "age", "country"),
   col_popn,
-  col_constraint = col_popn
+  col_constraint = col_popn,
+  rows_to_constrain = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,13 @@ counts. Default "popn".}
 
 \item{col_constraint}{String. Name of column in \code{constraint} containing population
 counts. Default col_popn.}
+
+\item{rows_to_constrain}{Which rows of the input population are to be
+constrained. This can be provided as a logical vector (e.g. \code{TRUE} for
+all rows or \code{c(TRUE, TRUE, FALSE)} or using dplyr's non-standard
+evaluation, e.g. for a population with a \code{gss_code} column,
+\code{gss_code == "E090000001"} for City of London, or \code{grepl("^E09",
+gss_code)} for all of London. Default TRUE.}
 }
 \value{
 A data frame of component counts calculated as input popn * rate, with one row
@@ -43,11 +51,8 @@ constraint <- expand.grid(year=2000, age=20:21, sex=c("f","m"), country = "a", p
 
 scaled <- constrain_component(popn,
                          constraint,
-                         col_aggregation = c("year", "sex", "age", "country"),
+                         col_aggregation = c("year", "sex", "age"),
                          col_popn = "popn",
                          col_constraint = "popn")
-
-Due to default parameter values, this is equivalent to
-scaled <- constrain_component(popn, constraint)
 
 }

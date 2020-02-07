@@ -24,7 +24,7 @@ Imports:
     tibble (>= 2.1.1),
     rprojroot,
     dtplyr,
-    minpack.lm
-Suggests: 
+    purrr,
+    minpack.lm,
     testthat (>= 2.1.0)
 RoxygenNote: 7.0.2

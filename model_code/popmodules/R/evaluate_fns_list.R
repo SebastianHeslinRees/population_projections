@@ -10,11 +10,13 @@
 #' @return The output from the final function in the funs_args_list
 #'
 #' @examples
+#' \dontrun{
 #'  funs_args_list <- list(
 #'   list(fn = function1, args = list(arg1_1, arg1_2, ....)),
 #'   list(fn = function2, args = list(arg2_1, arg2_2, ....)),
 #'   .....
 #' )
+#' }
 #'
 #' @export
 

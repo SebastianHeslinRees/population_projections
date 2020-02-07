@@ -73,7 +73,9 @@ out_traj <- list()
 for(i in 2006:2011){
   out_traj[[i]] <- mutate(out_flow, year = i)
 }
-out_traj <- data.table::rbindlist(out_traj) %>% select(names(out_rates)) %>%
+out_traj <- data.table::rbindlist(out_traj) %>%
+  data.frame() %>%
+  select(year, gss_code, sex, age, int_out) %>%
   mutate(year = as.numeric(year), age=as.numeric(age))
 
 
@@ -88,12 +90,14 @@ in_traj <- list()
 for(i in 2006:2011){
   in_traj[[i]] <- mutate(in_flow, year = i)
 }
-in_traj <- data.table::rbindlist(in_traj) %>% select(names(int_in)) %>%
-  data.frame() %>% mutate(year = as.numeric(year))
+in_traj <- data.table::rbindlist(in_traj) %>%
+  data.frame() %>%
+  select(year, gss_code, sex, age, int_in) %>%
+  mutate(year = as.numeric(year))
 
 #-----------------------------------
 
-x <-  calculate_international_rates_and_flows(popn_mye_path=popn_path,
+x <-  calculate_mean_international_rates_or_flows(popn_mye_path=popn_path,
                                    births_mye_path=births_path,
                                    flow_or_rate="flow",
                                    component_path=int_in_path,
@@ -110,7 +114,7 @@ test_that(" calculate_international_rates_and_flows error in flow calc", {
 
 #------------------------------------
 
-x <-  calculate_international_rates_and_flows(popn_mye_path=popn_path,
+x <-  calculate_mean_international_rates_or_flows(popn_mye_path=popn_path,
                                    births_mye_path=births_path,
                                    flow_or_rate="rate",
                                    component_path=int_out_path,
@@ -126,7 +130,7 @@ test_that(" calculate_international_rates_and_flows: error in rate calc", {
 
 
 test_that(" calculate_international_rates_and_flows: error in rate calc", {
-  expect_warning( calculate_international_rates_and_flows(popn_mye_path=popn_path,
+  expect_warning( calculate_mean_international_rates_or_flows(popn_mye_path=popn_path,
                                                births_mye_path=births_path,
                                                flow_or_rate="rate",
                                                component_path=int_out_path,

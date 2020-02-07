@@ -15,9 +15,9 @@
 #'   counts. Defaults to the value of \code{col_popn}.
 #' @param rows_to_constrain Which rows of the input population are to be
 #'   constrained. This can be provided as a logical vector (e.g. \code{TRUE} for
-#'   all rows or \code{c(TRUE, TRUE, FALSE))} or using dplyr's non-standard
+#'   all rows or \code{c(TRUE, TRUE, FALSE)} or using dplyr's non-standard
 #'   evaluation, e.g. for a population with a \code{gss_code} column,
-#'   \code{gss_code == "E090000001" for City of London, or \code{grepl("^E09",
+#'   \code{gss_code == "E090000001"} for City of London, or \code{grepl("^E09",
 #'   gss_code)} for all of London. Note this can't be applied to the population
 #'   column. Default TRUE.
 #'
@@ -27,6 +27,8 @@
 #'
 #' @import dplyr
 #' @import assertthat
+#' @importFrom utils capture.output
+#' @importFrom stats setNames
 #'
 #' @export
 
@@ -39,33 +41,34 @@ calculate_scaling_factors <- function(popn,
   # Standardise data
   # ----------------
   validate_calculate_scaling_factors_input(popn, constraint, col_aggregation, col_popn, col_constraint)
-  
+
+  # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
+  col_aggregation <- .convert_to_named_vector(col_aggregation)
+
+  if(anyDuplicated(data.table::as.data.table(constraint[col_aggregation]))) {
+    #warning(paste("calculate_scaling_factors is aggregating the input constraints up to the requested levels.",
+    #              "\nAlso, feel free to delete this warning in the source code if we're getting it too often, I'm just curious."))
+    constraint <- lazy_dt(constraint) %>%
+      group_by_at(unname(col_aggregation)) %>%
+      summarise(!!sym(col_constraint) := sum(!!sym(col_constraint))) %>%
+      ungroup() %>%
+      data.frame()
+  }
+
   cols <- names(popn)
   col_overlap <- intersect(names(popn), names(constraint)) %>%
     setdiff(c(col_aggregation, col_popn))
   names(cols) <- ifelse(cols %in% col_overlap, paste0(cols, ".x"), cols)
-  # Reformat col_aggregation to a named vector mapping between popn columns and constraint columns
-  col_aggregation <- .convert_to_named_vector(col_aggregation)
-  
+
   # Make sure the columns that are factors match
   constraint <- .match_factors(popn, constraint, col_aggregation)
-  
+
   # Deal with possible duplicate data column names
   col_popn_new <- paste0(col_popn, ".x")
   col_constraint_new <- paste0(col_constraint, ".y")
-  
+
   popn <- rename(popn, !!sym(col_popn_new) := !!sym(col_popn))
   constraint <- rename(constraint, !!sym(col_constraint_new) := !!sym(col_constraint))
-  
-   if(anyDuplicated(data.table::as.data.table(constraint[col_aggregation]))) {
-  #   warning(paste("calculate_scaling_factors is aggregating the input constraints up to the requested levels.",
-  #                 "\nAlso, feel free to delete this warning in the source code if we're getting it too often, I'm just curious."))
-     constraint <- lazy_dt(constraint) %>%
-       group_by_at(unname(col_aggregation)) %>%
-       summarise(!!sym(col_constraint_new) := sum(!!sym(col_constraint_new))) %>%
-       ungroup() %>%
-       data.frame()
-   }
 
   scaling <- popn %>%
     mutate(do_scale__ = !!enquo(rows_to_constrain)) %>%
@@ -81,7 +84,7 @@ calculate_scaling_factors <- function(popn,
 
   assertthat::assert_that(all(scaling$mixed_scaling_check),
                           msg = "calculate_scaling_factors was asked to aggregate to levels containing mixtures of geographies to be included and excluded from the rescaling")
-  
+
   ix <- scaling$scaling == -999
   if(any(ix)) {
     missing_levels <- filter(scaling, ix) %>%
@@ -92,15 +95,15 @@ calculate_scaling_factors <- function(popn,
       print("Levels affected:")
       print(sapply(missing_levels, unique))
     }), sep = "\n"))
-    
+
     scaling[ix, "scaling"] <- 1
   }
-  
+
   ix <- scaling$do_scale__ &
     scaling$popn_total__ == 0 &
     !is.na(scaling[[col_constraint_new]]) &
     scaling[[col_constraint_new]] != 0
-  
+
   if(any(ix)) {
     unable_to_scale <- dtplyr::lazy_dt(scaling) %>%
       filter(ix) %>%
@@ -129,7 +132,7 @@ calculate_scaling_factors <- function(popn,
     rename(!!col_popn := !!sym(col_popn_new)) %>%
     select(!!names(cols), scaling)  %>%
     setNames(c(cols, "scaling"))
-  
+
   return(scaling)
 }
 
@@ -142,7 +145,7 @@ calculate_scaling_factors <- function(popn,
 
 # Check the function input is valid
 validate_calculate_scaling_factors_input <- function(popn, constraint, col_aggregation, col_popn, col_constraint) {
-  
+
   # Type checking
   assert_that(is.data.frame(popn),
               msg = "calculate_scaling_factors needs popn to be a dataframe")
@@ -154,9 +157,9 @@ validate_calculate_scaling_factors_input <- function(popn, constraint, col_aggre
               msg = "calculate_scaling_factors needs a string as the col_popn parameter")
   assert_that(is.string(col_constraint),
               msg = "calculate_scaling_factors needs a string as the col_constraint parameter")
-  
+
   col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and constraint aggregation levels
-  
+
   assert_that(col_popn %in% names(popn),
               msg="in calculate_scaling_factors col_popn must be a column in popn dataframe")
   assert_that(col_constraint %in% names(constraint),
@@ -177,6 +180,6 @@ validate_calculate_scaling_factors_input <- function(popn, constraint, col_aggre
               msg = paste("calculate_scaling_factors needs a numeric column in the specified population count col:", names(col_popn)))
   assert_that(is.numeric(constraint[[col_constraint]]),
               msg = paste("calculate_scaling_factors needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
-  
+
   invisible(TRUE)
 }

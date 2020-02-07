@@ -42,12 +42,11 @@ constrain_births <- function(births, constraint){
   # (first check there are no births below the minimum constraint age - there shouldn't be, though the code would be fine if there were...)
   assert_that(sum(filter(births, age < min_constraint_age)$births) == 0)
 
-  births <- mutate(births, age_band = case_when(age < min_constraint_age ~ min_constraint_age,
-                                                age > max_constraint_age ~ max_constraint_age,
-                                                TRUE ~ age))
+  births <- mutate(births, age_band = ifelse(age < min_constraint_age, min_constraint_age,
+                                             ifelse(age > max_constraint_age, max_constraint_age, age)))
 
   constraint <- rename(constraint, age_band = age)
-  
+
   scaling <- calculate_scaling_factors(births, constraint, col_popn="births",
                                        col_aggregation = c("year","sex","age_band","country"),
                                        rows_to_constrain = births$country %in% unique(constraint$country) & births$sex == "female") %>%

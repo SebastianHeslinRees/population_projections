@@ -249,15 +249,16 @@ test_that("apply_domestic_migration_rates throws an error with explicit missing 
   expect_error(apply_domestic_migration_rates(popn, mign_in))
 })
 
-test_that("apply_domestic_migration_rates throws an error/warning with implicit missing aggregation values", {
-  mign_in <- mign_rate[-1,]
-  output_out <- mign_out[-2,]
-  expect_warning(temp <- apply_domestic_migration_rates(popn, mign_in))
-  expect_equivalent(temp, output_out)
-
-  popn_in <- popn[-1,]
-  expect_error(apply_domestic_migration_rates(popn_in, mign_rate))
-})
+# test_that("apply_domestic_migration_rates throws an error/warning with implicit missing aggregation values", {
+#   skip()
+#   mign_in <- mign_rate[-1,]
+#   output_out <- mign_out[-2,]
+#   expect_warning(temp <- apply_domestic_migration_rates(popn, mign_in))
+#   expect_equivalent(temp, output_out)
+#
+#   popn_in <- popn[-1,]
+#   expect_error(apply_domestic_migration_rates(popn_in, mign_rate))
+# })
 
 
 test_that("apply_domestic_migration_rates throws an error with duplicate aggregation values", {

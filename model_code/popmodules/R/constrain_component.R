@@ -15,10 +15,10 @@
 #'   counts. Default col_popn.
 #' @param rows_to_constrain Which rows of the input population are to be
 #'   constrained. This can be provided as a logical vector (e.g. \code{TRUE} for
-#'   all rows or \code{c(TRUE, TRUE, FALSE))} or using dplyr's non-standard
+#'   all rows or \code{c(TRUE, TRUE, FALSE)} or using dplyr's non-standard
 #'   evaluation, e.g. for a population with a \code{gss_code} column,
-#'   \code{gss_code == "E090000001" for City of London, or \code{grepl("^E09",
-#'   gss_code)} for all of London. Default tRUE
+#'   \code{gss_code == "E090000001"} for City of London, or \code{grepl("^E09",
+#'   gss_code)} for all of London. Default TRUE.
 #'
 #' @return A data frame of component counts calculated as input popn * rate, with one row
 #'   for each distinct level of the input \code{popn} dataframe
@@ -33,12 +33,9 @@
 #'
 #' scaled <- constrain_component(popn,
 #'                          constraint,
-#'                          col_aggregation = c("year", "sex", "age", "country"),
+#'                          col_aggregation = c("year", "sex", "age"),
 #'                          col_popn = "popn",
 #'                          col_constraint = "popn")
-#'
-#' Due to default parameter values, this is equivalent to
-#' scaled <- constrain_component(popn, constraint)
 #'
 #' @export
 #'
@@ -51,7 +48,7 @@ constrain_component <- function(popn,
                                 col_popn,
                                 col_constraint = col_popn,
                                 rows_to_constrain = TRUE) {
-  
+
   assertthat::assert_that(sum(is.na(filter(popn, rows_to_constrain)))==0,
                               msg="in constrain_component, there are NA values present in the popn data frame")
 

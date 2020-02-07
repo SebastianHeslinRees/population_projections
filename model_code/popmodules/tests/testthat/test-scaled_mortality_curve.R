@@ -78,7 +78,7 @@ aged <- pop_data %>%
 
 curves <- select(curves, -year)
 
-scaling_backseries_1 <- left_join(aged, curves, by = c("gss_code", "age", "sex")) %>%
+scaling_backseries <- left_join(aged, curves, by = c("gss_code", "age", "sex")) %>%
   mutate(curve_deaths = rate * popn) %>%
   left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
   group_by(gss_code, year, sex) %>%
@@ -125,11 +125,11 @@ trend <- curves %>%
 
 
 #-----------------------------------------------------------
-
-test_that("deaths_denominator in scaled_mortality_curve function",{
-  expect_equivalent(
-    deaths_denominator(pop_data, births), aged)
-})
+#
+# test_that("deaths_denominator in scaled_mortality_curve function",{
+#   expect_equivalent(
+#     deaths_denominator(pop_data, births), aged)
+# })
 
 # test_that("births_denominator produces the expected output",{
 #   expect_equivalent(

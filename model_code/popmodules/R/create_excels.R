@@ -13,10 +13,11 @@
 #'   include \code{.xslx} suffix.
 #'
 #' @examples
+#' \dontrun{
 #' create_excels(dir = "outputs/trend/2018/2018_long/",
 #'   stamp = "19-11-13_2144",
 #'   file_name = "2018_long_trend.xlsx")
-#'
+#' }
 #' @export
 
 create_excels <- function(dir, stamp, file_name){
