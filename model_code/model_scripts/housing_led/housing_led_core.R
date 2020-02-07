@@ -164,7 +164,10 @@ housing_led_core <- function(start_population,
   out_adjusted_dom <- left_join(adjusted_domestic_migration[["dom_in"]],
                                 adjusted_domestic_migration[["dom_out"]],
                                 by=c("year","gss_code","age","sex")) %>%
-    mutate(dom_net = dom_in-dom_out)
+    transmute(year, gss_code, age, sex, dom_net = dom_in-dom_out) %>%
+    left_join(trend_projection[["dom_in"]], by = c("year","gss_code","age","sex")) %>%
+    left_join(trend_projection[["dom_out"]], by = c("year","gss_code","age","sex")) %>%
+    transmute(year, gss_code, age, sex, adjustment = dom_net - dom_in + dom_out)
   
   #9. Add components from step 6 to domestic from step 8 & start population
   #Join the non-adjusted population data back to the adjusted
