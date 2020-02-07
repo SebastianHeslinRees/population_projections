@@ -162,7 +162,7 @@ housing_led_core <- function(start_population,
                                                            col_target = "target_popn")
   
   out_adjusted_dom <- left_join(adjusted_domestic_migration[["dom_in"]],
-                                adjusted_domestic_migration[[2]],
+                                adjusted_domestic_migration[["dom_out"]],
                                 by=c("year","gss_code","age","sex")) %>%
     mutate(dom_net = dom_in-dom_out)
   
