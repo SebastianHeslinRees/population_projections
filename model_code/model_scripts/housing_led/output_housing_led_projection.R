@@ -1,6 +1,7 @@
 output_housing_led_projection <- function(projection, output_dir,
                                           external_trend_path, external_trend_datestamp,
                                           additional_dwellings, housing_stock,
+                                          household_trajectory,
                                           first_proj_yr){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
@@ -29,6 +30,7 @@ output_housing_led_projection <- function(projection, output_dir,
   for(i in seq_along(projection)) {
     saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],".rds"))
   }
+  saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
   # Create extra tables to to ouput
   names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
@@ -87,7 +89,7 @@ output_housing_led_projection <- function(projection, output_dir,
   # 'value' so we can rbind them
   for(x in names(projection)){
     nm <- last(names(projection[[x]]))
-    if(!nm %in% c("ahs","ahs_choice")) {
+    if(x %in% c("population","births","deaths","int_out","int_in","dom_out","dom_in")){
       components[[x]] <- rename(projection[[x]], value := !!sym(nm)) %>%
         mutate(component = nm) %>%
         filter(substr(gss_code,1,3)=="E09")%>%
@@ -107,7 +109,7 @@ output_housing_led_projection <- function(projection, output_dir,
            dom_net = round(dom_in - dom_out, 2),
            total_change = round(births - deaths + int_net + dom_net, 2),
            borough = gss_name) %>%
-    select(gss_code, borough, year, births, deaths, int_in, int_out, int_net,
+    select(gss_code, borough, year, popn, births, deaths, int_in, int_out, int_net,
            dom_in, dom_out, dom_net, total_change) %>%
     arrange(gss_code, year)
   

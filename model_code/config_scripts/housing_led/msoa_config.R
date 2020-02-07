@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
-projection_name <- "shlaa_dev"
-housing_led_model_timestamp <- "20-01-31_1532"
+projection_name <- "2018_based_shlaa_dev"
+housing_led_model_timestamp <- "20-02-05_1808"
 
 first_proj_yr <- 2019
 final_proj_yr <- 2050

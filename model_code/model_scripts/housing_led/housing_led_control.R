@@ -70,6 +70,7 @@ run_housing_led_model <- function(config_list){
   
   #check
   assertthat::assert_that(config_list$final_proj_yr <= max(hma_constraint$year))
+
   
   #other data
   communal_establishment_population <- readRDS(external_communal_est_path) %>%
@@ -79,8 +80,8 @@ run_housing_led_model <- function(config_list){
     as.data.frame()
   
   external_ahs <- readRDS(config_list$external_ahs_trajectory_path) %>% as.data.frame()
-  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050) 
-  
+  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(2050)
+
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
     filter(year <= config_list$ldd_max_yr)%>%
@@ -106,21 +107,34 @@ run_housing_led_model <- function(config_list){
     mutate(dwellings = cumsum(units)) %>%
     as.data.frame() %>%
     select(year, gss_code, dwellings) %>%
-    arrange(gss_code, year)
+    arrange(gss_code, year) 
   
-  dwelling2household_ratio <- filter(external_trend_households,
+  dwelling2household_ratio_adjusted <- filter(external_trend_households,
                                      year <= config_list$ldd_max_yr,
                                      year %in% dwelling_trajectory$year,
                                      gss_code %in% dwelling_trajectory$gss_code) %>%
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
     mutate(dw2hh_ratio = households/dwellings) %>%
     select(year, gss_code, dw2hh_ratio) %>%
-    mutate(dw2hh_ratio = ifelse(year == config_list$ldd_max_yr & dw2hh_ratio > 1, 1, dw2hh_ratio)) %>%
     project_forward_flat(config_list$final_proj_yr)
   
-  #development_trajectory
-  household_trajectory <- dwelling_trajectory %>% 
-    left_join(dwelling2household_ratio, by=c("year", "gss_code")) %>%
+  dwelling2household_ratio_static <- filter(external_trend_households,
+                                     year == 2011,
+                                     gss_code %in% dwelling_trajectory$gss_code) %>%
+    left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
+    mutate(dw2hh_ratio = households/dwellings) %>%
+    select(year, gss_code, dw2hh_ratio) %>%
+    project_forward_flat(config_list$final_proj_yr)
+  
+
+  #development_trajectories
+  household_trajectory_static <- dwelling_trajectory %>% 
+    left_join(dwelling2household_ratio_static, by=c("year","gss_code")) %>%
+    mutate(households = dwellings * dw2hh_ratio) %>%
+    select(gss_code, year, households)
+  
+  household_trajectory_adjusted <- dwelling_trajectory %>% 
+    left_join(dwelling2household_ratio_adjusted, by=c("year", "gss_code")) %>%
     mutate(households = dwellings * dw2hh_ratio) %>%
     select(gss_code, year, households)
   
@@ -149,6 +163,7 @@ run_housing_led_model <- function(config_list){
   final_proj_yr <- config_list$final_proj_yr
   
   projection <- list()
+  trend_projection <- list()
   
   for(projection_year in first_proj_yr:final_proj_yr){
     
@@ -157,10 +172,11 @@ run_housing_led_model <- function(config_list){
     curr_yr_int_out <- mutate(component_rates$int_out, year = projection_year)
     curr_yr_int_in_flows <- component_rates$int_in %>% filter(year == projection_year)
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
-    curr_yr_households <- filter(household_trajectory, year == projection_year)
+    curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
+    curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
     curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
     
-    trend_projection <- trend_core(start_population = curr_yr_popn,
+    trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                    fertility_rates = curr_yr_fertility, 
                                    mortality_rates = curr_yr_mortality,
                                    int_out_flows_rates = curr_yr_int_out,
@@ -172,12 +188,13 @@ run_housing_led_model <- function(config_list){
                                    projection_year)
     
     projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
-                                                      trend_projection = trend_projection,
+                                                      trend_projection = trend_projection[[projection_year]],
                                                       component_constraints = component_constraints,
                                                       hma_constraint = curr_yr_hma_constraint,
                                                       communal_establishment_population = communal_establishment_population,
                                                       external_ahs = curr_yr_ahs,
-                                                      household_data = curr_yr_households,
+                                                      households_1 = curr_yr_households_adjusted,
+                                                      households_2 = curr_yr_households_adjusted ,
                                                       hma_list = hma_list,
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,
@@ -191,6 +208,7 @@ run_housing_led_model <- function(config_list){
   message(" ")
   message("Running outputs")
   projection <- arrange_housing_led_core_outputs(projection,
+                                                 trend_projection,
                                                  first_proj_yr,
                                                  final_proj_yr)
   
@@ -200,6 +218,6 @@ run_housing_led_model <- function(config_list){
                                 config_list$external_trend_datestamp,
                                 additional_dwellings,
                                 dwelling_trajectory,
+                                household_trajectory_static,
                                 first_proj_yr)
-  
 }
