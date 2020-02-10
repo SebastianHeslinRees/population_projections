@@ -234,7 +234,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
   
   assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
-  assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
+  assertthat::assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_constraints[['death_constraint']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
