@@ -26,7 +26,8 @@ run_small_area_model <- function(config_list){
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "ldd_max_yr",
-                       "projection_type")
+                       "projection_type",
+                       "bpo")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -222,7 +223,8 @@ run_small_area_model <- function(config_list){
                                births = births,
                                deaths = deaths,
                                first_proj_yr = config_list$first_proj_yr,
-                               lookup = small_area_to_district)
+                               lookup = small_area_to_district,
+                               bpo = config_list$bpo)
   
   return(projection)
 }

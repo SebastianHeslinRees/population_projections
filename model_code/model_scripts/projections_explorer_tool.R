@@ -248,4 +248,14 @@ sum(is.na(pop_w_everything))
 pop_w_everything[is.na(pop_w_everything)] <- ""
 sum(is.na(pop_w_everything))
 
-data.table::fwrite(pop_w_everything, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool.csv")
+#91 ages * 2 sexs * (624 wards + 33 boroughs) * 40 years
+assertthat::assert_that(91*2*(624+33)*40 == nrow(pop_w_everything))
+
+data.table::fwrite(pop_w_everything, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool_2.csv")
+
+#Check the output
+test_csv_output <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool_2.csv",
+                       header=TRUE, colClasses = unname(sapply(pop_w_everything,class)))
+test_csv_output[is.na(test_csv_output)] <- ""
+
+all_equal(as.data.frame(test_csv_output),pop_w_everything)

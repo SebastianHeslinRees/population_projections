@@ -2,7 +2,8 @@ run_bpo_projection <- function(projection_name,
                                dev_trajectory_path,
                                small_area_dev_trajectory_path,
                                first_proj_yr,
-                               final_proj_yr){
+                               final_proj_yr,
+                               bpo){
   tm <- Sys.time()
   #Setup
   external_trend_path <- "outputs/trend/2018/2018_central/"
@@ -98,13 +99,48 @@ run_bpo_projection <- function(projection_name,
                            
                            ldd_max_yr = ldd_max_yr,
                            
-                           projection_type = projection_type)
+                           projection_type = projection_type,
+                           
+                           bpo = bpo)
   
-  rm(list = setdiff(ls(), c("ward_config_list","borough_projection","tm")))
+  rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","tm")))
   
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
+  
+  #Dev Sheets
+  ward_dev_dataframe <- readRDS(ward_config_list$small_area_dev_trajectory_path) %>%
+    left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
+    filter(gss_code == borough_gss) %>%
+    left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
+    select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
+    tidyr::pivot_wider(names_from = year, values_from = units)
+  
+  assumed_dev_dataframe <- readRDS(config_list$dev_trajectory_path) %>%
+    filter(gss_code == borough_gss) %>%
+    mutate(borough = unique(ward_dev_dataframe$borough),
+           gss_code_ward = gss_code,
+           ward_name = paste0(borough, " (total)")) %>%
+    select(gss_code, borough, gss_code_ward, ward_name, year, units) %>%
+    tidyr::pivot_wider(names_from = year, values_from = units) %>%
+    rbind(ward_dev_dataframe) %>%
+    as.data.frame()
+  
+  wb <- xlsx::loadWorkbook(paste0(config_list$output_dir,"ward/bpo_workbook.xlsx"))
+  aa <- getSheets(wb)
+  xlsx::addDataFrame(assumed_dev_dataframe, aa$Assumed, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  
+  #dev data source 
+  dev_source_text <- as.data.frame(paste0("4. These projections incorporate assumptions about future development provided by the London Borough of ",
+                            unique(assumed_dev_dataframe$borough)))
+                   
+  xlsx::addDataFrame(dev_source_text, aa$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
+
+  #Write xlsx file
+  wbwrite <- paste0(config_list$output_dir, config_list$projection_name,"_BPO.xlsx")
+  saveWorkbook(wb, wbwrite)
+  file.remove(paste0(config_list$output_dir,"ward/bpo_workbook.xlsx"))
   
   #Finish
   data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))

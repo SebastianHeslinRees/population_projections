@@ -1,7 +1,7 @@
 output_small_area_projection <- function(projection, output_dir, projection_type,
                                          births, deaths, first_proj_yr,
-                                         lookup){
-
+                                         lookup, bpo=FALSE){
+  
   borough_names <- data.table::fread("input_data/lookup/lad18_code_to_name.csv")
   
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -62,7 +62,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     components[[i]] <- rename(proj_output[[i]], value := !!sym(nm)) %>%
       mutate(component = nm)
   }
- 
+  
   births <- filter(births, year %in% 2011:(first_proj_yr-1)) %>%
     left_join(lookup, by=c("gss_code_small_area")) %>%
     left_join(borough_names, by = "gss_code") %>%
@@ -80,7 +80,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     rename(value = deaths) %>%
     mutate(component = "deaths") %>%
     select_at(c("year","gss_code","borough", code, name, "value", "component"))
-
+  
   components <- data.table::rbindlist(components, use.names = TRUE) %>%
     as.data.frame() %>%
     select_at(c("year","gss_code","borough", code, name, "value", "component")) %>%
@@ -100,9 +100,47 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     mutate(total_change = round(births - deaths + migration, 2)) %>%
     select(gss_code, borough, code, name, year, popn, births, deaths, migration, total_change) %>%
     arrange_at(c("gss_code", code, "year"))
-
+  
   csvs <- list(persons=persons, males=males, females=females, components=components)
   for(i in seq_along(csvs)) {
     data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
   }
+  
+  if(bpo != FALSE){
+    #.rs.restartR()
+    library(xlsx)
+    library(rJava)
+    library(xlsxjars)
+    
+    bpo_data <- function(x, bpo_gss=bpo,
+                         col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
+      y <- x %>%
+        dtplyr::lazy_dt() %>%
+        filter(gss_code == bpo_gss) %>%
+        mutate(gss_code_ward = gss_code,
+               ward_name = paste0(borough, " (total)")) %>%
+        group_by_at(col_aggregation) %>%
+        summarise_all(.funs=sum) %>%
+        as.data.frame() %>%
+        rbind(x) %>%
+        dtplyr::lazy_dt() %>%
+        filter(gss_code == bpo_gss) %>%
+        as.data.frame()
+    }
+    
+    wb <- xlsx::loadWorkbook("M:/Projects/population_projections/outputs/housing_led/2018/ward_housing_led_2018_based_template.xlsx")
+    
+    aa<- getSheets(wb)
+    xlsx::addDataFrame(bpo_data(persons), aa$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(bpo_data(males), aa$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(bpo_data(females), aa$Females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(bpo_data(components, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name","year")),
+                       aa$Components, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    
+    wbwrite <- paste0(output_dir,"bpo_workbook.xlsx")
+    saveWorkbook(wb, wbwrite)
+    
+  }
 }
+
+
