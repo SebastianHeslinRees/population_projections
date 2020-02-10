@@ -4,6 +4,10 @@ run_bpo_projection <- function(projection_name,
                                first_proj_yr,
                                final_proj_yr,
                                bpo){
+  library(xlsx)
+  library(rJava)
+  library(xlsxjars)
+  
   tm <- Sys.time()
   #Setup
   external_trend_path <- "outputs/trend/2018/2018_central/"
@@ -128,18 +132,18 @@ run_bpo_projection <- function(projection_name,
     as.data.frame()
   
   wb <- xlsx::loadWorkbook(paste0(config_list$output_dir,"ward/bpo_workbook.xlsx"))
-  aa <- getSheets(wb)
-  xlsx::addDataFrame(assumed_dev_dataframe, aa$Assumed, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  wb_sheets <- getSheets(wb)
+  xlsx::addDataFrame(assumed_dev_dataframe, wb_sheets$Assumed, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #dev data source 
   dev_source_text <- as.data.frame(paste0("4. These projections incorporate assumptions about future development provided by the London Borough of ",
                             unique(assumed_dev_dataframe$borough)))
                    
-  xlsx::addDataFrame(dev_source_text, aa$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
+  xlsx::addDataFrame(dev_source_text, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
 
   #Write xlsx file
-  wbwrite <- paste0(config_list$output_dir, config_list$projection_name,"_BPO.xlsx")
-  saveWorkbook(wb, wbwrite)
+  wb_filename <- paste0(config_list$output_dir, config_list$projection_name,"_BPO.xlsx")
+  saveWorkbook(wb, wb_filename)
   file.remove(paste0(config_list$output_dir,"ward/bpo_workbook.xlsx"))
   
   #Finish

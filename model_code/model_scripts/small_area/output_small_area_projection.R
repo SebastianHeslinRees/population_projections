@@ -107,11 +107,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   }
   
   if(bpo != FALSE){
-    #.rs.restartR()
-    library(xlsx)
-    library(rJava)
-    library(xlsxjars)
-    
+
     bpo_data <- function(x, bpo_gss=bpo,
                          col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
       y <- x %>%
@@ -128,17 +124,17 @@ output_small_area_projection <- function(projection, output_dir, projection_type
         as.data.frame()
     }
     
-    wb <- xlsx::loadWorkbook("M:/Projects/population_projections/outputs/housing_led/2018/ward_housing_led_2018_based_template.xlsx")
+    wb <- xlsx::loadWorkbook("inputs/housing_led_model/ward_housing_led_2018_based_template.xlsx")
+    wb_sheets<- getSheets(wb)
     
-    aa<- getSheets(wb)
-    xlsx::addDataFrame(bpo_data(persons), aa$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(bpo_data(males), aa$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(bpo_data(females), aa$Females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(bpo_data(males), wb_sheets$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(bpo_data(females), wb_sheets$Females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
     xlsx::addDataFrame(bpo_data(components, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name","year")),
-                       aa$Components, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+                       wb_sheets$Components, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
     
-    wbwrite <- paste0(output_dir,"bpo_workbook.xlsx")
-    saveWorkbook(wb, wbwrite)
+    wb_filename <- paste0(output_dir,"bpo_workbook.xlsx")
+    saveWorkbook(wb, wb_filename)
     
   }
 }

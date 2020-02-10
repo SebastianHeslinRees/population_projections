@@ -1,12 +1,12 @@
 rm(list=ls())
-devtools::load_all('model_code/popmodules')
-source('model_code/config_scripts/housing_led/config_function.R')
-source('model_code/model_scripts/bpo_template_to_rds.R')
 
 bpo_name <- "merton_low"
 
 
 #--------
+devtools::load_all('model_code/popmodules')
+source('model_code/config_scripts/housing_led/config_function.R')
+source('model_code/model_scripts/bpo_template_to_rds.R')
 borough_gss <- create_bpo_trajectory(bpo_name = bpo_name)
 first_proj_yr <- 2019
 final_proj_yr <- 2050
@@ -20,5 +20,3 @@ bpo <- run_bpo_projection(projection_name = bpo_name,
                           first_proj_yr,
                           final_proj_yr,
                           bpo = borough_gss)
-
-
