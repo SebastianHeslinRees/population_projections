@@ -2,11 +2,16 @@ run_bpo_projection <- function(projection_name,
                                dev_trajectory_path,
                                small_area_dev_trajectory_path,
                                first_proj_yr,
-                               final_proj_yr){
+                               final_proj_yr,
+                               housing_led_params = list(),
+                               small_area_params = list()) {
+  
+  devtools::load_all("model_code/popmodules")
+  
   tm <- Sys.time()
   #Setup
-  external_trend_path <- "outputs/trend/2018/2018_central/"
-  external_trend_datestamp <- "19-11-13_2056"
+  external_trend_path <- "outputs/trend/2018/test2050/"
+  external_trend_datestamp <- "20-02-05_1130"
   communal_est_file <- "ons_communal_est_population.rds"
   trend_households_file <- "ons_stage_1_households.rds"
   ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
@@ -18,6 +23,9 @@ run_bpo_projection <- function(projection_name,
   ldd_max_yr <- 2018
   
   output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+
+  list2env(housing_led_params, environment())
+
   
   #------------------
   #Setup config list
@@ -71,6 +79,8 @@ run_bpo_projection <- function(projection_name,
   death_rate_n_years_to_avg <- 5
   
   projection_type <- "ward"
+  
+  list2env(small_area_params, environment())
 
   ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
                            small_area_communal_est_popn_path = small_area_communal_est_popn_path,
@@ -101,7 +111,7 @@ run_bpo_projection <- function(projection_name,
                            projection_type = projection_type)
   
   rm(list = setdiff(ls(), c("ward_config_list","borough_projection","tm")))
-  
+
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
