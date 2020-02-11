@@ -1,3 +1,20 @@
+#' Run the housing led and small area models with parametrised inputs
+#'
+#' @param projection_name String containing a name for the run. Used in the
+#'   output directory.
+#' @param dev_trajectory_path String containing a path to the input development
+#'   trajectory.
+#' @param small_area_dev_trajectory_path String containing a path the the input
+#'   development trajectory at small-area resolution.
+#' @param first_proj_year Integer. First year of projection.
+#' @param final_proj_year Integer. Last year of projection.
+#' @param housing_led_params,small_area_params Lists containing other key-value
+#'   pairs of configuration parameters for the two models. These will be written
+#'   over the default values, but won't supersede the above parameters. Note
+#'   that parameters constructed from other parameters, e.g.
+#'   external_ahs_trajectory_path which depends on external_trend_path, will
+#'   need to be specified as well.
+
 run_bpo_projection <- function(projection_name,
                                dev_trajectory_path,
                                small_area_dev_trajectory_path,
