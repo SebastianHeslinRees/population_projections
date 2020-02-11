@@ -54,7 +54,8 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
                             detailed_hh_pop = hh_pop,
                             household_summary = household_summary_sheet)
 
-  hh_output_dir <- paste0(output_dir, "/households_",timestamp,"/")
+  if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
+  hh_output_dir <- paste0(output_dir, "households/")
   dir.create(hh_output_dir, showWarnings = FALSE)
 
   #add authority names

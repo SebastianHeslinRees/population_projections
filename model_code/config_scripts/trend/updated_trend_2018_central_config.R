@@ -189,8 +189,7 @@ config_list <- list(
   ons_stage1_file_path = ons_stage1_file_path,
   ons_stage2_file_path = ons_stage2_file_path,
   dclg_stage1_file_path = dclg_stage1_file_path,
-  dclg_stage2_file_path = dclg_stage2_file_path,
-  output_dir = output_dir
+  dclg_stage2_file_path = dclg_stage2_file_path
 )
 
 # Save settings
