@@ -12,7 +12,6 @@ run_housing_led_model <- function(config_list){
                        "ldd_backseries_path",
                        "ahs_cap_year",
                        "external_trend_path",
-                       "external_trend_datestamp",
                        "first_proj_yr",
                        "final_proj_yr",
                        "ldd_max_yr",
@@ -36,22 +35,22 @@ run_housing_led_model <- function(config_list){
     return(dfs)
   }
   
-  external_trend_households_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$trend_households_file)
-  external_communal_est_path <- paste0(config_list$external_trend_path,"households_",config_list$external_trend_datestamp,"/",config_list$communal_est_file)
+  external_trend_households_path <- paste0(config_list$external_trend_path,"households/",config_list$trend_households_file)
+  external_communal_est_path <- paste0(config_list$external_trend_path,"households/",config_list$communal_est_file)
  
   #component rates
   component_rates <- get_data_from_file(
-    list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates_",config_list$external_trend_datestamp,".rds"),
-         mortality_rates = paste0(config_list$external_trend_path,"mortality_rates_",config_list$external_trend_datestamp,".rds"),
-         int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_",config_list$external_trend_datestamp,".rds"),
-         int_in_flows = paste0(config_list$external_trend_path,"int_in_",config_list$external_trend_datestamp,".rds"),
-         domestic_rates = paste0(config_list$external_trend_path,"domestic_rates_",config_list$external_trend_datestamp,".rds")))
+    list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates.rds"),
+         mortality_rates = paste0(config_list$external_trend_path,"mortality_rates.rds"),
+         int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates.rds"),
+         int_in_flows = paste0(config_list$external_trend_path,"int_in.rds"),
+         domestic_rates = paste0(config_list$external_trend_path,"domestic_rates.rds")))
   
   #For constraining
   component_constraints <- get_data_from_file(
-    list(birth_constraint = paste0(config_list$external_trend_path,"births_",config_list$external_trend_datestamp,".rds"),
-         death_constraint = paste0(config_list$external_trend_path,"deaths_",config_list$external_trend_datestamp,".rds"),
-         international_out_constraint = paste0(config_list$external_trend_path,"int_out_",config_list$external_trend_datestamp,".rds"))) %>%
+    list(birth_constraint = paste0(config_list$external_trend_path,"births.rds"),
+         death_constraint = paste0(config_list$external_trend_path,"deaths.rds"),
+         international_out_constraint = paste0(config_list$external_trend_path,"int_out.rds"))) %>%
     create_constraints()
   
   #housing market area constraint
@@ -60,7 +59,7 @@ run_housing_led_model <- function(config_list){
     tidyr::unnest(cols=c("hma","gss_code")) %>%
     as.data.frame()
   
-  hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population_", config_list$external_trend_datestamp,".rds")) %>%
+  hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
     filter(gss_code %in% hma_list$gss_code) %>%
     dtplyr::lazy_dt() %>%
     left_join(hma_list, by="gss_code") %>%
@@ -147,7 +146,7 @@ run_housing_led_model <- function(config_list){
   source('model_code/model_scripts/housing_led/output_housing_led_projection.R')
   
   #Starting population
-  curr_yr_popn <- readRDS(paste0(config_list$external_trend_path, "population_", config_list$external_trend_datestamp,".rds")) %>%
+  curr_yr_popn <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
     filter(year == config_list$first_proj_yr-1)
   
   #Other varibales
@@ -216,7 +215,6 @@ run_housing_led_model <- function(config_list){
   output_housing_led_projection(projection,
                                 config_list$output_dir,
                                 config_list$external_trend_path,
-                                config_list$external_trend_datestamp,
                                 additional_dwellings,
                                 dwelling_trajectory,
                                 household_trajectory_static,

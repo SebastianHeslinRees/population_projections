@@ -33,7 +33,7 @@ run_trend_model <- function(config_list) {
                        "communal_est_pop_path",
                        "dclg_stage1_file_path",
                        "dclg_stage2_file_path")
-  
+
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   #Create output directory
