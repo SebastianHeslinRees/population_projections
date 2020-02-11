@@ -251,7 +251,9 @@ sum(is.na(pop_w_everything))
 #91 ages * 2 sexs * (624 wards + 33 boroughs) * 40 years
 assertthat::assert_that(91*2*(624+33)*40 == nrow(pop_w_everything))
 
-data.table::fwrite(pop_w_everything, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool_2.csv")
+data.table::fwrite(pop_w_everything, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool.rds")
+saveRDS("Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool.rds")
+
 
 #Check the output
 test_csv_output <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool_2.csv",
