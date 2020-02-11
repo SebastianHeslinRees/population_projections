@@ -88,19 +88,19 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
 
   #write
   if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
-  output_dir <- paste0(output_dir,"datastore_", output_date)
-  dir.create(output_dir, recursive = T, showWarnings = F)
+  datastore_dir <- paste0(output_dir,"datastore")
+  dir.create(datastore_dir, recursive = T, showWarnings = F)
 
-  data.table::fwrite(persons, paste0(output_dir,"/persons.csv"))
-  data.table::fwrite(female, paste0(output_dir,"/females.csv"))
-  data.table::fwrite(male, paste0(output_dir,"/males.csv"))
-  data.table::fwrite(components, paste0(output_dir,"/components.csv"))
+  data.table::fwrite(persons, paste0(datastore_dir,"/persons.csv"))
+  data.table::fwrite(female, paste0(datastore_dir,"/females.csv"))
+  data.table::fwrite(male, paste0(datastore_dir,"/males.csv"))
+  data.table::fwrite(components, paste0(datastore_dir,"/components.csv"))
 
   #excel
   if(write_excel) {
     message("excel process running")
 
-    datastore_folder <- rprojroot::find_root_file(output_dir, criterion = rprojroot::is_git_root)
+    datastore_folder <- rprojroot::find_root_file(datastore_dir, criterion = rprojroot::is_git_root)
     datastore_folder <- gsub("/", "\\\\", datastore_folder)
     templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
     templates_folder <- gsub("/", "\\\\", templates_folder)
@@ -118,7 +118,7 @@ datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_i
 
 #--------------------------------------
 
-create_VBA_script <- function(output_dir, file_name){
+create_VBA_script <- function(datastore_dir, file_name){
 
   x <- data.frame(a = c(
 
@@ -134,17 +134,17 @@ create_VBA_script <- function(output_dir, file_name){
     "Worksheets(\"Sheet1\").Delete",
     "Application.DisplayAlerts = True",
 
-    paste0("wkb.SaveAs fileName:=\"",output_dir,"\\",file_name,"\""),
+    paste0("wkb.SaveAs fileName:=\"",datastore_dir,"\\",file_name,"\""),
     "wkb.Close SaveChanges:=False",
 
     "End Sub",
 
     "Sub run_open()",
 
-    paste0("Call open_copy_csv(\"",output_dir,"\\persons.csv\", \"persons\")"),
-    paste0("Call open_copy_csv(\"",output_dir,"\\females.csv\", \"females\")"),
-    paste0("Call open_copy_csv(\"",output_dir,"\\males.csv\", \"males\")"),
-    paste0("Call open_copy_csv(\"",output_dir,"\\components.csv\", \"components of change\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\persons.csv\", \"persons\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\females.csv\", \"females\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\males.csv\", \"males\")"),
+    paste0("Call open_copy_csv(\"",datastore_dir,"\\components.csv\", \"components of change\")"),
 
     "End Sub",
     "Sub open_copy_csv(fileName, tabName)",
