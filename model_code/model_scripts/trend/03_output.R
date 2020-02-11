@@ -1,13 +1,13 @@
 # @importFrom stringr str_detect
-output_projection <- function(projection, output_dir, timestamp, write_excel, n_csv_elements) {
+output_projection <- function(projection, output_dir, write_excel, n_csv_elements) {
   
   #RDS
   lapply(seq_along(projection), 
-         function(i) saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], "_", timestamp, ".rds"), compress = "gzip")) %>%
+         function(i) saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")) %>%
     invisible()
  
   #CSV
-  csv_dir <- paste0(output_dir,"csv_", timestamp, "/")
+  csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir)
   
   make_csvs <- function(data, name_stub){
@@ -70,7 +70,6 @@ output_projection <- function(projection, output_dir, timestamp, write_excel, n_
                     dom_in = projection$dom_in,
                     dom_out = projection$dom_out,
                     output_dir = output_dir,
-                    file_name = paste0("datastore_",timestamp,".xlsx"),
-                    output_date = config_list$timestamp,
+                    file_name = paste0("datastore_",Sys.Date(),".xlsx"),
                     write_excel = write_excel)
 }

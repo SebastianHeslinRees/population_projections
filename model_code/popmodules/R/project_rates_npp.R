@@ -35,6 +35,8 @@ project_rates_npp <- function(jump_off_rates,
   jump_off_year <- max(jump_off_rates$year)
   assert_that(all((jump_off_year + 1):final_projection_year %in% rate_trajectory$year))
 
+  backseries <- filter(jump_off_rates, year < jump_off_year)
+  jump_off_rates <- filter(jump_off_rates, year == jump_off_year)
   # calculate the rate changes relative to the first year, and apply this to the
   # jump off rate to calulate the rest of the projection years
 
@@ -53,9 +55,10 @@ project_rates_npp <- function(jump_off_rates,
     mutate(rate = cumprod*jump_rate) %>%
     select(gss_code, sex, age, year, rate) %>%
     rename(!!rate_col := rate) %>%
-    rbind(jump_off_rates) %>%
+    rbind(jump_off_rates, backseries) %>%
     arrange(gss_code,sex,age,year) %>%
-    as.data.frame()
+    as.data.frame() 
+    
 
   validate_population(rates, col_aggregation = c("gss_code", "sex", "age", "year"),
                       col_data = rate_col)

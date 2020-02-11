@@ -4,12 +4,11 @@
 #'   \code{household_model_ons} or \code{household_model_dclg}.
 #' @param model String. Either "ons" or "dclg".
 #' @param output_dir Location for output.
-#' @param timestamp String containing timestamp to use in output filename.
 #' @param write_excel Logical. Whether to output Excel .xls files.
 #'
 #' @import dplyr
 #' @export
-household_model_outputs <- function(model_output, model, output_dir, timestamp, write_excel){
+household_model_outputs <- function(model_output, model, output_dir, write_excel){
 
   if(model == "dclg"){ col_aggregation <- c("gss_code", "year", "sex", "age_group", "household_type")}
   if(model == "ons"){ col_aggregation <- c("gss_code", "year", "sex", "age_group")}
@@ -55,7 +54,8 @@ household_model_outputs <- function(model_output, model, output_dir, timestamp, 
                             detailed_hh_pop = hh_pop,
                             household_summary = household_summary_sheet)
 
-  hh_output_dir <- paste0(output_dir, "/households_",timestamp,"/")
+  if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
+  hh_output_dir <- paste0(output_dir, "households/")
   dir.create(hh_output_dir, showWarnings = FALSE)
 
   #add authority names

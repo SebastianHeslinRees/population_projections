@@ -1,7 +1,6 @@
 devtools::load_all("model_code/popmodules")
 
-projection_name <- "2018_based_shlaa_dev"
-housing_led_model_timestamp <- "20-02-05_1808"
+projection_name <- "2018_based_shlaa_dev_20-02-05_1808"
 
 first_proj_yr <- 2019
 final_proj_yr <- 2050
@@ -20,15 +19,12 @@ small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
 out_migration_rates_path <- "input_data/small_area_model/ward_out_migration_rates.rds"
 in_migration_characteristics_path <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
 
-external_trend_path <- "outputs/trend/2018/2018_central/"
-external_trend_datestamp <- "19-11-13_2056"
+external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 
-housing_led_model_path <- paste0("outputs/housing_led/2018/",projection_name,"_",housing_led_model_timestamp,"/")
+housing_led_model_path <- paste0("outputs/housing_led/2018/",projection_name,"/")
 
-borough_fertility_rates_path <- paste0(external_trend_path,"fertility_rates_",
-                                       external_trend_datestamp,".rds")
-borough_mortality_rates_path <- paste0(external_trend_path,"mortality_rates_",
-                                       external_trend_datestamp,".rds")
+borough_fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
+borough_mortality_rates_path <- paste0(external_trend_path,"mortality_rates.rds")
 
 last_data_year <- 2018
 birth_rate_n_years_to_avg <- 5

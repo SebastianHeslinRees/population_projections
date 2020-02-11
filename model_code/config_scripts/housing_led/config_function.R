@@ -31,13 +31,14 @@ run_bpo_projection <- function(projection_name,
   
   tm <- Sys.time()
   #Setup
-  external_trend_path <- "outputs/trend/2018/2018_central/"
-  external_trend_datestamp <- "19-11-13_2056"
+
+  external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
+
   communal_est_file <- "ons_communal_est_population.rds"
   trend_households_file <- "ons_stage_1_households.rds"
   ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
   
-  external_ahs_trajectory_path <- paste0(external_trend_path,"households_",external_trend_datestamp,"/ons_ahs.rds")
+  external_ahs_trajectory_path <- paste0(external_trend_path,"households/ons_ahs.rds")
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
   ahs_cap_year <- 2019
@@ -60,7 +61,6 @@ run_bpo_projection <- function(projection_name,
     ldd_backseries_path = ldd_backseries_path,
     ahs_cap_year = ahs_cap_year,
     external_trend_path = external_trend_path,
-    external_trend_datestamp = external_trend_datestamp,
     first_proj_yr = first_proj_yr,
     final_proj_yr = final_proj_yr,
     ldd_max_yr = ldd_max_yr,
@@ -88,10 +88,8 @@ run_bpo_projection <- function(projection_name,
   
   housing_led_model_path <- config_list$output_dir
  
-  borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates_",
-                                         config_list$external_trend_datestamp,".rds")
-  borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates_",
-                                         config_list$external_trend_datestamp,".rds")
+  borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates.rds")
+  borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates.rds")
   
   last_data_year <- 2018
   first_proj_yr <- config_list$first_proj_yr

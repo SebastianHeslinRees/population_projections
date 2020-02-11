@@ -76,8 +76,14 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     mutate(jump_off_rate = scaling * rate) %>%
     select(gss_code, year, sex, age, jump_off_rate) %>%
     rename(!!output_col := jump_off_rate)
+  
+  rates_backseries <- left_join(scaling_backseries, target_curves, by=c("gss_code","sex")) %>%
+    filter(!is.na(scaling)) %>%
+    mutate(rate = rate*scaling) %>%
+    select(gss_code, year, sex, age, rate) %>%
+    rename(!!output_col := rate)
 
-  return(jump_off_rates)
+  return(rbind(rates_backseries, jump_off_rates))
 
 }
 

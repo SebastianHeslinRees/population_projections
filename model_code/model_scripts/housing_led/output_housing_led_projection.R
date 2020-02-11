@@ -1,5 +1,5 @@
 output_housing_led_projection <- function(projection, output_dir,
-                                          external_trend_path, external_trend_datestamp,
+                                          external_trend_path,
                                           additional_dwellings, housing_stock,
                                           household_trajectory,
                                           first_proj_yr){
@@ -8,13 +8,13 @@ output_housing_led_projection <- function(projection, output_dir,
   
   # Add backseries to projection
   backseries <- get_data_from_file(
-    list(population = paste0(external_trend_path,"population_",external_trend_datestamp,".rds"),
-         births = paste0(external_trend_path,"births_",external_trend_datestamp,".rds"),
-         deaths = paste0(external_trend_path,"deaths_",external_trend_datestamp,".rds"),
-         int_out = paste0(external_trend_path,"int_out_",external_trend_datestamp,".rds"),
-         int_in = paste0(external_trend_path,"int_in_",external_trend_datestamp,".rds"),
-         dom_out = paste0(external_trend_path,"dom_out_",external_trend_datestamp,".rds"),
-         dom_in = paste0(external_trend_path,"dom_in_",external_trend_datestamp,".rds")
+    list(population = paste0(external_trend_path,"population.rds"),
+         births = paste0(external_trend_path,"births.rds"),
+         deaths = paste0(external_trend_path,"deaths.rds"),
+         int_out = paste0(external_trend_path,"int_out.rds"),
+         int_in = paste0(external_trend_path,"int_in.rds"),
+         dom_out = paste0(external_trend_path,"dom_out.rds"),
+         dom_in = paste0(external_trend_path,"dom_in.rds")
     ))
   
   for(x in names(backseries)){
