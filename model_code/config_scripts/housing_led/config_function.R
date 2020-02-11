@@ -27,8 +27,8 @@ run_bpo_projection <- function(projection_name,
   
   tm <- Sys.time()
   #Setup
-  external_trend_path <- "outputs/trend/2018/test2050/"
-  external_trend_datestamp <- "20-02-05_1130"
+  external_trend_path <- "outputs/trend/2018/2018_central/"
+  external_trend_datestamp <- "19-11-13-2056"
   communal_est_file <- "ons_communal_est_population.rds"
   trend_households_file <- "ons_stage_1_households.rds"
   ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
