@@ -124,7 +124,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
         as.data.frame()
     }
     
-    wb <- xlsx::loadWorkbook("inputs/housing_led_model/ward_housing_led_2018_based_template.xlsx")
+    wb <- xlsx::loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
     wb_sheets<- getSheets(wb)
     
     xlsx::addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
