@@ -146,7 +146,7 @@ run_bpo_projection <- function(projection_name,
     tidyr::pivot_wider(names_from = year, values_from = units)
   
   assumed_dev_dataframe <- readRDS(config_list$dev_trajectory_path) %>%
-    filter(gss_code == borough_gss) %>%
+    filter(gss_code == bpo) %>%
     mutate(borough = unique(ward_dev_dataframe$borough),
            gss_code_ward = gss_code,
            ward_name = paste0(borough, " (total)")) %>%
