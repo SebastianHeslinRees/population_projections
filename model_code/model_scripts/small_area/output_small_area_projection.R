@@ -110,7 +110,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
 
     bpo_data <- function(x, bpo_gss=bpo,
                          col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
-      y <- x %>%
+      x %>%
         dtplyr::lazy_dt() %>%
         filter(gss_code == bpo_gss) %>%
         mutate(gss_code_ward = gss_code,
@@ -138,5 +138,4 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     
   }
 }
-
 
