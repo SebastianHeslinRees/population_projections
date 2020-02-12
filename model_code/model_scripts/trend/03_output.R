@@ -62,7 +62,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
     invisible()
   
   #Excel
-  datastore_outputs(population = projection$population,
+  trend_datastore_outputs(population = projection$population,
                     births = projection$births,
                     deaths = projection$deaths,
                     int_in = projection$int_in,
