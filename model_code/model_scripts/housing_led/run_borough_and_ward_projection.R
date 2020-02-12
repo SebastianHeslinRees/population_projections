@@ -1,4 +1,4 @@
-#' Run the housing led and small area models with parametrised inputs
+#' Run the housing led and ward models with parametrised inputs
 #'
 #' @param projection_name String containing a name for the run. Used in the
 #'   output directory.
@@ -15,25 +15,22 @@
 #'   external_ahs_trajectory_path which depends on external_trend_path, will
 #'   need to be specified as well.
 
-run_bpo_projection <- function(projection_name,
-                               dev_trajectory_path,
-                               small_area_dev_trajectory_path,
-                               first_proj_yr,
-                               final_proj_yr,
-                               bpo,
-                               housing_led_params = list(),
-                               small_area_params = list()) {
+run_borough_and_ward_projection <- function(projection_name,
+                                            dev_trajectory_path,
+                                            small_area_dev_trajectory_path,
+                                            first_proj_yr,
+                                            final_proj_yr,
+                                            bpo=FALSE,
+                                            housing_led_params = list(),
+                                            small_area_params = list()) {
   
   devtools::load_all("model_code/popmodules")
-  library(xlsx)
-  library(rJava)
-  library(xlsxjars)
   
   tm <- Sys.time()
   #Setup
-
+  
   external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
-
+  
   communal_est_file <- "ons_communal_est_population.rds"
   trend_households_file <- "ons_stage_1_households.rds"
   ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
@@ -45,9 +42,9 @@ run_bpo_projection <- function(projection_name,
   ldd_max_yr <- 2018
   
   output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
-
+  
   list2env(housing_led_params, environment())
-
+  
   
   #------------------
   #Setup config list
@@ -87,7 +84,7 @@ run_bpo_projection <- function(projection_name,
   in_migration_characteristics_path <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
   
   housing_led_model_path <- config_list$output_dir
- 
+  
   borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates.rds")
   borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates.rds")
   
@@ -100,7 +97,7 @@ run_bpo_projection <- function(projection_name,
   projection_type <- "ward"
   
   list2env(small_area_params, environment())
-
+  
   ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estimates_path,
                            small_area_communal_est_popn_path = small_area_communal_est_popn_path,
                            small_area_births_backseries_path = small_area_births_backseries_path,
@@ -127,54 +124,32 @@ run_bpo_projection <- function(projection_name,
                            
                            ldd_max_yr = ldd_max_yr,
                            
-                           projection_type = projection_type,
-                           
-                           bpo = bpo)
+                           projection_type = projection_type)
   
-  rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","tm")))
+  rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","tm","bpo")))
   
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
-  
-  #Dev Sheets
+
+  #bpo
   if(bpo != FALSE) {
-    ward_dev_dataframe <- readRDS(ward_config_list$small_area_dev_trajectory_path) %>%
-      left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
-      filter(gss_code == bpo) %>%
-      left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
-      select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
-      tidyr::pivot_wider(names_from = year, values_from = units)
+    library(xlsx)
+    library(rJava)
+    library(xlsxjars)
     
-    assumed_dev_dataframe <- readRDS(config_list$dev_trajectory_path) %>%
-      filter(gss_code == bpo) %>%
-      mutate(borough = unique(ward_dev_dataframe$borough),
-             gss_code_ward = gss_code,
-             ward_name = paste0(borough, " (total)")) %>%
-      select(gss_code, borough, gss_code_ward, ward_name, year, units) %>%
-      tidyr::pivot_wider(names_from = year, values_from = units) %>%
-      rbind(ward_dev_dataframe) %>%
-      as.data.frame()
+    source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
     
-    wb <- xlsx::loadWorkbook(paste0(config_list$output_dir,"ward/bpo_workbook.xlsx"))
-    wb_sheets <- getSheets(wb)
-    xlsx::addDataFrame(assumed_dev_dataframe, wb_sheets$Assumed, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    
-    #dev data source 
-    dev_source_text <- as.data.frame(paste0("4. These projections incorporate assumptions about future development provided by the London Borough of ",
-                              unique(assumed_dev_dataframe$borough)))
-                     
-    xlsx::addDataFrame(dev_source_text, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
-  
-    #Write xlsx file
-    wb_filename <- paste0(config_list$output_dir, config_list$projection_name,"_BPO.xlsx")
-    saveWorkbook(wb, wb_filename)
-    file.remove(paste0(config_list$output_dir,"ward/bpo_workbook.xlsx"))
+    output_bpo_excel_file(data = ward_projection[["csvs"]],
+                          output_dir = config_list$output_dir,
+                          projection_name = config_list$projection_name,
+                          small_area_dev_trajectory_path = ward_config_list$small_area_dev_trajectory_path,
+                          borough_dev_trajectory_path = config_list$dev_trajectory_path,
+                          bpo = bpo)
   }
-      
+  
   #Finish
   data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
-  message("Complete")
   
   return(list(borough_projection = borough_projection,
               ward_projection = ward_projection))
