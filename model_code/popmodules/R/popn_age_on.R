@@ -96,6 +96,11 @@ popn_age_on <- function(popn,
   popn_factors <- names(popn)[ sapply(popn, is.factor) ]
   age_is_integer <- is.integer(popn[[col_age]]) && (is.null(col_year) || floor(timestep)==timestep)
 
+  # Increment the year
+  # We do this here so we can use this population for validation later
+  if(!is.null(col_year)) {
+    popn[[col_year]] <- popn[[col_year]] + timestep
+  }
 
   # This is a data.table implementation of the code. See below for the (slower) equivalent in the tidyverse.
   if(requireNamespace("data.table", quietly=TRUE)) {
@@ -103,19 +108,13 @@ popn_age_on <- function(popn,
     # Age on (data.table)
     # -------------------
 
-    popn <- data.table::setDT(popn)
-
-    # Increment the year
-    if(!is.null(col_year)) {
-      popn[, (col_year) := get(col_year) + timestep]
-    }
-
     aged <- data.table::copy(popn)
+    data.table::setDT(aged)
 
     # If age is numeric, increment age
-    if(is.numeric(popn[[col_age]])) {
+    if(is.numeric(aged[[col_age]])) {
       setkeyv(aged, col_age)
-      max_age <- aged[, max(sort(unique(get(col_age))))]
+      max_age <- aged[, max(get(col_age))]
       aged[get(col_age) != max_age, (col_age) := get(col_age) + timestep]
     }
 
@@ -134,7 +133,7 @@ popn_age_on <- function(popn,
     }
 
     # Our initial checks established that non-numeric data depends on age, so we can safely group by all non-numeric columns
-    col_non_numeric <- names(popn)[ !sapply(popn, is.numeric)]
+    col_non_numeric <- names(aged)[ !sapply(aged, is.numeric)]
     col_agg_non_numeric <- union(col_aggregation, col_non_numeric)
 
     aged <- aged[, lapply(.SD, sum), by = col_agg_non_numeric]
@@ -165,9 +164,8 @@ popn_age_on <- function(popn,
         aged <- dplyr::group_by_at(aged, popn_groups, add=FALSE)
       }
     } else {
-      aged <- data.table::setDF(aged)
+      data.table::setDF(aged)
     }
-    popn <- data.table::setDF(popn)
 
   }
 
@@ -177,11 +175,6 @@ popn_age_on <- function(popn,
 
     # Age on (tidyverse)
     # -------------------
-
-    # Increment the year
-    if(!is.null(col_year)) {
-      popn[[col_year]] <- popn[[col_year]] + timestep
-    }
 
     aged <- dplyr::ungroup(popn)
     # One way to speed up the function is to make this part of a pipeline with
@@ -237,7 +230,7 @@ popn_age_on <- function(popn,
         aged <- dplyr::group_by_at(aged, popn_groups, add=FALSE)
       }
     } else {
-      aged <- as.data.frame(aged)
+      data.table::setDF(aged)
     }
   }
 
@@ -263,8 +256,7 @@ popn_age_on <- function(popn,
 
   }
 
-  return(as.data.frame(aged))
-
+  return(aged)
 }
 
 
