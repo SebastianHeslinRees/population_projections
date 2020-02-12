@@ -5,6 +5,10 @@ run_trend_model <- function(config_list) {
   source("model_code/model_scripts/trend/02_core.R")
   source("model_code/model_scripts/trend/03_output.R")
   source("model_code/model_scripts/trend/arrange_trend_core_outputs.R")
+  source("model_code/model_scripts/trend/household_model_dclg.R")
+  source("model_code/model_scripts/trend/household_model_ons.R")
+  source("model_code/model_scripts/trend/household_model_outputs.R")
+  source("model_code/model_scripts/trend/trend_datastore_outputs.R")
 
   expected_config <- c("first_proj_yr", 
                        "n_proj_yr",

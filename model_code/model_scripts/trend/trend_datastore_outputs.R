@@ -1,15 +1,14 @@
-#' Datastore outputs
+#' Trend Model Datastore outputs
 #'
 #' @param population,births,deaths,int_in,int_out,dom_in,dom_out Data frames with population and component data.
 #' @param output_dir Path to output directory.
-#' @param file_name Output file
-#' @param output_date String. Date to include in output file
+#' @param excel_file_name Output file
 #' @param write_excel Logical. Whether to create Excel output files.
 #'
 #' @import dplyr
 #' @export
-datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
-                              output_dir, file_name, output_date, write_excel){
+trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
+                              output_dir, excel_file_name, write_excel){
 
   wrangle <- function(x){
     x <- filter(x, year >= 2011) %>%
