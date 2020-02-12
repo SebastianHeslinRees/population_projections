@@ -20,24 +20,23 @@
 #' }
 #' @export
 
-create_excels <- function(dir, stamp, file_name){
+create_trend_model_excels <- function(trend_dir, excel_file_name){
 
-  datastore_outputs(population = readRDS(paste0(dir,"population_",stamp,".rds")),
-                    births = readRDS(paste0(dir,"births_",stamp,".rds")),
-                    deaths = readRDS(paste0(dir,"deaths_",stamp,".rds")),
-                    int_in = readRDS(paste0(dir,"int_in_",stamp,".rds")),
-                    int_out = readRDS(paste0(dir,"int_out_",stamp,".rds")),
-                    dom_in = readRDS(paste0(dir,"dom_in_",stamp,".rds")),
-                    dom_out = readRDS(paste0(dir,"dom_out_",stamp,".rds")),
-                    output_dir = dir,
-                    file_name = file_name,
-                    output_date = stamp,
+  trend_datastore_outputs(population = readRDS(paste0(dir,"population.rds")),
+                    births = readRDS(paste0(dir,"births.rds")),
+                    deaths = readRDS(paste0(dir,"deaths.rds")),
+                    int_in = readRDS(paste0(dir,"int_in.rds")),
+                    int_out = readRDS(paste0(dir,"int_out.rds")),
+                    dom_in = readRDS(paste0(dir,"dom_in.rds")),
+                    dom_out = readRDS(paste0(dir,"dom_out.rds")),
+                    output_dir = trend_dir,
+                    excel_file_name = excel_file_name,
+                    output_date = output_date,
                     write_excel = T)
 
   for(model in c("ons","dclg")){
-    household_model_outputs(model_output = readRDS(paste0(dir,model,"_households_",stamp,".rds")),
-                            model = model, output_dir = dir, timestamp = stamp, write_excel = T)
+    household_model_outputs(model_output = readRDS(paste0(trend_dir, model, "_households.rds")),
+                            model = model, output_dir = trend_dir, write_excel = T)
   }
 
 }
-
