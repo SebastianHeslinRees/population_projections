@@ -140,7 +140,7 @@ run_bpo_projection <- function(projection_name,
   #Dev Sheets
   ward_dev_dataframe <- readRDS(ward_config_list$small_area_dev_trajectory_path) %>%
     left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
-    filter(gss_code == borough_gss) %>%
+    filter(gss_code == bpo) %>%
     left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
     select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
     tidyr::pivot_wider(names_from = year, values_from = units)
