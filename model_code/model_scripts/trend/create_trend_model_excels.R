@@ -14,24 +14,23 @@
 #'
 #' @examples
 #' \dontrun{
-#' create_excels(dir = "outputs/trend/2018/2018_long/",
-#'   stamp = "19-11-13_2144",
-#'   file_name = "2018_long_trend.xlsx")
+#' create_trend_model_excels(
+#'   trend_dir = "outputs/trend/2018/2018_long_19-11-13_2144",
+#'   excel_file_name = "2018_long_trend.xlsx")
 #' }
 #' @export
 
 create_trend_model_excels <- function(trend_dir, excel_file_name){
 
-  trend_datastore_outputs(population = readRDS(paste0(dir,"population.rds")),
-                    births = readRDS(paste0(dir,"births.rds")),
-                    deaths = readRDS(paste0(dir,"deaths.rds")),
-                    int_in = readRDS(paste0(dir,"int_in.rds")),
-                    int_out = readRDS(paste0(dir,"int_out.rds")),
-                    dom_in = readRDS(paste0(dir,"dom_in.rds")),
-                    dom_out = readRDS(paste0(dir,"dom_out.rds")),
+  trend_datastore_outputs(population = readRDS(paste0(trend_dir,"population.rds")),
+                    births = readRDS(paste0(trend_dir,"births.rds")),
+                    deaths = readRDS(paste0(trend_dir,"deaths.rds")),
+                    int_in = readRDS(paste0(trend_dir,"int_in.rds")),
+                    int_out = readRDS(paste0(trend_dir,"int_out.rds")),
+                    dom_in = readRDS(paste0(trend_dir,"dom_in.rds")),
+                    dom_out = readRDS(paste0(trend_dir,"dom_out.rds")),
                     output_dir = trend_dir,
                     excel_file_name = excel_file_name,
-                    output_date = output_date,
                     write_excel = T)
 
   for(model in c("ons","dclg")){

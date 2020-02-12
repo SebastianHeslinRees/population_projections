@@ -2,7 +2,7 @@
 #'
 #' @param population,births,deaths,int_in,int_out,dom_in,dom_out Data frames with population and component data.
 #' @param output_dir Path to output directory.
-#' @param file_name Output file
+#' @param excel_file_name Output file
 #' @param write_excel Logical. Whether to create Excel output files.
 #'
 #' @import dplyr
