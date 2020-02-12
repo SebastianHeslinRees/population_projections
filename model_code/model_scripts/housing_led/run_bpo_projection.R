@@ -21,8 +21,9 @@ run_bpo_projection <- function(bpo_name,
   source('model_code/model_scripts/housing_led/run_borough_and_ward_projection.R')
   
   #trajectory
-  borough_gss <- create_bpo_trajectory(bpo_name = bpo_name,
-                                       shlaa_first_year = shlaa_first_year)
+  borough_gss <- bpo_template_to_rds(csv_name = bpo_name,
+                                     bpo_dir = bpo_dir,
+                                     shlaa_first_year = shlaa_first_year)
   
   dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_borough_trajectory_",bpo_name,".rds")
   small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",bpo_name,".rds")

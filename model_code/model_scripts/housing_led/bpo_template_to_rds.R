@@ -1,13 +1,23 @@
-library(dplyr)
+#' Process a standard bpo template csv file into 2 rds files
+#' 
+#' Take a standard ward-level csv bpo template and create 2
+#' rds files - 1 ward and 1 borough - where additional data
+#' not contained in the template is taken from the SHLAA
+#'
+#' @param csv_name The name of the dwelling trajectory csv saved in the folder
+#'   \code{bpo_dir} folder.
+#' @param bpo_dir The folder containing the dwelling trajectory csv.
+#' @param shlaa_first_year The first year in ehich to use shlaa development data.
+#'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.  
 
-create_bpo_trajectory <- function(bpo_name,
-                                  csv_name = bpo_name,
-                                  shlaa_first_year = 2042){
+bpo_template_to_rds <- function(csv_name,
+                                bpo_dir,
+                                shlaa_first_year = 2042){
   
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
-  bpo_dir <- "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/"
   csv_path <- paste0(bpo_dir,"csvs/",csv_name)
+  bpo_name <- substr(csv_name,1,nchar(csv_name)-5)
   
   #Read in conventional & non-conventional as separate dataframes
   tbl <- data.table::fread(csv_path, header=FALSE) %>% as.data.frame()

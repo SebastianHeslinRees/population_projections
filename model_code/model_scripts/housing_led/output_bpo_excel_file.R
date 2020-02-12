@@ -1,13 +1,28 @@
+#' Process a standard bpo template csv file into 2 rds files
+#' 
+#' Take a standard ward-level csv bpo template and create 2
+#' rds files - 1 ward and 1 borough - where additional data
+#' not contained in the template is taken from the SHLAA
+#'
+#' @param data The \code{[['csv']]} element from a ward projection
+#' @param output_dir The directory in which to save the Excel file
+#' @param projection_name The name of the output Excel file
+#' @param small_area_dev_trajectory_path The path to the ward-level development
+#'   trajectory in rds format
+#' @paramborough_dev_trajectory_path  The path to the borough-level development
+#'   trajectory in rds format
+#' @param bpo_gss_code The gss code of the bpo projection
+
 output_bpo_excel_file <- function(data, output_dir, projection_name,
                                   small_area_dev_trajectory_path,
                                   borough_dev_trajectory_path,
-                                  bpo = bpo){
+                                  bpo_gss_code){
   
-  bpo_data <- function(x, bpo_gss=bpo,
-                       col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
+  bpo_data <- function(x, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
     x %>%
+      as.data.frame() %>%
       dtplyr::lazy_dt() %>%
-      filter(gss_code == bpo_gss) %>%
+      filter(gss_code == bpo_gss_code) %>%
       mutate(gss_code_ward = gss_code,
              ward_name = paste0(borough, " (total)")) %>%
       group_by_at(col_aggregation) %>%
@@ -15,7 +30,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
       as.data.frame() %>%
       rbind(x) %>%
       dtplyr::lazy_dt() %>%
-      filter(gss_code == bpo_gss) %>%
+      filter(gss_code == bpo_gss_code) %>%
       as.data.frame()
   }
   
@@ -26,13 +41,13 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   
   ward_dev_dataframe <- readRDS(small_area_dev_trajectory_path) %>%
     left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
-    filter(gss_code == bpo) %>%
+    filter(gss_code == bpo_gss_code) %>%
     left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
     select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
     tidyr::pivot_wider(names_from = year, values_from = units)
   
   assumed_dev_dataframe <- readRDS(borough_dev_trajectory_path) %>%
-    filter(gss_code == bpo) %>%
+    filter(gss_code == bpo_gss_code) %>%
     mutate(borough = unique(ward_dev_dataframe$borough),
            gss_code_ward = gss_code,
            ward_name = paste0(borough, " (total)")) %>%
