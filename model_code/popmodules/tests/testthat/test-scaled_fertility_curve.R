@@ -70,9 +70,8 @@ get_coef <- function(df){
 
 pop_data <- readRDS(popn_mye_path)
 births_data <- readRDS(births_mye_path)
-curves <- readRDS(target_curves_filepath)
-
-curves <- select(curves, -year) %>% as.data.frame()
+curves <- readRDS(target_curves_filepath) %>%
+  select(-year)
 
 birth_dom <- filter(pop_data, sex == "female", age %in% unique(curves$age))
 
@@ -102,7 +101,7 @@ mean <- filter(scaling_backseries, year %in% back_years) %>%
 mean <- curves %>%
   left_join(mean, by = c("gss_code")) %>%
   mutate(rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, rate)  %>%
+  select(gss_code, year, sex, age, rate) %>%
   arrange(gss_code, year, sex, age)
 
 trend <- scaling_backseries %>%
@@ -128,14 +127,15 @@ trend <- curves %>%
   select(gss_code, year, sex, age, rate)  %>%
   arrange(gss_code, year, sex, age)
 
-#-----------------------------------------------------------
+#--------9---------------------------------------------------
 
 test_that("scaled_fertility_curve function: test with mean", {
   expect_equivalent(
     scaled_fertility_curve(popn_mye_path, births_mye_path,
                            target_curves_filepath, last_data_year,
                            years_to_avg, avg_or_trend="average",
-                           data_col = "births", output_col = "rate"),
+                           data_col = "births", output_col = "rate") %>%
+      arrange(gss_code, year, sex, age),
     mean)
 })
 
@@ -145,7 +145,8 @@ test_that("scaled_fertility_curve function: test with regression", {
     scaled_fertility_curve(popn_mye_path, births_mye_path,
                       target_curves_filepath, last_data_year,
                       years_to_avg, avg_or_trend="trend",
-                      data_col = "births", output_col = "rate"),
+                      data_col = "births", output_col = "rate") %>%
+      arrange(gss_code, year, sex, age),
     trend)
 })
 
