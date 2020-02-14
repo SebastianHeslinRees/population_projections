@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
 #Setup
-projection_name <- "2018_based_shlaa_dev"
+projection_name <- "2018_based_shlaa_dev_high_migration"
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
@@ -20,7 +20,7 @@ ldd_max_yr <- 2018
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
 domestic_transition_year = NULL
-domestic_initial_rate_path = paste0(external_trend_path,"domestic_rates.rds")
+domestic_initial_rate_path = "input_data/migration/high_domestic_migration_rates_(2016_2018).rds"
 domestic_long_term_rate_path = NULL
 
 #------------------
