@@ -15,7 +15,8 @@ run_housing_led_model <- function(config_list){
                        "first_proj_yr",
                        "final_proj_yr",
                        "ldd_max_yr",
-                       "output_dir")
+                       "output_dir",
+                       "constrain_projection")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -37,7 +38,7 @@ run_housing_led_model <- function(config_list){
   
   external_trend_households_path <- paste0(config_list$external_trend_path,"households/",config_list$trend_households_file)
   external_communal_est_path <- paste0(config_list$external_trend_path,"households/",config_list$communal_est_file)
- 
+  
   #component rates
   component_rates <- get_data_from_file(
     list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates.rds"),
@@ -54,19 +55,23 @@ run_housing_led_model <- function(config_list){
     create_constraints()
   
   #housing market area constraint
-  hma_list <- config_list$hma_list %>% 
-    tibble::enframe("hma","gss_code") %>% 
-    tidyr::unnest(cols=c("hma","gss_code")) %>%
-    as.data.frame()
-  
-  hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
-    filter(gss_code %in% hma_list$gss_code) %>%
-    dtplyr::lazy_dt() %>%
-    left_join(hma_list, by="gss_code") %>%
-    group_by_at(c("year","hma","sex","age")) %>%
-    summarise(popn = sum(popn)) %>%
-    as.data.frame()
-
+  if(config_list$constrain_projection){
+    hma_list <- config_list$hma_list %>% 
+      tibble::enframe("hma","gss_code") %>% 
+      tidyr::unnest(cols=c("hma","gss_code")) %>%
+      as.data.frame()
+    
+    hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
+      filter(gss_code %in% hma_list$gss_code) %>%
+      dtplyr::lazy_dt() %>%
+      left_join(hma_list, by="gss_code") %>%
+      group_by_at(c("year","hma","sex","age")) %>%
+      summarise(popn = sum(popn)) %>%
+      as.data.frame()
+  } else {
+    hma_constraint <- NULL
+    curr_yr_hma_constraint <- NULL
+  }
   #other data
   communal_establishment_population <- readRDS(external_communal_est_path) %>%
     dtplyr::lazy_dt() %>%
@@ -156,14 +161,15 @@ run_housing_led_model <- function(config_list){
   
   projection <- list()
   trend_projection <- list()
-
+  
   #check
   validate_housing_led_control_variables(first_proj_yr, final_proj_yr,
-                                         hma_constraint, component_rates,
+                                         component_rates,
                                          component_constraints,
                                          communal_establishment_population,
                                          external_ahs,
-                                         dwelling_trajectory)
+                                         dwelling_trajectory,
+                                         hma_constraint)
   
   for(projection_year in first_proj_yr:final_proj_yr){
     
@@ -174,8 +180,10 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
-    curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
-   
+    if(config_list$constrain_projection){
+      curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
+    }
+    
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility, 
                                                       mortality_rates = curr_yr_mortality,
@@ -199,7 +207,8 @@ run_housing_led_model <- function(config_list){
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,
                                                       ahs_cap = ahs_cap,
-                                                      ldd_max_yr = config_list$ldd_max_yr)
+                                                      ldd_max_yr = config_list$ldd_max_yr,
+                                                      constrain_projection = config_list$constrain_projection)
     
     ahs_cap <- projection[[projection_year]][['ahs_cap']]
     curr_yr_popn <- projection[[projection_year]][['population']]
@@ -224,13 +233,13 @@ run_housing_led_model <- function(config_list){
 #-------
 
 validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
-                                                   hma_constraint, component_rates,
+                                                   component_rates,
                                                    component_constraints,
                                                    communal_establishment_population,
                                                    external_ahs,
-                                                   dwelling_trajectory){
+                                                   dwelling_trajectory,
+                                                   hma_constraint){
   
-  assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
@@ -240,7 +249,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
   assertthat::assert_that(min(external_ahs$year) <= first_proj_yr)
   assertthat::assert_that(min(dwelling_trajectory$year) <= first_proj_yr)
   
-  assertthat::assert_that(max(hma_constraint$year) >= final_proj_yr)
+  
   assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= final_proj_yr)
   assertthat::assert_that(max(component_rates[['mortality_rates']]$year) >= final_proj_yr)
   assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= final_proj_yr)
@@ -250,4 +259,8 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
   assertthat::assert_that(max(external_ahs$year) >= final_proj_yr)
   assertthat::assert_that(max(dwelling_trajectory$year) >= final_proj_yr)
   
+  if(!is.null(hma_constraint)){
+    assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
+    assertthat::assert_that(max(hma_constraint$year) >= final_proj_yr)
+  }
 }
