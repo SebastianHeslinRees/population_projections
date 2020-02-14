@@ -19,9 +19,9 @@ ldd_max_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
-domestic_transition_year = NULL
-domestic_initial_rate_path = paste0(external_trend_path,"domestic_rates.rds")
-domestic_long_term_rate_path = NULL
+domestic_transition_year <- NULL
+domestic_initial_rate_path <- paste0(external_trend_path,"domestic_rates.rds")
+domestic_long_term_rate_path <- NULL
 
 #------------------
 #Setup config list
