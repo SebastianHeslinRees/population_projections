@@ -12,7 +12,8 @@
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
-                                shlaa_first_year = 2042){
+                                shlaa_first_year = 2042,
+                                dev_first_year = 2011){
   
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
@@ -21,12 +22,15 @@ bpo_template_to_rds <- function(csv_name,
   
   #Read in conventional & non-conventional as separate dataframes
   tbl <- data.table::fread(csv_path, header=FALSE) %>% as.data.frame()
+  assertthat::assert_that(ncol(tbl)==32, msg="number of columns in input housing trajectory is wrong")
+  
   unc_row <- match("Non-Conventional", tbl[[1]])
   no_of_gss_codes <- filter(tbl, substr(V1,1,3)=="E05")[,1] %>% unique() %>% length()
-  conventional_in <- data.table::fread(csv_path, header=TRUE, skip = "GSS.Code.Ward")[1:no_of_gss_codes,]
-  non_conventional_in <- data.table::fread(csv_path, header=TRUE, skip = unc_row)[1:no_of_gss_codes,]
   
-  #Idntify wards and borough codes
+  conventional_in <- data.table::fread(csv_path, header=TRUE, skip = "GSS.Code.Ward",  colClasses = rep("character",32))[1:no_of_gss_codes,]
+  non_conventional_in <- data.table::fread(csv_path, header=TRUE, skip = unc_row, colClasses = rep("character",32))[1:no_of_gss_codes,]
+  
+  #Identify wards and borough codes
   codes_of_interest <- unique(conventional_in$GSS.Code.Ward)
   borough_gss <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
     filter(gss_code_ward %in% codes_of_interest) %>%
@@ -42,7 +46,7 @@ bpo_template_to_rds <- function(csv_name,
   rm(tbl, unc_row, no_of_gss_codes)
   
   #function to reformat template data
-  doo <- function(x){
+  process_input_csv <- function(x){
     
     x <- tidyr::pivot_longer(x,
                              cols = 3:32,
@@ -58,8 +62,9 @@ bpo_template_to_rds <- function(csv_name,
       tidyr::replace_na(list(units = 0))
   }
   
-  conventional <- doo(conventional_in)
-  non_conventional <- doo(non_conventional_in) %>%
+  conventional <- process_input_csv(conventional_in)
+  
+  non_conventional <- process_input_csv(non_conventional_in) %>%
     rbind(conventional) %>%
     mutate(gss_code = borough_gss) %>%
     group_by(year, gss_code) %>%
@@ -71,6 +76,19 @@ bpo_template_to_rds <- function(csv_name,
   additional_shlaa_ward <- ward_shlaa_trajectory  %>%
     filter(year >= shlaa_first_year,
            gss_code_ward %in% codes_of_interest)
+  
+  #years upto and inc 2018 will be replaced by LDD in the model
+  #If there is a gap between the start of the bpo trajectory and
+  #the end of the LDD (2018) this needs to be filled with SHLAA data
+
+  if(dev_first_year > 2019){
+    additional_shlaa_ward <- ward_shlaa_trajectory  %>%
+      filter(year < dev_first_year,
+             gss_code_ward %in% codes_of_interest) %>%
+      rbind(additional_shlaa_ward)
+    
+    conventional <- filter(conventional, year >= dev_first_year)
+  }
   
   conventional <- conventional %>%
     rbind(additional_shlaa_ward)
@@ -84,6 +102,15 @@ bpo_template_to_rds <- function(csv_name,
   additional_shlaa_borough <- borough_shlaa_trajectory  %>%
     filter(year >= shlaa_first_year,
            gss_code == borough_gss)
+  
+  if(dev_first_year > 2019){
+    additional_shlaa_borough <- borough_shlaa_trajectory  %>%
+      filter(year < dev_first_year,
+             gss_code == borough_gss) %>%
+      rbind(additional_shlaa_borough)
+    
+    non_conventional <- filter(non_conventional, year >= dev_first_year)
+  }
   
   non_conventional <- non_conventional %>%
     rbind(additional_shlaa_borough)
