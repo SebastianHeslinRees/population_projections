@@ -20,6 +20,10 @@ ldd_max_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
+domestic_transition_year <- NULL
+domestic_initial_rate_path <-"input_data/migration/high_domestic_migration_rates_(2016_2018).rds"
+domestic_long_term_rate_path <- NULL
+
 #------------------
 #Setup config list
 config_list <- list(
@@ -36,6 +40,9 @@ config_list <- list(
   final_proj_yr = final_proj_yr,
   ldd_max_yr = ldd_max_yr,
   output_dir = output_dir,
+  domestic_transition_year = domestic_transition_year,
+  domestic_initial_rate_path = domestic_initial_rate_path,
+  domestic_long_term_rate_path = domestic_long_term_rate_path,
   constrain_projection = constrain_projection)
 
 #---------------------

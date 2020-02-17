@@ -16,8 +16,11 @@ run_housing_led_model <- function(config_list){
                        "final_proj_yr",
                        "ldd_max_yr",
                        "output_dir",
-                       "constrain_projection")
-  
+                       "constrain_projection",
+                       "domestic_transition_year",
+                       "domestic_initial_rate_path",
+                       "domestic_long_term_rate_path")
+
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
@@ -45,8 +48,16 @@ run_housing_led_model <- function(config_list){
          mortality_rates = paste0(config_list$external_trend_path,"mortality_rates.rds"),
          int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates.rds"),
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds"),
-         domestic_rates = paste0(config_list$external_trend_path,"domestic_rates.rds")))
+         domestic_rates = config_list$domestic_initial_rate_path))
   
+  #domestic rates by year here
+  #is it better to have used a list
+  #than to have left joined and select
+  if(!is.null(config_list$domestic_transition_year)){
+    component_rates[['domestic_rates']] <- list(initial_rate = component_rates[['domestic_rates']],
+      long_term_rate = readRDS(config_list$domestic_long_term_rate_path))
+  }
+
   #For constraining
   component_constraints <- get_data_from_file(
     list(birth_constraint = paste0(config_list$external_trend_path,"births.rds"),
@@ -72,6 +83,7 @@ run_housing_led_model <- function(config_list){
     hma_constraint <- NULL
     curr_yr_hma_constraint <- NULL
   }
+  
   #other data
   communal_establishment_population <- readRDS(external_communal_est_path) %>%
     dtplyr::lazy_dt() %>%
@@ -180,8 +192,17 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
+
     if(config_list$constrain_projection){
       curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
+    }
+
+    if(is.null(config_list$domestic_transition_year)){
+      curr_yr_domestic_rates <- component_rates$domestic_rates
+    } else if(projection_year <= config_list$domestic_transition_year){
+      curr_yr_domestic_rates <- component_rates$domestic_rates[['initial_rate']]
+    } else {
+      curr_yr_domestic_rates <- component_rates$domestic_rates[['long_term_rate']]
     }
     
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
@@ -189,7 +210,7 @@ run_housing_led_model <- function(config_list){
                                                       mortality_rates = curr_yr_mortality,
                                                       int_out_flows_rates = curr_yr_int_out,
                                                       int_in_flows = curr_yr_int_in_flows,
-                                                      domestic_rates = component_rates$domestic_rates,
+                                                      domestic_rates = curr_yr_domestic_rates,
                                                       int_out_method = int_out_method,
                                                       constraints = npp_constraints,
                                                       upc = upc,
