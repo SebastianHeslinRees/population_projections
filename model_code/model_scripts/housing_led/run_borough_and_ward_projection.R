@@ -41,7 +41,11 @@ run_borough_and_ward_projection <- function(projection_name,
   ahs_cap_year <- 2019
   ldd_max_yr <- 2018
   
-  output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+  if(bpo==FALSE){
+    output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+  } else {
+    output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+  }
   
   list2env(housing_led_params, environment())
   
@@ -61,7 +65,11 @@ run_borough_and_ward_projection <- function(projection_name,
     first_proj_yr = first_proj_yr,
     final_proj_yr = final_proj_yr,
     ldd_max_yr = ldd_max_yr,
-    output_dir = output_dir)
+    output_dir = output_dir,
+    constrain_projection = constrain_projection,
+    domestic_transition_year = domestic_transition_year,
+    domestic_initial_rate_path = domestic_initial_rate_path,
+    domestic_long_term_rate_path = domestic_long_term_rate_path)
   
   #---------------------
   #run projection
@@ -131,7 +139,7 @@ run_borough_and_ward_projection <- function(projection_name,
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
-
+  
   #bpo
   if(bpo != FALSE) {
     library(xlsx)

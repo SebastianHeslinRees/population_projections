@@ -69,8 +69,10 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   #dev data source 
   dev_source_text <- as.data.frame(paste0("4. These projections incorporate assumptions about future development provided by the London Borough of ",
                                           unique(assumed_dev_dataframe$borough)))
+  date_of_projection <- as.data.frame(paste0("Projection run on ",format(Sys.time(), "%d/%m/%Y")))
   
   xlsx::addDataFrame(dev_source_text, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
+  xlsx::addDataFrame(date_of_projection, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #Write xlsx file
   wb_filename <- paste0(output_dir, projection_name,"_BPO.xlsx")
