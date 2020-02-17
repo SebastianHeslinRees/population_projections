@@ -39,19 +39,32 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   males <- data[["males"]]
   components <- data[["components"]]
   
+  ldd_backseries_dwellings_borough <- readRDS("input_data/housing_led_model/ldd_backseries_dwellings_borough.rds") %>%
+    filter(year %in% 2012:2018)
+  ldd_backseries_dwellings_ward <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_ward.rds") %>%
+    filter(year %in% 2012:2018)
+  
   ward_dev_dataframe <- readRDS(small_area_dev_trajectory_path) %>%
+    filter(year > 2018) %>%
+    rbind(ldd_backseries_dwellings_ward) %>%
     left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
     filter(gss_code == bpo_gss_code) %>%
     left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
     select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
+    arrange(year) %>%
+    mutate(units = round(units,2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = units)
   
   assumed_dev_dataframe <- readRDS(borough_dev_trajectory_path) %>%
+    filter(year > 2018) %>%
+    rbind(ldd_backseries_dwellings_borough) %>%
     filter(gss_code == bpo_gss_code) %>%
     mutate(borough = unique(ward_dev_dataframe$borough),
            gss_code_ward = gss_code,
            ward_name = paste0(borough, " (total)")) %>%
     select(gss_code, borough, gss_code_ward, ward_name, year, units) %>%
+    arrange(year)  %>%
+    mutate(units = round(units,2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = units) %>%
     rbind(ward_dev_dataframe) %>%
     as.data.frame()

@@ -18,6 +18,7 @@ run_bpo_projection <- function(bpo_name,
                                migration_scenario){
   
   #sauce
+  library(dplyr)
   source('model_code/model_scripts/housing_led/bpo_template_to_rds.R')
   source('model_code/model_scripts/housing_led/run_borough_and_ward_projection.R')
   

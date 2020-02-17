@@ -17,7 +17,7 @@ bpo_template_to_rds <- function(csv_name,
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
   csv_path <- paste0(bpo_dir,"csvs/",csv_name)
-  bpo_name <- substr(csv_name,1,nchar(csv_name)-5)
+  bpo_name <- substr(csv_name,1,nchar(csv_name)-4)
   
   #Read in conventional & non-conventional as separate dataframes
   tbl <- data.table::fread(csv_path, header=FALSE) %>% as.data.frame()
