@@ -20,7 +20,7 @@ run_housing_led_model <- function(config_list){
                        "domestic_transition_year",
                        "domestic_initial_rate_path",
                        "domestic_long_term_rate_path")
-
+  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
@@ -55,18 +55,19 @@ run_housing_led_model <- function(config_list){
   #than to have left joined and select
   if(!is.null(config_list$domestic_transition_year)){
     component_rates[['domestic_rates']] <- list(initial_rate = component_rates[['domestic_rates']],
-      long_term_rate = readRDS(config_list$domestic_long_term_rate_path))
+                                                long_term_rate = readRDS(config_list$domestic_long_term_rate_path))
   }
-
-  #For constraining
-  component_constraints <- get_data_from_file(
-    list(birth_constraint = paste0(config_list$external_trend_path,"births.rds"),
-         death_constraint = paste0(config_list$external_trend_path,"deaths.rds"),
-         international_out_constraint = paste0(config_list$external_trend_path,"int_out.rds"))) %>%
-    create_constraints()
   
-  #housing market area constraint
   if(config_list$constrain_projection){
+    
+    #borough constraining
+    component_constraints <- get_data_from_file(
+      list(birth_constraint = paste0(config_list$external_trend_path,"births.rds"),
+           death_constraint = paste0(config_list$external_trend_path,"deaths.rds"),
+           international_out_constraint = paste0(config_list$external_trend_path,"int_out.rds"))) %>%
+      create_constraints()
+    
+    #housing market area constraint
     hma_list <- config_list$hma_list %>% 
       tibble::enframe("hma","gss_code") %>% 
       tidyr::unnest(cols=c("hma","gss_code")) %>%
@@ -79,9 +80,11 @@ run_housing_led_model <- function(config_list){
       group_by_at(c("year","hma","sex","age")) %>%
       summarise(popn = sum(popn)) %>%
       as.data.frame()
+    
   } else {
     hma_constraint <- NULL
     curr_yr_hma_constraint <- NULL
+    component_constraints <- NULL
   }
   
   #other data
@@ -181,7 +184,8 @@ run_housing_led_model <- function(config_list){
                                          communal_establishment_population,
                                          external_ahs,
                                          dwelling_trajectory,
-                                         hma_constraint)
+                                         hma_constraint,
+                                         constrain_projection)
   
   for(projection_year in first_proj_yr:final_proj_yr){
     
@@ -192,11 +196,11 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
-
+    
     if(config_list$constrain_projection){
       curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
     }
-
+    
     if(is.null(config_list$domestic_transition_year)){
       curr_yr_domestic_rates <- component_rates$domestic_rates
     } else if(projection_year <= config_list$domestic_transition_year){
@@ -259,28 +263,30 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
                                                    communal_establishment_population,
                                                    external_ahs,
                                                    dwelling_trajectory,
-                                                   hma_constraint){
+                                                   hma_constraint,
+                                                   constrain_projection){
   
   assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
-  assertthat::assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
-  assertthat::assert_that(min(component_constraints[['death_constraint']]$year) <= first_proj_yr)
-  assertthat::assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
   assertthat::assert_that(min(communal_establishment_population$year) <= first_proj_yr)
   assertthat::assert_that(min(external_ahs$year) <= first_proj_yr)
   assertthat::assert_that(min(dwelling_trajectory$year) <= first_proj_yr)
   
-  
   assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= final_proj_yr)
   assertthat::assert_that(max(component_rates[['mortality_rates']]$year) >= final_proj_yr)
-  assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= final_proj_yr)
-  assertthat::assert_that(max(component_constraints[['death_constraint']]$year) >= final_proj_yr)
-  assertthat::assert_that(max(component_constraints[['international_out_constraint']]$year) >= final_proj_yr)
   assertthat::assert_that(max(communal_establishment_population$year) >= final_proj_yr)
   assertthat::assert_that(max(external_ahs$year) >= final_proj_yr)
   assertthat::assert_that(max(dwelling_trajectory$year) >= final_proj_yr)
   
-  if(!is.null(hma_constraint)){
+  if(constrain_projection){
+    assertthat::assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
+    assertthat::assert_that(min(component_constraints[['death_constraint']]$year) <= first_proj_yr)
+    assertthat::assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
+    
+    assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= final_proj_yr)
+    assertthat::assert_that(max(component_constraints[['death_constraint']]$year) >= final_proj_yr)
+    assertthat::assert_that(max(component_constraints[['international_out_constraint']]$year) >= final_proj_yr)
+    
     assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
     assertthat::assert_that(max(hma_constraint$year) >= final_proj_yr)
   }
