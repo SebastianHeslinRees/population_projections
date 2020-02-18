@@ -1,3 +1,21 @@
+#' Output the results of the housing-led model
+#' 
+#' Save RDS and CSV files to a specified folder path. Outputs include population,
+#' components of change (including backseries data) and the input dwelling and
+#' household trajectories.
+#'
+#' @param projection A list. The output from the run_housing_led_model function
+#' @param output_dir A string. The directory in which to save the model output files
+#' @param external_trend_path A string. The output path of the trend model used to
+#'   run the housing-led model. This is uses to import the backseries
+#'   components.
+#' @param additional_dwellings A dataframe. The dwelling trajectory used in the
+#'   projection model.
+#' @param housing_stock A dataframe. The total dwelling stock by year.
+#' @param household_trajectory A dataframe. The household trectory (as opposed
+#'   to the dwelling trajectory) used in the model.
+#' @param first_proj_yr Numeric. The first year of the projection
+
 output_housing_led_projection <- function(projection, output_dir,
                                           external_trend_path,
                                           additional_dwellings, housing_stock,

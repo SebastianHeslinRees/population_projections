@@ -9,7 +9,7 @@
 #' @param projection_name The name of the output Excel file
 #' @param small_area_dev_trajectory_path The path to the ward-level development
 #'   trajectory in rds format
-#' @paramborough_dev_trajectory_path  The path to the borough-level development
+#' @param borough_dev_trajectory_path  The path to the borough-level development
 #'   trajectory in rds format
 #' @param bpo_gss_code The gss code of the bpo projection
 
