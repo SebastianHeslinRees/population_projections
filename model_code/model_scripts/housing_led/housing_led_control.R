@@ -185,7 +185,7 @@ run_housing_led_model <- function(config_list){
                                          external_ahs,
                                          dwelling_trajectory,
                                          hma_constraint,
-                                         constrain_projection)
+                                         config_list$constrain_projection)
   
   for(projection_year in first_proj_yr:final_proj_yr){
     
