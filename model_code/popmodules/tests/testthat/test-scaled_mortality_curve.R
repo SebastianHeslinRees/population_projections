@@ -71,8 +71,11 @@ aged <- pop_data %>%
   group_by(gss_code, age, sex, year) %>%
   summarise(popn = sum(popn)) %>%
   data.frame() %>%
-  filter(year != max(year)) %>%
-  rbind(filter(births, age==0) %>% select(gss_code, age, sex, year, popn = births)) %>%
+  filter(year != max(year))
+
+aged <- filter(births, age==0, year %in% aged$year) %>%
+  select(gss_code, age, sex, year, popn = births) %>%
+  rbind(aged) %>%
   select(gss_code, year, sex, age, popn) %>%
   arrange(gss_code, year, sex, age)
 
@@ -95,12 +98,15 @@ mean <- filter(scaling_backseries, year %in% back_years) %>%
   summarise(scaling = sum(scaling)/years_to_avg) %>%
   data.frame() %>%
   mutate(year = last_data_year+1) %>%
-  select(gss_code, sex, year, scaling)
+  select(gss_code, sex, year, scaling) %>%
+  rbind(scaling_backseries) %>%
+  filter(year %in% (pop_data$year + 1))
 
 mean <- curves %>%
   left_join(mean, by = c("gss_code", "sex")) %>%
   mutate(rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, rate)
+  select(gss_code, year, sex, age, rate) %>%
+  arrange(gss_code, year, sex, age)
 
 trend <- scaling_backseries %>%
   filter(year %in% back_years) %>%
@@ -116,12 +122,15 @@ trend <- scaling_backseries %>%
     scaling = ifelse(scaling < 0, 0, scaling)) %>%
   as.data.frame()  %>%
   mutate(year = last_data_year + 1) %>%
-  select(gss_code, sex, year, scaling)
+  select(gss_code, sex, year, scaling) %>%
+  rbind(scaling_backseries) %>%
+  filter(year %in% (pop_data$year + 1))
 
 trend <- curves %>%
   left_join(trend, by = c("gss_code", "sex")) %>%
   mutate(rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, rate)
+  select(gss_code, year, sex, age, rate) %>%
+  arrange(gss_code, year, sex, age)
 
 
 #-----------------------------------------------------------

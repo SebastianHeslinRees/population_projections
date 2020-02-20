@@ -70,9 +70,8 @@ get_coef <- function(df){
 
 pop_data <- readRDS(popn_mye_path)
 births_data <- readRDS(births_mye_path)
-curves <- readRDS(target_curves_filepath)
-
-curves <- select(curves, -year) %>% as.data.frame()
+curves <- readRDS(target_curves_filepath) %>%
+  select(-year)
 
 birth_dom <- filter(pop_data, sex == "female", age %in% unique(curves$age))
 
@@ -80,12 +79,12 @@ births_data <- group_by(births_data, year, gss_code) %>%
   summarise(births = sum(births))
 
 scaling_backseries <- left_join(curves, birth_dom, by = c("gss_code", "age", "sex")) %>%
-  mutate(curve_deaths = rate * popn) %>%
+  mutate(curve_births = rate * popn) %>%
   group_by(gss_code, year) %>%
-  summarise(curve_deaths = sum(curve_deaths)) %>%
+  summarise(curve_births = sum(curve_births)) %>%
   ungroup() %>%
   left_join(births_data, by = c("gss_code", "year")) %>%
-  mutate(scaling = births / curve_deaths) %>%
+  mutate(scaling = births / curve_births) %>%
   select(gss_code, year, scaling) %>%
   data.frame()
 
@@ -96,12 +95,14 @@ mean <- filter(scaling_backseries, year %in% back_years) %>%
   summarise(scaling = sum(scaling)/years_to_avg) %>%
   data.frame() %>%
   mutate(year = last_data_year+1) %>%
-  select(gss_code, year, scaling)
+  select(gss_code, year, scaling) %>%
+  rbind(scaling_backseries)
 
 mean <- curves %>%
   left_join(mean, by = c("gss_code")) %>%
   mutate(rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, rate)
+  select(gss_code, year, sex, age, rate) %>%
+  arrange(gss_code, year, sex, age)
 
 trend <- scaling_backseries %>%
   filter(year %in% back_years) %>%
@@ -117,21 +118,24 @@ trend <- scaling_backseries %>%
     scaling = ifelse(scaling < 0, 0, scaling)) %>%
   as.data.frame()  %>%
   mutate(year = last_data_year + 1) %>%
-  select(gss_code, year, scaling)
+  select(gss_code, year, scaling)  %>%
+  rbind(scaling_backseries)
 
 trend <- curves %>%
   left_join(trend, by = c("gss_code")) %>%
   mutate(rate = scaling * rate) %>%
-  select(gss_code, year, sex, age, rate)
+  select(gss_code, year, sex, age, rate)  %>%
+  arrange(gss_code, year, sex, age)
 
-#-----------------------------------------------------------
+#--------9---------------------------------------------------
 
 test_that("scaled_fertility_curve function: test with mean", {
   expect_equivalent(
     scaled_fertility_curve(popn_mye_path, births_mye_path,
                            target_curves_filepath, last_data_year,
                            years_to_avg, avg_or_trend="average",
-                           data_col = "births", output_col = "rate"),
+                           data_col = "births", output_col = "rate") %>%
+      arrange(gss_code, year, sex, age),
     mean)
 })
 
@@ -141,7 +145,8 @@ test_that("scaled_fertility_curve function: test with regression", {
     scaled_fertility_curve(popn_mye_path, births_mye_path,
                       target_curves_filepath, last_data_year,
                       years_to_avg, avg_or_trend="trend",
-                      data_col = "births", output_col = "rate"),
+                      data_col = "births", output_col = "rate") %>%
+      arrange(gss_code, year, sex, age),
     trend)
 })
 
