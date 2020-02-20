@@ -1,3 +1,6 @@
+# TODO move this to an @importFrom call once this is in a package
+library(xlsx)
+
 #' Process a standard bpo template csv file into 2 rds files
 #' 
 #' Take a standard ward-level csv bpo template and create 2
@@ -92,5 +95,4 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   xlsx::saveWorkbook(wb, wb_filename)
   
 }
-
 
