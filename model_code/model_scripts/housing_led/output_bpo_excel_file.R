@@ -70,7 +70,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
     as.data.frame()
   
   wb <- xlsx::loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
-  wb_sheets<- getSheets(wb)
+  wb_sheets<- xlsx::getSheets(wb)
   
   xlsx::addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   xlsx::addDataFrame(bpo_data(males), wb_sheets$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
@@ -92,7 +92,6 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   saveWorkbook(wb, wb_filename)
   
 }
-
 
 
 
