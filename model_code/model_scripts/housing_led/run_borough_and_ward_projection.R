@@ -146,7 +146,6 @@ run_borough_and_ward_projection <- function(projection_name,
     library(rJava)
     library(xlsxjars)
     
-    source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
     
     output_bpo_excel_file(data = ward_projection[["csvs"]],
                           output_dir = config_list$output_dir,
