@@ -89,9 +89,8 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   
   #Write xlsx file
   wb_filename <- paste0(output_dir, projection_name,"_BPO.xlsx")
-  saveWorkbook(wb, wb_filename)
+  xlsx::saveWorkbook(wb, wb_filename)
   
 }
-
 
 
