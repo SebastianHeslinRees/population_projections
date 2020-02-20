@@ -143,7 +143,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   #bpo
   if(bpo != FALSE) {
-    library(rJava)
     library(xlsxjars)
     
     
