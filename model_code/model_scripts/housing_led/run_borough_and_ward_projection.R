@@ -25,7 +25,8 @@ run_borough_and_ward_projection <- function(projection_name,
                                             small_area_params = list()) {
   
   devtools::load_all("model_code/popmodules")
-  
+  source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
+
   tm <- Sys.time()
   #Setup
   
