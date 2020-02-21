@@ -53,7 +53,7 @@ run_housing_led_model <- function(config_list){
   #domestic rates by year here
   #is it better to have used a list
   #than to have left joined and select
-  if(!is.null(config_list$domestic_transition_year)){
+  if(!is.null(config_list$domestic_transition_yr)){
     component_rates[['domestic_rates']] <- list(initial_rate = component_rates[['domestic_rates']],
                                                 long_term_rate = readRDS(config_list$domestic_long_term_rate_path))
   }
@@ -201,9 +201,9 @@ run_housing_led_model <- function(config_list){
       curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
     }
     
-    if(is.null(config_list$domestic_transition_year)){
+    if(is.null(config_list$domestic_transition_yr)){
       curr_yr_domestic_rates <- component_rates$domestic_rates
-    } else if(projection_year <= config_list$domestic_transition_year){
+    } else if(projection_year <= config_list$domestic_transition_yr){
       curr_yr_domestic_rates <- component_rates$domestic_rates[['initial_rate']]
     } else {
       curr_yr_domestic_rates <- component_rates$domestic_rates[['long_term_rate']]
