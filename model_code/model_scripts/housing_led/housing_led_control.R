@@ -17,7 +17,7 @@ run_housing_led_model <- function(config_list){
                        "ldd_final_yr",
                        "output_dir",
                        "constrain_projection",
-                       "domestic_transition_year",
+                       "domestic_transition_yr",
                        "domestic_initial_rate_path",
                        "domestic_long_term_rate_path")
   

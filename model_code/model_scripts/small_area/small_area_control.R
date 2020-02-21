@@ -25,7 +25,7 @@ run_small_area_model <- function(config_list){
                        "final_proj_yr",
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
-                       "ldd_max_yr",
+                       "ldd_final_yr",
                        "projection_type")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
@@ -72,11 +72,11 @@ run_small_area_model <- function(config_list){
   
   #Create the cumulative development trajectory
   
-  ldd_data <- filter(ldd_data, year <= config_list$ldd_max_yr) 
-  assertthat::assert_that(min(dwelling_trajectory$year) <= config_list$ldd_max_yr + 1)
+  ldd_data <- filter(ldd_data, year <= config_list$ldd_final_yr) 
+  assertthat::assert_that(min(dwelling_trajectory$year) <= config_list$ldd_final_yr + 1)
   
   dwelling_trajectory <- dwelling_trajectory %>%
-    filter(year > config_list$ldd_max_yr) %>%
+    filter(year > config_list$ldd_final_yr) %>%
     rbind(ldd_data) %>%
     arrange(gss_code_small_area, year) %>%
     group_by(gss_code_small_area) %>%
