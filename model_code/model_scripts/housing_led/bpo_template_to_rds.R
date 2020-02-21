@@ -9,11 +9,13 @@
 #' @param bpo_dir The folder containing the dwelling trajectory csv.
 #' @param shlaa_first_year The first year in ehich to use shlaa development data.
 #'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.  
+#' @param final_ldd_yr Last year of LDD data. If there is a gap between this and the first year of the BPO trajectory, it will be filled with the SHLAA. \code{Default 2018}.
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
                                 shlaa_first_year = 2042,
-                                dev_first_year = 2011){
+                                dev_first_year = 2011,
+                                final_ldd_yr = 2018){
   
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
@@ -48,7 +50,7 @@ bpo_template_to_rds <- function(csv_name,
   #function to reformat template data
   process_input_csv <- function(x){
     
-    x <- tidyr::pivot_longer(x,
+    tidyr::pivot_longer(x,
                              cols = 3:32,
                              names_to = "year_long",
                              values_to = "dev") %>%
@@ -81,7 +83,7 @@ bpo_template_to_rds <- function(csv_name,
   #If there is a gap between the start of the bpo trajectory and
   #the end of the LDD (2018) this needs to be filled with SHLAA data
 
-  if(dev_first_year > 2019){
+  if(dev_first_year > final_ldd_yr + 1){
     additional_shlaa_ward <- ward_shlaa_trajectory  %>%
       filter(year < dev_first_year,
              gss_code_ward %in% codes_of_interest) %>%
@@ -103,7 +105,7 @@ bpo_template_to_rds <- function(csv_name,
     filter(year >= shlaa_first_year,
            gss_code == borough_gss)
   
-  if(dev_first_year > 2019){
+  if(dev_first_year > final_ldd_yr + 1){
     additional_shlaa_borough <- borough_shlaa_trajectory  %>%
       filter(year < dev_first_year,
              gss_code == borough_gss) %>%
@@ -128,4 +130,3 @@ bpo_template_to_rds <- function(csv_name,
   return(borough_gss)
   
 }
-

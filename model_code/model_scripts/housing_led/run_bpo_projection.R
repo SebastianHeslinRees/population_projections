@@ -15,6 +15,7 @@ run_bpo_projection <- function(bpo_name,
                                first_proj_yr = 2019,
                                final_proj_yr = 2050,
                                dev_first_year = 2019,
+                               ldd_final_year = 2018,
                                bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/",
                                migration_scenario){
   
@@ -39,13 +40,14 @@ run_bpo_projection <- function(bpo_name,
       domestic_transition_year = 2024,
       domestic_initial_rate_path = "outputs/trend/2018/2018_short_19-11-13_2205/domestic_rates.rds",
       domestic_long_term_rate_path = "input_data/migration/low_domestic_migration_rates_(2009_2012).rds")
-  } else {stop("migration sceantio must be low, medium or high") }
+  } else {stop("migration scenario must be low, medium or high") }
 
   #trajectory
   borough_gss <- bpo_template_to_rds(csv_name = bpo_name,
                                      bpo_dir = bpo_dir,
                                      shlaa_first_year = shlaa_first_year,
-                                     dev_first_year = dev_first_year)
+                                     dev_first_year = dev_first_year,
+                                     final_ldd_yr = final_ldd_yr)
   
   dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_borough_trajectory_",bpo_name,".rds")
   small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",bpo_name,".rds")
