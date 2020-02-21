@@ -40,7 +40,7 @@ run_borough_and_ward_projection <- function(projection_name,
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
   ahs_cap_year <- 2019
-  ldd_max_yr <- 2018
+  ldd_final_yr <- 2018
   
   if(bpo==FALSE){
     output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
@@ -65,10 +65,10 @@ run_borough_and_ward_projection <- function(projection_name,
     external_trend_path = external_trend_path,
     first_proj_yr = first_proj_yr,
     final_proj_yr = final_proj_yr,
-    ldd_max_yr = ldd_max_yr,
+    ldd_final_yr = ldd_final_yr,
     output_dir = output_dir,
     constrain_projection = constrain_projection,
-    domestic_transition_year = domestic_transition_year,
+    domestic_transition_yr = domestic_transition_yr,
     domestic_initial_rate_path = domestic_initial_rate_path,
     domestic_long_term_rate_path = domestic_long_term_rate_path)
   
@@ -131,7 +131,7 @@ run_borough_and_ward_projection <- function(projection_name,
                            birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                            death_rate_n_years_to_avg = death_rate_n_years_to_avg,
                            
-                           ldd_max_yr = ldd_max_yr,
+                           ldd_final_yr = ldd_final_yr,
                            
                            projection_type = projection_type)
   

@@ -10,7 +10,7 @@ housing_led_core <- function(start_population,
                              projection_year,
                              ahs_cap_year,
                              ahs_cap,
-                             ldd_max_yr,
+                             ldd_final_yr,
                              constrain_projection){
   
   #1. GSS codes present in housing trajectory
@@ -100,7 +100,7 @@ housing_led_core <- function(start_population,
     rename(external = ahs) %>%
     left_join(curr_yr_trend_ahs, by = c("year","gss_code"))
   
-  if(projection_year <= ldd_max_yr){
+  if(projection_year <= ldd_final_yr){
     if(is.null(ahs_cap)){
       #before the max LDD data year always select the trend
       average_household_size <- average_household_size %>%

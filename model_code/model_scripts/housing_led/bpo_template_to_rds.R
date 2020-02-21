@@ -4,18 +4,19 @@
 #' rds files - 1 ward and 1 borough - where additional data
 #' not contained in the template is taken from the SHLAA
 #'
-#' @param csv_name The name of the dwelling trajectory csv saved in the folder
-#'   \code{bpo_dir} folder.
+#' @param csv_name The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
+#'   With or without the \code{.csv} suffix.
 #' @param bpo_dir The folder containing the dwelling trajectory csv.
-#' @param shlaa_first_year The first year in ehich to use shlaa development data.
-#'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.  
-#' @param final_ldd_yr Last year of LDD data. If there is a gap between this and the first year of the BPO trajectory, it will be filled with the SHLAA. \code{Default 2018}.
+#' @param shlaa_first_yr The first year in ehich to use shlaa development data.
+#'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.
+#' @param dev_first_yr Numeric. The first year for which development data is provided. \code{Default 2019}.  
+#' @param ldd_final_yr Last year of LDD data. If there is a gap between this and the first year of the BPO trajectory, it will be filled with the SHLAA. \code{Default 2018}.
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
-                                shlaa_first_year = 2042,
-                                dev_first_year = 2011,
-                                final_ldd_yr = 2018){
+                                shlaa_first_yr = 2042,
+                                dev_first_yr = 2019,
+                                ldd_final_yr = 2018){
   
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
@@ -51,15 +52,14 @@ bpo_template_to_rds <- function(csv_name,
   process_input_csv <- function(x){
     
     tidyr::pivot_longer(x,
-                             cols = 3:32,
-                             names_to = "year_long",
-                             values_to = "dev") %>%
+                        cols = 3:32,
+                        names_to = "year_long",
+                        values_to = "dev") %>%
       mutate(year = as.numeric(substr(year_long,6,9)),
              units = as.numeric(dev)) %>%
-      select(year,
-             gss_code_ward = GSS.Code.Ward,
-             units) %>%
-      filter(year < shlaa_first_year) %>%
+      rename(gss_code_ward = GSS.Code.Ward) %>%
+      select(year, gss_code_ward, units) %>%
+      filter(year < shlaa_first_yr) %>%
       as.data.frame() %>%
       tidyr::replace_na(list(units = 0))
   }
@@ -76,20 +76,20 @@ bpo_template_to_rds <- function(csv_name,
   
   #Ward trajectory
   additional_shlaa_ward <- ward_shlaa_trajectory  %>%
-    filter(year >= shlaa_first_year,
+    filter(year >= shlaa_first_yr,
            gss_code_ward %in% codes_of_interest)
   
   #years upto and inc 2018 will be replaced by LDD in the model
   #If there is a gap between the start of the bpo trajectory and
   #the end of the LDD (2018) this needs to be filled with SHLAA data
-
-  if(dev_first_year > final_ldd_yr + 1){
+  
+  if(dev_first_yr > ldd_final_yr + 1){
     additional_shlaa_ward <- ward_shlaa_trajectory  %>%
-      filter(year < dev_first_year,
+      filter(year < dev_first_yr,
              gss_code_ward %in% codes_of_interest) %>%
       rbind(additional_shlaa_ward)
     
-    conventional <- filter(conventional, year >= dev_first_year)
+    conventional <- filter(conventional, year >= dev_first_yr)
   }
   
   conventional <- conventional %>%
@@ -102,16 +102,16 @@ bpo_template_to_rds <- function(csv_name,
   
   #Borough trajectory
   additional_shlaa_borough <- borough_shlaa_trajectory  %>%
-    filter(year >= shlaa_first_year,
+    filter(year >= shlaa_first_yr,
            gss_code == borough_gss)
   
-  if(dev_first_year > final_ldd_yr + 1){
+  if(dev_first_yr > ldd_final_yr + 1){
     additional_shlaa_borough <- borough_shlaa_trajectory  %>%
-      filter(year < dev_first_year,
+      filter(year < dev_first_yr,
              gss_code == borough_gss) %>%
       rbind(additional_shlaa_borough)
     
-    non_conventional <- filter(non_conventional, year >= dev_first_year)
+    non_conventional <- filter(non_conventional, year >= dev_first_yr)
   }
   
   non_conventional <- non_conventional %>%

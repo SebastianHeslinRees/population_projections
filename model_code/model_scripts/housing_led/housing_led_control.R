@@ -14,7 +14,7 @@ run_housing_led_model <- function(config_list){
                        "external_trend_path",
                        "first_proj_yr",
                        "final_proj_yr",
-                       "ldd_max_yr",
+                       "ldd_final_yr",
                        "output_dir",
                        "constrain_projection",
                        "domestic_transition_year",
@@ -99,7 +99,7 @@ run_housing_led_model <- function(config_list){
   
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
-    filter(year <= config_list$ldd_max_yr)%>%
+    filter(year <= config_list$ldd_final_yr)%>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
     summarise(households = sum(households)) %>%
@@ -107,11 +107,11 @@ run_housing_led_model <- function(config_list){
   
   #census stock in 2011 + LDD development upto 2019
   ldd_backseries <- readRDS(config_list$ldd_backseries_path)%>%
-    filter(year <= config_list$ldd_max_yr) %>%
+    filter(year <= config_list$ldd_final_yr) %>%
     select(names(development_trajectory))
   
   additional_dwellings <- ldd_backseries %>%
-    rbind(filter(development_trajectory, year > config_list$ldd_max_yr)) %>%
+    rbind(filter(development_trajectory, year > config_list$ldd_final_yr)) %>%
     arrange(gss_code, year)
   
   dwelling_trajectory <- additional_dwellings %>%
@@ -122,7 +122,7 @@ run_housing_led_model <- function(config_list){
     arrange(gss_code, year) 
   
   dwelling2household_ratio_adjusted <- filter(external_trend_households,
-                                              year <= config_list$ldd_max_yr,
+                                              year <= config_list$ldd_final_yr,
                                               year %in% dwelling_trajectory$year,
                                               gss_code %in% dwelling_trajectory$gss_code) %>%
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
@@ -232,7 +232,7 @@ run_housing_led_model <- function(config_list){
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,
                                                       ahs_cap = ahs_cap,
-                                                      ldd_max_yr = config_list$ldd_max_yr,
+                                                      ldd_final_yr = config_list$ldd_final_yr,
                                                       constrain_projection = config_list$constrain_projection)
     
     ahs_cap <- projection[[projection_year]][['ahs_cap']]
