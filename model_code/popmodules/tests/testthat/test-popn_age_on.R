@@ -21,7 +21,7 @@ aged_banded <- arrange_popn(aged_banded)
 
 births <- expand.grid(year = 2001, gss_code = c("a","b","c"), age = 0, sex = c("f","m"), births = 100, stringsAsFactors = F)
 
-aged_w_births <- rbind(rename(births, popn = births),aged)
+aged_w_births <- rbind(dplyr::rename(births, popn = births),aged)
 aged_w_births <- arrange_popn(aged_w_births)
 
 # The function being tested is:

@@ -45,7 +45,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
 
   population <-  lazy_dt(population) %>%
     filter(sex == "female", age %in% unique(target_curves$age))
-    
+
 
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
@@ -56,7 +56,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     mutate(curve_count = rate * popn) %>%
     group_by(year, gss_code) %>%
     summarise(curve_count = sum(curve_count)) %>%
-    ungroup() %>% 
+    ungroup() %>%
     as.data.frame() %>%   # dtplyr needs to take a break part way through
     lazy_dt() %>%
     left_join(births, by = c("gss_code", "year"))  %>%
@@ -84,14 +84,15 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     mutate(jump_off_rate = scaling * rate) %>%
     select(gss_code, year, sex, age, jump_off_rate) %>%
     rename(!!output_col := jump_off_rate)
-  
+
   rates_backseries <- left_join(scaling_backseries, target_curves, by="gss_code") %>%
     filter(!is.na(scaling)) %>%
     mutate(rate = rate*scaling) %>%
     select(gss_code, year, sex, age, rate) %>%
     rename(!!output_col := rate)
 
-  return(rbind(rates_backseries, jump_off_rates))
+  return(rbind(rates_backseries, jump_off_rates) %>%
+           arrange(gss_code, year, sex, age))
 
 }
 
