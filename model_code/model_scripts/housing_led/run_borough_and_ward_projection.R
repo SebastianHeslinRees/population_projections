@@ -32,11 +32,11 @@ run_borough_and_ward_projection <- function(projection_name,
   
   external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
   
-  communal_est_file <- "ons_communal_est_population.rds"
-  trend_households_file <- "ons_stage_1_households.rds"
+  communal_est_file <- "dclg_communal_est_population.rds"
+  trend_households_file <- "dclg_stage_1_households.rds"
   ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
   
-  external_ahs_trajectory_path <- paste0(external_trend_path,"households/ons_ahs.rds")
+  external_ahs_trajectory_path <- paste0(external_trend_path,"households/dclg_ahs.rds")
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
   ahs_cap_year <- 2019

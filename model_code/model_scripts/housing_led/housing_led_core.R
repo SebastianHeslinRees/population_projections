@@ -24,6 +24,7 @@ housing_led_core <- function(start_population,
   
   #2. Constrain births, deaths & international
   #So that totals match at the borough level
+  if(constrain_projection){
   births <- component_constraints[['birth_constraint']] %>%
     filter(gss_code %in% constrain_gss, year == projection_year) %>%
     mutate(female = births*(100/205),
@@ -45,6 +46,13 @@ housing_led_core <- function(start_population,
                         col_popn = "int_out",
                         col_constraint = "int_out",
                         rows_to_constrain = trend_projection$int_out$gss_code %in% constrain_gss)
+  } else {
+    
+    births <- trend_projection[['births']] %>%
+      select(year, gss_code, age, sex, births)
+    deaths <- trend_projection[['deaths']]
+    int_out <- trend_projection[['int_out']]
+  }
   
   initial_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(births,
@@ -59,7 +67,9 @@ housing_led_core <- function(start_population,
     as.data.frame()
   
   #3. Calculate household population
-  household_population <- dtplyr::lazy_dt(trend_projection[['population']]) %>%
+  household_population <- dtplyr::lazy_dt(initial_population) %>%
+    #I think we were using the wrong population here - it should be the initial not the trend
+    #dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%
     summarise(popn = sum(popn)) %>%
     left_join(communal_establishment_population, by=c("gss_code","year")) %>%
@@ -158,6 +168,7 @@ housing_led_core <- function(start_population,
                                                            col_popn = "household_popn",
                                                            col_target = "target_popn")
   
+  #This is a QA output only
   out_adjusted_dom <- left_join(adjusted_domestic_migration[["dom_in"]],
                                 adjusted_domestic_migration[["dom_out"]],
                                 by=c("year","gss_code","age","sex")) %>%
