@@ -6,6 +6,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rprofile
 
 input_data/*
 model_runs/*

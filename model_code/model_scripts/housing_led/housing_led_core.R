@@ -10,7 +10,8 @@ housing_led_core <- function(start_population,
                              projection_year,
                              ahs_cap_year,
                              ahs_cap,
-                             ldd_max_yr){
+                             ldd_final_yr,
+                             constrain_projection){
   
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
@@ -23,6 +24,7 @@ housing_led_core <- function(start_population,
   
   #2. Constrain births, deaths & international
   #So that totals match at the borough level
+  if(constrain_projection){
   births <- component_constraints[['birth_constraint']] %>%
     filter(gss_code %in% constrain_gss, year == projection_year) %>%
     mutate(female = births*(100/205),
@@ -44,6 +46,13 @@ housing_led_core <- function(start_population,
                         col_popn = "int_out",
                         col_constraint = "int_out",
                         rows_to_constrain = trend_projection$int_out$gss_code %in% constrain_gss)
+  } else {
+    
+    births <- trend_projection[['births']] %>%
+      select(year, gss_code, age, sex, births)
+    deaths <- trend_projection[['deaths']]
+    int_out <- trend_projection[['int_out']]
+  }
   
   initial_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(births,
@@ -58,7 +67,9 @@ housing_led_core <- function(start_population,
     as.data.frame()
   
   #3. Calculate household population
-  household_population <- dtplyr::lazy_dt(trend_projection[['population']]) %>%
+  household_population <- dtplyr::lazy_dt(initial_population) %>%
+    #I think we were using the wrong population here - it should be the initial not the trend
+    #dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%
     summarise(popn = sum(popn)) %>%
     left_join(communal_establishment_population, by=c("gss_code","year")) %>%
@@ -89,7 +100,7 @@ housing_led_core <- function(start_population,
     rename(external = ahs) %>%
     left_join(curr_yr_trend_ahs, by = c("year","gss_code"))
   
-  if(projection_year <= ldd_max_yr){
+  if(projection_year <= ldd_final_yr){
     if(is.null(ahs_cap)){
       #before the max LDD data year always select the trend
       average_household_size <- average_household_size %>%
@@ -157,6 +168,7 @@ housing_led_core <- function(start_population,
                                                            col_popn = "household_popn",
                                                            col_target = "target_popn")
   
+  #This is a QA output only
   out_adjusted_dom <- left_join(adjusted_domestic_migration[["dom_in"]],
                                 adjusted_domestic_migration[["dom_out"]],
                                 by=c("year","gss_code","age","sex")) %>%
@@ -167,7 +179,7 @@ housing_led_core <- function(start_population,
   
   #9. Add components from step 6 to domestic from step 8 & start population
   #Join the non-adjusted population data back to the adjusted
-  adjusted_population <- aged_on_population %>%
+  unconstrained_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(births,
                                                         trend_projection[['int_in']],
                                                         adjusted_domestic_migration[['dom_in']]),
@@ -175,14 +187,6 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
-
-  #10. Constrain total population
-  constrained_population <- constrain_to_hma(popn = adjusted_population,
-                                             constraint = hma_constraint,
-                                             hma_list = hma_list,
-                                             col_aggregation = c("year","hma","sex","age"),
-                                             col_popn = "popn",
-                                             col_constraint = "popn")
   
   #Join the non-adjusted components data back to the adjusted
   births <- rbind(births, areas_with_no_housing_data[['births']])
@@ -191,32 +195,49 @@ housing_led_core <- function(start_population,
   dom_in <- rbind(adjusted_domestic_migration[['dom_in']], areas_with_no_housing_data[['dom_in']])
   dom_out <- rbind(adjusted_domestic_migration[['dom_out']], areas_with_no_housing_data[['dom_out']])
   
-  #11. Compare population from step 10 to population from step 9.
-  #    Difference = domestic adjustment
-  #    Adjust domestic
-  final_domestic_migration <- adjust_domestic_migration(popn = adjusted_population,
-                                                        target = constrained_population,
-                                                        dom_in = dom_in,
-                                                        dom_out = dom_out,
-                                                        col_aggregation = c("year","gss_code","sex","age"),
-                                                        col_popn = "popn",
-                                                        col_target = "popn",
-                                                        rows_to_constrain = adjusted_population$gss_code %in% hma_list$gss_code)
+  if(constrain_projection){
+    #10. Constrain total population
+    constrained_population <- constrain_to_hma(popn =  unconstrained_population,
+                                               constraint = hma_constraint,
+                                               hma_list = hma_list,
+                                               col_aggregation = c("year","hma","sex","age"),
+                                               col_popn = "popn",
+                                               col_constraint = "popn")
+    
+    #11. Compare population from step 10 to population from step 9.
+    #    Difference = domestic adjustment
+    #    Adjust domestic
+    final_domestic_migration <- adjust_domestic_migration(popn =  unconstrained_population,
+                                                          target = constrained_population,
+                                                          dom_in = dom_in,
+                                                          dom_out = dom_out,
+                                                          col_aggregation = c("year","gss_code","sex","age"),
+                                                          col_popn = "popn",
+                                                          col_target = "popn",
+                                                          rows_to_constrain =  unconstrained_population$gss_code %in% hma_list$gss_code)
+    dom_in <- final_domestic_migration[['dom_in']]
+    dom_out <- final_domestic_migration[['dom_out']]
+    
+    #TODO More validation needed here?
+    output_population <- check_negative_values(constrained_population, "popn")
+    
+  } else {
+    
+    output_population <- check_negative_values(unconstrained_population, "popn")
+    
+  }
   
-  #TODO More validation needed here?
-  constrained_population <- check_negative_values(constrained_population, "popn")
-
-  return(list(population = constrained_population,
+  return(list(population = output_population,
               births = births,
               deaths = deaths,
               int_in = trend_projection_national[['int_in']],
               int_out = int_out,
-              dom_in = final_domestic_migration[['dom_in']],
-              dom_out = final_domestic_migration[['dom_out']],
+              dom_in = dom_in,
+              dom_out = dom_out,
               ahs = ahs,
               ahs_choice = ahs_choice,
               ahs_cap = ahs_cap,
               household_population = household_population,
               adjusted_domestic_migration = out_adjusted_dom,
-              unconstrained_population = adjusted_population))
+              unconstrained_population =  unconstrained_population))
 }

@@ -11,13 +11,18 @@ dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rd
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
+constrain_projection <- TRUE
 first_proj_yr <- 2019
-final_proj_yr <- 2050
+final_proj_yr <- 2020
 ahs_cap_year <- 2019
 
-ldd_max_yr <- 2018
+ldd_final_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+
+domestic_transition_yr <- NULL
+domestic_initial_rate_path <- paste0(external_trend_path,"domestic_rates.rds")
+domestic_long_term_rate_path <- NULL
 
 #------------------
 #Setup config list
@@ -33,8 +38,12 @@ config_list <- list(
   external_trend_path = external_trend_path,
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
-  ldd_max_yr = ldd_max_yr,
-  output_dir = output_dir)
+  ldd_final_yr = ldd_final_yr,
+  output_dir = output_dir,
+  constrain_projection = constrain_projection,
+  domestic_transition_yr = domestic_transition_yr,
+  domestic_initial_rate_path = domestic_initial_rate_path,
+  domestic_long_term_rate_path = domestic_long_term_rate_path)
 
 #---------------------
 #run projection

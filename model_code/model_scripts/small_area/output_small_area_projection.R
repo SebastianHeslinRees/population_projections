@@ -1,6 +1,6 @@
 output_small_area_projection <- function(projection, output_dir, projection_type,
                                          births, deaths, first_proj_yr,
-                                         lookup, bpo=FALSE){
+                                         lookup){
   
   borough_names <- data.table::fread("input_data/lookup/lad18_code_to_name.csv")
   
@@ -106,36 +106,8 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
   }
   
-  if(bpo != FALSE){
-
-    bpo_data <- function(x, bpo_gss=bpo,
-                         col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
-      x %>%
-        dtplyr::lazy_dt() %>%
-        filter(gss_code == bpo_gss) %>%
-        mutate(gss_code_ward = gss_code,
-               ward_name = paste0(borough, " (total)")) %>%
-        group_by_at(col_aggregation) %>%
-        summarise_all(.funs=sum) %>%
-        as.data.frame() %>%
-        rbind(x) %>%
-        dtplyr::lazy_dt() %>%
-        filter(gss_code == bpo_gss) %>%
-        as.data.frame()
-    }
-    
-    wb <- xlsx::loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
-    wb_sheets<- getSheets(wb)
-    
-    xlsx::addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(bpo_data(males), wb_sheets$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(bpo_data(females), wb_sheets$Females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(bpo_data(components, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name","year")),
-                       wb_sheets$Components, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    
-    wb_filename <- paste0(output_dir,"bpo_workbook.xlsx")
-    saveWorkbook(wb, wb_filename)
-    
-  }
+  projection[["csvs"]] <- csvs
+  
+  return(projection)
 }
 
