@@ -19,7 +19,8 @@ run_housing_led_model <- function(config_list){
                        "constrain_projection",
                        "domestic_transition_yr",
                        "domestic_initial_rate_path",
-                       "domestic_long_term_rate_path")
+                       "domestic_long_term_rate_path",
+                       "ahs_method")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -232,6 +233,7 @@ run_housing_led_model <- function(config_list){
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,
                                                       ahs_cap = ahs_cap,
+                                                      ahs_method = config_list$ahs_method,
                                                       ldd_final_yr = config_list$ldd_final_yr,
                                                       constrain_projection = config_list$constrain_projection)
     
