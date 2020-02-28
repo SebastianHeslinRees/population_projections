@@ -97,7 +97,7 @@ housing_led_core <- function(start_population,
   }
   
   #New floating method
-  if(ahs_method == "float"){
+  if(is.numeric(ahs_method)){
     set_ahs <- external_ahs %>%
       filter(gss_code %in% constrain_gss) %>%
       rename(external = ahs) %>%
@@ -113,12 +113,12 @@ housing_led_core <- function(start_population,
     
     set_ahs <- set_ahs %>%
       mutate(diff = cap - external,
-             mid_point = external + (diff/2)) %>%
+             float = external + (diff*ahs_method)) %>%
       select(-diff) %>%
-      mutate(diff = mid_point - trend,
+      mutate(diff = float - trend,
              ahs = trend + (diff/2))
     
-    ahs_choice <- select(set_ahs, year, gss_code, external, cap, trend, mid_point, ahs)
+    ahs_choice <- select(set_ahs, year, gss_code, external, cap, trend, float, ahs)
     ahs <- select(set_ahs, year, gss_code, ahs)
     
   }
