@@ -15,6 +15,7 @@ constrain_projection <- FALSE
 first_proj_yr <- 2019
 final_proj_yr <- 2050
 ahs_cap_year <- 2019
+ahs_method <- 0
 
 ldd_final_yr <- 2018
 
@@ -43,7 +44,8 @@ config_list <- list(
   constrain_projection = constrain_projection,
   domestic_transition_yr = domestic_transition_yr,
   domestic_initial_rate_path = domestic_initial_rate_path,
-  domestic_long_term_rate_path = domestic_long_term_rate_path)
+  domestic_long_term_rate_path = domestic_long_term_rate_path,
+  ahs_method = ahs_method)
 
 #---------------------
 #run projection

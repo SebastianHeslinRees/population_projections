@@ -19,7 +19,8 @@ run_housing_led_model <- function(config_list){
                        "constrain_projection",
                        "domestic_transition_yr",
                        "domestic_initial_rate_path",
-                       "domestic_long_term_rate_path")
+                       "domestic_long_term_rate_path",
+                       "ahs_method")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -185,7 +186,8 @@ run_housing_led_model <- function(config_list){
                                          external_ahs,
                                          dwelling_trajectory,
                                          hma_constraint,
-                                         config_list$constrain_projection)
+                                         config_list$constrain_projection,
+                                         config_list$ahs_method)
   
   for(projection_year in first_proj_yr:final_proj_yr){
     
@@ -232,6 +234,7 @@ run_housing_led_model <- function(config_list){
                                                       projection_year = projection_year,
                                                       ahs_cap_year = config_list$ahs_cap_year,
                                                       ahs_cap = ahs_cap,
+                                                      ahs_method = config_list$ahs_method,
                                                       ldd_final_yr = config_list$ldd_final_yr,
                                                       constrain_projection = config_list$constrain_projection)
     
@@ -264,7 +267,8 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
                                                    external_ahs,
                                                    dwelling_trajectory,
                                                    hma_constraint,
-                                                   constrain_projection){
+                                                   constrain_projection,
+                                                   ahs_method){
   
   assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assertthat::assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
@@ -290,4 +294,6 @@ validate_housing_led_control_variables <- function(first_proj_yr, final_proj_yr,
     assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
     assertthat::assert_that(max(hma_constraint$year) >= final_proj_yr)
   }
+  
+  assertthat::assert_that(is.numeric(ahs_method) | ahs_method == "tree")
 }
