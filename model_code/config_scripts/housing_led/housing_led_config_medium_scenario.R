@@ -15,7 +15,7 @@ constrain_projection <- FALSE
 first_proj_yr <- 2019
 final_proj_yr <- 2050
 ahs_cap_year <- 2019
-ahs_method = "float"
+ahs_method <- 0
 
 ldd_final_yr <- 2018
 

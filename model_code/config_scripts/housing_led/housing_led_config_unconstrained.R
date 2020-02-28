@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
 #Setup
-projection_name <- "2018_based_shlaa_dev_unconstrained"
+projection_name <- "2018_based_shlaa_dev_unconstrained_tree"
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
@@ -15,7 +15,7 @@ constrain_projection <- FALSE
 first_proj_yr <- 2019
 final_proj_yr <- 2050
 ahs_cap_year <- 2019
-ahs_method <- "float"
+ahs_method <- "tree"
 
 ldd_final_yr <- 2018
 
