@@ -115,8 +115,8 @@ housing_led_core <- function(start_population,
       mutate(diff = cap - external,
              float = external + (diff*ahs_method)) %>%
       select(-diff) %>%
-      mutate(diff = float - trend,
-             ahs = trend + (diff/2))
+      mutate(diff = trend - float,
+             ahs = float + (diff*0.5 ))
     
     ahs_choice <- select(set_ahs, year, gss_code, external, cap, trend, float, ahs)
     ahs <- select(set_ahs, year, gss_code, ahs)
