@@ -7,6 +7,7 @@
 #'
 #' @import dplyr
 #' @export
+
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
                               output_dir, excel_file_name, write_excel){
 

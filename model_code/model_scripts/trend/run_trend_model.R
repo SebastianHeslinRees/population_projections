@@ -1,15 +1,21 @@
+#' Run a trend model config file to produce a population projection
+#' 
+#' Read in, validate and manage model input data and then run the \code{trend_core}
+#' function to produce a population projection. Run the \code{household model} functions
+#' as specified in the config list. Run model output functions and, if specified,
+#' rmarkdown QA scripts.
+#'
+#' @param config_list A List. A trend model configuration list.
+#'
+#' @import dplyr
+#' @import popmodules
+#' @import rmarkdown
+#' @import assertthat
+#' 
+#' @export
+
 run_trend_model <- function(config_list) {
   
-  library(tidyverse)
-  library(popmodules)
-  source("model_code/model_scripts/trend/02_core.R")
-  source("model_code/model_scripts/trend/03_output.R")
-  source("model_code/model_scripts/trend/arrange_trend_core_outputs.R")
-  source("model_code/model_scripts/trend/household_model_dclg.R")
-  source("model_code/model_scripts/trend/household_model_ons.R")
-  source("model_code/model_scripts/trend/household_model_outputs.R")
-  source("model_code/model_scripts/trend/trend_datastore_outputs.R")
-
   expected_config <- c("first_proj_yr", 
                        "n_proj_yr",
                        "popn_mye_path", 

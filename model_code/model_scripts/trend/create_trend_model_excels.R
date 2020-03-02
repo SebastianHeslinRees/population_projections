@@ -18,6 +18,7 @@
 #'   trend_dir = "outputs/trend/2018/2018_long_19-11-13_2144",
 #'   excel_file_name = "2018_long_trend.xlsx")
 #' }
+#' 
 #' @export
 
 create_trend_model_excels <- function(trend_dir, excel_file_name){

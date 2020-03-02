@@ -7,7 +7,10 @@
 #' @param write_excel Logical. Whether to output Excel .xls files.
 #'
 #' @import dplyr
+#' @importFrom tidyr pivot_wider
+#' 
 #' @export
+
 household_model_outputs <- function(model_output, model, output_dir, write_excel){
 
   if(model == "dclg"){ col_aggregation <- c("gss_code", "year", "sex", "age_group", "household_type")}
@@ -18,26 +21,26 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     group_by_at(col_aggregation) %>%
     summarise(households = sum(households)) %>%
     ungroup() %>%
-    tidyr::pivot_wider(names_from = year, values_from = households)
+    pivot_wider(names_from = year, values_from = households)
 
   stage_2_sheet <- model_output$stage_2$constrained %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, age_group, household_type) %>%
     summarise(households = sum(households)) %>%
     ungroup() %>%
-    tidyr::pivot_wider(names_from = year, values_from = households)
+    pivot_wider(names_from = year, values_from = households)
 
   ce_pop <- model_output$stage_1$communal_establishment_population %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
     summarise(ce_popn = sum(communal_establishment_population)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = ce_popn)
+    pivot_wider(names_from = year, values_from = ce_popn)
 
   hh_pop <- model_output$stage_1$household_population %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
     summarise(hh_popn = sum(household_population)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = hh_popn)
+    pivot_wider(names_from = year, values_from = hh_popn)
 
   household_summary_sheet <- model_output$stage_1$detailed_households %>%
     filter(year >= 2011) %>%

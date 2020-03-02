@@ -35,6 +35,10 @@ household_model_dclg <- function(population, stage1_file_path, stage2_file_path)
 #'   type and total.
 #'
 #' @import dplyr
+#' @import popmodules
+#' @importFrom dtplyr lazy_dt
+#' 
+#' @export
 
 dclg_stage_1 <- function(population, stage1_file_path){
 
@@ -93,17 +97,17 @@ dclg_stage_1 <- function(population, stage1_file_path){
                                        col_aggregation = c("year", "gss_code", "sex", "age_group", "household_type"),
                                        col_popn = "scaled_hh_popn", col_rate = "hh_rep_rates", col_out = "scaled_households")
 
-  household_population <- dtplyr::lazy_dt(scaled_household_popn) %>%
+  household_population <- lazy_dt(scaled_household_popn) %>%
     group_by(year, gss_code, sex, age_group) %>%
     summarise(household_population = sum(scaled_hh_popn)) %>%
     as.data.frame()
 
-  ce_population <- dtplyr::lazy_dt(scaled_communal_popn) %>%
+  ce_population <- lazy_dt(scaled_communal_popn) %>%
     group_by(year, gss_code, sex, age_group) %>%
     summarise(communal_establishment_population = sum(scaled_ce_popn)) %>%
     as.data.frame()
 
-  total_households <- dtplyr::lazy_dt(scaled_households) %>%
+  total_households <- lazy_dt(scaled_households) %>%
     group_by(year, gss_code) %>%
     summarise(stage_1_households = sum(scaled_households)) %>%
     as.data.frame()
@@ -137,6 +141,10 @@ dclg_stage_1 <- function(population, stage1_file_path){
 #'   and households by age.
 #'
 #' @import dplyr
+#' @import popmodules
+#' @importFrom dtplyr lazy_dt
+#' 
+#' @export
 
 dclg_stage_2 <- function(stage2_file_path, stage1_output){
 
@@ -167,7 +175,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
                      "75_79" = "75_84",
                      "80_84" = "75_84")
 
-  child_hh_pop <- dtplyr::lazy_dt(household_popn) %>%
+  child_hh_pop <- lazy_dt(household_popn) %>%
     filter(gss_code %in% unique(headship_rates$gss_code)) %>%
     filter(age_group %in% c("0_4","5_9","10_14"))%>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
@@ -175,7 +183,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
     summarise(hh_popn = sum(household_population)) %>%
     as.data.frame()
 
-  adult_hh_pop <- dtplyr::lazy_dt(household_popn) %>%
+  adult_hh_pop <- lazy_dt(household_popn) %>%
     filter(gss_code %in% unique(headship_rates$gss_code)) %>%
     filter(!age_group %in% c("0_4","5_9","10_14")) %>%
     #filter(substr(gss_code,1,1)=="E") %>%
@@ -211,7 +219,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
     ungroup()
 
   ce_popn <- stage1_output$communal_establishment_population %>%
-    dtplyr::lazy_dt() %>%
+    lazy_dt() %>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
     group_by(gss_code, year, age_group) %>%
     summarise(communal_establishment_population = sum(communal_establishment_population)) %>%

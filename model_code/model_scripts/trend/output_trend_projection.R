@@ -1,4 +1,21 @@
-# @importFrom stringr str_detect
+#' Output a trend population projection
+#' 
+#' Write csv, rds and xlsx model outputs from the \code{trend_core} cohort component
+#' model. Input is taken from the \code{arrange_trend_core_outputs} function.
+#'
+#' @param projection A list. The model outputs from \code{arrange_trend_core_outputs}
+#' @param output_dir String. The output location folder path
+#' @param write_excel Logical. Should the Excel outputs be written
+#' @param n_csv_elements Numeric. The function will output csv files for elements
+#'  1:\code{n_csv_elements} of the \code{projection} list.
+#' 
+#' @import dplyr
+#' @importFrom stringr str_detect
+#' @importFrom data.table fwrite
+#' @importFrom tidyr pivot_wider
+#' 
+#' @export
+
 output_projection <- function(projection, output_dir, write_excel, n_csv_elements) {
   
   #RDS
@@ -27,7 +44,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         mutate(rounded = round(rounded, 3)) %>%
         pivot_wider(names_from = year, values_from = rounded)
       
-      data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
+      fwrite(b_m_a, paste0(name_stub,".csv"))
       
     } else {
       
@@ -50,9 +67,9 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         mutate(value = round(value, 3))%>%
         pivot_wider(names_from = year, values_from = value)
       
-      data.table::fwrite(female, paste0(name_stub,"_female.csv"))
-      data.table::fwrite(male, paste0(name_stub,"_male.csv"))
-      data.table::fwrite(persons, paste0(name_stub,"_persons.csv"))
+      fwrite(female, paste0(name_stub,"_female.csv"))
+      fwrite(male, paste0(name_stub,"_male.csv"))
+      fwrite(persons, paste0(name_stub,"_persons.csv"))
     }
     
   }

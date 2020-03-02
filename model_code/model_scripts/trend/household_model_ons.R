@@ -13,6 +13,8 @@
 #'   communal populations are adjusted after this date.
 #'
 #' @return A list containing 2 lists: Stage 1 outputs and Stage 2 outputs.
+#' 
+#' 
 #' @export
 
 household_model_ons <- function(population, stage1_file_path, stage2_file_path, communal_est_pop_path, first_proj_yr){
@@ -42,6 +44,9 @@ household_model_ons <- function(population, stage1_file_path, stage2_file_path, 
 #'   the projection period.
 #'
 #' @import dplyr
+#' @import popmodules
+#' 
+#' @export
 
 ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_proj_yr){
 
@@ -122,6 +127,9 @@ return(list(detailed_households = detailed_households,
 #'   household projections.
 #'
 #' @import dplyr
+#' @import popmodules
+#' 
+#' @export
 
 ons_stage_2 <- function(stage2_file_path, stage1_output){
 
