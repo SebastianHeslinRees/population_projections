@@ -1,3 +1,52 @@
+#' Run a housing-led population model and output population, components of change and rates
+#'
+#' Given a starting population and set of projected rates for fertility, mortality and migration
+#' the function will produce a population for the next year using the GLA housing-led
+#' method. The model outputs are the calculated populations and components of change.
+#'
+#' @param start_population A data frame. The population at the start of the time period
+#' @param trend_projection A list. The output of the \code{trendmodel::trend_core}
+#'   function for the \code{projection_year}
+#' @param component_constraints A dataframe. The component constraints by borough
+#' @param hma_constraint. A dataframe. The total population constrain by housing
+#'   market area (HMA)
+#' @param communal_establishment_population A dataframe. The communal establishment
+#'   population for the \code{projection_year}
+#' @param external_ahs A set of average household size rates by geographic
+#'   aggreagtion and year consistent with the \code{commual_establishment_population}
+#' @param households_1 A dataframe. For each geogrpahic aggregation a number of
+#'   total households to be used in calculating the current year trend ahs
+#' @param households_2 A dataframe. For each geogrpahic aggregation a number of
+#'   total households to be used in calculating the population by applying an AHS
+#'   rate
+#' @param hma_list A named list. Containing gss_codes which, when aggregated,
+#'   form a housing market area (HMA). The name in the list is the name of the HMA.
+#' @param projection_year Numeric. The year being projected
+#' @param ahs_cap_year Numeric. The year in which to set the AHS cap
+#' @param ahs_cap A dataframe or NULL. When no ahs cap has been set this
+#'   parameter is set to \code{NULL}. Once a set of ahs caps have been
+#'   this becomes the dataframe containing those caps
+#' @param ahs_method A string or Numeric. If the ahs tree method is to be used,
+#'   set to \code{tree}, else the flaoting ahs method will be used. In this case
+#'   the parameter is a numeric between 0 and 1. It acts to determine the mix
+#'   between the external ahs and the trend ahs where 0 is the external and 1 is
+#'   the trend.
+#' @param ldd_final_yr Numeric. The final year for which LDD development data 
+#'   is available.
+#' @param constrain_projection Logical. If \code{TRUE} then the projection will
+#'   be constrained (at the borough level for components and at hma level for
+#'   population totals.) If \code{FALSE} the model is run unconstrained.
+#'
+#' @return A list where each element is a data frame containing either projected population or
+#' projected components of change.
+#'
+#' @import popmodules
+#' @import dplyr
+#' @importFrom tidyr pivot_longer
+#' @importFrom dtplyr lazy_dt
+#'
+#' @export
+ 
 housing_led_core <- function(start_population,
                              trend_projection,
                              component_constraints,
@@ -32,7 +81,7 @@ housing_led_core <- function(start_population,
              male = births*(105/205),
              age = 0) %>%
       select(-births) %>%
-      tidyr::pivot_longer(c("female","male"), names_to = "sex", values_to="births")
+      pivot_longer(c("female","male"), names_to = "sex", values_to="births")
     
     deaths <- trend_projection[['deaths']] %>%
       constrain_component(constraint = component_constraints[['death_constraint']],
@@ -62,13 +111,13 @@ housing_led_core <- function(start_population,
                                    subtraction_data = list(deaths,
                                                            int_out,
                                                            trend_projection[['dom_out']])) %>%
-    dtplyr::lazy_dt() %>%
+    lazy_dt() %>%
     group_by(year, gss_code) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame()
   
   #3. Calculate household population
-  household_population <- dtplyr::lazy_dt(initial_population) %>%
+  household_population <- lazy_dt(initial_population) %>%
     #I think we were using the wrong population here - it should be the initial not the trend
     #dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%

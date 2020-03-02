@@ -12,6 +12,11 @@
 #' @param ldd_last_yr Numeric. The final year of the LDD dwellings backsries. \code{Default 2018}.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv
 #' @migration_sceanrio String. The domestic migration scenario \code{high}, \code{medium} or \code{low}.
+#'
+#' @import dplyr
+#' 
+#' @export
+
 
 run_bpo_projection <- function(bpo_name,
                                shlaa_first_yr = 2042,
@@ -21,11 +26,6 @@ run_bpo_projection <- function(bpo_name,
                                ldd_final_yr = 2018,
                                bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/",
                                migration_scenario){
-  
-  #sauce
-  library(dplyr)
-  source('model_code/model_scripts/housing_led/bpo_template_to_rds.R')
-  source('model_code/model_scripts/housing_led/run_borough_and_ward_projection.R')
   
   #domestic migration
   if(migration_scenario == "high"){

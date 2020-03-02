@@ -14,6 +14,11 @@
 #'   that parameters constructed from other parameters, e.g.
 #'   external_ahs_trajectory_path which depends on external_trend_path, will
 #'   need to be specified as well.
+#'   
+#' @import popmodules
+#' @importFrom data.table fwrite
+#' 
+#' @export
 
 run_borough_and_ward_projection <- function(projection_name,
                                             dev_trajectory_path,
@@ -24,9 +29,6 @@ run_borough_and_ward_projection <- function(projection_name,
                                             housing_led_params = list(),
                                             small_area_params = list()) {
   
-  devtools::load_all("model_code/popmodules")
-  source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
-
   tm <- Sys.time()
   #Setup
   
@@ -76,7 +78,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   #---------------------
   #run projection
-  source('model_code/model_scripts/housing_led/housing_led_control.R')
   borough_projection <- run_housing_led_model(config_list)
   log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   
@@ -156,7 +157,7 @@ run_borough_and_ward_projection <- function(projection_name,
   }
   
   #Finish
-  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
+  fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
   
   return(list(borough_projection = borough_projection,
               ward_projection = ward_projection))

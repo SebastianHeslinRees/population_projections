@@ -1,6 +1,3 @@
-# TODO move this to an @importFrom call once this is in a package
-library(xlsx)
-
 #' Process a standard bpo template csv file into 2 rds files
 #' 
 #' Take a standard ward-level csv bpo template and create 2
@@ -15,6 +12,12 @@ library(xlsx)
 #' @param borough_dev_trajectory_path  The path to the borough-level development
 #'   trajectory in rds format
 #' @param bpo_gss_code The gss code of the bpo projection
+#' 
+#' @import xlsx
+#' @import dplyr
+#' @importFrom tidyr pivot_longer
+#' 
+#' @export
 
 output_bpo_excel_file <- function(data, output_dir, projection_name,
                                   small_area_dev_trajectory_path,
@@ -22,6 +25,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
                                   bpo_gss_code){
   
   bpo_data <- function(x, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
+    
     x %>%
       as.data.frame() %>%
       dtplyr::lazy_dt() %>%
@@ -56,7 +60,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
     select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
     arrange(year) %>%
     mutate(units = round(units,2)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = units)
+    pivot_wider(names_from = year, values_from = units)
   
   assumed_dev_dataframe <- readRDS(borough_dev_trajectory_path) %>%
     filter(year > 2018) %>%
@@ -68,31 +72,31 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
     select(gss_code, borough, gss_code_ward, ward_name, year, units) %>%
     arrange(year)  %>%
     mutate(units = round(units,2)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = units) %>%
+    pivot_wider(names_from = year, values_from = units) %>%
     rbind(ward_dev_dataframe) %>%
     as.data.frame()
   
-  wb <- xlsx::loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
-  wb_sheets<- xlsx::getSheets(wb)
+  wb <- loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
+  wb_sheets<- getSheets(wb)
   
-  xlsx::addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-  xlsx::addDataFrame(bpo_data(males), wb_sheets$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-  xlsx::addDataFrame(bpo_data(females), wb_sheets$Females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-  xlsx::addDataFrame(bpo_data(components, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name","year")),
+  addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  addDataFrame(bpo_data(males), wb_sheets$Males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  addDataFrame(bpo_data(females), wb_sheets$Females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  addDataFrame(bpo_data(components, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name","year")),
                      wb_sheets$Components, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-  xlsx::addDataFrame(assumed_dev_dataframe, wb_sheets$Assumed, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  addDataFrame(assumed_dev_dataframe, wb_sheets$Assumed, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #dev data source 
   dev_source_text <- as.data.frame(paste0("4. These projections incorporate assumptions about future development provided by the London Borough of ",
                                           unique(assumed_dev_dataframe$borough)))
   date_of_projection <- as.data.frame(paste0("Projection run on ",format(Sys.time(), "%d/%m/%Y")))
   
-  xlsx::addDataFrame(dev_source_text, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
-  xlsx::addDataFrame(date_of_projection, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  addDataFrame(dev_source_text, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 11, startColumn = 1)
+  addDataFrame(date_of_projection, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #Write xlsx file
   wb_filename <- paste0(output_dir, projection_name,"_BPO.xlsx")
-  xlsx::saveWorkbook(wb, wb_filename)
+  saveWorkbook(wb, wb_filename)
   
 }
 
