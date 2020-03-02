@@ -1,5 +1,6 @@
 devtools::load_all("model_code/popmodules")
-
+devtools::load_all("model_code/trendmodel")
+devtools::load_all("model_code/housingledmodel")
 #Setup
 projection_name <- "2018_based_shlaa_dev"
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
@@ -49,6 +50,5 @@ config_list <- list(
 
 #---------------------
 #run projection
-source('model_code/model_scripts/housing_led/housing_led_control.R')
 projection <- run_housing_led_model(config_list)
 log_warnings(paste0(output_dir,"warnings.txt"))
