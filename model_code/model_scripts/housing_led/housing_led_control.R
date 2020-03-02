@@ -1,5 +1,7 @@
 run_housing_led_model <- function(config_list){
   
+  library(trendmodel)
+  
   message("Running borough model")
   
   #validate
@@ -160,8 +162,6 @@ run_housing_led_model <- function(config_list){
   npp_constraints = NULL
   upc = NULL
   
-  #TODO import trend model package
-  source('model_code/model_scripts/trend/02_core.R')
   source('model_code/model_scripts/housing_led/housing_led_core.R')
   source('model_code/model_scripts/housing_led/arrange_housing_led_core_outputs.R')
   source('model_code/model_scripts/housing_led/output_housing_led_projection.R')
