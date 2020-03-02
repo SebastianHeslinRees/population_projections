@@ -5,5 +5,5 @@ for(scenario in c("high","medium","low")){
                                  shlaa_first_yr = 2035,
                                  final_proj_yr = 2050,
                                  dev_first_yr = 2020,
-                                 migration_scenario = "other")
+                                 migration_scenario = scenario)
 }
