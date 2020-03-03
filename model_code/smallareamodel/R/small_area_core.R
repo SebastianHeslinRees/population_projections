@@ -37,7 +37,13 @@
 #'   area resolution.
 #' @param projection_year Integer. Uh, the projection year.
 #' @param small_area_to_district Data frame. A lookup from ward to borough codes.
-
+#' 
+#' @import dplyr
+#' @import popmodules
+#' @importFrom dtplyr lazy_dt
+#' @importFrom data.table rbindlist
+#' 
+#' @export
 
 small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             out_migration_rates, in_migration_characteristics,
@@ -109,7 +115,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
         as.data.frame()
     }
     
-    curr_yr_deaths <- data.table::rbindlist(x) %>%
+    curr_yr_deaths <- rbindlist(x) %>%
       as.data.frame() 
     
   } else {
@@ -153,7 +159,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     mutate(household_popn = popn - ce_popn) %>%
     select(-popn)
   
-  inflow_total <- dtplyr::lazy_dt(household_popn) %>%
+  inflow_total <- lazy_dt(household_popn) %>%
     filter(age >= 18) %>%
     group_by(gss_code_small_area) %>%
     summarise(adults = sum(household_popn)) %>%

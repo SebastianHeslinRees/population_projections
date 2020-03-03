@@ -1,8 +1,30 @@
+#' Output the results of the housing-led model
+#' 
+#' Save RDS and CSV files to a specified folder path. Outputs include population,
+#' components of change (including backseries data) and the input dwelling and
+#' household trajectories.
+#'
+#' @param projection A list. The output from the run_housing_led_model function
+#' @param output_dir A string. The directory in which to save the model output files
+#' @param projection_type A string. Is the projection at ward or MSOA level? Used in
+#'   naming the output files only
+#' @param births A dataframe. The projeted births output from the small area model
+#' @param deaths A dataframe. The projeted deaths output from the small area model
+#' @param first_proj_yr Numeric. The first year of the projection
+#' @param lookup A dataframe. A gss_code to name lookup for the modelled areas
+#' 
+#' @import dplyr
+#' @importFrom tidyr pivot_wider
+#' @importFrom dtplyr lazy_dt
+#' @importFrom data.table fread fwrite rbindlist
+#' 
+#' @export
+
 output_small_area_projection <- function(projection, output_dir, projection_type,
                                          births, deaths, first_proj_yr,
                                          lookup){
   
-  borough_names <- data.table::fread("input_data/lookup/lad18_code_to_name.csv")
+  borough_names <- fread("input_data/lookup/lad18_code_to_name.csv")
   
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   
@@ -38,22 +60,22 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   
   females <- filter(popn, sex == "female", year >= 2011) %>%
     mutate(popn = round(popn, 2)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    pivot_wider(names_from = year, values_from = popn) %>%
     select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
   
   males <- filter(popn, sex == "male", year >= 2011) %>%
     mutate(popn = round(popn, 2)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    pivot_wider(names_from = year, values_from = popn) %>%
     select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
   
   persons <- mutate(popn, sex = "persons") %>%
-    dtplyr::lazy_dt() %>%
+    lazy_dt() %>%
     filter(year >= 2011) %>%
     group_by_at(c("year", "gss_code", "borough", code, name, "sex", "age")) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
     mutate(popn = round(popn, 2)) %>%
-    tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    pivot_wider(names_from = year, values_from = popn) %>%
     select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
   
   components <- list()
@@ -81,16 +103,16 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     mutate(component = "deaths") %>%
     select_at(c("year","gss_code","borough", code, name, "value", "component"))
   
-  components <- data.table::rbindlist(components, use.names = TRUE) %>%
+  components <- rbindlist(components, use.names = TRUE) %>%
     as.data.frame() %>%
     select_at(c("year","gss_code","borough", code, name, "value", "component")) %>%
     rbind(births, deaths) %>%
-    dtplyr::lazy_dt() %>%
+    lazy_dt() %>%
     group_by_at(c("year","gss_code","borough", code, name, "component")) %>%
     summarise(value = sum(value)) %>%
     as.data.frame() %>%
     mutate(value = round(value, 2)) %>%
-    tidyr::pivot_wider(names_from = component, values_from = value) %>%
+    pivot_wider(names_from = component, values_from = value) %>%
     group_by_at(c("gss_code","borough", code, name)) %>%
     mutate(popn_lag = lag(popn)) %>%
     as.data.frame() %>%
@@ -103,7 +125,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   
   csvs <- list(persons=persons, males=males, females=females, components=components)
   for(i in seq_along(csvs)) {
-    data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
+    fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
   }
   
   projection[["csvs"]] <- csvs
