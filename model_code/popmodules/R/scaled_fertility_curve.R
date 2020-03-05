@@ -31,9 +31,21 @@
 scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
                                    n_years_to_avg, avg_or_trend, data_col="births", output_col){
 
-  population <- data.frame(readRDS(popn_mye_path))
-  births <- data.frame(readRDS(births_mye_path))
-  target_curves <- readRDS(target_curves_filepath) %>% select(-year)
+  if(class(popn_mye_path)=="character"){
+    population <- data.frame(readRDS(popn_mye_path))
+  } else {
+    population <- popn_mye_path
+  }
+  if(class(births_mye_path)=="character"){
+    births <- data.frame(readRDS(births_mye_path))
+  } else {
+    births <- births_mye_path
+  }
+  if(class(target_curves_filepath)=="character"){
+    target_curves <- readRDS(target_curves_filepath) %>% select(-year)
+  } else {
+    target_curves <- target_curves_filepath
+  }
 
   validate_scaled_fertility_curve_input(population, births, target_curves, last_data_year, n_years_to_avg,
                                         avg_or_trend, data_col, output_col)
@@ -44,8 +56,10 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     as.data.frame()
 
   population <-  lazy_dt(population) %>%
-    filter(sex == "female", age %in% unique(target_curves$age))
-
+    filter(sex == "female", age %in% unique(target_curves$age)) %>%
+    as.data.frame()
+  
+  target_curves <- filter(target_curves, gss_code %in% unique(births$gss_code))
 
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
@@ -59,6 +73,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     ungroup() %>%
     as.data.frame() %>%   # dtplyr needs to take a break part way through
     lazy_dt() %>%
+    mutate(year = year +1) %>%
     left_join(births, by = c("gss_code", "year"))  %>%
     as.data.frame() %>%
     rename(actual = data_col) %>%

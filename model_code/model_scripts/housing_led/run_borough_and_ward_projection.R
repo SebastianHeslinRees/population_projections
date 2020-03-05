@@ -49,6 +49,9 @@ run_borough_and_ward_projection <- function(projection_name,
     output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
   
+  fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london.rds"
+  additional_births_path <- "input_data/fertility/births_2019.rds"
+  
   list2env(housing_led_params, environment())
   
   
@@ -72,7 +75,9 @@ run_borough_and_ward_projection <- function(projection_name,
     domestic_transition_yr = domestic_transition_yr,
     domestic_initial_rate_path = domestic_initial_rate_path,
     domestic_long_term_rate_path = domestic_long_term_rate_path,
-    ahs_method = ahs_method)
+    ahs_method = ahs_method,
+    additional_births_path = additional_births_path,
+    fertility_rates_path = fertility_rates_path)
   
   #---------------------
   #run projection

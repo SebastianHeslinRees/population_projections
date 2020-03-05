@@ -20,7 +20,9 @@ run_housing_led_model <- function(config_list){
                        "domestic_transition_yr",
                        "domestic_initial_rate_path",
                        "domestic_long_term_rate_path",
-                       "ahs_method")
+                       "ahs_method",
+                       "additional_births_path",
+                       "fertility_rates_path")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -45,11 +47,16 @@ run_housing_led_model <- function(config_list){
   
   #component rates
   component_rates <- get_data_from_file(
-    list(fertility_rates = paste0(config_list$external_trend_path,"fertility_rates.rds"),
+    list(fertility_rates = config_list$fertility_rates_path,
          mortality_rates = paste0(config_list$external_trend_path,"mortality_rates.rds"),
          int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates.rds"),
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds"),
          domestic_rates = config_list$domestic_initial_rate_path))
+ 
+  if(!is.null(additional_births_path)){
+    additional_births <- get_data_from_file(list(additional_births = additional_births_path)) %>%
+      data.table::rbindlist()
+  }
   
   #domestic rates by year here
   #is it better to have used a list
@@ -174,6 +181,7 @@ run_housing_led_model <- function(config_list){
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
   final_proj_yr <- config_list$final_proj_yr
+  last_yr_actual_births <- ifelse(exists("additional_births"), max(additional_births$year), 0)
   
   projection <- list()
   trend_projection <- list()
@@ -198,6 +206,12 @@ run_housing_led_model <- function(config_list){
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
+    
+    if(last_yr_actual_births >= projection_year){
+      curr_yr_actual_births <- filter(additional_births, year == projection_year)
+    } else {
+      curr_yr_actual_births <- NULL
+    }
     
     if(config_list$constrain_projection){
       curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
@@ -236,7 +250,8 @@ run_housing_led_model <- function(config_list){
                                                       ahs_cap = ahs_cap,
                                                       ahs_method = config_list$ahs_method,
                                                       ldd_final_yr = config_list$ldd_final_yr,
-                                                      constrain_projection = config_list$constrain_projection)
+                                                      constrain_projection = config_list$constrain_projection,
+                                                      actual_births = curr_yr_actual_births)
     
     ahs_cap <- projection[[projection_year]][['ahs_cap']]
     curr_yr_popn <- projection[[projection_year]][['population']]
