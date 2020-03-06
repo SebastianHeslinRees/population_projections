@@ -115,7 +115,7 @@ housing_led_core <- function(start_population,
     
     if(is.null(ahs_cap)){
       set_ahs <- set_ahs %>%
-        mutate(ahs_cap = trend)
+        mutate(cap = trend)
     } else {
       set_ahs <- set_ahs %>%
         left_join(ahs_cap, by="gss_code")

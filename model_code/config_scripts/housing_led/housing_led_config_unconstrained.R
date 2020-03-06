@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
 #Setup
-projection_name <- "2018_based_shlaa_dev_unconstrained_tree"
+projection_name <- "2018_based_shlaa_dev_unconstrained_new_fert"
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
@@ -13,9 +13,9 @@ external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs
 hma_list <- NULL
 constrain_projection <- FALSE
 first_proj_yr <- 2019
-final_proj_yr <- 2020
+final_proj_yr <- 2050
 ahs_cap_year <- 2019
-ahs_method <- "tree"
+ahs_method <- 0
 
 ldd_final_yr <- 2018
 
@@ -27,6 +27,9 @@ domestic_long_term_rate_path <- NULL
 
 additional_births_path <- "input_data/fertility/births_2019.rds"
 fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london.rds"
+
+# additional_births_path <- NULL
+# fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
 
 #------------------
 #Setup config list
