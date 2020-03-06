@@ -13,7 +13,8 @@ housing_led_core <- function(start_population,
                              ahs_method,
                              ldd_final_yr,
                              constrain_projection,
-                             actual_births){
+                             actual_births,
+                             last_data_yr){
   
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
@@ -26,7 +27,7 @@ housing_led_core <- function(start_population,
   
   #2. Constrain births, deaths & international
   #So that totals match at the borough level
-  if(constrain_projection){
+  if(constrain_projection | projection_year <= last_data_yr){
     births <- component_constraints[['birth_constraint']] %>%
       filter(gss_code %in% constrain_gss, year == projection_year) %>%
       mutate(female = births*(100/205),

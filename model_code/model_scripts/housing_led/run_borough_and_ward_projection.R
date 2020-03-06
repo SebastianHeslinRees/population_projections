@@ -41,7 +41,8 @@ run_borough_and_ward_projection <- function(projection_name,
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
   ahs_cap_year <- 2019
   ldd_final_yr <- 2018
-  ahs_method = 0
+  ahs_method <- 0
+  last_data_yr <- 2018
   
   if(bpo==FALSE){
     output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
@@ -77,7 +78,8 @@ run_borough_and_ward_projection <- function(projection_name,
     domestic_long_term_rate_path = domestic_long_term_rate_path,
     ahs_method = ahs_method,
     additional_births_path = additional_births_path,
-    fertility_rates_path = fertility_rates_path)
+    fertility_rates_path = fertility_rates_path,
+    last_data_yr = last_data_yr)
   
   #---------------------
   #run projection

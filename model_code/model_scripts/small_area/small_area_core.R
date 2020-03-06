@@ -181,13 +181,14 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                         col_aggregation = c("year","gss_code","sex","age"))
   
   final_popn <- constrained_popn %>%
-    select(year, gss_code, gss_code_small_area, sex, age, popn)
+    select(year, gss_code, gss_code_small_area, sex, age, popn) %>%
+    check_negative_values("popn")
   
   final_migration <- rename(natural_change_popn, nat_chng = popn) %>%
     left_join(final_popn, by=c("year","gss_code","gss_code_small_area","sex","age")) %>%
     mutate(migration = popn - nat_chng) %>%
     select(year, gss_code, gss_code_small_area, sex, age, migration)
-  
+ 
   return(list(population = final_popn,
               births = rename(curr_yr_births, births = popn),
               deaths = curr_yr_deaths,

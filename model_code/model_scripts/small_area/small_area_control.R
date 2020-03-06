@@ -123,7 +123,7 @@ run_small_area_model <- function(config_list){
         select(-year)
       
       births_data_years <- (config_list$last_data_year-config_list$birth_rate_n_years_to_avg+1):config_list$last_data_year
-      
+     
       fertility_scaling <- calculate_geomean_scaling_factors(popn = popn_estimates,
                                                              future_rates = future_fertility_rates,
                                                              data_years = births_data_years,
