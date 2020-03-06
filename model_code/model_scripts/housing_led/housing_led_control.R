@@ -53,8 +53,8 @@ run_housing_led_model <- function(config_list){
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds"),
          domestic_rates = config_list$domestic_initial_rate_path))
  
-  if(!is.null(additional_births_path)){
-    additional_births <- get_data_from_file(list(additional_births = additional_births_path)) %>%
+  if(!is.null(config_list$additional_births_path)){
+    additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
       data.table::rbindlist()
   }
   
