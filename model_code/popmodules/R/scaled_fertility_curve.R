@@ -6,20 +6,27 @@
 #' averaged or trended forward using regression. The resulting scaling
 #' factor is applied to the input curve to produce a set of rates.
 #'
-#' @param popn_mye_path Character. Path to the MYE population data
-#' @param births_mye_path Character. Path to the MYE births component data
-#' @param target_curves_filepath Character. Path to the SNPP target fertility curves
-#' @param last_data_year numeric. The last year of births data on which to calculate
-#'   averages.
-#' @param n_years_to_avg numeric. The number of years to use in calculating averages/trend forward.
-#' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
-#'   or by linear regression \code{Trend}.
-#' @param data_col Character. The column in the \code{births} dataframe containing the rates. Defaults to \code{births}
-#' @param output_col Character. The name of the column in the output dataframe containing the calculated rates
+#' @param popn_mye_path Character or data frame. Path to the MYE population
+#'   data, or a data frame with the data.
+#' @param births_mye_path Character or data frame. Path to the MYE births
+#'   component data, or a data frame with the data.
+#' @param target_curves_filepath Character or data frame. Path to the SNPP
+#'   target fertility curves, or a data frame with the data.
+#' @param last_data_year numeric. The last year of births data on which to
+#'   calculate averages.
+#' @param n_years_to_avg numeric. The number of years to use in calculating
+#'   averages/trend forward.
+#' @param avg_or_trend Character. Should the averaged be calculated as the mean
+#'   \code{Average}, or by linear regression \code{Trend}.
+#' @param data_col Character. The column in the \code{births} dataframe
+#'   containing the rates. Defaults to \code{births}
+#' @param output_col Character. The name of the column in the output dataframe
+#'   containing the calculated rates
 #'
-#' @return A data frame of mortality probabilities or fertility rates by LA, year, sex and age with the same age structure
-#' as the target curves and overall rates scaled so that they are consistent with past births.
-#'
+#' @return A data frame of mortality probabilities or fertility rates by LA,
+#'   year, sex and age with the same age structure as the target curves and
+#'   overall rates scaled so that they are consistent with past births.
+#'   
 #' @import dplyr
 #' @import assertthat
 #' @importFrom data.table setnames
@@ -31,9 +38,21 @@
 scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
                                    n_years_to_avg, avg_or_trend, data_col="births", output_col){
 
-  population <- data.frame(readRDS(popn_mye_path))
-  births <- data.frame(readRDS(births_mye_path))
-  target_curves <- readRDS(target_curves_filepath) %>% select(-year)
+  if(class(popn_mye_path)=="character"){
+    population <- data.frame(readRDS(popn_mye_path))
+  } else {
+    population <- popn_mye_path
+  }
+  if(class(births_mye_path)=="character"){
+    births <- data.frame(readRDS(births_mye_path))
+  } else {
+    births <- births_mye_path
+  }
+  if(class(target_curves_filepath)=="character"){
+    target_curves <- readRDS(target_curves_filepath) %>% select(-year)
+  } else {
+    target_curves <- target_curves_filepath
+  }
 
   validate_scaled_fertility_curve_input(population, births, target_curves, last_data_year, n_years_to_avg,
                                         avg_or_trend, data_col, output_col)
@@ -44,15 +63,18 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     as.data.frame()
 
   population <-  lazy_dt(population) %>%
-    filter(sex == "female", age %in% unique(target_curves$age))
-
+    filter(sex == "female", age %in% unique(target_curves$age)) %>%
+    as.data.frame()
+  
+  target_curves <- filter(target_curves, gss_code %in% unique(births$gss_code))
 
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-  scaling_backseries <- lazy_dt(target_curves) %>%
-    left_join(population, by = c("gss_code", "age", "sex")) %>%
+  scaling_backseries <- popn_age_on(population) %>%
+    lazy_dt() %>%
+    right_join(target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
     group_by(year, gss_code) %>%
     summarise(curve_count = sum(curve_count)) %>%
@@ -66,7 +88,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, scaling)
-
+  
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
                                                              col_aggregation = "gss_code")
