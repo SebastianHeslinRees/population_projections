@@ -24,7 +24,7 @@ run_housing_led_model <- function(config_list){
                        "additional_births_path",
                        "fertility_rates_path",
                        "last_data_yr")
-  
+ 
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
@@ -198,6 +198,7 @@ run_housing_led_model <- function(config_list){
                                          config_list$ahs_method)
   
   for(projection_year in first_proj_yr:final_proj_yr){
+    
     curr_yr_fertility <- filter(component_rates$fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(component_rates$mortality_rates, year == projection_year)
     curr_yr_int_out <- mutate(component_rates$int_out, year = projection_year)
@@ -211,11 +212,11 @@ run_housing_led_model <- function(config_list){
     } else {
       curr_yr_actual_births <- NULL
     }
-    
+
     if(config_list$constrain_projection){
-      curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
+      curr_yr_hma_constraint <- filter(hma_constraint, projection_year == projection_year)
     }
-    curr_yr_constrain <- config_list$constrain_projection | year <= config_list$last_data_year
+    curr_yr_constrain <- config_list$constrain_projection | projection_year <= config_list$last_data_yr
     
     if(is.null(config_list$domestic_transition_yr)){
       curr_yr_domestic_rates <- component_rates$domestic_rates
