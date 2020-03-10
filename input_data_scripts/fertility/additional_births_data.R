@@ -3,8 +3,10 @@
 # The script uses this to create a UK-wide fertility trajectory to 2050 with the 2019
 # rates incuded in the calculations (for London only).
 
-# The output can then be used as model input by pointing the 
+# The output can then be used as model input by pointing the additional_births_path
+# parameter to it in the housing led config script
 
+# TODO adapt this for the trend model as well
 
 library(dplyr)
 devtools::load_all('model_code/popmodules')
