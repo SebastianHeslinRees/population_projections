@@ -12,7 +12,7 @@
 #' @param last_data_year numeric. The last year of births data on which to calculate
 #'   averages.
 #' @param n_years_to_avg numeric. The number of years to use in calculating averages/trend forward.
-#' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
+#' @param avg_or_trend Character. Should the averaged be calculated as the mean \code{Average},
 #'   or by linear regression \code{Trend}.
 #' @param data_col Character. The column in the \code{births} dataframe containing the rates. Defaults to \code{births}
 #' @param output_col Character. The name of the column in the output dataframe containing the calculated rates
@@ -65,15 +65,15 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-  scaling_backseries <- lazy_dt(target_curves) %>%
-    left_join(population, by = c("gss_code", "age", "sex")) %>%
+  scaling_backseries <- popn_age_on(population) %>%
+    lazy_dt() %>%
+    right_join(target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
     group_by(year, gss_code) %>%
     summarise(curve_count = sum(curve_count)) %>%
     ungroup() %>%
     as.data.frame() %>%   # dtplyr needs to take a break part way through
     lazy_dt() %>%
-    mutate(year = year +1) %>%
     left_join(births, by = c("gss_code", "year"))  %>%
     as.data.frame() %>%
     rename(actual = data_col) %>%
@@ -81,7 +81,7 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, scaling)
-
+  
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
                                                              col_aggregation = "gss_code")
