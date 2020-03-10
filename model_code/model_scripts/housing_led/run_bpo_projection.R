@@ -31,7 +31,7 @@ run_bpo_projection <- function(bpo_name,
   #domestic migration
   if(migration_scenario == "high"){
     housing_led_params <- list(
-      external_trend_path = "outputs/trend/2018/2018_central_19-11-13_2056/",
+      external_trend_path = "outputs/trend/2018/2018_high_mig_20-03-10_1436/",
       domestic_transition_yr = NULL,
       domestic_initial_rate_path = "input_data/migration/high_domestic_migration_rates_(2016_2018).rds",
       domestic_long_term_rate_path = NULL)
@@ -43,7 +43,7 @@ run_bpo_projection <- function(bpo_name,
       domestic_long_term_rate_path = "outputs/trend/2018/2018_central_19-11-13_2056/domestic_rates.rds")
   } else if(migration_scenario == "low"){
     housing_led_params <- list(
-      external_trend_path ="outputs/trend/2018/2018_central_19-11-13_2056/",
+      external_trend_path ="outputs/trend/2018/2018_low_mig_20-03-10-1446/",
       domestic_transition_yr = 2024,
       domestic_initial_rate_path = "outputs/trend/2018/2018_short_19-11-13_2205/domestic_rates.rds",
       domestic_long_term_rate_path = "input_data/migration/low_domestic_migration_rates_(2009_2012).rds")
