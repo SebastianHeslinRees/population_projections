@@ -1,5 +1,15 @@
+# Script to incorporate the 2019 births data in the model.
+# This exists because we have 2019 births data before any of the other 2019 MYE data.
+# The script uses this to create a UK-wide fertility trajectory to 2050 with the 2019
+# rates incuded in the calculations (for London only).
+
+# The output can then be used as model input by pointing the 
+
+
 library(dplyr)
 devtools::load_all('model_code/popmodules')
+
+popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds")
 
 ons_births <- readRDS("input_data/mye/2018/births_ons.rds")
 
@@ -39,8 +49,6 @@ london_backseries_births <- filter(ons_births, gss_code %in% unique(additional_b
 not_london_backseries_births <- filter(ons_births, !gss_code %in% unique(additional_births$gss_code)) %>%
   filter(age == 0) %>%
   select(names(additional_births)) 
-
-popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds")
 
 london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
                                             births_mye_path = london_backseries_births,
