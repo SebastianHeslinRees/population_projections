@@ -15,7 +15,7 @@ int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 dom_origin_destination_path <- paste0("input_data/migration/high_domestic_migration_rates_(2016_2018).rds")
-dom_origin_destination_path <- paste0("input_data/migration/low_domestic_migration_rates_(2009_2012).rds")
+# dom_origin_destination_path <- paste0("input_data/migration/low_domestic_migration_rates_(2009_2012).rds")
 
 upc_path <- NULL
 
