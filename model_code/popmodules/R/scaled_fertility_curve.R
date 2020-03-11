@@ -26,7 +26,7 @@
 #' @return A data frame of mortality probabilities or fertility rates by LA,
 #'   year, sex and age with the same age structure as the target curves and
 #'   overall rates scaled so that they are consistent with past births.
-#'   
+#'
 #' @import dplyr
 #' @import assertthat
 #' @importFrom data.table setnames
@@ -65,19 +65,20 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
   population <-  lazy_dt(population) %>%
     filter(sex == "female", age %in% unique(target_curves$age)) %>%
     as.data.frame()
-  
+
   target_curves <- filter(target_curves, gss_code %in% unique(births$gss_code))
 
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-  scaling_backseries <- popn_age_on(population) %>%
+  scaling_backseries <- popn_age_on(population, births = 0) %>%
     lazy_dt() %>%
     right_join(target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
     group_by(year, gss_code) %>%
     summarise(curve_count = sum(curve_count)) %>%
+    filter(year %in% births$year) %>%
     ungroup() %>%
     as.data.frame() %>%   # dtplyr needs to take a break part way through
     lazy_dt() %>%
@@ -88,7 +89,10 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
                             0,
                             actual / curve_count)) %>%
     select(gss_code, year, scaling)
-  
+
+  assert_that(n_years_to_avg <= length(unique(scaling_backseries$year)),
+              msg = paste("scaled_fertility_curve couldn't construct", n_years_to_avg,"years of fertility data from the inputs"))
+
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
                                                              col_aggregation = "gss_code")
