@@ -11,10 +11,10 @@ library(purrr)
 # setwd("..")
 # setwd("model_code/popmodules/tests/testthat")
 
-popn_mye_path <- "tests/testthat/test_data/test-popn-scaled-fert-curve.rds"
-births_mye_path <- "tests/testthat/test_data/test-births-scaled-fert-curve.rds"
-target_curves_filepath <- "tests/testthat/test_data/test-curves-scaled-fert-curve.rds"
-birth_dom_filepath <- "tests/testthat/test_data/test-birth_dom-scaled-fert-curve.rds"
+popn_mye_path <- "test_data/test-popn-scaled-fert-curve.rds"
+births_mye_path <- "test_data/test-births-scaled-fert-curve.rds"
+target_curves_filepath <- "test_data/test-curves-scaled-fert-curve.rds"
+birth_dom_filepath <- "test_data/test-birth_dom-scaled-fert-curve.rds"
 
 last_data_year <- 2005
 years_to_avg <- 3
@@ -63,10 +63,10 @@ create_input_data <- function() {
   saveRDS(birth_dom, birth_dom_filepath)
 }
 
-if(!file.exists(popn_mye_path)) {
-  message("Generating input files for first run")
-  create_input_data()
-}
+# if(!file.exists(popn_mye_path)) {
+#   message("Generating input files for first run")
+#   create_input_data()
+# }
 
 
 regression <- function(df){
