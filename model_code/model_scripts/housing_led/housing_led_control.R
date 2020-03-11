@@ -214,7 +214,7 @@ run_housing_led_model <- function(config_list){
     }
 
     if(config_list$constrain_projection){
-      curr_yr_hma_constraint <- filter(hma_constraint, projection_year == projection_year)
+      curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
     }
     curr_yr_constrain <- config_list$constrain_projection | projection_year <= config_list$last_data_yr
     
