@@ -91,7 +91,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   xlsx::addDataFrame(date_of_projection, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #Write xlsx file
-  wb_filename <- paste0(output_dir, projection_name,"_BPO.xlsx")
+  wb_filename <- paste0(output_dir, projection_name,"_BPO_2018.xlsx")
   xlsx::saveWorkbook(wb, wb_filename)
   
 }
