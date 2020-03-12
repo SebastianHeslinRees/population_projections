@@ -26,7 +26,9 @@ run_small_area_model <- function(config_list){
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "ldd_final_yr",
-                       "projection_type")
+                       "projection_type",
+                       "births_sya_path",
+                       "deaths_sya_path")
   
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
@@ -51,6 +53,9 @@ run_small_area_model <- function(config_list){
   deaths <- read_small_area_inputs(config_list$small_area_deaths_backseries_path)
   ldd_data <- read_small_area_inputs(config_list$small_area_ldd_data_path)
   dwelling_trajectory <- read_small_area_inputs(config_list$small_area_dev_trajectory_path)
+  
+  small_area_births_sya <- read_small_area_inputs(config_list$births_sya_path)
+  small_area_deaths_sya <- read_small_area_inputs(config_list$deaths_sya_path)
   
   #----------
   
@@ -123,7 +128,7 @@ run_small_area_model <- function(config_list){
         select(-year)
       
       births_data_years <- (config_list$last_data_year-config_list$birth_rate_n_years_to_avg+1):config_list$last_data_year
-     
+      
       fertility_scaling <- calculate_geomean_scaling_factors(popn = popn_estimates,
                                                              future_rates = future_fertility_rates,
                                                              data_years = births_data_years,
@@ -214,7 +219,8 @@ run_small_area_model <- function(config_list){
   small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
   
   projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
-                                                config_list$first_proj_yr, config_list$final_proj_yr)
+                                                config_list$first_proj_yr, config_list$final_proj_yr,
+                                                small_area_births_sya, small_area_deaths_sya)
   
   projection <- output_small_area_projection(projection = projection,
                                              output_dir = small_area_output_dir,
