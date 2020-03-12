@@ -37,7 +37,7 @@ lsoa_births <- readRDS(lsoa_births_path) %>%
 
 ward_births <- left_join(lsoa_births, lsoa_to_ward, by="gss_code_lsoa") %>%
   filter(gss_code_ward %in% london_wards) %>%
-  .aggregate_city_wards("births" ) %>%
+  aggregate_city_wards("births" ) %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, age_group) %>%
   summarise(births = sum(births)) %>%
@@ -75,7 +75,7 @@ lsoa_deaths <- readRDS(lsoa_deaths_path) %>%
 
 ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
   filter(gss_code_ward %in% london_wards) %>%
-  .aggregate_city_wards("deaths") %>%
+  aggregate_city_wards("deaths") %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, sex, age_group) %>%
   summarise(deaths = sum(deaths)) %>%
