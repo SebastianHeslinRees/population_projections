@@ -93,6 +93,7 @@ run_housing_led_model <- function(config_list){
   } else {
     hma_constraint <- NULL
     curr_yr_hma_constraint <- NULL
+    hma_list <- NULL
   }
   
   #other data
