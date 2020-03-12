@@ -1,14 +1,14 @@
 Package: trendmodel
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: What license it uses
+Title: The GLA Population Trend Model
+Version: 0.1.0
+Authors@R: c(
+   person("Chris", "Fairless", email="christopher.fairless@london.gov.uk", role = c("aut", "cre")),
+   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut"),
+   person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = "aut")
+   )
+Description: Functions required to project forward the UK population using the GLA Trend Model methodology.
+Depends: R (>= 3.5.0)
+License: Currently internal to the GLA - contact the authors with any questions
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
