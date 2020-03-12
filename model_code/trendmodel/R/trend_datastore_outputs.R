@@ -6,7 +6,9 @@
 #' @param write_excel Logical. Whether to create Excel output files.
 #'
 #' @import dplyr
-#' @export
+#' @importFrom tidyr spread
+#' @importFrom data.table fwrite
+#' @importFrom rprojroot find_root_file is_git_root
 
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
                               output_dir, excel_file_name, write_excel){

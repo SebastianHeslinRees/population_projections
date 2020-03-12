@@ -8,8 +8,6 @@
 #'
 #' @import dplyr
 #' @importFrom tidyr pivot_wider
-#' 
-#' @export
 
 household_model_outputs <- function(model_output, model, output_dir, write_excel){
 

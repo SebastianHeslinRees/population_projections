@@ -10,8 +10,6 @@
 #'
 #' @return A list containing 2 lists: Stage 1 outputs and Stage 2
 #'   outputs.
-#'
-#' @export
 
 household_model_dclg <- function(population, stage1_file_path, stage2_file_path){
 
@@ -37,8 +35,6 @@ household_model_dclg <- function(population, stage1_file_path, stage2_file_path)
 #' @import dplyr
 #' @import popmodules
 #' @importFrom dtplyr lazy_dt
-#' 
-#' @export
 
 dclg_stage_1 <- function(population, stage1_file_path){
 
@@ -143,8 +139,6 @@ dclg_stage_1 <- function(population, stage1_file_path){
 #' @import dplyr
 #' @import popmodules
 #' @importFrom dtplyr lazy_dt
-#' 
-#' @export
 
 dclg_stage_2 <- function(stage2_file_path, stage1_output){
 
