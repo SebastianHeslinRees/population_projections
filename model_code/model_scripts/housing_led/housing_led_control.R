@@ -25,6 +25,16 @@ run_housing_led_model <- function(config_list){
                        "fertility_rates_path",
                        "last_data_yr")
  
+  extra_config_elements <- setdiff(names(config_list), expected_config)
+  if(length(extra_config_elements) > 0) {
+    warning(paste(c("Housing led model was given unexpected extra config settings:", extra_config_elements), collapse = " "))
+  }
+  
+  missing_config_elements <- setdiff(expected_config, names(config_list))
+  if(length(missing_config_elements) > 0) {
+    warning(paste(c("Housing led model needed additional config settings:", missing_config_elements), collapse = " "))
+  }
+  
   if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
