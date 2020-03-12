@@ -31,6 +31,12 @@ the population, or a set of international out flow totals to be subtracted from 
 \item{int_in_flows}{A data frame. A set of international in migration flows to be added to
 the population}
 
+\item{domestic_rates}{A data frame. A set of orgin-destination migration rates by age and sex
+to be applied to the population}
+
+\item{int_out_method}{A string. A switch to define whether international out migration is
+a rate or a flow. Either \code{rate} or \code{flow}}
+
 \item{constraints}{A list. A set of national-level constraints for each component. If the projection
 is to be run unconstrained this is set to NULL. Default \code{NULL}}
 
@@ -38,12 +44,6 @@ is to be run unconstrained this is set to NULL. Default \code{NULL}}
 is set to NULL. Default \code{NULL}}
 
 \item{projection_year}{Numeric. The year being projected}
-
-\item{domestic_rates.}{A data frame. A set of orgin-destination migration rates by age and sex
-to be applied to the population}
-
-\item{int_out_method.}{A string. A switch to define whether international out migration is
-a rate or a flow. Either \code{rate} or \code{flow}}
 }
 \value{
 A list where each element is a data frame containing either projected population or

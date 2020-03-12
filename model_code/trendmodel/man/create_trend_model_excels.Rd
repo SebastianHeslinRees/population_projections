@@ -7,13 +7,10 @@
 create_trend_model_excels(trend_dir, excel_file_name)
 }
 \arguments{
-\item{dir}{String. The output directory where the projection RDS files are
+\item{trend_dir}{String. The output directory where the projection RDS files are
 saved.}
 
-\item{stamp}{String. The time stamp on the output RDS file names format
-\code{"\%y-\%m-\%d_\%H\%M"}.}
-
-\item{file_name}{String. File name for the population workbook ouput. Must
+\item{excel_file_name}{String. File name for the population workbook ouput. Must
 include \code{.xslx} suffix.}
 }
 \description{
@@ -28,5 +25,4 @@ create_trend_model_excels(
   trend_dir = "outputs/trend/2018/2018_long_19-11-13_2144",
   excel_file_name = "2018_long_trend.xlsx")
 }
-
 }

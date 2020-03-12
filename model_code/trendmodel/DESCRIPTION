@@ -14,4 +14,14 @@ LazyData: true
 RoxygenNote: 7.0.2
 Imports: 
     rprojroot,
-    tidyr
+    tidyr,
+    assertthat,
+    data.table,
+    dplyr,
+    dtplyr,
+    rmarkdown,
+    stringr,
+    popmodules,
+    utils
+Suggests:
+    testthat

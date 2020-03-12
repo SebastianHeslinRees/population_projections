@@ -110,7 +110,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_vba.bat", col.names=F, quote=F)
 
     bas_file <- "documentation/templates/datastoreVBA.bas"
-    vba <- create_VBA_script(datastore_folder, file_name)
+    vba <- create_VBA_script(datastore_folder, excel_file_name)
     data.table::fwrite(vba, bas_file, col.names=F, quote=F)
     file.remove("documentation/templates/temp_file.xlsm")
     shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_vba.bat", criterion = rprojroot::is_git_root))

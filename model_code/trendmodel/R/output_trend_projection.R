@@ -10,6 +10,7 @@
 #'  1:\code{n_csv_elements} of the \code{projection} list.
 #'
 #' @import dplyr
+#' @import popmodules
 #' @importFrom stringr str_detect
 #' @importFrom data.table fwrite
 #' @importFrom tidyr pivot_wider

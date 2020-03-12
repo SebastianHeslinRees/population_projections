@@ -12,9 +12,9 @@
 #'   the population, or a set of international out flow totals to be subtracted from the population
 #' @param int_in_flows A data frame. A set of international in migration flows to be added to
 #'   the population
-#' @param domestic_rates. A data frame. A set of orgin-destination migration rates by age and sex
+#' @param domestic_rates A data frame. A set of orgin-destination migration rates by age and sex
 #'   to be applied to the population
-#' @param int_out_method. A string. A switch to define whether international out migration is
+#' @param int_out_method A string. A switch to define whether international out migration is
 #'   a rate or a flow. Either \code{rate} or \code{flow}
 #' @param constraints A list. A set of national-level constraints for each component. If the projection
 #'   is to be run unconstrained this is set to NULL. Default \code{NULL}
@@ -41,7 +41,7 @@ trend_core <- function(start_population,
 
   # run projection
   cat('\r',paste("  Projecting year",projection_year))
-  flush.console()
+  utils::flush.console()
 
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
