@@ -38,7 +38,7 @@ run_trend_model <- function(config_list) {
                        "dclg_stage1_file_path",
                        "dclg_stage2_file_path")
 
-  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
+  validate_config_list(config_list, expected_config)
   
   #Create output directory
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)

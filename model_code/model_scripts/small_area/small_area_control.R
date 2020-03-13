@@ -28,7 +28,7 @@ run_small_area_model <- function(config_list){
                        "ldd_final_yr",
                        "projection_type")
   
-  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
+  validate_config_list(config_list, expected_config)
   
   read_small_area_inputs <- function(path){
     df <- readRDS(path)

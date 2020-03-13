@@ -25,7 +25,7 @@ run_housing_led_model <- function(config_list){
                        "fertility_rates_path",
                        "last_data_yr")
  
-  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
+  validate_config_list(config_list, expected_config)
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
