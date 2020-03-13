@@ -35,7 +35,7 @@ run_small_area_model <- function(config_list){
   
   missing_config_elements <- setdiff(expected_config, names(config_list))
   if(length(missing_config_elements) > 0) {
-    warning(paste(c("Small area model needed additional config settings:", missing_config_elements), collapse = " "))
+    stop(paste(c("Small area model needed additional config settings:", missing_config_elements), collapse = " "))
   }  
   read_small_area_inputs <- function(path){
     df <- readRDS(path)
