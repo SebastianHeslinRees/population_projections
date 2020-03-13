@@ -91,9 +91,8 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     for(i in 1:length(age_groups)){
       
       mn <- substr(age_groups[i],1,2)
-      mn <- case_when(mn == "1_" ~ 1,
-                      mn == "5_" ~ 5,
-                      TRUE ~ as.numeric(mn))
+      mn <- ifelse(mn == "1_", 1,
+                   ifelse(mn == "5_", 5, as.numeric(mn)))
       
       mx <- case_when(mn == 0 ~ 0,
                       mn == 1 ~ 4,
@@ -131,7 +130,8 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
 
   natural_change_popn <- left_join(popn_w_births, curr_yr_deaths, by=c("year","gss_code","gss_code_small_area","sex","age")) %>%
     mutate(popn = popn - deaths) %>%
-    select(-deaths)
+    select(-deaths) %>% 
+    check_negative_values(data_col = "popn")
   
   #Apply outmigration rates
   out_migration <- left_join(natural_change_popn, out_migration_rates, by=c("gss_code_small_area","sex","age")) %>%
