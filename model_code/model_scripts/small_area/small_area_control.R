@@ -28,15 +28,7 @@ run_small_area_model <- function(config_list){
                        "ldd_final_yr",
                        "projection_type")
   
-  extra_config_elements <- setdiff(names(config_list), expected_config)
-  if(length(extra_config_elements) > 0) {
-    warning(paste(c("Small area model was given unexpected extra config settings:", extra_config_elements), collapse = " "))
-  }
-  
-  missing_config_elements <- setdiff(expected_config, names(config_list))
-  if(length(missing_config_elements) > 0) {
-    stop(paste(c("Small area model needed additional config settings:", missing_config_elements), collapse = " "))
-  } 
+  validate_config_list(config_list, expected_config)
   
   read_small_area_inputs <- function(path){
     df <- readRDS(path)

@@ -38,15 +38,7 @@ run_trend_model <- function(config_list) {
                        "dclg_stage1_file_path",
                        "dclg_stage2_file_path")
 
-  extra_config_elements <- setdiff(names(config_list), expected_config)
-  if(length(extra_config_elements) > 0) {
-    warning(paste(c("Trend model was given unexpected extra config settings:", extra_config_elements), collapse = " "))
-  }
-  
-  missing_config_elements <- setdiff(expected_config, names(config_list))
-  if(length(missing_config_elements) > 0) {
-    stop(paste(c("Trend model needed additional config settings:", missing_config_elements), collapse = " "))
-  } 
+  validate_config_list(config_list, expected_config)
   
   #Create output directory
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
