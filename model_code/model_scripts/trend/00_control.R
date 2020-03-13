@@ -46,7 +46,8 @@ run_trend_model <- function(config_list) {
   missing_config_elements <- setdiff(expected_config, names(config_list))
   if(length(missing_config_elements) > 0) {
     stop(paste(c("Trend model needed additional config settings:", missing_config_elements), collapse = " "))
-  }  
+  } 
+  
   #Create output directory
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   

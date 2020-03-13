@@ -35,8 +35,6 @@ run_housing_led_model <- function(config_list){
     stop(paste(c("Housing led model needed additional config settings:", missing_config_elements), collapse = " "))
   }
   
-  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
-  
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
