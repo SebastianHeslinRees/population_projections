@@ -17,7 +17,7 @@
 #' @param mortality_rates Dataframe. Model mortality rates
 #' @param int_out_rates Dataframe. Model international out migration rates
 #' @param int_in_flows Dataframe. Model internation in migration flows
-#' @param domestic_rates Dataframe. Model mortality rates
+#' @param domestic_rates Dataframe. Model domestic migration rates
 #' @param first_proj_yr Numeric. First projection year
 #' @param last_proj_yr Numeric. Last projection year
 #'
@@ -25,8 +25,7 @@
 #'   of the projection and the backseries.
 #'
 #' @importFrom data.table rbindlist
-#'
-#' @export
+#' @import dplyr
 
 arrange_trend_core_outputs <- function(projection,
                              population, births, deaths, int_out, int_in, dom_in, dom_out,

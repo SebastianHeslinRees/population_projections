@@ -7,9 +7,8 @@
 #' @param write_excel Logical. Whether to output Excel .xls files.
 #'
 #' @import dplyr
+#' @import popmodules
 #' @importFrom tidyr pivot_wider
-#' 
-#' @export
 
 household_model_outputs <- function(model_output, model, output_dir, write_excel){
 

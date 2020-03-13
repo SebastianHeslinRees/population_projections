@@ -5,11 +5,9 @@
 #' will produce those workbooks. Creates a population workbook, an ONS household
 #' workbook and a DCLG household workbook.
 #'
-#' @param dir String. The output directory where the projection RDS files are
+#' @param trend_dir String. The output directory where the projection RDS files are
 #'   saved.
-#' @param stamp String. The time stamp on the output RDS file names format
-#'   \code{"\%y-\%m-\%d_\%H\%M"}.
-#' @param file_name String. File name for the population workbook ouput. Must
+#' @param excel_file_name String. File name for the population workbook ouput. Must
 #'   include \code{.xslx} suffix.
 #'
 #' @examples
@@ -18,8 +16,6 @@
 #'   trend_dir = "outputs/trend/2018/2018_long_19-11-13_2144",
 #'   excel_file_name = "2018_long_trend.xlsx")
 #' }
-#' 
-#' @export
 
 create_trend_model_excels <- function(trend_dir, excel_file_name){
 

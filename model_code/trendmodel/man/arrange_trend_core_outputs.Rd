@@ -48,7 +48,7 @@ arrange_trend_core_outputs(
 
 \item{int_in_flows}{Dataframe. Model internation in migration flows}
 
-\item{domestic_rates}{Dataframe. Model mortality rates}
+\item{domestic_rates}{Dataframe. Model domestic migration rates}
 
 \item{first_proj_yr}{Numeric. First projection year}
 
