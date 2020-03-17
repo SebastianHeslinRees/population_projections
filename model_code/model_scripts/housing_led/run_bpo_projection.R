@@ -21,7 +21,8 @@ run_bpo_projection <- function(bpo_name,
                                ldd_final_yr = 2018,
                                bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/",
                                migration_scenario,
-                               csv_name = bpo_name){
+                               csv_name = bpo_name,
+                               housing_led_params = list()){
   
   #sauce
   library(dplyr)
