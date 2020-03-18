@@ -45,14 +45,6 @@ run_borough_and_ward_projection <- function(projection_name,
   ahs_method <- 0
   last_data_yr <- 2018
   
-  projection_name <- paste0(projection_name,"_low_fertility")
-  
-  if(bpo==FALSE){
-    output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
-  } else {
-    output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
-  }
-  
   additional_births_path <- "input_data/fertility/births_2019.rds"
   
   if(fertility_scenario == "average"){
@@ -62,6 +54,12 @@ run_borough_and_ward_projection <- function(projection_name,
   if(fertility_scenario == "trend"){
     fertility_rates_path = "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_trend.rds"
     projection_name <- paste0(projection_name,"_trend_fertility")
+  }
+  
+  if(bpo==FALSE){
+    output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+  } else {
+    output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
   
   list2env(housing_led_params, environment())
