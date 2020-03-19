@@ -70,6 +70,7 @@ run_bpo_projection <- function(bpo_name,
   small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
   projection_name <- paste0(bpo_name,"_",migration_scenario,"_migration")
   housing_led_params[['constrain_projection']] <- FALSE
+  housing_led_params[['ldd_final_yr']] <- ldd_final_yr
   
   fertility_scenario <- "trend"
   
