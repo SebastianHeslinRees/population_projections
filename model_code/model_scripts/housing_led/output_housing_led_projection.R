@@ -21,7 +21,7 @@ output_housing_led_projection <- function(projection, output_dir,
                                           additional_dwellings, housing_stock,
                                           household_trajectory,
                                           first_proj_yr){
-  
+ 
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
   
   # Add backseries to projection

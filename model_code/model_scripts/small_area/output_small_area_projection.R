@@ -36,15 +36,17 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   #Published Ouputs (csv)
   popn <- proj_output[["population"]]
   
+  col_aggregation <- c("gss_code", "borough", code, name, "sex", "age", as.character(2011:max(popn$year)))
+  
   females <- filter(popn, sex == "female", year >= 2011) %>%
     mutate(popn = round(popn, 2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
-    select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
+    select_at(col_aggregation)
   
   males <- filter(popn, sex == "male", year >= 2011) %>%
     mutate(popn = round(popn, 2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
-    select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
+    select_at(col_aggregation)
   
   persons <- mutate(popn, sex = "persons") %>%
     dtplyr::lazy_dt() %>%
@@ -54,7 +56,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     as.data.frame() %>%
     mutate(popn = round(popn, 2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
-    select(gss_code, borough, code, name, sex, age, as.character(2011:max(popn$year)))
+    select_at(col_aggregation)
   
   components <- list()
   for(i in names(projection)[1:4]){
@@ -98,7 +100,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     mutate(migration = ifelse(!is.na(migration), migration,
                               round(popn - popn_lag + deaths - births, 2))) %>%
     mutate(total_change = round(births - deaths + migration, 2)) %>%
-    select(gss_code, borough, code, name, year, popn, births, deaths, migration, total_change) %>%
+    select_at(c("gss_code", "borough", code, name, "year", "popn", "births", "deaths", "migration", "total_change")) %>%
     arrange_at(c("gss_code", code, "year"))
   
   csvs <- list(persons=persons, males=males, females=females, components=components)
