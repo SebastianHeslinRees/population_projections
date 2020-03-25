@@ -5,7 +5,7 @@ for(scenario in c("high","medium","low")){
   bpo_name <- run_bpo_projection(bpo_name = "camden",
                                  shlaa_first_yr = 2033,
                                  final_proj_yr = 2050,
-                                 migration_scenario = 'medium',
+                                 migration_scenario = scenario,
                                  ldd_final_yr = 2011,
                                  fertility_scenario = "trend",
                                  dev_first_yr = 2012)
