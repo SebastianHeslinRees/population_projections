@@ -108,7 +108,8 @@ run_housing_led_model <- function(config_list){
   
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
-    filter(year <= config_list$ldd_final_yr)%>%
+    filter(year <= (config_list$first_proj_yr-1)) %>% 
+    #filter(year <= config_list$ldd_final_yr)%>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
     summarise(households = sum(households)) %>%
@@ -131,7 +132,7 @@ run_housing_led_model <- function(config_list){
     arrange(gss_code, year) 
   
   dwelling2household_ratio_adjusted <- filter(external_trend_households,
-                                              year <= config_list$ldd_final_yr,
+                                              year <= (config_list$first_proj_yr-1),
                                               year %in% dwelling_trajectory$year,
                                               gss_code %in% dwelling_trajectory$gss_code) %>%
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
