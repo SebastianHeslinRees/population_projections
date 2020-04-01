@@ -33,6 +33,15 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     saveRDS(proj_output[[i]], paste0(output_dir, names(proj_output)[i],"_",projection_type,".rds"))
   }
   
+  #assumed dev csv
+  assumed_dev <- proj_output[["assumed_development"]] %>%
+    group_by_at(c("gss_code", "borough", code, name)) %>%
+    mutate(lag_units = lag(units)) %>%
+    mutate(add_units = round(units-lag_units,2)) %>%
+    filter(year > 2011) %>%
+    select_at(c("year", "gss_code", "borough", code, name, "add_units")) %>%
+    tidyr::pivot_wider(names_from = year, values_from = add_units)
+  
   #Published Ouputs (csv)
   popn <- proj_output[["population"]]
   
@@ -103,7 +112,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     select_at(c("gss_code", "borough", code, name, "year", "popn", "births", "deaths", "migration", "total_change")) %>%
     arrange_at(c("gss_code", code, "year"))
   
-  csvs <- list(persons=persons, males=males, females=females, components=components)
+  csvs <- list(persons=persons, males=males, females=females, components=components, assumed_dev=assumed_dev)
   for(i in seq_along(csvs)) {
     data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
   }

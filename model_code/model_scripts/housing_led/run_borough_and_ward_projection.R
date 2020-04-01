@@ -23,7 +23,9 @@ run_borough_and_ward_projection <- function(projection_name,
                                             bpo=FALSE,
                                             housing_led_params = list(),
                                             small_area_params = list(),
-                                            fertility_scenario) {
+                                            fertility_scenario,
+                                            ldd_final_yr,
+                                            constrain_projection) {
   
   devtools::load_all("model_code/popmodules")
   source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
@@ -41,7 +43,7 @@ run_borough_and_ward_projection <- function(projection_name,
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
   ahs_cap_year <- 2019
-  ldd_final_yr <- 2018
+  
   ahs_method <- 0
   last_data_yr <- 2018
   
