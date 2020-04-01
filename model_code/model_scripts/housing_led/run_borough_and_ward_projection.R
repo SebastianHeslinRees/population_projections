@@ -23,7 +23,9 @@ run_borough_and_ward_projection <- function(projection_name,
                                             bpo=FALSE,
                                             housing_led_params = list(),
                                             small_area_params = list(),
-                                            fertility_scenario) {
+                                            fertility_scenario,
+                                            ldd_final_yr,
+                                            constrain_projection) {
   
   devtools::load_all("model_code/popmodules")
   source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')

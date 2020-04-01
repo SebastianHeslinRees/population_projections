@@ -67,11 +67,6 @@ run_bpo_projection <- function(bpo_name,
     projection_name <- paste0(projection_name,"_trend_fertility")
   }
   
-  housing_led_params[['constrain_projection']] <- FALSE
-  housing_led_params[['ldd_final_yr']] <- ldd_final_yr
-  
-  fertility_scenario <- "trend"
-  
   #fertility_scenario <- "trend"
   
   #projection
@@ -82,7 +77,9 @@ run_bpo_projection <- function(bpo_name,
                                                     final_proj_yr,
                                                     bpo = borough_gss,
                                                     housing_led_params = housing_led_params,
-                                                    fertility_scenario = fertility_scenario)
+                                                    fertility_scenario = fertility_scenario,
+                                                    ldd_final_yr = ldd_final_yr,
+                                                    constrain_projection = FALSE)
   
   message(paste(bpo_name, "-",migration_scenario,"complete"))
   
