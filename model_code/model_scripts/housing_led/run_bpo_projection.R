@@ -32,31 +32,24 @@ run_bpo_projection <- function(bpo_name,
   
   #domestic migration
   if(migration_scenario == "high"){
-    housing_led_params <- c(housing_led_params,
-                            list(
-                              external_trend_path = "outputs/trend/2018/high_mig_20-03-10_1436/",
-                              domestic_transition_yr = NULL,
-                              domestic_initial_rate_path = "input_data/migration/high_domestic_migration_rates_(2016_2018).rds",
-                              domestic_long_term_rate_path = NULL))
+    housing_led_params$external_trend_path <- "outputs/trend/2018/high_mig_20-03-10_1436/"
+    housing_led_params$domestic_transition_yr <- NULL
+    housing_led_params$domestic_initial_rate_path <- "input_data/migration/high_domestic_migration_rates_(2016_2018).rds"
+    housing_led_params$domestic_long_term_rate_path <- NULL
   } else if(migration_scenario == "medium"){
-    housing_led_params <- c(housing_led_params,list(
-      external_trend_path = "outputs/trend/2018/2018_central_19-11-13_2056/",
-      domestic_transition_yr = 2024,
-      domestic_initial_rate_path = "outputs/trend/2018/2018_short_19-11-13_2205/domestic_rates.rds",
-      domestic_long_term_rate_path = "outputs/trend/2018/2018_central_19-11-13_2056/domestic_rates.rds"))
+    housing_led_params$external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
+    housing_led_params$domestic_transition_yr <- 2024
+    housing_led_params$domestic_initial_rate_path <- "outputs/trend/2018/2018_short_19-11-13_2205/domestic_rates.rds"
+    housing_led_params$domestic_long_term_rate_path <- "outputs/trend/2018/2018_central_19-11-13_2056/domestic_rates.rds"
   } else if(migration_scenario == "low"){
-    housing_led_params <- c(housing_led_params,
-                            list(
-                              external_trend_path ="outputs/trend/2018/low_mig_20-03-10_1446/",
-                              domestic_transition_yr = 2024,
-                              domestic_initial_rate_path = "outputs/trend/2018/2018_short_19-11-13_2205/domestic_rates.rds",
-                              domestic_long_term_rate_path = "input_data/migration/low_domestic_migration_rates_(2009_2012).rds"))
+    housing_led_params$external_trend_path <- "outputs/trend/2018/low_mig_20-03-10_1446/"
+    housing_led_params$domestic_transition_yr <- 2024
+    housing_led_params$domestic_initial_rate_path <- "outputs/trend/2018/2018_short_19-11-13_2205/domestic_rates.rds"
+    housing_led_params$domestic_long_term_rate_path <- "input_data/migration/low_domestic_migration_rates_(2009_2012).rds"
   }else if(migration_scenario == "other"){
-    housing_led_params <- c(housing_led_params,
-                            list(
-                              domestic_transition_yr = NULL,
-                              domestic_initial_rate_path = "input_data/migration/low_domestic_migration_rates_(2009_2012).rds",
-                              domestic_long_term_rate_path = NULL))
+    housing_led_params$domestic_transition_yr <- NULL
+    housing_led_params$domestic_initial_rate_path <- "input_data/migration/low_domestic_migration_rates_(2009_2012).rds"
+    housing_led_params$domestic_long_term_rate_path <- NULL
   } else {stop("migration scenario must be low, medium or high") }
   
   #trajectory
@@ -68,11 +61,18 @@ run_bpo_projection <- function(bpo_name,
   
   dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_borough_trajectory_",csv_name,".rds")
   small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
+  
   projection_name <- paste0(bpo_name,"_",migration_scenario,"_migration")
+  if(fertility_scenario == "trend"){
+    projection_name <- paste0(projection_name,"_trend_fertility")
+  }
+  
   housing_led_params[['constrain_projection']] <- FALSE
   housing_led_params[['ldd_final_yr']] <- ldd_final_yr
   
   fertility_scenario <- "trend"
+  
+  #fertility_scenario <- "trend"
   
   #projection
   bpo_projection <- run_borough_and_ward_projection(projection_name = projection_name,

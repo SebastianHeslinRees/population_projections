@@ -52,8 +52,7 @@ run_borough_and_ward_projection <- function(projection_name,
   }
   
   if(fertility_scenario == "trend"){
-    fertility_rates_path = "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_trend.rds"
-    projection_name <- paste0(projection_name,"_trend_fertility")
+    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_trend.rds"
   }
   
   if(bpo==FALSE){

@@ -52,35 +52,38 @@ not_london_backseries_births <- filter(ons_births, !gss_code %in% unique(additio
   filter(age == 0) %>%
   select(names(additional_births)) 
 
-london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
-                                            births_mye_path = london_backseries_births,
-                                            target_curves_filepath = "input_data/fertility/ons_asfr_curves.rds",
-                                            last_data_year = 2019,
-                                            n_years_to_avg = 5,
-                                            avg_or_trend = "trend",
-                                            data_col = "births",
-                                            output_col = "rate") %>%
-  project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = "input_data/fertility/npp_fertility_trend.rds",
-                    first_proj_yr = 2020,
-                    n_proj_yr = 31,
-                    npp_var = "2018_principal")
-
-not_london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
-                                                births_mye_path = not_london_backseries_births,
-                                                target_curves_filepath = "input_data/fertility/ons_asfr_curves.rds",
-                                                last_data_year = 2018,
-                                                n_years_to_avg = 5,
-                                                avg_or_trend = "trend",
-                                                data_col = "births",
-                                                output_col = "rate") %>%
-  project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = "input_data/fertility/npp_fertility_trend.rds",
-                    first_proj_yr = 2019,
-                    n_proj_yr = 32,
-                    npp_var = "2018_principal")
-
-fertility_rates <- rbind(london_fert_rates, not_london_fert_rates) %>% 
-  complete_fertility(popn)
-
-saveRDS(fertility_rates, "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_trend.rds")
+for(method in c("average", "trend")) {
+  london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
+                                              births_mye_path = london_backseries_births,
+                                              target_curves_filepath = "input_data/fertility/ons_asfr_curves.rds",
+                                              last_data_year = 2019,
+                                              n_years_to_avg = 5,
+                                              avg_or_trend = method,
+                                              data_col = "births",
+                                              output_col = "rate") %>%
+    project_rates_npp(rate_col = "rate",
+                      rate_trajectory_filepath = "input_data/fertility/npp_fertility_trend.rds",
+                      first_proj_yr = 2020,
+                      n_proj_yr = 31,
+                      npp_var = "2018_principal")
+  
+  not_london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
+                                                  births_mye_path = not_london_backseries_births,
+                                                  target_curves_filepath = "input_data/fertility/ons_asfr_curves.rds",
+                                                  last_data_year = 2018,
+                                                  n_years_to_avg = 5,
+                                                  avg_or_trend = method,
+                                                  data_col = "births",
+                                                  output_col = "rate") %>%
+    project_rates_npp(rate_col = "rate",
+                      rate_trajectory_filepath = "input_data/fertility/npp_fertility_trend.rds",
+                      first_proj_yr = 2019,
+                      n_proj_yr = 32,
+                      npp_var = "2018_principal")
+  
+  fertility_rates <- rbind(london_fert_rates, not_london_fert_rates) %>% 
+    complete_fertility(popn)
+  
+  filename_suffix <- ifelse(method == "trend", "_5yr_trend", "")
+  saveRDS(fertility_rates, paste0("input_data/fertility/fertility_rates_inc_2019_in_london",filename_suffix,".rds"))
+}
