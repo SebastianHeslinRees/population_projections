@@ -1,5 +1,6 @@
 # @importFrom stringr str_detect
-output_projection <- function(projection, output_dir, write_excel, n_csv_elements) {
+output_projection <- function(projection, output_dir, write_excel, n_csv_elements,
+                              projection_name) {
   
   #RDS
   lapply(seq_along(projection), 
@@ -70,6 +71,6 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
                     dom_in = projection$dom_in,
                     dom_out = projection$dom_out,
                     output_dir = output_dir,
-                    excel_file_name = paste0("datastore_",Sys.Date(),".xlsx"),
+                    excel_file_name = paste0(projection_name,".xlsx"),
                     write_excel = write_excel)
 }

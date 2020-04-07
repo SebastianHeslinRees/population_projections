@@ -9,11 +9,20 @@
 #' @export
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
                               output_dir, excel_file_name, write_excel){
-
-  wrangle <- function(x){
-    x <- filter(x, year >= 2011) %>%
-      tidyr::spread(year, popn)
-  }
+  
+  gss_names <- get_gss_names()
+  
+  wrangle <- function(x, lookup=gss_names){
+    
+    y <- filter(x, year >= 2011) %>%
+      left_join(lookup, by = "gss_code") %>%
+      rename(borough = gss_name) %>%
+      select(year, gss_code, borough, sex, age, popn) %>%
+      mutate(popn = round(popn, digits=3)) %>%
+      tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+      as.data.frame()
+  
+    }
 
   group_by_london <- function(x, data_col){
     london <- filter(x, substr(gss_code,1,3)=="E09") %>%
@@ -63,9 +72,10 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
 
-  gss_names <- get_gss_names()
 
   components <- left_join(popn, gss_names, by="gss_code") %>%
+    rename(borough = gss_name,
+           population = popn) %>%
     left_join(births, by = c("gss_code", "year")) %>%
     left_join(deaths, by = c("gss_code", "year")) %>%
     left_join(int_in, by = c("gss_code", "year")) %>%
@@ -75,11 +85,12 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     left_join(dom_out, by = c("gss_code", "year")) %>%
     mutate(dom_net = dom_in - dom_out) %>%
     mutate(total_change = births - deaths + int_net + dom_net) %>%
-    select(gss_code, gss_name, year,
-           population = popn, births, deaths,
+    select(gss_code, borough, year,
+           population, births, deaths,
            int_in, int_out, int_net,
            dom_in, dom_out, dom_net,
-           total_change)
+           total_change) %>%
+    as.data.frame()
 
   #round data for output
   idx <- sapply(components, class)=="numeric"
@@ -97,121 +108,24 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
 
   #excel
   if(write_excel) {
-    message("excel process running")
-
-    datastore_folder <- rprojroot::find_root_file(datastore_dir, criterion = rprojroot::is_git_root)
-    datastore_folder <- gsub("/", "\\\\", datastore_folder)
-    templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
-    templates_folder <- gsub("/", "\\\\", templates_folder)
-    run_excel_vba <- data.frame(a = paste0("start Excel.exe \"", templates_folder, "\\excel_template.xlsm"))
-    data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_vba.bat", col.names=F, quote=F)
-
-    bas_file <- "documentation/templates/datastoreVBA.bas"
-    vba <- create_VBA_script(datastore_folder, file_name)
-    data.table::fwrite(vba, bas_file, col.names=F, quote=F)
-    file.remove("documentation/templates/temp_file.xlsm")
-    shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_vba.bat", criterion = rprojroot::is_git_root))
-
+    
+    wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template.xlsx")
+    wb_sheets<- xlsx::getSheets(wb)
+    #browser()
+    xlsx::addDataFrame(persons, wb_sheets$persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(female, wb_sheets$females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(male, wb_sheets$males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(components, wb_sheets$`components of change`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    
+    #Write xlsx file
+    wb_filename <- paste(datastore_dir,excel_file_name,sep="/")
+    xlsx::saveWorkbook(wb, wb_filename)
+    
   }
 }
 
-#--------------------------------------
 
-create_VBA_script <- function(datastore_dir, file_name){
 
-  x <- data.frame(a = c(
 
-    "Attribute VB_Name = \"datastoreVBA\"",
 
-    "Sub run_it()",
-
-    "Set This_wkb = Application.ThisWorkbook",
-    "Set wkb = Workbooks.Add",
-    "Call run_open",
-
-    "Application.DisplayAlerts = False",
-    "Worksheets(\"Sheet1\").Delete",
-    "Application.DisplayAlerts = True",
-
-    paste0("wkb.SaveAs fileName:=\"",datastore_dir,"\\",file_name,"\""),
-    "wkb.Close SaveChanges:=False",
-
-    "End Sub",
-
-    "Sub run_open()",
-
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\persons.csv\", \"persons\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\females.csv\", \"females\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\males.csv\", \"males\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\components.csv\", \"components of change\")"),
-
-    "End Sub",
-    "Sub open_copy_csv(fileName, tabName)",
-
-    "Dim wbkS As Workbook",
-    "Dim wshS As Worksheet",
-    "Dim wshT As Worksheet",
-
-    "Set wshT = Worksheets.Add(After:=Worksheets(Worksheets.Count))",
-    "Set wbkS = Workbooks.Open(fileName:=fileName)",
-    "Set wshS = wbkS.Worksheets(1)",
-
-    "wshS.UsedRange.Copy Destination:=wshT.Range(\"A1\")",
-    "wshT.Name = tabName",
-    "wbkS.Close SaveChanges:=False",
-
-    "End Sub"))
-
-}
-
-#--------------------------------------
-
-create_households_VBA_script <- function(datastore_dir, model){
-
-  x <- data.frame(a = c(
-
-    "Attribute VB_Name = \"datastoreVBA_households\"",
-
-    "Sub run_it()",
-
-    "Set This_wkb = Application.ThisWorkbook",
-    "Set wkb = Workbooks.Add",
-    "Call run_open",
-
-    "Application.DisplayAlerts = False",
-    "Worksheets(\"Sheet1\").Delete",
-    "Application.DisplayAlerts = True",
-
-    paste0("wkb.SaveAs fileName:=\"",datastore_dir,"\\",model,"_households\""),
-    "wkb.Close SaveChanges:=False",
-
-    "End Sub",
-
-    "Sub run_open()",
-
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_stage1_households.csv\", \"stage 1 households\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_stage2_households.csv\", \"stage 2 households\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_detailed_hh_pop.csv\", \"household popn\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_detailed_ce_pop.csv\", \"communal est popn\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_household_summary.csv\", \"summary\")"),
-
-    "End Sub",
-
-    "Sub open_copy_csv(fileName, tabName)",
-
-    "Dim wbkS As Workbook",
-    "Dim wshS As Worksheet",
-    "Dim wshT As Worksheet",
-
-    "Set wshT = Worksheets.Add(After:=Worksheets(Worksheets.Count))",
-    "Set wbkS = Workbooks.Open(fileName:=fileName)",
-    "Set wshS = wbkS.Worksheets(1)",
-
-    "wshS.UsedRange.Copy Destination:=wshT.Range(\"A1\")",
-    "wshT.Name = tabName",
-    "wbkS.Close SaveChanges:=False",
-
-    "End Sub"))
-
-}
 
