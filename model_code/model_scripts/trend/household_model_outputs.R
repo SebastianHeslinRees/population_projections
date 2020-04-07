@@ -8,7 +8,8 @@
 #'
 #' @import dplyr
 #' @export
-household_model_outputs <- function(model_output, model, output_dir, write_excel){
+
+household_model_outputs <- function(model_output, model, output_dir, write_excel, projection_name){
 
   if(model == "dclg"){ col_aggregation <- c("gss_code", "year", "sex", "age_group", "household_type")}
   if(model == "ons"){ col_aggregation <- c("gss_code", "year", "sex", "age_group")}
@@ -43,10 +44,10 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     filter(year >= 2011) %>%
     group_by(gss_code, year) %>%
     summarise(households = sum(households),
-              households_population = sum(household_population),
+              household_population = sum(household_population),
               communal_establishment_population = sum(communal_establishment_population)) %>%
     ungroup() %>%
-    mutate(average_households_size = households_population / households)
+    mutate(average_household_size = household_population / households)
 
   output_dataframes <- list(stage1_households = stage_1_sheet,
                             stage2_households = stage_2_sheet,
@@ -59,7 +60,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
   dir.create(hh_output_dir, showWarnings = FALSE)
 
   #add authority names
-  names_lookup <- data.table::fread('input_data/lookup/lad18_code_to_name.csv')
+  names_lookup <- get_gss_names()
   for(i in seq(output_dataframes)){
     nm <- setdiff(names(output_dataframes[[i]]),"gss_code")
 
@@ -74,32 +75,23 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
                                         paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))) %>%
     invisible()
 
+  ahs <- output_dataframes[[5]] %>%
+    select(year, gss_code, gss_name, average_household_size)
+  
   #RDS
   saveRDS(model_output[['stage_1']][['detailed_households']], paste0(hh_output_dir, model, "_", "stage_1_households.rds"))
   saveRDS(model_output[['stage_1']][['household_population']], paste0(hh_output_dir, model, "_", "household_population.rds"))
   saveRDS(model_output[['stage_1']][['communal_establishment_population']], paste0(hh_output_dir, model, "_", "communal_est_population.rds"))
   saveRDS(model_output[['stage_2']][['constrained']], paste0(hh_output_dir, model, "_", "stage_2_households.rds"))
-
-
-  ahs <- model_output[['stage_1']][['detailed_households']] %>%
-    dtplyr::lazy_dt() %>%
-    group_by(year, gss_code) %>%
-    summarise(ahs = sum(household_population)/sum(households)) %>%
-    as.data.frame()
-
   saveRDS(ahs, paste0(hh_output_dir, model, "_", "ahs.rds"))
 
   if(write_excel){
 
-    #Falls over if it tries to write an excel file while the previous excel process is still ongoing
-    Sys.sleep(10)
-
-    datastore_csv <- function(x, nm){
+    datastore_csv <- function(x){
 
       x <- as.data.frame(x)
 
-      col_order <- c("gss_code","gss_name",names(x)[names(x)!="gss_code"])
-      sort_order <- intersect(names(x), c("gss_code", "year", "sex", "age_group", "household_type"))
+      sort_order <- intersect(names(x), c("gss_code", "gss_name", "year", "sex", "age_group", "household_type"))
 
       x <- filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
 
@@ -118,38 +110,45 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
 
       x <- dplyr::arrange_at(x, sort_order)
 
-      x <- left_join(x, get_gss_names(), by="gss_code") %>%
-        select(col_order)
-
       #round data for output
       idx <- sapply(x, class)=="numeric"
       x[, idx] <- lapply(x[, idx], round, digits=3)
-
-      data.table::fwrite(x, paste0(output_dir,"/datastore_",timestamp,"/",model,"_",nm, ".csv"))
-
+      
+      x <- as.data.frame(x)
+      
     }
 
-    lapply(seq_along(output_dataframes),
-           function(i) datastore_csv(output_dataframes[[i]], names(output_dataframes[i]))) %>%
-      invisible()
+    
+    for(i in seq(output_dataframes)){
+      output_dataframes[[i]] <- datastore_csv(output_dataframes[[i]])
+      data.table::fwrite(output_dataframes[[i]],
+                         paste0(output_dir,"/datastore/",model,"_",names(output_dataframes[i]), ".csv"))
+    }
 
+    wb <- xlsx::loadWorkbook("input_data/excel_templates/household_template.xlsx")
+    wb_sheets<- xlsx::getSheets(wb)
 
-    datastore_folder <- rprojroot::find_root_file(paste0(output_dir,"/datastore_",timestamp), criterion = rprojroot::is_git_root)
-    datastore_folder <- gsub("/", "\\\\", datastore_folder)
-    templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
-    templates_folder <- gsub("/", "\\\\", templates_folder)
-    #household_folder <- rprojroot::find_root_file(hh_output_dir, criterion = rprojroot::is_git_root)
-    #household_folder <- gsub("/", "\\\\", household_folder)
-
-    run_excel_vba <- data.frame(a = paste0("start Excel.exe \"", templates_folder, "\\excel_household_template.xlsm"))
-    data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_households_vba.bat", col.names=F, quote=F)
-    bas_file <- "documentation/templates/datastore_households_VBA.bas"
-
-    vba <- create_households_VBA_script(datastore_folder, model)
-    data.table::fwrite(vba, bas_file, col.names=F, quote=F)
-    file.remove("documentation/templates/temp_file.xlsm")
-    shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_households_vba.bat",
-                                         criterion = rprojroot::is_git_root))
+    xlsx::addDataFrame(output_dataframes[[1]], wb_sheets$`stage 1 households`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(output_dataframes[[2]], wb_sheets$`stage 2 households`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(output_dataframes[[4]], wb_sheets$`household popn`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(output_dataframes[[3]], wb_sheets$`communal est popn`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(output_dataframes[[5]], wb_sheets$`summary`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    
+    
+    #metadata
+    title <- as.data.frame(paste0("London borough household projectons ",toupper(model)," model"))
+    model_desc <- as.data.frame(paste0("to households using the ", toupper(model), " household model"))
+    ce_desc <- as.data.frame(paste0("2. Communal establishment populations are taken from the ",toupper(model)," household model"))
+    proj_desc <- as.data.frame(paste0(projection_name, " projection"))
+    
+    xlsx::addDataFrame(title, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+    xlsx::addDataFrame(proj_desc, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 3, startColumn = 1)
+    xlsx::addDataFrame(model_desc, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 9, startColumn = 1)
+    xlsx::addDataFrame(ce_desc, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 16, startColumn = 1)
+    
+    #Write xlsx file
+    wb_filename <- paste0(output_dir,"/datastore/",model,"_households.xlsx")
+    xlsx::saveWorkbook(wb, wb_filename)
   }
 }
 

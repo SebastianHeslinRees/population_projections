@@ -170,8 +170,10 @@ run_trend_model <- function(config_list) {
   output_projection(projection, config_list$output_dir, write_excel = config_list$write_excel,
                     n_csv_elements=8, projection_name = config_list$projection_name)
   
-  household_model_outputs(projection$ons_households, model = "ons", config_list$output_dir, write_excel = config_list$write_excel)
-  household_model_outputs(projection$dclg_households, model = "dclg", config_list$output_dir, write_excel = config_list$write_excel)
+  household_model_outputs(projection$ons_households, model = "ons", config_list$output_dir,
+                          write_excel = config_list$write_excel, projection_name = config_list$projection_name)
+  household_model_outputs(projection$dclg_households, model = "dclg", config_list$output_dir,
+                          write_excel = config_list$write_excel, projection_name = config_list$projection_name)
   
   ## output the QA
   if(config_list$write_QA){

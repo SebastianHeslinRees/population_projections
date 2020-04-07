@@ -111,7 +111,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     
     wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template.xlsx")
     wb_sheets<- xlsx::getSheets(wb)
-    #browser()
+    
     xlsx::addDataFrame(persons, wb_sheets$persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
     xlsx::addDataFrame(female, wb_sheets$females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
     xlsx::addDataFrame(male, wb_sheets$males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
