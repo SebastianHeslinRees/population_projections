@@ -9,7 +9,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
  
   #CSV
   csv_dir <- paste0(output_dir,"csv/")
-  dir.create(csv_dir)
+  dir.create(csv_dir, showWarnings = FALSE)
   
   make_csvs <- function(data, name_stub){
     
@@ -24,7 +24,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
     if(str_detect(name_stub, "births_by_mothers_age")){
       
       b_m_a <- filter(data, sex == "female", age %in% 15:49) %>%
-        rename(rounded = data_col) %>%
+        rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
         pivot_wider(names_from = year, values_from = rounded)
       
@@ -33,12 +33,12 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
     } else {
       
       female <- filter(data, sex == "female") %>%
-        rename(rounded = data_col) %>%
+        rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
         pivot_wider(names_from = year, values_from = rounded)
       
       male <- filter(data, sex == "male")  %>%
-        rename(rounded = data_col) %>%
+        rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3))%>%
         pivot_wider(names_from = year, values_from = rounded)
       
