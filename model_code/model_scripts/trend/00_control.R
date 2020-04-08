@@ -27,6 +27,7 @@ run_trend_model <- function(config_list) {
                        "int_out_fns",
                        "int_in_fns",
                        "dom_rate_fns",
+                       "domestic_transition_yr",
                        "constraint_fns",
                        "int_out_method",
                        "qa_areas_of_interest",
@@ -110,7 +111,6 @@ run_trend_model <- function(config_list) {
   mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
   int_out_flows_rates <- int_out_flows_rates %>% select(year, gss_code, age, sex, int_out)
   int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
-  domestic_rates <- domestic_rates %>% select(gss_out, gss_in, age, sex, rate)
   
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
@@ -131,13 +131,22 @@ run_trend_model <- function(config_list) {
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
     
+    browser()
+     if(is.null(config_list$domestic_transition_yr) | projection_year < config_list$domestic_transition_yr){
+      curr_yr_domestic_rates <- domestic_rates[['initial']] %>%
+        select(gss_out, gss_in, age, sex, rate)
+    } else {
+      curr_yr_domestic_rates <- domestic_rates[['longterm']] %>%
+        select(gss_out, gss_in, age, sex, rate)
+    }
+    
     projection[[projection_year]] <- trend_core(
       start_population = curr_yr_popn, 
       fertility_rates = curr_yr_fertility, 
       mortality_rates = curr_yr_mortality,
       int_out_flows_rates = curr_yr_int_out,
       int_in_flows = curr_yr_int_in_flows,
-      domestic_rates = domestic_rates,
+      domestic_rates = curr_yr_domestic_rates,
       int_out_method = config_list$int_out_method,
       constraints = constraints,
       upc = upc,
@@ -212,7 +221,12 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
               msg = "the config variable int_out_method must be either 'flow' or 'rate'")
   popmodules::validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
   popmodules::validate_population(int_in_flows, col_data = "int_in")
-  popmodules::validate_population(domestic_rates, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+  
+  popmodules::validate_population(domestic_rates[['initial']], col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+  if(length(domestic_rates)==2){
+    popmodules::validate_population(domestic_rates[['longterm']], col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+  }
+  
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
