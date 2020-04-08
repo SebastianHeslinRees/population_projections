@@ -41,6 +41,7 @@ int_in_flow_or_rate <- "flow"
 
 dom_mig_last_data_year <- 2018
 dom_mig_years_to_avg <- 10
+domestic_transition_yr <- NULL
 
 popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"
 births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
@@ -180,6 +181,7 @@ config_list <- list(
   int_out_fns = int_out_rate_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
+  domestic_transition_yr = domestic_transition_yr,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   int_out_method = int_out_flow_or_rate,
