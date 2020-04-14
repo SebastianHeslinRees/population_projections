@@ -20,7 +20,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
       select_at(c("year", "gss_code", "borough", code, name, "sex", "age", col_nm)) %>%
       arrange_at(c("year", "gss_code", code, "sex", "age"))
   }
-  browser()
+ 
   proj_output[["total_stock"]] <- projection[["assumed_development"]] %>%
     left_join(lookup, by=c("gss_code_small_area")) %>%
     left_join(borough_names, by = "gss_code") %>%
