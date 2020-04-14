@@ -170,8 +170,6 @@ run_borough_and_ward_projection <- function(projection_name,
     output_bpo_excel_file(data = ward_projection[["csvs"]],
                           output_dir = config_list$output_dir,
                           projection_name = config_list$projection_name,
-                          small_area_dev_trajectory_path = ward_config_list$small_area_dev_trajectory_path,
-                          borough_dev_trajectory_path = config_list$dev_trajectory_path,
                           bpo = bpo)
   }
   

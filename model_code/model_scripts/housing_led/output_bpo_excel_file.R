@@ -12,8 +12,7 @@ library(xlsx)
 #' @param bpo_gss_code The gss code of the bpo projection
 #' @param file_suffix A string to append to the end of the filename
 
-output_bpo_excel_file <- function(data, output_dir, projection_name,
-                                  bpo_gss_code,
+output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_code,
                                   file_suffix = "_BPO_2018.xlsx"){
   
   bpo_data <- function(x, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
@@ -36,7 +35,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   females <- data[["females"]]
   males <- data[["males"]]
   components <- data[["components"]]
-  
+ 
   ward_dev_dataframe <- data.table::fread(paste0(output_dir,"ward/assumed_dev_ward.csv"),
                                           header = TRUE) %>%
     as.data.frame() %>% 
