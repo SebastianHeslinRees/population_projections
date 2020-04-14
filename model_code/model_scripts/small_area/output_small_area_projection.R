@@ -43,6 +43,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   
   #assumed dev csv
   assumed_dev <- proj_output[["assumed_development"]] %>%
+    mutate(units = round(units, 2)) %>% 
     tidyr::pivot_wider(names_from = year, values_from = units)
   
   #Published Ouputs (csv)
