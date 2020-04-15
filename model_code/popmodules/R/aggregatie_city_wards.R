@@ -22,7 +22,7 @@ aggregate_city_wards <- function(df, data_col){
   assertthat::assert_that(!"E09000001" %in% df$gss_code_ward,
                           msg="ward data already contains aggregated total for City of London")
   
-  city_wards <- ward_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
+  city_wards <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
     filter(gss_code == "E09000001")
   
   city <- dtplyr::lazy_dt(df) %>%
