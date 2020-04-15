@@ -14,6 +14,9 @@ small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rd
 small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
 small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
 
+small_area_births_sya_path <- "input_data/small_area_model/ward_sya_births.rds"
+small_area_deaths_sya_path <- "input_data/small_area_model/ward_sya_deaths.rds"
+
 adults_per_dwelling_path <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
 small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
 out_migration_rates_path <- "input_data/small_area_model/ward_out_migration_rates.rds"
@@ -59,7 +62,10 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          
                          ldd_final_yr = ldd_final_yr,
                          
-                         projection_type = projection_type)
+                         projection_type = projection_type,
+                         
+                         births_sya_path = small_area_births_sya_path,
+                         deaths_sya_path = small_area_deaths_sya_path)
 
 rm(list = setdiff(ls(), "ward_config_list"))
 
