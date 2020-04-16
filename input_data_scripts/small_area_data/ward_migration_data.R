@@ -95,7 +95,7 @@ foreign_born <- data.table::fread(census_foreign_born_path) %>%
                      names_to = "sex",
                      values_to = "nonUKborn") %>%
         left_join(ward_to_district, by="gss_code_ward") %>%
-        .aggregate_city_wards("nonUKborn") %>%
+        aggregate_city_wards("nonUKborn") %>%
         as.data.frame() %>%
         group_by(gss_code, sex) %>%
         mutate(borough_nonUKborn = sum(nonUKborn),
