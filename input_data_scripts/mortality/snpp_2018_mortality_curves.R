@@ -2,16 +2,15 @@
 library(dplyr)
 library(tidyr)
 library(data.table)
-mort_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2016-based (May 2018)/model_inputs/2016 snpp sya mortality rates.csv"
-national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/national asmrs.csv"
-over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/NPP deaths over 90.csv"
+
+mort_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2018-based (March 2020)/model_inputs/2018 snpp sya mort rates.csv"
+national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/national asmrs.csv"
+over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/NPP deaths over 90.csv"
 
 #Data for English LAs
 ons_mort <- data.table::fread(mort_curve_file) %>%
-  gather(year, death_rate, 5:29) %>%
-  filter(year == 2017)%>%
-  mutate(sex = ifelse(sex=="M","male","female")) %>%
-  select(gss_code, sex, age, death_rate)
+  data.frame() %>%
+  select(gss_code, sex, age, mort_rate)
 
 #Data for Wales, Scotland and NI
 #npp mortality data is published as deaths per 100k of population
@@ -19,18 +18,17 @@ ons_mort <- data.table::fread(mort_curve_file) %>%
 #Death data are provided up to 125 so data can safely be filter to < age 90
 #without the need to aggregate the 90+ age group following the age shift
 national_mort <- data.table::fread(national_file) %>%
+  data.frame() %>%
   mutate(age = ifelse(age == "Birth", -1, age),
          age = as.numeric(age),
          age = age+1) %>%
   filter(age < 90) %>%
-  mutate(death_rate = mortality_rate/100000) %>%
-  mutate(sex = ifelse(sex=="M","male","female")) %>%
-  select(-mortality_rate)
+  mutate(mort_rate = mort_rate/100000) %>%
+  mutate(sex = ifelse(sex==1,"male","female"))
 
 over90s <- data.table::fread(over90_file) %>%
-  mutate(death_rate = deaths/pop) %>%
-  mutate(sex = ifelse(sex=="M","male","female")) %>%
-  select(-pop, -deaths)
+  data.frame %>%
+  select(-pop_2018, -deaths_2019)
 
 national_mort <- rbind(national_mort, over90s)
 
@@ -48,10 +46,10 @@ national_mort <- filter(national_mort, gss_code != "W92000004")
 
 #Recode - takes a simple average when rates have to to be aggregated
 ons_mort <- rbind(ons_mort, national_mort, wales) %>%
-  mutate(year = 2017) %>%
-  select(gss_code, sex, age, year, rate = death_rate) %>%
+  mutate(year = 2019) %>%
+  select(gss_code, sex, age, year, rate = mort_rate) %>%
   popmodules::recode_gss_to_2011(col_geog = "gss_code", col_aggregation = c("gss_code", "sex", "age", "year"), fun = list(mean))
 
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
-saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves.rds" )
+saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves_2018.rds" )
 
