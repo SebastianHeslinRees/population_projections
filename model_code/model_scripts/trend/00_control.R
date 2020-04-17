@@ -137,11 +137,9 @@ run_trend_model <- function(config_list) {
       curr_yr_domestic_rates <- select(domestic_rates, gss_out, gss_in, age, sex, rate)
     }
     else if(is.null(config_list$domestic_transition_yr) | projection_year < config_list$domestic_transition_yr){
-      curr_yr_domestic_rates <- domestic_rates[['initial']] %>%
-        select(gss_out, gss_in, age, sex, rate)
+      curr_yr_domestic_rates <- domestic_rates[['initial']]
     } else {
-      curr_yr_domestic_rates <- domestic_rates[['longterm']] %>%
-        select(gss_out, gss_in, age, sex, rate)
+      curr_yr_domestic_rates <- domestic_rates[['longterm']]
     }
     
     projection[[projection_year]] <- trend_core(
