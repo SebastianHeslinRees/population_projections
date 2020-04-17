@@ -97,7 +97,7 @@ run_trend_model <- function(config_list) {
   int_in_flows <- evaluate_fns_list(config_list$int_in_fns)
   domestic_rates <- evaluate_fns_list(config_list$dom_rate_fns)
   constraints <- evaluate_fns_list(config_list$constraint_fns)
-  
+
   #Prep backseries
   population <- population %>% select(year, gss_code, age, sex, popn)
   deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
@@ -117,9 +117,11 @@ run_trend_model <- function(config_list) {
   curr_yr_popn <- population %>% filter(year == first_proj_yr - 1)
 
   # set up projection
-  validate_trend_core_inputs(population, births, deaths, int_out, int_in, dom_out, dom_in,
-                             fertility_rates, mortality_rates, int_out_flows_rates, int_in_flows, domestic_rates,
-                             first_proj_yr, config_list$n_proj_yr, config_list$int_out_method)
+  validate_trend_core_inputs(population, births, deaths, int_out, int_in,
+                             dom_out, dom_in, fertility_rates, mortality_rates,
+                             int_out_flows_rates, int_in_flows, domestic_rates,
+                             first_proj_yr, config_list$n_proj_yr,
+                             config_list$int_out_method)
   
   
   ## run the core
@@ -130,7 +132,7 @@ run_trend_model <- function(config_list) {
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
-    
+    browser()
     if(is.data.frame(domestic_rates)){
       curr_yr_domestic_rates <- select(domestic_rates, gss_out, gss_in, age, sex, rate)
     }

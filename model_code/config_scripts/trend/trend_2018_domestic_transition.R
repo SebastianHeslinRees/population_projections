@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 5
-projection_name <- "2018_central"
+projection_name <- "2018_central_transition"
 
 popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
@@ -137,16 +137,10 @@ dom_rate_fns <- list(
   list(fn = popmodules::calculate_domestic_rates_transition, args=list(dom_origin_destination_path,
                                                                         popn_mye_path,
                                                                         births_mye_path,
-                                                                        years_backseries = 2002:2018,
-                                                                        col_partial_match = c("gss_out","gss_in"),
-                                                                        col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
-                                                                        col_component = "value",
-                                                                        rate_cap = 0.8,
-                                                                        col_rate = "rate",
-                                                                        dom_mig_last_data_year_initial = dom_mig_last_data_year_initial,
-                                                                        dom_mig_years_to_avg_initial = dom_mig_years_to_avg_initial,
-                                                                        dom_mig_last_data_year_longterm = dom_mig_last_data_year_longterm,
-                                                                        dom_mig_years_to_avg_longterm = dom_mig_years_to_avg_longterm,
+                                                                        last_data_year_initial = dom_mig_last_data_year_initial,
+                                                                        years_to_avg_initial = dom_mig_years_to_avg_initial,
+                                                                        last_data_year_longterm = dom_mig_last_data_year_longterm,
+                                                                        years_to_avg_longterm = dom_mig_years_to_avg_longterm,
                                                                         domestic_transition_yr = domestic_transition_yr))
   )
   
