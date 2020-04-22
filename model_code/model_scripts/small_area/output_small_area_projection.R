@@ -9,6 +9,20 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   code <- paste0("gss_code_",projection_type)
   name <- paste0(projection_type, "_name")
   
+  #add past births
+  projection[['births']] <- filter(births, year <= first_proj_yr-1) %>%
+    group_by(year, gss_code_small_area) %>%
+    summarise(male = sum(births)*(105/205),
+              female = sum(births)*(100/205)) %>%
+    as.data.frame() %>% 
+    tidyr::pivot_longer(cols=c("male","female"), names_to="sex", values_to="births") %>%
+    mutate(age = 0) %>% 
+    left_join(lookup, by=c("gss_code_small_area")) %>%
+    select(year, gss_code, gss_code_small_area, sex, age, births) %>%
+    data.frame() %>%
+    rbind(projection[['births']])
+  
+  #add area names and arrange outputs
   proj_output <- list()
   for(i in names(projection)[1:4]){
     col_nm <- last(names(projection[[i]]))
@@ -21,6 +35,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
       arrange_at(c("year", "gss_code", code, "sex", "age"))
   }
   
+  #development data
   proj_output[["assumed_development"]] <- projection[["assumed_development"]] %>%
     left_join(lookup, by=c("gss_code_small_area")) %>%
     left_join(borough_names, by = "gss_code") %>%
@@ -67,21 +82,14 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     select_at(col_aggregation)
   
+  #components of change output sheet
+  #and residual migration claculation
   components <- list()
   for(i in names(projection)[1:4]){
     nm <- last(names(projection[[i]]))
     components[[i]] <- rename(proj_output[[i]], value := !!sym(nm)) %>%
       mutate(component = nm)
   }
-  
-  births <- filter(births, year %in% 2011:(first_proj_yr-1)) %>%
-    left_join(lookup, by=c("gss_code_small_area")) %>%
-    left_join(borough_names, by = "gss_code") %>%
-    rename(borough = gss_name) %>%
-    rename(!!code := gss_code_small_area) %>%
-    rename(value = births) %>%
-    mutate(component = "births") %>%
-    select_at(c("year","gss_code","borough", code, name, "value", "component"))
   
   deaths <- filter(deaths, year %in% 2011:(first_proj_yr-1)) %>%
     left_join(lookup, by=c("gss_code_small_area")) %>%
@@ -95,7 +103,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   components <- data.table::rbindlist(components, use.names = TRUE) %>%
     as.data.frame() %>%
     select_at(c("year","gss_code","borough", code, name, "value", "component")) %>%
-    rbind(births, deaths) %>%
+    rbind(deaths) %>%
     dtplyr::lazy_dt() %>%
     group_by_at(c("year","gss_code","borough", code, name, "component")) %>%
     summarise(value = sum(value)) %>%
