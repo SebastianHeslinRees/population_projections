@@ -36,7 +36,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   }
   
   #development data
-  proj_output[["assumed_development"]] <- projection[["assumed_development"]] %>%
+  proj_output[["total_stock"]] <- projection[["assumed_development"]] %>%
     left_join(lookup, by=c("gss_code_small_area")) %>%
     left_join(borough_names, by = "gss_code") %>%
     rename(!!code := gss_code_small_area) %>%
@@ -44,18 +44,22 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     select_at(c("year", "gss_code", "borough", code, name, "units")) %>%
     arrange_at(c("gss_code", code, "year"))
   
+  proj_output[["assumed_development"]] <- proj_output[["total_stock"]] %>%
+    group_by_at(c("gss_code", "borough", code, name)) %>%
+    mutate(lag_units = lag(units)) %>%
+    mutate(units = units-lag_units) %>%
+    as.data.frame() %>% 
+    filter(year > 2011) %>%
+    select_at(c("year", "gss_code", "borough", code, name, "units")) 
+  
   for(i in seq_along(proj_output)) {
     saveRDS(proj_output[[i]], paste0(output_dir, names(proj_output)[i],"_",projection_type,".rds"))
   }
   
   #assumed dev csv
   assumed_dev <- proj_output[["assumed_development"]] %>%
-    group_by_at(c("gss_code", "borough", code, name)) %>%
-    mutate(lag_units = lag(units)) %>%
-    mutate(add_units = round(units-lag_units,2)) %>%
-    filter(year > 2011) %>%
-    select_at(c("year", "gss_code", "borough", code, name, "add_units")) %>%
-    tidyr::pivot_wider(names_from = year, values_from = add_units)
+    mutate(units = round(units, 2)) %>% 
+    tidyr::pivot_wider(names_from = year, values_from = units)
   
   #Published Ouputs (csv)
   popn <- proj_output[["population"]]
