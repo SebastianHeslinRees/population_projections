@@ -136,7 +136,7 @@ run_housing_led_model <- function(config_list){
                                               year %in% dwelling_trajectory$year,
                                               gss_code %in% dwelling_trajectory$gss_code) %>%
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
-    mutate(dw2hh_ratio = households/dwellings) %>%
+    mutate(dw2hh_ratio = dwellings/households) %>%
     select(year, gss_code, dw2hh_ratio) %>%
     project_forward_flat(config_list$final_proj_yr)
   
@@ -144,7 +144,7 @@ run_housing_led_model <- function(config_list){
                                             year == 2011,
                                             gss_code %in% dwelling_trajectory$gss_code) %>%
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
-    mutate(dw2hh_ratio = households/dwellings) %>%
+    mutate(dw2hh_ratio = dwellings/households) %>%
     select(year, gss_code, dw2hh_ratio) %>%
     project_forward_flat(config_list$final_proj_yr)
   
@@ -152,12 +152,12 @@ run_housing_led_model <- function(config_list){
   #development_trajectories
   household_trajectory_static <- dwelling_trajectory %>% 
     left_join(dwelling2household_ratio_static, by=c("year","gss_code")) %>%
-    mutate(households = dwellings * dw2hh_ratio) %>%
+    mutate(households = dwellings / dw2hh_ratio) %>%
     select(gss_code, year, households)
   
   household_trajectory_adjusted <- dwelling_trajectory %>% 
     left_join(dwelling2household_ratio_adjusted, by=c("year", "gss_code")) %>%
-    mutate(households = dwellings * dw2hh_ratio) %>%
+    mutate(households = dwellings / dw2hh_ratio) %>%
     select(gss_code, year, households)
   
   #For trend model
