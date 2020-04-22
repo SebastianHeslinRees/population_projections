@@ -108,6 +108,8 @@ run_borough_and_ward_projection <- function(projection_name,
   small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rds"
   small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
   small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
+  small_area_births_sya_path <- "input_data/small_area_model/ward_sya_births.rds"
+  small_area_deaths_sya_path <- "input_data/small_area_model/ward_sya_deaths.rds"
   
   adults_per_dwelling_path <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
   small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
@@ -135,6 +137,8 @@ run_borough_and_ward_projection <- function(projection_name,
                            small_area_deaths_backseries_path = small_area_deaths_backseries_path,
                            small_area_ldd_data_path = small_area_ldd_data_path,
                            small_area_dev_trajectory_path = small_area_dev_trajectory_path,
+                           small_area_births_sya_path = small_area_births_sya_path,
+                           small_area_deaths_sya_path = small_area_deaths_sya_path,
                            
                            adults_per_dwelling_path = adults_per_dwelling_path,
                            small_area_to_district_path = small_area_to_district_path,

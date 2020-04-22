@@ -11,6 +11,8 @@ run_small_area_model <- function(config_list){
                        "small_area_communal_est_popn_path",
                        "small_area_births_backseries_path",
                        "small_area_deaths_backseries_path",
+                       "small_area_births_sya_path",
+                       "small_area_deaths_sya_path",
                        "small_area_ldd_data_path",
                        "small_area_dev_trajectory_path",
                        "adults_per_dwelling_path",
@@ -26,9 +28,7 @@ run_small_area_model <- function(config_list){
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "ldd_final_yr",
-                       "projection_type",
-                       "births_sya_path",
-                       "deaths_sya_path")
+                       "projection_type")
   
   validate_config_list(config_list, expected_config)
   
@@ -54,8 +54,8 @@ run_small_area_model <- function(config_list){
   ldd_data <- read_small_area_inputs(config_list$small_area_ldd_data_path)
   dwelling_trajectory <- read_small_area_inputs(config_list$small_area_dev_trajectory_path)
   
-  small_area_births_sya <- read_small_area_inputs(config_list$births_sya_path)
-  small_area_deaths_sya <- read_small_area_inputs(config_list$deaths_sya_path)
+  small_area_births_sya <- read_small_area_inputs(config_list$small_area_births_sya_path)
+  small_area_deaths_sya <- read_small_area_inputs(config_list$small_area_deaths_sya_path)
   
   #----------
   
