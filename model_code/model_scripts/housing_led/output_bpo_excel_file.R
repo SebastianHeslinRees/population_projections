@@ -1,25 +1,19 @@
 # TODO move this to an @importFrom call once this is in a package
 library(xlsx)
 
-#' Process a standard bpo template csv file into 2 rds files
+#' Create the BPO excel output
 #' 
-#' Take a standard ward-level csv bpo template and create 2
-#' rds files - 1 ward and 1 borough - where additional data
-#' not contained in the template is taken from the SHLAA
+#' Process population, components and developmnet data and place it into an
+#' Excel template.
 #'
 #' @param data The \code{[['csv']]} element from a ward projection
 #' @param output_dir The directory in which to save the Excel file
 #' @param projection_name The name of the output Excel file
-#' @param small_area_dev_trajectory_path The path to the ward-level development
-#'   trajectory in rds format
-#' @param borough_dev_trajectory_path  The path to the borough-level development
-#'   trajectory in rds format
 #' @param bpo_gss_code The gss code of the bpo projection
+#' @param file_suffix A string to append to the end of the filename
 
-output_bpo_excel_file <- function(data, output_dir, projection_name,
-                                  small_area_dev_trajectory_path,
-                                  borough_dev_trajectory_path,
-                                  bpo_gss_code){
+output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_code,
+                                  file_suffix = "_BPO_2018.xlsx"){
   
   bpo_data <- function(x, col_aggregation = c("gss_code", "borough", "gss_code_ward", "ward_name", "sex", "age")){
     x %>%
@@ -41,23 +35,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   females <- data[["females"]]
   males <- data[["males"]]
   components <- data[["components"]]
-  
-  ldd_backseries_dwellings_borough <- readRDS("input_data/housing_led_model/ldd_backseries_dwellings_borough.rds") %>%
-    filter(year %in% 2012:2018)
-  ldd_backseries_dwellings_ward <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_ward.rds") %>%
-    filter(year %in% 2012:2018)
-  
-  # ward_dev_dataframe <- readRDS(small_area_dev_trajectory_path) %>%
-  #   filter(year > 2018) %>%
-  #   rbind(ldd_backseries_dwellings_ward) %>%
-  #   left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
-  #   filter(gss_code == bpo_gss_code) %>%
-  #   left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
-  #   select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
-  #   arrange(year) %>%
-  #   mutate(units = round(units,2)) %>%
-  #   tidyr::pivot_wider(names_from = year, values_from = units)
-  
+ 
   ward_dev_dataframe <- data.table::fread(paste0(output_dir,"ward/assumed_dev_ward.csv"),
                                           header = TRUE) %>%
     as.data.frame() %>% 
@@ -76,22 +54,6 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
     tidyr::pivot_wider(names_from = year, values_from = units) %>%
     rbind(ward_dev_dataframe) %>%
     as.data.frame()
-  
-  
-  
-  # assumed_dev_dataframe <- readRDS(borough_dev_trajectory_path) %>%
-  #   filter(year > 2018) %>%
-  #   rbind(ldd_backseries_dwellings_borough) %>%
-  #   filter(gss_code == bpo_gss_code) %>%
-  #   mutate(borough = unique(ward_dev_dataframe$borough),
-  #          gss_code_ward = gss_code,
-  #          ward_name = paste0(borough, " (total)")) %>%
-  #   select(gss_code, borough, gss_code_ward, ward_name, year, units) %>%
-  #   arrange(year)  %>%
-  #   mutate(units = round(units,2)) %>%
-  #   tidyr::pivot_wider(names_from = year, values_from = units) %>%
-  #   rbind(ward_dev_dataframe) %>%
-  #   as.data.frame()
   
   wb <- xlsx::loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
   wb_sheets<- xlsx::getSheets(wb)
@@ -112,7 +74,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   xlsx::addDataFrame(date_of_projection, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #Write xlsx file
-  wb_filename <- paste0(output_dir, projection_name,"_BPO_2018.xlsx")
+  wb_filename <- paste0(output_dir, projection_name, file_suffix)
   xlsx::saveWorkbook(wb, wb_filename)
   
 }
