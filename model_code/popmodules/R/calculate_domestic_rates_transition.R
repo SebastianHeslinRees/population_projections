@@ -60,8 +60,8 @@ calculate_domestic_rates_transition <- function(dom_origin_destination_path,
   domestic_rates <- list(initial = calculate_mean_domestic_rates(domestic_rate_backseries,
                                                                  last_data_year = last_data_year_initial,
                                                                  n_years_to_avg = years_to_avg_initial,
-                                                                 rate_cap = rate_cap)) %>%
-    select(gss_out, gss_in, age, sex, rate)
+                                                                 rate_cap = rate_cap) %>%
+    select(gss_out, gss_in, age, sex, rate))
   
   if(!is.null(domestic_transition_yr)){
     domestic_rates[['longterm']] <- calculate_mean_domestic_rates(domestic_rate_backseries,
