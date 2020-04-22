@@ -170,7 +170,7 @@ run_borough_and_ward_projection <- function(projection_name,
     output_bpo_excel_file(data = ward_projection[["csvs"]],
                           output_dir = config_list$output_dir,
                           projection_name = config_list$projection_name,
-                          bpo = bpo)
+                          bpo_gss_code = bpo)
   }
   
   #Finish
