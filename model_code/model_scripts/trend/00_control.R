@@ -226,9 +226,11 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   
   if(is.data.frame(domestic_rates)){
     popmodules::validate_population(domestic_rates, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+    assert_that(max(domestic_rates$rate) <= 1 & min(domestic_rates$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
   }else{
     for(i in seq(domestic_rates)){
       popmodules::validate_population(domestic_rates[[i]], col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
+      assert_that(max(domestic_rates[[i]]$rate) <= 1 & min(domestic_rates[[i]]$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
     }
   }
   
@@ -256,7 +258,6 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   if(int_out_method == "rate") {
     assert_that(max(int_out_flows_rates$int_out) <= 1 & min(int_out_flows_rates$int_out) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
   }
-  assert_that(max(domestic_rates$rate) <= 1 & min(domestic_rates$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
   
   invisible(TRUE)
 }
