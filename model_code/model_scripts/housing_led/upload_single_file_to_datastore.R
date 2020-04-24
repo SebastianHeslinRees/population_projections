@@ -38,7 +38,7 @@ upload_single_file <- function(bpo_root, bpo_folder, resource_title, resource_de
   
   
   #DO NOT SAVE THIS FILE WITH AN API KEY
-  source("Q:/Teams/D&PA/Demography/Projections/2019_development/notebooks_and_analysis/mats_api_key.txt")
+  source("Q:/Teams/D&PA/Demography/Projections/population_projections/notebooks_and_analysis/mats_api_key.txt")
   api_key <- get_api_key()
   
   #hub names

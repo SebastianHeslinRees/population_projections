@@ -3,13 +3,13 @@ devtools::load_all("model_code/popmodules")
 
 #####Projection Paths and Timestamps####
 
-cen_proj_path <- "Q:/Teams/D&PA/Demography/Projections/2019_development/outputs/trend/2018/2018_central/"
+cen_proj_path <- "Q:/Teams/D&PA/Demography/Projections/population_projections/outputs/trend/2018/2018_central/"
 cen_proj_timestamp <- "_19-11-13_2056"
 
-long_proj_path <- "Q:/Teams/D&PA/Demography/Projections/2019_development/outputs/trend/2018/2018_long/"
+long_proj_path <- "Q:/Teams/D&PA/Demography/Projections/population_projections/outputs/trend/2018/2018_long/"
 long_proj_timestamp <- "_19-11-13_2144"
 
-short_proj_path <- "Q:/Teams/D&PA/Demography/Projections/2019_development/outputs/trend/2018/2018_short/"
+short_proj_path <- "Q:/Teams/D&PA/Demography/Projections/population_projections/outputs/trend/2018/2018_short/"
 short_proj_timestamp <- "_19-11-13_2205"
 
 housing_led_proj_path <- "outputs/housing_led/2018/2018_based_shlaa_dev_20-02-05_1808/"
