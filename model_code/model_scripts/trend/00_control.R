@@ -10,7 +10,8 @@ run_trend_model <- function(config_list) {
   source("model_code/model_scripts/trend/household_model_outputs.R")
   source("model_code/model_scripts/trend/trend_datastore_outputs.R")
 
-  expected_config <- c("first_proj_yr", 
+  expected_config <- c("projection_name",
+                       "first_proj_yr", 
                        "n_proj_yr",
                        "popn_mye_path", 
                        "deaths_mye_path", 
