@@ -135,16 +135,29 @@ datastore_csv <- function(x){
   x <- as.data.frame(x)
   
   sort_order <- intersect(names(x), c("gss_code", "gss_name", "year", "sex", "age_group", "household_type"))
+  data_cols <- setdiff(names(x), sort_order)
+  ix_averages <- grepl("average", data_cols)
+  average_cols <- data_cols[ix_averages]
+  sum_cols <- data_cols[!ix_averages]
   
   x <- filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
   
   if(!"E12000007" %in% x$gss_code){
     
+    message("Summarising for london in output csv")
+    message(paste(c("Columns:", names(x)), collapse = " "))
+            
     x <- mutate(x, gss_code = "E12000007") %>%
-      group_by_at(sort_order) %>%
-      summarise_all(.funs=list(sum)) %>%
-      ungroup() %>%
-      rbind(x)
+      group_by_at(sort_order)
+    
+    x_summary <- summarise_at(x, sum_cols, .funs=list(sum))
+    
+    if(length(average_cols) > 0) {
+      x_summary_averages <- summarise_at(x, average_cols, .funs=list(mean))
+      x_summary <- left_join(x, x_summary_averages, by = sort_order)
+    }
+    
+    x <- rbind(x_summary, x)
   }
   
   if("age_group" %in% sort_order){
