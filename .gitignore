@@ -13,7 +13,7 @@ model_runs/*
 notebooks_and_analysis/*
 outputs/*
 
-!input_data/excel_templates/*
+!input_data/excel_templates
 
 # Produced documentation (saved for later in case the package reaches a point where these can be made with a build command)
 *.Rcheck*
