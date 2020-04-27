@@ -59,7 +59,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
   dir.create(hh_output_dir, showWarnings = FALSE)
 
   #add authority names
-  names_lookup <- data.table::fread('input_data/lookup/lad18_code_to_name.csv')
+  names_lookup <- get_gss_names()
   for(i in seq(output_dataframes)){
     nm <- setdiff(names(output_dataframes[[i]]),"gss_code")
 
