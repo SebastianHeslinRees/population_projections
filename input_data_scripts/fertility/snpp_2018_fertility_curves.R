@@ -27,7 +27,8 @@ for(w in seq(welsh_gss_codes)){
   wales[[w]] <- filter(national_fert, gss_code == "W92000004") %>%
     mutate(gss_code = welsh_gss_codes[w])
 }
-wales <- data.table::rbindlist(wales)
+wales <- data.table::rbindlist(wales) %>%
+  data.frame()
 
 national_fert <- filter(national_fert, gss_code != "W92000004")
 
