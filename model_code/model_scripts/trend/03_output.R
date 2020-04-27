@@ -6,7 +6,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
   lapply(seq_along(projection), 
          function(i) saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")) %>%
     invisible()
- 
+  
   #CSV
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
@@ -63,14 +63,15 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
     invisible()
   
   #Excel
-  trend_datastore_outputs(population = projection$population,
-                    births = projection$births,
-                    deaths = projection$deaths,
-                    int_in = projection$int_in,
-                    int_out = projection$int_out,
-                    dom_in = projection$dom_in,
-                    dom_out = projection$dom_out,
-                    output_dir = output_dir,
-                    excel_file_name = paste0(projection_name,".xlsx"),
-                    write_excel = write_excel)
+  if(write_excel){
+    trend_datastore_outputs(population = projection$population,
+                            births = projection$births,
+                            deaths = projection$deaths,
+                            int_in = projection$int_in,
+                            int_out = projection$int_out,
+                            dom_in = projection$dom_in,
+                            dom_out = projection$dom_out,
+                            output_dir = output_dir,
+                            excel_file_name = paste0(projection_name,".xlsx"))
+  }
 }

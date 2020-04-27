@@ -3,13 +3,12 @@
 #' @param population,births,deaths,int_in,int_out,dom_in,dom_out Data frames with population and component data.
 #' @param output_dir Path to output directory.
 #' @param excel_file_name Output file name. With or without xslx suffix.
-#' @param write_excel Logical. Whether to create Excel output files.
 #'
 #' @import dplyr
 #' @export
 
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
-                                    output_dir, excel_file_name, write_excel){
+                                    output_dir, excel_file_name){
   
   #datastore directory
   if(!grepl("/$", output_dir)){ output_dir <- paste0(output_dir, "/") }
@@ -39,7 +38,6 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     wrangle_datastore_outputs()
   
   #CoC
-  
   births <- get_component_datastore(births, "births")
   deaths <- get_component_datastore(deaths, "deaths")
   int_in <- get_component_datastore(int_in, "int_in")
@@ -72,30 +70,20 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   idx <- sapply(components, class)=="numeric"
   components[, idx] <- lapply(components[, idx], round, digits=3)
   
-  #write
-  
-  #don't need to write these as separeamte csv files
-  # data.table::fwrite(persons, paste0(datastore_dir,"/persons.csv"))
-  # data.table::fwrite(female, paste0(datastore_dir,"/females.csv"))
-  # data.table::fwrite(male, paste0(datastore_dir,"/males.csv"))
-  # data.table::fwrite(components, paste0(datastore_dir,"/components.csv"))
-  
   #excel
-  if(write_excel) {
-    
-    wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template.xlsx")
-    wb_sheets<- xlsx::getSheets(wb)
-    
-    xlsx::addDataFrame(persons, wb_sheets$persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(female, wb_sheets$females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(male, wb_sheets$males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    xlsx::addDataFrame(components, wb_sheets$`components of change`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-    
-    #Write xlsx file
-    wb_filename <- paste(datastore_dir,excel_file_name,sep="/")
-    xlsx::saveWorkbook(wb, wb_filename)
-    
-  }
+  wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template.xlsx")
+  wb_sheets<- xlsx::getSheets(wb)
+  
+  xlsx::addDataFrame(persons, wb_sheets$persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  xlsx::addDataFrame(female, wb_sheets$females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  xlsx::addDataFrame(male, wb_sheets$males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  xlsx::addDataFrame(components, wb_sheets$`components of change`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  
+  #Write xlsx file
+  wb_filename <- paste(datastore_dir,excel_file_name,sep="/")
+  xlsx::saveWorkbook(wb, wb_filename)
+  
+  
 }
 
 #--------------------------------------------
@@ -103,7 +91,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
 
 wrangle_datastore_outputs <- function(x){
   
-  y <- filter(x, year >= 2011) %>%
+  wrangled <- filter(x, year >= 2011) %>%
     left_join(get_gss_names(), by = "gss_code") %>%
     rename(borough = gss_name) %>%
     select(year, gss_code, borough, sex, age, popn) %>%
@@ -114,6 +102,7 @@ wrangle_datastore_outputs <- function(x){
 }
 
 group_by_london <- function(x, data_col){
+  
   london <- filter(x, substr(gss_code,1,3)=="E09") %>%
     mutate(gss_code = "E12000007") %>%
     rename(value = !!data_col) %>%
@@ -121,18 +110,27 @@ group_by_london <- function(x, data_col){
     summarise(value = sum(value)) %>%
     ungroup() %>%
     rename(!!data_col := value)
+  
 }
 
 get_component_datastore <- function(component, data_col){
   
-  component <- filter(component, substr(gss_code,1,3)=="E09") %>%
-    rbind(group_by_london(component, data_col)) %>%
+  if(!data_col %in% c("dom_in","dom_out","popn")){
+    
+    component <- group_by_london(component, data_col) %>%
+      rbind(component)
+    
+  } 
+  
+  component <- component %>% 
+    filter(substr(gss_code,1,3) == "E09" | gss_code == "E12000007") %>%
     rename(value = !!data_col) %>%
     group_by(gss_code, year) %>%
     summarise(value = sum(value)) %>%
     ungroup() %>%
     rename(!!data_col := value) %>%
     filter(year >= 2011)
+  
 }
 
 
