@@ -74,9 +74,6 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     
     data.table::fwrite(output_dataframes[[i]],
                        paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))
-    
-    output_dataframes[[i]] <- datastore_csv(output_dataframes[[i]])
-    
   }
 
   
@@ -90,6 +87,8 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
           paste0(hh_output_dir, model, "_", "ahs.rds"))
   
   if(write_excel){
+    
+    output_dataframes <- lapply(output_dataframes, datastore_csv)
     
     if(model == "dclg"){
       #dclg excel file is too big to write out
@@ -135,16 +134,27 @@ datastore_csv <- function(x){
   x <- as.data.frame(x)
   
   sort_order <- intersect(names(x), c("gss_code", "gss_name", "year", "sex", "age_group", "household_type"))
+  data_cols <- setdiff(names(x), sort_order)
+  ix_averages <- grepl("average", data_cols)
+  average_cols <- data_cols[ix_averages]
+  sum_cols <- data_cols[!ix_averages]
   
   x <- filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
   
   if(!"E12000007" %in% x$gss_code){
-    
+
     x <- mutate(x, gss_code = "E12000007") %>%
-      group_by_at(sort_order) %>%
-      summarise_all(.funs=list(sum)) %>%
-      ungroup() %>%
-      rbind(x)
+      group_by_at(sort_order)
+    
+    x_summary <- summarise_at(x, sum_cols, .funs=list(sum))
+    
+    if(length(average_cols) > 0) {
+      x_summary_averages <- summarise_at(x, average_cols, .funs=list(mean))
+      x_summary <- left_join(x, x_summary_averages, by = sort_order)
+    }
+    
+    x <- rbind(x_summary, x) %>%
+      ungroup()
   }
   
   if("age_group" %in% sort_order){
