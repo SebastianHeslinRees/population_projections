@@ -57,8 +57,8 @@ if(FALSE) { # tidyverse equivalent
     ungroup()
 }
 
-domestic_region <- filter(domestic, substr(gss_in,1,3)=="E12")
-domestic_la <- filter(domestic, substr(gss_in,1,3)!="E12")
+domestic_region <- filter(domestic, substr(gss_in,1,3) %in% c("E12","W92"))
+domestic_la <- filter(domestic, !substr(gss_in,1,3) %in% c("E12","W92"))
 
 message("Saving domestic origin-destination flows. This may take a while")
 saveRDS(domestic_la, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))

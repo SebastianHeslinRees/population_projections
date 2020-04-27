@@ -19,14 +19,14 @@ upc_path <- NULL
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
 mortality_last_data_year <- 2018
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 5
 fertility_avg_or_trend <- "average"
 fertility_last_data_year <- 2018
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
+fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
@@ -163,6 +163,7 @@ qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
 config_list <- list(
+  projection_name = projection_name,
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
   popn_mye_path = popn_mye_path,

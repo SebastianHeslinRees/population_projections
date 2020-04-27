@@ -9,6 +9,8 @@ run_trend_model <- function(config_list) {
   source("model_code/model_scripts/trend/household_model_ons.R")
   source("model_code/model_scripts/trend/household_model_outputs.R")
   source("model_code/model_scripts/trend/trend_datastore_outputs.R")
+  
+  region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
 
   expected_config <- c("projection_name",
                        "first_proj_yr", 
@@ -142,7 +144,8 @@ run_trend_model <- function(config_list) {
       int_out_method = config_list$int_out_method,
       constraints = constraints,
       upc = upc,
-      projection_year = projection_year)
+      projection_year = projection_year,
+      region_lookup = region_lookup)
     
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
