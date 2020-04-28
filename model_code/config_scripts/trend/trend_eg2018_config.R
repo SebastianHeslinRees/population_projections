@@ -20,7 +20,7 @@ output_dir <- paste0("outputs/trend/2018/", projection_name, "/")
 mortality_years_to_avg <- 1
 mortality_avg_or_trend <- "average"
 mortality_last_data_year <- 2018
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 

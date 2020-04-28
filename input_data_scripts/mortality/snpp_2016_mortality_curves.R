@@ -8,6 +8,7 @@ over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP
 
 #Data for English LAs
 ons_mort <- data.table::fread(mort_curve_file) %>%
+  data.frame() %>%
   gather(year, death_rate, 5:29) %>%
   filter(year == 2017)%>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
@@ -19,6 +20,7 @@ ons_mort <- data.table::fread(mort_curve_file) %>%
 #Death data are provided up to 125 so data can safely be filter to < age 90
 #without the need to aggregate the 90+ age group following the age shift
 national_mort <- data.table::fread(national_file) %>%
+  data.frame() %>%
   mutate(age = ifelse(age == "Birth", -1, age),
          age = as.numeric(age),
          age = age+1) %>%
@@ -28,6 +30,7 @@ national_mort <- data.table::fread(national_file) %>%
   select(-mortality_rate)
 
 over90s <- data.table::fread(over90_file) %>%
+  data.frame() %>%
   mutate(death_rate = deaths/pop) %>%
   mutate(sex = ifelse(sex=="M","male","female")) %>%
   select(-pop, -deaths)
@@ -42,7 +45,8 @@ for(w in seq(welsh_gss_codes)){
   wales[[w]] <- filter(national_mort, gss_code == "W92000004") %>%
     mutate(gss_code = welsh_gss_codes[w])
 }
-wales <- data.table::rbindlist(wales)
+wales <- data.table::rbindlist(wales) %>%
+  data.frane()
 
 national_mort <- filter(national_mort, gss_code != "W92000004")
 

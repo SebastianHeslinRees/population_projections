@@ -22,7 +22,7 @@ outputs_dir <- "outputs/trend/2016/"
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
 mortality_last_data_year <- 2016
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2014_principal"
 
