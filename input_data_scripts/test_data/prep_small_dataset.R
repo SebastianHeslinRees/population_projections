@@ -18,7 +18,7 @@ dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migr
 mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018.rds"
+fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2016.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 
 # popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"
