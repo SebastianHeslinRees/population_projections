@@ -19,7 +19,7 @@ upc_path <- NULL
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
 mortality_last_data_year <- 2018
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
