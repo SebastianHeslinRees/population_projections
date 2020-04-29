@@ -19,7 +19,7 @@ housing_led_proj_path <- "M:/Projects/population_projections/outputs/housing_led
 
 ####Functions####
 
-names_lookup <- data.table::fread("M:/Projects/population_projections/input_data/lookup/lad18_code_to_name.csv")
+names_lookup <- readRDS("M:/Projects/population_projections/input_data/lookup/lad18_code_to_name.rds")
 
 process_projection <- function(x){
   nm <- last(names(x))
