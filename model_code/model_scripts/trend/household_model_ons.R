@@ -45,7 +45,7 @@ household_model_ons <- function(population, stage1_file_path, stage2_file_path, 
 
 ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_proj_yr){
 
-  district_to_region <- readRDS("input_data/household_model/district_to_region.rds")
+  district_to_region <- readRDS("input_data/lookup/district_to_region.rds")
 
   household_rates <- readRDS(hh_rep_rates_path) %>%
     project_forward_flat(max(popn$year)) %>%
