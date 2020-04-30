@@ -142,19 +142,18 @@ datastore_csv <- function(x){
   x <- filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
   
   if(!"E12000007" %in% x$gss_code){
-
-    x <- mutate(x, gss_code = "E12000007") %>%
+    x_renamed <- mutate(x, gss_code = "E12000007", gss_name = "London (total)") %>%
       group_by_at(sort_order)
     
-    x_summary <- summarise_at(x, sum_cols, .funs=list(sum))
+    x_summary <- summarise_at(x_renamed, sum_cols, .funs=list(sum))
     
     if(length(average_cols) > 0) {
-      x_summary_averages <- summarise_at(x, average_cols, .funs=list(mean))
-      x_summary <- left_join(x, x_summary_averages, by = sort_order)
+      x_summary_averages <- summarise_at(x_renamed, average_cols, .funs=list(mean))
+      x_summary <- left_join(x_summary, x_summary_averages, by = sort_order)
     }
     
-    x <- rbind(x_summary, x) %>%
-      ungroup()
+    x <- ungroup(x_summary) %>%
+      rbind(x)
   }
   
   if("age_group" %in% sort_order){
