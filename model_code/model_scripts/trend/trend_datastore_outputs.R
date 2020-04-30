@@ -93,7 +93,7 @@ wrangle_datastore_outputs <- function(x){
   
   wrangled <- filter(x, year >= 2011) %>%
     left_join(get_gss_names(), by = "gss_code") %>%
-    recode("London" = "London (total)") %>%
+    mutate(gss_name = recode(gss_name, "London" = "London (total)")) %>%
     rename(borough = gss_name) %>%
     select(year, gss_code, borough, sex, age, popn) %>%
     mutate(popn = round(popn, digits=3)) %>%
