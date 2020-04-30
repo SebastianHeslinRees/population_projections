@@ -52,7 +52,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name,
   #   rbind(ldd_backseries_dwellings_ward) %>%
   #   left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>%
   #   filter(gss_code == bpo_gss_code) %>%
-  #   left_join(data.table::fread("input_data/lookup/lad18_code_to_name.csv"), by="gss_code") %>%
+  #   left_join(get_gss_names()), by="gss_code") %>%
   #   select(gss_code, borough=gss_name, gss_code_ward, ward_name, year, units) %>%
   #   arrange(year) %>%
   #   mutate(units = round(units,2)) %>%
