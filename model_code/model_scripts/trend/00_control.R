@@ -156,6 +156,8 @@ run_trend_model <- function(config_list) {
                                            int_out_flows_rates, int_in_flows, domestic_rates,
                                            first_proj_yr, last_proj_yr)
   
+  validate_trend_core_outputs(projection)
+  
   ## household models
   message('')
   message('running household models')
@@ -169,6 +171,7 @@ run_trend_model <- function(config_list) {
                                                      stage1_file_path = config_list$dclg_stage1_file_path,
                                                      stage2_file_path = config_list$dclg_stage2_file_path)
   
+
   ## write the output data
   message("running outputs")
   output_projection(projection, config_list$output_dir, write_excel = config_list$write_excel,
@@ -199,6 +202,8 @@ run_trend_model <- function(config_list) {
   return(projection)
 }
 
+
+#===============================================================================
 
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
@@ -249,4 +254,24 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   assert_that(max(domestic_rates$rate) <= 1 & min(domestic_rates$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
   
   invisible(TRUE)
+}
+
+
+#===============================================================================
+
+validate_trend_core_outputs <- function(projection) {
+  
+  components <- names(projection)
+  expected_components <- c("population", "deaths","births", "int_out", "int_in",
+                           "dom_out", "dom_in", "births_by_mothers_age", "natural_change",
+                           "fertility_rates", "mortality_rates", "int_out_rates", "domestic_rates")
+  
+  assert_that(identical(components, expected_components))
+  
+  sapply(projection[1:12], validate_population)
+  
+  validate_population(projection$domestic_rates,
+                      col_aggregation = c("gss_out", "gss_in", "age", "sex"),
+                      col_data = "rate",
+                      test_complete = FALSE)
 }

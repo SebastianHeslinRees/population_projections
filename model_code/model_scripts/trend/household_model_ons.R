@@ -19,6 +19,8 @@ household_model_ons <- function(population, stage1_file_path, stage2_file_path, 
 
   stage_1 <- ons_stage_1(population, stage1_file_path, communal_est_pop_path, first_proj_yr)
   stage_2 <- ons_stage_2(stage2_file_path, stage_1)
+  
+  validate_ons_outputs(stage_1, stage_2, max(population$year))
 
   return(list(stage_1 = stage_1, stage_2 = stage_2))
 
@@ -304,6 +306,23 @@ create_regional_data <- function(population, district_to_region) {
 
 }
 
+#-----------------------------------------------------
 
+validate_ons_outputs <- function(stage_1, stage_2, max_year) {
 
-
+  validate_population(stage_1$detailed_households,
+                      col_aggregation = c("year", "gss_code", "sex", "age_group"),
+                      col_data = c("households", "household_population", "communal_establishment_population"))
+  for(i in 2:5) {
+    result <- stage_1[[i]] %>%
+      filter(year <= max_year) %>%
+      validate_population(col_aggregation = c("year", "gss_code", "sex", "age_group"))
+  }
+  for(i in 1:2) {
+    result <- stage_2[[i]] %>%
+      filter(year <= max_year) %>%
+      validate_population(col_aggregation = c("year", "gss_code", "household_type", "age_group"),
+                          col_data = "households")
+  }
+  return(TRUE)
+}
