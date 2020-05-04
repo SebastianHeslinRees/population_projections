@@ -21,13 +21,10 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   }
   
   #process data
-  population <- group_by_london(population, "popn") %>%
-    rbind(filter(population, substr(gss_code,1,3)=="E09"))
-  
   female <- filter(population, sex == "female") %>%
     wrangle_datastore_outputs()
   
-  male <- filter(population, sex == "male")%>%
+  male <- filter(population, sex == "male") %>%
     wrangle_datastore_outputs()
   
   persons <- population %>%
@@ -59,6 +56,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     left_join(dom_out, by = c("gss_code", "year")) %>%
     mutate(dom_net = dom_in - dom_out) %>%
     mutate(total_change = births - deaths + int_net + dom_net) %>%
+    mutate(borough = recode(borough, "London" = "London (total)")) %>%
     select(gss_code, borough, year,
            population, births, deaths,
            int_in, int_out, int_net,
@@ -92,6 +90,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
 wrangle_datastore_outputs <- function(x){
   
   wrangled <- filter(x, year >= 2011) %>%
+    filter_to_london() %>%
     left_join(get_gss_names(), by = "gss_code") %>%
     mutate(gss_name = recode(gss_name, "London" = "London (total)")) %>%
     rename(borough = gss_name) %>%
@@ -102,34 +101,21 @@ wrangle_datastore_outputs <- function(x){
   
 }
 
-group_by_london <- function(x, data_col){
-  
-  london <- filter(x, substr(gss_code,1,3)=="E09") %>%
-    mutate(gss_code = "E12000007", gss_name = "London (total)") %>%
-    rename(value = !!data_col) %>%
-    group_by(year, gss_code, sex, age) %>%
-    summarise(value = sum(value)) %>%
-    ungroup() %>%
-    rename(!!data_col := value)
+filter_to_london <- function(x){
+  filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
 }
 
 get_component_datastore <- function(component, data_col){
   
-  if(!data_col %in% c("dom_in","dom_out","popn")){
-    
-    component <- group_by_london(component, data_col) %>%
-      rbind(component)
-    
-  } 
-  
   component <- component %>% 
-    filter(substr(gss_code,1,3) == "E09" | gss_code == "E12000007") %>%
+    dtplyr::lazy_dt() %>%
+    filter(year >= 2011) %>%
+    filter_to_london() %>%
     rename(value = !!data_col) %>%
     group_by(gss_code, year) %>%
     summarise(value = sum(value)) %>%
-    ungroup() %>%
-    rename(!!data_col := value) %>%
-    filter(year >= 2011)
+    as.data.frame() %>%
+    rename(!!data_col := value) 
   
 }
 

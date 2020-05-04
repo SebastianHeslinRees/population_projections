@@ -11,6 +11,8 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
   
+  output_order <- readRDS("input_data/lookup/output_order.rds")
+  
   make_csvs <- function(data, name_stub){
     
     data_col <- names(data)[ncol(data)]
@@ -26,7 +28,10 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
       b_m_a <- filter(data, sex == "female", age %in% 15:49) %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
-        pivot_wider(names_from = year, values_from = rounded)
+        pivot_wider(names_from = year, values_from = rounded) %>%
+        left_join(output_order, by="gss_code") %>%
+        arrange(output_order) %>%
+        select(-output_order)
       
       data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
       
@@ -35,12 +40,18 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
       female <- filter(data, sex == "female") %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
-        pivot_wider(names_from = year, values_from = rounded)
+        pivot_wider(names_from = year, values_from = rounded) %>%
+        left_join(output_order, by="gss_code") %>%
+        arrange(output_order) %>%
+        select(-output_order)
       
       male <- filter(data, sex == "male")  %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3))%>%
-        pivot_wider(names_from = year, values_from = rounded)
+        pivot_wider(names_from = year, values_from = rounded) %>%
+        left_join(output_order, by="gss_code") %>%
+        arrange(output_order) %>%
+        select(-output_order)
       
       persons <- data %>%
         mutate(sex = "persons") %>%
@@ -49,11 +60,15 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         summarise(value = sum(value)) %>%
         ungroup() %>%
         mutate(value = round(value, 3))%>%
-        pivot_wider(names_from = year, values_from = value)
+        pivot_wider(names_from = year, values_from = value) %>%
+        left_join(output_order, by="gss_code") %>%
+        arrange(output_order) %>%
+        select(-output_order)
       
       data.table::fwrite(female, paste0(name_stub,"_female.csv"))
       data.table::fwrite(male, paste0(name_stub,"_male.csv"))
       data.table::fwrite(persons, paste0(name_stub,"_persons.csv"))
+      
     }
     
   }
