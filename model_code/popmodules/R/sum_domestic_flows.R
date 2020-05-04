@@ -30,7 +30,7 @@ sum_domestic_flows <- function(domestic_flow, in_or_out){
     group_by_at(c("year", gss_col, "sex", "age")) %>%
     summarise(flow = sum(flow)) %>%
     as.data.frame() %>%
-    rename(gss_code = all_of(gss_col)) %>%
+    rename(gss_code = !!gss_col) %>%
     tidyr::complete(year, gss_code, age=0:90, sex, fill=list(flow=0)) %>%
     rename(!!data_col := flow)
   
