@@ -21,8 +21,8 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   }
   
   #process data
-  population <- filter(population, substr(gss_code,1,3)=="E09") %>%
-    rbind(group_by_london(population, "popn"))
+  population <- group_by_london(population, "popn") %>%
+    rbind(filter(population, substr(gss_code,1,3)=="E09"))
   
   female <- filter(population, sex == "female") %>%
     wrangle_datastore_outputs()
@@ -105,13 +105,12 @@ wrangle_datastore_outputs <- function(x){
 group_by_london <- function(x, data_col){
   
   london <- filter(x, substr(gss_code,1,3)=="E09") %>%
-    mutate(gss_code = "E12000007") %>%
+    mutate(gss_code = "E12000007", gss_name = "London (total)") %>%
     rename(value = !!data_col) %>%
     group_by(year, gss_code, sex, age) %>%
     summarise(value = sum(value)) %>%
     ungroup() %>%
     rename(!!data_col := value)
-  
 }
 
 get_component_datastore <- function(component, data_col){

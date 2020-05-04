@@ -154,6 +154,8 @@ datastore_csv <- function(x){
     
     x <- ungroup(x_summary) %>%
       rbind(x)
+  } else {
+    x <- mutate(x, gss_name = recode(gss_name, "London" = "London (total)"))
   }
   
   if("age_group" %in% sort_order){
