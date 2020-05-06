@@ -170,15 +170,9 @@ trend_core <- function(start_population,
   
   dom_out <- sum_domestic_flows(domestic_flow, "out")
   dom_in <- sum_domestic_flows(domestic_flow, "in")
-  reg_dom_out <- sum_domestic_flows(regional_flow, "out")
-  reg_dom_in <- sum_domestic_flows(regional_flow, "in")
-  
-  dom_out_with_regions <- dom_out %>%
-    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>% # S and NI are already aggregated
-    rbind(reg_dom_out)
-  dom_in_with_regions <- dom_in %>%
-    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>%
-    rbind(reg_dom_in)
+
+  dom_out_with_regions <- aggregate_regions(dom_out, england = TRUE)
+  dom_in_with_regions <- aggregate_regions(dom_in, england = TRUE)
   
   if(is.null(upc)){
     
