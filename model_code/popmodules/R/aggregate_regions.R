@@ -13,8 +13,13 @@
 #' @export
 
 aggregate_regions <- function(x, lookup,
-                              col_aggreagtion = c("year", "region_gss_code", "age", "sex"),
+                              col_aggregation = c("year", "region_gss_code", "age", "sex"),
                               england = FALSE){
+  
+  if(any(c("E12", "E92") %in% substr(x$gss_code, 1, 3))) {
+    warning("aggregate_regions called on data frame with regional England data. Returning unchanged.")
+    return(x)
+  }
   
   data_col <- last(names(x))
   
@@ -23,7 +28,7 @@ aggregate_regions <- function(x, lookup,
     dtplyr::lazy_dt() %>%
     filter(substr(gss_code,1,1) %in% c("E","W")) %>% 
     left_join(lookup, by="gss_code") %>%
-    group_by_at(col_aggreagtion) %>% 
+    group_by_at(col_aggregation) %>% 
     summarise(value = sum(value)) %>%
     as.data.frame() %>%
     rename(gss_code = region_gss_code,
@@ -38,7 +43,7 @@ aggregate_regions <- function(x, lookup,
       dtplyr::lazy_dt() %>%
       filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09")) %>% 
       mutate(region_gss_code = "E92000001") %>%
-      group_by_at(col_aggreagtion) %>% 
+      group_by_at(col_aggregation) %>% 
       summarise(value = sum(value)) %>%
       as.data.frame() %>%
       rename(gss_code = region_gss_code,
