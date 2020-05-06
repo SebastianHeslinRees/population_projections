@@ -13,6 +13,13 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
   
   output_order <- readRDS("input_data/lookup/output_order.rds")
   
+  reorder_for_output <- function(df, output_order = output_order) {
+    df %>%
+      left_join(output_order, by="gss_code") %>%
+      arrange(output_order) %>%
+      select(-output_order)
+  }
+  
   make_csvs <- function(data, name_stub){
     
     data_col <- names(data)[ncol(data)]
@@ -29,9 +36,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
         pivot_wider(names_from = year, values_from = rounded) %>%
-        left_join(output_order, by="gss_code") %>%
-        arrange(output_order) %>%
-        select(-output_order)
+        
       
       data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
       
@@ -41,17 +46,13 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
         pivot_wider(names_from = year, values_from = rounded) %>%
-        left_join(output_order, by="gss_code") %>%
-        arrange(output_order) %>%
-        select(-output_order)
+        reorder_for_output()
       
       male <- filter(data, sex == "male")  %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3))%>%
         pivot_wider(names_from = year, values_from = rounded) %>%
-        left_join(output_order, by="gss_code") %>%
-        arrange(output_order) %>%
-        select(-output_order)
+        reorder_for_output()
       
       persons <- data %>%
         mutate(sex = "persons") %>%
@@ -61,9 +62,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         ungroup() %>%
         mutate(value = round(value, 3))%>%
         pivot_wider(names_from = year, values_from = value) %>%
-        left_join(output_order, by="gss_code") %>%
-        arrange(output_order) %>%
-        select(-output_order)
+        reorder_for_output()
       
       data.table::fwrite(female, paste0(name_stub,"_female.csv"))
       data.table::fwrite(male, paste0(name_stub,"_male.csv"))
