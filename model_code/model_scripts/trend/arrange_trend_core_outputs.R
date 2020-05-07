@@ -11,11 +11,15 @@ arrange_trend_core_outputs <- function(projection,
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
   proj_deaths <- list(deaths %>% filter(year < first_proj_yr))
   proj_births <- list(births %>% filter(year < first_proj_yr))
-  proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
-  proj_dom_in <- list(dom_in %>% filter(year < first_proj_yr))
+  proj_dom_out <- dom_out %>% filter(year < first_proj_yr) %>%
+    aggregate_regions(england = TRUE) %>%
+    list()
+  proj_dom_in <- dom_in %>% filter(year < first_proj_yr) %>%
+    aggregate_regions(england = TRUE) %>%
+    list()
   proj_natural_change <- list()
   proj_births_by_mother <- list()
-  
+
   for(projection_year in first_proj_yr:last_proj_yr){
     
     proj_popn[[projection_year]] <- projection[[projection_year]][['population']]
@@ -41,7 +45,7 @@ arrange_trend_core_outputs <- function(projection,
   regional_data <- lapply(regional_data, function(x){
     data.table::rbindlist(x, use.names = TRUE) %>%
       data.frame() %>%
-      aggregate_regions(region_lookup, england=TRUE)})
+      aggregate_regions(england=TRUE)})
   
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))

@@ -1,56 +1,73 @@
 #' Aggregate district-level data to regional totals
 #'
-#' @param x A data frame containing population/component data.
-#' @param lookup A dataframe containing a district to region gss code lookup
-#' @param col_aggregation A string of column names on which to aggregate the data
-#' @param england Logical indicating whether or not an England total should also 
+#' @param x A data frame containing population/component data. The last column
+#'   is assumed to contain the data.
+#' @param col_aggregation A string of column names on which to aggregate the
+#'   data. It's assumed that there is a column called \code{gss_code} which will
+#'   be joined to the regional data and then aggregated by region. Including
+#'   this, or code{gss_code_region} is optional.
+#' @param england Logical indicating whether or not an England total should also
 #'   be calculated. Default \code{FALSE}
-#' 
-#' @return The input data frame with additional rows for English regions and Wales
+#'
+#' @return The input data frame with additional rows for English regions and
+#'   Wales
 #'
 #' @import dplyr
 #'
 #' @export
 
-aggregate_regions <- function(x, lookup,
-                              col_aggregation = c("year", "region_gss_code", "age", "sex"),
+aggregate_regions <- function(x,
+                              gss_col = "gss_code",
+                              col_aggregation = c("year", "age", "sex"),
                               england = FALSE){
   
-  if(any(c("E12", "E92") %in% substr(x$gss_code, 1, 3))) {
-    warning("aggregate_regions called on data frame with regional England data. Returning unchanged.")
-    return(x)
-  }
+
+  lookup <- readRDS("input_data/lookup/district_to_region.rds")
+  
+  col_aggregation <- union(col_aggregation, "region_gss_code")
   
   data_col <- last(names(x))
-  
-  regions <- x %>%
-    rename(value := !!data_col) %>%
-    dtplyr::lazy_dt() %>%
-    filter(substr(gss_code,1,1) %in% c("E","W")) %>% 
-    left_join(lookup, by="gss_code") %>%
-    group_by_at(col_aggregation) %>% 
-    summarise(value = sum(value)) %>%
-    as.data.frame() %>%
-    rename(gss_code = region_gss_code,
-           !!data_col := value)
-  
-  output_df <- rbind(x, regions)
-  
-  if(england){
+
+  if(any(c("E12", "W92") %in% substr(x$gss_code, 1, 3))) {
+    warning("aggregate_regions called on data frame with regional England and Wales data. These won't be recalculated.")
+    output_df <- x
     
-    eng <- x %>%
+  } else {
+  
+    regions <- x %>%
       rename(value := !!data_col) %>%
       dtplyr::lazy_dt() %>%
-      filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09")) %>% 
-      mutate(region_gss_code = "E92000001") %>%
+      filter(substr(gss_code,1,1) %in% c("E","W")) %>% 
+      left_join(lookup, by = setNames("gss_code", gss_col)) %>%
       group_by_at(col_aggregation) %>% 
       summarise(value = sum(value)) %>%
       as.data.frame() %>%
       rename(gss_code = region_gss_code,
              !!data_col := value)
     
-    output_df <- rbind(output_df, eng)
+    output_df <- rbind(x, regions)
+  }
+  
+  if(england){
     
+    if("E92" %in% substr(x$gss_code, 1, 3)) {
+      warning("aggregate_regions called on data frame with national England Wales data. This won't be recalculated.")
+
+    } else {
+      
+      eng <- x %>%
+        rename(value := !!data_col) %>%
+        dtplyr::lazy_dt() %>%
+        filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09")) %>% 
+        mutate(region_gss_code = "E92000001") %>%
+        group_by_at(col_aggregation) %>% 
+        summarise(value = sum(value)) %>%
+        as.data.frame() %>%
+        rename(gss_code = region_gss_code,
+               !!data_col := value)
+      
+      output_df <- rbind(output_df, eng)
+    }   
   }
   
   return(output_df)

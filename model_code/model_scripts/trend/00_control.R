@@ -84,7 +84,7 @@ run_trend_model <- function(config_list) {
   
   dom_in <- get_component_from_file(filepath = config_list$dom_in_mye_path,
                           max_yr = config_list$first_proj_yr - 1)
-  
+
   if(is.null(config_list$upc_path)){
     upc <- NULL
   } else { 
@@ -267,7 +267,7 @@ validate_trend_core_outputs <- function(projection) {
                            "fertility_rates", "mortality_rates", "int_out_rates", "domestic_rates")
   
   assert_that(identical(components, expected_components))
-  
+
   sapply(projection[1:12], validate_population)
   
   validate_population(projection$domestic_rates,

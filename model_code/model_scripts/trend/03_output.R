@@ -2,23 +2,25 @@
 output_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                               projection_name) {
   
-  #RDS
-  lapply(seq_along(projection), 
-         function(i) saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")) %>%
-    invisible()
-  
-  #CSV
-  csv_dir <- paste0(output_dir,"csv/")
-  dir.create(csv_dir, showWarnings = FALSE)
-  
   output_order <- readRDS("input_data/lookup/output_order.rds")
   
-  reorder_for_output <- function(df, output_order = output_order) {
+  reorder_for_output <- function(df, output_order_data = output_order) {
     df %>%
       left_join(output_order, by="gss_code") %>%
       arrange(output_order) %>%
       select(-output_order)
   }
+
+  projection[1:12] <- lapply(projection[1:12], reorder_for_output) 
+  
+  #RDS
+  for(i in seq_along(projection)) {
+     saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
+  }
+  
+  #CSV
+  csv_dir <- paste0(output_dir,"csv/")
+  dir.create(csv_dir, showWarnings = FALSE)
   
   make_csvs <- function(data, name_stub){
     
@@ -36,7 +38,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
         pivot_wider(names_from = year, values_from = rounded) %>%
-        
+        reorder_for_output()
       
       data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
       
@@ -72,9 +74,9 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
     
   }
   
-  lapply(seq(n_csv_elements), 
-         function(i) make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))) %>%
-    invisible()
+  for(i in 1:n_csv_elements) { 
+    make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
+  }
   
   #Excel
   if(write_excel){
