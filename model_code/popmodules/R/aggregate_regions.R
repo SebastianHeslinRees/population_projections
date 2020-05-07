@@ -52,7 +52,7 @@ aggregate_regions <- function(x,
   if(england){
     
     if("E92" %in% substr(x$gss_code, 1, 3)) {
-      warning("aggregate_regions called on data frame with national England Wales data. This won't be recalculated.")
+      warning("aggregate_regions called on data frame with national England data. This won't be recalculated.")
 
     } else {
       
