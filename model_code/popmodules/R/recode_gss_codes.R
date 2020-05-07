@@ -29,9 +29,9 @@
 
 recode_gss_to_2011 <- function(df_in, col_geog="gss_code", col_aggregation, fun=list(sum), aggregate_data = TRUE){
 
-  df <- data.table::copy(df_in) %>% # otherwise the function can modify by reference
-    ungroup() %>%
-    rename("gss_code" = col_geog)
+  df <- df %>%
+    as.data.frame() %>%
+    rename("gss_code" = !!col_geog)
 
   i <- which(col_aggregation == col_geog)
   col_aggregation[i] <- "gss_code"
@@ -79,37 +79,35 @@ recode_gss_to_2011 <- function(df_in, col_geog="gss_code", col_aggregation, fun=
                 "E07000232" = "E06000054",
                 "E07000233" = "E06000054",
                 "E07000240" = "E07000100",
-                "E07000241" = "E07000104")
+                "E07000241" = "E07000104",
+                
+                #april 2019 geography changes
+                "E06000028" = "E06000058",
+                "E06000029" = "E06000058",
+                "E07000048" = "E06000058",
+                
+                "E07000049" = "E06000059",         
+                "E07000050" = "E06000059",         
+                "E07000051" = "E06000059",             
+                "E07000052" = "E06000059",          
+                "E07000053" = "E06000059",
+                
+                "E07000205" = "E07000244",
+                "E07000206" = "E07000244",
+                
+                "E07000201" = "E07000245",
+                "E07000204" = "E07000245",
+                
+                "E07000190" = "E07000246",
+                "E07000191" = "E07000246")
 
-  # FIXME: using data.table here means that the input df is changed by
-  # reference, i.e. if you set x <- recode_gss_to_2011(z), then both x and z
-  # will contain the recoded data frame. Is this ok? What should we do about it? --CF
-
-  data.table::setDT(df)
-  df[gss_code %in% names(recoding), gss_code := recode(gss_code, !!!recoding)]
-
-  if(aggregate_data == T){
-    df <- df[, lapply(.SD, fun[[1]]), by = col_aggregation]
-    data.table::setkeyv(df, col_aggregation)
-  }
-
-  data.table::setDF(df)
-  df <- rename(df, !!col_geog := "gss_code")
-
-  return(df)
-
-  if(FALSE) { # tidyverse equivalent
-    df <- mutate(df, gss_code = recode(gss_code, !!!recoding))
-
-    df <- rename(df, !!col_geog := "gss_code")
-
-    df_2 <- group_by_at(df, col_aggregation) %>%
-
-      summarise_all(.funs=fun) %>%
-      ungroup()
-
-    return(df_2)
-  }
+  df <- df %>% 
+    dtplyr::lazy_dt() %>% 
+    mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
+    rename(!!col_geog := "gss_code") %>% 
+    group_by_at(col_aggregation) %>%
+    summarise_all(.funs=fun) %>%
+    as.data.frame()
 
 
 }
