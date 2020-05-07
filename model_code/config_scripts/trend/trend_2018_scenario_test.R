@@ -6,6 +6,15 @@ first_proj_yr <- 2019
 n_proj_yr <- 5
 projection_name <- "2018_central_transition"
 
+#rates files
+rates_dir <- "C:/temp/scenario_projections/"
+dom_rate_path <- paste0(rates_dir, "dom_rates.rds")
+int_in_path <- paste0(rates_dir, "int_in.rds")
+int_out_rate_path <- paste0(rates_dir, "int_out_rate.rds")
+fertility_rate_path <- paste0(rates_dir, "fertility.rds")
+mortality_rate_path <- paste0(rates_dir, "mortality.rds")
+upc_path <- paste0(rates_dir, "upc.rds")
+
 popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
@@ -15,17 +24,8 @@ dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migratio
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
 
-
 domestic_transition_yr <- 2021
 int_out_flow_or_rate <- "rate"
-
-popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"
-births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
-deaths_constraint_path <- "input_data/constraints/npp_2018_mortality_constraint.rds"
-int_in_constraint_path <- "input_data/constraints/npp_2018_international_in_constraint.rds"
-int_out_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
-cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
-cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates.rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016.rds"
@@ -40,14 +40,7 @@ timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
 output_dir <- paste0("outputs/trend/2018/",projection_name,"/")
 
-temp_dir <- "C:/temp/scenario_projections/"
-dom_rate_path <- paste0(temp_dir, "dom_rates.rds")
-int_in_path <- paste0(temp_dir, "int_in.rds")
-int_out_rate_path <- paste0(temp_dir, "int_out_rate.rds")
-fertility_rate_path <- paste0(temp_dir, "fertility.rds")
-mortality_rate_path <- paste0(temp_dir, "mortality.rds")
-upc_path <- paste0(temp_dir, "upc.rds")
-
+#rates functions
 mortality_fns <- list(list(fn = readRDS, args = list(mortality_rate_path)))
 fertility_fns <- list(list(fn = readRDS, args = list(fertility_rate_path)))
 int_in_fns <- list(list(fn = readRDS, args = list(int_in_path)))
