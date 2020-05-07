@@ -2,10 +2,11 @@
 #'
 #' @param x A data frame containing population/component data. The last column
 #'   is assumed to contain the data.
-#' @param col_aggregation A string of column names on which to aggregate the
-#'   data. It's assumed that there is a column called \code{gss_code} which will
-#'   be joined to the regional data and then aggregated by region. Including
-#'   this, or code{gss_code_region} is optional.
+#' @param gss_col String with the column name to join to the regional lookup's
+#'   \code{gss_code} column. Default \code{"gss_code".}
+#' @param col_aggregation A string of column names (other than geography) to
+#'   group by when aggregating to region. Default \code{c("year", "age",
+#'   "sex")}.
 #' @param england Logical indicating whether or not an England total should also
 #'   be calculated. Default \code{FALSE}
 #'
