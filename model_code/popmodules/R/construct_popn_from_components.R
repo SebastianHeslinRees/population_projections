@@ -131,23 +131,23 @@ validate_construct_popn_from_component_input <- function(start_population,
     msg = "construct_popn_from_components: one or more col_aggregation columns not found in one of the subtraction_data dataframes"
   )
   
-  #every dataframe contains the same gss codes
+  #dataframes don't contain additional gss codes
   assertthat::assert_that(
     all(
       as.logical(
-        lapply(addition_data, FUN = function(x) validate_same_geog(start_population, x)
+        lapply(addition_data, FUN = function(x) all(unique(x$gss_code) %in% unique(start_population$gss_code))
         ))
     ),
-    msg = "construct_popn_from_components: dataframes in addition_data contain different gss_codes to start_population - they must be indentical"
+    msg = "construct_popn_from_components: dataframes in addition_data contain gss_codes that aren't in start_population"
   )
   
   assertthat::assert_that(
     all(
       as.logical(
-        lapply(subtraction_data, FUN = function(x) validate_same_geog(start_population, x)
+        lapply(subtraction_data, FUN = function(x) all(unique(x$gss_code) %in% unique(start_population$gss_code))
         ))
     ),
-    msg = "construct_popn_from_components: dataframes in subtraction_data contain different gss_codes to start_population - they must be indentical"
+    msg = "construct_popn_from_components: dataframes in subtraction_data contain gss_codes that aren't in start_population"
   )
   
 }
