@@ -4,10 +4,10 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 5
-projection_name <- "2018_central_transition"
+projection_name <- "2018_scenario_test"
 
 #rates files
-rates_dir <- "C:/temp/scenario_projections/"
+rates_dir <- "input_data/rates_files/"
 dom_rate_path <- paste0(rates_dir, "dom_rates.rds")
 int_in_path <- paste0(rates_dir, "int_in.rds")
 int_out_rate_path <- paste0(rates_dir, "int_out_rate.rds")
@@ -40,6 +40,8 @@ timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
 output_dir <- paste0("outputs/trend/2018/",projection_name,"/")
 
+#-------------------------------------------------
+
 #rates functions
 mortality_fns <- list(list(fn = readRDS, args = list(mortality_rate_path)))
 fertility_fns <- list(list(fn = readRDS, args = list(fertility_rate_path)))
@@ -48,54 +50,52 @@ int_out_rate_fns <- list(list(fn = readRDS, args = list(int_out_rate_path)))
 dom_rate_fns <- list(list(fn = readRDS, args = list(dom_rate_path)))
 constraint_fns <- list(list(fn = function() NULL, args = list()))
 
+#----------------------------
+qa_areas_of_interest <- list("London", "E09000001")
 
+# prepare the named list to pass into model
+config_list <- list(
+  first_proj_yr = first_proj_yr,
+  n_proj_yr = n_proj_yr,
+  popn_mye_path = popn_mye_path,
+  deaths_mye_path = deaths_mye_path,
+  births_mye_path = births_mye_path,
+  int_out_mye_path = int_out_mye_path,
+  int_in_mye_path = int_in_mye_path,
+  dom_out_mye_path = dom_out_mye_path,
+  dom_in_mye_path = dom_in_mye_path,
+  dom_origin_destination_path = dom_origin_destination_path,
+  upc_path = upc_path,
+  output_dir = output_dir,
+  mortality_fns = mortality_fns,
+  fertility_fns = fertility_fns,
+  int_out_fns = int_out_rate_fns,
+  int_in_fns = int_in_fns,
+  dom_rate_fns = dom_rate_fns,
+  domestic_transition_yr = domestic_transition_yr,
+  constraint_fns = constraint_fns,
+  qa_areas_of_interest = qa_areas_of_interest,
+  int_out_method = int_out_flow_or_rate,
+  write_excel  = write_excel,
+  write_QA = FALSE,
+  communal_est_pop_path = communal_est_pop_path,
+  ons_stage1_file_path = ons_stage1_file_path,
+  ons_stage2_file_path = ons_stage2_file_path,
+  dclg_stage1_file_path = dclg_stage1_file_path,
+  dclg_stage2_file_path = dclg_stage2_file_path
+)
 
-  qa_areas_of_interest <- list("London", "E09000001")
-  
-  # prepare the named list to pass into model
-  config_list <- list(
-    first_proj_yr = first_proj_yr,
-    n_proj_yr = n_proj_yr,
-    popn_mye_path = popn_mye_path,
-    deaths_mye_path = deaths_mye_path,
-    births_mye_path = births_mye_path,
-    int_out_mye_path = int_out_mye_path,
-    int_in_mye_path = int_in_mye_path,
-    dom_out_mye_path = dom_out_mye_path,
-    dom_in_mye_path = dom_in_mye_path,
-    dom_origin_destination_path = dom_origin_destination_path,
-    upc_path = upc_path,
-    output_dir = output_dir,
-    mortality_fns = mortality_fns,
-    fertility_fns = fertility_fns,
-    int_out_fns = int_out_rate_fns,
-    int_in_fns = int_in_fns,
-    dom_rate_fns = dom_rate_fns,
-    domestic_transition_yr = domestic_transition_yr,
-    constraint_fns = constraint_fns,
-    qa_areas_of_interest = qa_areas_of_interest,
-    int_out_method = int_out_flow_or_rate,
-    write_excel  = write_excel,
-    write_QA = FALSE,
-    communal_est_pop_path = communal_est_pop_path,
-    ons_stage1_file_path = ons_stage1_file_path,
-    ons_stage2_file_path = ons_stage2_file_path,
-    dclg_stage1_file_path = dclg_stage1_file_path,
-    dclg_stage2_file_path = dclg_stage2_file_path
-  )
-  
-  # Save settings
-  # TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
-  projdir <- rprojroot::find_root(rprojroot::is_git_root)
-  copy_dir <- paste0(projdir, "/", output_dir)
-  dir.create(copy_dir, recursive = TRUE)
-  this_file <- rstudioapi::getSourceEditorContext()$path
-  file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
-  
-  rm(list = setdiff(ls(), "config_list"))
-  
-  # Run the model
-  source("model_code/model_scripts/trend/00_control.R")
-  projection <- run_trend_model(config_list)
-  log_warnings(paste0(config_list$output_dir, "warnings.txt"))
-  
+# Save settings
+# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
+projdir <- rprojroot::find_root(rprojroot::is_git_root)
+copy_dir <- paste0(projdir, "/", output_dir)
+dir.create(copy_dir, recursive = TRUE)
+this_file <- rstudioapi::getSourceEditorContext()$path
+file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
+
+rm(list = setdiff(ls(), "config_list"))
+
+# Run the model
+source("model_code/model_scripts/trend/00_control.R")
+projection <- run_trend_model(config_list)
+log_warnings(paste0(config_list$output_dir, "warnings.txt"))
