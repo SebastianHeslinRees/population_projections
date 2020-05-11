@@ -27,8 +27,11 @@ popn_2018 <- ons_popn %>%
 popn_2019 <- ons_popn %>%
   filter(year == 2019)
 
-domestic_net <- rbind(births, ons_international_in, ons_international_out,
+domestic_net <- rbind(births, deaths,
+                      ons_international_in, ons_international_out,
                       popn_2018, popn_2019) %>%
-  group_by(gss_code, sex, year, age) %>% 
+  group_by(gss_code, sex, age) %>% 
   summarise(dom_net = sum(popn)) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  mutate(year = 2019) %>%
+  select(year, gss_code, sex, age, dom_net)
