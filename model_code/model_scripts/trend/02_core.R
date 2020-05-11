@@ -168,11 +168,33 @@ trend_core <- function(start_population,
     summarise(flow = sum(flow)) %>%
     as.data.frame()
   
+  national_flow <- dtplyr::lazy_dt(domestic_flow) %>%
+    mutate(gss_out = substring(gss_out, 1, 1),
+           gss_in  = substring(gss_in,  1, 1)) %>%
+    mutate(gss_out = recode(gss_out, "E" = "E92000001"),
+           gss_in  = recode(gss_in,  "E" = "E92000001")) %>%
+    filter(gss_in != gss_out) %>%
+    group_by(year, gss_in, gss_out, age, sex) %>%
+    summarise(flow = sum(flow)) %>%
+    as.data.frame()
+  
   dom_out <- sum_domestic_flows(domestic_flow, "out")
   dom_in <- sum_domestic_flows(domestic_flow, "in")
 
-  dom_out_with_regions <- aggregate_regions(dom_out, england = TRUE)
-  dom_in_with_regions <- aggregate_regions(dom_in, england = TRUE)
+  reg_dom_out <- sum_domestic_flows(regional_flow, "out")
+  reg_dom_in <- sum_domestic_flows(regional_flow, "in")
+  
+  nat_dom_out <- sum_domestic_flows(national_flow, "out")
+  nat_dom_in <- sum_domestic_flows(national_flow, "in")
+  
+  dom_out_with_regions <- dom_out %>%
+    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>% # S and NI are already aggregated
+    rbind(reg_dom_out) %>%
+    rbind(filter(nat_dom_out, substr(gss_code, 1, 1) == "E"))
+  dom_in_with_regions <- dom_in %>%
+    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>%
+    rbind(reg_dom_in) %>%
+    rbind(filter(nat_dom_in, substr(gss_code, 1, 1) == "E"))
   
   if(is.null(upc)){
     

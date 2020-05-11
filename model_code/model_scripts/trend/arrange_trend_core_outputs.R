@@ -11,12 +11,8 @@ arrange_trend_core_outputs <- function(projection,
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
   proj_deaths <- list(deaths %>% filter(year < first_proj_yr))
   proj_births <- list(births %>% filter(year < first_proj_yr))
-  proj_dom_out <- dom_out %>% filter(year < first_proj_yr) %>%
-    aggregate_regions(england = TRUE) %>%
-    list()
-  proj_dom_in <- dom_in %>% filter(year < first_proj_yr) %>%
-    aggregate_regions(england = TRUE) %>%
-    list()
+  proj_dom_out <- list(dom_out %>% filter(year < first_proj_yr))
+  proj_dom_in <- list(dom_in %>% filter(year < first_proj_yr))
   proj_natural_change <- list()
   proj_births_by_mother <- list()
 

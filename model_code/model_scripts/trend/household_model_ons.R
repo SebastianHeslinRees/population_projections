@@ -53,7 +53,8 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
     project_forward_flat(max(popn$year)) %>%
     filter(year <= max(popn$year))
   
-  population <- filter(popn, gss_code %in% unique(household_rates$gss_code)) # filter to England, basically
+  population <- filter(popn, gss_code %in% unique(household_rates$gss_code),
+                       !substr(gss_code, 1, 3) %in% c("E12", "E92", "W92")) # filter to England, basically
   
   #       Same number as 2011 for 0-74
   #       Same proportion 75+
