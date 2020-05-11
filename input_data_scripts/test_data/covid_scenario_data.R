@@ -1,5 +1,7 @@
-#pre-calculate rates for use in trend model
+#rates and upc save location
+save_location <- "input_data/scenario_data/"
 
+#pre-calculate rates for use in trend model
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
@@ -119,6 +121,8 @@ int_in <- popmodules::calculate_mean_international_rates_or_flows(popn_mye_path 
                                                                   first_proj_yr = first_proj_yr,
                                                                   n_proj_yr = n_proj_yr)
 
+#-----------------------------------------------------
+
 
 dom_rates <- popmodules::calculate_domestic_rates_transition(dom_origin_destination_path,
                                                              popn_mye_path,
@@ -128,19 +132,62 @@ dom_rates <- popmodules::calculate_domestic_rates_transition(dom_origin_destinat
                                                              last_data_year_longterm = dom_mig_last_data_year_longterm,
                                                              years_to_avg_longterm = dom_mig_years_to_avg_longterm,
                                                              domestic_transition_yr = domestic_transition_yr)
+#---------------------------------------------
 
-temp_dir <- "input_data/rates_files/"
-saveRDS(dom_rates, paste0(temp_dir, "dom_rates.rds"))
-saveRDS(int_in, paste0(temp_dir, "int_in.rds"))
-saveRDS(int_out_rate, paste0(temp_dir, "int_out_rate.rds"))
-saveRDS(fertility, paste0(temp_dir, "fertility.rds"))
-saveRDS(mortality, paste0(temp_dir, "mortality.rds"))
+dir.create(save_location)
+saveRDS(dom_rates, paste0(save_location, "dom_rates.rds"))
+saveRDS(int_in, paste0(save_location, "int_in.rds"))
+saveRDS(int_out_rate, paste0(save_location, "int_out_rate.rds"))
+saveRDS(fertility, paste0(save_location, "fertility.rds"))
+saveRDS(mortality, paste0(save_location, "mortality.rds"))
 
-upc <- mortality %>%
-  filter(year %in% 2019:2021,
-         gss_code == "E06000001") %>%
-  mutate(upc = rate*-50000) %>%
-  select(-rate)
+#-----------------------------------------------------
 
-saveRDS(upc, paste0(temp_dir, "upc.rds"))
+###UPC
+age_sex <- data.table::fread("c:/temp/scenario_projections/total_covid_deaths_by_age_sex.csv") %>%
+  as.data.frame() %>%
+  filter(sex %in% c("male","female"))
 
+uk_2018_deaths <- readRDS("C:/Projects_c/population_projections_c/input_data/mye/2018/deaths_ons.rds") %>%
+  filter(year == 2018) %>%
+  group_by(sex, age) %>%
+  summarise(deaths = sum(deaths)) %>%
+  as.data.frame()
+
+deaths_sya <- list()
+for(i in unique(age_sex$age_group)){
+  
+  a <- filter(age_sex, age_group ==i)
+  deaths_sya[[i]] <- distribute_within_age_band(a,
+                                                uk_2018_deaths,
+                                                "deaths", "deaths",
+                                                unique(a$min), unique(a$max),
+                                                col_aggregation=c("sex"))
+}
+
+deaths_sya <- data.table::rbindlist(deaths_sya) %>%
+  as.data.frame() %>% 
+  select(sex, age, deaths)
+
+la <- data.table::fread("c:/temp/scenario_projections/total_deaths_by_LA.csv") %>%
+  as.data.frame() %>%
+  filter(sex %in% c("male","female"),
+         substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","S92","N92")) %>% 
+  recode_gss_to_2011(col_aggregation = c("gss_code","sex"))
+
+death_structure <- deaths_sya %>%
+  group_by(sex) %>%
+  mutate(structure = deaths/sum(deaths)) %>%
+  as.data.frame() %>% 
+  select(-deaths)
+
+la_sya <- left_join(la, death_structure, by="sex") %>%
+  mutate(upc = deaths*structure,
+         year = 2020) %>%
+  select(year, gss_code, sex, age, upc)%>%
+  constrain_component(deaths_sya, col_aggregation = c("sex","age"),
+                      col_popn = "upc", col_constraint = "deaths")
+
+saveRDS(la_sya, paste0(save_location,"covid19_upc.rds"))
+
+#-----------------------------------------------------
