@@ -2,15 +2,6 @@
 output_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                               projection_name) {
   
-  output_order <- readRDS("input_data/lookup/output_order.rds")
-  
-  reorder_for_output <- function(df, output_order_data = output_order) {
-    df %>%
-      left_join(output_order, by="gss_code") %>%
-      arrange(output_order) %>%
-      select(-output_order)
-  }
-
   projection[1:12] <- lapply(projection[1:12], reorder_for_output) 
   
   #RDS

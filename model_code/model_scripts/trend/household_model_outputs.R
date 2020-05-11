@@ -162,7 +162,8 @@ datastore_csv <- function(x){
     x <- mutate(x, age_group = recode(age_group, "0_4" = "00_04", "5_9" = "05_09", "85&" = "85+"))
   }
   
-  x <- dplyr::arrange_at(x, sort_order)
+  x <- dplyr::arrange_at(x, sort_order) %>%
+    reorder_for_output()
   
   #round data for output
   idx <- sapply(x, class)=="numeric"

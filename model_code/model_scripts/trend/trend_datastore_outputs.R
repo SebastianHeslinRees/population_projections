@@ -31,7 +31,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     mutate(sex = "persons") %>%
     group_by(year, gss_code, sex, age) %>%
     summarise(popn = sum(popn)) %>%
-    ungroup()%>%
+    ungroup() %>%
     wrangle_datastore_outputs()
   
   #CoC
@@ -62,6 +62,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
            int_in, int_out, int_net,
            dom_in, dom_out, dom_net,
            total_change) %>%
+    reorder_for_output() %>%
     as.data.frame()
   
   #round data for output
@@ -97,6 +98,7 @@ wrangle_datastore_outputs <- function(x){
     select(year, gss_code, borough, sex, age, popn) %>%
     mutate(popn = round(popn, digits=3)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    reorder_for_output() %>%
     as.data.frame()
   
 }
