@@ -1,11 +1,11 @@
 devtools::load_all("model_code/popmodules")
 
-female_2019 <- fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_females.csv",
+female_2019 <- data.table::fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_females.csv",
                      header = TRUE) %>%
   tidyr::pivot_longer(cols = as.character(0:90), names_to = "age", values_to = "popn") %>%
   mutate(sex = "female")
 
-male_2019 <- fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_males.csv",
+male_2019 <- data.table::fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_males.csv",
                    header = TRUE) %>%
   tidyr::pivot_longer(cols = as.character(0:90), names_to = "age", values_to = "popn") %>%
   mutate(sex = "male")
@@ -16,11 +16,11 @@ mye_2019 <- rbind(female_2019, male_2019) %>%
   filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","N92","S92")) %>%
   recode_gss_to_2011(col_aggregation = c("gss_code","age","sex")) %>%
   mutate(year = 2019) %>% 
-  select(gss_code, year, sex, age, popn) 
+  select(year, gss_code, sex, age, popn) 
 
-population_ons <- readRDS("C:/Projects_c/population_projections_c/input_data/mye/2018/population_ons.rds")%>%
-  select(gss_code, year, sex, age, popn) %>% 
-  recode_gss_to_2011(col_aggregation = c("gss_code","age","sex")) %>%
+population_ons <- readRDS("input_data/mye/2018/population_ons.rds")%>%
+  select(year, gss_code, sex, age, popn) %>% 
+  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex")) %>%
   rbind(mye_2019)
 
 saveRDS(population_ons, "input_data/mye/2019/ons_popn.rds")

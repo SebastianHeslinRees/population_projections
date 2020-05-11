@@ -29,7 +29,7 @@
 
 recode_gss_to_2011 <- function(df_in, col_geog="gss_code", col_aggregation, fun=list(sum), aggregate_data = TRUE){
 
-  df <- df %>%
+  df <- df_in %>%
     as.data.frame() %>%
     rename("gss_code" = !!col_geog)
 
@@ -99,7 +99,13 @@ recode_gss_to_2011 <- function(df_in, col_geog="gss_code", col_aggregation, fun=
                 "E07000204" = "E07000245",
                 
                 "E07000190" = "E07000246",
-                "E07000191" = "E07000246")
+                "E07000191" = "E07000246",
+                
+                #april 2020 changes
+                "E07000004" = "E06000060",
+                "E07000005" = "E06000060",
+                "E07000006" = "E06000060",
+                "E07000007" = "E06000060")
 
   df <- df %>% 
     dtplyr::lazy_dt() %>% 

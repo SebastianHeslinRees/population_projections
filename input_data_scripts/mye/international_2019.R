@@ -11,11 +11,11 @@ international_out <- data.frame(country = c("E","W","S","N"),
 #2018
 ons_int_in <- readRDS("C:/Projects_c/population_projections_c/input_data/mye/2018/international_in_ons.rds") %>%
   select(gss_code, year, sex, age, int_in) %>% 
-  recode_gss_to_2011(col_aggregation = c("gss_code","age","sex"))
+  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
 
 ons_int_out <- readRDS("C:/Projects_c/population_projections_c/input_data/mye/2018/international_out_ons.rds")  %>%
   select(gss_code, year, sex, age, int_out) %>% 
-  recode_gss_to_2011(col_aggregation = c("gss_code","age","sex"))
+  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
   
 int_in_2018 <- ons_int_in %>% 
   filter(year == 2018) %>%
