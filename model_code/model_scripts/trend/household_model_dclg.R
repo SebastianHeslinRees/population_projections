@@ -51,8 +51,7 @@ dclg_stage_1 <- function(population, stage1_file_path){
   #Make sure years match
   common_years <- intersect(stage1_data$year, population$year)
   stage1_data <- filter(stage1_data, year %in% common_years)
-  population <- filter(population, year %in% common_years,
-                       !substr(gss_code, 1, 3) %in% c("E12", "E92", "W92"))
+  population <- filter(population, year %in% common_years)
 
   #separate out data
   hh_rep_rates <- select(stage1_data, gss_code, year, sex, household_type, age_group, hh_rep_rates)
@@ -123,7 +122,7 @@ dclg_stage_1 <- function(population, stage1_file_path){
               household_population = household_population,
               communal_establishment_population = ce_population)
   
-  out <- lapply(out, aggregate_regions, england = TRUE)
+  # out <- lapply(out, aggregate_regions, england = TRUE)
   
   return(out)
 
