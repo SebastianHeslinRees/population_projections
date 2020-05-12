@@ -27,6 +27,7 @@ outputs/*
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+ds_bpo.md
 
 # Windows thumbnail cache files
 Thumbs.db

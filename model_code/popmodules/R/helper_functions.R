@@ -90,31 +90,3 @@
   }
   return(dftarget)
 }
-
-
-.aggregate_city_wards <- function(df, data_col){
-
-  col_aggregation <- setdiff(names(df), data_col)
-  
-  assertthat::assert_that(!"E09000001" %in% df$gss_code_ward,
-                          msg="ward data already contains aggregated total for City of London")
-  
-  city_wards <- ward_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
-    filter(gss_code == "E09000001")
-  
-  city <- dtplyr::lazy_dt(df) %>%
-    filter(gss_code_ward %in% city_wards$gss_code_ward) %>%
-    as.data.frame() %>%
-    mutate(gss_code_ward = "E09000001") %>%
-    dtplyr::lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
-    summarise(value = sum(!!sym(data_col))) %>%
-    as.data.frame() %>%
-    rename(!!data_col := value)
-  
-  out_df <- filter(df, !gss_code_ward %in% city_wards$gss_code_ward) %>%
-    rbind(city)
-  
-  return(out_df)
-  
-}
