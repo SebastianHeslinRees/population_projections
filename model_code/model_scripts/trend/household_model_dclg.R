@@ -18,6 +18,8 @@ household_model_dclg <- function(population, stage1_file_path, stage2_file_path)
   stage_1 <- dclg_stage_1(population, stage1_file_path)
   stage_2 <- dclg_stage_2(stage2_file_path, stage_1)
 
+  validate_dclg_outputs(stage_1, stage_2, max(population$year))
+  
   return(list(stage_1 = stage_1, stage_2 = stage_2))
 
 }
@@ -115,10 +117,14 @@ dclg_stage_1 <- function(population, stage1_file_path){
            household_population = scaled_hh_popn,
            communal_establishment_population = scaled_ce_popn)
 
-  return(list(detailed_households = detailed_households,
+  out <- list(detailed_households = detailed_households,
               total_households = total_households,
               household_population = household_population,
-              communal_establishment_population = ce_population))
+              communal_establishment_population = ce_population)
+  
+  # out <- lapply(out, aggregate_regions, england = TRUE)
+  
+  return(out)
 
 }
 
@@ -222,4 +228,36 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
               detailed_households = households_stage_2_ages,
               household_population = household_population,
               communal_establishment_population = ce_popn))
+}
+
+
+#-----------------------------------------------------
+
+validate_dclg_outputs <- function(stage_1, stage_2, max_year) {
+  
+  validate_population(stage_1$detailed_households,
+                      col_aggregation = c("year", "gss_code", "household_type", "sex", "age_group"),
+                      col_data = c("households", "household_population", "communal_establishment_population"))
+  validate_population(stage_1$total_households,
+                      col_aggregation = c("year", "gss_code"),
+                      col_data = c("stage_1_households"))
+  validate_population(stage_1$household_population,
+                      col_aggregation = c("year", "gss_code", "sex", "age_group"),
+                      col_data = "household_population")
+  validate_population(stage_1$communal_establishment_population,
+                      col_aggregation = c("year", "gss_code", "sex", "age_group"),
+                      col_data = "communal_establishment_population")
+  
+  for(i in 1:2) {
+    result <- stage_2[[i]] %>%
+      filter(year <= max_year) %>%
+      validate_population(col_aggregation = c("gss_code", "year", "age_group", "household_type"),
+                          col_data = "households")
+  }
+  for(i in 3:5) {
+    result <- stage_2[[i]] %>%
+      filter(year <= max_year) %>%
+      validate_population(col_aggregation = c("gss_code", "year", "age_group"))
+  }
+  return(TRUE)
 }

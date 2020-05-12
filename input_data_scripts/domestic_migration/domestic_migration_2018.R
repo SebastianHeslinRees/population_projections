@@ -6,6 +6,8 @@ library(data.table)
 rm(list=ls()) # we're going to need memory, sorry
 message("domestic migration")
 
+region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
+
 domestic_file <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/processed/2002-2018 but codes not changed.rds"
 
 domestic <- readRDS(domestic_file) %>%
@@ -17,9 +19,25 @@ domestic <- domestic %>%
   popmodules::recode_gss_to_2011(col_geog="gss_in", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum)) %>%
   popmodules::recode_gss_to_2011(col_geog="gss_out", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum))
 
+domestic_region <- domestic %>%
+  left_join(region_lookup, by=c("gss_in"="gss_code")) %>%
+  select(-gss_in) %>%
+  rename(gss_in = region_gss_code) %>%
+  left_join(region_lookup, by=c("gss_out"="gss_code")) %>%
+  select(-gss_out) %>% 
+  rename(gss_out = region_gss_code) %>%
+  dtplyr::lazy_dt() %>%
+  filter(gss_in != gss_out) %>%
+  group_by(gss_in, gss_out, age, sex, year) %>%
+  summarise(value = sum(value)) %>%
+  as.data.frame()
 
-dir.create("input_data/domestic_migration/", showWarnings = T)
-dir.create("input_data/domestic_migration/2018", showWarnings = T)
+domestic <- rbind(domestic, domestic_region)
+
+rm(domestic_region)
+
+dir.create("input_data/domestic_migration/", showWarnings = F)
+dir.create("input_data/domestic_migration/2018", showWarnings = F)
 
 datestamp <- Sys.Date()
 
@@ -39,10 +57,13 @@ if(FALSE) { # tidyverse equivalent
     ungroup()
 }
 
+domestic_region <- filter(domestic, substr(gss_in,1,3) %in% c("E12","W92"))
+domestic_la <- filter(domestic, !substr(gss_in,1,3) %in% c("E12","W92"))
+
 message("Saving domestic origin-destination flows. This may take a while")
-saveRDS(domestic, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))
-
-
+saveRDS(domestic_la, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))
+saveRDS(domestic_region, file = paste0("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds"))
+rm(domestic_la, domestic_region)
 
 # Calculate net flows
 message("Calculating historic net flows. This may also take a while")

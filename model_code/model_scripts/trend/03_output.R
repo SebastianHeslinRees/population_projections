@@ -2,11 +2,13 @@
 output_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                               projection_name) {
   
+  projection[1:12] <- lapply(projection[1:12], reorder_for_output) 
+  
   #RDS
-  lapply(seq_along(projection), 
-         function(i) saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")) %>%
-    invisible()
- 
+  for(i in seq_along(projection)) {
+     saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
+  }
+  
   #CSV
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
@@ -26,7 +28,8 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
       b_m_a <- filter(data, sex == "female", age %in% 15:49) %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
-        pivot_wider(names_from = year, values_from = rounded)
+        pivot_wider(names_from = year, values_from = rounded) %>%
+        reorder_for_output()
       
       data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
       
@@ -35,12 +38,14 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
       female <- filter(data, sex == "female") %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
-        pivot_wider(names_from = year, values_from = rounded)
+        pivot_wider(names_from = year, values_from = rounded) %>%
+        reorder_for_output()
       
       male <- filter(data, sex == "male")  %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3))%>%
-        pivot_wider(names_from = year, values_from = rounded)
+        pivot_wider(names_from = year, values_from = rounded) %>%
+        reorder_for_output()
       
       persons <- data %>%
         mutate(sex = "persons") %>%
@@ -49,28 +54,31 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         summarise(value = sum(value)) %>%
         ungroup() %>%
         mutate(value = round(value, 3))%>%
-        pivot_wider(names_from = year, values_from = value)
+        pivot_wider(names_from = year, values_from = value) %>%
+        reorder_for_output()
       
       data.table::fwrite(female, paste0(name_stub,"_female.csv"))
       data.table::fwrite(male, paste0(name_stub,"_male.csv"))
       data.table::fwrite(persons, paste0(name_stub,"_persons.csv"))
+      
     }
     
   }
   
-  lapply(seq(n_csv_elements), 
-         function(i) make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))) %>%
-    invisible()
+  for(i in 1:n_csv_elements) { 
+    make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
+  }
   
   #Excel
-  trend_datastore_outputs(population = projection$population,
-                    births = projection$births,
-                    deaths = projection$deaths,
-                    int_in = projection$int_in,
-                    int_out = projection$int_out,
-                    dom_in = projection$dom_in,
-                    dom_out = projection$dom_out,
-                    output_dir = output_dir,
-                    excel_file_name = paste0(projection_name,".xlsx"),
-                    write_excel = write_excel)
+  if(write_excel){
+    trend_datastore_outputs(population = projection$population,
+                            births = projection$births,
+                            deaths = projection$deaths,
+                            int_in = projection$int_in,
+                            int_out = projection$int_out,
+                            dom_in = projection$dom_in,
+                            dom_out = projection$dom_out,
+                            output_dir = output_dir,
+                            excel_file_name = paste0(projection_name,".xlsx"))
+  }
 }
