@@ -18,7 +18,7 @@ ons_births <- readRDS("input_data/mye/2018/births_ons.rds")
 additional_births <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/births_borough_mid_2019.csv") %>%
   as.data.frame() %>%
   select(gss_code, sex, births) %>%
-  # recode_gss_to_2011(col_geog="gss_code",
+  # recode_gss_codes(col_geog="gss_code",
   #                    col_aggregation=c("gss_code","sex"),
   #                    fun=list(sum)) %>%
   # filter(gss_code %in% ons_births$gss_code) %>% 

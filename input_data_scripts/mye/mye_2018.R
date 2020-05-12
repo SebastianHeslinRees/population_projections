@@ -104,7 +104,7 @@ uk_deaths <- filter(uk_coc, component == "deaths") %>%
 #Append Scotland and NI data to E&W
 #Recode any gss codes which are not standard 2011 codes
 mye_coc <- rbind(mye_coc, uk_pop, uk_births, uk_international, uk_net_international, uk_deaths) %>%
-  recode_gss_to_2011(col_geog="gss_code",
+  recode_gss_codes(col_geog="gss_code",
                      col_aggregation=c("gss_code","gss_name","country","year","component","sex","age","geography"),
                      fun=list(sum))
 

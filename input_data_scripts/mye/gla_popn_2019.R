@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 #read in all the other components
 gla_popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>%
   select(year, gss_code, sex, age, popn) %>%
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","sex","age"))
+  recode_gss_codes(col_aggregation = c("year","gss_code","sex","age"), recode_to_year = 2020)
 
 births <- readRDS("input_data/mye/2019/temp_births.rds") %>%
   filter(year == 2019) %>%
@@ -44,9 +44,7 @@ popn_2019 <- gla_popn %>%
   select(year, gss_code, sex, age, popn) %>%
   check_negative_values(data_col = "popn")
 
-
 gla_mye <- rbind(gla_popn, popn_2019)
-
 
 #check geographies match
 validate_same_geog(births, gla_international_in)

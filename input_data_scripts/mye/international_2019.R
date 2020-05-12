@@ -15,11 +15,11 @@ international_out <- data.frame(country = c("E","W","S","N"),
 #2018
 ons_int_in <- readRDS("input_data/mye/2018/international_in_ons.rds") %>%
   select(gss_code, year, sex, age, int_in) %>% 
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
+  recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"), recode_to_year = 2020)
 
 ons_int_out <- readRDS("input_data/mye/2018/international_out_ons.rds")  %>%
   select(gss_code, year, sex, age, int_out) %>% 
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
+  recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"), recode_to_year = 2020)
   
 int_in_2018 <- ons_int_in %>% 
   filter(year == 2018) %>%
@@ -69,11 +69,11 @@ saveRDS(int_out, "input_data/mye/2019/temp_ons_international_out.rds")
 #2018
 gla_int_in <- readRDS("input_data/mye/2018/international_in_gla_2019-11-13.rds") %>%
   select(gss_code, year, sex, age, int_in) %>% 
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
+  recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"), recode_to_year = 2020)
 
 gla_int_out <- readRDS("input_data/mye/2018/international_out_gla_2019-11-13.rds")  %>%
   select(gss_code, year, sex, age, int_out) %>% 
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
+  recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"), recode_to_year = 2020)
 
 gla_in_2018 <- ons_int_in %>% 
   filter(year == 2018) %>%

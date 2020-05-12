@@ -36,7 +36,7 @@ national_fert <- filter(national_fert, gss_code != "W92000004")
 ons_fert <- rbind(ons_fert, national_fert, wales) %>%
   as.data.frame() %>%
   select(gss_code, sex, age, fert_rate) %>%
-  popmodules::recode_gss_to_2011(col_geog = "gss_code",
+  popmodules::recode_gss_codes(col_geog = "gss_code",
                                  col_aggregation = c("gss_code", "sex", "age"),
                                  fun = list(mean)) %>%
   as.data.frame()

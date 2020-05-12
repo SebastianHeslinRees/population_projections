@@ -15,7 +15,7 @@ process_rdata_file <- function(component, col_name){
     select(year,gss_code,sex,age,estimate) %>%
     mutate(estimate = ifelse(estimate <0, 0, estimate)) %>%
     rename(!!col_name := estimate) %>%
-    popmodules::recode_gss_to_2011(col_aggregation = c("year","gss_code","sex","age")) %>%
+    popmodules::recode_gss_codes(col_aggregation = c("year","gss_code","sex","age")) %>%
     filter(year > 2001)
   
 }
