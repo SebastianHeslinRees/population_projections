@@ -117,10 +117,14 @@ dclg_stage_1 <- function(population, stage1_file_path){
            household_population = scaled_hh_popn,
            communal_establishment_population = scaled_ce_popn)
 
-  return(list(detailed_households = detailed_households,
+  out <- list(detailed_households = detailed_households,
               total_households = total_households,
               household_population = household_population,
-              communal_establishment_population = ce_population))
+              communal_establishment_population = ce_population)
+  
+  # out <- lapply(out, aggregate_regions, england = TRUE)
+  
+  return(out)
 
 }
 

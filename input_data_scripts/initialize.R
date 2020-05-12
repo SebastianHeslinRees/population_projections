@@ -16,3 +16,4 @@ source("input_data_scripts/ldd/ldd.R")
 
 dir.create("input_data/lookup", showWarnings = FALSE)
 file.copy("Q:/Teams/D&PA/Demography/Projections/population_models/input_data/lookup/lad18_and_region_code_to_name.rds", "input_data/lookup/")
+file.copy("Q:/Teams/D&PA/Demography/Projections/population_models/input_data/lookup/output_order.rds", "input_data/lookup/")
