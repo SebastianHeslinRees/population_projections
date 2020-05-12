@@ -1,4 +1,5 @@
 devtools::load_all("model_code/popmodules")
+library(dplyr)
 
 female_2019 <- data.table::fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_females.csv",
                      header = TRUE) %>%
@@ -23,4 +24,6 @@ population_ons <- readRDS("input_data/mye/2018/population_ons.rds")%>%
   recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex")) %>%
   rbind(mye_2019)
 
-saveRDS(population_ons, "input_data/mye/2019/ons_popn.rds")
+saveRDS(population_ons, "input_data/mye/2019/temp_ons_popn.rds")
+
+rm(list=ls())

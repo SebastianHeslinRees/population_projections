@@ -37,7 +37,10 @@ scaled_deaths <- sya_deaths_2018 %>%
   mutate(year = 2019) %>%
   select(gss_code, year, sex, age, deaths)
 
-deaths_final <- rbind(deaths_backseries, scaled_deaths)
+deaths_final <- rbind(deaths_backseries, scaled_deaths) %>%
+  select(year, gss_code, sex, age, deaths)
 
 
-saveRDS(deaths_final, "input_data/mye/2019/deaths.rds")
+saveRDS(deaths_final, "input_data/mye/2019/temp_deaths.rds")
+
+rm(list=ls())

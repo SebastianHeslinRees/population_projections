@@ -1,4 +1,6 @@
 library(data.table)
+library(dplyr)
+devtools::load_all("model_code/popmodules")
 
 #2019 Births
 
@@ -46,9 +48,10 @@ scotland <- data.frame(gss_code = rep("S92000003",2),
 
 births_2019 <- filter(births_2019, !gss_code %in% c("E09000012, E09000001",
                                                     "E06000052, E06000053")) %>%
-  rbind(hackney, city, cornwall, scilly, nireland, scotland)
+  rbind(hackney, city, cornwall, scilly, nireland, scotland) %>% 
+  recode_gss_to_2011(col_aggregation = c("gss_code","sex"))
 
-births_2018 <- readRDS("C:/Projects_c/population_projections_c/input_data/mye/2018/births_ons.rds")  %>%
+births_2018 <- readRDS("input_data/mye/2018/births_ons.rds")  %>%
   select(-gss_name, -country, -geography) %>% 
   recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age"))
 
@@ -58,7 +61,9 @@ mye_births <- births_2019 %>%
   mutate(year = 2019,
          age = 0) %>%
   complete_fertility(births_2018, col_rate = "births") %>%
-  rbind(births_2018)
+  rbind(births_2018) %>%
+  select(year, gss_code, sex, age, births)
 
-saveRDS(mye_births, "input_data/mye/2019/births.rds")
+saveRDS(mye_births, "input_data/mye/2019/temp_births.rds")
   
+rm(list=ls())
