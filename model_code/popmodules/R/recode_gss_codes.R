@@ -110,11 +110,10 @@ recode_gss_to_2011 <- function(df_in, col_geog="gss_code", col_aggregation, fun=
   df <- df %>% 
     dtplyr::lazy_dt() %>% 
     mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
-    rename(!!col_geog := "gss_code") %>% 
     group_by_at(col_aggregation) %>%
     summarise_all(.funs=fun) %>%
-    as.data.frame()
-
+    as.data.frame() %>%
+    rename(!!col_geog := "gss_code")
 
 }
 
