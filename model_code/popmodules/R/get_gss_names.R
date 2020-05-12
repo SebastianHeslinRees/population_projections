@@ -1,6 +1,6 @@
 get_gss_names <- function(){
 
-  gss_names <- readRDS("input_data/lookup/lad18_code_to_name.rds") %>%
+  gss_names <- readRDS("input_data/lookup/lad18_and_region_code_to_name.rds") %>%
     data.frame() %>%
     popmodules::recode_gss_to_2011(col_aggregation = c("gss_code","gss_name"), aggregate_data = FALSE)
 

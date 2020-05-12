@@ -51,8 +51,7 @@ output_housing_led_projection <- function(projection, output_dir,
   saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
   # Create extra tables to to ouput
-  names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv") %>%
-    as.data.frame()
+  names_lookup <- get_gss_names()
   popn <- left_join(projection[["population"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")
 

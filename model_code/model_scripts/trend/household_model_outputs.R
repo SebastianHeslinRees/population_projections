@@ -90,6 +90,10 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     
     output_dataframes <- lapply(output_dataframes, datastore_csv)
     
+    output_dataframes$household_summary <- output_dataframes$household_summary %>%
+      mutate(average_household_size = (household_population / households) %>%
+                                      round(digits = 3)) # since the summing in datastore_csv gets this wrong
+    
     if(model == "dclg"){
       #dclg excel file is too big to write out
       for(i in seq(output_dataframes)){
@@ -135,33 +139,26 @@ datastore_csv <- function(x){
   
   sort_order <- intersect(names(x), c("gss_code", "gss_name", "year", "sex", "age_group", "household_type"))
   data_cols <- setdiff(names(x), sort_order)
-  ix_averages <- grepl("average", data_cols)
-  average_cols <- data_cols[ix_averages]
-  sum_cols <- data_cols[!ix_averages]
   
   x <- filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
   
   if(!"E12000007" %in% x$gss_code){
-
-    x <- mutate(x, gss_code = "E12000007") %>%
-      group_by_at(sort_order)
-    
-    x_summary <- summarise_at(x, sum_cols, .funs=list(sum))
-    
-    if(length(average_cols) > 0) {
-      x_summary_averages <- summarise_at(x, average_cols, .funs=list(mean))
-      x_summary <- left_join(x, x_summary_averages, by = sort_order)
-    }
-    
-    x <- rbind(x_summary, x) %>%
+    x_summary <- mutate(x, gss_code = "E12000007", gss_name = "London (total)") %>%
+      group_by_at(sort_order) %>%
+      summarise_at(data_cols, .funs=list(sum)) %>%
       ungroup()
+    
+    x <- rbind(x_summary, x)
+  } else {
+    x <- mutate(x, gss_name = recode(gss_name, "London" = "London (total)"))
   }
   
   if("age_group" %in% sort_order){
     x <- mutate(x, age_group = recode(age_group, "0_4" = "00_04", "5_9" = "05_09", "85&" = "85+"))
   }
   
-  x <- dplyr::arrange_at(x, sort_order)
+  x <- dplyr::arrange_at(x, sort_order) %>%
+    reorder_for_output()
   
   #round data for output
   idx <- sapply(x, class)=="numeric"
