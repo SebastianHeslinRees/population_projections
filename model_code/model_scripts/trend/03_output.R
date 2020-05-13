@@ -38,13 +38,17 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
       female <- filter(data, sex == "female") %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3)) %>%
+        arrange(year) %>% # so that pivot_wider behaves
         pivot_wider(names_from = year, values_from = rounded) %>%
+        arrange(gss_code, sex, age) %>%
         reorder_for_output()
       
       male <- filter(data, sex == "male")  %>%
         rename(rounded = !!data_col) %>%
         mutate(rounded = round(rounded, 3))%>%
+        arrange(year) %>%
         pivot_wider(names_from = year, values_from = rounded) %>%
+        arrange(gss_code, sex, age) %>%
         reorder_for_output()
       
       persons <- data %>%
@@ -54,7 +58,9 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
         summarise(value = sum(value)) %>%
         ungroup() %>%
         mutate(value = round(value, 3))%>%
+        arrange(year) %>%
         pivot_wider(names_from = year, values_from = value) %>%
+        arrange(gss_code, sex, age) %>%
         reorder_for_output()
       
       data.table::fwrite(female, paste0(name_stub,"_female.csv"))

@@ -90,6 +90,9 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
 
 wrangle_datastore_outputs <- function(x){
   
+  years <- max(min(x$year), 2011):max(x$year) %>%
+    as.character()
+  
   wrangled <- filter(x, year >= 2011) %>%
     filter_to_london() %>%
     left_join(get_gss_names(), by = "gss_code") %>%
@@ -98,6 +101,8 @@ wrangle_datastore_outputs <- function(x){
     select(year, gss_code, borough, sex, age, popn) %>%
     mutate(popn = round(popn, digits=3)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    select_at(c("gss_code", "borough", "age", "sex", years)) %>%
+    arrange(gss_code, sex, age) %>%
     reorder_for_output() %>%
     as.data.frame()
   
