@@ -10,7 +10,10 @@ run_trend_model <- function(config_list) {
   source("model_code/model_scripts/trend/household_model_outputs.R")
   source("model_code/model_scripts/trend/trend_datastore_outputs.R")
   
-  expected_config <- c("first_proj_yr", 
+  region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
+
+  expected_config <- c("projection_name",
+                       "first_proj_yr", 
                        "n_proj_yr",
                        "popn_mye_path", 
                        "deaths_mye_path", 
@@ -60,7 +63,7 @@ run_trend_model <- function(config_list) {
   
   
   # get the MYEs
-  message("get components")
+  message("get components backseries")
   population <- get_component_from_file(filepath = config_list$popn_mye_path, 
                                         max_yr = config_list$first_proj_yr - 1)
   
@@ -152,7 +155,8 @@ run_trend_model <- function(config_list) {
       int_out_method = config_list$int_out_method,
       constraints = constraints,
       upc = upc,
-      projection_year = projection_year)
+      projection_year = projection_year,
+      region_lookup = region_lookup)
     
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
@@ -162,10 +166,13 @@ run_trend_model <- function(config_list) {
                                            fertility_rates, mortality_rates,
                                            int_out_flows_rates, int_in_flows, domestic_rates,
                                            first_proj_yr, last_proj_yr)
+ 
+  validate_trend_core_outputs(projection)
   
   ## household models
   message('')
   message('running household models')
+
   projection$ons_households <- household_model_ons(population = projection$population,
                                                    stage1_file_path = config_list$ons_stage1_file_path,
                                                    stage2_file_path = config_list$ons_stage2_file_path,
@@ -178,9 +185,13 @@ run_trend_model <- function(config_list) {
   
   ## write the output data
   message("running outputs")
-  output_projection(projection, config_list$output_dir, write_excel = config_list$write_excel, n_csv_elements=8)
-  household_model_outputs(projection$ons_households, model = "ons", config_list$output_dir, write_excel = config_list$write_excel)
-  household_model_outputs(projection$dclg_households, model = "dclg", config_list$output_dir, write_excel = config_list$write_excel)
+  output_projection(projection, config_list$output_dir, write_excel = config_list$write_excel,
+                    n_csv_elements=8, projection_name = config_list$projection_name)
+  
+  household_model_outputs(projection$ons_households, model = "ons", config_list$output_dir,
+                          write_excel = config_list$write_excel, projection_name = config_list$projection_name)
+  household_model_outputs(projection$dclg_households, model = "dclg", config_list$output_dir,
+                          write_excel = config_list$write_excel, projection_name = config_list$projection_name)
   
   ## output the QA
   if(config_list$write_QA){
@@ -202,6 +213,8 @@ run_trend_model <- function(config_list) {
   return(projection)
 }
 
+
+#===============================================================================
 
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
@@ -260,4 +273,27 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   }
   
   invisible(TRUE)
+}
+
+
+#===============================================================================
+
+validate_trend_core_outputs <- function(projection) {
+  
+  components <- names(projection)
+  expected_components <- c("population", "deaths","births", "int_out", "int_in",
+                           "dom_out", "dom_in", "births_by_mothers_age", "natural_change",
+                           "fertility_rates", "mortality_rates", "int_out_rates", "domestic_rates")
+  
+  assert_that(identical(components, expected_components))
+
+  warning("Skipping tests on domestic trend output until aggregated domestic backseries are implemented")
+  #sapply(projection[1:12], validate_population)
+  sapply(projection[c(1,2,3,4,5,8,9,10,11,12)], validate_population)
+  
+  
+  validate_population(projection$domestic_rates,
+                      col_aggregation = c("gss_out", "gss_in", "age", "sex"),
+                      col_data = "rate",
+                      test_complete = FALSE)
 }

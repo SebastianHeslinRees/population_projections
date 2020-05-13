@@ -19,7 +19,7 @@ housing_led_proj_path <- "outputs/housing_led/2018/2018_based_shlaa_dev_20-02-05
 
 ####Functions####
 
-names_lookup <- data.table::fread("input_data/lookup/lad18_code_to_name.csv")
+names_lookup <- get_gss_names()
 
 process_projection <- function(x){
   nm <- last(names(x))
