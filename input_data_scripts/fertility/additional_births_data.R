@@ -55,7 +55,7 @@ not_london_backseries_births <- filter(ons_births, !gss_code %in% unique(additio
 for(method in c("average", "trend")) {
   london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
                                               births_mye_path = london_backseries_births,
-                                              target_curves_filepath = "input_data/fertility/ons_asfr_curves.rds",
+                                              target_curves_filepath = "input_data/fertility/ons_asfr_curves_2018.rds",
                                               last_data_year = 2019,
                                               n_years_to_avg = 5,
                                               avg_or_trend = method,
@@ -69,7 +69,7 @@ for(method in c("average", "trend")) {
   
   not_london_fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
                                                   births_mye_path = not_london_backseries_births,
-                                                  target_curves_filepath = "input_data/fertility/ons_asfr_curves.rds",
+                                                  target_curves_filepath = "input_data/fertility/ons_asfr_curves_2018.rds",
                                                   last_data_year = 2018,
                                                   n_years_to_avg = 5,
                                                   avg_or_trend = method,

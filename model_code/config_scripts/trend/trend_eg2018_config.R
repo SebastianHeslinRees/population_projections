@@ -20,14 +20,14 @@ output_dir <- paste0("outputs/trend/2018/", projection_name, "/")
 mortality_years_to_avg <- 1
 mortality_avg_or_trend <- "average"
 mortality_last_data_year <- 2018
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 1
 fertility_avg_or_trend <- "average"
 fertility_last_data_year <- 2018
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
+fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
