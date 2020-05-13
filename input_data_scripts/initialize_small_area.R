@@ -5,10 +5,12 @@ library(dplyr)
 library(data.table)
 library(tidyr)
 
-source('population_projections_c/initialize_lookups.R')
-
 #Directory
 dir.create("input_data/small_area_model", showWarnings = FALSE)
+
+dir.create("input_data/lookup", showWarnings = FALSE)
+R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/model_lookups",
+                       "input_data/lookup")
 
 #LDD Polygon splits file
 polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")	
