@@ -43,6 +43,21 @@ run_housing_led_model <- function(config_list){
     return(dfs)
   }
   
+  filter_to_LAs <- function(df) {
+    if("gss_code" %in% names(df)) {
+      df <- filter(df, substr(gss_code, 1, 2) %in% c("E0", "W0", "S9", "N9"))
+    }
+    else if("gss_in" %in% names(df)) {
+      df <- filter(df, substr(gss_in, 1, 2) %in% c("E0", "W0", "S9", "N9"),
+                       substr(gss_out, 1, 2) %in% c("E0", "W0", "S9", "N9"))
+    }
+    else {
+      print(names(df))
+      stop("filter_to_LAs could not find gss_column")
+    }
+  }
+  
+  
   external_trend_households_path <- paste0(config_list$external_trend_path,"households/",config_list$trend_households_file)
   external_communal_est_path <- paste0(config_list$external_trend_path,"households/",config_list$communal_est_file)
   
@@ -52,7 +67,8 @@ run_housing_led_model <- function(config_list){
          mortality_rates = paste0(config_list$external_trend_path,"mortality_rates.rds"),
          int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates.rds"),
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds"),
-         domestic_rates = config_list$domestic_initial_rate_path))
+         domestic_rates = config_list$domestic_initial_rate_path)) %>%
+    lapply(filter_to_LAs)
  
   if(!is.null(config_list$additional_births_path)){
     additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
@@ -72,6 +88,7 @@ run_housing_led_model <- function(config_list){
     list(birth_constraint = paste0(config_list$external_trend_path,"births.rds"),
          death_constraint = paste0(config_list$external_trend_path,"deaths.rds"),
          international_out_constraint = paste0(config_list$external_trend_path,"int_out.rds"))) %>%
+    lapply(filter_to_LAs) %>%
     create_constraints()
   
   if(config_list$constrain_projection){
@@ -83,6 +100,7 @@ run_housing_led_model <- function(config_list){
       as.data.frame()
     
     hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
+      filter_to_LAs() %>%
       filter(gss_code %in% hma_list$gss_code) %>%
       dtplyr::lazy_dt() %>%
       left_join(hma_list, by="gss_code") %>%
@@ -98,6 +116,7 @@ run_housing_led_model <- function(config_list){
   
   #other data
   communal_establishment_population <- readRDS(external_communal_est_path) %>%
+    filter_to_LAs() %>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
     summarise(communal_est_popn = sum(communal_establishment_population)) %>%
@@ -108,7 +127,8 @@ run_housing_led_model <- function(config_list){
   
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
-    filter(year <= (config_list$first_proj_yr-1)) %>% 
+    filter(year <= (config_list$first_proj_yr-1)) %>%
+    filter_to_LAs() %>% 
     #filter(year <= config_list$ldd_final_yr)%>%
     dtplyr::lazy_dt() %>%
     group_by(gss_code, year) %>%
@@ -177,13 +197,16 @@ run_housing_led_model <- function(config_list){
   
   #Starting population
   curr_yr_popn <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
-    filter(year == config_list$first_proj_yr-1)
+    filter(year == config_list$first_proj_yr-1) %>%
+    filter_to_LAs()
   
-  #Other varibales
+  #Other variables
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
   final_proj_yr <- config_list$final_proj_yr
   additional_births_years <- ifelse(exists("additional_births"), unique(additional_births$year), 0)
+  
+  region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
   projection <- list()
   trend_projection <- list()
@@ -237,7 +260,8 @@ run_housing_led_model <- function(config_list){
                                                       int_out_method = int_out_method,
                                                       constraints = npp_constraints,
                                                       upc = upc,
-                                                      projection_year)
+                                                      projection_year,
+                                                      region_lookup = region_lookup)
     
     projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                       trend_projection = trend_projection[[projection_year]],
