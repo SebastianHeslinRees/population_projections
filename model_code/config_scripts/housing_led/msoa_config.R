@@ -14,6 +14,9 @@ small_area_births_backseries_path <- "input_data/small_area_model/msoa_births.rd
 small_area_deaths_backseries_path <- "input_data/small_area_model/msoa_deaths.rds"
 small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds"
 
+small_area_births_sya_path <- "input_data/small_area_model/msoa_sya_births.rds"
+small_area_deaths_sya_path <- "input_data/small_area_model/msoa_sya_deaths.rds"
+
 adults_per_dwelling_path <- "input_data/small_area_model/msoa_adults_per_dwelling.rds"
 small_area_to_district_path <- "input_data/lookup/msoa_to_district.rds"
 out_migration_rates_path <- "input_data/small_area_model/msoa_out_migration_rates.rds"
@@ -56,6 +59,8 @@ msoa_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          
                          birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                          death_rate_n_years_to_avg = death_rate_n_years_to_avg,
+                         small_area_births_sya_path = small_area_births_sya_path,
+                         small_area_deaths_sya_path = small_area_deaths_sya_path,
                          
                          ldd_final_yr = ldd_final_yr,
                          
