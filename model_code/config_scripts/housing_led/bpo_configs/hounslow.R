@@ -1,7 +1,7 @@
 source('model_code/model_scripts/housing_led/run_bpo_projection.R')
 
 for(scenario in c("high","medium","low")){
-  bpo_name <- run_bpo_projection(bpo_name = "hounslow_scenario_2",
+  bpo_name <- run_bpo_projection(bpo_name = "hounslow",
                                  dev_first_yr = 2020,
                                  shlaa_first_yr = 2035,
                                  final_proj_yr = 2050,
@@ -9,7 +9,7 @@ for(scenario in c("high","medium","low")){
                                  fertility_scenario = "average")
 }
 
-bpo_name <- run_bpo_projection(bpo_name = "hounslow_scenario_2",
+bpo_name <- run_bpo_projection(bpo_name = "hounslow",
                                dev_first_yr = 2020,
                                shlaa_first_yr = 2035,
                                final_proj_yr = 2050,
