@@ -24,7 +24,7 @@ run_housing_led_model <- function(config_list){
                        "additional_births_path",
                        "fertility_rates_path",
                        "last_data_yr")
- 
+  
   validate_config_list(config_list, expected_config)
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
@@ -42,22 +42,7 @@ run_housing_led_model <- function(config_list){
     
     return(dfs)
   }
-  
-  filter_to_LAs <- function(df) {
-    if("gss_code" %in% names(df)) {
-      df <- filter(df, substr(gss_code, 1, 2) %in% c("E0", "W0", "S9", "N9"))
-    }
-    else if("gss_in" %in% names(df)) {
-      df <- filter(df, substr(gss_in, 1, 2) %in% c("E0", "W0", "S9", "N9"),
-                       substr(gss_out, 1, 2) %in% c("E0", "W0", "S9", "N9"))
-    }
-    else {
-      print(names(df))
-      stop("filter_to_LAs could not find gss_column")
-    }
-  }
-  
-  
+
   external_trend_households_path <- paste0(config_list$external_trend_path,"households/",config_list$trend_households_file)
   external_communal_est_path <- paste0(config_list$external_trend_path,"households/",config_list$communal_est_file)
   
@@ -69,7 +54,7 @@ run_housing_led_model <- function(config_list){
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds"),
          domestic_rates = config_list$domestic_initial_rate_path)) %>%
     lapply(filter_to_LAs)
- 
+  
   if(!is.null(config_list$additional_births_path)){
     additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
       data.table::rbindlist()
@@ -237,7 +222,7 @@ run_housing_led_model <- function(config_list){
     } else {
       curr_yr_actual_births <- NULL
     }
-
+    
     if(config_list$constrain_projection){
       curr_yr_hma_constraint <- filter(hma_constraint, year == projection_year)
     }

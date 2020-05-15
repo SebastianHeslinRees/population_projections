@@ -34,7 +34,7 @@ output_housing_led_projection <- function(projection, output_dir,
          dom_out = paste0(external_trend_path,"dom_out.rds"),
          dom_in = paste0(external_trend_path,"dom_in.rds")
     )) %>%
-    lapply(function(x) filter(x, substr(gss_code, 1, 2) %in% c("E0", "W0", "S9", "N9")))
+    lapply(filter_to_LAs)
   
   
   for(x in names(backseries)){
