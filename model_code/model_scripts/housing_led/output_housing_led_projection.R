@@ -33,7 +33,9 @@ output_housing_led_projection <- function(projection, output_dir,
          int_in = paste0(external_trend_path,"int_in.rds"),
          dom_out = paste0(external_trend_path,"dom_out.rds"),
          dom_in = paste0(external_trend_path,"dom_in.rds")
-    ))
+    )) %>%
+    lapply(filter_to_LAs)
+  
   
   for(x in names(backseries)){
     

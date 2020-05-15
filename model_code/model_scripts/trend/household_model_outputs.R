@@ -83,7 +83,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
   saveRDS(model_output[['stage_1']][['communal_establishment_population']], paste0(hh_output_dir, model, "_", "communal_est_population.rds"))
   saveRDS(model_output[['stage_2']][['constrained']], paste0(hh_output_dir, model, "_", "stage_2_households.rds"))
   saveRDS(select(output_dataframes[['household_summary']],
-                 year, gss_code, gss_name, average_household_size),
+                 year, gss_code, gss_name, ahs = average_household_size),
           paste0(hh_output_dir, model, "_", "ahs.rds"))
   
   if(write_excel){
