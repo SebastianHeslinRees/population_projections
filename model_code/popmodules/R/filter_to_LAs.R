@@ -7,7 +7,7 @@
 #'
 #' @import assertthat
 #' @importFrom dtplyr lazy_dt
-#'
+#' @import dplyr
 #' @export
 
 filter_to_LAs <- function(df) {
