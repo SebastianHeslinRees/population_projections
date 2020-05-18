@@ -64,8 +64,8 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          
                          projection_type = projection_type,
                          
-                         births_sya_path = small_area_births_sya_path,
-                         deaths_sya_path = small_area_deaths_sya_path)
+                         small_area_births_sya_path = small_area_births_sya_path,
+                         small_area_deaths_sya_path = small_area_deaths_sya_path)
 
 rm(list = setdiff(ls(), "ward_config_list"))
 

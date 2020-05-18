@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
 #Setup
-projection_name <- "2018_based_shlaa_dev"
+projection_name <- "test"
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
@@ -18,6 +18,7 @@ ahs_cap_year <- 2019
 ahs_method <- 0
 
 ldd_final_yr <- 2018
+last_data_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
@@ -43,6 +44,7 @@ config_list <- list(
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
   ldd_final_yr = ldd_final_yr,
+  last_data_yr = last_data_yr,
   output_dir = output_dir,
   constrain_projection = constrain_projection,
   domestic_transition_yr = domestic_transition_yr,
