@@ -2,7 +2,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
                                          births, deaths, first_proj_yr,
                                          lookup){
   
-  borough_names <- readRDS("input_data/lookup/lad18_code_to_name.rds")
+  borough_names <- get_gss_names()
   
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   

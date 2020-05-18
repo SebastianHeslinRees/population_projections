@@ -57,7 +57,7 @@ communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_
 dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
 dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
 
-write_excel <- FALSE
+write_excel <- TRUE
 
 #-------------------------------------------------
 timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
@@ -164,6 +164,7 @@ qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
 config_list <- list(
+  projection_name = projection_name,
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
   popn_mye_path = popn_mye_path,
