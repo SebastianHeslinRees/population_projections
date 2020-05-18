@@ -59,21 +59,21 @@ output_housing_led_projection <- function(projection, output_dir,
 
   london_totals <- function(data, col_aggregation=setdiff(names(data),data_col), data_col){
   
-  assertthat::assert_that(all("gss_code" %in% names(data)))
-  assertthat::assert_that(all(grepl("E09", data$gss_code)))
-
-    x <- data %>%
-      mutate(gss_code = "E12000007") %>%
-      mutate(gss_name = "London (total)") %>%
-      dtplyr::lazy_dt() %>%
-      group_by_at(col_aggregation) %>%
-      summarise(!!data_col := sum(!!sym(data_col))) %>%
-      as.data.frame() %>%
-      select(names(data)) %>%
-      rbind(data) %>%
-      arrange(gss_code, year)
-    
-    return(x)
+    assertthat::assert_that("gss_code" %in% names(data))
+    assertthat::assert_that(all(grepl("E09", data$gss_code)))
+  
+      x <- data %>%
+        mutate(gss_code = "E12000007") %>%
+        mutate(gss_name = "London (total)") %>%
+        dtplyr::lazy_dt() %>%
+        group_by_at(col_aggregation) %>%
+        summarise(!!data_col := sum(!!sym(data_col))) %>%
+        as.data.frame() %>%
+        select(names(data)) %>%
+        rbind(data) %>%
+        arrange(gss_code, year)
+      
+      return(x)
     
   }
   
@@ -132,9 +132,16 @@ output_housing_led_projection <- function(projection, output_dir,
            dom_in, dom_out, dom_net, total_change) %>%
     arrange(gss_code, year)
   
-  ahs <- left_join(projection[["ahs"]], projection[["ahs_choice"]],
-                   by = c("year", "gss_code")) %>%
-    arrange(year, gss_code)
+  # All London dom_in/out isn't just the sum of components, and we can't calculate it in this model
+  components[components$gss_code == "E12000007", c("dom_in", "dom_out")] <- NA
+  
+  
+  if("ahs" %in% names(projection[["ahs_choice"]])) {
+    ahs <- projection[["ahs_choice"]]
+  } else {
+    ahs <- left_join(projection[["ahs"]], projection[["ahs_choice"]], by = c("year", "gss_code"))
+  }
+  ahs <- arrange(ahs, year, gss_code)
   
   stock <- housing_stock %>%
     london_totals(data_col = "dwellings") %>%
