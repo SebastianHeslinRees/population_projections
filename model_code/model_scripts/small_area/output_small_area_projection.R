@@ -1,6 +1,4 @@
-output_small_area_projection <- function(projection, output_dir, projection_type,
-                                         births, deaths, first_proj_yr,
-                                         lookup){
+output_small_area_projection <- function(projection, output_dir, projection_type,lookup){
   
   borough_names <- get_gss_names()
   
