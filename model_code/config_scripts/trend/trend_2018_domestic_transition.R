@@ -13,7 +13,7 @@ int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-1
 int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
-upc_path <- NULL
+upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
