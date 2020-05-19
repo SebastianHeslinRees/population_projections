@@ -37,12 +37,13 @@ trend_core <- function(start_population,
                        domestic_rates,
                        int_out_method,
                        constraints = NULL, upc = NULL,
-                       projection_year) {
- 
+                       projection_year,
+                       region_lookup) {
+  
   # run projection
   cat('\r',paste("  Projecting year",projection_year))
   flush.console()
-
+  
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
   # change rates are for changes that occured in the 12 months up to 30th June
@@ -50,7 +51,7 @@ trend_core <- function(start_population,
   aged_popn <- start_population %>%
     popn_age_on() 
   
-
+  
   # at_risk <- start_population %>%
   #   mutate(age = age+1) %>%
   #   left_join(start_population, by=c("gss_code","year","sex","age")) %>%
@@ -64,14 +65,14 @@ trend_core <- function(start_population,
                                                filter(fertility_rates, age != 0),
                                                col_out = "births",
                                                many2one = FALSE)
-
+  
   if(!is.null(constraints)){
     births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
   }
   
   birthratio_m2f <- 1.05 
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
-
+  
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
   validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   
@@ -145,7 +146,8 @@ trend_core <- function(start_population,
                                    col_flow = "flow", 
                                    pop1_is_subset = FALSE, 
                                    many2one = FALSE) %>%
-    mutate(year = projection_year)
+    mutate(year = projection_year) %>%
+    select(year, gss_in, gss_out, age, sex, flow)
   
   if(!is.null(constraints)){
     domestic_flow <- constrain_cross_border(domestic_flow = domestic_flow,
@@ -153,23 +155,55 @@ trend_core <- function(start_population,
                                             out_constraint = constraints$cross_border_out_constraint,
                                             col_flow = "flow")
   }
+
+  #flows between 9 english regions & other 3 home nations
+  regional_flow <- dtplyr::lazy_dt(domestic_flow) %>%
+    left_join(region_lookup, by=c("gss_in"="gss_code")) %>%
+    select(-gss_in) %>%
+    rename(gss_in = region_gss_code) %>%
+    left_join(region_lookup, by=c("gss_out"="gss_code")) %>%
+    select(-gss_out) %>% 
+    rename(gss_out = region_gss_code) %>%
+    filter(gss_in != gss_out) %>%
+    group_by(year, gss_in, gss_out, age, sex) %>%
+    summarise(flow = sum(flow)) %>%
+    as.data.frame()
+
+  #flows between all 4 home nations
+  national_flow <- dtplyr::lazy_dt(domestic_flow) %>%
+    mutate(gss_out = substring(gss_out, 1, 1),
+           gss_in  = substring(gss_in,  1, 1)) %>%
+    mutate(gss_out = recode(gss_out, "E" = "E92000001"),
+           gss_in  = recode(gss_in,  "E" = "E92000001")) %>%
+    filter(gss_in != gss_out) %>%
+    group_by(year, gss_in, gss_out, age, sex) %>%
+    summarise(flow = sum(flow)) %>%
+    as.data.frame()
   
-  dom_out <- dtplyr::lazy_dt(domestic_flow) %>%
-    group_by(year, gss_out, sex, age) %>%
-    summarise(dom_out = sum(flow)) %>%
-    as.data.frame() %>%
-    rename(gss_code = gss_out)%>%
-    tidyr::complete(year, gss_code, age=0:90, sex, fill=list(dom_out=0))
+  #District in E & W, national S, NI gross flows
+  dom_out <- sum_domestic_flows(domestic_flow, "out")
+  dom_in <- sum_domestic_flows(domestic_flow, "in")
+
+  #Region in E, national W, S, NI gross flows
+  reg_dom_out <- sum_domestic_flows(regional_flow, "out")
+  reg_dom_in <- sum_domestic_flows(regional_flow, "in")
   
-  dom_in <- dtplyr::lazy_dt(domestic_flow) %>%
-    group_by(year, gss_in, sex, age) %>%
-    summarise(dom_in = sum(flow)) %>%
-    as.data.frame()%>%
-    rename(gss_code = gss_in)%>%
-    tidyr::complete(year, gss_code, age=0:90, sex, fill=list(dom_in=0))
+  #National E, W, S, NI gross flows
+  nat_dom_out <- sum_domestic_flows(national_flow, "out")
+  nat_dom_in <- sum_domestic_flows(national_flow, "in")
+  
+  #Bind and de-duplicate
+  dom_out_with_regions <- dom_out %>%
+    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>% # S and NI are already aggregated
+    rbind(reg_dom_out) %>%
+    rbind(filter(nat_dom_out, substr(gss_code, 1, 1) == "E"))
+  dom_in_with_regions <- dom_in %>%
+    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>%
+    rbind(reg_dom_in) %>%
+    rbind(filter(nat_dom_in, substr(gss_code, 1, 1) == "E"))
   
   if(is.null(upc)){
- 
+    
     next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
                                                    addition_data = list(int_in, dom_in),
                                                    subtraction_data = list(int_out, dom_out),
@@ -198,9 +232,9 @@ trend_core <- function(start_population,
               births = births,
               int_out = int_out,
               int_in = int_in,
-              dom_out = dom_out,
-              dom_in = dom_in,
+              dom_out = dom_out_with_regions,
+              dom_in = dom_in_with_regions,
               births_by_mothers_age = births_by_mother,
               natural_change = natural_change_popn))
- 
+  
 }

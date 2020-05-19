@@ -35,7 +35,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_cod
   females <- data[["females"]]
   males <- data[["males"]]
   components <- data[["components"]]
- 
+
   ward_dev_dataframe <- data.table::fread(paste0(output_dir,"ward/assumed_dev_ward.csv"),
                                           header = TRUE) %>%
     as.data.frame() %>% 
@@ -55,7 +55,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_cod
     rbind(ward_dev_dataframe) %>%
     as.data.frame()
   
-  wb <- xlsx::loadWorkbook("input_data/housing_led_model/ward_housing_led_2018_based_template.xlsx")
+  wb <- xlsx::loadWorkbook("input_data/excel_templates/ward_housing_led_2018_based_template.xlsx")
   wb_sheets<- xlsx::getSheets(wb)
   
   xlsx::addDataFrame(bpo_data(persons), wb_sheets$Persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)

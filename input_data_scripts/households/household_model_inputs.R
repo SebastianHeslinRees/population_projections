@@ -182,7 +182,7 @@ district_to_region <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Loo
   recode_gss_codes(col_aggregation = "gss_code", fun=list(c)) %>%
   mutate(region_gss_code = ifelse(substr(gss_code,1,1) == "E", region_gss_code, gss_code))
 
-saveRDS(district_to_region, "input_data/household_model/district_to_region.rds")
+saveRDS(district_to_region, "input_data/lookup/district_to_region.rds")
 rm(list=ls())
 
 

@@ -18,6 +18,7 @@ housing_led_core <- function(start_population,
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
   
+  trend_projection <- lapply(trend_projection, filter_to_LAs)
   areas_with_no_housing_data <- lapply(trend_projection, function(x) filter(x, !x$gss_code %in% constrain_gss)) 
   trend_projection_national <- trend_projection
   trend_projection <- lapply(trend_projection, function(x) filter(x, x$gss_code %in% constrain_gss))
