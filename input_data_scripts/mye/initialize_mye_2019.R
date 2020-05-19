@@ -18,3 +18,7 @@ source('input_data_scripts/mye/gla_popn_2019.R')
 
 #household model inputs
 source('input_data_scripts/households/household_model_inputs_(2020 geog).R')
+
+#mortality & fertility
+source('input_data_scripts/mortality/asmr_2020_geography.R')
+source('input_data_scripts/fertility/asfr_2020_geography.R')
