@@ -60,6 +60,8 @@ dom_rates_10yr_avg_2019_50pc <- dom_rates_10yr_avg_2019 %>%
 dom_rates_10yr_avg_2019_30pc <- dom_rates_10yr_avg_2019 %>%
   mutate(rate = rate *0.3)
 
+dom_rates_zero <- dom_rates_10yr_avg_2019 %>%
+  mutate(rate = 0)
 
 
 #save files
@@ -78,3 +80,4 @@ saveRDS(dom_rates_15yr_avg_2019, paste0(loc, "dom_rates_15yr_avg_2019.rds"))
 saveRDS(dom_rates_10yr_avg_2019_50pc, paste0(loc, "dom_rates_10yr_avg_2019_50pc.rds"))
 saveRDS(dom_rates_10yr_avg_2019_30pc, paste0(loc, "dom_rates_10yr_avg_2019_30pc.rds"))
 
+saveRDS(dom_rates_zero, paste0(loc, "dom_rates_zero.rds"))
