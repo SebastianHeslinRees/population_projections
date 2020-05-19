@@ -12,8 +12,8 @@ ons_stage2 <- recode_gss_codes(ons_stage2,
                                  col_aggregation = c("gss_code","year","household_type","age_group"),
                                  col_geog="gss_code",
                                  fun = list(mean))
-sum(is.na(ons_stage1))
-sum(is.na(ons_stage2))
+assert_that(!any(is.na(ons_stage1))
+assert_that(!any(is.na(ons_stage2))
 
 communal_est_pop <- communal_est %>%
   select(-ce_rate) %>%
