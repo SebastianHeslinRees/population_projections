@@ -29,7 +29,7 @@
 
 calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
                                                         component_path, last_data_year, n_years_to_avg, data_col,
-                                                        first_proj_yr, n_proj_yr, rate_cap) {
+                                                        first_proj_yr, n_proj_yr, rate_cap, modify_rates_and_flows=1) {
 
   component <- readRDS(component_path)
 
@@ -73,7 +73,9 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
         }
       }), collapse = "\n"))
 
-      rates <- mutate(rates, rate = ifelse(rate > rate_cap, rate_cap, rate))
+      rates <-  rates %>%
+        mutate(rate = rate*modify_rates_and_flows) %>%
+        mutate(rate = ifelse(rate > rate_cap, rate_cap, rate))
 
     }
 
@@ -98,6 +100,7 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
       group_by(gss_code, sex, age) %>%
       summarise(value = sum(value)/n_years_to_avg) %>%
       ungroup() %>%
+      mutate(value = value*modify_rates_and_flows) %>%
       rename(!!data_col := value) %>%
       mutate(year = last_data_year+1)
 

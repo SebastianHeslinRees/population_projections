@@ -18,14 +18,14 @@ upc_path <- "input_data/scenario_data/covid19_upc.rds"
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
 mortality_last_data_year <- 2019
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018_(2020_geog).rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 5
 fertility_avg_or_trend <- "average"
 fertility_last_data_year <- 2019
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018.rds"
+fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018_(2020_geog).rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
@@ -37,6 +37,7 @@ int_out_rate_cap <- 0.8
 int_in_last_data_year <- 2019
 int_in_years_to_avg <- 10
 int_in_flow_or_rate <- "flow"
+modify_rates_and_flows <- 0.5
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"
@@ -102,7 +103,8 @@ int_out_rate_fns <- list(
                                                                                data_col = "int_out",
                                                                                first_proj_yr = first_proj_yr,
                                                                                n_proj_yr = n_proj_yr,
-                                                                               rate_cap = int_out_rate_cap))
+                                                                               rate_cap = int_out_rate_cap,
+                                                                               modify_rates_and_flows = modify_rates_and_flows))
 )
 
 
@@ -115,7 +117,8 @@ int_in_fns <- list(
                                                                                n_years_to_avg = int_in_years_to_avg,
                                                                                data_col = "int_in",
                                                                                first_proj_yr = first_proj_yr,
-                                                                               n_proj_yr = n_proj_yr))
+                                                                               n_proj_yr = n_proj_yr,
+                                                                               modify_rates_and_flows = modify_rates_and_flows))
 )
 
 #-----------------------------------------------------
