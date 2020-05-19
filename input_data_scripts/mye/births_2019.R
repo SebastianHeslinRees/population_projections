@@ -17,7 +17,7 @@ births_2019 <- rbind(births_1, births_2) %>%
   group_by(gss_code, sex) %>%
   summarise(births = sum(births)) %>%
   data.frame() %>%
-  popmodules::recode_gss_to_2011(col_aggregation = c("gss_code","sex")) %>%
+  popmodules::recode_gss_codes(col_aggregation = c("gss_code","sex"), recode_to_year = 2020) %>%
   filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","N92","S92"))
 
 hackney_city <- filter(births_2019, gss_code == "E09000012, E09000001")
@@ -49,11 +49,11 @@ scotland <- data.frame(gss_code = rep("S92000003",2),
 births_2019 <- filter(births_2019, !gss_code %in% c("E09000012, E09000001",
                                                     "E06000052, E06000053")) %>%
   rbind(hackney, city, cornwall, scilly, nireland, scotland) %>% 
-  recode_gss_to_2011(col_aggregation = c("gss_code","sex"))
+  recode_gss_codes(col_aggregation = c("gss_code","sex"), recode_to_year = 2020)
 
 births_2018 <- readRDS("input_data/mye/2018/births_ons.rds")  %>%
   select(-gss_name, -country, -geography) %>% 
-  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age"))
+  recode_gss_codes(col_aggregation = c("gss_code","year","sex","age"), recode_to_year = 2020)
 
 validate_same_geog(births_2019, births_2018)
 

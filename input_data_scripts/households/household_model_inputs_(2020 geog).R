@@ -4,11 +4,11 @@ communal_est <- readRDS("input_data/household_model/ons_communal_establishment_p
 dclg_stage1 <- readRDS("input_data/household_model/dclg_stage1_data_2014.rds")
 dclg_stage2 <- readRDS("input_data/household_model/dclg_headship_rates_2014.rds")
 
-ons_stage1 <- recode_gss_to_2011(ons_stage1,
+ons_stage1 <- recode_gss_codes(ons_stage1,
                                  col_aggregation = c("gss_code","year","sex","age_group"),
                                  col_geog="gss_code",
                                  fun = list(mean))
-ons_stage2 <- recode_gss_to_2011(ons_stage2,
+ons_stage2 <- recode_gss_codes(ons_stage2,
                                  col_aggregation = c("gss_code","year","household_type","age_group"),
                                  col_geog="gss_code",
                                  fun = list(mean))
@@ -17,12 +17,12 @@ sum(is.na(ons_stage2))
 
 communal_est_pop <- communal_est %>%
   select(-ce_rate) %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code","age_group","sex","year"),
+  recode_gss_codes(col_aggregation = c("gss_code","age_group","sex","year"),
                      col_geog="gss_code")
 
 communal_est_rate <- communal_est %>% 
   select(-ce_pop) %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code","age_group","sex","year"),
+  recode_gss_codes(col_aggregation = c("gss_code","age_group","sex","year"),
                      col_geog="gss_code",
                      fun = list(mean))
 
@@ -33,12 +33,12 @@ communal_est <- left_join(communal_est_pop, communal_est_rate,
 
 dclg_stage1_pops <- dclg_stage1 %>%
   select(-hh_rep_rates) %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
+  recode_gss_codes(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
                      col_geog="gss_code")
 
 dclg_stage1_rates <- dclg_stage1 %>%
   select(-households, -household_population, -institutional_population, -total_population) %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
+  recode_gss_codes(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
                      col_geog="gss_code",
                      fun=list(mean))
 
@@ -47,7 +47,7 @@ dclg_stage1 <- left_join(dclg_stage1_pops, dclg_stage1_rates,
 
 
 dclg_stage2 <- dclg_stage2 %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code","year","household_type","age_group"),
+  recode_gss_codes(col_aggregation = c("gss_code","year","household_type","age_group"),
                      col_geog="gss_code",
                      fun=list(mean))
 

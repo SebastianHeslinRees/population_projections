@@ -16,14 +16,14 @@ total_deaths <- rbind(deaths_2018, deaths_2019) %>%
   group_by(gss_code) %>%
   summarise(total_deaths = sum(value)) %>% 
   as.data.frame() %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code")) %>%
+  recode_gss_codes(col_aggregation = c("gss_code")) %>%
   rbind(data.frame(gss_code = c("N92000002","S92000003"),
                    total_deaths = c(15349, 56209)))
 	
 
 deaths_backseries <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
   select(gss_code, year, sex, age, deaths) %>% 
-  recode_gss_to_2011(col_aggregation = c("year","gss_code","age","sex"))
+  recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"))
 
 sya_deaths_2018 <- deaths_backseries %>%
   filter(year == 2018) 

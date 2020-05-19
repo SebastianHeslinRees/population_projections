@@ -41,7 +41,7 @@ domestic_net <- rbind(births, deaths,
 #calculate net domestic as a residual
 domestic_migration_net <- readRDS("input_data/domestic_migration/2018/domestic_migration_net.rds") %>%
   select(-dom_in, -dom_out) %>% 
-  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age")) %>%
+  recode_gss_codes(col_aggregation = c("gss_code","year","sex","age"), recode_to_year = 2020) %>%
   select(names(domestic_net)) %>% 
   rbind(domestic_net)
 
@@ -60,13 +60,13 @@ flows_2004 <- filter(domestic_migration_flows_ons, year == 2004) %>%
   mutate(year = 2019)
 
 dom_flows <- rbind(domestic_migration_flows_ons, flows_2004) %>%
-  recode_gss_to_2011(col_aggregation = c("gss_out","gss_in","year","sex","age"),
-                     col_geog = "gss_in") %>%
-  recode_gss_to_2011(col_aggregation = c("gss_out","gss_in","year","sex","age"),
-                     col_geog = "gss_out")
+  recode_gss_codes(col_aggregation = c("gss_out","gss_in","year","sex","age"),
+                     col_geog = "gss_in", recode_to_year = 2020) %>%
+  recode_gss_codes(col_aggregation = c("gss_out","gss_in","year","sex","age"),
+                     col_geog = "gss_out", recode_to_year = 2020)
 
 domestic_migration_net <- readRDS("input_data/domestic_migration/2018/domestic_migration_net.rds") %>%
-  recode_gss_to_2011(col_aggregation = c("gss_code","year","sex","age"))
+  recode_gss_codes(col_aggregation = c("gss_code","year","sex","age"), recode_to_year = 2020)
 
 net_2004 <- filter(domestic_migration_net, year == 2004) %>%
   mutate(year = 2019)
