@@ -3,7 +3,7 @@
 devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2020
-n_proj_yr <- 10
+n_proj_yr <- 31
 projection_name <- "interim_2019_50percent_scenario"
 
 popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
