@@ -21,6 +21,7 @@ ons_stage2 <- recode_gss_codes(ons_stage2,
 assert_that(!any(is.na(ons_stage1)))
 assert_that(!any(is.na(ons_stage2)))
 
+
 communal_est_pop <- communal_est %>%
   select(-ce_rate) %>%
   recode_gss_codes(col_aggregation = c("gss_code","age_group","sex","year"),
