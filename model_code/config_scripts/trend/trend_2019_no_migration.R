@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2020
 n_proj_yr <- 31
-projection_name <- "interim_2019_no_migration_scenario"
+projection_name <- "interim_2019_no_migration"
 
 popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
 deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
@@ -163,11 +163,11 @@ config_list <- list(
 )
 
 # Save settings
-projdir <- rprojroot::find_root(rprojroot::is_git_root)
-copy_dir <- paste0(projdir, "/", output_dir)
-dir.create(copy_dir, recursive = TRUE)
-this_file <- rstudioapi::getSourceEditorContext()$path
-file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
+# projdir <- rprojroot::find_root(rprojroot::is_git_root)
+# copy_dir <- paste0(projdir, "/", output_dir)
+# dir.create(copy_dir, recursive = TRUE)
+# this_file <- rstudioapi::getSourceEditorContext()$path
+# file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
 
 rm(list = setdiff(ls(), "config_list"))
 

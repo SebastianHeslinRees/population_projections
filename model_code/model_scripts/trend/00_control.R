@@ -9,6 +9,7 @@ run_trend_model <- function(config_list) {
   source("model_code/model_scripts/trend/household_model_ons.R")
   source("model_code/model_scripts/trend/household_model_outputs.R")
   source("model_code/model_scripts/trend/trend_datastore_outputs.R")
+  source('model_code/model_scripts/trend/return_domestic_rates.R')
   
   region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
@@ -59,6 +60,9 @@ run_trend_model <- function(config_list) {
                            })
   rm(file_list, validate_paths)      
   
+  #
+  first_proj_yr <- config_list$first_proj_yr
+  last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
   
   # get the MYEs
   message("get components backseries")
@@ -94,10 +98,11 @@ run_trend_model <- function(config_list) {
   mortality_rates <- evaluate_fns_list(config_list$mortality_fns)
   int_out_flows_rates <- evaluate_fns_list(config_list$int_out_fns) 
   int_in_flows <- evaluate_fns_list(config_list$int_in_fns)
-  
+  #browser()
   #FIXME
   #domestic_rates <- evaluate_fns_list(config_list$dom_rate_fns)
-  domestic_rates <- config_list$domestic_rates
+  domestic_rates_info <- .get_domestic_rates_info(config_list$domestic_rates, first_proj_yr, last_proj_yr)
+  domestic_rates <- NULL
   
   constraints <- evaluate_fns_list(config_list$constraint_fns)
   
@@ -115,9 +120,6 @@ run_trend_model <- function(config_list) {
   int_out_flows_rates <- int_out_flows_rates %>% select(year, gss_code, age, sex, int_out)
   int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
   
-  first_proj_yr <- config_list$first_proj_yr
-  last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
-  
   curr_yr_popn <- filter(population, year == first_proj_yr-1)
 
   # set up projection
@@ -126,6 +128,8 @@ run_trend_model <- function(config_list) {
                              int_out_flows_rates, int_in_flows, domestic_rates,
                              first_proj_yr, config_list$n_proj_yr,
                              config_list$int_out_method)
+  
+    
   
   ## run the core
   projection <- list()
@@ -146,42 +150,11 @@ run_trend_model <- function(config_list) {
       curr_yr_domestic_rates <- select(domestic_rates, gss_out, gss_in, age, sex, rate)
     }
     else {
-      #new code here
-      
-      domestic_years <- as.numeric(names(domestic_rates))
-      start_yr <- max(domestic_years[domestic_years<=projection_year])
-      element_number <- which(domestic_years == start_yr)
-      end_yr <- domestic_years[element_number+1]
-      
-      if(projection_year %in% domestic_years){
-        start_yr_rate <- readRDS(domestic_rates[[element_number]]$path) %>%
-          rename(start = rate)
-        
-        if(domestic_rates[[element_number]]$transition){
-          end_yr_rate <- readRDS(domestic_rates[[element_number+1]]$path) %>%
-            rename(end = rate)
-        }
-      }
-      
-      if(domestic_rates[[element_number]]$transition){
-        
-        transition_period <- end_yr - start_yr
-        this_year <- projection_year - start_yr
-        
-          change <- dtplyr::lazy_dt(start_yr_rate) %>%
-            full_join(dtplyr::lazy_dt(end_yr_rate),
-                      by=c("gss_in","gss_out","sex","age")) %>%
-            as.data.frame() %>%
-            tidyr::replace_na(list(start = 0, end = 0)) %>% 
-            mutate(difference = end - start,
-                   increment = difference/transition_period,
-                   rate = start + (increment*this_year))
 
-        curr_yr_domestic_rates <- change %>% select(gss_in, gss_out, sex, age, rate)
-        
-      } else {
-        curr_yr_domestic_rates <- start_yr_rate %>% rename(rate = start)
-      }
+      domestic_rates <- return_domestic_rates(domestic_rates, domestic_rates_info,
+                                              projection_year, first_proj_yr)
+      
+      curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
     }
     
     projection[[projection_year]] <- trend_core(
@@ -280,10 +253,10 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
     popmodules::validate_population(domestic_rates, col_aggregation = c("gss_out","gss_in","sex","age"), col_data = "rate", test_complete = FALSE, test_unique = TRUE)
     assert_that(max(domestic_rates$rate) <= 1 & min(domestic_rates$rate) >= 0, msg = "projected domestic migration rate contains rates outside the range 0-1")
   }else{
-    for(i in seq(domestic_rates)){
-      assert_that(file.exists(domestic_rates[[i]]$path),
-                  msg = paste0("File not found: ",domestic_rates[[i]]$path))
-    }
+    # for(i in seq(domestic_rates)){
+    #   assert_that(file.exists(domestic_rates[[i]]$path),
+    #               msg = paste0("File not found: ",domestic_rates[[i]]$path))
+    # }
   }
   
   # check that the rates join onto the population
