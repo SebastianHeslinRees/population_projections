@@ -102,23 +102,30 @@ covid_modelled_sya <- data.table::rbindlist(covid_modelled_sya) %>%
 
 #scale-up to latest data
 #Again, no time, hard coding
-
-
 modlled_figure <- sum(covid_modelled_sya$upc)
-scaling <- latest_uk_figure/modlled_figure
+
+#Future covid deaths
+#There are about 10 weeks left in the year and atm there are ~100 deaths per day in England
+#So 7000 more deaths to mid year?
+
+total_2020_deaths <- 7000 + latest_uk_figure
+
+scaling <- total_2020_deaths/modlled_figure
+
 covid_upc <- covid_modelled_sya %>% 
   mutate(upc = deaths*scaling,
          year = 2020) %>%
   select(year, gss_code, sex, age, upc)
 
-#Future covid deaths
-#I'm going to assume that this total accounts for 75% of covid deaths in 2020
-#I could do something more intelligent but I've spent all my time dicking around
-#with awful data
+#2021?
+#Who knows, lets say a second wave has half the deaths of 2020
 
-covid_upc <- covid_upc %>%
-  mutate(upc = (upc/3)*4)
+covid_2021 <- covid_upc %>%
+  mutate(year = 2021,
+         upc = upc*0.5)
 
+covid_upc <- rbind(covid_upc, covid_2021) 
+  
 #save
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")
 
