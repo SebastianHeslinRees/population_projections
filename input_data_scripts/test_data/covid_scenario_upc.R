@@ -26,6 +26,7 @@ covid_eng_age_sex <- data.frame(min_age = c(0,20,40,60,80),
 #Recode gss codes so they're consitent with othre inputs
 covid_la_total <- data.table::fread(paste0(covid_repo,"processed/",ons_file,".csv")) %>%
   as.data.frame() %>%
+  filter(cause_of_death == "COVID 19") %>% 
   group_by(gss_code = area_code) %>%
   summarise(la_total = sum(deaths)) %>%
   as.data.frame() %>%
@@ -102,7 +103,7 @@ covid_modelled_sya <- data.table::rbindlist(covid_modelled_sya) %>%
 
 #scale-up to latest data
 #Again, no time, hard coding
-modlled_figure <- sum(covid_modelled_sya$upc)
+modelled_figure <- sum(covid_modelled_sya$deaths)
 
 #Future covid deaths
 #There are about 10 weeks left in the year and atm there are ~100 deaths per day in England
@@ -110,7 +111,7 @@ modlled_figure <- sum(covid_modelled_sya$upc)
 
 total_2020_deaths <- 7000 + latest_uk_figure
 
-scaling <- total_2020_deaths/modlled_figure
+scaling <- total_2020_deaths/modelled_figure
 
 covid_upc <- covid_modelled_sya %>% 
   mutate(upc = deaths*scaling,
@@ -124,7 +125,8 @@ covid_2021 <- covid_upc %>%
   mutate(year = 2021,
          upc = upc*0.5)
 
-covid_upc <- rbind(covid_upc, covid_2021) 
+covid_upc <- rbind(covid_upc, covid_2021) %>%
+  mutate(upc = upc*-1)
   
 #save
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")

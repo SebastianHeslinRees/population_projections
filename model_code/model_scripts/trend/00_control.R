@@ -139,11 +139,11 @@ run_trend_model <- function(config_list) {
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
-    
+    browser()
     if(is.null(config_list$upc_path)){
       curr_yr_upc <- NULL
     } else { 
-      curr_yr_upc <- upc %>% filter(year == first_proj_yr - 1)
+      curr_yr_upc <- upc %>% filter(year == projection_year)
     }
     
     if(is.data.frame(domestic_rates)){
