@@ -29,8 +29,8 @@ covid_la_total <- data.table::fread(paste0(covid_repo,"processed/",ons_file,".cs
   group_by(gss_code = area_code) %>%
   summarise(la_total = sum(deaths)) %>%
   as.data.frame() %>%
-  filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","S92","N92")) #%>% 
-#recode_gss_to_2011(col_aggregation = c("gss_code","sex"), year=2020)
+  filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","S92","N92")) %>% 
+  recode_gss_codes(col_aggregation = c("gss_code"), recode_to_year=2020)
 
 #FIXME
 #This is ONS data so its just E&W
@@ -42,7 +42,7 @@ wales <- 1238
 
 #These numbers don't add up to the official UK total ad I honestly don't care anymore
 latest_uk_figure <- 35704
-  
+
 covid_la_total <- data.frame(gss_code = c("S92000003","N92000002"),
                              la_total = c(scotland,nire),
                              stringsAsFactors = FALSE) %>%
@@ -68,10 +68,10 @@ for(i in 1:nrow(covid_eng_age_sex)){
     data.frame()
   
   england_covid_deaths_sya[[i]] <- distribute_within_age_band(a,
-                                                         uk_2018_deaths,
-                                                         "covid_deaths", "deaths",
-                                                         unique(a$min), unique(a$max),
-                                                         col_aggregation=c("sex"))
+                                                              uk_2018_deaths,
+                                                              "covid_deaths", "deaths",
+                                                              unique(a$min), unique(a$max),
+                                                              col_aggregation=c("sex"))
 }
 
 #Single year of age by sex for england
