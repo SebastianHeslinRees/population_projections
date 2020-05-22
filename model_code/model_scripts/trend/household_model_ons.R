@@ -69,7 +69,7 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
                                                             population_age_groups,
                                                             rates_ages = c("75_79","80_84","85_89","90+"),
                                                             first_proj_yr = first_proj_yr)
-  
+ 
   household_population <- get_household_popn(population_age_groups, communal_establishment)
   
   household_projection <- apply_rate_to_population(popn = household_population,
@@ -301,3 +301,4 @@ validate_ons_outputs <- function(stage_1, stage_2, max_year) {
   }
   return(TRUE)
 }
+
