@@ -64,6 +64,7 @@ mye_births <- births_2019 %>%
   rbind(births_2018) %>%
   select(year, gss_code, sex, age, births)
 
+if(!dir.exists("input_data/mye/2019")) dir.create("input_data/mye/2019")
 saveRDS(mye_births, "input_data/mye/2019/temp_births.rds")
   
 rm(list=ls())

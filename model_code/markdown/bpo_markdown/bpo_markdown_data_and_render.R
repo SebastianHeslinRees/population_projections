@@ -18,7 +18,7 @@ bpo_markdown_data_and_render <- function(bpo_name, output_dir = "C:/temp", root_
   borough_name <- substr(bpo_name,1,gregexpr(pattern ='_',bpo_name)[[1]][1]-1)
   if(borough_name==""){borough_name <- bpo_name}
   
-  borough_code <- readRDS(paste0(root_dir,"/input_data/lookup/lad18_code_to_name.rds")) %>%
+  borough_code <- readRDS(paste0(root_dir,"/input_data/lookup/lad18_and_region_code_to_name.rds")) %>%
     filter(substr(gss_code,1,3) == "E09") %>%
     mutate(partial_name = substr(toupper(gss_name),1,nchar(borough_name))) %>%
     filter(partial_name == toupper(borough_name))
