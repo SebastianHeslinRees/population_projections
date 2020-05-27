@@ -102,3 +102,15 @@ int_in_flows_5 <- int_in_flows_4 %>%
   project_forward_flat(last_proj_yr = 2050)
 
 saveRDS(int_in_flows_5, "input_data/mye/2019/temp_ons_international_in_increased_ldn_share.rds")
+
+
+#Pre-accession int in & london reduction
+int_in_flows_6 <- int_in_flows_3 %>%
+  group_by(year) %>%
+  mutate(proportion = int_in/sum(int_in)) %>%
+  data.frame() %>%
+  mutate(new_int_in = 483419*proportion) %>% #This is the value of int in in 2003
+  select(-int_in, -proportion) %>%
+  rename(int_in = new_int_in)
+  
+saveRDS(int_in_flows_5, "input_data/mye/2019/temp_ons_international_in_pre_accession_decreased_ldn_share.rds")
