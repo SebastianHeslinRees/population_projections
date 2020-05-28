@@ -9,13 +9,13 @@
 #' by
 #'
 #' @param df_in A data frame containing gss_codes and data.
-#' @param col_geog A string. The column which contains gss codes
-#'   (defaults to \code{gss_code}).
-#' @param data_col A string. The column which constains the data to be
-#'   aggregated. Defaults to last column of input dataframe.
-#' @param recode_to_year Numeric. Conform to geography in which year.
-#'   Default \code{2011}.
-#' @aggregated_data Not currently used
+#' @param col_geog A string. The column which contains gss codes (defaults to
+#'   \code{gss_code}).
+#' @param col_data A string or character vector. The column(s) that contain the
+#'   data to be aggregated. Defaults to last column of input dataframe.
+#' @param recode_to_year Numeric. Conform to geography in which year. Default
+#'   \code{2011}.
+#' @param aggregate_data Not currently used
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
@@ -24,7 +24,7 @@
 
 recode_gss_codes <- function(df_in,
                              col_geog="gss_code",
-                             data_cols = last(names(df_in)),
+                             col_data = last(names(df_in)),
                              fun = list(sum),
                              recode_to_year = 2012,
                              aggregate_data = TRUE){
@@ -34,7 +34,7 @@ recode_gss_codes <- function(df_in,
     as.data.frame() %>%
     rename("gss_code" = !!col_geog)
   
-  col_aggregation <- setdiff(names(df),data_cols)
+  col_aggregation <- setdiff(names(df),col_data)
   
   #prepare recoding
   recode_years <- c(2009,2012,2013,2018,2019,2020)
@@ -45,7 +45,7 @@ recode_gss_codes <- function(df_in,
   recode_merges <- list()
   recode_name_changes <- list()
   
-  code_changes <- readRDS("Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds") %>%
+  code_changes <- readRDS("input_data/lookup/district_changes_clean.rds") %>%
     select(changed_to_code, changed_from_code, year, split, merge)
   
   #splits
@@ -109,6 +109,8 @@ recode_gss_codes <- function(df_in,
       as.data.frame() %>%
       rename(!!col_geog := "gss_code")
   }
+  
+  return(df)
   
 }
 

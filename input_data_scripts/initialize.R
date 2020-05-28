@@ -1,6 +1,8 @@
 dir.create("input_data/lookup", showWarnings = FALSE)
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/model_lookups",
                        "input_data/lookup")
+file.copy("Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds",
+          "input_data/lookup/district_changes_clean.rds")
 
 source("input_data_scripts/mye/mye_2018.R")
 source("input_data_scripts/domestic_migration/domestic_migration_2018.R")
