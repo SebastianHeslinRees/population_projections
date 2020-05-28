@@ -15,13 +15,13 @@ mye_2019 <- rbind(female_2019, male_2019) %>%
   mutate(popn = as.numeric(popn)) %>% 
   rename(gss_code = Code) %>% 
   filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","N92","S92")) %>%
-  recode_gss_codes(col_aggregation = c("gss_code","age","sex"), recode_to_year = 2020) %>%
+  recode_gss_codes(data_cols="popn", recode_to_year = 2020) %>%
   mutate(year = 2019) %>% 
   select(year, gss_code, sex, age, popn) 
 
 population_ons <- readRDS("input_data/mye/2018/population_ons.rds")%>%
   select(year, gss_code, sex, age, popn) %>% 
-  recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"), recode_to_year = 2020) %>%
+  recode_gss_codes(data_cols = "popn", recode_to_year = 2020) %>%
   rbind(mye_2019)
 
 saveRDS(population_ons, "input_data/mye/2019/temp_ons_popn.rds")

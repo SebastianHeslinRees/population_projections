@@ -28,7 +28,7 @@ recode_gss_codes <- function(df_in,
                              fun = list(sum),
                              recode_to_year = 2012,
                              aggregate_data = TRUE){
- 
+
   #prepare input dataframe
   df <- df_in %>%
     as.data.frame() %>%
@@ -69,15 +69,15 @@ recode_gss_codes <- function(df_in,
     recode_merges[[yr]] <- filter(code_changes, year == yr,
                                   merge == TRUE)
     
-    recode_merges[[yr]] <- c(setNames(as.character(recode_merges[[yr]]$changed_from_code),
-                                      recode_merges[[yr]]$changed_to_code), "x"="X")
+    recode_merges[[yr]] <- c(setNames(as.character(recode_merges[[yr]]$changed_to_code),
+                                      recode_merges[[yr]]$changed_from_code), "x"="X")
     
     
     recode_name_changes[[yr]] <- filter(code_changes, year == yr,
                                         merge == FALSE)
     
-    recode_name_changes[[yr]] <- c(setNames(as.character(recode_name_changes[[yr]]$changed_from_code),
-                                            recode_name_changes[[yr]]$changed_to_code), "x"="X")
+    recode_name_changes[[yr]] <- c(setNames(as.character(recode_name_changes[[yr]]$changed_to_code),
+                                            recode_name_changes[[yr]]$changed_from_code), "x"="X")
   }
   
   #april 2020 changes - not yet in code history database
@@ -88,7 +88,7 @@ recode_gss_codes <- function(df_in,
   recode_name_changes[[2020]] <- c("x" = "X")
   
   recode_years <- recode_years[recode_years <= recode_to_year]
-  
+  #browser()
   #in a loop so that codes that are changed and then changed again are picked-up
   for(yr in recode_years){
     

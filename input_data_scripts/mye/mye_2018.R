@@ -105,8 +105,9 @@ uk_deaths <- filter(uk_coc, component == "deaths") %>%
 #Recode any gss codes which are not standard 2011 codes
 mye_coc <- rbind(mye_coc, uk_pop, uk_births, uk_international, uk_net_international, uk_deaths) %>%
   recode_gss_codes(col_geog="gss_code",
-                     col_aggregation=c("gss_code","gss_name","country","year","component","sex","age","geography"),
-                     fun=list(sum))
+                   data_cols = "value",
+                   fun=list(sum),
+                   recode_to_year = 2018)
 
 rm(death_curves, international_curves, uk_births, uk_coc, uk_deaths, uk_international, uk_net_international,
    uk_pop, ew_coc_file, uk_coc_file, uk_pop_file, right)
