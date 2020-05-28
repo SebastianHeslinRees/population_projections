@@ -1,7 +1,7 @@
 #ONS Household Rates
 library(dplyr)
 library(data.table)
-library(popmodules)
+devtools::load_all("model_code/popmodules/")
 
 read_hh_rates_files <- function(file, file_location, yr){
   
@@ -115,7 +115,7 @@ hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_femal
          sex = case_when(sex == "Female" ~ "female",
                          sex == "Male" ~ "male")) %>%
   select(-district) %>%
-  popmodules::recode_gss_codes(data_cols = hh_pop,
+  popmodules::recode_gss_codes(data_cols = "hh_pop",
                                recode_to_year = 2018)
 
 ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%

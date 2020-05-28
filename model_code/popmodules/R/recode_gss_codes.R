@@ -88,7 +88,7 @@ recode_gss_codes <- function(df_in,
   recode_name_changes[[2020]] <- c("x" = "X")
   
   recode_years <- recode_years[recode_years <= recode_to_year]
-  #browser()
+
   #in a loop so that codes that are changed and then changed again are picked-up
   for(yr in recode_years){
     
