@@ -11,7 +11,7 @@
 #' @param df_in A data frame containing gss_codes and data.
 #' @param col_geog A string. The column which contains gss codes (defaults to
 #'   \code{gss_code}).
-#' @param col_data A string or character vector. The column(s) that contain the
+#' @param data_cols A string or character vector. The column(s) that contain the
 #'   data to be aggregated. Defaults to last column of input dataframe.
 #' @param recode_to_year Numeric. Conform to geography in which year. Default
 #'   \code{2011}.
@@ -24,7 +24,7 @@
 
 recode_gss_codes <- function(df_in,
                              col_geog="gss_code",
-                             col_data = last(names(df_in)),
+                             data_cols = last(names(df_in)),
                              fun = list(sum),
                              recode_to_year = 2012,
                              aggregate_data = TRUE){
@@ -34,7 +34,7 @@ recode_gss_codes <- function(df_in,
     as.data.frame() %>%
     rename("gss_code" = !!col_geog)
   
-  col_aggregation <- setdiff(names(df),col_data)
+  col_aggregation <- setdiff(names(df),data_cols)
   
   #prepare recoding
   recode_years <- c(2009,2012,2013,2018,2019,2020)
