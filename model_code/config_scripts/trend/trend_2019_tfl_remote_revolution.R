@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2020
 n_proj_yr <- 31
-projection_name <- "remote_working"
+projection_name <- "remote_revolution"
 
 popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
 deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
@@ -33,11 +33,11 @@ int_out_last_data_year <- 2019
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
-
-int_in_last_data_year <- 2019
-int_in_years_to_avg <- 10
-int_in_flow_or_rate <- "flow"
-modify_rates_and_flows <- 1
+# 
+# int_in_last_data_year <- 2019
+# int_in_years_to_avg <- 10
+# int_in_flow_or_rate <- "flow"
+# modify_rates_and_flows <- 1
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"
@@ -106,12 +106,13 @@ int_out_rate_fns <- list(
                                                                                rate_cap = int_out_rate_cap))
 )
 
+int_flows_loc <- "input_data/migration/processed_flows/"
 
-int_in  <- list('2020' = list(path = paste0(int_loc,"int_in_10yr_avg_2019_70pc.rds"),
+int_in  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_70pc.rds"),
                               transition = F),
-                '2021' = list(path = paste0(int_loc,"int_in_10yr_avg_2019_50pc.rds"),
+                '2021' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_50pc.rds"),
                               transition = T),
-                '2024' = list(path = paste0(int_loc,"reduced_int_in.rds"),
+                '2024' = list(path = paste0(int_flows_loc,"int_in_reduced_ldn_share.rds"),
                               transition = F))
 
 #-----------------------------------------------------

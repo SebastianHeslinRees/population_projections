@@ -106,11 +106,13 @@ int_out_rate_fns <- list(
                                                                                rate_cap = int_out_rate_cap))
 )
 
-int_in  <- list('2020' = list(path = paste0(int_loc,"int_in_10yr_avg_2019_70pc.rds"),
+int_flows_loc <- "input_data/migration/processed_flows/"
+
+int_in  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_70pc.rds"),
                               transition = F),
-                '2021' = list(path = paste0(int_loc,"int_in_10yr_avg_2019_30pc.rds"),
+                '2021' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_30pc.rds"),
                               transition = T),
-                '2026' = list(path = paste0(int_loc,"reduced_int_in.rds"),
+                '2026' = list(path = paste0(int_flows_loc,"int_in_pre_accession_reduced_ldn_share.rds"),
                               transition = F))
 
 #-----------------------------------------------------

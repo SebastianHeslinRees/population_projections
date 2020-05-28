@@ -34,10 +34,10 @@ int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
 
-int_in_last_data_year <- 2019
-int_in_years_to_avg <- 10
-int_in_flow_or_rate <- "flow"
-modify_rates_and_flows <- 1
+# int_in_last_data_year <- 2019
+# int_in_years_to_avg <- 10
+# int_in_flow_or_rate <- "flow"
+# modify_rates_and_flows <- 1
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"
@@ -106,17 +106,18 @@ int_out_rate_fns <- list(
                                                                                rate_cap = int_out_rate_cap))
 )
 
+int_flows_loc <- "input_data/migration/processed_flows/"
 
-int_in  <- list('2020' = list(path = paste0(dom_rates_loc,"int_in_10yr_avg_2019_70pc.rds"),
+int_in  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_70pc.rds"),
                               transition = F),
-                '2021' = list(path = paste0(dom_rates_loc,"int_in_10yr_avg_2019_50pc.rds"),
+                '2021' = list(path = paste0(intt_flows_loc,"int_in_10yr_avg_2019_50pc.rds"),
                               transition = T),
-                '2024' = list(path = paste0(dom_rates_loc,"int_in_10yr_avg_2019.rds"),
+                '2024' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019.rds"),
                               transition = F))
 
 #-----------------------------------------------------
 
-dom_rates_loc <- "input_data/domestic_migration/process_rates/"
+dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
 
 domestic_rates <- list('2020' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_70pc.rds"),
                                      transition = F),
