@@ -63,6 +63,12 @@ dom_rates_10yr_avg_2019_30pc <- dom_rates_10yr_avg_2019 %>%
 dom_rates_zero <- dom_rates_10yr_avg_2019 %>%
   mutate(rate = 0)
 
+dom_rates_2011 <- rates_backseries %>%
+  popmodules::calculate_mean_domestic_rates(last_data_year = 2011,
+                                            n_years_to_avg = 1,
+                                            col_rate = "rate",
+                                            rate_cap = 0.8)
+
 
 #save files
 loc <- "input_data/domestic_migration/processed_rates/"
@@ -81,3 +87,5 @@ saveRDS(dom_rates_10yr_avg_2019_50pc, paste0(loc, "dom_rates_10yr_avg_2019_50pc.
 saveRDS(dom_rates_10yr_avg_2019_30pc, paste0(loc, "dom_rates_10yr_avg_2019_30pc.rds"))
 
 saveRDS(dom_rates_zero, paste0(loc, "dom_rates_zero.rds"))
+
+saveRDS(dom_rates_2011, paste0(loc, "dom_rates_2011_levels.rds"))
