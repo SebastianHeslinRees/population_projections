@@ -87,7 +87,7 @@ run_trend_model <- function(config_list) {
   
   dom_in <- get_component_from_file(filepath = config_list$dom_in_mye_path,
                                     max_yr = config_list$first_proj_yr - 1)
-
+  
   if(!is.null(config_list$upc_path)){
     upc <- readRDS(config_list$upc_path)
   }
@@ -97,12 +97,12 @@ run_trend_model <- function(config_list) {
   fertility_rates <- evaluate_fns_list(config_list$fertility_fns) %>% complete_fertility(population)
   mortality_rates <- evaluate_fns_list(config_list$mortality_fns)
   int_out_flows_rates <- evaluate_fns_list(config_list$int_out_fns) 
-  int_in_flows <- evaluate_fns_list(config_list$int_in_fns)
-  #browser()
-  #FIXME
-  #domestic_rates <- evaluate_fns_list(config_list$dom_rate_fns)
-  domestic_rates_info <- .get_domestic_rates_info(config_list$domestic_rates, first_proj_yr, last_proj_yr)
+  
+  domestic_rates_info <- get_rates_flows_info(config_list$domestic_rates, first_proj_yr, last_proj_yr)
   domestic_rates <- NULL
+  
+  international_flow_info <- get_rates_flows_info(config_list$int_in_fns, first_proj_yr, last_proj_yr)
+  int_in_flows <- NULL
   
   constraints <- evaluate_fns_list(config_list$constraint_fns)
   
@@ -118,18 +118,19 @@ run_trend_model <- function(config_list) {
   fertility_rates <- fertility_rates %>% select(year, gss_code, age, sex, rate)
   mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
   int_out_flows_rates <- int_out_flows_rates %>% select(year, gss_code, age, sex, int_out)
-  int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
+  #int_in_flows <- int_in_flows %>% select(year, gss_code, age, sex, int_in)
   
   curr_yr_popn <- filter(population, year == first_proj_yr-1)
-
-  # set up projection
-  validate_trend_core_inputs(population, births, deaths, int_out, int_in,
-                             dom_out, dom_in, fertility_rates, mortality_rates,
-                             int_out_flows_rates, int_in_flows, domestic_rates,
-                             first_proj_yr, config_list$n_proj_yr,
-                             config_list$int_out_method)
   
-    
+  # set up projection
+  #FIXME
+  # validate_trend_core_inputs(population, births, deaths, int_out, int_in,
+  #                            dom_out, dom_in, fertility_rates, mortality_rates,
+  #                            int_out_flows_rates, int_in_flows, domestic_rates,
+  #                            first_proj_yr, config_list$n_proj_yr,
+  #                            config_list$int_out_method)
+  
+  
   
   ## run the core
   projection <- list()
@@ -138,24 +139,29 @@ run_trend_model <- function(config_list) {
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
-    curr_yr_int_in_flows <- int_in_flows %>% filter(year == projection_year)
-   
+    
     if(is.null(config_list$upc_path)){
       curr_yr_upc <- NULL
     } else { 
       curr_yr_upc <- upc %>% filter(year == projection_year)
     }
     
-    if(is.data.frame(domestic_rates)){
-      curr_yr_domestic_rates <- select(domestic_rates, gss_out, gss_in, age, sex, rate)
-    }
-    else {
-
-      domestic_rates <- return_domestic_rates(domestic_rates, domestic_rates_info,
-                                              projection_year, first_proj_yr)
-      
-      curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
-    }
+    domestic_rates <- get_rates_or_flows(domestic_rates, domestic_rates_info,
+                                          projection_year, first_proj_yr,
+                                          col_aggregation = c("gss_in","gss_out","sex","age"),
+                                          data_col = "rate")
+    
+    curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
+    
+    
+    int_in_flows <- get_rates_or_flows(int_in_flows, international_flow_info,
+                                        projection_year, first_proj_yr,
+                                        col_aggregation = c("gss_code","sex","age"),
+                                        data_col = "int_in")
+    
+    curr_yr_int_in_flows <- int_in_flows %>% 
+      mutate(year = projection_year) %>% 
+      select(year, gss_code, sex, age, int_in)
     
     projection[[projection_year]] <- trend_core(
       start_population = curr_yr_popn, 
