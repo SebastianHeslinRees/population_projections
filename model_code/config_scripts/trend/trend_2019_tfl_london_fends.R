@@ -15,14 +15,14 @@ dom_out_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_mig
 dom_in_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_in.rds")
 upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
-mortality_years_to_avg <- 5
-mortality_avg_or_trend <- "trend"
+mortality_years_to_avg <- 1#5
+mortality_avg_or_trend <- "average"#"trend"
 mortality_last_data_year <- 2019
 mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018_(2020_geog).rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
-fertility_years_to_avg <- 5
+fertility_years_to_avg <- 1#5
 fertility_avg_or_trend <- "average"
 fertility_last_data_year <- 2019
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018_(2020_geog).rds"
@@ -30,7 +30,7 @@ fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2019
-int_out_years_to_avg <- 10
+int_out_years_to_avg <- 1#10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
 

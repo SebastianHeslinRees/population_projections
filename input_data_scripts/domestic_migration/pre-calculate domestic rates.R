@@ -1,3 +1,6 @@
+library(dplyr)
+devtools::load_all('model_code/popmodules')
+
 #create domestic inputs rates
 popn_mye_path <- "input_data/mye/2019/temp_gla_population.rds"
 births_mye_path <-  "input_data/mye/2019/temp_births.rds"
@@ -13,8 +16,9 @@ rates_backseries <- popmodules::get_rate_backseries(component_mye_path = dom_ori
                                                     col_aggregation = c("year","gss_code"="gss_out","gss_in","sex","age"),
                                                     col_component = "value",
                                                     rate_cap = NULL)
+#-------------------------------------
 
-#Averages
+#Averages for 2018 based projections
 dom_rates_10yr_avg_2018 <- rates_backseries %>%
   popmodules::calculate_mean_domestic_rates(last_data_year = 2018,
                                             n_years_to_avg = 10,
@@ -35,6 +39,9 @@ dom_rates_15yr_avg_2018 <- rates_backseries %>%
                                             col_rate = "rate",
                                             rate_cap = 0.8)
 
+#-------------------------------------
+
+#Averages for 2019 based projections
 dom_rates_10yr_avg_2019 <- rates_backseries %>%
   popmodules::calculate_mean_domestic_rates(last_data_year = 2019,
                                             n_years_to_avg = 10,
@@ -54,6 +61,12 @@ dom_rates_15yr_avg_2019 <- rates_backseries %>%
                                             col_rate = "rate",
                                             rate_cap = 0.8)
 
+#-------------------------------------
+
+#Fractional flows for 2019 scenario projections
+dom_rates_10yr_avg_2019_70pc <- dom_rates_10yr_avg_2019 %>%
+  mutate(rate = rate *0.7)
+
 dom_rates_10yr_avg_2019_50pc <- dom_rates_10yr_avg_2019 %>%
   mutate(rate = rate *0.5)
 
@@ -63,16 +76,36 @@ dom_rates_10yr_avg_2019_30pc <- dom_rates_10yr_avg_2019 %>%
 dom_rates_zero <- dom_rates_10yr_avg_2019 %>%
   mutate(rate = 0)
 
-dom_rates_2011 <- dom_rates_10yr_avg_2018 %>%
-  select(-rate) %>%
-  left_join(popmodules::calculate_mean_domestic_rates(rates_backseries,
-                                                      last_data_year = 2011,
-                                                      n_years_to_avg = 1,
-                                                      col_rate = "rate",
-                                                      rate_cap = 0.8),
-            by = c("gss_out", "age", "sex", "gss_in")) %>%
-  tidyr::replace_na(list(rate = 0))
+dom_rates_2011 <- calculate_mean_domestic_rates(rates_backseries,
+                                                last_data_year = 2011,
+                                                n_years_to_avg = 1,
+                                                col_rate = "rate",
+                                                rate_cap = 0.8)
 
+#-------------------------------------
+
+#In some scenarios we want to affect the amount of migration coming into
+#or going out of London without ammending the rest of the rates
+
+amend_rates_by <- 0.5 #50%
+
+#scenario 8
+#reduced inflow, maintain outflow
+reduced_in_rate <- dom_rates_10yr_avg_2019 %>%
+  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*amend_rates_by, rate))
+
+#scenario 10         
+#Inflow rates increased, outfow decreased
+ldn <- dom_rates_10yr_avg_2019 %>%
+  filter(substr(gss_in,1,3)=="E09" & substr(gss_out,1,3)=="E09")
+
+in_up_out_down <- dom_rates_10yr_avg_2019 %>%
+  filter(!(substr(gss_in,1,3)=="E09" & substr(gss_out,1,3)=="E09")) %>%
+  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*(1+amend_rates_by), rate),
+         rate = ifelse(substr(gss_out,1,3)=="E09", rate*amend_rates_by, rate)) %>%
+  rbind(ldn)
+
+#----------------------------------------------------------
 
 #save files
 loc <- "input_data/domestic_migration/processed_rates/"
@@ -82,14 +115,17 @@ saveRDS(dom_rates_10yr_avg_2018, paste0(loc, "dom_rates_10yr_avg_2018.rds"))
 saveRDS(dom_rates_5yr_avg_2018, paste0(loc, "dom_rates_5yr_avg_2018.rds"))
 saveRDS(dom_rates_15yr_avg_2018, paste0(loc, "dom_rates_15yr_avg_2018.rds"))
 
-
 saveRDS(dom_rates_10yr_avg_2019, paste0(loc, "dom_rates_10yr_avg_2019.rds"))
 saveRDS(dom_rates_5yr_avg_2019, paste0(loc, "dom_rates_5yr_avg_2019.rds"))
 saveRDS(dom_rates_15yr_avg_2019, paste0(loc, "dom_rates_15yr_avg_2019.rds"))
 
+saveRDS(dom_rates_10yr_avg_2019_70pc, paste0(loc, "dom_rates_10yr_avg_2019_70pc.rds"))
 saveRDS(dom_rates_10yr_avg_2019_50pc, paste0(loc, "dom_rates_10yr_avg_2019_50pc.rds"))
 saveRDS(dom_rates_10yr_avg_2019_30pc, paste0(loc, "dom_rates_10yr_avg_2019_30pc.rds"))
 
 saveRDS(dom_rates_zero, paste0(loc, "dom_rates_zero.rds"))
 
 saveRDS(dom_rates_2011, paste0(loc, "dom_rates_2011_levels.rds"))
+
+saveRDS(reduced_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_reduced_ldn_in.rds")
+saveRDS(in_up_out_down, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds")
