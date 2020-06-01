@@ -63,11 +63,15 @@ dom_rates_10yr_avg_2019_30pc <- dom_rates_10yr_avg_2019 %>%
 dom_rates_zero <- dom_rates_10yr_avg_2019 %>%
   mutate(rate = 0)
 
-dom_rates_2011 <- rates_backseries %>%
-  popmodules::calculate_mean_domestic_rates(last_data_year = 2011,
-                                            n_years_to_avg = 1,
-                                            col_rate = "rate",
-                                            rate_cap = 0.8)
+dom_rates_2011 <- dom_rates_10yr_avg_2018 %>%
+  select(-rate) %>%
+  left_join(popmodules::calculate_mean_domestic_rates(rates_backseries,
+                                                      last_data_year = 2011,
+                                                      n_years_to_avg = 1,
+                                                      col_rate = "rate",
+                                                      rate_cap = 0.8),
+            by = c("gss_out", "age", "sex", "gss_in")) %>%
+  tidyr::replace_na(list(rate = 0))
 
 
 #save files
