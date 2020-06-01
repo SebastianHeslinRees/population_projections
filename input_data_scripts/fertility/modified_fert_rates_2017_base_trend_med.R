@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 
-fertility <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Outputs/2017 Base/medium_out_migration/Fertility Rates.rds") %>%
+fertility <- readRDS("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model/Outputs/2017 Base/medium_out_migration/Fertility Rates.rds") %>%
   mutate(sex = "female") %>% 
   select(year, gss_code, age, sex, rate = fertility_rate) %>%
   arrange(year, sex,gss_code, age) %>%
@@ -22,7 +22,8 @@ wales <- filter(fertility, gss_code == "E06000001") %>%
 
 fertility  <- fertility %>% rbind(wales) %>%
   filter(gss_code != "W92000004") %>%
-  popmodules::recode_gss_to_2011(col_aggregation = c("year","gss_code","sex","age"))
+  popmodules::recode_gss_codes(data_cols = "rate",
+                               recode_to_year = 2018)
 
 assertthat::assert_that(dir.exists("input_data"))
 dir.create("input_data/fertility", showWarnings = FALSE)

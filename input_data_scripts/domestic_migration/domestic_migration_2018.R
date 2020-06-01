@@ -2,6 +2,7 @@ library(dplyr)
 library(tidyr)
 library(assertthat)
 library(data.table)
+library(popmodules)
 
 rm(list=ls()) # we're going to need memory, sorry
 message("domestic migration")
@@ -16,8 +17,8 @@ domestic <- readRDS(domestic_file) %>%
          gss_out = out_la)
 
 domestic <- domestic %>%
-  popmodules::recode_gss_to_2011(col_geog="gss_in", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum)) %>%
-  popmodules::recode_gss_to_2011(col_geog="gss_out", col_aggregation=c("gss_in","gss_out","age","sex","year"), fun=list(sum))
+  recode_gss_codes(col_geog="gss_in", data_col="value", fun=list(sum), recode_to_year = 2018) %>%
+  recode_gss_codes(col_geog="gss_out", data_col="value", fun=list(sum), recode_to_year = 2018)
 
 domestic_region <- domestic %>%
   left_join(region_lookup, by=c("gss_in"="gss_code")) %>%

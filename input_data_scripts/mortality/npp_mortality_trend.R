@@ -10,6 +10,7 @@ npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based N
 #function to read and wrangle raw data
 mortality_trend <- function(file, var, max_year, npp_data_location){
   mort <- fread(paste0(npp_data_location, file)) %>%
+    tibble() %>%
     gather(year, rate, 3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
     mutate(age = ifelse(Age == "Birth", -1, Age),
@@ -27,10 +28,11 @@ mortality_trend <- function(file, var, max_year, npp_data_location){
   }
   
   mort <- rbind(data.table::rbindlist(back_to_2001), mort) %>%
+    data.frame() %>%
     mutate(variant = var)
   
   return(mort)
-  
+
 }
 
 #read in data
@@ -52,7 +54,7 @@ mort_trend <- rbind(principal_2016, high_2016, low_2016,
                     principal_2018, high_2018, low_2018) 
 
 #2012 data
-load("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
+load("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
 rm(list=setdiff(ls(),c("mort_trend", "npp_mortality_trend")))
 
 trend_2012 <- npp_mortality_trend %>%
