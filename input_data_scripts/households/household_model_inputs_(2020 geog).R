@@ -9,13 +9,11 @@ dclg_stage1 <- readRDS("input_data/household_model/dclg_stage1_data_2014.rds")
 dclg_stage2 <- readRDS("input_data/household_model/dclg_headship_rates_2014.rds")
 
 ons_stage1 <- recode_gss_codes(ons_stage1,
-                               col_aggregation = c("gss_code","year","sex","age_group"),
-                               col_geog="gss_code",
+                               data_cols = "HRR",
                                fun = list(mean),
                                recode_to_year = 2020)
 ons_stage2 <- recode_gss_codes(ons_stage2,
-                               col_aggregation = c("gss_code","year","household_type","age_group"),
-                               col_geog="gss_code",
+                               data_cols = "HRR",
                                fun = list(mean),
                                recode_to_year = 2020)
 assert_that(!any(is.na(ons_stage1)))
@@ -24,13 +22,13 @@ assert_that(!any(is.na(ons_stage2)))
 
 communal_est_pop <- communal_est %>%
   select(-ce_rate) %>%
-  recode_gss_codes(col_aggregation = c("gss_code","age_group","sex","year"),
+  recode_gss_codes(data_cols = "ce_pop",
                    col_geog="gss_code",
                    recode_to_year = 2020)
 
 communal_est_rate <- communal_est %>% 
   select(-ce_pop) %>%
-  recode_gss_codes(col_aggregation = c("gss_code","age_group","sex","year"),
+  recode_gss_codes(data_cols = "ce_rate",
                    col_geog="gss_code",
                    fun = list(mean),
                    recode_to_year = 2020)
@@ -42,13 +40,15 @@ communal_est <- left_join(communal_est_pop, communal_est_rate,
 
 dclg_stage1_pops <- dclg_stage1 %>%
   select(-hh_rep_rates) %>%
-  recode_gss_codes(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
+  recode_gss_codes(data_cols = c("households","household_population",
+                                 "institutional_population",
+                                 "total_population"),
                    col_geog="gss_code",
                    recode_to_year = 2020)
 
 dclg_stage1_rates <- dclg_stage1 %>%
   select(-households, -household_population, -institutional_population, -total_population) %>%
-  recode_gss_codes(col_aggregation = c("gss_code","year","sex","household_type","age_group"),
+  recode_gss_codes(data_cols = "hh_rep_rates",
                    col_geog="gss_code",
                    fun=list(mean),
                    recode_to_year = 2020)
@@ -56,9 +56,8 @@ dclg_stage1_rates <- dclg_stage1 %>%
 dclg_stage1 <- left_join(dclg_stage1_pops, dclg_stage1_rates,
                          by = c("gss_code","year","sex","household_type","age_group"))
 
-
 dclg_stage2 <- dclg_stage2 %>%
-  recode_gss_codes(col_aggregation = c("gss_code","year","household_type","age_group"),
+  recode_gss_codes(data_cols = "rate",
                    col_geog="gss_code",
                    fun=list(mean),
                    recode_to_year = 2020)

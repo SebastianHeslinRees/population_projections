@@ -1,6 +1,6 @@
 library(tidyverse)
 library(data.table)
-library(popmodules)
+devtools::load_all("model_code/popmodules/")
 
 message("mye data")
 
@@ -17,6 +17,7 @@ mye_coc <- readRDS(ew_coc_file) %>%
 
 #Scotland & NI Population
 uk_pop <- fread(uk_pop_file) %>%
+  data.frame() %>%
   filter(country %in% c("N","S")) %>%
   gather(year, value, 6:23) %>%
   mutate(year = substr(year, 12, 15),
@@ -38,6 +39,7 @@ right = function(text, num_char) {
 }
 
 uk_coc <- fread(uk_coc_file) %>%
+  data.frame() %>%
   filter(country %in% c("N","S")) %>%
   gather(var, value, 4:191) %>%
   mutate(year = as.numeric(right(var, 4)),
@@ -105,8 +107,9 @@ uk_deaths <- filter(uk_coc, component == "deaths") %>%
 #Recode any gss codes which are not standard 2011 codes
 mye_coc <- rbind(mye_coc, uk_pop, uk_births, uk_international, uk_net_international, uk_deaths) %>%
   recode_gss_codes(col_geog="gss_code",
-                     col_aggregation=c("gss_code","gss_name","country","year","component","sex","age","geography"),
-                     fun=list(sum))
+                   data_cols = "value",
+                   fun=list(sum),
+                   recode_to_year = 2018)
 
 rm(death_curves, international_curves, uk_births, uk_coc, uk_deaths, uk_international, uk_net_international,
    uk_pop, ew_coc_file, uk_coc_file, uk_pop_file, right)
@@ -142,6 +145,7 @@ upc <- filter(mye_coc, component %in% c("special_change", "unattrib", "other_adj
 deaths <- arrange(deaths, gss_code, age, sex, year)
 ix <- deaths$deaths < 0
 deaths$deaths[ix] <- NA
+assert_that(!any( range(deaths$year) %in% deaths$year[ix]), msg = "Min or max year of deaths missing: can't interpolate without more information")
 missing_deaths <- approx(x = 1:nrow(deaths), y = deaths$deaths, xout = (1:nrow(deaths))[ix])
 deaths$deaths[ix] <- missing_deaths$y
 deaths <- arrange(deaths, gss_code, year, sex, age)

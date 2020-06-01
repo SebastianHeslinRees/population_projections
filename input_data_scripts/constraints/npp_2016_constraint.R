@@ -6,6 +6,7 @@ npp_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NP
 mig_constraints <- function(file, component, in_out, country_id) {
   
   x <- data.table::fread(paste0(npp_location,file)) %>%
+    tibble() %>%
     filter(Flow == in_out) %>%
     tidyr::gather(year, value, 4:103) %>%
     mutate(sex = case_when(Sex == 1 ~ "male",
@@ -52,6 +53,7 @@ for(i in 1:4){
   
   #deaths
   deaths[[i]] <- data.table::fread(paste0(npp_location,"npp_2016_deaths_",country_suffix[[i]],".csv")) %>%
+    tibble() %>%
     tidyr::gather(year, deaths, 3:102) %>%
     mutate(sex = case_when(Sex == 1 ~ "male",
                            Sex == 2 ~ "female")) %>%
@@ -70,6 +72,7 @@ for(i in 1:4){
   
   #births
   births[[i]] <- data.table::fread(paste0(npp_location,"npp_2016_births_",country_suffix[[i]],".csv")) %>%
+    tibble() %>%
     tidyr::gather(year, births, 3:102) %>%
     mutate(sex = case_when(Sex == 1 ~ "male",
                            Sex == 2 ~ "female")) %>%

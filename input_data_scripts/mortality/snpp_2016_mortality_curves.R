@@ -46,7 +46,7 @@ for(w in seq(welsh_gss_codes)){
     mutate(gss_code = welsh_gss_codes[w])
 }
 wales <- data.table::rbindlist(wales) %>%
-  data.frane()
+  data.frame()
 
 national_mort <- filter(national_mort, gss_code != "W92000004")
 
@@ -54,7 +54,8 @@ national_mort <- filter(national_mort, gss_code != "W92000004")
 ons_mort <- rbind(ons_mort, national_mort, wales) %>%
   mutate(year = 2017) %>%
   select(gss_code, sex, age, year, rate = death_rate) %>%
-  popmodules::recode_gss_codes(col_geog = "gss_code", col_aggregation = c("gss_code", "sex", "age", "year"), fun = list(mean))
+  popmodules::recode_gss_codes(data_cols = "rate", fun = list(mean),
+                               recode_to_year = 2018)
 
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves_2016.rds" )

@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 
-int_out_rates <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Outputs/2017 Base/medium_out_migration/International Out Probabilities.rds") %>%
+int_out_rates <- readRDS("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model/Outputs/2017 Base/medium_out_migration/International Out Probabilities.rds") %>%
   select(year, gss_code, age, sex, rate = int_out) %>%
   arrange(year, sex,gss_code, age) %>%
   as.data.frame()
@@ -32,6 +32,7 @@ wales <- filter(int_out_rates, gss_code == "E06000001") %>%
 
 
 int_out_rates  <- int_out_rates %>% rbind(wales) %>%
-  popmodules::recode_gss_codes(col_aggregation = c("year","gss_code","age","sex"))
+  popmodules::recode_gss_codes(data_cols = "int_out",
+                               recode_to_year = 2018)
 
 saveRDS(int_out_rates, file = "input_data/migration/modified_int_out_rates_2017_base_trend_med.rds")

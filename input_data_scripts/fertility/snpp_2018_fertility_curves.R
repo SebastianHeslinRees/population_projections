@@ -2,7 +2,7 @@
 library(dplyr)
 library(tidyr)
 library(data.table)
-library(popmodules)
+devtools::load_all("model_code/popmodules")
 
 fert_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2018-based (March 2020)/model_inputs/2018 snpp sya fert rates.csv"
 national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/national asfrs.csv"
@@ -37,8 +37,9 @@ ons_fert <- rbind(ons_fert, national_fert, wales) %>%
   as.data.frame() %>%
   select(gss_code, sex, age, fert_rate) %>%
   popmodules::recode_gss_codes(col_geog = "gss_code",
-                                 col_aggregation = c("gss_code", "sex", "age"),
-                                 fun = list(mean)) %>%
+                               data_cols = "fert_rate",
+                               fun = list(mean),
+                               recode_to_year = 2018) %>%
   as.data.frame()
 
 #smooth curves
@@ -49,7 +50,7 @@ smoothed_curves <- smooth_fertility(ons_fert)$data %>%
   mutate(year = 2019) %>%
   rename(rate = fert_rate) %>%
   mutate(gss_code = as.character(gss_code))
-  
+
 validate_population(smoothed_curves, col_data = "rate")
 
 
