@@ -1,7 +1,7 @@
 #ONS Household Rates
 library(dplyr)
 library(data.table)
-library(popmodules)
+devtools::load_all("model_code/popmodules/")
 
 read_hh_rates_files <- function(file, file_location, yr){
   
@@ -11,7 +11,7 @@ read_hh_rates_files <- function(file, file_location, yr){
                            sex == "M" ~ "male"))
 }
 
-file_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/ONS Household Projections/GLA implementation/input"
+file_location <- "Q:/Teams/D&PA/Demography/Projections/Legacy Models/ONS Household Projections/GLA implementation/input"
 
 rates_2001 <- read_hh_rates_files("/hh_rep_rates.rds", file_location, 2001) %>%
   recode_gss_codes(data_cols = "HRR",
@@ -58,15 +58,18 @@ for(i in 2022:2041){
     mutate(year = i)
 }
 
-rates <- data.table::rbindlist(rates)
+rates <- data.table::rbindlist(rates) %>%
+  data.frame()
 
 #Split out 85_89 & 90+ from 85+ data using ONS rounded rates
 ons_data_location <- "Q:/Teams/D&PA/Data/household_projections/ONS_data/2016_based/csv/"
 merged_lookup <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/la to merged la.csv") %>%
+  data.frame() %>%
   select(-merged_name)
 
 rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_female.csv"), header = T),
                        data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_male.csv"), header = T)) %>%
+  tibble() %>%
   filter(age_group %in% c("85_89","90+")) %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "HRR") %>%
   mutate(year = as.numeric(year),
@@ -100,6 +103,7 @@ rm(list=setdiff(ls(),c("rates","merged_lookup","ons_data_location")))
 
 ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.csv"), header = T),
             data.table::fread(paste0(ons_data_location, "ce_population_male.csv"), header = T)) %>%
+  tibble() %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "ce_pop") %>%
   mutate(year = as.numeric(year),
          sex = case_when(sex == "Female" ~ "female",
@@ -110,12 +114,13 @@ ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.cs
 
 hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
                 data.table::fread(paste0(ons_data_location, "hh_population_male.csv"), header = T)) %>%
+  tibble() %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "hh_pop") %>%
   mutate(year = as.numeric(year),
          sex = case_when(sex == "Female" ~ "female",
                          sex == "Male" ~ "male")) %>%
   select(-district) %>%
-  popmodules::recode_gss_codes(data_cols = hh_pop,
+  popmodules::recode_gss_codes(data_cols = "hh_pop",
                                recode_to_year = 2018)
 
 ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
@@ -125,6 +130,7 @@ ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
 
 #Stage 2
 stage_2_inputs <- data.table::fread(paste0(ons_data_location,"s2_household_representative_rate.csv"),header = TRUE) %>%
+  tibble() %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "rate") %>%
   select(-AREA) %>%
   setnames(c("merged_gss_code","age_group","household_type","year","rate")) %>%
@@ -153,7 +159,7 @@ rm(list=ls())
 #--------------------------------------------------------
 
 #DCLG Data
-data_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/"
+data_location <- "Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/"
 
 stage1_data <- readRDS(paste0(data_location,"2014 DCLG stage 1 data.rds")) %>%
   setnames(c("gss_code","year","sex","household_type","age_group","households",

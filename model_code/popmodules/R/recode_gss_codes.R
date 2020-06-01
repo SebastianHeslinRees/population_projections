@@ -9,13 +9,13 @@
 #' by
 #'
 #' @param df_in A data frame containing gss_codes and data.
-#' @param col_geog A string. The column which contains gss codes
-#'   (defaults to \code{gss_code}).
-#' @param data_col A string. The column which constains the data to be
-#'   aggregated. Defaults to last column of input dataframe.
-#' @param recode_to_year Numeric. Conform to geography in which year.
-#'   Default \code{2011}.
-#' @aggregated_data Not currently used
+#' @param col_geog A string. The column which contains gss codes (defaults to
+#'   \code{gss_code}).
+#' @param data_cols A string or character vector. The column(s) that contain the
+#'   data to be aggregated. Defaults to last column of input dataframe.
+#' @param recode_to_year Numeric. Conform to geography in which year. Default
+#'   \code{2011}.
+#' @param aggregate_data Not currently used
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
@@ -45,7 +45,7 @@ recode_gss_codes <- function(df_in,
   recode_merges <- list()
   recode_name_changes <- list()
   
-  code_changes <- readRDS("Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds") %>%
+  code_changes <- readRDS("input_data/lookup/district_changes_clean.rds") %>%
     select(changed_to_code, changed_from_code, year, split, merge)
   
   #splits
@@ -88,7 +88,7 @@ recode_gss_codes <- function(df_in,
   recode_name_changes[[2020]] <- c("x" = "X")
   
   recode_years <- recode_years[recode_years <= recode_to_year]
-  #browser()
+
   #in a loop so that codes that are changed and then changed again are picked-up
   for(yr in recode_years){
     
@@ -109,6 +109,8 @@ recode_gss_codes <- function(df_in,
       as.data.frame() %>%
       rename(!!col_geog := "gss_code")
   }
+  
+  return(df)
   
 }
 
