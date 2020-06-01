@@ -11,7 +11,7 @@ read_hh_rates_files <- function(file, file_location, yr){
                            sex == "M" ~ "male"))
 }
 
-file_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/ONS Household Projections/GLA implementation/input"
+file_location <- "Q:/Teams/D&PA/Demography/Projections/Legacy Models/ONS Household Projections/GLA implementation/input"
 
 rates_2001 <- read_hh_rates_files("/hh_rep_rates.rds", file_location, 2001) %>%
   recode_gss_codes(data_cols = "HRR",
@@ -159,7 +159,7 @@ rm(list=ls())
 #--------------------------------------------------------
 
 #DCLG Data
-data_location <- "Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/"
+data_location <- "Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/"
 
 stage1_data <- readRDS(paste0(data_location,"2014 DCLG stage 1 data.rds")) %>%
   setnames(c("gss_code","year","sex","household_type","age_group","households",

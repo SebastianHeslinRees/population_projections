@@ -123,7 +123,7 @@ borough_units <- left_join(lsoa_units, lsoa_to_borough, by="gss_code_lsoa") %>%
 ####
 #Tests/Checks/Comparissons
 #
-# load("Q:/Teams/D&PA/Demography/Projections/R Models/Housing Led Model/Inputs/housing data/2016 SHLAA.Rdata")
+# load("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Housing Led Model/Inputs/housing data/2016 SHLAA.Rdata")
 # 
 # b <- left_join(lsoa_census_dwellings, lsoa_to_borough, by="gss_code_lsoa") %>%
 #   dtplyr::lazy_dt() %>%
