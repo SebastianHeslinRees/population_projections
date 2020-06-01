@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 
-fertility <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Outputs/2017 Base/medium_out_migration/Fertility Rates.rds") %>%
+fertility <- readRDS("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model/Outputs/2017 Base/medium_out_migration/Fertility Rates.rds") %>%
   mutate(sex = "female") %>% 
   select(year, gss_code, age, sex, rate = fertility_rate) %>%
   arrange(year, sex,gss_code, age) %>%

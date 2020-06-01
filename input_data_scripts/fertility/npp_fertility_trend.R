@@ -55,7 +55,7 @@ fert_trend <- rbind(principal_2016, high_2016, low_2016,
                     principal_2018, high_2018, low_2018) 
 
 #2012 data
-load("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
+load("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
 rm(list=setdiff(ls(),c("fert_trend", "npp_fertility_trend")))
 
 trend_2012 <- select(npp_fertility_trend, year, age, High.2012, Low.2012, Principal.2012) %>%

@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 
-int_out_rates <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Trend Model/Outputs/2017 Base/medium_out_migration/International Out Probabilities.rds") %>%
+int_out_rates <- readRDS("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model/Outputs/2017 Base/medium_out_migration/International Out Probabilities.rds") %>%
   select(year, gss_code, age, sex, rate = int_out) %>%
   arrange(year, sex,gss_code, age) %>%
   as.data.frame()
