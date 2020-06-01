@@ -58,15 +58,18 @@ for(i in 2022:2041){
     mutate(year = i)
 }
 
-rates <- data.table::rbindlist(rates)
+rates <- data.table::rbindlist(rates) %>%
+  data.frame()
 
 #Split out 85_89 & 90+ from 85+ data using ONS rounded rates
 ons_data_location <- "Q:/Teams/D&PA/Data/household_projections/ONS_data/2016_based/csv/"
 merged_lookup <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/la to merged la.csv") %>%
+  data.frame() %>%
   select(-merged_name)
 
 rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_female.csv"), header = T),
                        data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_male.csv"), header = T)) %>%
+  tibble() %>%
   filter(age_group %in% c("85_89","90+")) %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "HRR") %>%
   mutate(year = as.numeric(year),
@@ -100,6 +103,7 @@ rm(list=setdiff(ls(),c("rates","merged_lookup","ons_data_location")))
 
 ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.csv"), header = T),
             data.table::fread(paste0(ons_data_location, "ce_population_male.csv"), header = T)) %>%
+  tibble() %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "ce_pop") %>%
   mutate(year = as.numeric(year),
          sex = case_when(sex == "Female" ~ "female",
@@ -110,6 +114,7 @@ ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.cs
 
 hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
                 data.table::fread(paste0(ons_data_location, "hh_population_male.csv"), header = T)) %>%
+  tibble() %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "hh_pop") %>%
   mutate(year = as.numeric(year),
          sex = case_when(sex == "Female" ~ "female",
@@ -125,6 +130,7 @@ ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
 
 #Stage 2
 stage_2_inputs <- data.table::fread(paste0(ons_data_location,"s2_household_representative_rate.csv"),header = TRUE) %>%
+  tibble() %>%
   tidyr::pivot_longer(5:45, names_to = "year", values_to = "rate") %>%
   select(-AREA) %>%
   setnames(c("merged_gss_code","age_group","household_type","year","rate")) %>%

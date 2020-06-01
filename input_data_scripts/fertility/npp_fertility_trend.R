@@ -10,6 +10,7 @@ npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based N
 #function to read and wrangle raw data
 fertility_trend <- function(file, var, max_year, npp_data_location){
   fert <- fread(paste0(npp_data_location, file)) %>%
+    tibble() %>%
     gather(year, rate, 3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
     mutate(age = as.numeric(Age))%>%
@@ -24,16 +25,16 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
     back_to_2001[[y]] <- filter(fert, year == min_year) %>% mutate(year = y)
   }
   
-  fert <- rbind(data.table::rbindlist(back_to_2001), fert)
-  
+  fert <- rbind(data.table::rbindlist(back_to_2001), fert) %>%
+    data.frame()
   
   additional_ages <- list()
   for(a in 47:49){
     additional_ages[[a]] <- filter(fert, age == max(fert$age)) %>% mutate(age = a)
   }
   
-  
   fert <- rbind(data.table::rbindlist(additional_ages), fert) %>%
+    data.frame() %>%
     mutate(variant = var)
   
   return(fert)

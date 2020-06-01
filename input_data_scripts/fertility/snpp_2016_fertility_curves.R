@@ -9,6 +9,7 @@ national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based N
 
 #Data for English LAs
 ons_fert <- data.table::fread(fert_curve_file) %>%
+  tibble() %>%
   pivot_longer(cols=4:28, names_to = "year", values_to = "fert_rate") %>%
   dtplyr::lazy_dt() %>%
   filter(year == 2017) %>%

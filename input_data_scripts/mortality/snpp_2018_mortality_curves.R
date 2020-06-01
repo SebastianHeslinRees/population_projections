@@ -49,7 +49,7 @@ national_mort <- filter(national_mort, gss_code != "W92000004")
 ons_mort <- rbind(ons_mort, national_mort, wales) %>%
   mutate(year = 2019) %>%
   select(gss_code, sex, age, year, rate = mort_rate) %>%
-  popmodules::recode_gss_codes(rate = "rate", fun = list(mean),
+  popmodules::recode_gss_codes(data_cols = "rate", fun = list(mean),
                                recode_to_year = 2018)
 
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
