@@ -8,7 +8,7 @@ devtools::load_all('model_code/popmodules')
 covid_repo <- "Q:/Projects/2019-20/Covid-19_public_facing/londonC19dashboard/data/updated/"
 
 #ons data by LA
-ons_file <- "ons_deaths_weekly_occurrences_by_la_2020-05-08"
+ons_file <- "ons_deaths_weekly_occurrences_by_la_2020-05-15"
 
 #FIXME
 #This excel workbook has deaths by sex and broad age for England
@@ -31,7 +31,7 @@ covid_la_total <- data.table::fread(paste0(covid_repo,"processed/",ons_file,".cs
   summarise(la_total = sum(deaths)) %>%
   as.data.frame() %>%
   filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","S92","N92")) %>% 
-  recode_gss_codes(col_aggregation = c("gss_code"), recode_to_year=2020)
+  recode_gss_codes(data_cols = "la_total", recode_to_year=2020)
 
 #FIXME
 #This is ONS data so its just E&W
@@ -106,10 +106,11 @@ covid_modelled_sya <- data.table::rbindlist(covid_modelled_sya) %>%
 modelled_figure <- sum(covid_modelled_sya$deaths)
 
 #Future covid deaths
-#There are about 10 weeks left in the year and atm there are ~100 deaths per day in England
-#So 7000 more deaths to mid year?
+#There are about 6 weeks left in the year from 15/05
+#and atm there are ~100 deaths per day in England
+#So 100*7*6 more deaths to mid year?
 
-total_2020_deaths <- 7000 + latest_uk_figure
+total_2020_deaths <- (100*7*6) + latest_uk_figure
 
 scaling <- total_2020_deaths/modelled_figure
 
@@ -126,7 +127,8 @@ covid_2021 <- covid_upc %>%
          upc = upc*0.5)
 
 covid_upc <- rbind(covid_upc, covid_2021) %>%
-  mutate(upc = upc*-1)
+  mutate(upc = upc*-1) %>%
+  recode_gss_codes(data_cols = "upc", recode_to_year = 2020)
   
 #save
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")

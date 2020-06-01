@@ -38,8 +38,7 @@ saveRDS(avg_20_yr_50, paste0(int_flows_loc,"int_in_10yr_avg_2019_50pc.rds"))
 saveRDS(avg_20_yr_80, paste0(int_flows_loc,"int_in_10yr_avg_2019_80pc.rds"))
 
 #proportion of uk int in going to different regions
-#for reference
-int_in_proprtions <- avg_10_yr %>% 
+int_in_proportions <- avg_10_yr %>%
   left_join(district_to_region, by="gss_code") %>%
   group_by(region_gss_code) %>%
   summarise(int_in = sum(int_in)) %>%
@@ -54,7 +53,7 @@ int_in_proprtions <- avg_10_yr %>%
 amount_to_change <- sum(avg_10_yr$int_in)*proportion_to_redistribute
 
 #reduction in London, increase elsewhere
-increase_to_regions <- int_in_proprtions %>% 
+increase_to_regions <- int_in_proportions %>% 
   mutate(additional = ifelse(region_gss_code == "E12000007",
                              amount_to_change*-1,
                              amount_to_change * dist_without_ldn),
@@ -85,7 +84,7 @@ saveRDS(int_in_flows_3, paste0(int_flows_loc,"int_in_reduced_ldn_share.rds"))
 #####
 #Opposite thing: increase london, resuction everywhere else
 
-increase_to_london <- int_in_proprtions %>% 
+increase_to_london <- int_in_proportions %>% 
   mutate(additional = ifelse(region_gss_code == "E12000007",
                              amount_to_change,
                              amount_to_change * dist_without_ldn * -1),
@@ -121,4 +120,5 @@ int_in_flows_6 <- int_in_flows_3 %>%
   select(-int_in, -proportion) %>%
   rename(int_in = new_int_in)
   
-saveRDS(int_in_flows_5, paste0(int_flows_loc,"int_in_pre_accession_reduced_ldn_share.rds"))
+saveRDS(int_in_flows_6, paste0(int_flows_loc,"int_in_pre_accession_reduced_ldn_share.rds"))
+

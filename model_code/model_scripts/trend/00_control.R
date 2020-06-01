@@ -152,7 +152,6 @@ run_trend_model <- function(config_list) {
     
     curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
     
-    
     int_in_flows <- get_rates_or_flows(int_in_flows, international_flow_info,
                                         projection_year, first_proj_yr,
                                         col_aggregation = c("gss_code","sex","age"),

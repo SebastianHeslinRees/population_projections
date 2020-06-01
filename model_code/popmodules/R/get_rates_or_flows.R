@@ -21,7 +21,7 @@
 
 get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
                                 col_aggregation, data_col){
-  
+ 
   #value_1 = data_col for df_info$path
   #value_2 = data_col for df_info$next_path
   #data_col = actual rate used in projection_year-1
@@ -50,7 +50,8 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       #add next set of data
       df <- readRDS(curr_yr_info$next_path) %>%
         rename(value_2 = !!data_col) %>%
-        full_join(df, by = col_aggregation)
+        full_join(df, by = col_aggregation) %>% 
+        tidyr::replace_na(list(value_1 = 0, value_2 = 0))
     }
     
   }
