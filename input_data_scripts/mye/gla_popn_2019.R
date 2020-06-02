@@ -36,6 +36,15 @@ popn_2019 <- gla_popn %>%
   arrange(year, gss_code, sex, age) %>%
   check_negative_values(data_col = "popn")
 
+chang <-  gla_popn %>%
+  filter(year == 2018) %>%
+  left_join(popn_2019, by=c("gss_code","sex","age")) %>%
+  mutate(diff = popn.y-popn.x,
+         pc = diff/popn.x,
+         pc = pc*100) %>%
+  filter(pc >50)
+              
+
 gla_mye <- rbind(gla_popn, popn_2019)
 
 #check geographies match

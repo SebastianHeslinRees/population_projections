@@ -87,23 +87,30 @@ dom_rates_2011 <- calculate_mean_domestic_rates(rates_backseries,
 #In some scenarios we want to affect the amount of migration coming into
 #or going out of London without ammending the rest of the rates
 
-amend_rates_by <- 0.5 #50%
+reduce_rates_to <- 0.8 #80% of average
+increase_rates_to <- 1.2 #120% of average
 
-#scenario 8
+#remote working scenario
 #reduced inflow, maintain outflow
 reduced_in_rate <- dom_rates_10yr_avg_2019 %>%
-  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*amend_rates_by, rate))
+  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*reduce_rates_to, rate))
 
-#scenario 10         
+#agglomeration scenario  
+#2 possibles
+
 #Inflow rates increased, outfow decreased
 ldn <- dom_rates_10yr_avg_2019 %>%
   filter(substr(gss_in,1,3)=="E09" & substr(gss_out,1,3)=="E09")
 
 in_up_out_down <- dom_rates_10yr_avg_2019 %>%
   filter(!(substr(gss_in,1,3)=="E09" & substr(gss_out,1,3)=="E09")) %>%
-  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*(1+amend_rates_by), rate),
-         rate = ifelse(substr(gss_out,1,3)=="E09", rate*amend_rates_by, rate)) %>%
+  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*increase_rates_to, rate),
+         rate = ifelse(substr(gss_out,1,3)=="E09", rate*reduce_rates_to, rate)) %>%
   rbind(ldn)
+
+#increase inflow, maintain outflow
+increased_in_rate <- dom_rates_10yr_avg_2019 %>%
+  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*increase_rate_to, rate))
 
 #----------------------------------------------------------
 

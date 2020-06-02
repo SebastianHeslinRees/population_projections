@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2020
 n_proj_yr <- 31
-projection_name <- "agglomoration"
+projection_name <- "agglomeration"
 
 popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
 deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
@@ -33,11 +33,6 @@ int_out_last_data_year <- 2019
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
-
-int_in_last_data_year <- 2019
-int_in_years_to_avg <- 10
-int_in_flow_or_rate <- "flow"
-modify_rates_and_flows <- 1
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"

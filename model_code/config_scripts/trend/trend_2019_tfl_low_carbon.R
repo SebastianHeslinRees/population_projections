@@ -23,7 +23,7 @@ mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 5
-fertility_avg_or_trend <- "average"
+fertility_avg_or_trend <- "trend"
 fertility_last_data_year <- 2019
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018_(2020_geog).rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
