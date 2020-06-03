@@ -21,7 +21,7 @@ additional_births <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/bir
   # recode_gss_codes(col_geog = "gss_code",
   #                  data_cols = "births",
   #                  fun = list(sum),
-  #                  recode_to_year = 2018) %>%
+  #                  recode_gla_codes = TRUE) %>%
   filter(gss_code %in% ons_births$gss_code) %>%
   validate_same_geog(ons_births) %>%
   filter(substr(gss_code,1,3)=="E09")

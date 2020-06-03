@@ -15,7 +15,7 @@ process_rdata_file <- function(component, col_name){
     select(year,gss_code,sex,age,estimate) %>%
     mutate(estimate = ifelse(estimate <0, 0, estimate)) %>%
     popmodules::recode_gss_codes(data_cols = "estimate",
-                                 recode_to_year = 2018) %>%
+                                 recode_gla_codes = TRUE) %>%
     rename(!!col_name := estimate) %>%
     filter(year > 2001)
   

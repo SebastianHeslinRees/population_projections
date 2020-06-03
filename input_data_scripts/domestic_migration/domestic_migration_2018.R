@@ -17,8 +17,8 @@ domestic <- readRDS(domestic_file) %>%
          gss_out = out_la)
 
 domestic <- domestic %>%
-  recode_gss_codes(col_geog="gss_in", data_col="value", fun=list(sum), recode_to_year = 2018) %>%
-  recode_gss_codes(col_geog="gss_out", data_col="value", fun=list(sum), recode_to_year = 2018)
+  recode_gss_codes(col_geog="gss_in", data_col="value", fun=list(sum), recode_gla_codes = TRUE) %>%
+  recode_gss_codes(col_geog="gss_out", data_col="value", fun=list(sum), recode_gla_codes = TRUE)
 
 domestic_region <- domestic %>%
   left_join(region_lookup, by=c("gss_in"="gss_code")) %>%
