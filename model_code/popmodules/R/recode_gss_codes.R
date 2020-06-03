@@ -20,7 +20,9 @@
 #'   gss code will be aggregated using the function specified in \code{fun} parammeter.
 #'   Default to \code{TRUE}.
 #' @recode_gla_codes Logical. If set to \code{TRUE} recodes to the codes used in
-#'  2018-based and earlier projections. Default \code{FALSE}.
+#'  2018-based and earlier projections. This is introduced for backward
+#'  compatibility and doesn't correspond to any single vintage year.
+#'  Default \code{FALSE}.
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
