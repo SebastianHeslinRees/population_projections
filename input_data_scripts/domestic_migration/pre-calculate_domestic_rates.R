@@ -110,7 +110,7 @@ in_up_out_down <- dom_rates_10yr_avg_2019 %>%
 
 #increase inflow, maintain outflow
 increased_in_rate <- dom_rates_10yr_avg_2019 %>%
-  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*increase_rate_to, rate))
+  mutate(rate = ifelse(substr(gss_in,1,3)=="E09", rate*increase_rates_to, rate))
 
 #----------------------------------------------------------
 
@@ -136,3 +136,4 @@ saveRDS(dom_rates_2011, paste0(loc, "dom_rates_2011_levels.rds"))
 
 saveRDS(reduced_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_reduced_ldn_in.rds")
 saveRDS(in_up_out_down, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds")
+saveRDS(increased_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_increased_ldn_in.rds")
