@@ -27,7 +27,7 @@
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
 #' @import dplyr
-#' @importFrom dtply lazy_dt
+#' @importFrom dtplyr lazy_dt
 #' @importFrom assertthat assert_that
 #' 
 #' @export
