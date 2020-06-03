@@ -118,7 +118,7 @@ domestic_rates <- list('2020' = list(path = paste0(dom_rates_loc,"dom_rates_10yr
                                      transition = F),
                        '2021' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_50pc.rds"),
                                      transition = T),
-                       '2024' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds"),
+                       '2024' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_increased_ldn_in.rds"),
                                      transition = F))
 
 #-----------------------------------------------------
