@@ -16,7 +16,7 @@ lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
 london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))
 london_wards <- london_wards$gss_code_ward
 
-msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds")
+msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>%
   select(-msoa_name)
 lsoa_to_msoa <- readRDS("input_data/lookup/lsoa_to_msoa.rds")
 
