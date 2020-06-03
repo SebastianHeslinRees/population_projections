@@ -109,7 +109,7 @@ mye_coc <- rbind(mye_coc, uk_pop, uk_births, uk_international, uk_net_internatio
   recode_gss_codes(col_geog="gss_code",
                    data_cols = "value",
                    fun=list(sum),
-                   recode_to_year = 2018)
+                   recode_gla_codes = TRUE)
 
 rm(death_curves, international_curves, uk_births, uk_coc, uk_deaths, uk_international, uk_net_international,
    uk_pop, ew_coc_file, uk_coc_file, uk_pop_file, right)

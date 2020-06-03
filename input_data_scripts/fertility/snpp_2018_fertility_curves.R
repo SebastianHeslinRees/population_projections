@@ -39,7 +39,7 @@ ons_fert <- rbind(ons_fert, national_fert, wales) %>%
   popmodules::recode_gss_codes(col_geog = "gss_code",
                                data_cols = "fert_rate",
                                fun = list(mean),
-                               recode_to_year = 2018) %>%
+                               recode_gla_codes = TRUE) %>%
   as.data.frame()
 
 #smooth curves

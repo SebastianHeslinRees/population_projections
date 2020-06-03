@@ -23,7 +23,7 @@ wales <- filter(fertility, gss_code == "E06000001") %>%
 fertility  <- fertility %>% rbind(wales) %>%
   filter(gss_code != "W92000004") %>%
   popmodules::recode_gss_codes(data_cols = "rate",
-                               recode_to_year = 2018)
+                               recode_gla_codes = TRUE)
 
 assertthat::assert_that(dir.exists("input_data"))
 dir.create("input_data/fertility", showWarnings = FALSE)

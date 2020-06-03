@@ -55,7 +55,7 @@ ons_mort <- rbind(ons_mort, national_mort, wales) %>%
   mutate(year = 2017) %>%
   select(gss_code, sex, age, year, rate = death_rate) %>%
   popmodules::recode_gss_codes(data_cols = "rate", fun = list(mean),
-                               recode_to_year = 2018)
+                               recode_gla_codes = TRUE)
 
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves_2016.rds" )
