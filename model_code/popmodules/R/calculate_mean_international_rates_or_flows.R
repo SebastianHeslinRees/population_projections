@@ -3,8 +3,10 @@
 #' A wrapper for \code{calc_mean_rate} which prepares mye
 #' and international in/out flow component data.
 #'
-#' @param popn_mye_path Character. The path to the mye backseries population.
-#' @param births_mye_path Character. The path to the mye births backseries.
+#' @param popn_mye_path Character. The path to the mye backseries population
+#'   when \code{flow_or_rate} is \code{"rate"}.
+#' @param births_mye_path Character. The path to the mye births backseries when
+#'   \code{flow_or_rate} is \code{"rate"}.
 #' @param flow_or_rate Character. Either "flow" or "rate" - determines whether
 #'   the function returns absolute flows or migration rates.
 #' @param component_path Character The path to the international in or out migration

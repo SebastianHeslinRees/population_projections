@@ -14,13 +14,11 @@ proportion_to_redistribute <- 0.1 #redistribute 10% of UK inflow away from/to Lo
 
 
 #10 year average
-popn_mye_path <- "input_data/mye/2019/temp_gla_population.rds"
-births_mye_path <- "input_data/mye/2019/temp_births.rds"
 int_out_mye_path <- "input_data/mye/2019/temp_gla_international_out.rds"
 int_in_mye_path <-  "input_data/mye/2019/temp_gla_international_in.rds"
 
 avg_10_yr <- popmodules::calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path, births_mye_path = births_mye_path,
+  popn_mye_path = NULL, births_mye_path = NULL,
   flow_or_rate = "flow", component_path = int_in_mye_path,
   last_data_year = 2019, n_years_to_avg = 10, data_col = "int_in",
   first_proj_yr = 2020, n_proj_yr = 1, rate_cap = 0.8) %>%
