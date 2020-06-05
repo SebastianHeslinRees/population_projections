@@ -116,19 +116,19 @@ recode_gss_codes <- function(df_in,
     #merges
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recode_merges[[yr]])) 
-  }
   
-  if(aggregate_data){
-    df <- df %>% 
-      dtplyr::lazy_dt() %>%
-      group_by_at(col_aggregation) %>%
-      summarise_all(.funs = fun) %>%
-      as.data.frame() %>%
-      rename(!!col_geog := "gss_code")
-  } else {
-    df <- as.data.frame(df) %>%
-      rename(!!col_geog := "gss_code")
+    if(aggregate_data){
+      df <- df %>% 
+        dtplyr::lazy_dt() %>%
+        group_by_at(col_aggregation) %>%
+        summarise_all(.funs = fun) %>%
+        as.data.frame()
+      
+    }
   }
+
+  df <- as.data.frame(df) %>%
+    rename(!!col_geog := "gss_code")
   
   return(df)
   
