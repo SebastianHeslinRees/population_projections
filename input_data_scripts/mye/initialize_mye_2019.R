@@ -1,3 +1,6 @@
+source(dplyr)
+devtools::load_all("model_code/popmodules")
+
 #ONS population
 source('input_data_scripts/mye/ons_popn_2019.R')
 
@@ -37,7 +40,9 @@ validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
                    readRDS("input_data/mye/2019/temp_gla_international_out.rds"))
 
 validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
-                   readRDS("input_data/domestic_migration/2019/temp_domestic_migration_in.rds"))
+                   readRDS("input_data/domestic_migration/2019/temp_domestic_migration_in.rds") %>%
+                     filter_to_LAs())
 
 validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
-                   readRDS("input_data/domestic_migration/2019/temp_domestic_migration_out.rds"))
+                   readRDS("input_data/domestic_migration/2019/temp_domestic_migration_out.rds") %>%
+                     filter_to_LAs())
