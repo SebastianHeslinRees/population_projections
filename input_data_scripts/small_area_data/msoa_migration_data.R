@@ -39,7 +39,7 @@ london_msoas <- filter(msoa_to_district, grepl("E09", gss_code))$gss_code_msoa
 #Data come from the census
 #Data only goes to age 75 so ages 75-90 are modelled using borough distribution
 
-borough_domestic_out <- readRDS(borough_dom_out_path) %>% filter(year == 2011)
+borough_domestic_out <- readRDS(borough_dom_out_path) %>% filter(year == 2011) %>% filter_to_LAs()
 
 dom_out_male <- data.table::fread(paste0(census_data_dir,msoa_dom_out_male_path), header = T) %>%
         as.data.frame() %>%
@@ -103,7 +103,7 @@ domestic_out <- left_join(domestic_out, msoa_to_district, by="gss_code_msoa") %>
                             col_constraint = "dom_out")
 
 ####DOMESTIC IN####
-borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011)
+borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011) %>% filter_to_LAs()
 
 dom_in_male <- data.table::fread(paste0(census_data_dir,msoa_dom_in_male_path), header = T) %>%
         as.data.frame() %>%

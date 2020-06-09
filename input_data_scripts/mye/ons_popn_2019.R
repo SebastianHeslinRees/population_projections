@@ -24,6 +24,7 @@ population_ons <- readRDS("input_data/mye/2018/population_ons.rds")%>%
   recode_gss_codes(data_cols = "popn", recode_to_year = 2020) %>%
   rbind(mye_2019)
 
+dir.create("input_data/mye/2019", showWarnings = FALSE)
 saveRDS(population_ons, "input_data/mye/2019/temp_ons_popn.rds")
 
 rm(list=ls())

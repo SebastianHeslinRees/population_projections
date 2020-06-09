@@ -33,6 +33,7 @@ domestic_net <- construct_popn_from_components(start_population = popn_2019,
 
 #calculate net domestic as a residual
 domestic_migration_net <- readRDS("input_data/domestic_migration/2018/domestic_migration_net.rds") %>%
+  filter_to_LAs() %>%
   select(-dom_in, -dom_out) %>% 
   recode_gss_codes(data_cols = "dom_net", recode_to_year = 2020) %>%
   select(names(domestic_net)) %>% 
@@ -49,6 +50,7 @@ domestic_migration_flows_ons <- readRDS("input_data/domestic_migration/2018/dome
   recode_gss_codes(data_cols = "value", col_geog = "gss_in", recode_to_year = 2020) %>%
   recode_gss_codes(data_cols = "value", col_geog = "gss_out", recode_to_year = 2020) %>%
   filter(gss_out != gss_in)
+
 
 #Use 2004 flows as 2019 flows (they're not identical but it doesn't matter)
 #Make all of the domestic components

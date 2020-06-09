@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 library(assertthat)
 library(data.table)
-library(popmodules)
+devtools::load_all("model_code/popmodules")
 
 rm(list=ls()) # we're going to need memory, sorry
 message("domestic migration")
@@ -58,12 +58,18 @@ if(FALSE) { # tidyverse equivalent
     ungroup()
 }
 
-domestic_region <- filter(domestic, substr(gss_in,1,3) %in% c("E12","W92"))
-domestic_la <- filter(domestic, !substr(gss_in,1,3) %in% c("E12","W92"))
+# Here 'regional' means only England and Wales totals, without NI and S
+# so we don't need to worry about double counting when we aggregate later in the script
+domestic_region <- filter(domestic, substr(gss_in,1,3) %in% c("E12","W92")) %>%
+  filter(substr(gss_out,1,3) %in% c("E12","W92"))
+domestic_la <- filter(domestic, !substr(gss_in,1,3) %in% c("E12","W92")) %>%
+  filter(!substr(gss_out,1,3) %in% c("E12","W92"))
 
 message("Saving domestic origin-destination flows. This may take a while")
 saveRDS(domestic_la, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))
 saveRDS(domestic_region, file = paste0("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds"))
+
+
 rm(domestic_la, domestic_region)
 
 # Calculate net flows
@@ -122,5 +128,4 @@ if(FALSE) {
 saveRDS(dom_out_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_out.rds"))
 saveRDS(dom_in_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_in.rds"))
 saveRDS(dom_net, file = paste0("input_data/domestic_migration/2018/domestic_migration_net.rds"))
-
 

@@ -19,5 +19,5 @@ source("input_data_scripts/constraints/npp_2016_constraint.R")
 source("input_data_scripts/constraints/npp_2018_constraint.R")
 source("input_data_scripts/households/household_model_inputs.R")
 source("input_data_scripts/mye/gla_mye_2018.R")
-source("input_data_scripts/ldd/further_geom_code.R")
-source("input_data_scripts/ldd/ldd.R")
+source("input_data_scripts/migration/variant_migration_rates.R")
+

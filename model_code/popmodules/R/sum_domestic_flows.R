@@ -17,10 +17,13 @@
 #' @import dplyr
 #' @importFrom dtplyr lazydt
 #' @importFrom tidyr complete
-#'
+#' @importFrom assertthat assert_that
+#' 
 #' @export
 
 sum_domestic_flows <- function(domestic_flow, in_or_out){
+  
+  assert_that(in_or_out %in% c("in", "out"))
   
   gss_col <- ifelse(in_or_out == "in", "gss_in", "gss_out")
   
