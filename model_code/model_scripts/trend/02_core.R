@@ -213,7 +213,8 @@ trend_core <- function(start_population,
     next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
                                                    addition_data = list(int_in, dom_in, upc),
                                                    subtraction_data = list(int_out, dom_out),
-                                                   col_aggregation = c("year", "gss_code", "age", "sex")) 
+                                                   col_aggregation = c("year", "gss_code", "age", "sex"),
+                                                   data_are_subsets = TRUE) 
   }
   
   # FIXME
