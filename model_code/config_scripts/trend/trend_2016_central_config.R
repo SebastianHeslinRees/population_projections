@@ -11,8 +11,8 @@ deaths_mye_path <-  "input_data/mye/2016/deaths_gla_.rds"
 births_mye_path <-  "input_data/mye/2016/births_gla_.rds"
 int_in_mye_path <-  "input_data/mye/2016/international_in_gla_.rds"
 int_out_mye_path <- "input_data/mye/2016/international_out_gla_.rds"
-dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out_", datestamp, ".rds")
-dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in_", datestamp, ".rds")
+dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
+dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 upc_path <- "input_data/mye/2016/upc_gla_.rds"
 
 mortality_years_to_avg <- 5
