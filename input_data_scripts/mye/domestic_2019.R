@@ -67,14 +67,16 @@ dom_in <- dom_flows %>%
   group_by(year, gss_in, sex, age) %>%
   summarise(dom_in = sum(value)) %>%
   data.frame() %>% 
-  rename(gss_code = gss_in)
+  rename(gss_code = gss_in) %>%
+  complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_in = 0))
 
 dom_out <- dom_flows %>%
   rbind(regional) %>% 
   group_by(year, gss_out, sex, age) %>%
   summarise(dom_out = sum(value)) %>%
   data.frame() %>% 
-  rename(gss_code = gss_out)
+  rename(gss_code = gss_out) %>%
+  complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_out = 0))
 
 dom_net <- full_join(dom_in, dom_out, by=c("year","gss_code","sex","age")) %>%
   tidyr::replace_na(list(dom_in = 0, dom_out = 0)) %>%
