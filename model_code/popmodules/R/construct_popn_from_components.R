@@ -28,7 +28,7 @@ construct_popn_from_components <- function(start_population,
                                            col_aggregation = c("year","gss_code","sex","age"),
                                            data_are_subsets = FALSE){
   
-  validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation)
+  validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation, data_are_subsets)
   
   nm <- last(names(start_population))
   
@@ -69,7 +69,8 @@ construct_popn_from_components <- function(start_population,
 validate_construct_popn_from_component_input <- function(start_population,
                                                          addition_data,
                                                          subtraction_data,
-                                                         col_aggregation){
+                                                         col_aggregation,
+                                                         data_are_subsets){
   #validation
   #are addition and subratction lists
   assertthat::assert_that(is.list(addition_data),
