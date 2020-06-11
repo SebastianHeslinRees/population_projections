@@ -1,13 +1,13 @@
 library(dplyr)
 devtools::load_all("model_code/popmodules")
 
-deaths_2018 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/deaths_calendar_2018.csv",
+deaths_2018 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/calendar_year_deaths/deaths_calendar_2018.csv",
                                  header = TRUE) %>%
   data.frame() %>%
   select(gss_code, Jul, Aug, Sep, Oct, Nov, Dec) %>%
   tidyr::pivot_longer(2:7, "month")
 
-deaths_2019 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/deaths_calendar_2019.csv",
+deaths_2019 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/calendar_year_deaths/deaths_calendar_2019.csv",
                                  header = TRUE) %>%
   data.frame() %>%
   select(gss_code, Jan, Feb, Mar, Apr, May, Jun) %>%
