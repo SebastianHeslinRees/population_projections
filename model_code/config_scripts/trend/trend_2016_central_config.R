@@ -6,14 +6,14 @@ first_proj_yr <- 2017
 n_proj_yr <- 34
 projection_name <- "2016_central"
 
-popn_mye_path <- "input_data/mye/2016/population_gla_.rds"
-deaths_mye_path <-  "input_data/mye/2016/deaths_gla_.rds"
-births_mye_path <-  "input_data/mye/2016/births_gla_.rds"
-int_in_mye_path <-  "input_data/mye/2016/international_in_gla_.rds"
-int_out_mye_path <- "input_data/mye/2016/international_out_gla_.rds"
+popn_mye_path <- "input_data/mye/2016/population_gla.rds"
+deaths_mye_path <-  "input_data/mye/2016/deaths_gla.rds"
+births_mye_path <-  "input_data/mye/2016/births_gla.rds"
+int_in_mye_path <-  "input_data/mye/2016/international_in_gla.rds"
+int_out_mye_path <- "input_data/mye/2016/international_out_gla.rds"
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
-upc_path <- "input_data/mye/2016/upc_gla_.rds"
+upc_path <- "input_data/mye/2016/upc_gla.rds"
 
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
