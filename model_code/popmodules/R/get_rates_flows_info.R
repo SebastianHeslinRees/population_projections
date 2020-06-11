@@ -5,17 +5,17 @@
 #' \code{path} variable and a \code{transition} variable.
 #' 
 #' \code{path} is a String. The file path to a dataframe containing rates or flows
-#' \code{tranisition} is Logical. Is the year a transitioning from one set of rates
+#' \code{transition} is Logical. Is the year interpolating from one set of rates
 #'   to another
 #'
-#' The function extract information from the list of lists and arranges it in a
+#' The function extracts information from the list of lists and arranges it in a
 #' dataframe which is used by the \code{get_rates_or_flows} function to read
 #' and calculate model data
 #'
 #' @param data_list A named list of lists. Each list name is a year. Each list
 #'   contains a list with a \code{path} and \code{transition} varibale
 #' @param first_proj_yr Numeric. The first projection year
-#' @param lasst_proj_yr Numeric. The first projection year
+#' @param last_proj_yr Numeric. The last projection year
 #'
 #' @return A dataframe containing paths and information for calculating rates
 #'
@@ -58,10 +58,12 @@ validate_get_rates_or_flows_info <- function(data_list){
     assertthat::assert_that(is.list(data_list[[i]]),
                             msg=paste0("data_list[",i,"] must be a list"))
     
-    assertthat::assert_that(any(names(data_list[[i]]) == c("path","transition")),
-                            msg=paste0("data_list[",i,"] must be a list"))
+    assertthat::assert_that(setequal(names(data_list[[i]]), c("path","transition")),
+                            msg=paste0("data_list[",i,"] must have elements 'path' and 'transition'"))
     
     assertthat::assert_that(file.exists(data_list[[i]]$path),
                             msg = paste0("data_list[", i, "] file does not exist"))
   }
+  assertthat::assert_that(!data_list[[length(data_list)]]$transition,
+                          msg = "The last entry in data_list can't have transition = TRUE")
 }
