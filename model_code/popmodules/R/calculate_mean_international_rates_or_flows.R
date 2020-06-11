@@ -1,7 +1,7 @@
 #' Calculate average international rates based on past data
 #'
-#' A wrapper for \code{calc_mean_rate} which prepares mye
-#' and international in/out flow component data.
+#' A wrapper for \code{calc_mean_rate} which prepares mye and international
+#' in/out flow component data.
 #'
 #' @param popn_mye_path Character. The path to the mye backseries population
 #'   when \code{flow_or_rate} is \code{"rate"}.
@@ -9,17 +9,20 @@
 #'   \code{flow_or_rate} is \code{"rate"}.
 #' @param flow_or_rate Character. Either "flow" or "rate" - determines whether
 #'   the function returns absolute flows or migration rates.
-#' @param component_path Character The path to the international in or out migration
-#'   component from the mye.
+#' @param component_path Character The path to the international in or out
+#'   migration component from the mye.
 #' @param last_data_year Integer. The last year of data on which to calculate
 #'   averages.
-#' @param n_years_to_avg Integer. The number of years to use in calculating averages.
+#' @param n_years_to_avg Integer. The number of years to use in calculating
+#'   averages.
 #' @param data_col Character. The column in the component dataframe containing
 #'   the flow data.
 #' @param first_proj_yr Numeric. The first year of the model's projection (may
 #'   not always be the last_data_year + 1).
 #' @param n_proj_yr Numeric. The number of years to project forward.
 #' @param rate_cap Numeric. A cap constraining the maximum rates output.
+#' @param modify_rates_and_flows Numeric. A factor to scale the output rates or
+#'   flows by. Applied last, but before the cap. Default 1.
 #'
 #' @return A data frame of international migration probabilities.
 #'

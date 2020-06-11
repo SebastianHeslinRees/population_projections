@@ -131,5 +131,6 @@ covid_upc <- rbind(covid_upc, covid_2021) %>%
   recode_gss_codes(data_cols = "upc", recode_to_year = 2020)
   
 #save
+dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")
 
