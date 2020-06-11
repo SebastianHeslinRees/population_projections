@@ -195,12 +195,12 @@ trend_core <- function(start_population,
   #Bind and de-duplicate
   dom_out_with_regions <- dom_out %>%
     filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>% # S and NI are already aggregated
-    rbind(reg_dom_out) %>%
-    rbind(filter(nat_dom_out, substr(gss_code, 1, 1) == "E"))
+    rbind(reg_dom_out) #%>%
+    #rbind(filter(nat_dom_out, substr(gss_code, 1, 1) == "E"))  # Removed for consistency with backseries
   dom_in_with_regions <- dom_in %>%
     filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>%
-    rbind(reg_dom_in) %>%
-    rbind(filter(nat_dom_in, substr(gss_code, 1, 1) == "E"))
+    rbind(reg_dom_in) #%>%
+    #rbind(filter(nat_dom_in, substr(gss_code, 1, 1) == "E"))
   
   if(is.null(upc)){
     
