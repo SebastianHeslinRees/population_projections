@@ -29,7 +29,8 @@
 
 calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
                                                         component_path, last_data_year, n_years_to_avg, data_col,
-                                                        first_proj_yr, n_proj_yr, rate_cap, modify_rates_and_flows=1) {
+                                                        first_proj_yr, n_proj_yr, rate_cap, modify_rates_and_flows=1,
+                                                        project_rate_from = last_data_year+1) {
 
   component <- readRDS(component_path)
 
@@ -48,7 +49,8 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
 
 
     rates <- calculate_mean_from_backseries(rate_backseries, n_years_to_avg, last_data_year, "rate",
-                                            col_aggregation = c("gss_code","sex","age"))
+                                            col_aggregation = c("gss_code","sex","age"),
+                                            project_rate_from = project_rate_from)
 
     #Document any rates that are capped
     if(any(rates$rate > rate_cap)) {
@@ -102,7 +104,7 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
       ungroup() %>%
       mutate(value = value*modify_rates_and_flows) %>%
       rename(!!data_col := value) %>%
-      mutate(year = last_data_year+1)
+      mutate(year = project_from)
 
     last_proj_yr <- n_proj_yr + first_proj_yr - 1
 

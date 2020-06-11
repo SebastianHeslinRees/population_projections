@@ -59,9 +59,9 @@ validate_get_rates_or_flows_info <- function(data_list, first_proj_yr){
                           msg = "names in data_list must be years and convertable to numeric")
   
   x <- min(x)
-  assertthat::assert_that(x<=first_proj_yr,
+  assertthat::assert_that(x==first_proj_yr,
                           msg=(paste0("the first year in data_list is ", x,
-                          ", it must be <= first_proj_yr (",first_proj_yr,")")))
+                          ", it must be the same as first_proj_yr (",first_proj_yr,")")))
   
   
   for(i in 1:length(data_list)){

@@ -22,6 +22,8 @@
 #'   containing the rates. Defaults to \code{births}
 #' @param output_col Character. The name of the column in the output dataframe
 #'   containing the calculated rates
+#' @param project_rate_from Numeric. The year for which a rate is being
+#'   calculated. Default \code{last_data_yearr+1}
 #'
 #' @return A data frame of mortality probabilities or fertility rates by LA,
 #'   year, sex and age with the same age structure as the target curves and
@@ -36,7 +38,8 @@
 
 
 scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
-                                   n_years_to_avg, avg_or_trend, data_col="births", output_col){
+                                   n_years_to_avg, avg_or_trend, data_col="births", output_col,
+                                   project_rate_from = last_data_year+1){
 
   if(class(popn_mye_path)=="character"){
     population <- data.frame(readRDS(popn_mye_path))
@@ -95,12 +98,14 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
 
   if(avg_or_trend == "trend"){
     averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
-                                                             col_aggregation = "gss_code")
+                                                             col_aggregation = "gss_code",
+                                                             project_rate_from)
   }
 
   if(avg_or_trend == "average"){
     averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, n_years_to_avg, last_data_year, data_col="scaling",
-                                                               col_aggregation = "gss_code")
+                                                               col_aggregation = "gss_code",
+                                                               project_rate_from)
   }
 
   validate_population(averaged_scaling_factors, col_aggregation = c("year", "gss_code"), col_data = "scaling")
@@ -115,7 +120,8 @@ scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves
     filter(!is.na(scaling)) %>%
     mutate(rate = rate*scaling) %>%
     select(gss_code, year, sex, age, rate) %>%
-    rename(!!output_col := rate)
+    rename(!!output_col := rate) %>%
+    filter(year < project_rate_from)
 
   return(rbind(rates_backseries, jump_off_rates) %>%
            arrange(gss_code, year, sex, age))
