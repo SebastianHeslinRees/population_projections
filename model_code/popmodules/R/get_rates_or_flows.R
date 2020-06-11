@@ -7,7 +7,7 @@
 #'
 #' @param df A data frame or NULL. The dataframe is the output of this function in
 #'   the previous year iteration
-#' @param df_info A data frame. The output from the function \code{.get_rates_info}
+#' @param df_info A data frame. The output from the function \code{get_rates_flows_info}
 #' @param projection_year Numeric
 #' @param first_proj_yr Numeric. The first projection year
 #' @param col_aggregation Character. The non-data columns in the dataframe \code{df}
@@ -28,6 +28,14 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
 
   curr_yr_info <- filter(df_info, year == projection_year)
   assertthat::assert_that(nrow(curr_yr_info)==1,msg="too many rows in df_info dataframe")
+  assertthat::assert_that(!is.null(df) | !is.na(curr_yr_info$path),
+                          msg = "Must provide input df or a path to read from in the current year of df_info")
+
+  # return input if rates will be the same as last year
+  if(is.na(curr_yr_info$path) && !curr_yr_info$transition) {
+    return(df)
+  }
+  
   if(!is.null(df) & data_col %in% names(df)){
     df <- select(df, -!!data_col)
   }
@@ -38,6 +46,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       
       #create the df in the first year
       df <- readRDS(curr_yr_info$path) %>%
+        validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col)
     }
     
@@ -49,6 +58,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       
       #add next set of data
       df <- readRDS(curr_yr_info$next_path) %>%
+        validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col) %>%
         full_join(df, by = col_aggregation) %>% 
         tidyr::replace_na(list(value_1 = 0, value_2 = 0))
@@ -61,7 +71,9 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
     df <- df %>% 
       #select(-!!data_col) %>% 
       mutate(increment = (value_2-value_1)/curr_yr_info$transition_period,
-             value = value_1+(increment*curr_yr_info$period_step))
+             value = value_1+(increment*curr_yr_info$period_step)) %>%
+      select(-increment) %>%
+      check_negative_values("value", set_to_zero = TRUE)
     
   } else {
     
@@ -74,4 +86,17 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
   
   return(df)
   
+}
+
+
+validate_rates_or_flows <- function(df, col_aggregation, data_col) {
+  if(all(c("gss_out", "gss_in") %in% names(df))) {
+    validate_population(df, col_aggregation, col_data = data_col, test_complete = FALSE, test_unique = TRUE)
+  } else {
+    validate_population(df, col_aggregation, data_col, test_complete = TRUE, test_unique = TRUE)
+  }
+  if(data_col == "rate") {
+    assert_that(max(df$rate) <= 1 & min(df$rate) >= 0, msg = "rate data contains rates outside the range 0-1")
+  }
+  invisible(df)
 }
