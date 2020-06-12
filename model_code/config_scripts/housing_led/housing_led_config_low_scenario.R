@@ -22,9 +22,9 @@ last_data_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
-domestic_transition_yr <- 2024 #NULL if not used
-domestic_initial_rate_path <- "input_data/migration/high_domestic_migration_rates_(2016_2018).rds"
-domestic_long_term_rate_path <- "input_data/migration/low_domestic_migration_rates_(2009_2012).rds"
+dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
+domestic_rates <- list('2019'  = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2018.rds"),
+                                      transition = F))
 
 #------------------
 #Setup config list
@@ -39,15 +39,16 @@ config_list <- list(
   ahs_cap_year = ahs_cap_year,
   external_trend_path = external_trend_path,
   first_proj_yr = first_proj_yr,
-  final_proj_yr = final_proj_yr,
+  last_proj_yr = last_proj_yr,
   ldd_final_yr = ldd_final_yr,
   last_data_yr = last_data_yr,
   output_dir = output_dir,
+  domestic_rates = domestic_rates,
   constrain_projection = constrain_projection,
-  domestic_transition_yr = domestic_transition_yr,
-  domestic_initial_rate_path = domestic_initial_rate_path,
-  domestic_long_term_rate_path = domestic_long_term_rate_path,
-  ahs_method = ahs_method)
+  ahs_method = ahs_method,
+  additional_births_path = additional_births_path,
+  fertility_rates_path = fertility_rates_path,
+  upc_path = NULL)
 
 #---------------------
 #run projection
