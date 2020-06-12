@@ -26,6 +26,9 @@ dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
 domestic_rates <- list('2019'  = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2018.rds"),
                                       transition = F))
 
+additional_births_path <- NULL
+fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
+
 #------------------
 #Setup config list
 config_list <- list(
