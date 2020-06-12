@@ -5,7 +5,6 @@ output_loc <- "input_data/mye/"
 
 #2016 Flows
 int_in_mye_path <-  "input_data/mye/2016/international_in_gla.rds"
-int_out_mye_path <- "input_data/mye/2016/international_out_gla.rds"
 
 int_in_10yr_avg_2016 <- popmodules::calculate_mean_international_rates_or_flows(
   popn_mye_path = NULL,
@@ -34,7 +33,6 @@ int_in_5yr_avg_2016 <- popmodules::calculate_mean_international_rates_or_flows(
   select(-year)
 
 #2018 Flows
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
 int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
 
 int_in_10yr_avg_2018 <- popmodules::calculate_mean_international_rates_or_flows(
@@ -79,7 +77,6 @@ int_in_5yr_avg_2018 <- popmodules::calculate_mean_international_rates_or_flows(
 #-------------------------------
 
 #2019 Flows
-int_out_mye_path <- "input_data/mye/2019/temp_gla_international_out.rds"
 int_in_mye_path <-  "input_data/mye/2019/temp_gla_international_in.rds"
 
 #10 year average
