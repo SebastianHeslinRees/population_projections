@@ -4,8 +4,8 @@ devtools::load_all('model_code/popmodules')
 output_loc <- "input_data/mye/"
 
 #2016 Flows
-int_in_mye_path <-  "input_data/mye/2016/international_in_gla_.rds"
-int_out_mye_path <- "input_data/mye/2016/international_out_gla_.rds"
+int_in_mye_path <-  "input_data/mye/2016/international_in_gla.rds"
+int_out_mye_path <- "input_data/mye/2016/international_out_gla.rds"
 
 int_in_10yr_avg_2016 <- popmodules::calculate_mean_international_rates_or_flows(
   popn_mye_path = NULL,
