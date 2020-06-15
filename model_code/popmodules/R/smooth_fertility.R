@@ -142,7 +142,7 @@ smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_m
   resid_sum <- unlist(lapply(resids, function(x){sum(x^2)}))
   failed_GSS <- failed_LAs[!failed_LAs %in% success_GSS2]
 
-  combine_data <- function(i, age_range_to_model=age_range_to_model){
+  combine_data <- function(i){
     data.frame(age = age_range_to_model,
                gss_code=rep(names(coefs)[[i]],length(age_range_to_model)),
                fert_rate = getPred('curve_function',coefs[[i]],age_range_to_model),
