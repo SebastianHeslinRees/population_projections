@@ -3,7 +3,7 @@ devtools::load_all("model_code/popmodules")
 projection_name <- "2018_based_shlaa_dev_20-02-05_1808"
 
 first_proj_yr <- 2019
-final_proj_yr <- 2050
+last_proj_yr <- 2050
 
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory.rds"
@@ -55,7 +55,7 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          
                          last_data_year = last_data_year,
                          first_proj_yr = first_proj_yr,
-                         final_proj_yr = final_proj_yr,
+                         last_proj_yr = last_proj_yr,
                          
                          birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                          death_rate_n_years_to_avg = death_rate_n_years_to_avg,

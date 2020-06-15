@@ -13,7 +13,7 @@ external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 constrain_projection <- FALSE
 first_proj_yr <- 2019
-final_proj_yr <- 2050
+last_proj_yr <- 2050
 ahs_cap_year <- 2019
 ahs_method <- 0
 
@@ -23,8 +23,14 @@ last_data_yr <- 2018
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
 dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
-domestic_rates <- list('2019'  = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2018.rds"),
-                                      transition = F))
+housing_led_params$domestic_rates = list('2019' = list(path = paste0(dom_rates_loc,"dom_rates_5yr_avg_2018.rds"),
+                                                       transition = F),
+                                         '2024'= list(path = paste0(dom_rates_loc,"dom_rates_4yr_avg_2012.rds"),
+                                                      transition = F))
+
+additional_births_path <- NULL
+fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
+
 
 #------------------
 #Setup config list
