@@ -15,7 +15,7 @@
 #' @return A dataframe with flows into or out of an area summed
 #'
 #' @import dplyr
-#' @importFrom dtplyr lazydt
+#' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
 #' @importFrom assertthat assert_that
 #' 

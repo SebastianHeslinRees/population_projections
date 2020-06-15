@@ -3,7 +3,8 @@ library(popmodules)
 library(testthat)
 library(dplyr)
 
-code_changes <- readRDS("Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds")
+code_changes_path <- "Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds"
+code_changes <- readRDS(code_changes_path)
 
 df_1 <- code_changes %>%
   select(gss_code = changed_from_code) %>%
@@ -74,17 +75,17 @@ expect_2020 <- expect_2019 %>%
   group_by(gss_code) %>%
   summarise(value = sum(value)) %>%
   data.frame()
-
-output_2009 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2009)
-output_2012 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2012)
-output_2013 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2013)
-output_2018 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2018)
-output_2019 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2019)
-output_2020 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2020)
+ 
+output_2009 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2009, code_changes_path = code_changes_path)
+output_2012 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2012, code_changes_path = code_changes_path)
+output_2013 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2013, code_changes_path = code_changes_path)
+output_2018 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2018, code_changes_path = code_changes_path)
+output_2019 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2019, code_changes_path = code_changes_path)
+output_2020 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2020, code_changes_path = code_changes_path)
 
 expect_2_vars <- mutate(expect_2020, value_2=value)
 output_2_vars <- mutate(df_1, value_2 = value) %>% 
-  recode_gss_codes(data_cols = c("value","value_2"), recode_to_year = 2020)
+  recode_gss_codes(data_cols = c("value","value_2"), recode_to_year = 2020, code_changes_path = code_changes_path)
 
 expect_mean <- code_changes %>%
   select(changed_to_code) %>%
@@ -96,7 +97,8 @@ expect_mean <- code_changes %>%
 
 output_mean <- recode_gss_codes(df_1, data_cols = "value",
                                 recode_to_year = 2020,
-                                fun = list(mean)) %>% 
+                                fun = list(mean),
+                                code_changes_path = code_changes_path) %>% 
   arrange(gss_code)
 
 #test with 1 var
