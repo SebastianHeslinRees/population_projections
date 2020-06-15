@@ -1,53 +1,47 @@
-###UPC
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+devtools::load_all("model_code/popmodules")
 
-#Hard coded data correct as of 21/05/20
+#DATA To WEEK 21 (22/May/20202)
 
-#covid data repo
-covid_repo <- "Q:/Projects/2019-20/Covid-19_public_facing/londonC19dashboard/data/updated/"
+####PROCESS####
+#1. Download data from ONS using 2 links below
+#2. Edit in excel and save as csvs
+#3, Edit file paths (line 22-23)
+#4. Go to NISRA and NRS sites and find national totals (links below)
+#5. Hard code Sc and NI totals (line 26-27)
+#6. Run script
 
-#ons data by LA
-ons_file <- "ons_deaths_weekly_occurrences_by_la_2020-05-15"
 
-#FIXME
-#This excel workbook has deaths by sex and broad age for England
-#nhse_file <- "nhse_deaths_total_2020-05-20"
-#Sheet is COVID19 total deaths by age
-#I don't have time to figure out how to extract that data properly
-#So I'm hard-coding it for now
-#Covid19 deaths for UK by age group and sex
-covid_eng_age_sex <- data.frame(min_age = c(0,20,40,60,80),
-                                max_age = c(19,39,59,79,90),
-                                male = c(8, 99,1268, 6155,7218),
-                                female = c(4,73,637,3118,5372))
+#ONS weekly deaths
+#contains sex/age breakdown and total
+#https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/datasets/weeklyprovisionalfiguresondeathsregisteredinenglandandwales
 
-#Covid19 total deaths by LA (E&W)
-#Recode gss codes so they're consitent with othre inputs
-covid_la_total <- data.table::fread(paste0(covid_repo,"processed/",ons_file,".csv")) %>%
+#by LA
+#https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/causesofdeath/datasets/deathregistrationsandoccurrencesbylocalauthorityandhealthboard
+
+ons_weekly_file_1 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_age_sex_2020_05_22.csv"
+ons_weekly_file_2 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_la_2020_05_22.csv"
+
+#national deaths sc and ni
+#https://www.nisra.gov.uk/publications/weekly-deaths
+#https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/weekly-and-monthly-data-on-births-and-deaths/deaths-involving-coronavirus-covid-19-in-scotland
+scottish_deaths <- data.frame(gss_code = "S92000003", deaths = 3911, stringsAsFactors = F)
+n_irish_deaths <-  data.frame(gss_code = "N92000002", deaths = 754, stringsAsFactors = F)
+
+deaths_sex_age <- data.table::fread(ons_weekly_file_1) %>% data.frame()
+deaths_la <- data.table::fread(ons_weekly_file_2) %>%
+  data.frame() %>%
+  filter(cause_of_death == "COVID 19") %>%
+  filter_to_LAs() %>%
+  group_by(gss_code) %>%
+  summarise(deaths = sum(deaths)) %>%
   as.data.frame() %>%
-  filter(cause_of_death == "COVID 19") %>% 
-  group_by(gss_code = area_code) %>%
-  summarise(la_total = sum(deaths)) %>%
-  as.data.frame() %>%
-  filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","S92","N92")) %>% 
-  recode_gss_codes(data_cols = "la_total", recode_to_year=2020)
+  recode_gss_codes(recode_to_year = 2020) %>% 
+  rbind(scottish_deaths, n_irish_deaths)
 
-#FIXME
-#This is ONS data so its just E&W
-#I don't have time to code the N and S data so I'm hard coding it here
-scotland <- 2184
-nire <- 578
-england <- sum(covid_eng_age_sex$male)+sum(covid_eng_age_sex$female)
-wales <- 1238
+sum(deaths_la$deaths)
+sum(deaths_sex_age$deaths)
 
-#These numbers don't add up to the official UK total ad I honestly don't care anymore
-latest_uk_figure <- 35704
-
-covid_la_total <- data.frame(gss_code = c("S92000003","N92000002"),
-                             la_total = c(scotland,nire),
-                             stringsAsFactors = FALSE) %>%
-  rbind(covid_la_total)
 
 #2018 Mid-year estimates age structure for LAs by sex
 uk_2018_deaths <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
@@ -58,79 +52,69 @@ uk_2018_deaths <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
 
 #-----------------------------------------
 
+####SINGLE YEAR OF AGE####
+
 #Apply 2018 age structure to covid19 age group data
-england_covid_deaths_sya <- list()
-for(i in 1:nrow(covid_eng_age_sex)){
-  
-  a <- covid_eng_age_sex[i,] %>%
-    tidyr::pivot_longer(cols=c("male","female"),
-                        names_to = "sex",
-                        values_to = "covid_deaths") %>%
-    data.frame()
-  
-  england_covid_deaths_sya[[i]] <- distribute_within_age_band(a,
-                                                              uk_2018_deaths,
-                                                              "covid_deaths", "deaths",
-                                                              unique(a$min), unique(a$max),
-                                                              col_aggregation=c("sex"))
+sya_covid <- list()
+for(i in 1:nrow(deaths_sex_age)){
+  a <- deaths_sex_age[i,]
+  sya_covid[[i]] <- a %>% 
+    distribute_within_age_band(uk_2018_deaths,
+                               "deaths", "deaths",
+                               unique(a$min), unique(a$max),
+                               col_aggregation=c("sex"))
 }
+sya_covid <- data.table::rbindlist(sya_covid) %>%
+  mutate(structure = deaths/sum(deaths)) %>%
+  select(sex, age, structure)
 
-#Single year of age by sex for england
-england_covid_deaths_sya <- data.table::rbindlist(england_covid_deaths_sya) %>%
-  as.data.frame() %>% 
-  select(sex, age, covid_deaths)
+rm(a)
 
-#deaths as a proportion of total by sex
-covid_mort_structure <- england_covid_deaths_sya %>%
-  mutate(country = "england") %>%
-  group_by(country) %>%
-  mutate(structure = covid_deaths/sum(covid_deaths)) %>%
-  as.data.frame()
+#-----------------------------------------
 
-#Apply the age structure to the LA/sex data
-covid_modelled_sya <- list()
-for(i in 1:nrow(covid_la_total)){
-  
-  covid_modelled_sya[[i]] <- covid_mort_structure %>%
-    mutate(deaths = structure * covid_la_total[i,2],
-           gss_code = covid_la_total[i,1])
-  
+####APPLY AGE/SEX STRUCTURE TO LAs####
+la_sya <- list()
+for(i in 1:nrow(deaths_la)){
+  la_sya[[i]] <- sya_covid %>%
+    mutate(gss_code = deaths_la[i,1],
+           deaths = deaths_la[i,2] * structure) %>%
+    select(gss_code, sex, age, deaths)
 }
+la_sya <- data.table::rbindlist(la_sya) %>% 
+  data.frame()
 
-covid_modelled_sya <- data.table::rbindlist(covid_modelled_sya) %>%
-  as.data.frame() %>%
-  select(gss_code, sex, age, deaths)
+#-----------------------------------------
 
-#scale-up to latest data
-#Again, no time, hard coding
-modelled_figure <- sum(covid_modelled_sya$deaths)
+####FUTURE DEATHS####
 
-#Future covid deaths
-#There are about 6 weeks left in the year from 15/05
-#and atm there are ~100 deaths per day in England
-#So 100*7*6 more deaths to mid year?
+#weeks from data date to mid-year
+current_deaths <- sum(deaths_sex_age$deaths) #this is ons deaths in and out of hospital where covid19 is cause of death
+current_deaths <- 61920 #this is a modelled figure including excess deaths
 
-total_2020_deaths <- (100*7*6) + latest_uk_figure
+weeks <- 5.5
+deaths_per_day <- 100
+additional_deaths <- weeks * 7 * deaths_per_day
 
-scaling <- total_2020_deaths/modelled_figure
+total_2020_deaths <- current_deaths + additional_deaths
 
-covid_upc <- covid_modelled_sya %>% 
-  mutate(upc = deaths*scaling,
-         year = 2020) %>%
+#scale up
+scaling <- total_2020_deaths / sum(la_sya$deaths)
+
+covid_2020 <- mutate(la_sya, deaths = deaths * scaling) %>%
+  mutate(year = 2020)
+
+covid_2021 <- covid_2020 %>%
+  mutate(year = 2021,
+         deaths = deaths*0.5)
+
+
+#------------------------------------------
+
+####SAVE####
+
+covid_upc <- rbind(covid_2020, covid_2021) %>%
+  mutate(upc = deaths * -1) %>%
   select(year, gss_code, sex, age, upc)
 
-#2021?
-#Who knows, lets say a second wave has half the deaths of 2020
-
-covid_2021 <- covid_upc %>%
-  mutate(year = 2021,
-         upc = upc*0.5)
-
-covid_upc <- rbind(covid_upc, covid_2021) %>%
-  mutate(upc = upc*-1) %>%
-  recode_gss_codes(data_cols = "upc", recode_to_year = 2020)
-  
-#save
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")
-

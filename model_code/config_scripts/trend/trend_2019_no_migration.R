@@ -107,19 +107,12 @@ int_out_rate_fns <- list(
                                                                                modify_rates_and_flows = modify_rates_and_flows))
 )
 
+#-----------------------------------------------------
 
-int_in_fns <- list(
-  list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                               births_mye_path = births_mye_path,
-                                                                               flow_or_rate = int_in_flow_or_rate,
-                                                                               component_path = int_in_mye_path,
-                                                                               last_data_year = int_in_last_data_year,
-                                                                               n_years_to_avg = int_in_years_to_avg,
-                                                                               data_col = "int_in",
-                                                                               first_proj_yr = first_proj_yr,
-                                                                               n_proj_yr = n_proj_yr,
-                                                                               modify_rates_and_flows = modify_rates_and_flows))
-)
+int_flows_loc <- "input_data/mye/2019/"
+
+int_in  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019.rds"),
+                              transition = F))
 
 #-----------------------------------------------------
 
@@ -129,7 +122,9 @@ domestic_rates <- list('2020' = list(path = "input_data/domestic_migration/proce
 #-----------------------------------------------------
 
 constraint_fns <- list(list(fn = function() NULL, args = list()))
-qa_areas_of_interest <- list("London", "E09000001")
+qa_areas_of_interest <- FALSE
+
+#-----------------------------------------------------
 
 # prepare the named list to pass into model
 config_list <- list(
@@ -148,7 +143,7 @@ config_list <- list(
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   int_out_fns = int_out_rate_fns,
-  int_in_fns = int_in_fns,
+  int_in_fns = int_in,
   domestic_rates = domestic_rates,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,

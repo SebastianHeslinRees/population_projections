@@ -60,7 +60,8 @@ dom_flows <- rbind(domestic_migration_flows_ons, flows_2004)
 regional <- readRDS("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds")
 regional <- filter(regional, year == 2004) %>%
   mutate(year = 2019) %>% 
-  rbind(regional)
+  rbind(regional) %>%
+  arrange(year, gss_out, gss_in, sex, age)
 
 dom_in <- dom_flows %>%
   rbind(regional) %>% 
