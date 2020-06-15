@@ -7,8 +7,8 @@
 #' @param last_data_year numeric. The final year of data to include in the regression calculation
 #' @param data_col Character. The name of the column containing the values
 #' @param col_aggregation Character. The columns to group_by
-#' #' @param project_rate_from Numeric. The year for which the rate being calculated
-#'   is to be used. Default \code{last_data_yearr+1}.
+#' @param project_rate_from Numeric. The year for which the rate being
+#'   calculated is to be used. Default \code{last_data_year+1}.
 #'
 #' @return A data frame of mortality probabilities, fertility rates, or
 #' international migration flows/rates.
