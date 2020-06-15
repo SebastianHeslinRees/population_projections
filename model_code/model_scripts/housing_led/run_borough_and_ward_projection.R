@@ -7,7 +7,7 @@
 #' @param small_area_dev_trajectory_path String containing a path the the input
 #'   development trajectory at small-area resolution.
 #' @param first_proj_year Integer. First year of projection.
-#' @param final_proj_year Integer. Last year of projection.
+#' @param last_proj_year Integer. Last year of projection.
 #' @param housing_led_params,small_area_params Lists containing other key-value
 #'   pairs of configuration parameters for the two models. These will be written
 #'   over the default values, but won't supersede the above parameters. Note
@@ -19,7 +19,7 @@ run_borough_and_ward_projection <- function(projection_name,
                                             dev_trajectory_path,
                                             small_area_dev_trajectory_path,
                                             first_proj_yr,
-                                            final_proj_yr,
+                                            last_proj_yr,
                                             bpo=FALSE,
                                             housing_led_params = list(),
                                             small_area_params = list(),
@@ -29,9 +29,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   devtools::load_all("model_code/popmodules")
   source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
-  
-  tm <- Sys.time()
-  #Setup
   
   external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
   
@@ -50,7 +47,7 @@ run_borough_and_ward_projection <- function(projection_name,
   additional_births_path <- "input_data/fertility/births_2019.rds"
   
   if(fertility_scenario == "average"){
-    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london.rds"
+    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_avg.rds"
   }
   
   if(fertility_scenario == "trend"){
@@ -82,17 +79,16 @@ run_borough_and_ward_projection <- function(projection_name,
     ahs_cap_year = ahs_cap_year,
     external_trend_path = external_trend_path,
     first_proj_yr = first_proj_yr,
-    final_proj_yr = final_proj_yr,
+    last_proj_yr = last_proj_yr,
     ldd_final_yr = ldd_final_yr,
+    last_data_yr = last_data_yr,
     output_dir = output_dir,
+    domestic_rates = domestic_rates,
     constrain_projection = constrain_projection,
-    domestic_transition_yr = domestic_transition_yr,
-    domestic_initial_rate_path = domestic_initial_rate_path,
-    domestic_long_term_rate_path = domestic_long_term_rate_path,
     ahs_method = ahs_method,
     additional_births_path = additional_births_path,
     fertility_rates_path = fertility_rates_path,
-    last_data_yr = last_data_yr)
+    upc_path = NULL)
   
   #---------------------
   #run projection
@@ -123,7 +119,7 @@ run_borough_and_ward_projection <- function(projection_name,
   
   last_data_year <- 2018
   first_proj_yr <- config_list$first_proj_yr
-  final_proj_yr <- config_list$final_proj_yr
+  last_proj_yr <- config_list$last_proj_yr
   birth_rate_n_years_to_avg <- 5
   death_rate_n_years_to_avg <- 5
   
@@ -152,7 +148,7 @@ run_borough_and_ward_projection <- function(projection_name,
                            
                            last_data_year = last_data_year,
                            first_proj_yr = first_proj_yr,
-                           final_proj_yr = final_proj_yr,
+                           last_proj_yr = last_proj_yr,
                            
                            birth_rate_n_years_to_avg = birth_rate_n_years_to_avg,
                            death_rate_n_years_to_avg = death_rate_n_years_to_avg,
@@ -161,7 +157,7 @@ run_borough_and_ward_projection <- function(projection_name,
                            
                            projection_type = projection_type)
   
-  rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","tm","bpo")))
+  rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","bpo")))
   
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
@@ -169,8 +165,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   #bpo
   if(bpo != FALSE) {
-    
-    
     output_bpo_excel_file(data = ward_projection[["csvs"]],
                           output_dir = config_list$output_dir,
                           projection_name = config_list$projection_name,
@@ -178,8 +172,6 @@ run_borough_and_ward_projection <- function(projection_name,
   }
   
   #Finish
-  data.table::fwrite(data.frame(time = Sys.time() - tm), paste0(ward_config_list$housing_led_model_path, "run_time.txt"))
-  
   return(list(borough_projection = borough_projection,
               ward_projection = ward_projection))
   
