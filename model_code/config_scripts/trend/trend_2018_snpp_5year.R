@@ -4,7 +4,7 @@ devtools::load_all("model_code/popmodules")
 
 first_proj_yr <- 2019
 n_proj_yr <- 25
-projection_name <- "2018_snpp_2_year_domestic"
+projection_name <- "2018_snpp_5_year_domestic"
 
 
 popn_mye_path <- paste0("input_data/mye/2018/population_ons.rds")
@@ -188,4 +188,3 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
 log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
-
