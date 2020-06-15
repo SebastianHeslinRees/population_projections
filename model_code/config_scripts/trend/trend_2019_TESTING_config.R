@@ -50,7 +50,7 @@ write_excel <- TRUE
 #-------------------------------------------------
 timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
-output_dir <- paste0("outputs/trend/2018/",projection_name,"/")
+output_dir <- paste0("outputs/trend/2019/",projection_name,"/")
 
 mortality_fns <- list(
   
