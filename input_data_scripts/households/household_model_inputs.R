@@ -11,7 +11,7 @@ read_hh_rates_files <- function(file, file_location, yr){
                            sex == "M" ~ "male"))
 }
 
-file_location <- "Q:/Teams/D&PA/Demography/Projections/Legacy Models/ONS Household Projections/GLA implementation/input"
+file_location <- "Q:/Teams/D&PA/Data/household_projections/ONS_data/2016_based/model_inputs"
 
 rates_2001 <- read_hh_rates_files("/hh_rep_rates.rds", file_location, 2001) %>%
   recode_gss_codes(data_cols = "HRR",
@@ -63,8 +63,7 @@ rates <- data.table::rbindlist(rates) %>%
 
 #Split out 85_89 & 90+ from 85+ data using ONS rounded rates
 ons_data_location <- "Q:/Teams/D&PA/Data/household_projections/ONS_data/2016_based/csv/"
-merged_lookup <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/la to merged la.csv") %>%
-  data.frame() %>%
+merged_lookup <- readRDS("input_data/lookup/2011_merged_la_to_la.rds") %>%
   select(-merged_name)
 
 rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_rep_rates_female.csv"), header = T),
@@ -159,7 +158,7 @@ rm(list=ls())
 #--------------------------------------------------------
 
 #DCLG Data
-data_location <- "Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/"
+data_location <-  "Q:/Teams/D&PA/Data/household_projections/DCLG_data/model_inputs/"
 
 stage1_data <- readRDS(paste0(data_location,"2014 DCLG stage 1 data.rds")) %>%
   setnames(c("gss_code","year","sex","household_type","age_group","households",
