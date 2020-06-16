@@ -1,7 +1,7 @@
 #' Calculate average international rates based on past data
 #'
-#' A wrapper for \code{calc_mean_rate} which prepares mye and international
-#' in/out flow component data.
+#' A wrapper for \code{calculate_mean_from_backseries} which prepares mye
+#' and international in/out flow component data.
 #'
 #' @param popn_mye_path Character. The path to the mye backseries population
 #'   when \code{flow_or_rate} is \code{"rate"}.
@@ -23,6 +23,8 @@
 #' @param rate_cap Numeric. A cap constraining the maximum rates output.
 #' @param modify_rates_and_flows Numeric. A factor to scale the output rates or
 #'   flows by. Applied last, but before the cap. Default 1.
+#' @param project_rate_from Numeric. The year for which the average being
+#'   calculated is to be used. Default \code{last_data_year+1}.
 #'
 #' @return A data frame of international migration probabilities.
 #'
@@ -34,7 +36,8 @@
 
 calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_mye_path, flow_or_rate,
                                                         component_path, last_data_year, n_years_to_avg, data_col,
-                                                        first_proj_yr, n_proj_yr, rate_cap, modify_rates_and_flows=1) {
+                                                        first_proj_yr, n_proj_yr, rate_cap, modify_rates_and_flows=1,
+                                                        project_rate_from = last_data_year+1) {
 
   component <- readRDS(component_path)
 
@@ -53,7 +56,8 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
 
 
     rates <- calculate_mean_from_backseries(rate_backseries, n_years_to_avg, last_data_year, "rate",
-                                            col_aggregation = c("gss_code","sex","age"))
+                                            col_aggregation = c("gss_code","sex","age"),
+                                            project_rate_from = project_rate_from)
 
     #Document any rates that are capped
     if(any(rates$rate > rate_cap)) {
@@ -107,7 +111,7 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
       ungroup() %>%
       mutate(value = value*modify_rates_and_flows) %>%
       rename(!!data_col := value) %>%
-      mutate(year = last_data_year+1)
+      mutate(year = project_from)
 
     last_proj_yr <- n_proj_yr + first_proj_yr - 1
 
