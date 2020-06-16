@@ -149,9 +149,7 @@ smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_m
                stringsAsFactors = FALSE)
   }
 
-  laa <- combine_data(1)
-
-  smoothed_data <- lapply(seq_along(coefs),combine_data) %>%
+ smoothed_data <- lapply(seq_along(coefs),combine_data) %>%
     rbindlist() %>%
     data.frame() %>%
     mutate(sex="female",ID=paste0(age,gss_code,sex)) %>%

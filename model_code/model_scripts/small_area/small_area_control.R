@@ -225,9 +225,6 @@ run_small_area_model <- function(config_list){
   projection <- output_small_area_projection(projection = projection,
                                              output_dir = small_area_output_dir,
                                              projection_type = config_list$projection_type,
-                                             births = births,
-                                             deaths = deaths,
-                                             first_proj_yr = config_list$first_proj_yr,
                                              lookup = small_area_to_district)
   
   return(projection)

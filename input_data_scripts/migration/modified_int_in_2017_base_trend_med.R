@@ -33,7 +33,7 @@ wales <- filter(int_in, gss_code == "E06000001") %>%
 
 int_in  <- int_in %>% rbind(wales)%>%
   popmodules::recode_gss_codes(data_cols = "int_in",
-                               recode_to_year = 2018)
+                               recode_gla_codes = TRUE)
 
 dir.create("input_data/migration", showWarnings = F, recursive = T)
 saveRDS(int_in, file = "input_data/migration/modified_int_in_2017_base_trend_med.rds")
