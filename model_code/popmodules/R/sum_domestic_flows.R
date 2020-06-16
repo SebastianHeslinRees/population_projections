@@ -15,12 +15,15 @@
 #' @return A dataframe with flows into or out of an area summed
 #'
 #' @import dplyr
-#' @importFrom dtplyr lazydt
+#' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
-#'
+#' @importFrom assertthat assert_that
+#' 
 #' @export
 
 sum_domestic_flows <- function(domestic_flow, in_or_out){
+  
+  assert_that(in_or_out %in% c("in", "out"))
   
   gss_col <- ifelse(in_or_out == "in", "gss_in", "gss_out")
   

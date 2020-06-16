@@ -7,10 +7,10 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
   popn_backseries <- filter(popn_backseries, year %in% 2010:(first_proj_yr-1))
   
   births_backseries <- small_area_births_sya %>%
-    filter(year %in% 2011:(first_proj_yr-1))
+    filter(year %in% 2002:(first_proj_yr-1))
   
   deaths_backseries <- small_area_deaths_sya %>%
-    filter(year %in% 2011:(first_proj_yr-1))
+    filter(year %in% 2002:(first_proj_yr-1))
   
   past_net <- popn_backseries %>%
     popn_age_on(col_aggregation = c("year", "gss_code_small_area", "age", "sex"),

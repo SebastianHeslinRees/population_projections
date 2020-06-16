@@ -1,3 +1,5 @@
+devtools::load_all("model_code/popmodules")
+
 popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
 dom_origin_destination_path <- paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
