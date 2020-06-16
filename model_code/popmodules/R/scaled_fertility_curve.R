@@ -23,7 +23,7 @@
 #' @param output_col Character. The name of the column in the output dataframe
 #'   containing the calculated rates
 #' @param project_rate_from Numeric. The year for which a rate is being
-#'   calculated. Default \code{last_data_yearr+1}
+#'   calculated. Default \code{last_data_year+1}
 #'
 #' @return A data frame of mortality probabilities or fertility rates by LA,
 #'   year, sex and age with the same age structure as the target curves and

@@ -1,6 +1,6 @@
 #' Calculate average international rates based on past data
 #'
-#' A wrapper for \code{calc_mean_rate} which prepares mye
+#' A wrapper for \code{calculate_mean_from_backseries} which prepares mye
 #' and international in/out flow component data.
 #'
 #' @param popn_mye_path Character. The path to the mye backseries population.
@@ -18,6 +18,8 @@
 #'   not always be the last_data_year + 1).
 #' @param n_proj_yr Numeric. The number of years to project forward.
 #' @param rate_cap Numeric. A cap constraining the maximum rates output.
+#' @param project_rate_from Numeric. The year for which the average being
+#'   calculated is to be used. Default \code{last_data_year+1}.
 #'
 #' @return A data frame of international migration probabilities.
 #'
