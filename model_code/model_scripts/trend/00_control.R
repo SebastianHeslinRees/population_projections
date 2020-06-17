@@ -122,7 +122,8 @@ run_trend_model <- function(config_list) {
   
   # set up projection
    validate_trend_core_inputs(population, births, deaths, int_out, int_in,
-                              dom_out, dom_in, fertility_rates, mortality_rates,
+                              dom_out, dom_in, upc,
+                              fertility_rates, mortality_rates,
                               int_out_flows_rates,
                               first_proj_yr, config_list$n_proj_yr,
                               config_list$int_out_method)
@@ -231,17 +232,18 @@ run_trend_model <- function(config_list) {
 #===============================================================================
 
 # do checks on the input data
-validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in,
+validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, upc,
                                        fertility_rates, mortality_rates, int_out_flows_rates,
                                        first_proj_yr, n_proj_yr, int_out_method) {
   
   popmodules::validate_population(population, col_data = "popn")
-  popmodules::validate_population(births, col_data = "births")
-  popmodules::validate_population(deaths, col_data = "deaths")
-  popmodules::validate_population(int_out, col_data = "int_out")
-  popmodules::validate_population(int_in, col_data = "int_in")
-  popmodules::validate_population(dom_out, col_data = c("dom_out"), test_complete = TRUE, test_unique = TRUE)
-  popmodules::validate_population(dom_in, col_data = c("dom_in"), test_complete = TRUE, test_unique = TRUE)
+  popmodules::validate_population(births, col_data = "births", comparison_pop = population, col_comparison = c("gss_code", "year", "sex"))
+  popmodules::validate_population(deaths, col_data = "deaths", comparison_pop = population)
+  popmodules::validate_population(int_out, col_data = "int_out", comparison_pop = population)
+  popmodules::validate_population(int_in, col_data = "int_in", comparison_pop = population)
+  popmodules::validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"), comparison_pop = population)
+  popmodules::validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"), comparison_pop = population)
+  popmodules::validate_population(upc, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   
   popmodules::validate_population(fertility_rates, col_data = "rate")
   popmodules::validate_population(mortality_rates, col_data = "rate")
