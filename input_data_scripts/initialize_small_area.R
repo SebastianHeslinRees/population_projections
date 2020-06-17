@@ -7,6 +7,7 @@ library(tidyr)
 
 #Directory
 dir.create("input_data/small_area_model", showWarnings = FALSE)
+dir.create("input_data/housing_led_model", showWarnings = FALSE)
 
 #LDD Polygon splits file
 polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")	
