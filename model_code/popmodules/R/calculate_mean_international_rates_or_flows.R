@@ -111,7 +111,7 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
       ungroup() %>%
       mutate(value = value*modify_rates_and_flows) %>%
       rename(!!data_col := value) %>%
-      mutate(year = project_from)
+      mutate(year = project_rate_from)
 
     last_proj_yr <- n_proj_yr + first_proj_yr - 1
 
