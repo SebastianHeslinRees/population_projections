@@ -32,6 +32,11 @@ run_small_area_model <- function(config_list){
   
   validate_config_list(config_list, expected_config)
   
+  #log warnings
+  small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
+  dir.create(small_area_output_dir)
+  loggr::log_file(paste0(small_area_output_dir,"warnings.log"))
+  
   read_small_area_inputs <- function(path){
     df <- readRDS(path)
     if("gss_code_ward" %in% names(df)){df <- rename(df, gss_code_small_area = gss_code_ward)}
@@ -226,6 +231,14 @@ run_small_area_model <- function(config_list){
                                              output_dir = small_area_output_dir,
                                              projection_type = config_list$projection_type,
                                              lookup = small_area_to_district)
+  
+  loggr::deactivate_log()
+  data.table::fread(paste0(config_list$output_dir,"warnings.log"), header = FALSE,
+                    sep = "*") %>%
+    data.frame() %>% 
+    filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
+    data.table::fwrite(paste0(config_list$output_dir,"warnings.log"),
+                       col.names = FALSE, quote=FALSE)
   
   return(projection)
 }
