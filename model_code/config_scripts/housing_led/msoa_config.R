@@ -70,4 +70,3 @@ rm(list = setdiff(ls(), "msoa_config_list"))
 
 source('model_code/model_scripts/small_area/small_area_control.R')
 msoa_projection <- run_small_area_model(msoa_config_list)
-log_warnings(paste0(msoa_config_list$housing_led_model_path, msoa_config_list$projection_type,"/warnings.txt"))

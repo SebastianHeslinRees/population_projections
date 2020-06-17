@@ -208,4 +208,3 @@ rm(list = setdiff(ls(), "config_list"))
 # Run the model
 source("model_code/model_scripts/trend/00_control.R")
 projection <- run_trend_model(config_list)
-log_warnings(paste0(config_list$output_dir, "warnings.txt"))

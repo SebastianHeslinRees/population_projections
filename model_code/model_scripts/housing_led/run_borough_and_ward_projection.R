@@ -98,7 +98,6 @@ run_borough_and_ward_projection <- function(projection_name,
   #run projection
   source('model_code/model_scripts/housing_led/housing_led_control.R')
   borough_projection <- run_housing_led_model(config_list)
-  log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   
   #----
   
@@ -165,8 +164,7 @@ run_borough_and_ward_projection <- function(projection_name,
   
   source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
-  log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
-  
+    
   #bpo
   if(bpo != FALSE) {
     
