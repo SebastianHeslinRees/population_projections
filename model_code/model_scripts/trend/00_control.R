@@ -89,6 +89,8 @@ run_trend_model <- function(config_list) {
   
   if(!is.null(config_list$upc_path)){
     upc <- readRDS(config_list$upc_path)
+  } else {
+    upc <- NULL
   }
   
   # get the projected rates
