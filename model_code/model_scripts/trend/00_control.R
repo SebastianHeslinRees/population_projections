@@ -237,12 +237,12 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                                        first_proj_yr, n_proj_yr, int_out_method) {
   
   popmodules::validate_population(population, col_data = "popn")
-  popmodules::validate_population(births, col_data = "births", comparison_pop = population, col_comparison = c("gss_code", "year", "sex"))
-  popmodules::validate_population(deaths, col_data = "deaths", comparison_pop = population)
-  popmodules::validate_population(int_out, col_data = "int_out", comparison_pop = population)
-  popmodules::validate_population(int_in, col_data = "int_in", comparison_pop = population)
-  popmodules::validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"), comparison_pop = population)
-  popmodules::validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"), comparison_pop = population)
+  popmodules::validate_population(births, col_data = "births", comparison_pop = population, col_comparison = c("gss_code", "sex"))
+  popmodules::validate_population(deaths, col_data = "deaths", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  popmodules::validate_population(int_out, col_data = "int_out", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  popmodules::validate_population(int_in, col_data = "int_in", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  popmodules::validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"), comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  popmodules::validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"), comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
   popmodules::validate_population(upc, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   
   popmodules::validate_population(fertility_rates, col_data = "rate")
