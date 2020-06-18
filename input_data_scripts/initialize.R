@@ -26,4 +26,3 @@ source("input_data_scripts/mye/initialize_mye_2019.R")
 
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
 source("input_data_scripts/migration/pre-calculate_international_in_flows.R")
-source("input_data_scripts/migration/variant_migration_rates.R")
