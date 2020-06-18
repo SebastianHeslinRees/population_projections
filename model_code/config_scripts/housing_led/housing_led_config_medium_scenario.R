@@ -23,10 +23,10 @@ last_data_yr <- 2018
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
 dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
-housing_led_params$domestic_rates = list('2019' = list(path = paste0(dom_rates_loc,"dom_rates_5yr_avg_2018.rds"),
-                                                       transition = F),
-                                         '2024'= list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2018.rds"),
-                                                      transition = F))
+domestic_rates = list('2019' = list(path = paste0(dom_rates_loc,"dom_rates_5yr_avg_2018.rds"),
+                                    transition = F),
+                      '2024' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2018.rds"),
+                                    transition = F))
 
 additional_births_path <- NULL
 fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
