@@ -140,7 +140,7 @@ run_trend_model <- function(config_list) {
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     
-    if(is.null(config_list$upc_path)){
+    if(is.null(upc)){
       curr_yr_upc <- NULL
     } else { 
       curr_yr_upc <- upc %>% filter(year == projection_year)
@@ -179,7 +179,8 @@ run_trend_model <- function(config_list) {
   }
   
   projection <- arrange_trend_core_outputs(projection,
-                                           population, births, deaths, int_out, int_in, dom_in, dom_out,
+                                           population, births, deaths, int_out,
+                                           int_in, dom_in, dom_out, upc,
                                            fertility_rates, mortality_rates,
                                            int_out_flows_rates, int_in_flows,
                                            first_proj_yr, last_proj_yr)

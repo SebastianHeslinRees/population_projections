@@ -7,7 +7,8 @@
 #' @import dplyr
 #' @export
 
-trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
+trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
+                                    dom_in, dom_out, upc,
                                     output_dir, excel_file_name){
   
   #datastore directory
@@ -43,27 +44,55 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
   
-  
-  components <- left_join(popn, get_gss_names(), by="gss_code") %>%
-    rename(borough = gss_name,
-           population = popn) %>%
-    left_join(births, by = c("gss_code", "year")) %>%
-    left_join(deaths, by = c("gss_code", "year")) %>%
-    left_join(int_in, by = c("gss_code", "year")) %>%
-    left_join(int_out, by = c("gss_code", "year")) %>%
-    mutate(int_net = int_in - int_out) %>%
-    left_join(dom_in, by = c("gss_code", "year")) %>%
-    left_join(dom_out, by = c("gss_code", "year")) %>%
-    mutate(dom_net = dom_in - dom_out) %>%
-    mutate(total_change = births - deaths + int_net + dom_net) %>%
-    mutate(borough = recode(borough, "London" = "London (total)")) %>%
-    select(gss_code, borough, year,
-           population, births, deaths,
-           int_in, int_out, int_net,
-           dom_in, dom_out, dom_net,
-           total_change) %>%
-    reorder_for_output() %>%
-    as.data.frame()
+  if(!is.null(upc)){
+    upc <- get_component_datastore(upc, "upc")
+    
+    components <- left_join(popn, get_gss_names(), by="gss_code") %>%
+      rename(borough = gss_name,
+             population = popn) %>%
+      left_join(births, by = c("gss_code", "year")) %>%
+      left_join(deaths, by = c("gss_code", "year")) %>%
+      left_join(int_in, by = c("gss_code", "year")) %>%
+      left_join(int_out, by = c("gss_code", "year")) %>%
+      mutate(int_net = int_in - int_out) %>%
+      left_join(dom_in, by = c("gss_code", "year")) %>%
+      left_join(dom_out, by = c("gss_code", "year")) %>%
+      left_join(upc, by = c("gss_code", "year")) %>% 
+      mutate(dom_net = dom_in - dom_out) %>%
+      mutate(total_change = births - deaths + int_net + dom_net + upc) %>%
+      mutate(borough = recode(borough, "London" = "London (total)")) %>%
+      select(gss_code, borough, year,
+             population, births, deaths,
+             int_in, int_out, int_net,
+             dom_in, dom_out, dom_net, upc,
+             total_change) %>%
+      reorder_for_output() %>%
+      as.data.frame()
+    
+  } else {
+    
+    components <- left_join(popn, get_gss_names(), by="gss_code") %>%
+      rename(borough = gss_name,
+             population = popn) %>%
+      left_join(births, by = c("gss_code", "year")) %>%
+      left_join(deaths, by = c("gss_code", "year")) %>%
+      left_join(int_in, by = c("gss_code", "year")) %>%
+      left_join(int_out, by = c("gss_code", "year")) %>%
+      mutate(int_net = int_in - int_out) %>%
+      left_join(dom_in, by = c("gss_code", "year")) %>%
+      left_join(dom_out, by = c("gss_code", "year")) %>%
+      mutate(dom_net = dom_in - dom_out) %>%
+      mutate(total_change = births - deaths + int_net + dom_net) %>%
+      mutate(borough = recode(borough, "London" = "London (total)")) %>%
+      select(gss_code, borough, year,
+             population, births, deaths,
+             int_in, int_out, int_net,
+             dom_in, dom_out, dom_net,
+             total_change) %>%
+      reorder_for_output() %>%
+      as.data.frame()
+    
+  }
   
   #round data for output
   idx <- sapply(components, class)=="numeric"
@@ -82,11 +111,9 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   wb_filename <- paste(datastore_dir,excel_file_name,sep="/")
   xlsx::saveWorkbook(wb, wb_filename)
   
-  
 }
 
 #--------------------------------------------
-
 
 wrangle_datastore_outputs <- function(x){
   
@@ -125,5 +152,3 @@ get_component_datastore <- function(component, data_col){
     rename(!!data_col := value) 
   
 }
-
-

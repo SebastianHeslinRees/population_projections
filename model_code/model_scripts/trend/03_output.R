@@ -5,10 +5,16 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
   projection[1:12] <- lapply(projection[1:12], reorder_for_output) 
   
   #RDS
-  for(i in seq_along(projection)) {
+  for(i in 1:12) {
      saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
   }
   
+  #upc
+  if(!is.null(projection$upc)){
+    projection$upc <- reorder_for_output(reorder_for_output)
+    saveRDS(projection$upc, paste0(output_dir, "upc.rds"), compress = "gzip")
+  }
+ 
   #CSV
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
@@ -75,6 +81,10 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
     make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
   }
   
+  if(!is.null(projection$upc)){
+    make_csvs(projection$upc, paste0(csv_dir, "upc"))
+  }
+  
   #Excel
   if(write_excel){
     trend_datastore_outputs(population = projection$population,
@@ -84,6 +94,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
                             int_out = projection$int_out,
                             dom_in = projection$dom_in,
                             dom_out = projection$dom_out,
+                            upc = projection$upc,
                             output_dir = output_dir,
                             excel_file_name = paste0(projection_name,".xlsx"))
   }
