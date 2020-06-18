@@ -27,6 +27,9 @@ source('input_data_scripts/small_area_data/msoa_communal_establishment_populatio
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
 
+file.copy("Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2016/October 2017 (v2)/Output/borough_shlaa_trajectory.rds",
+          "input_data/housing_led_model/borough_shlaa_trajectory.rds")
+
 #TESTS
 rm(list=ls())
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
