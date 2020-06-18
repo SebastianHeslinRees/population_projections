@@ -14,13 +14,11 @@ proportion_to_redistribute <- 0.1 #redistribute 10% of UK inflow away from/to Lo
 
 
 #10 year average
-popn_mye_path <- "input_data/mye/2019/temp_gla_population.rds"
-births_mye_path <- "input_data/mye/2019/temp_births.rds"
 int_out_mye_path <- "input_data/mye/2019/temp_gla_international_out.rds"
 int_in_mye_path <-  "input_data/mye/2019/temp_gla_international_in.rds"
 
 avg_10_yr <- popmodules::calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path, births_mye_path = births_mye_path,
+  popn_mye_path = NULL, births_mye_path = NULL,
   flow_or_rate = "flow", component_path = int_in_mye_path,
   last_data_year = 2019, n_years_to_avg = 10, data_col = "int_in",
   first_proj_yr = 2020, n_proj_yr = 1, rate_cap = 0.8) %>%
@@ -40,30 +38,27 @@ saveRDS(avg_20_yr_80, paste0(int_flows_loc,"int_in_10yr_avg_2019_80pc.rds"))
 #proportion of uk int in going to different regions
 int_in_proportions <- avg_10_yr %>%
   left_join(district_to_region, by="gss_code") %>%
-  group_by(region_gss_code) %>%
+  mutate(london = region_gss_code == "E12000007") %>%
+  group_by(london) %>%
   summarise(int_in = sum(int_in)) %>%
   ungroup() %>%
   mutate(proportion = 100*(int_in/sum(int_in))) %>%
-  data.frame() %>%
-  mutate(dist_without_ldn = ifelse(region_gss_code == "E12000007",0,int_in),
-         dist_without_ldn = ifelse(region_gss_code == "E12000007",0,
-                                   int_in / sum(dist_without_ldn)))
+  data.frame()
 
 #total uk in migration to redistribute
 amount_to_change <- sum(avg_10_yr$int_in)*proportion_to_redistribute
 
 #reduction in London, increase elsewhere
 increase_to_regions <- int_in_proportions %>% 
-  mutate(additional = ifelse(region_gss_code == "E12000007",
-                             amount_to_change*-1,
-                             amount_to_change * dist_without_ldn),
-         new_total = additional+int_in,
+  mutate(new_total = ifelse(london,
+                            int_in + amount_to_change,
+                            int_in - amount_to_change),
          scaling = new_total/int_in) %>% 
   mutate(check = 100*(new_total / sum(new_total))) %>%
   data.frame()
 
-london_scaling <- filter(increase_to_regions, region_gss_code=="E12000007")$scaling
-other_scaling <- unique(filter(increase_to_regions, region_gss_code!="E12000007")$scaling)
+london_scaling <- filter(increase_to_regions, london)$scaling
+other_scaling <- filter(increase_to_regions, !london)$scaling
 
 int_in_flows_2 <- avg_10_yr %>%
   mutate(new_int_in = ifelse(substr(gss_code,1,3)=="E09",
@@ -83,18 +78,16 @@ saveRDS(int_in_flows_3, paste0(int_flows_loc,"int_in_reduced_ldn_share.rds"))
 
 #####
 #Opposite thing: increase london, resuction everywhere else
-
-increase_to_london <- int_in_proportions %>% 
-  mutate(additional = ifelse(region_gss_code == "E12000007",
-                             amount_to_change,
-                             amount_to_change * dist_without_ldn * -1),
-         new_total = additional+int_in,
+increase_to_regions <- int_in_proportions %>% 
+  mutate(new_total = ifelse(london,
+                            int_in - amount_to_change,
+                            int_in + amount_to_change),
          scaling = new_total/int_in) %>% 
   mutate(check = 100*(new_total / sum(new_total))) %>%
   data.frame()
 
-london_scaling <- filter(increase_to_london, region_gss_code=="E12000007")$scaling
-other_scaling <- unique(filter(increase_to_london, region_gss_code!="E12000007")$scaling)
+london_scaling <- filter(increase_to_regions, london)$scaling
+other_scaling <- filter(increase_to_regions, !london)$scaling
 
 int_in_flows_4 <- avg_10_yr %>%
   mutate(new_int_in = ifelse(substr(gss_code,1,3)=="E09",

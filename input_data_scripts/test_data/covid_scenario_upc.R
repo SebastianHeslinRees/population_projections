@@ -116,4 +116,5 @@ covid_upc <- rbind(covid_2020, covid_2021) %>%
   mutate(upc = deaths * -1) %>%
   select(year, gss_code, sex, age, upc)
 
+dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")

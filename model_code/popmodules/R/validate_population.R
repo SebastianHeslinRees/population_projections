@@ -21,7 +21,7 @@
 #'   will be checked that these behave as a primary key. If there is more than
 #'   one geography column (e.g. ward code, ward name, or ward code borough code)
 #'   include only the highest resolution and only one column. Default value is
-#'   columns for "gss_code", "age", "sex".
+#'   \code{"year", "gss_code", "age", "sex"}.
 #' @param col_data A string of character vector giving column names for data
 #'   (e.g. popn, birth rate). Columns given will be checked for missing and
 #'   negative values. Any columns not named in the input are currently ignored.
