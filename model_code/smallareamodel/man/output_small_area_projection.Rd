@@ -4,15 +4,7 @@
 \alias{output_small_area_projection}
 \title{Output the results of the housing-led model}
 \usage{
-output_small_area_projection(
-  projection,
-  output_dir,
-  projection_type,
-  births,
-  deaths,
-  first_proj_yr,
-  lookup
-)
+output_small_area_projection(projection, output_dir, projection_type, lookup)
 }
 \arguments{
 \item{projection}{A list. The output from the run_housing_led_model function}
@@ -21,12 +13,6 @@ output_small_area_projection(
 
 \item{projection_type}{A string. Is the projection at ward or MSOA level? Used in
 naming the output files only}
-
-\item{births}{A dataframe. The projeted births output from the small area model}
-
-\item{deaths}{A dataframe. The projeted deaths output from the small area model}
-
-\item{first_proj_yr}{Numeric. The first year of the projection}
 
 \item{lookup}{A dataframe. A gss_code to name lookup for the modelled areas}
 }

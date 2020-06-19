@@ -10,7 +10,9 @@ arrange_small_area_core_outputs(
   popn_backseries,
   dwelling_trajectory,
   first_proj_yr,
-  final_proj_yr
+  last_proj_yr,
+  small_area_births_sya,
+  small_area_deaths_sya
 )
 }
 \arguments{
@@ -23,7 +25,13 @@ and geographic aggregation (ward or msoa)}
 
 \item{first_proj_yr}{Numeric. First projection year}
 
-\item{final_proj_yr}{Numeric. Last projection year}
+\item{last_proj_yr}{Numeric. Last projection year}
+
+\item{small_area_births_sya}{A datatframe. Births by single year of age and sex 
+for each geographic aggregation and year}
+
+\item{small_area_deaths_sya}{A datatframe. Deaths by single year of age and sex
+for each #'  geographic aggregation and year}
 }
 \value{
 A list where each element is a data frame containing data for each year

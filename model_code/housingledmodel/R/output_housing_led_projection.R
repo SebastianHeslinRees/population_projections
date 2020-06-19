@@ -29,7 +29,7 @@ output_housing_led_projection <- function(projection, output_dir,
                                           first_proj_yr){
  
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
-  
+
   # Add backseries to projection
   backseries <- get_data_from_file(
     list(population = paste0(external_trend_path,"population.rds"),
@@ -165,9 +165,7 @@ output_housing_led_projection <- function(projection, output_dir,
                assumed_dev = annual_dev, housing_stock = stock, ahs = ahs)
   
   for(i in seq_along(csvs)) {
-    
     fwrite(csvs[[i]], paste0(output_dir, "csv/",names(csvs)[i],".csv"))
-    
   }
   
 }

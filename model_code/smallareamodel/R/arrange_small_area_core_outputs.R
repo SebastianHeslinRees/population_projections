@@ -1,7 +1,3 @@
-<<<<<<< HEAD:model_code/model_scripts/small_area/arrange_small_area_core_outputs.R
-
-
-=======
 #' Arrange outputs from the \code{small_area_led_core} function into inputs for the
 #' \code{output_small_area_projection} function
 #'

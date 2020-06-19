@@ -1,4 +1,5 @@
 #' Run a housing-led model config file to produce a population projection
+#' Previously housing-led control
 #' 
 #' Read in, validate and manage model input data and then run the \code{trend_core}
 #' and \code{housing_led_core} functions to produce a population projection as

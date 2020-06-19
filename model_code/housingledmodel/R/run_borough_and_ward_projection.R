@@ -16,6 +16,8 @@
 #'   need to be specified as well.
 #'   
 #' @import popmodules
+#' @import trendmodel
+#' @import smallareamodel
 #' @importFrom data.table fwrite
 
 run_borough_and_ward_projection <- function(projection_name,
@@ -157,7 +159,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","bpo")))
   
-  source('model_code/model_scripts/small_area/small_area_control.R')
   ward_projection <- run_small_area_model(ward_config_list)
   log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
   
