@@ -24,7 +24,7 @@ run_small_area_model <- function(config_list){
                        "borough_mortality_rates_path",
                        "last_data_year",
                        "first_proj_yr",
-                       "final_proj_yr",
+                       "last_proj_yr",
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "ldd_final_yr",
@@ -41,7 +41,7 @@ run_small_area_model <- function(config_list){
   
   #Read Data
   adults_per_dwelling <- read_small_area_inputs(config_list$adults_per_dwelling_path) %>%
-    project_forward_flat(config_list$final_proj_yr)
+    project_forward_flat(config_list$last_proj_yr)
   
   small_area_to_district <- read_small_area_inputs(config_list$small_area_to_district_path)
   out_migration_rates <- read_small_area_inputs(config_list$out_migration_rates_path)
@@ -101,7 +101,7 @@ run_small_area_model <- function(config_list){
   curr_yr_popn <- filter(popn_estimates, year == config_list$first_proj_yr-1)
   projection <- list()
   
-  for(projection_year in config_list$first_proj_yr:config_list$final_proj_yr){
+  for(projection_year in config_list$first_proj_yr:config_list$last_proj_yr){
     
     cat('\r',paste("  Projecting year", projection_year))
     flush.console()
@@ -219,7 +219,7 @@ run_small_area_model <- function(config_list){
   small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
   
   projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
-                                                config_list$first_proj_yr, config_list$final_proj_yr,
+                                                config_list$first_proj_yr, config_list$last_proj_yr,
                                                 small_area_births_sya, small_area_deaths_sya)
   
   projection <- output_small_area_projection(projection = projection,
@@ -271,8 +271,8 @@ validate_small_area_input_components <- function(popn_estimates,
   
   # Check years are all correct
   past_years <- (config_list$first_proj_yr - 1):config_list$last_data_year
-  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
-  if(config_list$final_proj_yr > config_list$last_data_year) {
+  proj_years <- (config_list$last_data_year + 1):config_list$last_proj_yr
+  if(config_list$last_proj_yr > config_list$last_data_year) {
     all_years <- c(past_years, proj_years)
   } else {
     all_years <- past_years
@@ -294,7 +294,7 @@ validate_small_area_fert_mort_components <- function(popn_estimates,
                                                      mortality_rates,
                                                      config_list) {
   domain <- unique(popn_estimates$gss_code)
-  proj_years <- (config_list$last_data_year + 1):config_list$final_proj_yr
+  proj_years <- (config_list$last_data_year + 1):config_list$last_proj_yr
   
   validate_population(small_area_fertility_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "fert_rate")
   validate_population(small_area_mortality_rates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"), col_data = "mort_rate")

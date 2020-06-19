@@ -1,6 +1,6 @@
 arrange_small_area_core_outputs <- function(projection, popn_backseries,
                                             dwelling_trajectory,
-                                            first_proj_yr, final_proj_yr,
+                                            first_proj_yr, last_proj_yr,
                                             small_area_births_sya,
                                             small_area_deaths_sya){
 
@@ -33,7 +33,7 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
   proj_migration[[1]] <- past_net
   assumed_dev <- list()
   
-  for(projection_year in first_proj_yr:final_proj_yr){
+  for(projection_year in first_proj_yr:last_proj_yr){
     
     proj_popn[[projection_year]] <- projection[[projection_year]][['population']]
     proj_births[[projection_year]] <- projection[[projection_year]][['births']]

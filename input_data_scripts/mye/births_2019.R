@@ -4,11 +4,11 @@ devtools::load_all("model_code/popmodules")
 
 #2019 Births
 
-births_1 <- fread("Q:/Teams/D&PA/Data/births_and_deaths/births_sept2017_aug2018.csv") %>%
+births_1 <- fread("Q:/Teams/D&PA/Data/births_and_deaths/births_by_month/births_sept2017_aug2018.csv") %>%
   data.frame() %>% 
   select(gss_code, sex, Jul_2018, Aug_2018) %>%
   tidyr::pivot_longer(cols = c(Jul_2018, Aug_2018), names_to = "month", values_to = "births")
-births_2 <- fread("Q:/Teams/D&PA/Data/births_and_deaths/births_sept2018_aug2019.csv")%>%
+births_2 <- fread("Q:/Teams/D&PA/Data/births_and_deaths/births_by_month/births_sept2018_aug2019.csv")%>%
   data.frame() %>% 
   select(-Jul_2019, -Aug_2019) %>%
   tidyr::pivot_longer(cols = 3:12, names_to = "month", values_to = "births")

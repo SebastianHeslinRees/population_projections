@@ -1,13 +1,13 @@
 library(dplyr)
 devtools::load_all("model_code/popmodules")
 
-deaths_2018 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/deaths_calendar_2018.csv",
+deaths_2018 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/calendar_year_deaths/deaths_calendar_2018.csv",
                                  header = TRUE) %>%
   data.frame() %>%
   select(gss_code, Jul, Aug, Sep, Oct, Nov, Dec) %>%
   tidyr::pivot_longer(2:7, "month")
 
-deaths_2019 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/deaths_calendar_2019.csv",
+deaths_2019 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/calendar_year_deaths/deaths_calendar_2019.csv",
                                  header = TRUE) %>%
   data.frame() %>%
   select(gss_code, Jan, Feb, Mar, Apr, May, Jun) %>%
@@ -18,9 +18,9 @@ total_deaths <- rbind(deaths_2018, deaths_2019) %>%
   group_by(gss_code) %>%
   summarise(total_deaths = sum(value)) %>% 
   as.data.frame() %>%
-  recode_gss_codes(data_cols="deaths", recode_to_year = 2020) %>%
+  recode_gss_codes(data_cols="total_deaths", recode_to_year = 2020) %>%
   rbind(data.frame(gss_code = c("N92000002","S92000003"),
-                   total_deaths = c(15349, 56209)))
+                   total_deaths = c(15349, 56209))) 
 	
 
 deaths_backseries <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
@@ -41,7 +41,6 @@ scaled_deaths <- sya_deaths_2018 %>%
 
 deaths_final <- rbind(deaths_backseries, scaled_deaths) %>%
   select(year, gss_code, sex, age, deaths)
-
 
 saveRDS(deaths_final, "input_data/mye/2019/temp_deaths.rds")
 

@@ -2,10 +2,17 @@
 #'
 #' Shortcut function to combine population components
 #'
-#' @param start_population Data frame with initial population. All subsequent inputs should be at the same resolution.
-#' @param addition_data a List of component dataframes contain data to be added to the start population
-#' @param subtraction_data a List of component dataframes contain data to be subtracted from the start population
-#' @param col_aggregation Aggregation columns common to all the above to join on.
+#' @param start_population Data frame with initial population. All subsequent
+#'   inputs should be at the same resolution.
+#' @param addition_data a List of component dataframes contain data to be added
+#'   to the start population
+#' @param subtraction_data a List of component dataframes contain data to be
+#'   subtracted from the start population
+#' @param col_aggregation Aggregation columns common to all the above to join
+#'   on.
+#' @param data_are_subsets Logical. Set to TRUE when addition or subtraction
+#'   component data are provided for subsets of the \code{start_population},
+#'   e.g. for London only. Default \code{false}.
 #'
 #' @return A data frame with all components added.
 #'
@@ -14,13 +21,14 @@
 #' @importFrom dtplyr lazy_dt
 #'
 #' @export
-#'
+#' 
 construct_popn_from_components <- function(start_population,
                                            addition_data,
                                            subtraction_data,
-                                           col_aggregation = c("year","gss_code","sex","age")){
+                                           col_aggregation = c("year","gss_code","sex","age"),
+                                           data_are_subsets = FALSE){
   
-  validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation)
+  validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation, data_are_subsets)
   
   nm <- last(names(start_population))
   
@@ -61,7 +69,8 @@ construct_popn_from_components <- function(start_population,
 validate_construct_popn_from_component_input <- function(start_population,
                                                          addition_data,
                                                          subtraction_data,
-                                                         col_aggregation){
+                                                         col_aggregation,
+                                                         data_are_subsets){
   #validation
   #are addition and subratction lists
   assertthat::assert_that(is.list(addition_data),
@@ -74,80 +83,48 @@ validate_construct_popn_from_component_input <- function(start_population,
                           msg = "construct_popn_from_components: start_population must be a dataframe")
   
   assertthat::assert_that(
-    all(
-      as.logical(
-        sapply(addition_data, is.data.frame)
-      )
-    ),
+    all(sapply(addition_data, is.data.frame)),
     msg = "construct_popn_from_components: All elements the addition_data list must be dataframes"
   )
   
   assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(subtraction_data, FUN = function(x) is.data.frame(x))
-      )
-    ),
+    all(sapply(subtraction_data, FUN = function(x) is.data.frame(x))),
     msg = "construct_popn_from_components: All elements the subtraction_data list must be dataframes"
   )
   
   #is the final colmn of each df numeric
   assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(addition_data, FUN = function(x) is.numeric(x[[ncol(x)]]))
-      )
-    ),
+    all(sapply(addition_data, FUN = function(x) is.numeric(x[[ncol(x)]]))),
     msg = "construct_popn_from_components: The final column in every addition_data dataframe must be numeric"
   )
   
   assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(subtraction_data, FUN = function(x) is.numeric(x[[ncol(x)]]))
-      )
-    ),
+    all(sapply(subtraction_data, FUN = function(x) is.numeric(x[[ncol(x)]]))),
     msg = "construct_popn_from_components: The final column in every subtraction_data dataframe must be numeric"
-    
   )
   
   #every data frame contains col_aggregation fields
   
   assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(addition_data, FUN = function(x) all(col_aggregation %in% names(x)))
-      )
-    ),
+    all(sapply(addition_data, FUN = function(x) all(col_aggregation %in% names(x)))),
     msg = "construct_popn_from_components: one or more col_aggregation columns not found in one of the addition_data dataframes"
   )
   
   assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(subtraction_data, FUN = function(x) all(col_aggregation %in% names(x)))
-      )
-    ),
+    all(sapply(subtraction_data, FUN = function(x) all(col_aggregation %in% names(x)))),
     msg = "construct_popn_from_components: one or more col_aggregation columns not found in one of the subtraction_data dataframes"
   )
   
-  #every dataframe contains the same gss codes
-  assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(addition_data, FUN = function(x) validate_same_geog(start_population, x)
-        ))
-    ),
-    msg = "construct_popn_from_components: dataframes in addition_data contain different gss_codes to start_population - they must be indentical"
-  )
-  
-  assertthat::assert_that(
-    all(
-      as.logical(
-        lapply(subtraction_data, FUN = function(x) validate_same_geog(start_population, x)
-        ))
-    ),
-    msg = "construct_popn_from_components: dataframes in subtraction_data contain different gss_codes to start_population - they must be indentical"
-  )
-  
+  #dataframes don't contain additional gss codes
+  if(!data_are_subsets) {
+    assertthat::assert_that(
+      all(sapply(addition_data, FUN = function(x) setequal(x$gss_code, start_population$gss_code))),
+      msg = "construct_popn_from_components: dataframes in addition_data contain gss_codes that aren't in start_population"
+    )
+    
+    assertthat::assert_that(
+      all(sapply(subtraction_data, FUN = function(x) setequal(x$gss_code, start_population$gss_code))),
+      msg = "construct_popn_from_components: dataframes in subtraction_data contain gss_codes that aren't in start_population"
+    )
+  }
 }

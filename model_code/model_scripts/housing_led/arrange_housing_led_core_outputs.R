@@ -1,4 +1,4 @@
-arrange_housing_led_core_outputs <- function(projection, trend_projection, first_proj_yr, final_proj_yr){
+arrange_housing_led_core_outputs <- function(projection, trend_projection, first_proj_yr, last_proj_yr){
   
   proj_popn <- list()
   proj_int_out <- list()
@@ -14,7 +14,7 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
   proj_adj_mig <- list()
   proj_unconstrained <- list()
   
-  for(projection_year in first_proj_yr:final_proj_yr){
+  for(projection_year in first_proj_yr:last_proj_yr){
     
     proj_popn[[projection_year]] <- projection[[projection_year]][['population']]
     proj_births[[projection_year]] <- projection[[projection_year]][['births']]

@@ -16,6 +16,7 @@
 #'   or by linear regression \code{Trend}.
 #' @param data_col Character. The column in the \code{deaths} dataframe containing the rates. Defaults to \code{deaths}
 #' @param output_col Character. The name of the column in the output dataframe containing the calculated rates
+#' @param project_rate_from Numeric. The year for which a rate is being calculated. Default \code{last_data_year+1}.
 #'
 #' @return A data frame of mortality probabilities rates by LA, year, sex and age with the same age structure
 #' as the target curves and overall rates scaled so that they are consistent with past deaths.
@@ -27,7 +28,8 @@
 
 
 scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_path, target_curves_filepath,
-                                   last_data_year, n_years_to_avg, avg_or_trend, data_col="deaths", output_col){
+                                   last_data_year, n_years_to_avg, avg_or_trend, data_col="deaths", output_col,
+                                   project_rate_from = last_data_year+1){
 
   population <- data.frame(readRDS(popn_mye_path))
   births <- data.frame(readRDS(births_mye_path))
@@ -62,11 +64,19 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     select(gss_code, year, sex, scaling)
 
   if(avg_or_trend == "trend"){
-    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling")
+    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries,
+                                                             n_years_regression = n_years_to_avg,
+                                                             last_data_year,
+                                                             data_col="scaling",
+                                                             project_rate_from=project_rate_from)
   }
 
   if(avg_or_trend == "average"){
-    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, n_years_to_avg, last_data_year, data_col="scaling")
+    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries,
+                                                               n_years_to_avg,
+                                                               last_data_year,
+                                                               data_col="scaling",
+                                                               project_rate_from=project_rate_from)
   }
 
   validate_population(averaged_scaling_factors, col_aggregation = c("year", "gss_code", "sex"), col_data = "scaling")
@@ -81,7 +91,8 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     filter(!is.na(scaling)) %>%
     mutate(rate = rate*scaling) %>%
     select(gss_code, year, sex, age, rate) %>%
-    rename(!!output_col := rate)
+    rename(!!output_col := rate) %>%
+    filter(year < project_rate_from)
 
   return(rbind(rates_backseries, jump_off_rates)  %>%
            arrange(gss_code, year, sex, age))
