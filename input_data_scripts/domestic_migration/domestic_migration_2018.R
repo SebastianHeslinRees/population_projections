@@ -69,11 +69,10 @@ message("Saving domestic origin-destination flows. This may take a while")
 saveRDS(domestic_la, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))
 saveRDS(domestic_region, file = paste0("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds"))
 
-
 rm(domestic_la, domestic_region)
 
-# Calculate net flows
-message("Calculating historic net flows. This may also take a while")
+# Calculate gross flows
+message("Calculating historic gross flows")
 backseries_years <- sort(unique(domestic$year))
 
 # data.table again - it's repeated below in a tidyverse equivalent

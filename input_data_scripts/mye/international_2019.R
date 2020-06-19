@@ -75,11 +75,11 @@ gla_int_out <- readRDS("input_data/mye/2018/international_out_gla_2019-11-13.rds
   select(gss_code, year, sex, age, int_out) %>% 
   recode_gss_codes(data_cols = "int_out", recode_to_year = 2020)
 
-gla_in_2018 <- ons_int_in %>% 
+gla_in_2018 <- gla_int_in %>% 
   filter(year == 2018) %>%
   select(-year)
 
-gla_out_2018 <- ons_int_out %>% 
+gla_out_2018 <- gla_int_out %>% 
   filter(year == 2018) %>%
   select(-year)
 

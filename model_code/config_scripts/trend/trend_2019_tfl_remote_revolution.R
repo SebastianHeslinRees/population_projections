@@ -2,69 +2,55 @@
 
 devtools::load_all("model_code/popmodules")
 
-first_proj_yr <- 2019
-n_proj_yr <- 32
-projection_name <- "high_mig"
-projection_name <- "low_mig"
+first_proj_yr <- 2020
+n_proj_yr <- 31
+projection_name <- "remote_revolution"
 
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
-deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
-births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
-dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
-dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
-dom_origin_destination_path <- paste0("input_data/migration/high_domestic_migration_rates_(2016_2018).rds")
-# dom_origin_destination_path <- paste0("input_data/migration/low_domestic_migration_rates_(2009_2012).rds")
-
-upc_path <- NULL
+popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
+deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
+births_mye_path <-  paste0("input_data/mye/2019/temp_births.rds")
+int_out_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_out.rds")
+int_in_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_in.rds")
+dom_out_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_out.rds")
+dom_in_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_in.rds")
+upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
 mortality_years_to_avg <- 5
 mortality_avg_or_trend <- "trend"
-mortality_last_data_year <- 2018
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018.rds"
+mortality_last_data_year <- 2019
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018_(2020_geog).rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 mortality_npp_variant <- "2018_principal"
 
 fertility_years_to_avg <- 5
 fertility_avg_or_trend <- "average"
-fertility_last_data_year <- 2018
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018.rds"
+fertility_last_data_year <- 2019
+fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018_(2020_geog).rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 fertility_npp_variant <- "2018_principal"
 
-int_out_last_data_year <- 2018
+int_out_last_data_year <- 2019
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
+# 
+# int_in_last_data_year <- 2019
+# int_in_years_to_avg <- 10
+# int_in_flow_or_rate <- "flow"
+# modify_rates_and_flows <- 1
 
-int_in_last_data_year <- 2018
-int_in_years_to_avg <- 10
-int_in_flow_or_rate <- "flow"
+ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
+ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"
+communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population_(2020_geog).rds"
+dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014_(2020_geog).rds"
+dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014_(2020_geog).rds"
 
-dom_mig_last_data_year <- 2018
-dom_mig_years_to_avg <- 10
-
-popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"
-births_constraint_path <- "input_data/constraints/npp_2018_fertility_constraint.rds"
-deaths_constraint_path <- "input_data/constraints/npp_2018_mortality_constraint.rds"
-int_in_constraint_path <- "input_data/constraints/npp_2018_international_in_constraint.rds"
-int_out_constraint_path <- "input_data/constraints/npp_2018_international_out_constraint.rds"
-cross_in_constraint_path <- "input_data/constraints/npp_2018_cross_border_in_constraint.rds"
-cross_out_constraint_path <- "input_data/constraints/npp_2018_cross_border_out_constraint.rds"
-
-ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates.rds"
-ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016.rds"
-communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population.rds"
-dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014.rds"
-dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014.rds"
-
-write_excel <- FALSE
+write_excel <- TRUE
 
 #-------------------------------------------------
 timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
-output_dir <- paste0("outputs/trend/2018/",projection_name,"/")
+output_dir <- paste0("outputs/trend/2019/",projection_name,"/")
 
 mortality_fns <- list(
   
@@ -120,40 +106,34 @@ int_out_rate_fns <- list(
                                                                                rate_cap = int_out_rate_cap))
 )
 
+int_flows_loc <- "input_data/mye/2019/"
 
-int_in_fns <- list(
-  list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
-                                                                               births_mye_path = births_mye_path,
-                                                                               flow_or_rate = int_in_flow_or_rate,
-                                                                               component_path = int_in_mye_path,
-                                                                               last_data_year = int_in_last_data_year,
-                                                                               n_years_to_avg = int_in_years_to_avg,
-                                                                               data_col = "int_in",
-                                                                               first_proj_yr = first_proj_yr,
-                                                                               n_proj_yr = n_proj_yr))
-)
+int_in  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_70pc.rds"),
+                              transition = F),
+                '2021' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_50pc.rds"),
+                              transition = T),
+                '2024' = list(path = paste0(int_flows_loc,"int_in_reduced_ldn_share.rds"),
+                              transition = F))
 
-dom_rate_fns <- list(
-  list(fn = readRDS, args = list(file = dom_origin_destination_path))
-)
+#-----------------------------------------------------
 
-constraint_fns <- list(
-  list(fn = popmodules::get_data_from_file, args = list(popn_path = popn_constraint_path,
-                                                               births_path = births_constraint_path,
-                                                               deaths_path = deaths_constraint_path,
-                                                               int_in_path = int_in_constraint_path,
-                                                               int_out_path = int_out_constraint_path,
-                                                               cross_in_path = cross_in_constraint_path,
-                                                               cross_out_path = cross_out_constraint_path))
-)
+dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
+
+domestic_rates <- list('2020' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_70pc.rds"),
+                                     transition = F),
+                       '2021' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_50pc.rds"),
+                                     transition = T),
+                       '2024' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_reduced_ldn_in.rds"),
+                                     transition = F))
+
+#-----------------------------------------------------
 
 constraint_fns <- list(list(fn = function() NULL, args = list()))
-#TODO figure out the best way to get a null value when we don't want to constrain
-
 qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
 config_list <- list(
+  projection_name = projection_name,
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
   popn_mye_path = popn_mye_path,
@@ -163,14 +143,13 @@ config_list <- list(
   int_in_mye_path = int_in_mye_path,
   dom_out_mye_path = dom_out_mye_path,
   dom_in_mye_path = dom_in_mye_path,
-  dom_origin_destination_path = dom_origin_destination_path,
   upc_path = upc_path,
   output_dir = output_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   int_out_fns = int_out_rate_fns,
-  int_in_fns = int_in_fns,
-  dom_rate_fns = dom_rate_fns,
+  int_in_fns = int_in,
+  domestic_rates = domestic_rates,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
   int_out_method = int_out_flow_or_rate,
@@ -184,12 +163,11 @@ config_list <- list(
 )
 
 # Save settings
-# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
 projdir <- rprojroot::find_root(rprojroot::is_git_root)
-copy_dir <- paste0(projdir, "/", output_dir)
-dir.create(copy_dir, recursive = TRUE)
-this_file <- rstudioapi::getSourceEditorContext()$path
-file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
+# copy_dir <- paste0(projdir, "/", output_dir)
+# dir.create(copy_dir, recursive = TRUE)
+# this_file <- rstudioapi::getSourceEditorContext()$path
+# file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
 
 rm(list = setdiff(ls(), "config_list"))
 
