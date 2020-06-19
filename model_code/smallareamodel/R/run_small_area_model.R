@@ -1,7 +1,18 @@
-#devtools::load_all('model_code/popmodules')
-source('model_code/model_scripts/small_area/small_area_core.R')
-source('model_code/model_scripts/small_area/arrange_small_area_core_outputs.R')
-source('model_code/model_scripts/small_area/output_small_area_projection.R')
+#' Run a small area model config file to produce a population projection
+#' 
+#' Read in, validate and manage model input data and then run the \code{small_area_core}
+#' function to produce a population projection as specified in the config list.
+#'
+#' @param config_list A List. A housing-led model configuration list.
+#' 
+#' @return A list of projected components
+#' 
+#' @import popmodules
+#' @import dplyr
+#' @importFrom assertthat assert_that
+#' @importFrom dtplyr lazy_dt
+#' 
+#' @export
 
 run_small_area_model <- function(config_list){
   
@@ -78,7 +89,7 @@ run_small_area_model <- function(config_list){
   #Create the cumulative development trajectory
   
   ldd_data <- filter(ldd_data, year <= config_list$ldd_final_yr) 
-  assertthat::assert_that(min(dwelling_trajectory$year) <= config_list$ldd_final_yr + 1)
+  assert_that(min(dwelling_trajectory$year) <= config_list$ldd_final_yr + 1)
   
   dwelling_trajectory <- dwelling_trajectory %>%
     filter(year > config_list$ldd_final_yr) %>%
@@ -118,7 +129,7 @@ run_small_area_model <- function(config_list){
       #TODO make it work with age groups
       #Scaling factors for the 2019 rates and then applied to the fertility trajectory
       
-      curr_yr_births <- dtplyr::lazy_dt(births) %>%
+      curr_yr_births <- lazy_dt(births) %>%
         group_by(year, gss_code_small_area) %>%
         summarise(births = sum(births)) %>%
         as.data.frame() %>%
@@ -144,7 +155,7 @@ run_small_area_model <- function(config_list){
       
       #------------------
       
-      curr_yr_deaths <- dtplyr::lazy_dt(deaths) %>%
+      curr_yr_deaths <- lazy_dt(deaths) %>%
         group_by(year, gss_code_small_area) %>%
         summarise(deaths = sum(deaths)) %>%
         as.data.frame() %>%

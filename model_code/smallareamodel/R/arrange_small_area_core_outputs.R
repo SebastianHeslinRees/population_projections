@@ -1,9 +1,36 @@
+<<<<<<< HEAD:model_code/model_scripts/small_area/arrange_small_area_core_outputs.R
+
+
+=======
+#' Arrange outputs from the \code{small_area_led_core} function into inputs for the
+#' \code{output_small_area_projection} function
+#'
+#' The \code{small_area_led_core} outputs a list for each year of the projection.
+#' Each list is a list of components. This function rearrages those outputs into
+#' a list of dataframes of components.
+#'
+#' @param projection A list. The output list from the \code{small_area_led_core} function
+#' @param popn_backseries A dataframe. The small area population backseries
+#' @param dwelling_trajectory A dataframe. The small area dwelling trajectory by year
+#'   and geographic aggregation (ward or msoa)
+#' @param first_proj_yr Numeric. First projection year
+#' @param last_proj_yr Numeric. Last projection year
+#' @param small_area_births_sya A datatframe. Births by single year of age and sex 
+#'  for each geographic aggregation and year
+#' @param small_area_deaths_sya  A datatframe. Deaths by single year of age and sex
+#'  for each #'  geographic aggregation and year
+#'
+#' @return A list where each element is a data frame containing data for each year
+#'   of the projection and the backseries.
+#'
+#' @import dplyr
+
 arrange_small_area_core_outputs <- function(projection, popn_backseries,
                                             dwelling_trajectory,
                                             first_proj_yr, last_proj_yr,
                                             small_area_births_sya,
                                             small_area_deaths_sya){
-
+ 
   popn_backseries <- filter(popn_backseries, year %in% 2010:(first_proj_yr-1))
   
   births_backseries <- small_area_births_sya %>%
@@ -39,14 +66,13 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
     proj_births[[projection_year]] <- projection[[projection_year]][['births']]
     proj_deaths[[projection_year]] <- projection[[projection_year]][['deaths']]
     proj_migration[[projection_year]] <- projection[[projection_year]][['migration']]
-    #assumed_dev[[projection_year]] <- projection[[projection_year]][['assumed_development']]
+    
   }
   
   proj_popn   <- data.frame(data.table::rbindlist(proj_popn, use.names=TRUE))
   proj_deaths <- data.frame(data.table::rbindlist(proj_deaths, use.names=TRUE))
   proj_births <- data.frame(data.table::rbindlist(proj_births, use.names=TRUE))
   proj_migration <- data.frame(data.table::rbindlist(proj_migration, use.names=TRUE))
-  #assumed_dev <- data.frame(data.table::rbindlist(assumed_dev, use.names = TRUE))
   
   return(list(population = proj_popn,
               births = proj_births,

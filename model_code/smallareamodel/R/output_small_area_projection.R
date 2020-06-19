@@ -1,7 +1,24 @@
-output_small_area_projection <- function(projection, output_dir, projection_type,lookup){
+#' Output the results of the housing-led model
+#' 
+#' Save RDS and CSV files to a specified folder path. Outputs include population,
+#' components of change (including backseries data) and the input dwelling and
+#' household trajectories.
+#'
+#' @param projection A list. The output from the run_housing_led_model function
+#' @param output_dir A string. The directory in which to save the model output files
+#' @param projection_type A string. Is the projection at ward or MSOA level? Used in
+#'   naming the output files only
+#' @param lookup A dataframe. A gss_code to name lookup for the modelled areas
+#' 
+#' @import dplyr
+#' @importFrom tidyr pivot_wider
+#' @importFrom dtplyr lazy_dt
+#' @importFrom data.table fwrite rbindlist
+
+output_small_area_projection <- function(projection, output_dir, projection_type, lookup){
   
   borough_names <- get_gss_names()
-  
+
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   
   code <- paste0("gss_code_",projection_type)
@@ -60,9 +77,10 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     mutate(popn = round(popn, 2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     select_at(col_aggregation)
+
   
   persons <- mutate(popn, sex = "persons") %>%
-    dtplyr::lazy_dt() %>%
+    lazy_dt() %>%
     filter(year >= 2011) %>%
     group_by_at(c("year", "gss_code", "borough", code, name, "sex", "age")) %>%
     summarise(popn = sum(popn)) %>%
@@ -70,7 +88,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     mutate(popn = round(popn, 2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     select_at(col_aggregation)
-  
+
   #components of change output sheet
   #and residual migration claculation
   components <- list()
@@ -88,7 +106,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     summarise(value = sum(value)) %>%
     as.data.frame() %>%
     mutate(value = round(value, 2)) %>%
-    tidyr::pivot_wider(names_from = component, values_from = value) %>%
+    pivot_wider(names_from = component, values_from = value) %>%
     group_by_at(c("gss_code","borough", code, name)) %>%
     mutate(popn_lag = lag(popn)) %>%
     as.data.frame() %>%
@@ -101,7 +119,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
   
   csvs <- list(persons=persons, males=males, females=females, components=components, assumed_dev=assumed_dev)
   for(i in seq_along(csvs)) {
-    data.table::fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
+    fwrite(csvs[[i]], paste0(output_dir, names(csvs)[i], "_", projection_type, ".csv"))
   }
   
   projection[["csvs"]] <- csvs

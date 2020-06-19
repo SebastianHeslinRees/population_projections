@@ -1,4 +1,5 @@
 devtools::load_all("model_code/popmodules")
+devtools::load_all("model_code/trendmodel")
 devtools::load_all("model_code/housingledmodel")
 
 #Setup
@@ -57,6 +58,5 @@ config_list <- list(
 
 #---------------------
 #run projection
-
 projection <- run_housing_led_model(config_list)
 log_warnings(paste0(output_dir,"warnings.txt"))
