@@ -19,7 +19,7 @@ household_model_ons <- function(population, stage1_file_path, stage2_file_path, 
   
   stage_1 <- ons_stage_1(population, stage1_file_path, communal_est_pop_path, first_proj_yr)
   stage_2 <- ons_stage_2(stage2_file_path, stage_1)
-  
+
   validate_ons_outputs(stage_1, stage_2, max(population$year))
   
   return(list(stage_1 = stage_1, stage_2 = stage_2))
@@ -53,10 +53,11 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
   
   household_rates <- readRDS(hh_rep_rates_path) %>%
     project_forward_flat(max(popn$year)) %>%
-    filter(year <= max(popn$year))
+    filter(year %in% unique(popn$year))
   
-  population <- filter(popn, gss_code %in% unique(household_rates$gss_code)) # filter to England, basically
-  
+  population <- popn %>%
+    filter(gss_code %in% unique(household_rates$gss_code), # filter to England, basically
+           year %in% unique(household_rates$year))
   #       Same number as 2011 for 0-74
   #       Same proportion 75+
   #       Prison population updated upto and inc 2016
@@ -130,7 +131,8 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
   
   headship_rates <- readRDS(stage2_file_path) %>%
     project_forward_flat(max(household_popn$year)) %>%
-    filter(gss_code %in% unique(household_popn$gss_code))
+    filter(gss_code %in% unique(household_popn$gss_code),
+           year %in% unique(household_popn$year))
   
   
   hh_rates_no_sex <- filter(headship_rates, !household_type %in%

@@ -1,3 +1,6 @@
+library(dplyr)
+devtools::load_all("model_code/popmodules")
+
 #ONS population
 source('input_data_scripts/mye/ons_popn_2019.R')
 
@@ -22,3 +25,24 @@ source('input_data_scripts/households/household_model_inputs_(2020 geog).R')
 #mortality & fertility
 source('input_data_scripts/mortality/asmr_2020_geography.R')
 source('input_data_scripts/fertility/asfr_2020_geography.R')
+
+#validate
+validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
+                   readRDS("input_data/mye/2019/temp_births.rds"))
+
+validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
+                   readRDS("input_data/mye/2019/temp_deaths.rds"))
+
+validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
+                   readRDS("input_data/mye/2019/temp_gla_international_in.rds"))
+
+validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
+                   readRDS("input_data/mye/2019/temp_gla_international_out.rds"))
+
+validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
+                   readRDS("input_data/domestic_migration/2019/temp_domestic_migration_in.rds") %>%
+                     filter_to_LAs())
+
+validate_same_geog(readRDS("input_data/mye/2019/temp_ons_popn.rds"),
+                   readRDS("input_data/domestic_migration/2019/temp_domestic_migration_out.rds") %>%
+                     filter_to_LAs())

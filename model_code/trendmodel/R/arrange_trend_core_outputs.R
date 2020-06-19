@@ -30,12 +30,11 @@
 arrange_trend_core_outputs <- function(projection,
                                        population, births, deaths, int_out, int_in, dom_in, dom_out,
                                        fertility_rates, mortality_rates,
-                                       int_out_rates, int_in_flows, domestic_rates,
+                                       int_out_rates, int_in_flows,
                                        first_proj_yr, last_proj_yr){
   
   region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
-
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_int_out <- list(int_out %>% filter(year < first_proj_yr))
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
@@ -91,7 +90,5 @@ arrange_trend_core_outputs <- function(projection,
               natural_change = regional_data$proj_natural_change,
               fertility_rates = fertility_rates,
               mortality_rates = mortality_rates,
-              int_out_rates = int_out_rates,
-              domestic_rates = domestic_rates))
-
+              int_out_rates = int_out_rates))
 }

@@ -19,5 +19,10 @@ source("input_data_scripts/constraints/npp_2016_constraint.R")
 source("input_data_scripts/constraints/npp_2018_constraint.R")
 source("input_data_scripts/households/household_model_inputs.R")
 source("input_data_scripts/mye/gla_mye_2018.R")
-source("input_data_scripts/migration/variant_migration_rates.R")
+source("input_data_scripts/mye/gla_mye_2016.R")
 
+#Iterim 2019 MYE & components
+source("input_data_scripts/mye/initialize_mye_2019.R")
+
+source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
+source("input_data_scripts/migration/pre-calculate_international_in_flows.R")
