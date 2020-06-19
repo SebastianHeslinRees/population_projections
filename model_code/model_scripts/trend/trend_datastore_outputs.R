@@ -44,23 +44,25 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
   
+  components <- left_join(popn, get_gss_names(), by="gss_code") %>%
+    rename(borough = gss_name,
+           population = popn) %>%
+    left_join(births, by = c("gss_code", "year")) %>%
+    left_join(deaths, by = c("gss_code", "year")) %>%
+    left_join(int_in, by = c("gss_code", "year")) %>%
+    left_join(int_out, by = c("gss_code", "year")) %>%
+    mutate(int_net = int_in - int_out) %>%
+    left_join(dom_in, by = c("gss_code", "year")) %>%
+    left_join(dom_out, by = c("gss_code", "year")) %>%
+    mutate(dom_net = dom_in - dom_out) %>%
+    mutate(borough = recode(borough, "London" = "London (total)"))
+  
   if(!is.null(upc)){
     upc <- get_component_datastore(upc, "upc")
     
-    components <- left_join(popn, get_gss_names(), by="gss_code") %>%
-      rename(borough = gss_name,
-             population = popn) %>%
-      left_join(births, by = c("gss_code", "year")) %>%
-      left_join(deaths, by = c("gss_code", "year")) %>%
-      left_join(int_in, by = c("gss_code", "year")) %>%
-      left_join(int_out, by = c("gss_code", "year")) %>%
-      mutate(int_net = int_in - int_out) %>%
-      left_join(dom_in, by = c("gss_code", "year")) %>%
-      left_join(dom_out, by = c("gss_code", "year")) %>%
+    components <- components %>% 
       left_join(upc, by = c("gss_code", "year")) %>% 
-      mutate(dom_net = dom_in - dom_out) %>%
       mutate(total_change = births - deaths + int_net + dom_net + upc) %>%
-      mutate(borough = recode(borough, "London" = "London (total)")) %>%
       select(gss_code, borough, year,
              population, births, deaths,
              int_in, int_out, int_net,
@@ -71,19 +73,8 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     
   } else {
     
-    components <- left_join(popn, get_gss_names(), by="gss_code") %>%
-      rename(borough = gss_name,
-             population = popn) %>%
-      left_join(births, by = c("gss_code", "year")) %>%
-      left_join(deaths, by = c("gss_code", "year")) %>%
-      left_join(int_in, by = c("gss_code", "year")) %>%
-      left_join(int_out, by = c("gss_code", "year")) %>%
-      mutate(int_net = int_in - int_out) %>%
-      left_join(dom_in, by = c("gss_code", "year")) %>%
-      left_join(dom_out, by = c("gss_code", "year")) %>%
-      mutate(dom_net = dom_in - dom_out) %>%
+    components <- components %>% 
       mutate(total_change = births - deaths + int_net + dom_net) %>%
-      mutate(borough = recode(borough, "London" = "London (total)")) %>%
       select(gss_code, borough, year,
              population, births, deaths,
              int_in, int_out, int_net,

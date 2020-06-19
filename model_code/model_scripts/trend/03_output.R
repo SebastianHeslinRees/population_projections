@@ -11,7 +11,7 @@ output_projection <- function(projection, output_dir, write_excel, n_csv_element
   
   #upc
   if(!is.null(projection$upc)){
-    projection$upc <- reorder_for_output(reorder_for_output)
+    projection$upc <- reorder_for_output(projection$upc)
     saveRDS(projection$upc, paste0(output_dir, "upc.rds"), compress = "gzip")
   }
  
