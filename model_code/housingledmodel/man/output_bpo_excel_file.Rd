@@ -2,15 +2,14 @@
 % Please edit documentation in R/output_bpo_excel_file.R
 \name{output_bpo_excel_file}
 \alias{output_bpo_excel_file}
-\title{Process a standard bpo template csv file into 2 rds files}
+\title{Create the BPO excel output}
 \usage{
 output_bpo_excel_file(
   data,
   output_dir,
   projection_name,
-  small_area_dev_trajectory_path,
-  borough_dev_trajectory_path,
-  bpo_gss_code
+  bpo_gss_code,
+  file_suffix = "_BPO_2018.xlsx"
 )
 }
 \arguments{
@@ -20,16 +19,11 @@ output_bpo_excel_file(
 
 \item{projection_name}{The name of the output Excel file}
 
-\item{small_area_dev_trajectory_path}{The path to the ward-level development
-trajectory in rds format}
-
-\item{borough_dev_trajectory_path}{The path to the borough-level development
-trajectory in rds format}
-
 \item{bpo_gss_code}{The gss code of the bpo projection}
+
+\item{file_suffix}{A string to append to the end of the filename}
 }
 \description{
-Take a standard ward-level csv bpo template and create 2
-rds files - 1 ward and 1 borough - where additional data
-not contained in the template is taken from the SHLAA
+Process population, components and developmnet data and place it into an
+Excel template.
 }

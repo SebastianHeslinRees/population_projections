@@ -9,10 +9,13 @@ run_borough_and_ward_projection(
   dev_trajectory_path,
   small_area_dev_trajectory_path,
   first_proj_yr,
-  final_proj_yr,
+  last_proj_yr,
   bpo = FALSE,
   housing_led_params = list(),
-  small_area_params = list()
+  small_area_params = list(),
+  fertility_scenario,
+  ldd_final_yr,
+  constrain_projection
 )
 }
 \arguments{
@@ -34,7 +37,7 @@ need to be specified as well.}
 
 \item{first_proj_year}{Integer. First year of projection.}
 
-\item{final_proj_year}{Integer. Last year of projection.}
+\item{last_proj_year}{Integer. Last year of projection.}
 }
 \description{
 Run the housing led and ward models with parametrised inputs

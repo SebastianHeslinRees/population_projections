@@ -9,7 +9,7 @@ arrange_housing_led_core_outputs(
   projection,
   trend_projection,
   first_proj_yr,
-  final_proj_yr
+  last_proj_yr
 )
 }
 \arguments{
@@ -17,9 +17,9 @@ arrange_housing_led_core_outputs(
 
 \item{first_proj_yr}{Numeric. First projection year}
 
-\item{trend_rpojection}{A list. The output flist rom the \code{trend_core} function}
-
 \item{last_proj_yr}{Numeric. Last projection year}
+
+\item{trend_rpojection}{A list. The output flist rom the \code{trend_core} function}
 }
 \value{
 A list where each element is a data frame containing data for each year

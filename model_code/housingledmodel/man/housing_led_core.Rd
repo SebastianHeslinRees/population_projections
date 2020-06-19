@@ -19,7 +19,8 @@ housing_led_core(
   ahs_cap,
   ahs_method,
   ldd_final_yr,
-  constrain_projection
+  constrain_projection,
+  actual_births
 )
 }
 \arguments{

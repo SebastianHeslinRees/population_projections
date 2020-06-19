@@ -8,11 +8,14 @@ run_bpo_projection(
   bpo_name,
   shlaa_first_yr = 2042,
   first_proj_yr = 2019,
-  final_proj_yr = 2050,
+  last_proj_yr = 2050,
   dev_first_yr = 2019,
   ldd_final_yr = 2018,
   bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/",
-  migration_scenario
+  migration_scenario,
+  csv_name = bpo_name,
+  housing_led_params = list(),
+  fertility_scenario = "average"
 )
 }
 \arguments{
@@ -24,7 +27,7 @@ Effectively the final year of the supplied trajectory plus 1. \code{Default 2042
 
 \item{first_proj_yr}{Numeric. The first projection year \code{default 2019}}
 
-\item{final_proj_yr}{Numeric. The final projection year \code{default 2050}}
+\item{last_proj_yr}{Numeric. The final projection year \code{default 2050}}
 
 \item{dev_first_yr}{Numeric. The first year for which development data is provided. \code{Default 2019}.}
 
