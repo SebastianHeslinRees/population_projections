@@ -5,9 +5,8 @@
 #' @param excel_file_name Output file name. With or without xslx suffix.
 #'
 #' @import dplyr
-#' @importFrom tidyr spread
-#' @importFrom data.table fwrite
-#' @importFrom rprojroot find_root_file is_git_root
+#' @import xlsx
+#' @import popmodules
 
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
                                     output_dir, excel_file_name){

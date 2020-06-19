@@ -18,7 +18,6 @@ arrange_trend_core_outputs(
   mortality_rates,
   int_out_rates,
   int_in_flows,
-  domestic_rates,
   first_proj_yr,
   last_proj_yr
 )
@@ -48,11 +47,11 @@ arrange_trend_core_outputs(
 
 \item{int_in_flows}{Dataframe. Model internation in migration flows}
 
-\item{domestic_rates}{Dataframe. Model domestic migration rates}
-
 \item{first_proj_yr}{Numeric. First projection year}
 
 \item{last_proj_yr}{Numeric. Last projection year}
+
+\item{domestic_rates}{Dataframe. Model domestic migration rates}
 }
 \value{
 A list where each element is a data frame containing data for each year

@@ -4,7 +4,13 @@
 \alias{household_model_outputs}
 \title{Household model outputs}
 \usage{
-household_model_outputs(model_output, model, output_dir, write_excel)
+household_model_outputs(
+  model_output,
+  model,
+  output_dir,
+  write_excel,
+  projection_name
+)
 }
 \arguments{
 \item{model_output}{The household model output, as created by

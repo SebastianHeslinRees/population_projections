@@ -14,7 +14,8 @@ trend_core(
   int_out_method,
   constraints = NULL,
   upc = NULL,
-  projection_year
+  projection_year,
+  region_lookup
 )
 }
 \arguments{

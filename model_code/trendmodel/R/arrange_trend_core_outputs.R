@@ -26,6 +26,7 @@
 #'
 #' @importFrom data.table rbindlist
 #' @import dplyr
+#' @import popmodules
 
 arrange_trend_core_outputs <- function(projection,
                                        population, births, deaths, int_out, int_in, dom_in, dom_out,

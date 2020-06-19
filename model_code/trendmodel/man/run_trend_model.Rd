@@ -2,7 +2,8 @@
 % Please edit documentation in R/run_trend_model.R
 \name{run_trend_model}
 \alias{run_trend_model}
-\title{Run a trend model config file to produce a population projection}
+\title{Run a trend model config file to produce a population projection
+Previously 00_control}
 \usage{
 run_trend_model(config_list)
 }

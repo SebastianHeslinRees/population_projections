@@ -13,8 +13,7 @@ trend_datastore_outputs(
   dom_in,
   dom_out,
   output_dir,
-  excel_file_name,
-  write_excel
+  excel_file_name
 )
 }
 \arguments{
@@ -22,9 +21,7 @@ trend_datastore_outputs(
 
 \item{output_dir}{Path to output directory.}
 
-\item{excel_file_name}{Output file}
-
-\item{write_excel}{Logical. Whether to create Excel output files.}
+\item{excel_file_name}{Output file name. With or without xslx suffix.}
 }
 \description{
 Trend Model Datastore outputs

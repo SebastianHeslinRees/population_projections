@@ -4,7 +4,13 @@
 \alias{output_projection}
 \title{Output a trend population projection}
 \usage{
-output_projection(projection, output_dir, write_excel, n_csv_elements)
+output_projection(
+  projection,
+  output_dir,
+  write_excel,
+  n_csv_elements,
+  projection_name
+)
 }
 \arguments{
 \item{projection}{A list. The model outputs from \code{arrange_trend_core_outputs}}
@@ -14,7 +20,8 @@ output_projection(projection, output_dir, write_excel, n_csv_elements)
 \item{write_excel}{Logical. Should the Excel outputs be written}
 
 \item{n_csv_elements}{Numeric. The function will output csv files for elements
-1:\code{n_csv_elements} of the \code{projection} list.}
+1:\code{n_csv_elements} of the \code{projection} list.
+@param projection_name String. Name of the projection.}
 }
 \description{
 Write csv, rds and xlsx model outputs from the \code{trend_core} cohort component
