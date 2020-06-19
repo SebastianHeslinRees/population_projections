@@ -1,6 +1,7 @@
 # config file for model runs
 
 devtools::load_all("model_code/popmodules")
+devtools::load_all("model_code/trendmodel")
 
 first_proj_yr <- 2017
 n_proj_yr <- 25
@@ -177,6 +178,6 @@ this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 
 # Run the model
-source("model_code/model_scripts/trend/00_control.R")
+
 projection <- run_trend_model(config_list)
 
