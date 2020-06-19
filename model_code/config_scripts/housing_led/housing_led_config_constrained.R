@@ -1,7 +1,7 @@
 devtools::load_all("model_code/popmodules")
 
 #Setup
-projection_name <- "2018_based_shlaa_dev"
+projection_name <- "test"
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
@@ -13,17 +13,21 @@ external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 constrain_projection <- TRUE
 first_proj_yr <- 2019
-final_proj_yr <- 2020
+final_proj_yr <- 2050
 ahs_cap_year <- 2019
 ahs_method <- 0
 
 ldd_final_yr <- 2018
+last_data_yr <- 2018
 
 output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
 domestic_transition_yr <- NULL
 domestic_initial_rate_path <- paste0(external_trend_path,"domestic_rates.rds")
 domestic_long_term_rate_path <- NULL
+
+additional_births_path <- "input_data/fertility/births_2019.rds"
+fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london.rds"
 
 #------------------
 #Setup config list
@@ -40,12 +44,16 @@ config_list <- list(
   first_proj_yr = first_proj_yr,
   final_proj_yr = final_proj_yr,
   ldd_final_yr = ldd_final_yr,
+  last_data_yr = last_data_yr,
   output_dir = output_dir,
   constrain_projection = constrain_projection,
   domestic_transition_yr = domestic_transition_yr,
   domestic_initial_rate_path = domestic_initial_rate_path,
   domestic_long_term_rate_path = domestic_long_term_rate_path,
-  ahs_method = ahs_method)
+  ahs_method = ahs_method,
+  additional_births_path = additional_births_path,
+  fertility_rates_path = fertility_rates_path)
+
 
 #---------------------
 #run projection

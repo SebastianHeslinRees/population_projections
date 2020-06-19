@@ -11,6 +11,8 @@ run_small_area_model <- function(config_list){
                        "small_area_communal_est_popn_path",
                        "small_area_births_backseries_path",
                        "small_area_deaths_backseries_path",
+                       "small_area_births_sya_path",
+                       "small_area_deaths_sya_path",
                        "small_area_ldd_data_path",
                        "small_area_dev_trajectory_path",
                        "adults_per_dwelling_path",
@@ -28,7 +30,7 @@ run_small_area_model <- function(config_list){
                        "ldd_final_yr",
                        "projection_type")
   
-  if(!identical(sort(names(config_list)),  sort(expected_config))) stop("configuration list is not as expected")
+  validate_config_list(config_list, expected_config)
   
   read_small_area_inputs <- function(path){
     df <- readRDS(path)
@@ -51,6 +53,9 @@ run_small_area_model <- function(config_list){
   deaths <- read_small_area_inputs(config_list$small_area_deaths_backseries_path)
   ldd_data <- read_small_area_inputs(config_list$small_area_ldd_data_path)
   dwelling_trajectory <- read_small_area_inputs(config_list$small_area_dev_trajectory_path)
+  
+  small_area_births_sya <- read_small_area_inputs(config_list$small_area_births_sya_path)
+  small_area_deaths_sya <- read_small_area_inputs(config_list$small_area_deaths_sya_path)
   
   #----------
   
@@ -214,14 +219,12 @@ run_small_area_model <- function(config_list){
   small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
   
   projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
-                                                config_list$first_proj_yr, config_list$final_proj_yr)
+                                                config_list$first_proj_yr, config_list$final_proj_yr,
+                                                small_area_births_sya, small_area_deaths_sya)
   
   projection <- output_small_area_projection(projection = projection,
                                              output_dir = small_area_output_dir,
                                              projection_type = config_list$projection_type,
-                                             births = births,
-                                             deaths = deaths,
-                                             first_proj_yr = config_list$first_proj_yr,
                                              lookup = small_area_to_district)
   
   return(projection)

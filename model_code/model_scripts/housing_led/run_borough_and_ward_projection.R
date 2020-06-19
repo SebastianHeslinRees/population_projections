@@ -22,11 +22,14 @@ run_borough_and_ward_projection <- function(projection_name,
                                             final_proj_yr,
                                             bpo=FALSE,
                                             housing_led_params = list(),
-                                            small_area_params = list()) {
+                                            small_area_params = list(),
+                                            fertility_scenario,
+                                            ldd_final_yr,
+                                            constrain_projection) {
   
   devtools::load_all("model_code/popmodules")
   source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
-
+  
   tm <- Sys.time()
   #Setup
   
@@ -40,14 +43,28 @@ run_borough_and_ward_projection <- function(projection_name,
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
   ahs_cap_year <- 2019
-  ldd_final_yr <- 2018
-  ahs_method = 0
+  
+  ahs_method <- 0
+  last_data_yr <- 2018
+  
+  additional_births_path <- "input_data/fertility/births_2019.rds"
+  
+  if(fertility_scenario == "average"){
+    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london.rds"
+  }
+  
+  if(fertility_scenario == "trend"){
+    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_trend.rds"
+  }
   
   if(bpo==FALSE){
     output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   } else {
     output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
+  
+  domestic_transition_yr <- NULL
+  domestic_long_term_rate_path <- NULL
   
   list2env(housing_led_params, environment())
   
@@ -72,7 +89,10 @@ run_borough_and_ward_projection <- function(projection_name,
     domestic_transition_yr = domestic_transition_yr,
     domestic_initial_rate_path = domestic_initial_rate_path,
     domestic_long_term_rate_path = domestic_long_term_rate_path,
-    ahs_method = ahs_method)
+    ahs_method = ahs_method,
+    additional_births_path = additional_births_path,
+    fertility_rates_path = fertility_rates_path,
+    last_data_yr = last_data_yr)
   
   #---------------------
   #run projection
@@ -88,6 +108,8 @@ run_borough_and_ward_projection <- function(projection_name,
   small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rds"
   small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
   small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
+  small_area_births_sya_path <- "input_data/small_area_model/ward_sya_births.rds"
+  small_area_deaths_sya_path <- "input_data/small_area_model/ward_sya_deaths.rds"
   
   adults_per_dwelling_path <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
   small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
@@ -115,6 +137,8 @@ run_borough_and_ward_projection <- function(projection_name,
                            small_area_deaths_backseries_path = small_area_deaths_backseries_path,
                            small_area_ldd_data_path = small_area_ldd_data_path,
                            small_area_dev_trajectory_path = small_area_dev_trajectory_path,
+                           small_area_births_sya_path = small_area_births_sya_path,
+                           small_area_deaths_sya_path = small_area_deaths_sya_path,
                            
                            adults_per_dwelling_path = adults_per_dwelling_path,
                            small_area_to_district_path = small_area_to_district_path,
@@ -150,9 +174,7 @@ run_borough_and_ward_projection <- function(projection_name,
     output_bpo_excel_file(data = ward_projection[["csvs"]],
                           output_dir = config_list$output_dir,
                           projection_name = config_list$projection_name,
-                          small_area_dev_trajectory_path = ward_config_list$small_area_dev_trajectory_path,
-                          borough_dev_trajectory_path = config_list$dev_trajectory_path,
-                          bpo = bpo)
+                          bpo_gss_code = bpo)
   }
   
   #Finish

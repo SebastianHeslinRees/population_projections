@@ -37,7 +37,7 @@ lsoa_births <- readRDS(lsoa_births_path) %>%
 
 ward_births <- left_join(lsoa_births, lsoa_to_ward, by="gss_code_lsoa") %>%
   filter(gss_code_ward %in% london_wards) %>%
-  .aggregate_city_wards("births" ) %>%
+  aggregate_city_wards("births" ) %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, age_group) %>%
   summarise(births = sum(births)) %>%
@@ -75,7 +75,7 @@ lsoa_deaths <- readRDS(lsoa_deaths_path) %>%
 
 ward_deaths <- left_join(lsoa_deaths, lsoa_to_ward, by="gss_code_lsoa") %>%
   filter(gss_code_ward %in% london_wards) %>%
-  .aggregate_city_wards("deaths") %>%
+  aggregate_city_wards("deaths") %>%
   dtplyr::lazy_dt() %>%
   group_by(year, gss_code_ward, sex, age_group) %>%
   summarise(deaths = sum(deaths)) %>%
@@ -94,3 +94,93 @@ if(length(unique(msoa_deaths$gss_code_msoa))!=983){message("Warning: Wrong numbe
 
 saveRDS(ward_deaths, "input_data/small_area_model/ward_deaths.rds")
 saveRDS(msoa_deaths, "input_data/small_area_model/msoa_deaths.rds")
+
+ward_la_lookup <- readRDS("input_data/lookup/2011_ward_to_district.rds")
+msoa_la_lookup <- readRDS("input_data/lookup/msoa_to_district.rds")
+
+#Single year ward births
+births_sya_ward <- ward_births %>%
+  left_join(ward_la_lookup, by="gss_code_ward") %>%
+  group_by(year, gss_code,gss_code_ward) %>%
+  summarise(male = sum(births)*(105/205),
+            female = sum(births)*(100/205)) %>%
+  tidyr::pivot_longer(c("male","female"), names_to = "sex", values_to = "births") %>%
+  mutate(age = 0) %>% 
+  select(year, gss_code, gss_code_ward, sex, age, births) %>%
+  as.data.frame() 
+
+saveRDS(births_sya_ward, "input_data/small_area_model/ward_sya_births.rds")
+
+
+#Single year ward deaths
+deaths_sya_ward <- ward_deaths %>%
+  mutate(min = substr(age_group,1,2),
+         min = ifelse(min == "1_", "1",
+                      ifelse(min == "5_", "5",
+                             min)),
+         min = as.numeric(min)) %>%
+  mutate(max = case_when(min == 0 ~ 0,
+                         min == 1 ~ 4,
+                         min == 85 ~ 90,
+                         TRUE ~ min + 4)) %>%
+  left_join(ward_la_lookup, by="gss_code_ward")
+
+borough_deaths <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
+  select(gss_code, year, sex, age, deaths)
+
+past_deaths <- list()
+for(i in unique(deaths_sya_ward$age_group)){
+  
+  a <- filter(deaths_sya_ward, age_group ==i)
+  past_deaths[[i]] <- distribute_within_age_band(a, borough_deaths, "deaths", "deaths",
+                                                 unique(a$min), unique(a$max),
+                                                 col_aggregation=c("year","gss_code","sex"))
+}
+
+deaths_sya_ward <- data.table::rbindlist(past_deaths) %>%
+  as.data.frame() %>%
+  select(year, gss_code, gss_code_ward, sex, age, deaths)
+
+saveRDS(deaths_sya_ward, "input_data/small_area_model/ward_sya_deaths.rds")
+
+#Single year msoa births
+births_sya_msoa <- msoa_births %>%
+  left_join(msoa_la_lookup, by="gss_code_msoa") %>%
+  group_by(year, gss_code, gss_code_msoa) %>%
+  summarise(male = sum(births)*(105/205),
+            female = sum(births)*(100/205)) %>%
+  tidyr::pivot_longer(c("male","female"), names_to = "sex", values_to = "births") %>%
+  mutate(age = 0) %>% 
+  select(year, gss_code, gss_code_msoa, sex, age, births) %>%
+  as.data.frame() 
+
+saveRDS(births_sya_msoa, "input_data/small_area_model/msoa_sya_births.rds")
+
+
+#Single year msoa deaths
+deaths_sya_msoa <- msoa_deaths %>%
+  mutate(min = substr(age_group,1,2),
+         min = ifelse(min == "1_", "1",
+                      ifelse(min == "5_", "5",
+                             min)),
+         min = as.numeric(min)) %>%
+  mutate(max = case_when(min == 0 ~ 0,
+                         min == 1 ~ 4,
+                         min == 85 ~ 90,
+                         TRUE ~ min + 4)) %>%
+  left_join(msoa_la_lookup, by="gss_code_msoa")
+
+past_deaths <- list()
+for(i in unique(deaths_sya_msoa$age_group)){
+  
+  a <- filter(deaths_sya_msoa, age_group ==i)
+  past_deaths[[i]] <- distribute_within_age_band(a, borough_deaths, "deaths", "deaths",
+                                                 unique(a$min), unique(a$max),
+                                                 col_aggregation=c("year","gss_code","sex"))
+}
+
+deaths_sya_msoa <- data.table::rbindlist(past_deaths) %>%
+  as.data.frame() %>%
+  select(year, gss_code, gss_code_msoa, sex, age, deaths)
+
+saveRDS(deaths_sya_msoa, "input_data/small_area_model/msoa_sya_deaths.rds")

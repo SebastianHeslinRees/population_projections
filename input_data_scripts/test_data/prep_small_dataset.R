@@ -11,14 +11,12 @@ deaths_mye_path <-  "input_data/mye/2018/deaths_ons.rds"
 births_mye_path <-  "input_data/mye/2018/births_ons.rds"
 int_out_mye_path <-  "input_data/mye/2018/international_out_gla_2019-11-13.rds"
 int_in_mye_path <-  "input_data/mye/2018/international_in_gla_2019-11-13.rds"
-dom_out_mye_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
-dom_in_mye_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"
 
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves.rds"
+mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2016.rds"
 mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves.rds"
+fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2016.rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 
 # popn_constraint_path <- "input_data/constraints/npp_2018_population_constraint.rds"

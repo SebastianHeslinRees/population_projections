@@ -149,10 +149,9 @@ smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_m
                stringsAsFactors = FALSE)
   }
 
-  laa <- combine_data(1)
-
-  smoothed_data <- lapply(seq_along(coefs),combine_data) %>%
+ smoothed_data <- lapply(seq_along(coefs),combine_data) %>%
     rbindlist() %>%
+    data.frame() %>%
     mutate(sex="female",ID=paste0(age,gss_code,sex)) %>%
     mutate(fert_rate=ifelse(fert_rate<0,0,fert_rate))
 
@@ -160,7 +159,8 @@ smooth_fertility <- function(asfr_structure, reproducible = TRUE, age_range_to_m
     mutate(ID=paste0(age,gss_code,sex)) %>%
     filter(!ID %in% smoothed_data$ID) %>%
     rbind(smoothed_data) %>%
-    select(-ID)
+    select(-ID) %>%
+    data.frame()
 
   LA_status <- list(fitted_pass1=unlist(success_GSS), fitted_pass2=unlist(success_GSS2), not_fitted=unlist(failed_GSS))
 

@@ -2,8 +2,7 @@
 #'
 #' @param population,births,deaths,int_in,int_out,dom_in,dom_out Data frames with population and component data.
 #' @param output_dir Path to output directory.
-#' @param excel_file_name Output file
-#' @param write_excel Logical. Whether to create Excel output files.
+#' @param excel_file_name Output file name. With or without xslx suffix.
 #'
 #' @import dplyr
 #' @importFrom tidyr spread
@@ -11,53 +10,33 @@
 #' @importFrom rprojroot find_root_file is_git_root
 
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
-                              output_dir, excel_file_name, write_excel){
-
-  wrangle <- function(x){
-    x <- filter(x, year >= 2011) %>%
-      tidyr::spread(year, popn)
+                                    output_dir, excel_file_name){
+  
+  #datastore directory
+  if(!grepl("/$", output_dir)){ output_dir <- paste0(output_dir, "/") }
+  datastore_dir <- paste0(output_dir,"datastore")
+  dir.create(datastore_dir, recursive = T, showWarnings = F)
+  
+  #excel file name
+  if(substr(excel_file_name, nchar(excel_file_name)-4, nchar(excel_file_name))!=".xlsx"){
+    excel_file_name <- paste0(excel_file_name,".xlsx")
   }
-
-  group_by_london <- function(x, data_col){
-    london <- filter(x, substr(gss_code,1,3)=="E09") %>%
-      mutate(gss_code = "E12000007") %>%
-      rename(value = data_col) %>%
-      group_by(year, gss_code, sex, age) %>%
-      summarise(value = sum(value)) %>%
-      ungroup() %>%
-      rename(!!data_col := value)
-  }
-
-  population <- filter(population, substr(gss_code,1,3)=="E09") %>%
-    rbind(group_by_london(population, "popn"))
-
+  
+  #process data
   female <- filter(population, sex == "female") %>%
-    wrangle()
-
-  male <- filter(population, sex == "male")%>%
-    wrangle()
-
+    wrangle_datastore_outputs()
+  
+  male <- filter(population, sex == "male") %>%
+    wrangle_datastore_outputs()
+  
   persons <- population %>%
     mutate(sex = "persons") %>%
     group_by(year, gss_code, sex, age) %>%
     summarise(popn = sum(popn)) %>%
-    ungroup()%>%
-    wrangle()
-
+    ungroup() %>%
+    wrangle_datastore_outputs()
+  
   #CoC
-
-  get_component_datastore <- function(component, data_col){
-
-    component <- filter(component, substr(gss_code,1,3)=="E09") %>%
-      rbind(group_by_london(component, data_col)) %>%
-      rename(value = data_col) %>%
-      group_by(gss_code, year) %>%
-      summarise(value = sum(value)) %>%
-      ungroup() %>%
-      rename(!!data_col := value) %>%
-      filter(year >= 2011)
-  }
-
   births <- get_component_datastore(births, "births")
   deaths <- get_component_datastore(deaths, "deaths")
   int_in <- get_component_datastore(int_in, "int_in")
@@ -65,10 +44,11 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   dom_in <- get_component_datastore(dom_in, "dom_in")
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
-
-  gss_names <- get_gss_names()
-
-  components <- left_join(popn, gss_names, by="gss_code") %>%
+  
+  
+  components <- left_join(popn, get_gss_names(), by="gss_code") %>%
+    rename(borough = gss_name,
+           population = popn) %>%
     left_join(births, by = c("gss_code", "year")) %>%
     left_join(deaths, by = c("gss_code", "year")) %>%
     left_join(int_in, by = c("gss_code", "year")) %>%
@@ -78,143 +58,69 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     left_join(dom_out, by = c("gss_code", "year")) %>%
     mutate(dom_net = dom_in - dom_out) %>%
     mutate(total_change = births - deaths + int_net + dom_net) %>%
-    select(gss_code, gss_name, year,
-           population = popn, births, deaths,
+    mutate(borough = recode(borough, "London" = "London (total)")) %>%
+    select(gss_code, borough, year,
+           population, births, deaths,
            int_in, int_out, int_net,
            dom_in, dom_out, dom_net,
-           total_change)
-
+           total_change) %>%
+    reorder_for_output() %>%
+    as.data.frame()
+  
   #round data for output
   idx <- sapply(components, class)=="numeric"
   components[, idx] <- lapply(components[, idx], round, digits=3)
-
-  #write
-  if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
-  datastore_dir <- paste0(output_dir,"datastore")
-  dir.create(datastore_dir, recursive = T, showWarnings = F)
-
-  data.table::fwrite(persons, paste0(datastore_dir,"/persons.csv"))
-  data.table::fwrite(female, paste0(datastore_dir,"/females.csv"))
-  data.table::fwrite(male, paste0(datastore_dir,"/males.csv"))
-  data.table::fwrite(components, paste0(datastore_dir,"/components.csv"))
-
+  
   #excel
-  if(write_excel) {
-    message("excel process running")
-
-    datastore_folder <- rprojroot::find_root_file(datastore_dir, criterion = rprojroot::is_git_root)
-    datastore_folder <- gsub("/", "\\\\", datastore_folder)
-    templates_folder <- rprojroot::find_root_file("documentation", "templates", criterion = rprojroot::is_git_root)
-    templates_folder <- gsub("/", "\\\\", templates_folder)
-    run_excel_vba <- data.frame(a = paste0("start Excel.exe \"", templates_folder, "\\excel_template.xlsm"))
-    data.table::fwrite(run_excel_vba, "documentation/templates/run_excel_vba.bat", col.names=F, quote=F)
-
-    bas_file <- "documentation/templates/datastoreVBA.bas"
-    vba <- create_VBA_script(datastore_folder, excel_file_name)
-    data.table::fwrite(vba, bas_file, col.names=F, quote=F)
-    file.remove("documentation/templates/temp_file.xlsm")
-    shell.exec(rprojroot::find_root_file("documentation","templates","run_excel_vba.bat", criterion = rprojroot::is_git_root))
-
-  }
+  wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template.xlsx")
+  wb_sheets<- xlsx::getSheets(wb)
+  
+  xlsx::addDataFrame(persons, wb_sheets$persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  xlsx::addDataFrame(female, wb_sheets$females, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  xlsx::addDataFrame(male, wb_sheets$males, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  xlsx::addDataFrame(components, wb_sheets$`components of change`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
+  
+  #Write xlsx file
+  wb_filename <- paste(datastore_dir,excel_file_name,sep="/")
+  xlsx::saveWorkbook(wb, wb_filename)
 }
 
-#--------------------------------------
+#--------------------------------------------
 
-create_VBA_script <- function(datastore_dir, file_name){
-
-  x <- data.frame(a = c(
-
-    "Attribute VB_Name = \"datastoreVBA\"",
-
-    "Sub run_it()",
-
-    "Set This_wkb = Application.ThisWorkbook",
-    "Set wkb = Workbooks.Add",
-    "Call run_open",
-
-    "Application.DisplayAlerts = False",
-    "Worksheets(\"Sheet1\").Delete",
-    "Application.DisplayAlerts = True",
-
-    paste0("wkb.SaveAs fileName:=\"",datastore_dir,"\\",file_name,"\""),
-    "wkb.Close SaveChanges:=False",
-
-    "End Sub",
-
-    "Sub run_open()",
-
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\persons.csv\", \"persons\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\females.csv\", \"females\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\males.csv\", \"males\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\components.csv\", \"components of change\")"),
-
-    "End Sub",
-    "Sub open_copy_csv(fileName, tabName)",
-
-    "Dim wbkS As Workbook",
-    "Dim wshS As Worksheet",
-    "Dim wshT As Worksheet",
-
-    "Set wshT = Worksheets.Add(After:=Worksheets(Worksheets.Count))",
-    "Set wbkS = Workbooks.Open(fileName:=fileName)",
-    "Set wshS = wbkS.Worksheets(1)",
-
-    "wshS.UsedRange.Copy Destination:=wshT.Range(\"A1\")",
-    "wshT.Name = tabName",
-    "wbkS.Close SaveChanges:=False",
-
-    "End Sub"))
-
+wrangle_datastore_outputs <- function(x){
+  
+  years <- max(min(x$year), 2011):max(x$year) %>%
+    as.character()
+  
+  wrangled <- filter(x, year >= 2011) %>%
+    filter_to_london() %>%
+    left_join(get_gss_names(), by = "gss_code") %>%
+    mutate(gss_name = recode(gss_name, "London" = "London (total)")) %>%
+    rename(borough = gss_name) %>%
+    select(year, gss_code, borough, sex, age, popn) %>%
+    mutate(popn = round(popn, digits=3)) %>%
+    tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    select_at(c("gss_code", "borough", "age", "sex", years)) %>%
+    arrange(gss_code, sex, age) %>%
+    reorder_for_output() %>%
+    as.data.frame()
+  
 }
 
-#--------------------------------------
-
-create_households_VBA_script <- function(datastore_dir, model){
-
-  x <- data.frame(a = c(
-
-    "Attribute VB_Name = \"datastoreVBA_households\"",
-
-    "Sub run_it()",
-
-    "Set This_wkb = Application.ThisWorkbook",
-    "Set wkb = Workbooks.Add",
-    "Call run_open",
-
-    "Application.DisplayAlerts = False",
-    "Worksheets(\"Sheet1\").Delete",
-    "Application.DisplayAlerts = True",
-
-    paste0("wkb.SaveAs fileName:=\"",datastore_dir,"\\",model,"_households\""),
-    "wkb.Close SaveChanges:=False",
-
-    "End Sub",
-
-    "Sub run_open()",
-
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_stage1_households.csv\", \"stage 1 households\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_stage2_households.csv\", \"stage 2 households\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_detailed_hh_pop.csv\", \"household popn\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_detailed_ce_pop.csv\", \"communal est popn\")"),
-    paste0("Call open_copy_csv(\"",datastore_dir,"\\",model,"_household_summary.csv\", \"summary\")"),
-
-    "End Sub",
-
-    "Sub open_copy_csv(fileName, tabName)",
-
-    "Dim wbkS As Workbook",
-    "Dim wshS As Worksheet",
-    "Dim wshT As Worksheet",
-
-    "Set wshT = Worksheets.Add(After:=Worksheets(Worksheets.Count))",
-    "Set wbkS = Workbooks.Open(fileName:=fileName)",
-    "Set wshS = wbkS.Worksheets(1)",
-
-    "wshS.UsedRange.Copy Destination:=wshT.Range(\"A1\")",
-    "wshT.Name = tabName",
-    "wbkS.Close SaveChanges:=False",
-
-    "End Sub"))
-
+filter_to_london <- function(x){
+  filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
 }
 
+get_component_datastore <- function(component, data_col){
+  
+  component <- component %>% 
+    dtplyr::lazy_dt() %>%
+    filter(year >= 2011) %>%
+    filter_to_london() %>%
+    rename(value = !!data_col) %>%
+    group_by(gss_code, year) %>%
+    summarise(value = sum(value)) %>%
+    as.data.frame() %>%
+    rename(!!data_col := value) 
+  
+}

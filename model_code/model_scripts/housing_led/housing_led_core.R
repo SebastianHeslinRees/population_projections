@@ -12,11 +12,13 @@ housing_led_core <- function(start_population,
                              ahs_cap,
                              ahs_method,
                              ldd_final_yr,
-                             constrain_projection){
+                             constrain_projection,
+                             actual_births){
   
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
   
+  trend_projection <- lapply(trend_projection, filter_to_LAs)
   areas_with_no_housing_data <- lapply(trend_projection, function(x) filter(x, !x$gss_code %in% constrain_gss)) 
   trend_projection_national <- trend_projection
   trend_projection <- lapply(trend_projection, function(x) filter(x, x$gss_code %in% constrain_gss))
@@ -55,6 +57,14 @@ housing_led_core <- function(start_population,
     int_out <- trend_projection[['int_out']]
   }
   
+  #Overwrite births if there are actuals for the projection year
+  if(!is.null(actual_births)){
+    births <- trend_projection[['births']] %>%
+      select(year, gss_code, age, sex, births) %>% 
+      filter(!gss_code %in% actual_births$gss_code) %>%
+      rbind(actual_births)
+  }
+  
   initial_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(births,
                                                         trend_projection[['int_in']],
@@ -66,6 +76,7 @@ housing_led_core <- function(start_population,
     group_by(year, gss_code) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame()
+  
   
   #3. Calculate household population
   household_population <- dtplyr::lazy_dt(initial_population) %>%
@@ -105,7 +116,7 @@ housing_led_core <- function(start_population,
     
     if(is.null(ahs_cap)){
       set_ahs <- set_ahs %>%
-        mutate(ahs_cap = trend)
+        mutate(cap = trend)
     } else {
       set_ahs <- set_ahs %>%
         left_join(ahs_cap, by="gss_code")
@@ -228,7 +239,7 @@ housing_led_core <- function(start_population,
   dom_in <- rbind(adjusted_domestic_migration[['dom_in']], areas_with_no_housing_data[['dom_in']])
   dom_out <- rbind(adjusted_domestic_migration[['dom_out']], areas_with_no_housing_data[['dom_out']])
   
-  if(constrain_projection){
+  if(constrain_projection & !is.null(hma_list)){
     #10. Constrain total population
     constrained_population <- constrain_to_hma(popn =  unconstrained_population,
                                                constraint = hma_constraint,

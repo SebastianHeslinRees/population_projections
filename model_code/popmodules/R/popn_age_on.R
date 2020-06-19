@@ -25,7 +25,7 @@
 #'
 #' @param popn Data frame containing a cohort population.
 #' @param col_aggregation Character vector of columns in \code{popn} acting as
-#'   aggregation levels. Default c("year","gss_code","age","sex"). In the case
+#'   aggregation levels. Default \code{c("year","gss_code","age","sex")}. In the case
 #'   of multiple geography columns, only supply the highest resolution column;
 #'   other columns will be preserved.
 #' @param col_age String denoting the age column. Default "age".
@@ -39,9 +39,13 @@
 #'   levels for the population's ages. This is an optional validation tool that
 #'   runs an extra check to make sure all expected levels are present. Default
 #'   NULL.
-#' @param births Data frame. Births data at the same aggregation levels as
-#'   \code{popn} but coded to the lowest age band that can be joined to the
-#'   output with code{rbind}. Default \code{NULL}.
+#' @param births Data frame, 0 or \code{NULL}. Births data at the same
+#'   aggregation levels as \code{popn} but coded to the lowest age band that can
+#'   be joined to the output with \code{rbind}. If zero, then the output rows for
+#'   zero-year-olds, all of which are zero. These settings currently only work
+#'   when \code{col_aggregation} is set to the default
+#'   \code{c("year","gss_code","age","sex")}. If \code{NULL} then no
+#'   zero-year-olds are included in the output. Default \code{NULL}.
 #'
 #' @return A data frame containing the population with age advanced by one time
 #'   step (or age band). The lowest age will not be present in this output. Rows
@@ -74,7 +78,8 @@ popn_age_on <- function(popn,
                              col_age,
                              col_year,
                              timestep,
-                             template_age_levels)
+                             template_age_levels,
+                             births)
 
 
   # Standardise data
@@ -113,7 +118,7 @@ popn_age_on <- function(popn,
 
     # If age is numeric, increment age
     if(is.numeric(aged[[col_age]])) {
-      setkeyv(aged, col_age)
+      data.table::setkeyv(aged, col_age)
       max_age <- aged[, max(get(col_age))]
       aged[get(col_age) != max_age, (col_age) := get(col_age) + timestep]
     }
@@ -241,19 +246,38 @@ popn_age_on <- function(popn,
 
 
   #Add births
-  if(!is.null(births)){
+  if(!is.null(births)) {
 
-    births <- births %>%
-      filter(age == 0) %>%
-      rename(popn = births) %>%
-      select(names(aged))
+    if(is.numeric(births) && births == 0) {
+      # births <- dplyr::filter(aged, age == aged$age[[1]]) %>%
+      #   dplyr::mutate(age = 0, popn = 0)
+      #
+      # assert_that(setequal(aged$gss_code, births$gss_code),
+      #             msg = "popn_age_on failed to create a data frame of zero births. To be fair the method was pretty crude.")
+      #
+      # aged <- rbind(births, aged) %>%
+      #   dplyr::arrange(year, gss_code, age, sex) %>%
+      #   validate_population(col_aggregation = col_aggregation)
+      aged <- tidyr::complete(aged, year, gss_code, age = unique(!!popn$age), sex, fill = list(popn = 0)) %>%
+        as.data.frame()
 
-    common_years <- intersect(aged[["year"]], births[["year"]])
+      if(is.numeric(aged$age)) { # This is only really needed for the tests to work
+        aged <- mutate(aged, age = ifelse( age == min(age), 0, as.numeric(age)))
+      }
 
-    aged <- rbind(births, aged)%>%
-      filter(year %in% common_years) %>%
-      arrange(year, gss_code, age, sex)
+    } else {
 
+      births <- births %>%
+        dplyr::filter(age == 0) %>%
+        dplyr::rename(popn = births) %>%
+        dplyr::select(names(aged))
+
+      common_years <- intersect(aged[["year"]], births[["year"]])
+
+      aged <- rbind(births, aged)%>%
+        dplyr::filter(year %in% common_years) %>%
+        dplyr::arrange(year, gss_code, age, sex)
+    }
   }
 
   return(aged)
@@ -270,7 +294,8 @@ validate_popn_age_on_input <- function(popn,
                                        col_age,
                                        col_year,
                                        timestep,
-                                       template_age_levels) {
+                                       template_age_levels,
+                                       births) {
 
   # Type checking
   assert_that(is.data.frame(popn),
@@ -285,6 +310,8 @@ validate_popn_age_on_input <- function(popn,
               msg = "popn_age_on needs a number as the timestep parameter")
   assert_that(is.null(template_age_levels) || is.vector(template_age_levels) || is.factor(template_age_levels)  ,
               msg = "popn_age_on needs a vector, a factor, or NULL as the template_age_levels parameter")
+  assert_that(is.null(births) || (is.numeric(births) && births == 0) || is.data.frame(births),
+              msg = "popn_age_on needs NULL, 0 or a data frame as the births parameter")
 
   # Check for naming conflicts
   assert_that(all(names(col_aggregation) %in% names(popn)),
@@ -366,6 +393,12 @@ validate_popn_age_on_input <- function(popn,
 
     assert_that(unique_levels_agg == unique_levels_all,
                 msg = "popn_age_on: non-numeric, age-dependent data detected in input. The function can't deal with this.")
+  }
+
+  # Validate input births data
+  if(is.data.frame(births)) {
+    validate_population(births, col_aggregation = col_aggregation)
+    assert_that(setequal(births$gss_code, popn$gss_code))
   }
 
   invisible(TRUE)

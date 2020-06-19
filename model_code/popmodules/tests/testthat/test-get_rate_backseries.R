@@ -73,4 +73,8 @@ test_that("get_rate_backseries creates expected output for migration test case",
   expect_equivalent(migration_rate, mig_rate_answer)
 })
 
+file.remove(file = "test_data/test-get_rates_backseries_popn.rds")
+file.remove(file = "test_data/test-get_rates_backseries_births.rds")
+file.remove(file = "test_data/test-get_rates_backseries_deaths.rds")
+file.remove(file = "test_data/test-get_rates_backseries_migration.rds")
 
