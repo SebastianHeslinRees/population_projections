@@ -11,6 +11,12 @@
 #'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.
 #' @param dev_first_yr Numeric. The first year for which development data is provided. \code{Default 2019}.  
 #' @param ldd_final_yr Last year of LDD data. If there is a gap between this and the first year of the BPO trajectory, it will be filled with the SHLAA. \code{Default 2018}.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom tidyr pivot_longer replace_na
+#' @import dplyr
+#' 
+#' @export
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
@@ -25,7 +31,7 @@ bpo_template_to_rds <- function(csv_name,
   
   #Read in conventional & non-conventional as separate dataframes
   tbl <- data.table::fread(csv_path, header=FALSE) %>% as.data.frame()
-  assertthat::assert_that(ncol(tbl)==32, msg="number of columns in input housing trajectory is wrong")
+  assert_that(ncol(tbl)==32, msg="number of columns in input housing trajectory is wrong")
   
   unc_row <- match("Non-Conventional", tbl[[1]])
   no_of_gss_codes <- filter(tbl, substr(V1,1,3)=="E05")[,1] %>% unique() %>% length()
@@ -40,7 +46,7 @@ bpo_template_to_rds <- function(csv_name,
     select(gss_code) %>%
     unique() %>%
     as.character()
-  assertthat::assert_that(length(borough_gss) == 1)
+  assert_that(length(borough_gss) == 1)
   
   #read in stadard shlaa trajectories
   ward_shlaa_trajectory <- readRDS("input_data/small_area_model/ward_shlaa_trajectory.rds")
@@ -51,17 +57,17 @@ bpo_template_to_rds <- function(csv_name,
   #function to reformat template data
   process_input_csv <- function(x){
     
-    tidyr::pivot_longer(x,
-                        cols = 3:32,
-                        names_to = "year_long",
-                        values_to = "dev") %>%
+    pivot_longer(x,
+                 cols = 3:32,
+                 names_to = "year_long",
+                 values_to = "dev") %>%
       mutate(year = as.numeric(substr(year_long,6,9)),
              units = as.numeric(dev)) %>%
       rename(gss_code_ward = GSS.Code.Ward) %>%
       select(year, gss_code_ward, units) %>%
       filter(year < shlaa_first_yr) %>%
       as.data.frame() %>%
-      tidyr::replace_na(list(units = 0))
+      replace_na(list(units = 0))
   }
   
   conventional <- process_input_csv(conventional_in)
@@ -121,8 +127,8 @@ bpo_template_to_rds <- function(csv_name,
     filter(!gss_code == borough_gss) %>%
     rbind(non_conventional)
   
-  assertthat::assert_that(nrow(bpo_ward_trajectory)==nrow(ward_shlaa_trajectory))
-  assertthat::assert_that(nrow(bpo_borough_trajectory)==nrow(borough_shlaa_trajectory))
+  assert_that(nrow(bpo_ward_trajectory)==nrow(ward_shlaa_trajectory))
+  assert_that(nrow(bpo_borough_trajectory)==nrow(borough_shlaa_trajectory))
   
   saveRDS(bpo_ward_trajectory, paste0(bpo_dir,"rds/bpo_ward_trajectory_",bpo_name,".rds"))
   saveRDS(bpo_borough_trajectory, paste0(bpo_dir,"rds/bpo_borough_trajectory_",bpo_name,".rds"))

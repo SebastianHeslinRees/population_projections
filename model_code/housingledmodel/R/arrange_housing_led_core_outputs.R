@@ -1,5 +1,23 @@
+#' Arrange outputs from the \code{housing_led_core} function into inputs for the
+#' \code{output_housing_led_projections} function
+#'
+#' The \code{housing_led_core} outputs a list for each year of the projection.
+#' Each list is a list of components. This function rearrages those outputs into
+#' a list of dataframes of components.
+#'
+#' @param projection A list. The output list from the \code{housing_led_core} function
+#' @param trend_rpojection A list. The output flist rom the \code{trend_core} function
+#' @param first_proj_yr Numeric. First projection year
+#' @param last_proj_yr Numeric. Last projection year
+#'
+#' @return A list where each element is a data frame containing data for each year
+#'   of the projection and the backseries.
+#'
+#' @importFrom data.table rbindlist
+#'
+
 arrange_housing_led_core_outputs <- function(projection, trend_projection, first_proj_yr, last_proj_yr){
-  
+
   proj_popn <- list()
   proj_int_out <- list()
   proj_int_in <- list()
@@ -32,19 +50,19 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
     proj_unconstrained[[projection_year]] <- projection[[projection_year]][['unconstrained_population']]
   }
   
-  proj_popn   <- data.frame(data.table::rbindlist(proj_popn, use.names=TRUE))
-  proj_deaths <- data.frame(data.table::rbindlist(proj_deaths, use.names=TRUE))
-  proj_births <- data.frame(data.table::rbindlist(proj_births, use.names=TRUE))
-  proj_int_out <- data.frame(data.table::rbindlist(proj_int_out, use.names=TRUE))
-  proj_int_in <- data.frame(data.table::rbindlist(proj_int_in, use.names=TRUE))
-  proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
-  proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
-  proj_ahs <- data.frame(data.table::rbindlist(proj_ahs, use.names=TRUE))
-  proj_ahs_choice <- data.frame(data.table::rbindlist(proj_ahs_choice, use.names=TRUE))
-  proj_household_popn <- data.frame(data.table::rbindlist(proj_household_popn, use.names=TRUE))
-  proj_trend_popn <- data.frame(data.table::rbindlist(proj_trend_popn, use.names=TRUE))
-  proj_adj_mig <- data.frame(data.table::rbindlist(proj_adj_mig, use.names = TRUE))
-  proj_unconstrained <- data.frame(data.table::rbindlist(proj_unconstrained, use.names = TRUE))
+  proj_popn   <- data.frame(rbindlist(proj_popn, use.names=TRUE))
+  proj_deaths <- data.frame(rbindlist(proj_deaths, use.names=TRUE))
+  proj_births <- data.frame(rbindlist(proj_births, use.names=TRUE))
+  proj_int_out <- data.frame(rbindlist(proj_int_out, use.names=TRUE))
+  proj_int_in <- data.frame(rbindlist(proj_int_in, use.names=TRUE))
+  proj_dom_out <- data.frame(rbindlist(proj_dom_out, use.names=TRUE))
+  proj_dom_in <- data.frame(rbindlist(proj_dom_in, use.names=TRUE))
+  proj_ahs <- data.frame(rbindlist(proj_ahs, use.names=TRUE))
+  proj_ahs_choice <- data.frame(rbindlist(proj_ahs_choice, use.names=TRUE))
+  proj_household_popn <- data.frame(rbindlist(proj_household_popn, use.names=TRUE))
+  proj_trend_popn <- data.frame(rbindlist(proj_trend_popn, use.names=TRUE))
+  proj_adj_mig <- data.frame(rbindlist(proj_adj_mig, use.names = TRUE))
+  proj_unconstrained <- data.frame(rbindlist(proj_unconstrained, use.names = TRUE))
   
   projection <- list(population = proj_popn,
                      births = proj_births,

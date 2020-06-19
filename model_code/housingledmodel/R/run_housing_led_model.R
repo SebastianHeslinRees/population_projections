@@ -1,6 +1,20 @@
+#' Run a housing-led model config file to produce a population projection
+#' 
+#' Read in, validate and manage model input data and then run the \code{trend_core}
+#' and \code{housing_led_core} functions to produce a population projection as
+#' specified in the config list.
+#'
+#' @param config_list A List. A housing-led model configuration list.
+#'
+#' @import dplyr
+#' @import popmodules
+#' @import trendmodel
+#' @import assertthat
+#' @importFrom dtplyr lazy_dt
+#' @importFrom tibble enframe
+#' @importFrom tidyr unnest
+
 run_housing_led_model <- function(config_list){
-  
-  library(trendmodel)
   
   message("Running borough model")
   
@@ -34,7 +48,7 @@ run_housing_led_model <- function(config_list){
       
       nm <- last(names(dfs[[i]]))
       dfs[[i]] <- dfs[[i]] %>%
-        dtplyr::lazy_dt() %>%
+        lazy_dt() %>%
         group_by_at(col_aggregation) %>%
         summarise(value = sum(!!sym(nm))) %>%
         rename(!!nm := value) %>%
@@ -84,7 +98,7 @@ run_housing_led_model <- function(config_list){
     hma_constraint <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
       filter_to_LAs() %>%
       filter(gss_code %in% hma_list$gss_code) %>%
-      dtplyr::lazy_dt() %>%
+      lazy_dt() %>%
       left_join(hma_list, by="gss_code") %>%
       group_by_at(c("year","hma","sex","age")) %>%
       summarise(popn = sum(popn)) %>%
@@ -172,10 +186,6 @@ run_housing_led_model <- function(config_list){
   if(!is.null(config_list$upc_path)){
     upc <- readRDS(config_list$upc_path)
   }
-  
-  source('model_code/model_scripts/housing_led/housing_led_core.R')
-  source('model_code/model_scripts/housing_led/arrange_housing_led_core_outputs.R')
-  source('model_code/model_scripts/housing_led/output_housing_led_projection.R')
   
   #Starting population
   curr_yr_popn <- readRDS(paste0(config_list$external_trend_path, "population.rds")) %>%
@@ -300,22 +310,23 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
                                                    constrain_projection,
                                                    ahs_method){
   
-  assertthat::assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
-  assertthat::assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
-  assertthat::assert_that(min(communal_establishment_population$year) <= first_proj_yr)
-  assertthat::assert_that(min(external_ahs$year) <= first_proj_yr)
-  assertthat::assert_that(min(dwelling_trajectory$year) <= first_proj_yr)
+  assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
+  assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
+  assert_that(min(communal_establishment_population$year) <= first_proj_yr)
+  assert_that(min(external_ahs$year) <= first_proj_yr)
+  assert_that(min(dwelling_trajectory$year) <= first_proj_yr)
   
   assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= last_proj_yr)
   assertthat::assert_that(max(component_rates[['mortality_rates']]$year) >= last_proj_yr)
   assertthat::assert_that(max(communal_establishment_population$year) >= last_proj_yr)
   assertthat::assert_that(max(external_ahs$year) >= last_proj_yr)
   assertthat::assert_that(max(dwelling_trajectory$year) >= last_proj_yr)
+
   
   if(constrain_projection){
-    assertthat::assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
-    assertthat::assert_that(min(component_constraints[['death_constraint']]$year) <= first_proj_yr)
-    assertthat::assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
+    assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
+    assert_that(min(component_constraints[['death_constraint']]$year) <= first_proj_yr)
+    assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
     
     assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= last_proj_yr)
     assertthat::assert_that(max(component_constraints[['death_constraint']]$year) >= last_proj_yr)
@@ -323,7 +334,8 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
     
     assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
     assertthat::assert_that(max(hma_constraint$year) >= last_proj_yr)
+
   }
   
-  assertthat::assert_that(is.numeric(ahs_method) | ahs_method == "tree")
+  assert_that(is.numeric(ahs_method) | ahs_method == "tree")
 }

@@ -14,6 +14,9 @@
 #'   that parameters constructed from other parameters, e.g.
 #'   external_ahs_trajectory_path which depends on external_trend_path, will
 #'   need to be specified as well.
+#'   
+#' @import popmodules
+#' @importFrom data.table fwrite
 
 run_borough_and_ward_projection <- function(projection_name,
                                             dev_trajectory_path,
@@ -26,10 +29,7 @@ run_borough_and_ward_projection <- function(projection_name,
                                             fertility_scenario,
                                             ldd_final_yr,
                                             constrain_projection) {
-  
-  devtools::load_all("model_code/popmodules")
-  source('model_code/model_scripts/housing_led/output_bpo_excel_file.R')
-  
+
   external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
   
   communal_est_file <- "dclg_communal_est_population.rds"
@@ -65,7 +65,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   list2env(housing_led_params, environment())
   
-  
   #------------------
   #Setup config list
   config_list <- list(
@@ -92,7 +91,6 @@ run_borough_and_ward_projection <- function(projection_name,
   
   #---------------------
   #run projection
-  source('model_code/model_scripts/housing_led/housing_led_control.R')
   borough_projection <- run_housing_led_model(config_list)
   log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   

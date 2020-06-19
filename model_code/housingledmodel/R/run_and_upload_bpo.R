@@ -1,7 +1,5 @@
 bpo_name <- 'barnet'
 
-
-
 library(dplyr)
 library(ldndatar)
 library(knitr)
