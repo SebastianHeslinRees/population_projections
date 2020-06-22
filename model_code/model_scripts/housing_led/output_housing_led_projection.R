@@ -21,7 +21,7 @@ output_housing_led_projection <- function(projection, output_dir,
                                           additional_dwellings, housing_stock,
                                           household_trajectory,
                                           first_proj_yr){
- 
+  
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
   
   # Add backseries to projection
@@ -48,8 +48,32 @@ output_housing_led_projection <- function(projection, output_dir,
   }
   
   for(i in seq_along(projection)) {
+    col_aggregation = intersect(c("year", "gss_code", "age", "sex"), names(projection[[i]]))
+    col_data <- setdiff(names(projection[[i]]), col_aggregation)
+    comparison_pop <- projection$population
+    if(names(projection)[i] %in% c("ahs", "ahs_choice", "household_population", "adjusted_domestic_migration")) {
+      comparison_pop <- filter(comparison_pop, substr(gss_code, 1, 3) == "E09")
+    }
+    if(names(projection)[i] %in% c("ahs", "ahs_choice", "household_population", "trend_population", "adjusted_domestic_migration", "unconstrained_population")) {
+      comparison_pop <- filter(comparison_pop, year >= min(projection[[i]]$year))
+    }
+    if(identical(col_data, "births")) {
+      col_comparison <- setdiff(col_aggregation, "age")
+    } else {
+      col_comparison <- col_aggregation
+    }
+    check_negative <- !names(projection)[i] == "adjusted_domestic_migration"
+    validate_population(projection[[i]],
+                        col_aggregation = col_aggregation,
+                        col_data = col_data,
+                        check_negative_values = check_negative,
+                        comparison_pop = comparison_pop,
+                        col_comparison = col_comparison)
+    
     saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],".rds"))
   }
+  
+  validate_population(household_trajectory, col_aggregation = c("gss_code", "year"))
   saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
   # Create extra tables to to ouput
@@ -62,7 +86,9 @@ output_housing_led_projection <- function(projection, output_dir,
     assertthat::assert_that("gss_code" %in% names(data))
     assertthat::assert_that(all(grepl("E09", data$gss_code)))
   
-      x <- data %>%
+      x <- arrange(data, gss_code, year)
+    
+      x <- x %>%
         mutate(gss_code = "E12000007") %>%
         mutate(gss_name = "London (total)") %>%
         dtplyr::lazy_dt() %>%
@@ -70,11 +96,18 @@ output_housing_led_projection <- function(projection, output_dir,
         summarise(!!data_col := sum(!!sym(data_col))) %>%
         as.data.frame() %>%
         select(names(data)) %>%
-        rbind(data) %>%
-        arrange(gss_code, year)
+        rbind(data)
       
       return(x)
     
+  }
+  
+  order_gss_with_london_total_first <- function(data) {
+    assertthat::assert_that("gss_code" %in% names(data))
+    data %>%
+      mutate(gss_code = factor(gss_code, levels = c("E12000007", paste0("E0900000", 1:9), paste0("E090000", 10:33)))) %>%
+      arrange(gss_code) %>%
+      mutate(gss_code = as.character(gss_code))
   }
   
   females <- filter(popn, sex == "female") %>%
@@ -94,11 +127,12 @@ output_housing_led_projection <- function(projection, output_dir,
   persons <- mutate(popn, sex = "persons") %>%
     london_totals(data_col = "popn") %>%
     dtplyr::lazy_dt() %>%
-    group_by(year, gss_code, gss_name, sex, age) %>%
+    group_by(gss_code, gss_name, year, sex, age) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
     mutate(popn = round(popn, digits=2)) %>%
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
+    order_gss_with_london_total_first() %>%
     rename(borough = gss_name) %>%
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
   
@@ -112,9 +146,9 @@ output_housing_led_projection <- function(projection, output_dir,
       components[[x]] <- rename(projection[[x]], value := !!sym(nm)) %>%
         mutate(component = nm) %>%
         filter(substr(gss_code,1,3)=="E09")%>%
-        london_totals(data_col = "value") %>%
+        left_join(names_lookup, by="gss_code") %>%
         dtplyr::lazy_dt() %>%
-        group_by(year, gss_code, component) %>%
+        group_by(year, gss_code, gss_name, component) %>%
         summarise(value = sum(value)) %>%
         as.data.frame() %>%
         mutate(value = round(value, digits=2))
@@ -122,15 +156,16 @@ output_housing_led_projection <- function(projection, output_dir,
   }
   
   components <- data.table::rbindlist(components, use.names = TRUE) %>%
+    london_totals(data_col = "value") %>%
     tidyr::pivot_wider(names_from = component, values_from = value) %>%
-    left_join(names_lookup, by="gss_code") %>%
     mutate(int_net = round(int_in - int_out, 2),
            dom_net = round(dom_in - dom_out, 2),
            total_change = round(births - deaths + int_net + dom_net, 2),
            borough = gss_name) %>%
     select(gss_code, borough, year, popn, births, deaths, int_in, int_out, int_net,
            dom_in, dom_out, dom_net, total_change) %>%
-    arrange(gss_code, year)
+    arrange(gss_code, year) %>%
+    order_gss_with_london_total_first()
   
   # All London dom_in/out isn't just the sum of components, and we can't calculate it in this model
   components[components$gss_code == "E12000007", c("dom_in", "dom_out")] <- NA
@@ -144,18 +179,18 @@ output_housing_led_projection <- function(projection, output_dir,
   ahs <- arrange(ahs, year, gss_code)
   
   stock <- housing_stock %>%
-    london_totals(data_col = "dwellings") %>%
-    left_join(names_lookup, by="gss_code") %>%
-    mutate(dwellings = round(dwellings, 2)) %>%
     arrange(gss_code, year) %>%
+    left_join(names_lookup, by="gss_code") %>%
+    london_totals(data_col = "dwellings") %>%
+    mutate(dwellings = round(dwellings, 2)) %>%
     tidyr::pivot_wider(names_from = "year", values_from = "dwellings") %>%
     rename(borough = gss_name)
 
   annual_dev <- additional_dwellings %>%
-    london_totals(data_col = "units") %>%
     filter(year != 2011) %>%
-    left_join(names_lookup, by="gss_code") %>%
     arrange(gss_code, year) %>%
+    left_join(names_lookup, by="gss_code") %>%
+    london_totals(data_col = "units") %>%
     mutate(units = round(units, 2)) %>%
     tidyr::pivot_wider(names_from = "year", values_from = "units") %>%
     rename(borough = gss_name)
@@ -165,9 +200,17 @@ output_housing_led_projection <- function(projection, output_dir,
                assumed_dev = annual_dev, housing_stock = stock, ahs = ahs)
   
   for(i in seq_along(csvs)) {
+
+    col_agg <- intersect(names(csvs[[i]]), c("gss_code", "age", "sex", "year"))
+    col_data <- setdiff(names(csvs[[i]]), c(col_agg, "borough"))
+    if(names(csvs)[i] == "components") {
+      validation_data <- filter(csvs[[i]], substr(gss_code,1,3) != "E12")
+    } else {
+      validation_data <- csvs[[i]]
+    }
+    validate_population(validation_data, col_aggregation = col_agg, col_data = col_data, check_negative_values = FALSE)
     
     data.table::fwrite(csvs[[i]], paste0(output_dir, "csv/",names(csvs)[i],".csv"))
-    
   }
   
 }
