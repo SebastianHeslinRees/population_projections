@@ -241,12 +241,13 @@ housing_led_core <- function(start_population,
   
   if(constrain_projection & !is.null(hma_list)){
     #10. Constrain total population
-    constrained_population <- constrain_to_hma(popn =  unconstrained_population,
-                                               constraint = hma_constraint,
-                                               hma_list = hma_list,
-                                               col_aggregation = c("year","hma","sex","age"),
-                                               col_popn = "popn",
-                                               col_constraint = "popn")
+    constrained_population <- unconstrained_population %>%
+      check_negative_values("popn") %>%
+      constrain_to_hma(constraint = hma_constraint,
+                       hma_list = hma_list,
+                       col_aggregation = c("year","hma","sex","age"),
+                       col_popn = "popn",
+                       col_constraint = "popn")
     
     #11. Compare population from step 10 to population from step 9.
     #    Difference = domestic adjustment

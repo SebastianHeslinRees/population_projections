@@ -62,7 +62,7 @@ output_housing_led_projection <- function(projection, output_dir,
     } else {
       col_comparison <- col_aggregation
     }
-    check_negative <- !names(projection)[i] == "adjusted_domestic_migration"
+    check_negative <- !(names(projection)[i] %in% c("adjusted_domestic_migration", "unconstrained_population"))
     validate_population(projection[[i]],
                         col_aggregation = col_aggregation,
                         col_data = col_data,
