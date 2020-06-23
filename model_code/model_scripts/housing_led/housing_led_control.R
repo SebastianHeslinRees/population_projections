@@ -277,7 +277,8 @@ run_housing_led_model <- function(config_list){
   projection <- arrange_housing_led_core_outputs(projection,
                                                  trend_projection,
                                                  first_proj_yr,
-                                                 last_proj_yr)
+                                                 last_proj_yr,
+                                                 upc)
   
   output_housing_led_projection(projection,
                                 config_list$output_dir,
