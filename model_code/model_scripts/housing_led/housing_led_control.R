@@ -360,7 +360,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
     validate_population(upc, col_data = "upc", test_complete = FALSE, check_negative_values = FALSE)
   }
   if(!is.null(additional_births)) {
-    validate_population(additional_births, col_data = "births", comparison_pop = curr_yr_popn, col_comparison = c("gss_code", "age", "sex"))
+    validate_population(additional_births, col_data = "births", test_complete = FALSE)
   }
   validate_population(household_trajectory_static, col_aggregation = c("gss_code", "year"), col_data = "households")
   validate_population(household_trajectory_adjusted, col_aggregation = c("gss_code", "year"), col_data = "households")
