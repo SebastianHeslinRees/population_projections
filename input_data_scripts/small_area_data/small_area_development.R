@@ -3,7 +3,7 @@ load("Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2016/October 2017 (v2)/
 #          "input_data/housing_led_model/borough_shlaa_trajectory.rds")
 
 borough_dev <- select(borough_dev, year, gss_code_ward, units = new_homes)
-saveRDS(ward_dev, "input_data/small_area_model/borough_shlaa_trajectory.rds")
+saveRDS(borough_dev, "input_data/housing_led_model/borough_shlaa_trajectory.rds")
 
 ward_dev <- select(ward_dev, year, gss_code_ward, units = new_homes)
 saveRDS(ward_dev, "input_data/small_area_model/ward_shlaa_trajectory.rds")
