@@ -133,6 +133,8 @@ constraint_fns <- list(
                                                                      cross_border_out_constraint = cross_out_constraint_path)))
 )
 
+qa_areas_of_interest <- list("London", "E09000001")
+
 
 # prepare the named list to pass into model
 config_list <- list(
