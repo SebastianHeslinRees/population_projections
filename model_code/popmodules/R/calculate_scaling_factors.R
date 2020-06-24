@@ -181,5 +181,12 @@ validate_calculate_scaling_factors_input <- function(popn, constraint, col_aggre
   assert_that(is.numeric(constraint[[col_constraint]]),
               msg = paste("calculate_scaling_factors needs a numeric column in the specified constraint constraint col:", unname(col_popn)))
 
+  if(min(popn[[col_popn]]) < 0) {
+    warning("Calculate scaling factors was called on a population data frame with negative populations.")
+  }
+  if(min(constraint[[col_constraint]]) < 0) {
+    warning("Calculate scaling factors was called with a constraint data frame with negative populations.")
+  }
+  
   invisible(TRUE)
 }
