@@ -17,19 +17,20 @@ bpo_template_to_rds <- function(csv_name,
                                 shlaa_first_yr = 2042,
                                 dev_first_yr = 2019,
                                 ldd_final_yr = 2018){
-  
+  browser()
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
   csv_path <- paste0(bpo_dir,"csvs/",csv_name)
   bpo_name <- substr(csv_name,1,nchar(csv_name)-4)
+  dev_years <- dev_first_yr:(shlaa_first_yr-1)
   
-  #Read in conventional & non-conventional as separate dataframes
+  #Read in data, do a check and find where the data starts and finishes
   tbl <- data.table::fread(csv_path, header=FALSE) %>% as.data.frame()
   assertthat::assert_that(ncol(tbl)==32, msg="number of columns in input housing trajectory is wrong")
-  
   unc_row <- match("Non-Conventional", tbl[[1]])
   no_of_gss_codes <- filter(tbl, substr(V1,1,3)=="E05")[,1] %>% unique() %>% length()
   
+  #read the data in again but this time as 2 dataframes
   conventional_in <- data.table::fread(csv_path, header=TRUE, skip = "GSS.Code.Ward",  colClasses = rep("character",32))[1:no_of_gss_codes,]
   non_conventional_in <- data.table::fread(csv_path, header=TRUE, skip = unc_row, colClasses = rep("character",32))[1:no_of_gss_codes,]
   
@@ -42,7 +43,7 @@ bpo_template_to_rds <- function(csv_name,
     as.character()
   assertthat::assert_that(length(borough_gss) == 1)
   
-  #read in stadard shlaa trajectories
+  #read in standard shlaa trajectories
   ward_shlaa_trajectory <- readRDS("input_data/small_area_model/ward_shlaa_trajectory.rds")
   borough_shlaa_trajectory <- readRDS("input_data/housing_led_model/borough_shlaa_trajectory.rds")
   
@@ -56,12 +57,13 @@ bpo_template_to_rds <- function(csv_name,
                         names_to = "year_long",
                         values_to = "dev") %>%
       mutate(year = as.numeric(substr(year_long,6,9)),
-             units = as.numeric(dev)) %>%
+             dev = as.numeric(dev)) %>%
       rename(gss_code_ward = GSS.Code.Ward) %>%
-      select(year, gss_code_ward, units) %>%
-      filter(year < shlaa_first_yr) %>%
+      select(year, gss_code_ward, dev) %>%
+      filter(year %in% dev_years) %>%
       as.data.frame() %>%
-      tidyr::replace_na(list(units = 0))
+      tidyr::replace_na(list(dev = 0))
+      
   }
   
   conventional <- process_input_csv(conventional_in)
@@ -70,56 +72,20 @@ bpo_template_to_rds <- function(csv_name,
     rbind(conventional) %>%
     mutate(gss_code = borough_gss) %>%
     group_by(year, gss_code) %>%
-    summarise(units = sum(units)) %>%
+    summarise(dev = sum(dev)) %>%
     as.data.frame()
-  
-  
+
   #Ward trajectory
-  additional_shlaa_ward <- ward_shlaa_trajectory  %>%
-    filter(year >= shlaa_first_yr,
-           gss_code_ward %in% codes_of_interest)
-  
-  #years upto and inc 2018 will be replaced by LDD in the model
-  #If there is a gap between the start of the bpo trajectory and
-  #the end of the LDD (2018) this needs to be filled with SHLAA data
-  
-  if(dev_first_yr > ldd_final_yr + 1){
-    additional_shlaa_ward <- ward_shlaa_trajectory  %>%
-      filter(year < dev_first_yr,
-             gss_code_ward %in% codes_of_interest) %>%
-      rbind(additional_shlaa_ward)
-    
-    conventional <- filter(conventional, year >= dev_first_yr)
-  }
-  
-  conventional <- conventional %>%
-    rbind(additional_shlaa_ward)
-  
   bpo_ward_trajectory <- ward_shlaa_trajectory %>%
-    filter(!gss_code_ward %in% codes_of_interest) %>%
-    rbind(conventional)
-  
+    left_join(conventional, by = c("gss_code_ward","year")) %>%
+    mutate(units = ifelse(is.na(dev), units, dev)) %>% 
+    select(-dev)
   
   #Borough trajectory
-  additional_shlaa_borough <- borough_shlaa_trajectory  %>%
-    filter(year >= shlaa_first_yr,
-           gss_code == borough_gss)
-  
-  if(dev_first_yr > ldd_final_yr + 1){
-    additional_shlaa_borough <- borough_shlaa_trajectory  %>%
-      filter(year < dev_first_yr,
-             gss_code == borough_gss) %>%
-      rbind(additional_shlaa_borough)
-    
-    non_conventional <- filter(non_conventional, year >= dev_first_yr)
-  }
-  
-  non_conventional <- non_conventional %>%
-    rbind(additional_shlaa_borough)
-  
   bpo_borough_trajectory <- borough_shlaa_trajectory %>%
-    filter(!gss_code == borough_gss) %>%
-    rbind(non_conventional)
+    left_join(non_conventional, by = c("gss_code","year")) %>%
+    mutate(units = ifelse(is.na(dev), units, dev)) %>% 
+    select(-dev)
   
   assertthat::assert_that(nrow(bpo_ward_trajectory)==nrow(ward_shlaa_trajectory))
   assertthat::assert_that(nrow(bpo_borough_trajectory)==nrow(borough_shlaa_trajectory))
