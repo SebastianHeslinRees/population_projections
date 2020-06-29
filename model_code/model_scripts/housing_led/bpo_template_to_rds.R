@@ -10,14 +10,12 @@
 #' @param shlaa_first_yr The first year in ehich to use shlaa development data.
 #'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.
 #' @param dev_first_yr Numeric. The first year for which development data is provided. \code{Default 2019}.  
-#' @param ldd_final_yr Last year of LDD data. If there is a gap between this and the first year of the BPO trajectory, it will be filled with the SHLAA. \code{Default 2018}.
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
                                 shlaa_first_yr = 2042,
-                                dev_first_yr = 2019,
-                                ldd_final_yr = 2018){
-  browser()
+                                dev_first_yr = 2019){
+
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
   csv_path <- paste0(bpo_dir,"csvs/",csv_name)
