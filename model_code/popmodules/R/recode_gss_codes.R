@@ -19,10 +19,11 @@
 #' @param aggregate_data Logical. If set to true multiple instances of the same
 #'   gss code will be aggregated using the function specified in \code{fun} parammeter.
 #'   Default to \code{TRUE}.
-#' @recode_gla_codes Logical. If set to \code{TRUE} recodes to the codes used in
+#' @param recode_gla_codes Logical. If set to \code{TRUE} recodes to the codes used in
 #'  2018-based and earlier projections. This is introduced for backward
 #'  compatibility and doesn't correspond to any single vintage year.
 #'  Default \code{FALSE}.
+#'  @param code_changes_path string. file path to the code changes database.
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
@@ -38,7 +39,8 @@ recode_gss_codes <- function(df_in,
                              fun = list(sum),
                              recode_to_year = 2013,
                              aggregate_data = TRUE,
-                             recode_gla_codes = FALSE){
+                             recode_gla_codes = FALSE,
+                             code_changes_path = "input_data/lookup/district_changes_clean.rds"){
 
   #prepare input dataframe
   df <- df_in %>%
@@ -62,7 +64,7 @@ recode_gss_codes <- function(df_in,
   recode_merges <- list()
   recode_name_changes <- list()
   
-  code_changes <- readRDS("input_data/lookup/district_changes_clean.rds") %>%
+  code_changes <- readRDS(code_changes_path) %>%
     select(changed_to_code, changed_from_code, year, split, merge)
   
   #splits

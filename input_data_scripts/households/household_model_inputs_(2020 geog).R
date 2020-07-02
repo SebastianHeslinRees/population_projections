@@ -13,7 +13,7 @@ ons_stage1 <- recode_gss_codes(ons_stage1,
                                fun = list(mean),
                                recode_to_year = 2020)
 ons_stage2 <- recode_gss_codes(ons_stage2,
-                               data_cols = "HRR",
+                               data_cols = "rate",
                                fun = list(mean),
                                recode_to_year = 2020)
 assert_that(!any(is.na(ons_stage1)))

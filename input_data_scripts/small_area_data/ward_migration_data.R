@@ -29,7 +29,7 @@ ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
 #Data come from the census
 #Data only goes to age 75 so ages 75-90 are modelled using borough distribution
 
-borough_domestic_out <- readRDS(borough_dom_out_path) %>% filter(year == 2011)
+borough_domestic_out <- readRDS(borough_dom_out_path) %>% filter(year == 2011) %>% filter_to_LAs()
 
 domestic_out <- data.table::fread(ward_dom_out_path, header = T) %>%
         pivot_longer(cols = as.character(0:75), names_to = "age",
@@ -56,7 +56,7 @@ domestic_out <- left_join(domestic_out, ward_to_district, by="gss_code_ward") %>
                                      col_constraint = "dom_out")
 
 ####DOMESTIC IN####
-borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011)
+borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011) %>% filter_to_LAs()
 
 domestic_in <- data.table::fread(ward_dom_in_path, header = T) %>%
         pivot_longer(cols = as.character(0:75), names_to = "age",

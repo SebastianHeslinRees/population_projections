@@ -118,7 +118,7 @@ popn_age_on <- function(popn,
 
     # If age is numeric, increment age
     if(is.numeric(aged[[col_age]])) {
-      setkeyv(aged, col_age)
+      data.table::setkeyv(aged, col_age)
       max_age <- aged[, max(get(col_age))]
       aged[get(col_age) != max_age, (col_age) := get(col_age) + timestep]
     }

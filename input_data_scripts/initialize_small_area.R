@@ -7,16 +7,14 @@ library(tidyr)
 
 #Directory
 dir.create("input_data/small_area_model", showWarnings = FALSE)
-
-dir.create("input_data/lookup", showWarnings = FALSE)
-R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/model_lookups",
-                       "input_data/lookup")
+dir.create("input_data/housing_led_model", showWarnings = FALSE)
 
 #LDD Polygon splits file
 polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")	
 write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)	
 rm(polygon_splits)
 
+source("input_data_scripts/ldd/further_geom_code.R")
 source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')
@@ -28,6 +26,7 @@ source('input_data_scripts/small_area_data/ward_migration_data.R')
 source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
+source('input_data_scripts/small_area_data/small_area_development.R')
 
 #TESTS
 rm(list=ls())

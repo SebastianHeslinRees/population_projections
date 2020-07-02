@@ -3,12 +3,13 @@
 library(dplyr)
 
 #lookups
-lsoa_to_ward <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to ward.rds")
-lsoa_to_msoa <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%
+lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+lsoa_to_msoa <- readRDS("input_data/lookup/lsoa_to_msoa.rds") %>%
   select(gss_code_lsoa, gss_code_msoa)
-lsoa_to_borough <- readRDS("Q:/Teams/D&PA/Demography/Projections/R Models/Lookups/lsoa to msoa and borough.rds") %>%
-  select(gss_code_lsoa, gss_code = gss_code_borough)
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
+msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds")
+lsoa_to_borough <- left_join(lsoa_to_msoa, msoa_to_district, by = c("gss_code_msoa")) %>%
+  select(gss_code_lsoa, gss_code)
 
 #base census dwellings
 lsoa_census_dwellings <- data.table::fread("Q:/Teams/D&PA/Data/census_tables/housing_led_model/LSOA_DWELLINGS_CENSUS.CSV")

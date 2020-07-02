@@ -33,6 +33,7 @@ domestic_net <- construct_popn_from_components(start_population = popn_2019,
 
 #calculate net domestic as a residual
 domestic_migration_net <- readRDS("input_data/domestic_migration/2018/domestic_migration_net.rds") %>%
+  filter_to_LAs() %>%
   select(-dom_in, -dom_out) %>% 
   recode_gss_codes(data_cols = "dom_net", recode_to_year = 2020) %>%
   select(names(domestic_net)) %>% 
@@ -50,6 +51,7 @@ domestic_migration_flows_ons <- readRDS("input_data/domestic_migration/2018/dome
   recode_gss_codes(data_cols = "value", col_geog = "gss_out", recode_to_year = 2020) %>%
   filter(gss_out != gss_in)
 
+
 #Use 2004 flows as 2019 flows (they're not identical but it doesn't matter)
 #Make all of the domestic components
 flows_2004 <- filter(domestic_migration_flows_ons, year == 2004) %>%
@@ -57,17 +59,27 @@ flows_2004 <- filter(domestic_migration_flows_ons, year == 2004) %>%
 
 dom_flows <- rbind(domestic_migration_flows_ons, flows_2004) 
 
+regional <- readRDS("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds")
+regional <- filter(regional, year == 2004) %>%
+  mutate(year = 2019) %>% 
+  rbind(regional) %>%
+  arrange(year, gss_out, gss_in, sex, age)
+
 dom_in <- dom_flows %>%
+  rbind(regional) %>% 
   group_by(year, gss_in, sex, age) %>%
   summarise(dom_in = sum(value)) %>%
   data.frame() %>% 
-  rename(gss_code = gss_in)
+  rename(gss_code = gss_in) %>%
+  complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_in = 0))
 
 dom_out <- dom_flows %>%
+  rbind(regional) %>% 
   group_by(year, gss_out, sex, age) %>%
   summarise(dom_out = sum(value)) %>%
   data.frame() %>% 
-  rename(gss_code = gss_out)
+  rename(gss_code = gss_out) %>%
+  complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_out = 0))
 
 dom_net <- full_join(dom_in, dom_out, by=c("year","gss_code","sex","age")) %>%
   tidyr::replace_na(list(dom_in = 0, dom_out = 0)) %>%
