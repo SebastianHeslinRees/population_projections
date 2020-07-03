@@ -49,7 +49,7 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
   #complete upc
   if(!is.null(upc)){
     upc <- upc %>% 
-      tidyr::complete(year = min(proj_popn$year):last_proj_yr,
+      tidyr::complete(year = first_proj_yr:last_proj_yr,
                       gss_code = unique(proj_popn$gss_code),
                       sex = c("male", "female"),
                       age = 0:90,

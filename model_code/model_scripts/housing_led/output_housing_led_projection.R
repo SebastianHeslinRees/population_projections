@@ -47,12 +47,18 @@ output_housing_led_projection <- function(projection, output_dir,
       as.data.frame()
   }
   
-  for(i in seq_along(projection)) {
+  #save RDS files
+  for(i in 1:13) {
     saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],".rds"))
   }
+  
+  if(!is.null(projection[['upc']])){
+    saveRDS(projection[['upc']], paste0(output_dir, "upc.rds"))
+  }
+  
   saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
-  # Create extra tables to to ouput
+  # Create extra tables to to output
   names_lookup <- get_gss_names()
   popn <- left_join(projection[["population"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")

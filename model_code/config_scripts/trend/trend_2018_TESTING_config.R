@@ -142,7 +142,7 @@ constraint_fns <- list(list(fn = function() NULL, args = list()))
 
 qa_areas_of_interest <- list("London", "E09000001")
 
-upc_path <- "C:/temp/test_upc.rds"
+upc_path <- "input_data/test_data/test_upc.rds"
 upc <- readRDS(popn_mye_path) %>% 
   filter(year %in% 2011:2012) %>%
   mutate(year = year + 8) %>%
