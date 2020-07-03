@@ -26,9 +26,7 @@ source('input_data_scripts/small_area_data/ward_migration_data.R')
 source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
-
-file.copy("Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2016/October 2017 (v2)/Output/borough_shlaa_trajectory.rds",
-          "input_data/housing_led_model/borough_shlaa_trajectory.rds")
+source('input_data_scripts/small_area_data/small_area_development.R')
 
 #TESTS
 rm(list=ls())

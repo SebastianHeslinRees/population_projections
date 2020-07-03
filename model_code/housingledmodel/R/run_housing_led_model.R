@@ -74,6 +74,8 @@ run_housing_led_model <- function(config_list){
     additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
       data.table::rbindlist() %>% 
       as.data.frame()
+  } else {
+    additional_births <- NULL
   }
   
   #domestic rates
@@ -136,7 +138,7 @@ run_housing_led_model <- function(config_list){
   ldd_backseries <- readRDS(config_list$ldd_backseries_path) %>%
     filter(year <= config_list$ldd_final_yr) %>%
     select(names(development_trajectory))
-  
+
   additional_dwellings <- ldd_backseries %>%
     rbind(filter(development_trajectory, year > config_list$ldd_final_yr)) %>%
     arrange(gss_code, year)
@@ -167,11 +169,13 @@ run_housing_led_model <- function(config_list){
   
   #development_trajectories
   household_trajectory_static <- dwelling_trajectory %>% 
+    filter(year <= config_list$last_proj_yr) %>%
     left_join(dwelling2household_ratio_static, by=c("year","gss_code")) %>%
     mutate(households = dwellings / dw2hh_ratio) %>%
     select(gss_code, year, households)
   
   household_trajectory_adjusted <- dwelling_trajectory %>% 
+    filter(year <= config_list$last_proj_yr) %>%
     left_join(dwelling2household_ratio_adjusted, by=c("year", "gss_code")) %>%
     mutate(households = dwellings / dw2hh_ratio) %>%
     select(gss_code, year, households)
@@ -186,6 +190,8 @@ run_housing_led_model <- function(config_list){
   
   if(!is.null(config_list$upc_path)){
     upc <- readRDS(config_list$upc_path)
+  } else {
+    upc <- NULL
   }
   
   #Starting population
@@ -197,7 +203,11 @@ run_housing_led_model <- function(config_list){
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <- config_list$last_proj_yr
-  additional_births_years <- ifelse(exists("additional_births"), unique(additional_births$year), 0)
+  if(exists("additional_births")) {
+    additional_births_years <- unique(additional_births$year)
+  } else {
+    additional_births_years <- 0
+  }
   
   region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
@@ -206,14 +216,19 @@ run_housing_led_model <- function(config_list){
   
   #check
   validate_housing_led_control_variables(first_proj_yr, last_proj_yr,
+                                         curr_yr_popn,
                                          component_rates,
+                                         upc,
                                          component_constraints,
                                          communal_establishment_population,
                                          external_ahs,
                                          dwelling_trajectory,
                                          hma_constraint,
                                          config_list$constrain_projection,
-                                         config_list$ahs_method)
+                                         config_list$ahs_method,
+                                         household_trajectory_static,
+                                         household_trajectory_adjusted,
+                                         additional_births)
   
   for(projection_year in first_proj_yr:last_proj_yr){
     
@@ -302,14 +317,19 @@ run_housing_led_model <- function(config_list){
 #-------
 
 validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
+                                                   curr_yr_popn,
                                                    component_rates,
+                                                   upc,
                                                    component_constraints,
                                                    communal_establishment_population,
                                                    external_ahs,
                                                    dwelling_trajectory,
                                                    hma_constraint,
                                                    constrain_projection,
-                                                   ahs_method){
+                                                   ahs_method,
+                                                   household_trajectory_static,
+                                                   household_trajectory_adjusted,
+                                                   additional_births){
   
   assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
@@ -338,5 +358,23 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
 
   }
   
-  assert_that(is.numeric(ahs_method) | ahs_method == "tree")
+  assertthat::assert_that(is.numeric(ahs_method) | ahs_method == "tree")
+  
+  validate_population(curr_yr_popn, col_aggregation = c("year", "gss_code", "age", "sex"), col_data = "popn")
+  for(i in seq_along(component_rates)) {
+    col_data = intersect(names(component_rates[[i]]), c("rate", "int_out", "int_in"))
+    validate_population(component_rates[[i]],
+                        col_aggregation = c("year", "gss_code", "age", "sex"),
+                        col_data = col_data,
+                        comparison_pop = curr_yr_popn,
+                        col_comparison = c("gss_code", "age", "sex"))
+  }
+  if(!is.null(upc)) {
+    validate_population(upc, col_data = "upc", test_complete = FALSE, check_negative_values = FALSE)
+  }
+  if(!is.null(additional_births)) {
+    validate_population(additional_births, col_data = "births", test_complete = FALSE)
+  }
+  validate_population(household_trajectory_static, col_aggregation = c("gss_code", "year"), col_data = "households")
+  validate_population(household_trajectory_adjusted, col_aggregation = c("gss_code", "year"), col_data = "households")
 }

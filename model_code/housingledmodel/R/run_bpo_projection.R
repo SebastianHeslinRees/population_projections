@@ -58,9 +58,8 @@ run_bpo_projection <- function(bpo_name,
   borough_gss <- bpo_template_to_rds(csv_name = csv_name,
                                      bpo_dir = bpo_dir,
                                      shlaa_first_yr = shlaa_first_yr,
-                                     dev_first_yr = dev_first_yr,
-                                     ldd_final_yr = ldd_final_yr)
-
+                                     dev_first_yr = dev_first_yr)
+  
   dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_borough_trajectory_",csv_name,".rds")
   small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
   
