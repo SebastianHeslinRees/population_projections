@@ -65,13 +65,27 @@ housing_led_core <- function(start_population,
       rbind(actual_births)
   }
   
-  initial_population <- aged_on_population %>%
-    construct_popn_from_components(addition_data = list(births,
-                                                        trend_projection[['int_in']],
-                                                        trend_projection[['dom_in']]),
-                                   subtraction_data = list(deaths,
-                                                           int_out,
-                                                           trend_projection[['dom_out']])) %>%
+  if(is.null(trend_projection[['upc']])) {
+    initial_population <- aged_on_population %>%
+      construct_popn_from_components(addition_data = list(births,
+                                                          trend_projection[['int_in']],
+                                                          trend_projection[['dom_in']]),
+                                     subtraction_data = list(deaths,
+                                                             int_out,
+                                                             trend_projection[['dom_out']]))
+  } else {
+    initial_population <- aged_on_population %>%
+      construct_popn_from_components(addition_data = list(births,
+                                                          trend_projection[['int_in']],
+                                                          trend_projection[['dom_in']],
+                                                          trend_projection[['upc']]),
+                                     subtraction_data = list(deaths,
+                                                             int_out,
+                                                             trend_projection[['dom_out']]),
+                                     data_are_subsets = TRUE)
+  }
+  
+  initial_population <- initial_population %>%
     dtplyr::lazy_dt() %>%
     group_by(year, gss_code) %>%
     summarise(popn = sum(popn)) %>%
@@ -241,12 +255,13 @@ housing_led_core <- function(start_population,
   
   if(constrain_projection & !is.null(hma_list)){
     #10. Constrain total population
-    constrained_population <- constrain_to_hma(popn =  unconstrained_population,
-                                               constraint = hma_constraint,
-                                               hma_list = hma_list,
-                                               col_aggregation = c("year","hma","sex","age"),
-                                               col_popn = "popn",
-                                               col_constraint = "popn")
+    constrained_population <- unconstrained_population %>%
+      check_negative_values("popn") %>%
+      constrain_to_hma(constraint = hma_constraint,
+                       hma_list = hma_list,
+                       col_aggregation = c("year","hma","sex","age"),
+                       col_popn = "popn",
+                       col_constraint = "popn")
     
     #11. Compare population from step 10 to population from step 9.
     #    Difference = domestic adjustment
