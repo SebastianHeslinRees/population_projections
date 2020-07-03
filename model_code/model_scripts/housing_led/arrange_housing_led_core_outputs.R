@@ -1,5 +1,5 @@
-arrange_housing_led_core_outputs <- function(projection, trend_projection, first_proj_yr, last_proj_yr){
-  
+arrange_housing_led_core_outputs <- function(projection, trend_projection, first_proj_yr, last_proj_yr, upc){
+
   proj_popn <- list()
   proj_int_out <- list()
   proj_int_in <- list()
@@ -46,6 +46,17 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
   proj_adj_mig <- data.frame(data.table::rbindlist(proj_adj_mig, use.names = TRUE))
   proj_unconstrained <- data.frame(data.table::rbindlist(proj_unconstrained, use.names = TRUE))
   
+  #complete upc
+  if(!is.null(upc)){
+    upc <- upc %>% 
+      tidyr::complete(year = first_proj_yr:last_proj_yr,
+                      gss_code = unique(proj_popn$gss_code),
+                      sex = c("male", "female"),
+                      age = 0:90,
+                      fill = list(upc = 0)) %>% 
+      data.frame()
+  }
+  
   projection <- list(population = proj_popn,
                      births = proj_births,
                      deaths = proj_deaths,
@@ -58,7 +69,8 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
                      household_population = proj_household_popn,
                      trend_population = proj_trend_popn,
                      adjusted_domestic_migration = proj_adj_mig,
-                     unconstrained_population = proj_unconstrained)
+                     unconstrained_population = proj_unconstrained,
+                     upc = upc)
 
   return(projection)
 }

@@ -171,7 +171,9 @@ run_housing_led_model <- function(config_list){
   #TODO Sort this out so it can take constraint dataframes here
   npp_constraints <- NULL
   
-  if(!is.null(config_list$upc_path)){
+  if(is.null(config_list$upc_path)){
+    upc <- NULL
+  } else {
     upc <- readRDS(config_list$upc_path)
   } else {
     upc <- NULL
@@ -248,7 +250,7 @@ run_housing_led_model <- function(config_list){
     
     curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
     
-    if(is.null(config_list$upc_path)){
+    if(is.null(upc)){
       curr_yr_upc <- NULL
     } else { 
       curr_yr_upc <- upc %>% filter(year == projection_year)
@@ -292,7 +294,8 @@ run_housing_led_model <- function(config_list){
   projection <- arrange_housing_led_core_outputs(projection,
                                                  trend_projection,
                                                  first_proj_yr,
-                                                 last_proj_yr)
+                                                 last_proj_yr,
+                                                 upc)
   
   output_housing_led_projection(projection,
                                 config_list$output_dir,

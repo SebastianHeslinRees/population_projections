@@ -1,5 +1,6 @@
 arrange_trend_core_outputs <- function(projection,
-                                       population, births, deaths, int_out, int_in, dom_in, dom_out,
+                                       population, births, deaths, int_out,
+                                       int_in, dom_in, dom_out, upc,
                                        fertility_rates, mortality_rates,
                                        int_out_rates, int_in_flows,
                                        first_proj_yr, last_proj_yr){
@@ -28,6 +29,18 @@ arrange_trend_core_outputs <- function(projection,
     proj_natural_change[[projection_year]] <- projection[[projection_year]][['natural_change']]
     proj_births_by_mother[[projection_year]] <- projection[[projection_year]][['births_by_mothers_age']]
     
+  }
+  
+  #complete upc
+  if(!is.null(upc)){
+    upc <- upc %>% 
+      tidyr::complete(year = min(population$year):last_proj_yr,
+                    gss_code = unique(population$gss_code),
+                    sex = c("male", "female"),
+                    age = 0:90,
+                    fill = list(upc = 0)) %>% 
+      data.frame() %>%
+      aggregate_regions(england=TRUE)
   }
   
   regional_data <- list(proj_popn = proj_popn,
@@ -61,6 +74,7 @@ arrange_trend_core_outputs <- function(projection,
               natural_change = regional_data$proj_natural_change,
               fertility_rates = fertility_rates,
               mortality_rates = mortality_rates,
-              int_out_rates = int_out_rates))
+              int_out_rates = int_out_rates,
+              upc = upc))
   
 }
