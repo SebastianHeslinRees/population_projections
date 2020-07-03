@@ -23,6 +23,7 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
                                        min_age, max_age,
                                        col_aggregation=c("gss_code","sex")){
 
+  
   assert_that(!"age" %in% col_aggregation,
               msg = "In distribute_within_age_band, {age} cannot be specified in the col_aggreation variable")
 
@@ -38,6 +39,8 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
     popn_1 <- select(popn_1, -age)
   }
 
+  validate_join_population(popn_1, distribution, cols_common_aggregation = col_aggregation)
+  
   distributed <- popn_1 %>%
     left_join(distribution, by=c(col_aggregation))
 

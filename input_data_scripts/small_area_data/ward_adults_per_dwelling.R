@@ -18,7 +18,7 @@ ldd_units <- readRDS(ward_ldd_path) %>%
   ungroup()
 
 ward_popn <- readRDS(ward_estimates_path) %>%
-  filter(year %in% 2012:most_recent_data_year)
+  filter(year %in% 2011:most_recent_data_year)
 
 ward_ce <- readRDS(ward_communal_est_path)
 
@@ -53,10 +53,10 @@ aylesbury_popn <- filter(base_household_adults, gss_code_ward == "E05000541") %>
   select(gss_code_ward, year, scaling) %>%
   left_join(ward_estimates, by=c("gss_code_ward","year")) %>%
   mutate(popn = popn*scaling) %>%
-  filter(year >= 2012) %>%
+  filter(year >= 2011) %>%
   select(names(ward_estimates))
 
-revised_ward_estimates <- filter(ward_estimates, gss_code_ward == "E05000541" & year < 2012) %>%
+revised_ward_estimates <- filter(ward_estimates, gss_code_ward == "E05000541" & year < 2011) %>%
   rbind(aylesbury_popn) %>%
   rbind(filter(ward_estimates, gss_code_ward != "E05000541"))
 
