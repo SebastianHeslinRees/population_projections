@@ -2,7 +2,8 @@
 % Please edit documentation in R/run_housing_led_model.R
 \name{run_housing_led_model}
 \alias{run_housing_led_model}
-\title{Run a housing-led model config file to produce a population projection}
+\title{Run a housing-led model config file to produce a population projection
+Previously housing-led control}
 \usage{
 run_housing_led_model(config_list)
 }

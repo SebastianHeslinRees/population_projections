@@ -2,8 +2,8 @@ Package: trendmodel
 Title: The GLA Population Trend Model
 Version: 0.1.0
 Authors@R: c(
-   person("Chris", "Fairless", email="demography@london.gov.uk", role = c("aut", "cre")),
-   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = c("aut", "cre")),
+   person("Chris", "Fairless", email="demography@london.gov.uk", role = "aut"),
+   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut"),
    person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = c("aut", "cre"))
    )
 Description: Functions required to project forward the UK population using the GLA Trend Model methodology.

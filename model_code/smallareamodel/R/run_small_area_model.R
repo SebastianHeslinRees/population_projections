@@ -11,8 +11,7 @@
 #' @import dplyr
 #' @importFrom assertthat assert_that
 #' @importFrom dtplyr lazy_dt
-#' 
-#' @export
+#' @importfrom utils flush.console
 
 run_small_area_model <- function(config_list){
   
@@ -115,7 +114,7 @@ run_small_area_model <- function(config_list){
   for(projection_year in config_list$first_proj_yr:config_list$last_proj_yr){
     
     cat('\r',paste("  Projecting year", projection_year))
-    flush.console()
+    utils::flush.console()
     
     curr_yr_popn_constraint <- filter(popn_constraint, year == projection_year)
     curr_yr_birth_constraint <- filter(birth_constraint, year == projection_year)

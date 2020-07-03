@@ -44,9 +44,7 @@
 #' @import dplyr
 #' @importFrom tidyr pivot_longer
 #' @importFrom dtplyr lazy_dt
-#'
-#' @export
- 
+
 housing_led_core <- function(start_population,
                              trend_projection,
                              component_constraints,

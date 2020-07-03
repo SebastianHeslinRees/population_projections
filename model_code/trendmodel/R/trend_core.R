@@ -30,6 +30,7 @@
 #' @import assertthat
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
+#' @importfrom utils flush.console
 
 trend_core <- function(start_population,
                        fertility_rates, mortality_rates,
@@ -42,7 +43,7 @@ trend_core <- function(start_population,
   
   # run projection
   cat('\r',paste("  Projecting year",projection_year))
-  flush.console()
+  utils::flush.console()
   
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June

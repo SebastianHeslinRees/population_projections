@@ -2,8 +2,8 @@ Package: housingledmodel
 Title: The GLA housing-led population model
 Version: 0.1.0
 Authors@R: c(
-   person("Chris", "Fairless", email="demography@london.gov.uk", role = c("aut", "cre")),
-   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = c("aut", "cre")),
+   person("Chris", "Fairless", email="demography@london.gov.uk", role = "aut"),
+   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut"),
    person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = c("aut", "cre"))
    )
 Description: Functions required to project the population using the GLA housing-led methodology.
@@ -24,6 +24,7 @@ Imports:
     popmodules,
     utils,
     xlsx,
-    tibble
+    tibble,
+    smallareamodel
 Suggests:
     testthat

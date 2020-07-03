@@ -15,8 +15,6 @@
 #' @importFrom assertthat assert_that
 #' @importFrom tidyr pivot_longer replace_na
 #' @import dplyr
-#' 
-#' @export
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
