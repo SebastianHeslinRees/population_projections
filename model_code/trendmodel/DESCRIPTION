@@ -2,9 +2,9 @@ Package: trendmodel
 Title: The GLA Population Trend Model
 Version: 0.1.0
 Authors@R: c(
-   person("Chris", "Fairless", email="christopher.fairless@london.gov.uk", role = c("aut", "cre")),
-   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut"),
-   person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = "aut")
+   person("Chris", "Fairless", email="demography@london.gov.uk", role = c("aut", "cre")),
+   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = c("aut", "cre")),
+   person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = c("aut", "cre"))
    )
 Description: Functions required to project forward the UK population using the GLA Trend Model methodology.
 Depends: R (>= 3.5.0)
@@ -22,6 +22,7 @@ Imports:
     rmarkdown,
     stringr,
     popmodules,
-    utils
+    utils,
+    xlsx
 Suggests:
     testthat
