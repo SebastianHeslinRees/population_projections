@@ -14,6 +14,8 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tibble enframe
 #' @importFrom tidyr unnest
+#' 
+#' @export
 
 run_housing_led_model <- function(config_list){
   

@@ -70,4 +70,3 @@ msoa_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
 rm(list = setdiff(ls(), "msoa_config_list"))
 
 msoa_projection <- run_small_area_model(msoa_config_list)
-log_warnings(paste0(msoa_config_list$housing_led_model_path, msoa_config_list$projection_type,"/warnings.txt"))

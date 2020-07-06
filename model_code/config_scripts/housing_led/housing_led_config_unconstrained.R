@@ -12,6 +12,8 @@ ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_bo
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
 
+upc_path <- NULL
+
 hma_list <- NULL
 constrain_projection <- FALSE
 first_proj_yr <- 2019
@@ -56,9 +58,9 @@ config_list <- list(
   ahs_method = ahs_method,
   additional_births_path = additional_births_path,
   fertility_rates_path = fertility_rates_path,
-  upc_path = NULL)
+  upc_path = upc_path)
 
 #---------------------
 #run projection
+rm(list=setdiff(ls(),"config_list"))
 projection <- run_housing_led_model(config_list)
-log_warnings(paste0(output_dir,"warnings.txt"))

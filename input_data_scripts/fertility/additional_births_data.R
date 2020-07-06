@@ -11,7 +11,7 @@
 library(dplyr)
 library(popmodules)
 
-popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn <- readRDS("input_data/mye/2018/population_gla.rds")
 
 ons_births <- readRDS("input_data/mye/2018/births_ons.rds")
 

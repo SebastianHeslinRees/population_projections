@@ -14,7 +14,15 @@ polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_
 write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)	
 rm(polygon_splits)
 
-source("input_data_scripts/ldd/further_geom_code.R")
+#necessary packages
+pkg <- c("igraph","smoothr","lwgeom","sf")
+for(i in seq(pkg)){
+  if(!pkg[i] %in% rownames(installed.packages())){
+    install.packages(pkg[i])
+  }
+}
+
+#source("input_data_scripts/ldd/further_geom_code.R")
 source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')
@@ -26,6 +34,7 @@ source('input_data_scripts/small_area_data/ward_migration_data.R')
 source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
+
 source('input_data_scripts/small_area_data/small_area_development.R')
 
 #TESTS
@@ -94,3 +103,5 @@ test_msoa_inputs(out_migration_rates)
 test_msoa_inputs(in_migration_characteristics)
 test_msoa_inputs(births, c("year", "gss_code_msoa", "age_group"))
 test_msoa_inputs(deaths, c("year", "gss_code_msoa", "sex", "age_group"))
+
+rm(list=ls())

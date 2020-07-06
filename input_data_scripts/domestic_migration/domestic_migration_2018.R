@@ -128,3 +128,4 @@ saveRDS(dom_out_dt, file = paste0("input_data/domestic_migration/2018/domestic_m
 saveRDS(dom_in_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_in.rds"))
 saveRDS(dom_net, file = paste0("input_data/domestic_migration/2018/domestic_migration_net.rds"))
 
+rm(list=ls())

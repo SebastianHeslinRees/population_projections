@@ -12,6 +12,8 @@
 #' @importFrom assertthat assert_that
 #' @importFrom dtplyr lazy_dt
 #' @importfrom utils flush.console
+#' 
+#' @export
 
 run_small_area_model <- function(config_list){
   

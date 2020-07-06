@@ -29,3 +29,4 @@ assertthat::assert_that(dir.exists("input_data"))
 dir.create("input_data/fertility", showWarnings = FALSE)
 
 saveRDS(fertility, file = "input_data/fertility/modified_fert_rates_2017_base_trend_med.rds")
+rm(list=ls())

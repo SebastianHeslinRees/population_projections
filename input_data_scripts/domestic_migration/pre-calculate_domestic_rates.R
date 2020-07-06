@@ -7,7 +7,7 @@ dir.create(output_loc)
 
 #create domestic inputs rates
 #for 2018 and 2016 use the mye series with gla geography
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
 dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"
 
@@ -185,3 +185,5 @@ saveRDS(dom_rates_2011, paste0(output_loc, "dom_rates_2011_levels.rds"))
 saveRDS(reduced_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_reduced_ldn_in.rds")
 saveRDS(in_up_out_down, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds")
 saveRDS(increased_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_increased_ldn_in.rds")
+
+rm(list=ls())

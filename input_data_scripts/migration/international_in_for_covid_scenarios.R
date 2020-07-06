@@ -115,3 +115,4 @@ int_in_flows_6 <- int_in_flows_3 %>%
   
 saveRDS(int_in_flows_6, paste0(int_flows_loc,"int_in_pre_accession_reduced_ldn_share.rds"))
 
+rm(list=ls())

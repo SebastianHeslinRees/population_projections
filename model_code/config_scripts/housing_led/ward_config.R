@@ -69,6 +69,4 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          small_area_deaths_sya_path = small_area_deaths_sya_path)
 
 rm(list = setdiff(ls(), "ward_config_list"))
-
 ward_projection <- run_small_area_model(ward_config_list)
-log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
