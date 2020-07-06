@@ -12,16 +12,19 @@ trend_datastore_outputs(
   int_out,
   dom_in,
   dom_out,
+  upc,
   output_dir,
   excel_file_name
 )
 }
 \arguments{
-\item{population, births, deaths, int_in, int_out, dom_in, dom_out}{Data frames with population and component data.}
+\item{population, births, deaths, int_in, int_out, dom_in, dom_out}{Dataframes with population and component data.}
+
+\item{upc}{Dataframe or NULL. Contains upc component data.}
 
 \item{output_dir}{Path to output directory.}
 
-\item{excel_file_name}{Output file name. With or without xslx suffix.}
+\item{excel_file_name}{Output file name. With or without xlsx suffix.}
 }
 \description{
 Trend Model Datastore outputs

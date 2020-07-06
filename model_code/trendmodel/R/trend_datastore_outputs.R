@@ -1,14 +1,16 @@
 #' Trend Model Datastore outputs
 #'
-#' @param population,births,deaths,int_in,int_out,dom_in,dom_out Data frames with population and component data.
+#' @param population,births,deaths,int_in,int_out,dom_in,dom_out Dataframes with population and component data.
+#' @param upc Dataframe or NULL. Contains upc component data.
 #' @param output_dir Path to output directory.
-#' @param excel_file_name Output file name. With or without xslx suffix.
+#' @param excel_file_name Output file name. With or without xlsx suffix.
 #'
 #' @import dplyr
 #' @import xlsx
 #' @import popmodules
 
-trend_datastore_outputs <- function(population, births, deaths, int_in, int_out, dom_in, dom_out,
+trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
+                                    dom_in, dom_out, upc,
                                     output_dir, excel_file_name){
   
   #datastore directory
@@ -44,7 +46,6 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   dom_out <- get_component_datastore(dom_out, "dom_out")
   popn <- get_component_datastore(population, "popn")
   
-  
   components <- left_join(popn, get_gss_names(), by="gss_code") %>%
     rename(borough = gss_name,
            population = popn) %>%
@@ -56,15 +57,35 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     left_join(dom_in, by = c("gss_code", "year")) %>%
     left_join(dom_out, by = c("gss_code", "year")) %>%
     mutate(dom_net = dom_in - dom_out) %>%
-    mutate(total_change = births - deaths + int_net + dom_net) %>%
-    mutate(borough = recode(borough, "London" = "London (total)")) %>%
-    select(gss_code, borough, year,
-           population, births, deaths,
-           int_in, int_out, int_net,
-           dom_in, dom_out, dom_net,
-           total_change) %>%
-    reorder_for_output() %>%
-    as.data.frame()
+    mutate(borough = recode(borough, "London" = "London (total)"))
+  
+  if(!is.null(upc)){
+    upc <- get_component_datastore(upc, "upc")
+    
+    components <- components %>% 
+      left_join(upc, by = c("gss_code", "year")) %>% 
+      mutate(total_change = births - deaths + int_net + dom_net + upc) %>%
+      select(gss_code, borough, year,
+             population, births, deaths,
+             int_in, int_out, int_net,
+             dom_in, dom_out, dom_net, upc,
+             total_change) %>%
+      reorder_for_output() %>%
+      as.data.frame()
+    
+  } else {
+    
+    components <- components %>% 
+      mutate(total_change = births - deaths + int_net + dom_net) %>%
+      select(gss_code, borough, year,
+             population, births, deaths,
+             int_in, int_out, int_net,
+             dom_in, dom_out, dom_net,
+             total_change) %>%
+      reorder_for_output() %>%
+      as.data.frame()
+    
+  }
   
   #round data for output
   idx <- sapply(components, class)=="numeric"
@@ -82,6 +103,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   #Write xlsx file
   wb_filename <- paste(datastore_dir,excel_file_name,sep="/")
   xlsx::saveWorkbook(wb, wb_filename)
+
 }
 
 #--------------------------------------------

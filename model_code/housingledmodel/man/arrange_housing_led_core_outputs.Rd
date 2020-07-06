@@ -9,7 +9,8 @@ arrange_housing_led_core_outputs(
   projection,
   trend_projection,
   first_proj_yr,
-  last_proj_yr
+  last_proj_yr,
+  upc
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ arrange_housing_led_core_outputs(
 \item{first_proj_yr}{Numeric. First projection year}
 
 \item{last_proj_yr}{Numeric. Last projection year}
+
+\item{upc}{Dataframe or NULL. UPC component}
 }
 \value{
 A list where each element is a data frame containing data for each year

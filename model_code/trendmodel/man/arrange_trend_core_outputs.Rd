@@ -14,6 +14,7 @@ arrange_trend_core_outputs(
   int_in,
   dom_in,
   dom_out,
+  upc,
   fertility_rates,
   mortality_rates,
   int_out_rates,
@@ -38,6 +39,8 @@ arrange_trend_core_outputs(
 \item{dom_in}{Dataframe. Backseries domestic in migration data}
 
 \item{dom_out}{Dataframe. Backseries domestic out migration data}
+
+\item{upc}{Dataframe or NULL. UPC component data.}
 
 \item{fertility_rates}{Dataframe. Model fertility rates}
 

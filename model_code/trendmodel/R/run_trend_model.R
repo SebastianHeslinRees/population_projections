@@ -139,7 +139,6 @@ run_trend_model <- function(config_list) {
                              first_proj_yr, config_list$n_proj_yr,
                              config_list$int_out_method)
   
-  
   ## run the core
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
@@ -148,7 +147,7 @@ run_trend_model <- function(config_list) {
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     
-    if(is.null(config_list$upc_path)){
+    if(is.null(upc)){
       curr_yr_upc <- NULL
     } else { 
       curr_yr_upc <- upc %>% filter(year == projection_year)
@@ -187,7 +186,8 @@ run_trend_model <- function(config_list) {
   }
   
   projection <- arrange_trend_core_outputs(projection,
-                                           population, births, deaths, int_out, int_in, dom_in, dom_out,
+                                           population, births, deaths, int_out,
+                                           int_in, dom_in, dom_out, upc,
                                            fertility_rates, mortality_rates,
                                            int_out_flows_rates, int_in_flows,
                                            first_proj_yr, last_proj_yr)
@@ -300,10 +300,12 @@ validate_trend_core_outputs <- function(projection) {
   components <- names(projection)
   expected_components <- c("population", "deaths","births", "int_out", "int_in",
                            "dom_out", "dom_in", "births_by_mothers_age", "natural_change",
-                           "fertility_rates", "mortality_rates", "int_out_rates")
+                           "fertility_rates", "mortality_rates", "int_out_rates", "upc")
   
   assert_that(identical(components, expected_components))
   
   #warning("Skipping tests on domestic trend output until aggregated domestic backseries are implemented")
-  sapply(projection, validate_population)
+  for(i in 1:12){ validate_population(projection[[i]]) }
+  if(!is.null(projection$upc)){validate_population(projection$upc)}
+  
 }

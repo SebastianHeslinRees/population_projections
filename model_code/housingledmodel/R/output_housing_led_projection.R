@@ -53,7 +53,7 @@ output_housing_led_projection <- function(projection, output_dir,
       as.data.frame()
   }
   
-  for(i in seq_along(projection)) {
+  for(i in 1:13) {
     col_aggregation = intersect(c("year", "gss_code", "age", "sex"), names(projection[[i]]))
     col_data <- setdiff(names(projection[[i]]), col_aggregation)
     comparison_pop <- projection$population
@@ -79,10 +79,14 @@ output_housing_led_projection <- function(projection, output_dir,
     saveRDS(projection[[i]], paste0(output_dir, names(projection)[i],".rds"))
   }
   
+  if(!is.null(projection[['upc']])){
+    saveRDS(projection[['upc']], paste0(output_dir, "upc.rds"))
+  }
+  
   validate_population(household_trajectory, col_aggregation = c("gss_code", "year"))
   saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
-  # Create extra tables to to ouput
+  # Create extra tables to to output
   names_lookup <- get_gss_names()
 
   popn <- left_join(projection[["population"]], names_lookup, by="gss_code") %>%
