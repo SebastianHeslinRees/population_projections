@@ -1,7 +1,7 @@
 # config file for model runs
 
-devtools::load_all("model_code/popmodules")
-devtools::load_all("model_code/trendmodel")
+library(popmodules)
+library(trendmodel)
 
 first_proj_yr <- 2017
 n_proj_yr <- 25

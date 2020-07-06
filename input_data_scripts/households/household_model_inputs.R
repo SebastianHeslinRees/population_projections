@@ -1,7 +1,7 @@
 #ONS Household Rates
 library(dplyr)
 library(data.table)
-devtools::load_all("model_code/popmodules/")
+library(popmodules)
 
 read_hh_rates_files <- function(file, file_location, yr){
   

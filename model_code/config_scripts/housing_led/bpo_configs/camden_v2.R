@@ -1,5 +1,7 @@
 #Revised camden trajectory. Sent on 22/06/20
-source('model_code/model_scripts/housing_led/run_bpo_projection.R')
+library(popmodules)
+library(trendmodel)
+library(housingledmodel)
 
 # for(scenario in c("high","medium","low")){
 #   

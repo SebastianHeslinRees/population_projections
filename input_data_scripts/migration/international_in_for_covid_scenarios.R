@@ -3,7 +3,7 @@
 #changes.
 
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 int_flows_loc <- "input_data/mye/2019/"
 

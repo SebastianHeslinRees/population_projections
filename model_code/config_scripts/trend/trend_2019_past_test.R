@@ -1,7 +1,7 @@
 # run the model from a year in the past - testing config
 
-devtools::load_all("model_code/popmodules")
-devtools::load_all("model_code/trendmodel")
+library(popmodules)
+library(trendmodel)
 
 first_proj_yr <- 2012
 n_proj_yr <- 20

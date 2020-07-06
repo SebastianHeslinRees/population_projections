@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #ONS population
 source('input_data_scripts/mye/ons_popn_2019.R')

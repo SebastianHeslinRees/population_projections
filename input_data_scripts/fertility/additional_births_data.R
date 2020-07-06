@@ -9,7 +9,7 @@
 # TODO adapt this for the trend model as well
 
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds")
 

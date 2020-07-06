@@ -1,5 +1,5 @@
-devtools::load_all("model_code/popmodules")
-devtools::load_all('model_code/smallareamodel')
+library(popmodules)
+library(smallareamodel)
 
 projection_name <- "2018_based_shlaa_dev_20-02-05_1808"
 

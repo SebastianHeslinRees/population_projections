@@ -1,6 +1,6 @@
-devtools::load_all("model_code/popmodules")
-devtools::load_all("model_code/trendmodel")
-devtools::load_all("model_code/housingledmodel")
+library(popmodules)
+library(trendmodel)
+library(housingledmodel)
 
 #Setup
 projection_name <- "2018_based_shlaa_dev_medium_migration"

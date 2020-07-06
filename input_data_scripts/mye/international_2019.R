@@ -1,4 +1,4 @@
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 library(dplyr)
 
 #2019

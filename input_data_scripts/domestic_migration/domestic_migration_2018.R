@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 library(assertthat)
 library(data.table)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 rm(list=ls()) # we're going to need memory, sorry
 message("domestic migration")

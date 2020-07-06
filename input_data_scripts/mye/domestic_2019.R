@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #read in all the other components
 ons_popn <- readRDS("input_data/mye/2019/temp_ons_popn.rds")

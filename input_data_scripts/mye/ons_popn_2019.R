@@ -1,4 +1,4 @@
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 library(dplyr)
 
 female_2019 <- data.table::fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_females.csv",

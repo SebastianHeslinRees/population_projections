@@ -1,4 +1,4 @@
-devtools::load_all('model_code/housingledmodel')
+library(housingledmodel)
 
 for(scenario in c("high","medium","low")){
   bpo_name <- run_bpo_projection(bpo_name = "hounslow_heston_divided",

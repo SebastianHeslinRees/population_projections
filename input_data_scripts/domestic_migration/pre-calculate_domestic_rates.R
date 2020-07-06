@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 output_loc <- "input_data/domestic_migration/processed_rates/"
 dir.create(output_loc)

@@ -1,7 +1,7 @@
 library(data.table)
 library(dplyr)
 library(tidyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #Set these to the location of the final borough components
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"

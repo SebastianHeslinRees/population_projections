@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #read in all the other components
 gla_popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>%

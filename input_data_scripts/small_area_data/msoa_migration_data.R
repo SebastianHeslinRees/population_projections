@@ -1,7 +1,7 @@
 library(data.table)
 library(dplyr)
 library(tidyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #Set these to the location of the final borough components
 mye_popn_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
