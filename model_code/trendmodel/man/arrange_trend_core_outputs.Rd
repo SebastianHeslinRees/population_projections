@@ -50,8 +50,6 @@ arrange_trend_core_outputs(
 \item{first_proj_yr}{Numeric. First projection year}
 
 \item{last_proj_yr}{Numeric. Last projection year}
-
-\item{domestic_rates}{Dataframe. Model domestic migration rates}
 }
 \value{
 A list where each element is a data frame containing data for each year

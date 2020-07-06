@@ -37,8 +37,9 @@ Default to \code{TRUE}.}
 \item{recode_gla_codes}{Logical. If set to \code{TRUE} recodes to the codes used in
 2018-based and earlier projections. This is introduced for backward
 compatibility and doesn't correspond to any single vintage year.
-Default \code{FALSE}.
-@param code_changes_path string. file path to the code changes database.}
+Default \code{FALSE}.}
+
+\item{code_changes_path}{string. file path to the code changes database.}
 }
 \value{
 The input dataframe with gss codes changed and data aggregated

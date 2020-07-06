@@ -28,6 +28,13 @@ trajectory.}
 \item{small_area_dev_trajectory_path}{String containing a path the the input
 development trajectory at small-area resolution.}
 
+\item{first_proj_yr}{Integer. First year of projection.}
+
+\item{last_proj_yr}{Integer. Last year of projection.}
+
+\item{bpo}{Logical. Is this a bpo projection. Used in setting the output dir
+and in whether bpo-specific outputs are triggered. Default \code{FALSE}.}
+
 \item{housing_led_params, small_area_params}{Lists containing other key-value
 pairs of configuration parameters for the two models. These will be written
 over the default values, but won't supersede the above parameters. Note
@@ -35,9 +42,12 @@ that parameters constructed from other parameters, e.g.
 external_ahs_trajectory_path which depends on external_trend_path, will
 need to be specified as well.}
 
-\item{first_proj_year}{Integer. First year of projection.}
+\item{fertility_scenario}{String. Will the model use fertility rates based on
+an \code{average} or a \code{trend} pf past data.}
 
-\item{last_proj_year}{Integer. Last year of projection.}
+\item{ldd_final_yr}{Numeric The final year for which LDD data is to be used}
+
+\item{constrain_projection}{Logical. Should the projection be constrained}
 }
 \description{
 Run the housing led and ward models with parametrised inputs

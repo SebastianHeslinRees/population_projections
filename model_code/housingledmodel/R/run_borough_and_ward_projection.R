@@ -6,14 +6,21 @@
 #'   trajectory.
 #' @param small_area_dev_trajectory_path String containing a path the the input
 #'   development trajectory at small-area resolution.
-#' @param first_proj_year Integer. First year of projection.
-#' @param last_proj_year Integer. Last year of projection.
+#' @param first_proj_yr Integer. First year of projection.
+#' @param last_proj_yr Integer. Last year of projection.
+#' @param bpo Logical. Is this a bpo projection. Used in setting the output dir
+#'   and in whether bpo-specific outputs are triggered. Default \code{FALSE}.
 #' @param housing_led_params,small_area_params Lists containing other key-value
 #'   pairs of configuration parameters for the two models. These will be written
 #'   over the default values, but won't supersede the above parameters. Note
 #'   that parameters constructed from other parameters, e.g.
 #'   external_ahs_trajectory_path which depends on external_trend_path, will
 #'   need to be specified as well.
+#' @param fertility_scenario String. Will the model use fertility rates based on
+#'   an \code{average} or a \code{trend} pf past data.
+#' @param ldd_final_yr Numeric The final year for which LDD data is to be used
+#' @param constrain_projection Logical. Should the projection be constrained
+#' 
 #'   
 #' @import popmodules
 #' @import trendmodel
@@ -61,9 +68,6 @@ run_borough_and_ward_projection <- function(projection_name,
   } else {
     output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
-  
-  domestic_transition_yr <- NULL
-  domestic_long_term_rate_path <- NULL
   
   list2env(housing_led_params, environment())
   

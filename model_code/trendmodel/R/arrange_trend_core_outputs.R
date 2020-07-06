@@ -17,7 +17,6 @@
 #' @param mortality_rates Dataframe. Model mortality rates
 #' @param int_out_rates Dataframe. Model international out migration rates
 #' @param int_in_flows Dataframe. Model internation in migration flows
-#' @param domestic_rates Dataframe. Model domestic migration rates
 #' @param first_proj_yr Numeric. First projection year
 #' @param last_proj_yr Numeric. Last projection year
 #'

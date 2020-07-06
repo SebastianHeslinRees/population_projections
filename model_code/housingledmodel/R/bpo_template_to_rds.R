@@ -4,10 +4,10 @@
 #' rds files - 1 ward and 1 borough - where additional data
 #' not contained in the template is taken from the SHLAA
 #'
-#' @param csv_name The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
+#' @param csv_name String. The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
 #'   With or without the \code{.csv} suffix.
-#' @param bpo_dir The folder containing the dwelling trajectory csv.
-#' @param shlaa_first_yr The first year in ehich to use shlaa development data.
+#' @param bpo_dir String. The folder containing the dwelling trajectory csv.
+#' @param shlaa_first_yr Numeric. The first year in which to use shlaa development data.
 #'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.
 #' @param dev_first_yr Numeric. The first year for which development data is provided. \code{Default 2019}.  
 #'

@@ -21,6 +21,7 @@
 #'
 #' @import dplyr
 #' @import tidyr
+#' @export
 
 get_rates_flows_info <- function(data_list, first_proj_yr, last_proj_yr){
   

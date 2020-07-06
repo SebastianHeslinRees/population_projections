@@ -31,16 +31,19 @@ function for the \code{projection_year}}
 
 \item{component_constraints}{A dataframe. The component constraints by borough}
 
+\item{hma_constraint}{A dataframe. The total population constrain by housing
+market area (HMA)}
+
 \item{communal_establishment_population}{A dataframe. The communal establishment
 population for the \code{projection_year}}
 
 \item{external_ahs}{A set of average household size rates by geographic
 aggreagtion and year consistent with the \code{commual_establishment_population}}
 
-\item{households_1}{A dataframe. For each geogrpahic aggregation a number of
-total households to be used in calculating the current year trend ahs}
+\item{households_1}{A dataframe. For each geographic aggregation a number of
+total households to be used in calculating the current year trend AHS}
 
-\item{households_2}{A dataframe. For each geogrpahic aggregation a number of
+\item{households_2}{A dataframe. For each geographic aggregation a number of
 total households to be used in calculating the population by applying an AHS
 rate}
 
@@ -51,14 +54,14 @@ form a housing market area (HMA). The name in the list is the name of the HMA.}
 
 \item{ahs_cap_year}{Numeric. The year in which to set the AHS cap}
 
-\item{ahs_cap}{A dataframe or NULL. When no ahs cap has been set this
-parameter is set to \code{NULL}. Once a set of ahs caps have been
+\item{ahs_cap}{A dataframe or NULL. When no AHS cap has been set this
+parameter is set to \code{NULL}. Once a set of AHS caps have been
 this becomes the dataframe containing those caps}
 
-\item{ahs_method}{A string or Numeric. If the ahs tree method is to be used,
-set to \code{tree}, else the flaoting ahs method will be used. In this case
+\item{ahs_method}{A string or Numeric. If the AHS tree method is to be used,
+set to \code{tree}, else the floating AHS method will be used. In this case
 the parameter is a numeric between 0 and 1. It acts to determine the mix
-between the external ahs and the trend ahs where 0 is the external and 1 is
+between the external AHS and the trend AHS where 0 is the external and 1 is
 the trend.}
 
 \item{ldd_final_yr}{Numeric. The final year for which LDD development data 
@@ -68,8 +71,8 @@ is available.}
 be constrained (at the borough level for components and at hma level for
 population totals.) If \code{FALSE} the model is run unconstrained.}
 
-\item{hma_constraint.}{A dataframe. The total population constrain by housing
-market area (HMA)}
+\item{actual_births}{A dataframe containing actual births data to be used in
+core in place of calculated births}
 }
 \value{
 A list where each element is a data frame containing either projected population or

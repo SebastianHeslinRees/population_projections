@@ -6,7 +6,7 @@
 #' a list of dataframes of components.
 #'
 #' @param projection A list. The output list from the \code{housing_led_core} function
-#' @param trend_rpojection A list. The output flist rom the \code{trend_core} function
+#' @param trend_projection A list. The output list from the \code{trend_core} function
 #' @param first_proj_yr Numeric. First projection year
 #' @param last_proj_yr Numeric. Last projection year
 #'

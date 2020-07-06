@@ -5,6 +5,7 @@
 #' @param model String. Either "ons" or "dclg".
 #' @param output_dir Location for output.
 #' @param write_excel Logical. Whether to output Excel .xls files.
+#' @param projection_name String. The projection name
 #'
 #' @import dplyr
 #' @import popmodules

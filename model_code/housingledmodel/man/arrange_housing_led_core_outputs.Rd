@@ -15,11 +15,11 @@ arrange_housing_led_core_outputs(
 \arguments{
 \item{projection}{A list. The output list from the \code{housing_led_core} function}
 
+\item{trend_projection}{A list. The output list from the \code{trend_core} function}
+
 \item{first_proj_yr}{Numeric. First projection year}
 
 \item{last_proj_yr}{Numeric. Last projection year}
-
-\item{trend_rpojection}{A list. The output flist rom the \code{trend_core} function}
 }
 \value{
 A list where each element is a data frame containing data for each year

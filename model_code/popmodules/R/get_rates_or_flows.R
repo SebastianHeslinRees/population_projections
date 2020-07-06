@@ -18,6 +18,7 @@
 #'   rates or flows to be used in future calculations
 #'
 #' @import dplyr
+#' @export
 
 get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
                                 col_aggregation, data_col){

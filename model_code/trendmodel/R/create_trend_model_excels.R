@@ -27,8 +27,7 @@ create_trend_model_excels <- function(trend_dir, excel_file_name){
                     dom_in = readRDS(paste0(trend_dir,"dom_in.rds")),
                     dom_out = readRDS(paste0(trend_dir,"dom_out.rds")),
                     output_dir = trend_dir,
-                    excel_file_name = excel_file_name,
-                    write_excel = T)
+                    excel_file_name = excel_file_name)
 
   for(model in c("ons","dclg")){
     household_model_outputs(model_output = readRDS(paste0(trend_dir, model, "_households.rds")),

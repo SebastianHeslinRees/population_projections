@@ -21,6 +21,7 @@
 #' @param upc A data frame. Unattributable population change component. If no UPC is being applied this
 #'   is set to NULL. Default \code{NULL}
 #' @param projection_year Numeric. The year being projected
+#' @param region_lookup Dataframe A lookup between LAD gss codes and region gss codes
 #'
 #' @return A list where each element is a data frame containing either projected population or
 #' projected components of change.
@@ -189,8 +190,8 @@ trend_core <- function(start_population,
   reg_dom_in <- sum_domestic_flows(regional_flow, "in")
   
   #National E, W, S, NI gross flows
-  nat_dom_out <- sum_domestic_flows(national_flow, "out")
-  nat_dom_in <- sum_domestic_flows(national_flow, "in")
+  #nat_dom_out <- sum_domestic_flows(national_flow, "out")
+  #nat_dom_in <- sum_domestic_flows(national_flow, "in")
   
   #Bind and de-duplicate
   dom_out_with_regions <- dom_out %>%

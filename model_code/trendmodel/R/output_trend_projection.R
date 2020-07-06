@@ -8,7 +8,7 @@
 #' @param write_excel Logical. Should the Excel outputs be written
 #' @param n_csv_elements Numeric. The function will output csv files for elements
 #'  1:\code{n_csv_elements} of the \code{projection} list.
-#'  @param projection_name String. Name of the projection.
+#' @param projection_name String. Name of the projection.
 #'
 #' @import dplyr
 #' @import popmodules
@@ -16,7 +16,7 @@
 #' @importFrom data.table fwrite
 #' @importFrom tidyr pivot_wider
 
-output_projection <- function(projection, output_dir, write_excel, n_csv_elements,
+output_trend_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                               projection_name) {
   
   projection[1:12] <- lapply(projection[1:12], reorder_for_output) 

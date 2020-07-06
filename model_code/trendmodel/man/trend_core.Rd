@@ -45,6 +45,8 @@ is to be run unconstrained this is set to NULL. Default \code{NULL}}
 is set to NULL. Default \code{NULL}}
 
 \item{projection_year}{Numeric. The year being projected}
+
+\item{region_lookup}{Dataframe A lookup between LAD gss codes and region gss codes}
 }
 \value{
 A list where each element is a data frame containing either projected population or

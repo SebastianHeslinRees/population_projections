@@ -31,11 +31,20 @@ Effectively the final year of the supplied trajectory plus 1. \code{Default 2042
 
 \item{dev_first_yr}{Numeric. The first year for which development data is provided. \code{Default 2019}.}
 
+\item{ldd_final_yr}{Numeric. The final year of the LDD dwellings backseries. \code{Default 2018}.}
+
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv}
 
-\item{ldd_last_yr}{Numeric. The final year of the LDD dwellings backsries. \code{Default 2018}.}
+\item{migration_scenario}{String. The domestic migration scenario \code{high}, \code{medium} or \code{low}.}
 
-\item{migration_sceanrio}{String. The domestic migration scenario \code{high}, \code{medium} or \code{low}.}
+\item{csv_name}{String. The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
+With or without the \code{.csv} suffix. Default is \code{bpo_name}}
+
+\item{housing_led_params}{A list of parameters (a partial config list) to be passed to the housing-led model.
+These will overwrite the default parameters for the bpo projection.}
+
+\item{fertility_scenario}{String. Should the model use fertility rates based on an \code{average} or
+a \code{trend} of past data. Default is \code{average}}
 }
 \description{
 A wrapper for create_bpo_trajectory and run_borough_and_ward

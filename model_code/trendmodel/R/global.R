@@ -76,5 +76,7 @@ globalVariables(c(
   "variant",
   "curve_count",
   "rounded",
-  "flow"
+  "flow",
+  "average_household_size",
+  "borough"
 ))

@@ -9,9 +9,15 @@
 #' @param first_proj_yr Numeric. The first projection year \code{default 2019}
 #' @param last_proj_yr Numeric. The final projection year \code{default 2050}
 #' @param dev_first_yr Numeric. The first year for which development data is provided. \code{Default 2019}.
-#' @param ldd_last_yr Numeric. The final year of the LDD dwellings backsries. \code{Default 2018}.
+#' @param ldd_final_yr Numeric. The final year of the LDD dwellings backseries. \code{Default 2018}.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv
-#' @param migration_sceanrio String. The domestic migration scenario \code{high}, \code{medium} or \code{low}.
+#' @param migration_scenario String. The domestic migration scenario \code{high}, \code{medium} or \code{low}.
+#' @param csv_name String. The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
+#'   With or without the \code{.csv} suffix. Default is \code{bpo_name}
+#' @param housing_led_params A list of parameters (a partial config list) to be passed to the housing-led model.
+#'   These will overwrite the default parameters for the bpo projection.
+#' @param fertility_scenario String. Should the model use fertility rates based on an \code{average} or
+#'  a \code{trend} of past data. Default is \code{average}
 #'
 #' @import dplyr
 
