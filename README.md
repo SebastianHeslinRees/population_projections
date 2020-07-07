@@ -11,9 +11,9 @@ The `trendmodel`, `housingledmodel` and `smallareamodel` packages contain functi
 
 ## Installation
 
-To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the popmodules RStudio project within the repository (`model_code/popmodules/popmodules.Rproj`) and run the following scripts:
+To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the RStudio project within the repository root (`population_projections.Rproj`) and run the following scripts:
 
-`input_data_scripts/initialize.R` Will install 4 packages which comprise the gla models suite. It will also create the data needed to run the trend and houing-led models
+`input_data_scripts/initialize.R` Will install 4 packages which comprise the gla models suite. It will also create the data needed to run the trend and houing-led models.
 
 `input_data_scripts/intitalize_small_area.R` will create the data needed to run the small area model.
 
@@ -23,5 +23,5 @@ To install, download the `population_projections` repository from the GLA GitHub
 
 ## Running the models
 
-Each model package has a *run model* function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `model_code/config_scripts` folder.
+Each model package has a `run_model()` function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `model_code/config_scripts` folder.
 
