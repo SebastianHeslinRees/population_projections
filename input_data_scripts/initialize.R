@@ -1,5 +1,7 @@
-#check for packages needed to run the input scripts and install any that are missing
-pkg <- c("dplyr", "tidyr", "data.table", "assertthat", "stringr")
+#check for packages needed to run the input scripts/models  and install any that are missing
+pkg <- c("assertthat", "data.table", "dplyr", "dtplyr", "minpack.lm", "purrr", 
+         "rmarkdown", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
+
 for(i in seq(pkg)){
   if(!pkg[i] %in% rownames(installed.packages())){
     install.packages(pkg[i])
