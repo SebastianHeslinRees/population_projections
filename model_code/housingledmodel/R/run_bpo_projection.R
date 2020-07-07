@@ -20,6 +20,7 @@
 #'  a \code{trend} of past data. Default is \code{average}
 #'
 #' @import dplyr
+#' @export
 
 run_bpo_projection <- function(bpo_name,
                                shlaa_first_yr = 2042,
@@ -32,7 +33,7 @@ run_bpo_projection <- function(bpo_name,
                                csv_name = bpo_name,
                                housing_led_params = list(),
                                fertility_scenario = "average"){
-  
+ 
   dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
 
 

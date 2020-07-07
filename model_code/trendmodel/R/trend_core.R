@@ -32,6 +32,8 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
 #' @importfrom utils flush.console
+#' 
+#' @export
 
 trend_core <- function(start_population,
                        fertility_rates, mortality_rates,

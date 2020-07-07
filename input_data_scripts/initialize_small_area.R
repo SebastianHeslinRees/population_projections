@@ -1,5 +1,5 @@
 #Initialize script for small area model data
-#Needs to be done in this order as subsequent steps use data created in precendent steps
+#Needs to be done in this order as subsequent steps use data created in precedent steps
 #Some scripts read data from Q:/
 library(dplyr)
 library(data.table)

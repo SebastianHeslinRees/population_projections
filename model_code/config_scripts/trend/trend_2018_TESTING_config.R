@@ -2,6 +2,7 @@
 
 library(popmodules)
 library(trendmodel)
+library(dplyr)
 
 first_proj_yr <- 2019
 n_proj_yr <- 2
@@ -143,6 +144,7 @@ constraint_fns <- list(list(fn = function() NULL, args = list()))
 
 qa_areas_of_interest <- list("London", "E09000001")
 
+dir.create('input_data/test_data', showWarnings = FALSE)
 upc_path <- "input_data/test_data/test_upc.rds"
 upc <- readRDS(popn_mye_path) %>% 
   filter(year %in% 2011:2012) %>%
@@ -189,15 +191,6 @@ config_list <- list(
 )
 
 rm(list = setdiff(ls(), "config_list"))
-
-# Save settings
-# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
-# if (!grepl("/$", config_list$output_dir)) config_list$output_dir <- paste0(config_list$output_dir, "/")
-# projdir <- rprojroot::find_root(rprojroot::is_git_root)
-# copy_dir <- paste0(projdir, "/", config_list$output_dir, config_list$projection_name)
-# dir.create(copy_dir, recursive = TRUE)
-# this_file <- rstudioapi::getSourceEditorContext()$path
-# file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 
 # Run the model
 projection <- run_trend_model(config_list)

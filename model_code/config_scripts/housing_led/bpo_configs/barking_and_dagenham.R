@@ -9,3 +9,9 @@ for(scenario in c("high","medium","low")){
                                  last_proj_yr = 2050,
                                  migration_scenario = scenario)
 }
+
+bpo_name <- run_bpo_projection(bpo_name = "barking_and_dagenham",
+                               shlaa_first_yr = 2035,
+                               last_proj_yr = 2050,
+                               migration_scenario = "medium",
+                               fertility_scenario = "trend")

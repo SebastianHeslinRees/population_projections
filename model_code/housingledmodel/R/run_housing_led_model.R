@@ -302,6 +302,7 @@ run_housing_led_model <- function(config_list){
   
   message(" ")
   message("Running outputs")
+  
   projection <- arrange_housing_led_core_outputs(projection,
                                                  trend_projection,
                                                  first_proj_yr,
