@@ -1,6 +1,11 @@
 #check for packages needed to run the input scripts/models  and install any that are missing
-pkg <- c("assertthat", "data.table", "dplyr", "dtplyr", "minpack.lm", "purrr", 
+pkg <- c("assertthat", "data.table", "dtplyr", "minpack.lm", "purrr", 
          "rmarkdown", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
+
+#needs old version of dplyr - waiting on bug fix in dplyr 1.0.0
+#devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
+if(packageVersion("dplyr")=="1.0.0"){stop("gla models won't run with dplyr 1.0.0. Install version 0.8.5.")}
+
 
 for(i in seq(pkg)){
   if(!pkg[i] %in% rownames(installed.packages())){
