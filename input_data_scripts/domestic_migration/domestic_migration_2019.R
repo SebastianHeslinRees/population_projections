@@ -120,7 +120,8 @@ reg_dom_in <- regional_flows %>%
                   year = 2002:2019,
                   sex = c("male","female"),
                   age = 0:90,
-                  fill = list(dom_in = 0))
+                  fill = list(dom_in = 0)) %>% 
+  filter(substr(gss_code,1,1)=="E")
 
 reg_dom_out <- regional_flows %>% 
   group_by(gss_code = gss_out, year, sex, age) %>% 
@@ -130,7 +131,8 @@ reg_dom_out <- regional_flows %>%
                   year = 2002:2019,
                   sex = c("male","female"),
                   age = 0:90,
-                  fill = list(dom_out = 0))
+                  fill = list(dom_out = 0)) %>% 
+  filter(substr(gss_code,1,1)=="E")
 
 reg_dom_net <- reg_dom_out %>%
   mutate(dom_in = dom_out *-1) %>% 
@@ -138,7 +140,8 @@ reg_dom_net <- reg_dom_out %>%
   rbind(reg_dom_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
   summarise(dom_net = sum(dom_in)) %>% 
-  data.frame()
+  data.frame() %>% 
+  filter(substr(gss_code,1,1)=="E")
 
 #---------------------------------------------------
 
@@ -158,15 +161,19 @@ national_flows <- dom_flows_output %>%
   summarise(value = sum(value)) %>% 
   data.frame()
 
+#Scotland and Northern Ireland are in the district-level data
+#Only England & Wales are missing
 nat_dom_in <- national_flows %>% 
   group_by(gss_code = gss_in, year, sex, age) %>% 
   summarise(dom_in = sum(value)) %>% 
-  data.frame() 
+  data.frame()  %>%
+  filter(gss_code %in% c("E92000001","W92000004"))
 
 nat_dom_out <- national_flows %>% 
   group_by(gss_code = gss_out, year, sex, age) %>% 
   summarise(dom_out = sum(value)) %>% 
-  data.frame() 
+  data.frame() %>%
+  filter(gss_code %in% c("E92000001","W92000004"))
 
 nat_dom_net <- nat_dom_out %>%
   mutate(dom_in = dom_out *-1) %>% 
@@ -174,13 +181,22 @@ nat_dom_net <- nat_dom_out %>%
   rbind(nat_dom_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
   summarise(dom_net = sum(dom_in)) %>% 
-  data.frame()
+  data.frame() %>%
+  filter(gss_code %in% c("E92000001","W92000004"))
 
 #---------------------------------------------------
 
-dom_in_all <- rbind(dom_in, reg_dom_in, nat_dom_in)
-dom_out_all <- rbind(dom_out, reg_dom_out, nat_dom_out)
-dom_net_all <- rbind(dom_net, reg_dom_net, nat_dom_net)
+dom_in_all <- rbind(dom_in, reg_dom_in, eng_dom_in)
+dom_out_all <- rbind(dom_out, reg_dom_out, eng_dom_out)
+dom_net_all <- rbind(dom_net, reg_dom_net, eng_dom_net)
+
+#validate
+validate_population(dom_in_all)
+validate_population(dom_out_all)
+validate_population(dom_net_all)
+
+
+#Save
 
 saveRDS(dom_in_all, paste0(output_location, "domestic_migration_in_(2020_geog).rds"))
 saveRDS(dom_out_all, paste0(output_location, "domestic_migration_out_(2020_geog).rds"))
