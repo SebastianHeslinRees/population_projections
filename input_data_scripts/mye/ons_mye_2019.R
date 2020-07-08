@@ -9,11 +9,19 @@ all_components <- readRDS(paste0(data_location, "mye_2019_detailed_components_of
 
 unique(all_components$component)
 
-split_components <- function(data, comp, data_col=comp){
+split_components <- function(data, comp, data_col=comp, check_neg=TRUE){
   
-  x <- filter(data, component == comp) %>%
-    select(gss_code, year, sex, age, value) %>%
-    rename(!!sym(data_col) := value)
+  if(check_neg){
+    x <- filter(data, component == comp) %>%
+      select(gss_code, year, sex, age, value)  %>%
+      check_negative_values("value") %>%
+      rename(!!sym(data_col) := value)
+  } else {
+    x <- filter(data, component == comp) %>%
+      select(gss_code, year, sex, age, value)  %>%
+      rename(!!sym(data_col) := value)
+  }
+  
 }
 
 population <- split_components(all_components, "population", "popn")
@@ -21,14 +29,15 @@ births <- split_components(all_components, "births")
 deaths <-  split_components(all_components, "deaths")
 dom_in <- split_components(all_components, "internal_in", "dom_in")
 dom_out <- split_components(all_components, "internal_out", "dom_out")
-dom_net <- split_components(all_components, "internal_net", "dom_net")
 int_in <- split_components(all_components, "international_in", "int_in")
 int_out <- split_components(all_components, "international_out", "int_out")
-int_net <- split_components(all_components, "international_net", "int_net")
 
-other <- rbind(split_components(all_components, "unattrib", "upc"),
-               split_components(all_components, "other_adjust", "upc"),
-               split_components(all_components, "special_change", "upc")) %>%
+dom_net <- split_components(all_components, "internal_net", "dom_net", check_neg=FALSE)
+int_net <- split_components(all_components, "international_net", "int_net", check_neg=FALSE)
+
+other <- rbind(split_components(all_components, "unattrib", "upc", check_neg=FALSE),
+               split_components(all_components, "other_adjust", "upc", check_neg=FALSE),
+               split_components(all_components, "special_change", "upc", check_neg=FALSE)) %>%
   group_by(gss_code, year, sex, age) %>% 
   summarise(upc = sum(upc)) %>% 
   data.frame()
@@ -44,6 +53,6 @@ saveRDS(dom_net, paste0(output_location, "dom_net_ons.rds"))
 saveRDS(int_in, paste0(output_location, "int_in_ons.rds"))
 saveRDS(int_out, paste0(output_location, "int_out_ons.rds"))
 saveRDS(int_net, paste0(output_location, "int_net_ons.rds"))
-saveRDS(dom_in, paste0(output_location, "dom_in_ons.rds"))
-saveRDS(dom_out, paste0(output_location, "dom_out_ons.rds"))
 saveRDS(other, paste0(output_location, "upc_ons.rds"))
+
+rm(list=ls())
