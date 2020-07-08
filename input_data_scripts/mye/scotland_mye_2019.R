@@ -103,6 +103,7 @@ ons_int_out <- rbind(ons_int_out, sc_int_out)
 sc_int_net <- mutate(sc_int_out, int_net = int_out*-1) %>%
   select(-int_out) %>% 
   rbind(rename(sc_int_in, int_net = int_in)) %>%
+  filter(year == 2019) %>% 
   group_by(gss_code,year,sex,age) %>% 
   summarise(int_net = sum(int_net)) %>% 
   data.frame() %>%
@@ -111,6 +112,14 @@ sc_int_net <- mutate(sc_int_out, int_net = int_out*-1) %>%
 ons_int_net <- readRDS(paste0(output_location, "int_net_ons.rds")) %>% 
   rbind(sc_int_net)
 
+#validate data
+validate_population(ons_popn)
+validate_population(ons_births)
+validate_population(ons_deaths)
+validate_population(ons_int_in)
+validate_population(ons_int_out)
+validate_population(ons_int_net)
+
 #Bind to ONS data and save
 saveRDS(ons_popn, paste0(output_location, "population_ons.rds"))
 saveRDS(ons_births, paste0(output_location, "births_ons.rds"))
@@ -118,3 +127,5 @@ saveRDS(ons_deaths, paste0(output_location, "deaths_ons.rds"))
 saveRDS(ons_int_in, paste0(output_location, "int_in_ons.rds"))
 saveRDS(ons_int_out, paste0(output_location, "int_out_ons.rds"))
 saveRDS(ons_int_net, paste0(output_location, "int_net_ons.rds"))
+
+rm(list=ls())
