@@ -43,6 +43,18 @@ other <- rbind(split_components(all_components, "unattrib", "upc", check_neg=FAL
   data.frame()
 
 #------------
+validate_population(population)
+validate_population(births)
+validate_population(deaths)
+validate_population(dom_in)
+validate_population(dom_out)
+validate_population(int_in)
+validate_population(int_out)
+validate_population(int_net)
+validate_population(dom_net)
+validate_population(other)
+
+#------------
 
 saveRDS(population, paste0(output_location, "population_ons.rds"))
 saveRDS(births, paste0(output_location, "births_ons.rds"))
