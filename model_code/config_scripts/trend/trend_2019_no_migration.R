@@ -157,13 +157,6 @@ config_list <- list(
   dclg_stage2_file_path = dclg_stage2_file_path
 )
 
-# Save settings
-# projdir <- rprojroot::find_root(rprojroot::is_git_root)
-# copy_dir <- paste0(projdir, "/", output_dir)
-# dir.create(copy_dir, recursive = TRUE)
-# this_file <- rstudioapi::getSourceEditorContext()$path
-# file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
-
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
