@@ -73,9 +73,9 @@ dom_rates_2yr_avg_2018 <- rates_backseries %>%
 #Use 2020 geography MYE files
 
 #create domestic inputs rates
-popn_mye_path <- "input_data/mye/2019/temp_gla_population.rds"
-births_mye_path <-  "input_data/mye/2019/temp_births.rds"
-dom_origin_destination_path <- "input_data/domestic_migration/2019/temp_domestic_flows.rds"
+popn_mye_path <- "input_data/mye/2019/population_ons.rds"
+births_mye_path <-  "input_data/mye/2019/births_ons.rds"
+dom_origin_destination_path <- "input_data/domestic_migration/2019/domestic_migration_flows_ons_(2020_geog).rds"
 
 
 #All rates

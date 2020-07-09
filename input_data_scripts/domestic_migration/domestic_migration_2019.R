@@ -62,7 +62,7 @@ popmodules::validate_same_geog(past_data, dom_flows, "gss_out", "gss_out")
 #combine and save
 dom_flows_output <- rbind(past_data, dom_flows)
 rm(list=setdiff(ls(), c("dom_flows_output","output_location")))
-saveRDS(dom_flows_output, paste0(ouput_location, "domestic_migration_flows_ons_(2020_geog).rds"))
+saveRDS(dom_flows_output, paste0(output_location, "domestic_migration_flows_ons_(2020_geog).rds"))
 
 #------------------------------------
 
@@ -186,9 +186,9 @@ nat_dom_net <- nat_dom_out %>%
 
 #---------------------------------------------------
 
-dom_in_all <- rbind(dom_in, reg_dom_in, eng_dom_in)
-dom_out_all <- rbind(dom_out, reg_dom_out, eng_dom_out)
-dom_net_all <- rbind(dom_net, reg_dom_net, eng_dom_net)
+dom_in_all <- rbind(dom_in, reg_dom_in, nat_dom_in)
+dom_out_all <- rbind(dom_out, reg_dom_out, nat_dom_out)
+dom_net_all <- rbind(dom_net, reg_dom_net, nat_dom_net)
 
 #validate
 validate_population(dom_in_all)
