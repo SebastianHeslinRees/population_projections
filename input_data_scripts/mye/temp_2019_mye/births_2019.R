@@ -1,6 +1,6 @@
 library(data.table)
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #2019 Births
 

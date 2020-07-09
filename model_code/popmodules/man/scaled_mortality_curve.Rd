@@ -14,7 +14,8 @@ scaled_mortality_curve(
   n_years_to_avg,
   avg_or_trend,
   data_col = "deaths",
-  output_col
+  output_col,
+  project_rate_from = last_data_year + 1
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ or by linear regression \code{Trend}.}
 \item{data_col}{Character. The column in the \code{deaths} dataframe containing the rates. Defaults to \code{deaths}}
 
 \item{output_col}{Character. The name of the column in the output dataframe containing the calculated rates}
+
+\item{project_rate_from}{Numeric. The year for which a rate is being calculated. Default \code{last_data_year+1}.}
 }
 \value{
 A data frame of mortality probabilities rates by LA, year, sex and age with the same age structure

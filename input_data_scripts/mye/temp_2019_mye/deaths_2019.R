@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 deaths_2018 <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/calendar_year_deaths/deaths_calendar_2018.csv",
                                  header = TRUE) %>%

@@ -1,6 +1,7 @@
 # config file for model runs
 
-devtools::load_all("model_code/popmodules")
+library(popmodules)
+library(trendmodel)
 
 first_proj_yr <- 2020
 n_proj_yr <- 2
@@ -158,17 +159,9 @@ config_list <- list(
   dclg_stage2_file_path = dclg_stage2_file_path
 )
 
-# Save settings
-# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
-projdir <- rprojroot::find_root(rprojroot::is_git_root)
-copy_dir <- paste0(projdir, "/", output_dir)
-dir.create(copy_dir, recursive = TRUE)
-this_file <- rstudioapi::getSourceEditorContext()$path
-file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
-
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
-source("model_code/model_scripts/trend/00_control.R")
+
 projection <- run_trend_model(config_list)
 log_warnings(paste0(config_list$output_dir, "warnings.txt"))

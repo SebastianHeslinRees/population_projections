@@ -6,7 +6,6 @@ library(purrr)
 
 # setwd("..")
 # setwd("..")
-# devtools::load_all()
 # setwd("..")
 # setwd("..")
 # setwd("model_code/popmodules/tests/testthat")

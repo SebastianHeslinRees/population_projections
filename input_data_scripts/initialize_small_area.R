@@ -1,5 +1,5 @@
 #Initialize script for small area model data
-#Needs to be done in this order as subsequent steps use data created in precendent steps
+#Needs to be done in this order as subsequent steps use data created in precedent steps
 #Some scripts read data from Q:/
 library(dplyr)
 library(data.table)
@@ -14,7 +14,15 @@ polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_
 write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)	
 rm(polygon_splits)
 
-source("input_data_scripts/ldd/further_geom_code.R")
+#necessary packages
+pkg <- c("igraph","smoothr","lwgeom","sf")
+for(i in seq(pkg)){
+  if(!pkg[i] %in% rownames(installed.packages())){
+    install.packages(pkg[i])
+  }
+}
+
+#source("input_data_scripts/ldd/further_geom_code.R")
 source('input_data_scripts/ldd/ldd.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')
@@ -27,8 +35,7 @@ source('input_data_scripts/small_area_data/msoa_communal_establishment_populatio
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
 
-file.copy("Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2016/October 2017 (v2)/Output/borough_shlaa_trajectory.rds",
-          "input_data/housing_led_model/borough_shlaa_trajectory.rds")
+source('input_data_scripts/small_area_data/small_area_development.R')
 
 #TESTS
 rm(list=ls())
@@ -96,3 +103,5 @@ test_msoa_inputs(out_migration_rates)
 test_msoa_inputs(in_migration_characteristics)
 test_msoa_inputs(births, c("year", "gss_code_msoa", "age_group"))
 test_msoa_inputs(deaths, c("year", "gss_code_msoa", "sex", "age_group"))
+
+rm(list=ls())

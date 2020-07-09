@@ -14,24 +14,29 @@ calculate_mean_international_rates_or_flows(
   data_col,
   first_proj_yr,
   n_proj_yr,
-  rate_cap
+  rate_cap,
+  modify_rates_and_flows = 1,
+  project_rate_from = last_data_year + 1
 )
 }
 \arguments{
-\item{popn_mye_path}{Character. The path to the mye backseries population.}
+\item{popn_mye_path}{Character. The path to the mye backseries population
+when \code{flow_or_rate} is \code{"rate"}.}
 
-\item{births_mye_path}{Character. The path to the mye births backseries.}
+\item{births_mye_path}{Character. The path to the mye births backseries when
+\code{flow_or_rate} is \code{"rate"}.}
 
 \item{flow_or_rate}{Character. Either "flow" or "rate" - determines whether
 the function returns absolute flows or migration rates.}
 
-\item{component_path}{Character The path to the international in or out migration
-component from the mye.}
+\item{component_path}{Character The path to the international in or out
+migration component from the mye.}
 
 \item{last_data_year}{Integer. The last year of data on which to calculate
 averages.}
 
-\item{n_years_to_avg}{Integer. The number of years to use in calculating averages.}
+\item{n_years_to_avg}{Integer. The number of years to use in calculating
+averages.}
 
 \item{data_col}{Character. The column in the component dataframe containing
 the flow data.}
@@ -42,11 +47,17 @@ not always be the last_data_year + 1).}
 \item{n_proj_yr}{Numeric. The number of years to project forward.}
 
 \item{rate_cap}{Numeric. A cap constraining the maximum rates output.}
+
+\item{modify_rates_and_flows}{Numeric. A factor to scale the output rates or
+flows by. Applied last, but before the cap. Default 1.}
+
+\item{project_rate_from}{Numeric. The year for which the average being
+calculated is to be used. Default \code{last_data_year+1}.}
 }
 \value{
 A data frame of international migration probabilities.
 }
 \description{
-A wrapper for \code{calc_mean_rate} which prepares mye
+A wrapper for \code{calculate_mean_from_backseries} which prepares mye
 and international in/out flow component data.
 }

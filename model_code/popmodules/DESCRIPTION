@@ -27,4 +27,4 @@ Imports:
     purrr,
     minpack.lm,
     testthat (>= 2.1.0)
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

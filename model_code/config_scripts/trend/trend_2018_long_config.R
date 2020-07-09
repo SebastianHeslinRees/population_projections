@@ -1,16 +1,17 @@
 # config file for model runs
 
-devtools::load_all("model_code/popmodules")
+library(popmodules)
+library(trendmodel)
 
 first_proj_yr <- 2019
 n_proj_yr <- 32
 projection_name <- "2018_long"
 
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla.rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 upc_path <- NULL
@@ -185,5 +186,5 @@ this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 
 # Run the model
-source("model_code/model_scripts/trend/00_control.R")
+
 projection <- run_trend_model(config_list)

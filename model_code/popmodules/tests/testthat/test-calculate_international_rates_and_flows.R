@@ -1,6 +1,5 @@
 library(dplyr)
 library(testthat)
-#devtools::load_all()
 
 # popn <- expand.grid(year = c(2000:2004),
 #                     gss_code = c("E0901", "E0902"),

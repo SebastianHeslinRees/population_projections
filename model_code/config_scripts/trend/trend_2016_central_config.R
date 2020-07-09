@@ -1,6 +1,7 @@
 # config file for model runs
 
-devtools::load_all("model_code/popmodules")
+library(popmodules)
+library(trendmodel)
 
 first_proj_yr <- 2017
 n_proj_yr <- 34
@@ -119,6 +120,7 @@ domestic_rates <- list('2017' = list(path = paste0(dom_rates_loc,"dom_rates_10yr
 #-----------------------------------------------------
 
 constraint_fns <- list(list(fn = function() NULL, args = list()))
+qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
 config_list <- list(
@@ -163,5 +165,5 @@ this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
 
 # Run the model
-source("model_code/model_scripts/trend/00_control.R")
+
 projection <- run_trend_model(config_list)
