@@ -26,6 +26,10 @@ run_housing_led_model <- function(config_list){
   
   validate_config_list(config_list, expected_config)
   
+  #Create output directory
+  dir.create(config_list$output_dir, recursive = T, showWarnings = F)
+  write_model_config(config_list)
+  
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -175,8 +179,6 @@ run_housing_led_model <- function(config_list){
     upc <- NULL
   } else {
     upc <- readRDS(config_list$upc_path)
-  } else {
-    upc <- NULL
   }
   
   #TODO import trend model package

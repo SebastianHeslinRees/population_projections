@@ -32,6 +32,11 @@ run_small_area_model <- function(config_list){
   
   validate_config_list(config_list, expected_config)
   
+  #Create output directory
+  small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
+  dir.create(small_area_output_dir, recursive = T, showWarnings = F)
+  write_model_config(config_list, small_area_output_dir)
+  
   read_small_area_inputs <- function(path){
     df <- readRDS(path)
     if("gss_code_ward" %in% names(df)){df <- rename(df, gss_code_small_area = gss_code_ward)}
@@ -229,8 +234,6 @@ run_small_area_model <- function(config_list){
   
   message(" ")
   message("Running outputs")
-  small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
-  
   projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
                                                 config_list$first_proj_yr, config_list$last_proj_yr,
                                                 small_area_births_sya, small_area_deaths_sya)

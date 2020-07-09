@@ -44,6 +44,7 @@ run_trend_model <- function(config_list) {
   
   #Create output directory
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
+  write_model_config(config_list)
   
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
