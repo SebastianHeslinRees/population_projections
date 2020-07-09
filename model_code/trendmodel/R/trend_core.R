@@ -203,8 +203,8 @@ trend_core <- function(start_population,
   reg_dom_in <- sum_domestic_flows(regional_flow, "in")
   
   #National E, W, S, NI gross flows
-  #nat_dom_out <- sum_domestic_flows(national_flow, "out")
-  #nat_dom_in <- sum_domestic_flows(national_flow, "in")
+  nat_dom_out <- sum_domestic_flows(national_flow, "out")
+  nat_dom_in <- sum_domestic_flows(national_flow, "in")
   
   dom_out_all_geog <- rbind(
     filter(dom_out, substr(gss_code,1,2) %in% c("E0","W0")),
