@@ -31,7 +31,7 @@ Functions which take raw data and aggregate, wrangle and combine it to produce r
 Functions which produce populations and components by applying rates and processes to input data. Most functions are generalised and can be used on a range of components. Functions which include keywords `apply`, `constrain`, `distrubte`, `construct`, `project`, `sum`, `scale`, etc.
 
 ### Validate
-Function which validate data inputs and process outputs. These can be general and called by multiple functions, or specific to individual functions. Failure of validation criteria reports meaningful error messages or warnings. Functions include which the keywords `validate`, `check`, etc.
+Functions which validate data inputs and process outputs. These can be general and called by multiple functions, or specific to individual functions. Failure of validation criteria reports meaningful error messages or warnings. Functions include the keywords `validate`, `check`, etc.
 
 ### Wrangle
 Helper functions which filter, combine and create data for use at various points and in different processes throughout the models. Functions which include the keywords `order`, `filter`, `aggregate`, etc.

@@ -26,7 +26,7 @@ Settings, input data file paths and model parameters are defined in a `config` f
 ###Housing-led control
 The `housingled_control` module takes a single `config_list` parameter containing all of the necessary inofrmation to run a projection. The function validates the list and it's elements.
 
-The control module uses the parameters passsed to it to read-in and process data ready for use in calculating the projected population. The function makes heavy use of the functionality provided in the `popmodules` package.
+The control module uses the parameters passed to it to read-in and process data ready for use in calculating the projected population. The function makes heavy use of the functionality provided in the `popmodules` package.
 
 Processed data is passed into a loop where an initial trended population is calculated by running `trendmodel::trend_core` function.
 
@@ -35,7 +35,7 @@ This population is passed to the `housingled_core` function along with other par
 Once completed the outputs from the `housingled_core` are wrangled and arranged and output.
 
 ###Housing-led core
-The `housingled_core` module data on housing stock and delivery as well as occupany rates to calculate a population consistent with forecast capacity. This target population is compared to the output from the `trend_core` and where ncessary adjustemnts to the latter are made. Changes are in the form of adjustments to net migration into an area. The function output is a population based on the trended population but which is consistent with the amount of available housing. A consistent set of components is also output. 
+The `housingled_core` module uses data on housing stock and delivery as well as occupancy rates to calculate a population consistent with forecast capacity. This target population is compared to the output from the `trend_core` and where necessary adjustments to the latter are made. Changes are in the form of adjustments to net migration into an area. The function output is a population based on the trended population but which is consistent with the amount of available housing. A consistent set of components is also output. 
 
 The final population is passed back to the `housingled_control` and then comes back into the loop as the start population for the next year.
 
@@ -47,7 +47,7 @@ The `ouput_housingled_projection` function writes out `rds`, `csv` and `excel` o
 
 
 ##BPO process
-The Borough Preferred Option projection (BPO) provide local authorities with the ability to run a housing-led projection based on their own housing developmnet data. A series of function is necessary to enable to the processing of housing data and the bluk running of a number of projections.
+The Borough Preferred Option projection (BPO) provide local authorities with the ability to run a housing-led projection based on their own housing development data. A series of function is necessary to enable to the processing of housing data and the bulk running of a number of projections.
 
 `bpo_template_to_rds` converts a csv file containg development data into an rds file in the format expected by the housing-led model.
 

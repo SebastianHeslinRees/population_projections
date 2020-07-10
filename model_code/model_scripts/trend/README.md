@@ -22,10 +22,10 @@ devtools::install()
 This package makes use of the `popmodules` package to produce population projections. The stages of a projection are:
 
 ###Projection parameters
-Settings, input data file paths and model parameters are defined in a `config` file which colates all necesarry input information into an R list object.
+Settings, input data file paths and model parameters are defined in a `config` file which collates all necessary input information into an R list object.
 
 ###Trend control
-The `trend_control` module takes a single `config_list` parameter containing all of the necessary inofrmation to run a projection. The function validates the list and it's elements.
+The `trend_control` module takes a single `config_list` parameter containing all of the necessary information to run a projection. The function validates the list and its elements.
 
 The control module uses the parameters passsed to it to read-in and process data ready for use in calculating the projected population. The function makes heavy use of the functionality provided in the `popmodules` package.
 
