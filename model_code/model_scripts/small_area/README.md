@@ -7,9 +7,15 @@ The `smallareamodel` package contains functions for running the GLA small projec
 ##TODO
 ## Installation
 
-To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the popmodules RStudio project within the repository (`model_code/popmodules/popmodules.Rproj`) and run
+To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the population_projections RStudio project within the repository (`population_projections.Rproj`) and run
 ``` r
-devtools::install()
+devtools::install('model_code/smallareamodel')
+```
+
+It is recommended that users install all 4 GLA model packages (`trendmodel`, `housingledmodel`, `smallareamodel` and `popmodules`) at the same time. This can be done by opening the population_projections RStudio project within the repository and running
+```r
+source('model_scripts/install_gla_models')
+install_gla_models()
 ```
 
 
@@ -38,7 +44,7 @@ Once completed the outputs from the `samll_area_core` are wrangled and arranged 
 ###Small Area core
 Populations consistent with housing delivery are calculated and components are derived either through the application of rates to a staring population (births and deaths) or by differencing (migration).
 
-Aggregated small area populations are compared to borough-level population and scaling factors derviced which are then used to scale the small area populations. This ensures consistency with the outputs from the housing-led model and lends the small area model some of the greater robustness that the the housing-led model contains.
+Aggregated small area populations are compared to borough-level population and scaling factors are derived. These factors are used to scale the small area populations. This ensures consistency with the outputs from the housing-led model and lends the small area model some of the greater robustness that the the housing-led model contains.
 
 ###Small Area arranging and outputting
 The function `arrange_small_area_core_outputs` processes the raw model outputs from `small_area_core` into the format expected by `output_small_area_projections`. The latter then writes csv and rds output files.

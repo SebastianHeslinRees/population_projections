@@ -7,9 +7,15 @@ The `housingled` package contains functions for running the GLA housing-led proj
 ##TODO
 ## Installation
 
-To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the popmodules RStudio project within the repository (`model_code/popmodules/popmodules.Rproj`) and run
+To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the population_projections RStudio project within the repository (`population_projections.Rproj`) and run
 ``` r
-devtools::install()
+devtools::install('model_code/housingledmodel')
+```
+
+It is recommended that users install all 4 GLA model packages (`trendmodel`, `housingledmodel`, `smallareamodel` and `popmodules`) at the same time. This can be done by opening the population_projections RStudio project within the repository and running
+```r
+source('model_scripts/install_gla_models')
+install_gla_models()
 ```
 
 
