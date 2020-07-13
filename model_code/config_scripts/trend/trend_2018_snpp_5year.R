@@ -1,6 +1,7 @@
 # config file for model runs
 
-devtools::load_all("model_code/popmodules")
+library(popmodules)
+library(trendmodel)
 
 first_proj_yr <- 2019
 n_proj_yr <- 25
@@ -176,6 +177,5 @@ config_list <- list(
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
-source("model_code/model_scripts/trend/00_control.R")
+rm(list = setdiff(ls(), "config_list"))
 projection <- run_trend_model(config_list)
-log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))

@@ -1,16 +1,18 @@
 # config file for model runs
 
-devtools::load_all("model_code/popmodules")
+library(popmodules)
+library(trendmodel)
+library(dplyr)
 
 first_proj_yr <- 2019
 n_proj_yr <- 2
 projection_name <- "2018_test"
 
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla.rds")
 deaths_mye_path <-  paste0("input_data/mye/2018/deaths_ons.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
-int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla_2019-11-13.rds")
-int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla_2019-11-13.rds")
+int_out_mye_path <-  paste0("input_data/mye/2018/international_out_gla.rds")
+int_in_mye_path <-  paste0("input_data/mye/2018/international_in_gla.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_out.rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2018/domestic_migration_in.rds")
 upc_path <- NULL
@@ -142,6 +144,7 @@ constraint_fns <- list(list(fn = function() NULL, args = list()))
 
 qa_areas_of_interest <- list("London", "E09000001")
 
+dir.create('input_data/test_data', showWarnings = FALSE)
 upc_path <- "input_data/test_data/test_upc.rds"
 upc <- readRDS(popn_mye_path) %>% 
   filter(year %in% 2011:2012) %>%
@@ -187,8 +190,6 @@ config_list <- list(
   dclg_stage2_file_path = dclg_stage2_file_path
 )
 
-rm(list = setdiff(ls(), "config_list"))
-
 # Run the model
-source("model_code/model_scripts/trend/00_control.R")
+rm(list = setdiff(ls(), "config_list"))
 projection <- run_trend_model(config_list)

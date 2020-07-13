@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 output_loc <- "input_data/domestic_migration/processed_rates/"
 dir.create(output_loc)
@@ -7,7 +7,7 @@ dir.create(output_loc)
 
 #create domestic inputs rates
 #for 2018 and 2016 use the mye series with gla geography
-popn_mye_path <- paste0("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn_mye_path <- paste0("input_data/mye/2018/population_gla.rds")
 births_mye_path <-  paste0("input_data/mye/2018/births_ons.rds")
 dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"
 
@@ -73,9 +73,9 @@ dom_rates_2yr_avg_2018 <- rates_backseries %>%
 #Use 2020 geography MYE files
 
 #create domestic inputs rates
-popn_mye_path <- "input_data/mye/2019/temp_gla_population.rds"
-births_mye_path <-  "input_data/mye/2019/temp_births.rds"
-dom_origin_destination_path <- "input_data/domestic_migration/2019/temp_domestic_flows.rds"
+popn_mye_path <- "input_data/mye/2019/population_ons.rds"
+births_mye_path <-  "input_data/mye/2019/births_ons.rds"
+dom_origin_destination_path <- "input_data/domestic_migration/2019/domestic_migration_flows_ons_(2020_geog).rds"
 
 
 #All rates
@@ -185,3 +185,5 @@ saveRDS(dom_rates_2011, paste0(output_loc, "dom_rates_2011_levels.rds"))
 saveRDS(reduced_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_reduced_ldn_in.rds")
 saveRDS(in_up_out_down, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds")
 saveRDS(increased_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_increased_ldn_in.rds")
+
+rm(list=ls())

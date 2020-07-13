@@ -9,6 +9,8 @@ library(lwgeom)
 ##################### Determine final permission polygons ######################
 
 # Code from Libby Rogers, 2019-12-18 . Cheers!
+rm(list=ls())
+gc()
 
 dir.create("input_data/housing_led_model", showWarnings = FALSE)
 perm_poly_file <- "N:/LDD/GIS download/ldd_nightly_download.gdb"
@@ -16,10 +18,9 @@ ldd_unit_flow_file <- "N:/LDD/Unit flow analysis/output_data/IMA/2019_12/0_ldd_d
 # Remove polygons which superseed earlier permissions
 # Should give us a better idea of where units were/will be actually built
 # This takes a while
+load(ldd_unit_flow_file) # ldd_development_unit_flow
 polys_in <- st_read(perm_poly_file, layer = "ldd_polygons_clean",
                  stringsAsFactors = FALSE)
-load(ldd_unit_flow_file) # ldd_development_unit_flow
-
 
 # Initial poly data cleaning
 polys <- polys_in %>%

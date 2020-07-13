@@ -68,10 +68,9 @@ final_int_net <- filter(ons_int_net, substr(gss_code,1,3)!="E09") %>%
 
 
 #Write out
-datestamp <- Sys.Date()
-saveRDS(final_popn, file = paste0("input_data/mye/2018/population_gla_", datestamp, ".rds"))
-saveRDS(final_int_in, file = paste0("input_data/mye/2018/international_in_gla_", datestamp, ".rds"))
-saveRDS(final_int_out, file = paste0("input_data/mye/2018/international_out_gla_", datestamp, ".rds"))
-saveRDS(final_int_net, file = paste0("input_data/mye/2018/international_net_gla_", datestamp, ".rds"))
+saveRDS(final_popn, file = "input_data/mye/2018/population_gla.rds")
+saveRDS(final_int_in, file = "input_data/mye/2018/international_in_gla.rds")
+saveRDS(final_int_out, file = "input_data/mye/2018/international_out_gla.rds")
+saveRDS(final_int_net, file = "input_data/mye/2018/international_net_gla.rds")
 
 rm(list=ls())
