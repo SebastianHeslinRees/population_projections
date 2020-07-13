@@ -1,11 +1,11 @@
 #' Write model log file
 #'
-#' Run loggr::deactivate_log() and then clean up the resulting log file
+#' Run loggr::deactivate_log and then clean up the resulting log file
 #'
 #' @param log_file_path The path and file name (with extension) of the log file
 #' 
 #' @import dplyr
-#' @importFrom loggr deactivate_log()
+#' @importFrom loggr deactivate_log
 #' @importFrom data.table fread fwrite
 #' 
 #' @export

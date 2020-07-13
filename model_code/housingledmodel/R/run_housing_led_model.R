@@ -14,6 +14,7 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tibble enframe
 #' @importFrom tidyr unnest
+#' @importFrom loggr log_file
 #' 
 #' @export
 

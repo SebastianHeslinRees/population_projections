@@ -12,6 +12,7 @@
 #' @import popmodules
 #' @importFrom rmarkdown render
 #' @import assertthat
+#' @importFrom loggr log_file
 #'
 #' @export
 

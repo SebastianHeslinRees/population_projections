@@ -12,6 +12,7 @@
 #' @importFrom assertthat assert_that
 #' @importFrom dtplyr lazy_dt
 #' @importfrom utils flush.console
+#' @importFrom loggr log_file
 #' 
 #' @export
 
