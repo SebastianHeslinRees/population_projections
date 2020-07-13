@@ -98,7 +98,6 @@ run_borough_and_ward_projection <- function(projection_name,
   #---------------------
   #run projection
   borough_projection <- run_housing_led_model(config_list)
-  log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   
   #----
   
@@ -164,8 +163,7 @@ run_borough_and_ward_projection <- function(projection_name,
   rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","bpo")))
   
   ward_projection <- run_small_area_model(ward_config_list)
-  log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
-  
+    
   #bpo
   if(bpo != FALSE) {
     output_bpo_excel_file(data = ward_projection[["csvs"]],

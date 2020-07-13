@@ -170,9 +170,8 @@ projdir <- rprojroot::find_root(rprojroot::is_git_root)
 # this_file <- rstudioapi::getSourceEditorContext()$path
 # file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
 
-rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
-
+rm(list = setdiff(ls(), "config_list"))
 projection <- run_trend_model(config_list)
-log_warnings(paste0(config_list$output_dir, "warnings.txt"))
+
