@@ -18,7 +18,7 @@ popn_age_on(
 \item{popn}{Data frame containing a cohort population.}
 
 \item{col_aggregation}{Character vector of columns in \code{popn} acting as
-aggregation levels. Default c("year","gss_code","age","sex"). In the case
+aggregation levels. Default \code{c("year","gss_code","age","sex")}. In the case
 of multiple geography columns, only supply the highest resolution column;
 other columns will be preserved.}
 
@@ -37,9 +37,13 @@ levels for the population's ages. This is an optional validation tool that
 runs an extra check to make sure all expected levels are present. Default
 NULL.}
 
-\item{births}{Data frame. Births data at the same aggregation levels as
-\code{popn} but coded to the lowest age band that can be joined to the
-output with code{rbind}. Default \code{NULL}.}
+\item{births}{Data frame, 0 or \code{NULL}. Births data at the same
+aggregation levels as \code{popn} but coded to the lowest age band that can
+be joined to the output with \code{rbind}. If zero, then the output rows for
+zero-year-olds, all of which are zero. These settings currently only work
+when \code{col_aggregation} is set to the default
+\code{c("year","gss_code","age","sex")}. If \code{NULL} then no
+zero-year-olds are included in the output. Default \code{NULL}.}
 }
 \value{
 A data frame containing the population with age advanced by one time

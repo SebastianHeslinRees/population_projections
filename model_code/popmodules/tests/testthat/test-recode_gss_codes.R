@@ -111,8 +111,7 @@ test_that("recode_gss_codes produces the expected output", {
   expect_equal(expect_2020, output_2020)
 })
 
-#test 2 varibale
-
+#test 2 variables
 test_that("recode_gss_codes produces the expected output", {
   expect_equivalent(expect_2_vars, output_2_vars)
 })

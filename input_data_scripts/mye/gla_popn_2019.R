@@ -1,8 +1,8 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #read in all the other components
-gla_popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>%
+gla_popn <- readRDS("input_data/mye/2018/population_gla.rds") %>%
   select(year, gss_code, sex, age, popn) %>%
   recode_gss_codes(data_cols = "popn", recode_to_year = 2020)
 
@@ -28,6 +28,7 @@ dom_out <- readRDS("input_data/domestic_migration/2019/temp_domestic_migration_o
 
 popn_2019 <- gla_popn %>%
   filter(year == 2018) %>%
+  popn_age_on() %>%
   construct_popn_from_components(addition_data = list(births, gla_international_in, dom_in),
                                  subtraction_data = list(deaths, gla_international_out, dom_out),
                                  col_aggregation = c("gss_code", "age", "sex")) %>%
@@ -35,6 +36,15 @@ popn_2019 <- gla_popn %>%
   select(year, gss_code, sex, age, popn) %>%
   arrange(year, gss_code, sex, age) %>%
   check_negative_values(data_col = "popn")
+
+#For checking
+# chang <-  gla_popn %>%
+#   filter(year == 2018) %>%
+#   left_join(popn_2019, by=c("gss_code","sex","age")) %>%
+#   mutate(diff = popn.y-popn.x,
+#          pc = diff/popn.x,
+#          pc = pc*100) %>%
+#   filter(pc >50)
 
 gla_mye <- rbind(gla_popn, popn_2019)
 
@@ -47,4 +57,4 @@ assert_that(!any(is.na(popn_2019)))
 
 saveRDS(gla_mye, "input_data/mye/2019/temp_gla_population.rds")
 
-#rm(list=ls())
+rm(list=ls())

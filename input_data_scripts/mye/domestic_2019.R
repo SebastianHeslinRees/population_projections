@@ -1,5 +1,5 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #read in all the other components
 ons_popn <- readRDS("input_data/mye/2019/temp_ons_popn.rds")
@@ -59,17 +59,27 @@ flows_2004 <- filter(domestic_migration_flows_ons, year == 2004) %>%
 
 dom_flows <- rbind(domestic_migration_flows_ons, flows_2004) 
 
+regional <- readRDS("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds")
+regional <- filter(regional, year == 2004) %>%
+  mutate(year = 2019) %>% 
+  rbind(regional) %>%
+  arrange(year, gss_out, gss_in, sex, age)
+
 dom_in <- dom_flows %>%
+  rbind(regional) %>% 
   group_by(year, gss_in, sex, age) %>%
   summarise(dom_in = sum(value)) %>%
   data.frame() %>% 
-  rename(gss_code = gss_in)
+  rename(gss_code = gss_in) %>%
+  complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_in = 0))
 
 dom_out <- dom_flows %>%
+  rbind(regional) %>% 
   group_by(year, gss_out, sex, age) %>%
   summarise(dom_out = sum(value)) %>%
   data.frame() %>% 
-  rename(gss_code = gss_out)
+  rename(gss_code = gss_out) %>%
+  complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_out = 0))
 
 dom_net <- full_join(dom_in, dom_out, by=c("year","gss_code","sex","age")) %>%
   tidyr::replace_na(list(dom_in = 0, dom_out = 0)) %>%

@@ -13,31 +13,42 @@ scaled_fertility_curve(
   n_years_to_avg,
   avg_or_trend,
   data_col = "births",
-  output_col
+  output_col,
+  project_rate_from = last_data_year + 1
 )
 }
 \arguments{
-\item{popn_mye_path}{Character. Path to the MYE population data}
+\item{popn_mye_path}{Character or data frame. Path to the MYE population
+data, or a data frame with the data.}
 
-\item{births_mye_path}{Character. Path to the MYE births component data}
+\item{births_mye_path}{Character or data frame. Path to the MYE births
+component data, or a data frame with the data.}
 
-\item{target_curves_filepath}{Character. Path to the SNPP target fertility curves}
+\item{target_curves_filepath}{Character or data frame. Path to the SNPP
+target fertility curves, or a data frame with the data.}
 
-\item{last_data_year}{numeric. The last year of births data on which to calculate
-averages.}
+\item{last_data_year}{numeric. The last year of births data on which to
+calculate averages.}
 
-\item{n_years_to_avg}{numeric. The number of years to use in calculating averages/trend forward.}
+\item{n_years_to_avg}{numeric. The number of years to use in calculating
+averages/trend forward.}
 
-\item{avg_or_trend}{Character. Should the averaged be caulated as the mean \code{Average},
-or by linear regression \code{Trend}.}
+\item{avg_or_trend}{Character. Should the averaged be calculated as the mean
+\code{Average}, or by linear regression \code{Trend}.}
 
-\item{data_col}{Character. The column in the \code{births} dataframe containing the rates. Defaults to \code{births}}
+\item{data_col}{Character. The column in the \code{births} dataframe
+containing the rates. Defaults to \code{births}}
 
-\item{output_col}{Character. The name of the column in the output dataframe containing the calculated rates}
+\item{output_col}{Character. The name of the column in the output dataframe
+containing the calculated rates}
+
+\item{project_rate_from}{Numeric. The year for which a rate is being
+calculated. Default \code{last_data_year+1}}
 }
 \value{
-A data frame of mortality probabilities or fertility rates by LA, year, sex and age with the same age structure
-as the target curves and overall rates scaled so that they are consistent with past births.
+A data frame of mortality probabilities or fertility rates by LA,
+  year, sex and age with the same age structure as the target curves and
+  overall rates scaled so that they are consistent with past births.
 }
 \description{
 Compares past rates by LA, age and sex to an input

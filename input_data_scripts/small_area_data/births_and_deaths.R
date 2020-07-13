@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(stringr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #TODO is there any point having the model data save all births and deaths back to 2001, they're big files as a result
 #TODO conventions around naming of age groups (01_05 or 1_5, 85+)
@@ -98,6 +98,9 @@ saveRDS(msoa_deaths, "input_data/small_area_model/msoa_deaths.rds")
 ward_la_lookup <- readRDS("input_data/lookup/2011_ward_to_district.rds")
 msoa_la_lookup <- readRDS("input_data/lookup/msoa_to_district.rds")
 
+borough_deaths <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
+  select(gss_code, year, sex, age, deaths)
+
 #Single year ward births
 births_sya_ward <- ward_births %>%
   left_join(ward_la_lookup, by="gss_code_ward") %>%
@@ -123,10 +126,9 @@ deaths_sya_ward <- ward_deaths %>%
                          min == 1 ~ 4,
                          min == 85 ~ 90,
                          TRUE ~ min + 4)) %>%
-  left_join(ward_la_lookup, by="gss_code_ward")
+  left_join(ward_la_lookup, by="gss_code_ward") %>%
+  filter(year %in% borough_deaths$year)
 
-borough_deaths <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
-  select(gss_code, year, sex, age, deaths)
 
 past_deaths <- list()
 for(i in unique(deaths_sya_ward$age_group)){
@@ -168,7 +170,8 @@ deaths_sya_msoa <- msoa_deaths %>%
                          min == 1 ~ 4,
                          min == 85 ~ 90,
                          TRUE ~ min + 4)) %>%
-  left_join(msoa_la_lookup, by="gss_code_msoa")
+  left_join(msoa_la_lookup, by="gss_code_msoa") %>%
+  filter(year %in% borough_deaths$year)
 
 past_deaths <- list()
 for(i in unique(deaths_sya_msoa$age_group)){

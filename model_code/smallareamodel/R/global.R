@@ -1,0 +1,38 @@
+#' @importFrom utils globalVariables
+globalVariables(c(
+  ':=',
+  'adults',
+  'age',
+  'age_group',
+  'births',
+  'ce_popn',
+  'component',
+  'cum_units',
+  'deaths',
+  'fert_rate',
+  'gss_code',
+  'gss_code_msoa',
+  'gss_code_small_area',
+  'gss_code_ward',
+  'gss_name',
+  'in_migrants',
+  'in_migration_rate',
+  'inflow',
+  'lag_units',
+  'migration',
+  'mort_rate',
+  'nat_chg',
+  'nat_chng',
+  'out_migrants',
+  'out_migration_rate',
+  'popn',
+  'popn_lag',
+  'rate',
+  'scaling',
+  'sex',
+  'target',
+  'value',
+  'year'
+))
+
+

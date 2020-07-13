@@ -1,4 +1,4 @@
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 library(dplyr)
 
 #2019
@@ -67,19 +67,19 @@ saveRDS(int_out, "input_data/mye/2019/temp_ons_international_out.rds")
 #GLA INTERNATIONAL BACKSERIES
 
 #2018
-gla_int_in <- readRDS("input_data/mye/2018/international_in_gla_2019-11-13.rds") %>%
+gla_int_in <- readRDS("input_data/mye/2018/international_in_gla.rds") %>%
   select(gss_code, year, sex, age, int_in) %>% 
   recode_gss_codes(data_cols = "int_in", recode_to_year = 2020)
 
-gla_int_out <- readRDS("input_data/mye/2018/international_out_gla_2019-11-13.rds")  %>%
+gla_int_out <- readRDS("input_data/mye/2018/international_out_gla.rds")  %>%
   select(gss_code, year, sex, age, int_out) %>% 
   recode_gss_codes(data_cols = "int_out", recode_to_year = 2020)
 
-gla_in_2018 <- ons_int_in %>% 
+gla_in_2018 <- gla_int_in %>% 
   filter(year == 2018) %>%
   select(-year)
 
-gla_out_2018 <- ons_int_out %>% 
+gla_out_2018 <- gla_int_out %>% 
   filter(year == 2018) %>%
   select(-year)
 

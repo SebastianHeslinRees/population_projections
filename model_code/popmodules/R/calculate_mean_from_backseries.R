@@ -1,22 +1,28 @@
-#' Calculate averagesbased on past data
+#' Calculate averages based on past data
 #'
-#' Given a backseries of data the function will return an average
+#' Given a backseries of data the function will return an average.
 #'
-#' @param data_backseries Dataframe. A set of rates or flows by LA, sex and age
-#' @param n_years_to_avg numeric. Number of years data to include in the average
-#' @param last_data_year numeric. The final year of data to include in the average
-#' @param data_col Character. The name of the column containing the data
-#' @param col_aggregation Character. The columns to group_by
+#' @param data_backseries Dataframe. A set of rates or flows by LA, sex and age.
+#' @param n_years_to_avg numeric. Number of years data to include in the
+#'   average.
+#' @param last_data_year numeric. The final year of data to include in the
+#'   average.
+#' @param data_col Character. The name of the column containing the data.
+#' @param col_aggregation Character. The columns to group_by.
+#' @param project_rate_from Numeric. The year for which the average being
+#'   calculated is to be used. Default \code{last_data_year+1}.
 #'
 #' @return A data frame of mortality probabilities, fertility rates, or
-#' international migration flows/rates.
+#'   international migration flows/rates.
 #'
 #' @import dplyr
 #' @importFrom assertthat assert_that
 #'
 #' @export
 
-calculate_mean_from_backseries <- function(data_backseries, n_years_to_avg, last_data_year, data_col, col_aggregation = c("gss_code","sex")){
+calculate_mean_from_backseries <- function(data_backseries, n_years_to_avg, last_data_year,
+                                           data_col, col_aggregation = c("gss_code","sex"),
+                                           project_rate_from = last_data_year+1){
 
   assert_that(is.data.frame(data_backseries),
               msg="calc_trend_rate expects that data_backseries is a dataframe")
@@ -40,7 +46,7 @@ calculate_mean_from_backseries <- function(data_backseries, n_years_to_avg, last
     group_by_at(col_aggregation) %>%
     summarise(value = sum(value)/n_years_to_avg) %>%
     ungroup() %>%
-    mutate(year = last_data_year+1) %>%
+    mutate(year = project_rate_from) %>% 
     select_at(c("year", col_aggregation, "value")) %>%
     rename(!!data_col := value)
 

@@ -9,7 +9,8 @@ calculate_rate_by_regression(
   n_years_regression,
   last_data_year,
   data_col,
-  col_aggregation = c("gss_code", "sex")
+  col_aggregation = c("gss_code", "sex"),
+  project_rate_from = last_data_year + 1
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ calculate_rate_by_regression(
 \item{data_col}{Character. The name of the column containing the values}
 
 \item{col_aggregation}{Character. The columns to group_by}
+
+\item{project_rate_from}{Numeric. The year for which the rate being
+calculated is to be used. Default \code{last_data_year+1}.}
 }
 \value{
 A data frame of mortality probabilities, fertility rates, or

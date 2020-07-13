@@ -15,10 +15,10 @@ ldd_units <- readRDS(msoa_ldd_path) %>%
   group_by(gss_code_msoa) %>%
   mutate(units = cumsum(units)) %>%
   as.data.frame() %>%
-  filter(year %in% 2012:most_recent_data_year)
+  filter(year %in% 2011:most_recent_data_year)
 
 msoa_popn <- readRDS(msoa_estimates_path) %>%
-  filter(year %in% 2012:most_recent_data_year)
+  filter(year %in% 2011:most_recent_data_year)
 
 msoa_ce <- readRDS(msoa_communal_est_path)
 

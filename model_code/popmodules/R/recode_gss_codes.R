@@ -23,7 +23,7 @@
 #'  2018-based and earlier projections. This is introduced for backward
 #'  compatibility and doesn't correspond to any single vintage year.
 #'  Default \code{FALSE}.
-#'  @param code_changes_path string. file path to the code changes database.
+#' @param code_changes_path string. file path to the code changes database.
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
@@ -118,19 +118,19 @@ recode_gss_codes <- function(df_in,
     #merges
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recode_merges[[yr]])) 
-  }
   
-  if(aggregate_data){
-    df <- df %>% 
-      dtplyr::lazy_dt() %>%
-      group_by_at(col_aggregation) %>%
-      summarise_all(.funs = fun) %>%
-      as.data.frame() %>%
-      rename(!!col_geog := "gss_code")
-  } else {
-    df <- as.data.frame(df) %>%
-      rename(!!col_geog := "gss_code")
+    if(aggregate_data){
+      df <- df %>% 
+        dtplyr::lazy_dt() %>%
+        group_by_at(col_aggregation) %>%
+        summarise_all(.funs = fun) %>%
+        as.data.frame()
+      
+    }
   }
+
+  df <- as.data.frame(df) %>%
+    rename(!!col_geog := "gss_code")
   
   return(df)
   

@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 library(assertthat)
 library(data.table)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 rm(list=ls()) # we're going to need memory, sorry
 message("domestic migration")
@@ -69,11 +69,10 @@ message("Saving domestic origin-destination flows. This may take a while")
 saveRDS(domestic_la, file = paste0("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"))
 saveRDS(domestic_region, file = paste0("input_data/domestic_migration/2018/regional_domestic_migration_flows_ons.rds"))
 
-
 rm(domestic_la, domestic_region)
 
-# Calculate net flows
-message("Calculating historic net flows. This may also take a while")
+# Calculate gross flows
+message("Calculating historic gross flows")
 backseries_years <- sort(unique(domestic$year))
 
 # data.table again - it's repeated below in a tidyverse equivalent
@@ -129,3 +128,4 @@ saveRDS(dom_out_dt, file = paste0("input_data/domestic_migration/2018/domestic_m
 saveRDS(dom_in_dt, file = paste0("input_data/domestic_migration/2018/domestic_migration_in.rds"))
 saveRDS(dom_net, file = paste0("input_data/domestic_migration/2018/domestic_migration_net.rds"))
 
+rm(list=ls())
