@@ -8,12 +8,12 @@
 #' @param trend_projection A list. The output of the \code{trendmodel::trend_core}
 #'   function for the \code{projection_year}
 #' @param component_constraints A dataframe. The component constraints by borough
-#' @param hma_constraint A dataframe. The total population constrain by housing
+#' @param hma_constraint A dataframe. The total population constraint by housing
 #'   market area (HMA)
 #' @param communal_establishment_population A dataframe. The communal establishment
 #'   population for the \code{projection_year}
 #' @param external_ahs A set of average household size rates by geographic
-#'   aggreagtion and year consistent with the \code{commual_establishment_population}
+#'   aggregation and year consistent with the \code{communal_establishment_population}
 #' @param households_1 A dataframe. For each geographic aggregation a number of
 #'   total households to be used in calculating the current year trend AHS
 #' @param households_2 A dataframe. For each geographic aggregation a number of
@@ -24,7 +24,7 @@
 #' @param projection_year Numeric. The year being projected
 #' @param ahs_cap_year Numeric. The year in which to set the AHS cap
 #' @param ahs_cap A dataframe or NULL. When no AHS cap has been set this
-#'   parameter is set to \code{NULL}. Once a set of AHS caps have been
+#'   parameter is set to \code{NULL}. Once a set of AHS caps have been set
 #'   this becomes the dataframe containing those caps
 #' @param ahs_method A string or Numeric. If the AHS tree method is to be used,
 #'   set to \code{tree}, else the floating AHS method will be used. In this case
