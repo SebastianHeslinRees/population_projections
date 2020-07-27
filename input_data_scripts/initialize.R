@@ -1,6 +1,6 @@
 #check for packages needed to run the input scripts/models  and install any that are missing
 pkg <- c("assertthat", "data.table", "dtplyr", "minpack.lm", "purrr", 
-         "rmarkdown", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
+         "rmarkdown", "R.utils", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
 
 #needs old version of dplyr - waiting on bug fix in dplyr 1.0.0
 #devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
@@ -51,5 +51,5 @@ source('input_data_scripts/domestic_migration/pre-calulate_domestic_rates_2018_b
 
 #Excel templates
 dir.create("input_data/excel_templates")
-R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/input_data/excel_templates",
+R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/excel_templates",
                        "input_data/excel_templates")
