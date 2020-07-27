@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(stringr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #TODO is there any point having the model data save all births and deaths back to 2001, they're big files as a result
 #TODO conventions around naming of age groups (01_05 or 1_5, 85+)

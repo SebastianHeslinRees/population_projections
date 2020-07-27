@@ -1,6 +1,6 @@
 library(assertthat)
 library(dplyr)
-devtools::load_all("model_code/popmodules/")
+library(popmodules)
 
 ons_stage1 <- readRDS("input_data/household_model/ons_household_representative_rates.rds")
 ons_stage2 <- readRDS("input_data/household_model/ons_headship_rates_2016.rds")

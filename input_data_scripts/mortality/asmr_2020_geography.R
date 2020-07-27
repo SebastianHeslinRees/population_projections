@@ -1,4 +1,4 @@
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 library(dplyr)
 
 mort_curves <- readRDS("input_data/mortality/ons_asmr_curves_2018.rds") %>%

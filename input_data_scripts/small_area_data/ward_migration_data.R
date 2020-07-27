@@ -1,13 +1,13 @@
 library(data.table)
 library(dplyr)
 library(tidyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #Set these to the location of the final borough components
 borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
 borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
-borough_int_out_path <- "input_data/mye/2018/international_out_gla_2019-11-13.rds"
-borough_int_in_path <- "input_data/mye/2018/international_in_gla_2019-11-13.rds"
+borough_int_out_path <- "input_data/mye/2018/international_out_gla.rds"
+borough_int_in_path <- "input_data/mye/2018/international_in_gla.rds"
 borough_deaths_path <- "input_data/mye/2018/deaths_ons.rds"
 
 #census data

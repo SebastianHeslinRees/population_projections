@@ -1,4 +1,6 @@
-source('model_code/model_scripts/housing_led/run_bpo_projection.R')
+library(popmodules)
+library(trendmodel)
+library(housingledmodel)
 
 for(scenario in c("high","medium","low")){
   bpo_name <- run_bpo_projection(bpo_name = "city_of_london_decoupled",

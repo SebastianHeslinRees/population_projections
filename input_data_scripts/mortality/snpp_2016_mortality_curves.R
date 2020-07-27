@@ -60,3 +60,4 @@ ons_mort <- rbind(ons_mort, national_mort, wales) %>%
 dir.create("input_data/mortality", recursive = TRUE, showWarnings = FALSE)
 saveRDS(ons_mort, "input_data/mortality/ons_asmr_curves_2016.rds" )
 
+rm(list=ls())

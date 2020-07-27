@@ -1,12 +1,12 @@
 library(dplyr)
 library(stringr)
 library(data.table)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 most_recent_data_year <- 2018
 #data paths
 lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_estimates/lsoa/machine_readable/by_indiviudal_year"
-mye_pop_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
+mye_pop_path <- "input_data/mye/2018/population_gla.rds"
 
 #lookups
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%

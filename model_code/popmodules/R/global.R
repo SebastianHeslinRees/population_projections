@@ -1,5 +1,6 @@
 #' @importFrom utils globalVariables
 globalVariables(c(
+  ".",
   ":=",
   "year",
   "gss_code",
@@ -74,5 +75,22 @@ globalVariables(c(
   "scaled_popn",
   "total_unconstrained",
   "variant",
-  "curve_count"
+  "curve_count",
+  "data",
+  "Model",
+  "Coef",
+  "Slope",
+  "Intercept",
+  "transition",
+  "path",
+  "next_path",
+  "period_start",
+  "period_end",
+  "value_1",
+  "value_2",
+  "increment",
+  ".SD",
+  "changed_to_code",
+  "changed_from_code",
+  "flow"
 ))

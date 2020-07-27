@@ -3,7 +3,7 @@
 #changes.
 
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 int_flows_loc <- "input_data/mye/2019/"
 
@@ -115,3 +115,4 @@ int_in_flows_6 <- int_in_flows_3 %>%
   
 saveRDS(int_in_flows_6, paste0(int_flows_loc,"int_in_pre_accession_reduced_ldn_share.rds"))
 
+rm(list=ls())

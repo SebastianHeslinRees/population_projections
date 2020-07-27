@@ -9,21 +9,15 @@
 # TODO adapt this for the trend model as well
 
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
-popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds")
+popn <- readRDS("input_data/mye/2018/population_gla.rds")
 
 ons_births <- readRDS("input_data/mye/2018/births_ons.rds")
 
-additional_births <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/births_borough_mid_2019.csv") %>%
+additional_births <- data.table::fread("Q:/Teams/D&PA/Data/births_and_deaths/mid_year_births/births_borough_mid_2019.csv") %>%
   as.data.frame() %>%
   select(gss_code, sex, births) %>%
-  # recode_gss_codes(col_geog = "gss_code",
-  #                  data_cols = "births",
-  #                  fun = list(sum),
-  #                  recode_gla_codes = TRUE) %>%
-  filter(gss_code %in% ons_births$gss_code) %>%
-  validate_same_geog(ons_births) %>%
   filter(substr(gss_code,1,3)=="E09")
 
 #Use 2018 births for city
@@ -85,6 +79,6 @@ for(method in c("average", "trend")) {
   fertility_rates <- rbind(london_fert_rates, not_london_fert_rates) %>% 
     complete_fertility(popn)
   
-  filename_suffix <- ifelse(method == "trend", "_5yr_trend", "")
+  filename_suffix <- ifelse(method == "average", "_5yr_avg", "_5yr_trend")
   saveRDS(fertility_rates, paste0("input_data/fertility/fertility_rates_inc_2019_in_london",filename_suffix,".rds"))
 }

@@ -26,7 +26,6 @@ proj <- filter(trend, year > 2012) %>%
   select(gss_code, sex, age, year, test_rate) %>%
   data.frame()
 
-rate_trajectory_filepath <- "test_data/test_ptoject_rates_npp_data.rds"
 x <- project_rates_npp(jump_off, rate_col="test_rate", rate_trajectory_filepath, first_proj_yr=2012, n_proj_yr=9, npp_var="2018_principal")
 
 testthat::test_that("project_rates_npp produces the expected output",

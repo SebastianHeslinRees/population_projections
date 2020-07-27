@@ -1,8 +1,8 @@
 library(dplyr)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 #create domestic inputs rates
-popn_mye_path <- "input_data/mye/2018/population_gla_2019-11-13.rds"
+popn_mye_path <- "input_data/mye/2018/population_gla.rds"
 births_mye_path <-  "input_data/mye/2018/births_ons.rds"
 dom_origin_destination_path <- "input_data/domestic_migration/2018/domestic_migration_flows_ons.rds"
 

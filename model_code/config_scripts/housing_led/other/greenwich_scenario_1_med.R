@@ -1,4 +1,4 @@
-source('model_code/model_scripts/housing_led/run_bpo_projection.R')
+library(housingledmodel)
 
 bpo_name <- run_bpo_projection(bpo_name = "greenwich_scenario_1",
                                shlaa_first_yr = 2035,

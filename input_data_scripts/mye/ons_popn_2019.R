@@ -1,12 +1,13 @@
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 library(dplyr)
+loc <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/may_2020_release/"
 
-female_2019 <- data.table::fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_females.csv",
+female_2019 <- data.table::fread(paste0(loc, "2019_mye_may_2020_release_females.csv"),
                      header = TRUE) %>%
   tidyr::pivot_longer(cols = as.character(0:90), names_to = "age", values_to = "popn") %>%
   mutate(sex = "female")
 
-male_2019 <- data.table::fread("Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/2019_mye_may_2020_release_males.csv",
+male_2019 <- data.table::fread(paste0(loc, "2019_mye_may_2020_release_males.csv"),
                    header = TRUE) %>%
   tidyr::pivot_longer(cols = as.character(0:90), names_to = "age", values_to = "popn") %>%
   mutate(sex = "male")

@@ -1,4 +1,6 @@
-devtools::load_all("model_code/popmodules")
+library(popmodules)
+library(trendmodel)
+library(housingledmodel)
 
 #Setup
 projection_name <- "2018_based_shlaa_dev_TEST"
@@ -61,6 +63,5 @@ config_list <- list(
 #---------------------
 #run projection
 rm(list=setdiff(ls(), "config_list"))
-source('model_code/model_scripts/housing_led/housing_led_control.R')
 projection <- run_housing_led_model(config_list)
 

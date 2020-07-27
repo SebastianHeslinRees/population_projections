@@ -1,0 +1,24 @@
+Package: smallareamodel
+Title: The GLA small area model for proucing ward and MSOA-level population projections
+Version: 0.1.0
+Authors@R: c(
+   person("Chris", "Fairless", email="demography@london.gov.uk", role = "aut"),
+   person("Marta", "Lapsley", email="marta.lapsley@london.gov.uk", role = "aut"),
+   person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = c("aut", "cre"))
+   )
+Description: Functions required to project the population using the GLA small area housing-led methodology.
+Depends: R (>= 3.5.0)
+License: Currently internal to the GLA - contact the authors with any questions
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: 
+    dplyr,
+    popmodules,
+    assertthat,
+    data.table,
+    dtplyr,
+    tidyr,
+    utils
+Suggests:
+    testthat

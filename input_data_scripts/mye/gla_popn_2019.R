@@ -1,8 +1,8 @@
 library(dplyr)
-devtools::load_all("model_code/popmodules")
+library(popmodules)
 
 #read in all the other components
-gla_popn <- readRDS("input_data/mye/2018/population_gla_2019-11-13.rds") %>%
+gla_popn <- readRDS("input_data/mye/2018/population_gla.rds") %>%
   select(year, gss_code, sex, age, popn) %>%
   recode_gss_codes(data_cols = "popn", recode_to_year = 2020)
 
@@ -57,4 +57,4 @@ assert_that(!any(is.na(popn_2019)))
 
 saveRDS(gla_mye, "input_data/mye/2019/temp_gla_population.rds")
 
-#rm(list=ls())
+rm(list=ls())

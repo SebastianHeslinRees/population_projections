@@ -1,4 +1,9 @@
-devtools::load_all("model_code/popmodules")
+# Test the Trend Model all the way through with a small dataset
+
+# To run:
+# 1: Install trendmodel and popmodules packages (if not installed since last update)
+# 2: Run scripts in the input_data_scripts folder (if not done)
+# 3: Source this script
 
 popn_mye_path <- "input_data/test_data/pop_test.rds"
 deaths_mye_path <-  "input_data/test_data/deaths_test.rds"
@@ -13,7 +18,6 @@ mortality_curve_filepath <- "input_data/test_data/mort_curve_test.rds"
 fertility_curve_filepath <- "input_data/test_data/fert_curve_test.rds"
 
 upc_path <- NULL
-outputs_dir <- "outputs/trend/2018/"
 
 mortality_years_to_avg <- 1
 mortality_avg_or_trend <- "average"
@@ -29,7 +33,7 @@ fertility_npp_variant <- "2018_principal"
 
 int_out_last_data_year <- 2018
 int_out_years_to_avg <- 2
-int_out_method <- "rate"
+int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
 
 int_in_last_data_year <- 2018
@@ -62,6 +66,11 @@ projection_name <- "test_x"
 
 #-------------------------------------------------
 
+timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
+projection_name <- paste0(projection_name,"_",timestamp)
+output_dir <- paste0("outputs/trend/2018/",projection_name,"/")
+
+#-------------------------------------------------
 
 mortality_fns <- list(
   
@@ -108,7 +117,7 @@ fertility_fns <- list(
 int_out_fns <- list(
   list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                births_mye_path = births_mye_path,
-                                                                               flow_or_rate = int_out_method,
+                                                                               flow_or_rate = int_out_flow_or_rate,
                                                                                component_path = int_out_mye_path,
                                                                                last_data_year = int_out_last_data_year,
                                                                                n_years_to_avg = int_out_years_to_avg,
@@ -176,33 +185,31 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   dom_origin_destination_path = dom_origin_destination_path,
   upc_path = upc_path,
-  outputs_dir = outputs_dir,
+  output_dir = output_dir,
   mortality_fns = mortality_fns,
   fertility_fns = fertility_fns,
   int_out_fns = int_out_fns,
   int_in_fns = int_in_fns,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
+  int_out_method = int_out_flow_or_rate,
   qa_areas_of_interest = qa_areas_of_interest,
-  int_out_method = int_out_method,
   write_excel  = write_excel,
   write_QA = write_QA,
-  communal_est_pop_path = communal_est_pop_path,
   ons_stage1_file_path = ons_stage1_file_path,
   ons_stage2_file_path = ons_stage2_file_path,
+  communal_est_pop_path = communal_est_pop_path,
   dclg_stage1_file_path = dclg_stage1_file_path,
-  dclg_stage2_file_path = dclg_stage2_file_path,
-  projection_name = projection_name,
-  timestamp = format(Sys.time(), "%y-%m-%d_%H%M")
+  dclg_stage2_file_path = dclg_stage2_file_path
 )
 
 rm(list = setdiff(ls(), "config_list"))
 
 # Save settings
 # TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
-if (!grepl("/$", config_list$outputs_dir)) config_list$outputs_dir <- paste0(config_list$outputs_dir, "/")
+if (!grepl("/$", config_list$output_dir)) config_list$output_dir <- paste0(config_list$output_dir, "/")
 projdir <- rprojroot::find_root(rprojroot::is_git_root)
-copy_dir <- paste0(projdir, "/", config_list$outputs_dir, config_list$projection_name)
+copy_dir <- paste0(projdir, "/", config_list$output_dir, config_list$projection_name)
 dir.create(copy_dir, recursive = TRUE)
 this_file <- rstudioapi::getSourceEditorContext()$path
 file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
@@ -210,11 +217,10 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 
 # Run the model
 # TODO Get the household model working as a toy model
-source("model_code/model_scripts/trend/00_control.R")
-projection <- run_trend_model(config_list)
-log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
+projection <- trendmodel::run_trend_model(config_list)
+popmodules::log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
 
 test_population_output <- readRDS("model_code/model_tests/test_outputs/test_trend_population_output.rds")
-expect_equal(projection[[1]], test_population_output)
+testthat::expect_equal(projection[[1]], test_population_output)
 
 message("Trend model test successful")
