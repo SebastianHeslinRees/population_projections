@@ -19,7 +19,7 @@ if(!'loggr' %in% rownames(installed.packages())){
 
 #install the gla models packages
 devtools::install('model_code/popmodules')
-install_gla_models()
+popmodules::install_gla_models()
 
 #copy lookupss
 dir.create("input_data/lookup", showWarnings = FALSE, recursive = TRUE)
