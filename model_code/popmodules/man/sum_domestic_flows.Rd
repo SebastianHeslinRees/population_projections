@@ -5,13 +5,15 @@
 \title{Calculate a residual between populations and convert to domestic migration
 flows}
 \usage{
-sum_domestic_flows(domestic_flow, in_or_out)
+sum_domestic_flows(domestic_flow, in_or_out, flow_col = "flow")
 }
 \arguments{
 \item{domestic_flow}{A data frame containing sya/sex flows between geographic areas}
 
 \item{in_or_out}{A string indicating whether the flows should be summed for
 the destination (in) or origin (out) area.}
+
+\item{flow_col}{A string. The name of the column containg the flow data. Defaul \code{flow}}
 }
 \value{
 A dataframe with flows into or out of an area summed

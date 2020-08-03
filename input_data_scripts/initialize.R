@@ -3,7 +3,7 @@ pkg <- c("assertthat", "data.table", "dtplyr", "minpack.lm", "purrr",
          "rmarkdown", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
 
 #needs old version of dplyr - waiting on bug fix in dplyr 1.0.0
-#devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
+devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
 if(packageVersion("dplyr")=="1.0.0"){stop("gla models won't run with dplyr 1.0.0. Install version 0.8.5.")}
 
 
@@ -13,8 +13,12 @@ for(i in seq(pkg)){
   }
 }
 
+if(!'loggr' %in% rownames(installed.packages())){
+  devtools::install_github("smbache/loggr", force=TRUE)
+}
+
 #install the gla models packages
-source('model_code/model_scripts/install_gla_models.R')
+devtools::install('model_code/popmodules')
 install_gla_models()
 
 #copy lookupss
@@ -41,8 +45,17 @@ source("input_data_scripts/mye/gla_mye_2018.R")
 source("input_data_scripts/mye/gla_mye_2016.R")
 source('input_data_scripts/fertility/additional_births_data.R')
 
-#Iterim 2019 MYE & components
-source("input_data_scripts/mye/initialize_mye_2019.R")
+#2019 MYE & components
+source("input_data_scripts/mye/ons_mye_2019.R")
+source("input_data_scripts/mye/northern_ireland_mye_2019.R")
+source("input_data_scripts/mye/scotland_mye_2019.R")
+
+source("input_data_scripts/domestic_migration/domestic_migration_2019.R")
+source("input_data_scripts/households/household_model_inputs_(2020 geog).R")
+source('input_data_scripts/fertility/asfr_2020_geography.R')
+source('input_data_scripts/fertility/fertility_rates_2019.R')
+source('input_data_scripts/mortality/asmr_2020_geography.R')
+source('input_data_scripts/mortality/mortality_rates_2019.R')
 
 #pre calc rates
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
@@ -51,5 +64,5 @@ source('input_data_scripts/domestic_migration/pre-calulate_domestic_rates_2018_b
 
 #Excel templates
 dir.create("input_data/excel_templates")
-R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/input_data/excel_templates",
+R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/excel_templates",
                        "input_data/excel_templates")

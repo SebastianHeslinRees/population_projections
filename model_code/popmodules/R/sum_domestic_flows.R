@@ -11,6 +11,7 @@
 #' @param domestic_flow A data frame containing sya/sex flows between geographic areas
 #' @param in_or_out A string indicating whether the flows should be summed for
 #'  the destination (in) or origin (out) area.
+#' @param flow_col A string. The name of the column containg the flow data. Defaul \code{flow}
 #'
 #' @return A dataframe with flows into or out of an area summed
 #'
@@ -21,15 +22,19 @@
 #' 
 #' @export
 
-sum_domestic_flows <- function(domestic_flow, in_or_out){
+sum_domestic_flows <- function(domestic_flow, in_or_out, flow_col = "flow"){
   
-  assert_that(in_or_out %in% c("in", "out"))
+  assert_that(in_or_out %in% c("in", "out"),
+              msg = "In sum_domestic_flows in_or_out must be either in or out")
+  assert_that(flow_col %in% names(domestic_flow),
+              msg = "In sum_domestic_flows flow_col must be in domestic_flow dataframe")
   
   gss_col <- ifelse(in_or_out == "in", "gss_in", "gss_out")
   
   data_col <- ifelse(in_or_out == "in", "dom_in", "dom_out")
   
   dom <- dtplyr::lazy_dt(domestic_flow) %>%
+    rename(flow = !!flow_col) %>%
     group_by_at(c("year", gss_col, "sex", "age")) %>%
     summarise(flow = sum(flow)) %>%
     as.data.frame() %>%
