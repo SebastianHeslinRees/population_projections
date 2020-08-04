@@ -118,7 +118,7 @@ validate_population(ons_deaths)
 validate_population(ons_int_in)
 validate_population(ons_int_out)
 validate_population(ons_int_net)
-
+dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 #Bind to ONS data and save
 saveRDS(ons_popn, paste0(output_location, "population_ons.rds"))
 saveRDS(ons_births, paste0(output_location, "births_ons.rds"))

@@ -1,11 +1,13 @@
-#' Load the development version of the GLA model packages
+#' Load the development versions of the GLA model suite
 #' 
-#' Run devtools::load_all() on the GLA model packages
+#' Run devtools::load_all() on the GLA model packages and popmodules
 #' 
 #' @param popmodules Logical Load the popmodules package Default \code{TRUE}
 #' @param trend Logical Load the trendmodel package Default \code{TRUE}
-#' @param housingled Logical Load the housingledmodel package Default \code{TRUE}
+#' @param housing_led Logical Load the housingledmodel package Default \code{TRUE}
 #' @param small_area Logical Load the smallareamodel package Default \code{TRUE}
+#' 
+#' @export
 
 load_gla_models <- function(popmodules = TRUE, trend = TRUE, housing_led = TRUE, small_area = TRUE){
   

@@ -1,8 +1,10 @@
 library(dplyr)
 library(data.table)
+library(popmodules)
 
 data_location <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/"
 output_location <- "input_data/domestic_migration/2019/"
+dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 
 #--------------------------
 
@@ -67,25 +69,9 @@ saveRDS(dom_flows_output, paste0(output_location, "domestic_migration_flows_ons_
 #------------------------------------
 
 #gross at net flows files
-dom_in <- dom_flows_output %>% 
-  group_by(gss_code = gss_in, year, sex, age) %>% 
-  summarise(dom_in = sum(value)) %>% 
-  data.frame() %>% 
-  tidyr::complete(gss_code = unique(dom_flows_output$gss_in),
-                  year = 2002:2019,
-                  sex = c("male","female"),
-                  age = 0:90,
-                  fill = list(dom_in = 0))
+dom_in <- sum_domestic_flows(dom_flows_output, "in", "value")
 
-dom_out <- dom_flows_output %>% 
-  group_by(gss_code = gss_out, year, sex, age) %>% 
-  summarise(dom_out = sum(value)) %>% 
-  data.frame() %>% 
-  tidyr::complete(gss_code = unique(dom_flows_output$gss_in),
-                  year = 2002:2019,
-                  sex = c("male","female"),
-                  age = 0:90,
-                  fill = list(dom_out = 0))
+dom_out <- sum_domestic_flows(dom_flows_output, "out", "value")
 
 dom_net <- dom_out %>%
   mutate(dom_in = dom_out *-1) %>% 
@@ -99,39 +85,12 @@ dom_net <- dom_out %>%
 
 #regional flows
 district_to_region <- readRDS("input_data/lookup/district_to_region.rds")
+aggregated_flows <- aggregate_regional_flows(dom_flows_output, district_to_region, "value")
 
-regional_flows <- dom_flows_output %>%
-  left_join(district_to_region, by=c("gss_out"="gss_code")) %>% 
-  select(-gss_out) %>% 
-  rename(gss_out = region_gss_code) %>% 
-  left_join(district_to_region, by=c("gss_in"="gss_code")) %>% 
-  select(-gss_in) %>% 
-  rename(gss_in = region_gss_code) %>% 
-  filter(gss_in != gss_out) %>% 
-  group_by(gss_in, gss_out, year, sex, age) %>% 
-  summarise(value = sum(value)) %>% 
-  data.frame()
-
-reg_dom_in <- regional_flows %>% 
-  group_by(gss_code = gss_in, year, sex, age) %>% 
-  summarise(dom_in = sum(value)) %>% 
-  data.frame() %>% 
-  tidyr::complete(gss_code = unique(district_to_region$region_gss_code),
-                  year = 2002:2019,
-                  sex = c("male","female"),
-                  age = 0:90,
-                  fill = list(dom_in = 0)) %>% 
+reg_dom_in<- sum_domestic_flows(aggregated_flows[[1]], "in", "value") %>% 
   filter(substr(gss_code,1,1)=="E")
 
-reg_dom_out <- regional_flows %>% 
-  group_by(gss_code = gss_out, year, sex, age) %>% 
-  summarise(dom_out = sum(value)) %>% 
-  data.frame() %>% 
-  tidyr::complete(gss_code = unique(district_to_region$region_gss_code),
-                  year = 2002:2019,
-                  sex = c("male","female"),
-                  age = 0:90,
-                  fill = list(dom_out = 0)) %>% 
+reg_dom_out<- sum_domestic_flows(aggregated_flows[[1]], "out", "value") %>% 
   filter(substr(gss_code,1,1)=="E")
 
 reg_dom_net <- reg_dom_out %>%
@@ -144,35 +103,32 @@ reg_dom_net <- reg_dom_out %>%
   filter(substr(gss_code,1,1)=="E")
 
 #---------------------------------------------------
+#sub regional flows
+sub_reg_dom_out <- sum_domestic_flows(aggregated_flows[[3]], "out", "value") %>% 
+  filter(gss_code %in% c("E13000001","E13000002"))
+
+sub_reg_dom_in <- sum_domestic_flows(aggregated_flows[[3]], "in", "value") %>% 
+  filter(gss_code %in% c("E13000001","E13000002"))
+
+sub_regional_net <- sub_reg_dom_out %>%
+  mutate(dom_in = dom_out *-1) %>% 
+  select(-dom_out) %>% 
+  rbind(sub_reg_dom_in) %>% 
+  group_by(gss_code, year, sex, age) %>% 
+  summarise(dom_net = sum(dom_in)) %>% 
+  data.frame()
+
+#---------------------------------------------------
 
 #national flows
-
-national_flows <- dom_flows_output %>%
-  mutate(gss_in = case_when(substr(gss_in,1,1) == "E" ~ "E92000001",
-                            substr(gss_in,1,1) == "N" ~ "E92000002",
-                            substr(gss_in,1,1) == "S" ~ "E92000003",
-                            substr(gss_in,1,1) == "W" ~ "W92000004")) %>%
-  mutate(gss_out = case_when(substr(gss_out,1,1) == "E" ~ "E92000001",
-                             substr(gss_out,1,1) == "N" ~ "E92000002",
-                             substr(gss_out,1,1) == "S" ~ "E92000003",
-                             substr(gss_out,1,1) == "W" ~ "W92000004")) %>% 
-  filter(gss_in != gss_out) %>% 
-  group_by(gss_in, gss_out, year, sex, age) %>% 
-  summarise(value = sum(value)) %>% 
-  data.frame()
+national_flows <- aggregated_flows[[2]]
 
 #Scotland and Northern Ireland are in the district-level data
 #Only England & Wales are missing
-nat_dom_in <- national_flows %>% 
-  group_by(gss_code = gss_in, year, sex, age) %>% 
-  summarise(dom_in = sum(value)) %>% 
-  data.frame()  %>%
+nat_dom_in <- sum_domestic_flows(aggregated_flows[[2]], "in", "value")  %>%
   filter(gss_code %in% c("E92000001","W92000004"))
 
-nat_dom_out <- national_flows %>% 
-  group_by(gss_code = gss_out, year, sex, age) %>% 
-  summarise(dom_out = sum(value)) %>% 
-  data.frame() %>%
+nat_dom_out <- sum_domestic_flows(aggregated_flows[[2]], "out", "value") %>%
   filter(gss_code %in% c("E92000001","W92000004"))
 
 nat_dom_net <- nat_dom_out %>%
@@ -186,9 +142,9 @@ nat_dom_net <- nat_dom_out %>%
 
 #---------------------------------------------------
 
-dom_in_all <- rbind(dom_in, reg_dom_in, nat_dom_in)
-dom_out_all <- rbind(dom_out, reg_dom_out, nat_dom_out)
-dom_net_all <- rbind(dom_net, reg_dom_net, nat_dom_net)
+dom_in_all <- rbind(dom_in, reg_dom_in, nat_dom_in, sub_reg_dom_in)
+dom_out_all <- rbind(dom_out, reg_dom_out, nat_dom_out, sub_reg_dom_out)
+dom_net_all <- rbind(dom_net, reg_dom_net, nat_dom_net, sub_regional_net)
 
 #validate
 validate_population(dom_in_all)
@@ -203,4 +159,4 @@ saveRDS(dom_out_all, paste0(output_location, "domestic_migration_out_(2020_geog)
 saveRDS(dom_net_all, paste0(output_location, "domestic_migration_net_(2020_geog).rds"))
 
 saveRDS(national_flows, paste0(output_location, "national_domestic_migration_flows.rds"))
-saveRDS(regional_flows, paste0(output_location, "regional_domestic_migration_flows.rds"))
+saveRDS(aggregated_flows[[1]], paste0(output_location, "regional_domestic_migration_flows.rds"))
