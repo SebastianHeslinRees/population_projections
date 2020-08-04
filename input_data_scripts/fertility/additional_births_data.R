@@ -79,6 +79,6 @@ for(method in c("average", "trend")) {
   fertility_rates <- rbind(london_fert_rates, not_london_fert_rates) %>% 
     complete_fertility(popn)
   
-  filename_suffix <- ifelse(method == "trend", "_5yr_avg", "")
+  filename_suffix <- ifelse(method == "average", "_5yr_avg", "_5yr_trend")
   saveRDS(fertility_rates, paste0("input_data/fertility/fertility_rates_inc_2019_in_london",filename_suffix,".rds"))
 }
