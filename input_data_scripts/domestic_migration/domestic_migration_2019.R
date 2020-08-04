@@ -4,7 +4,7 @@ library(popmodules)
 
 data_location <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/"
 output_location <- "input_data/domestic_migration/2019/"
-dir.create(output_location)
+dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 
 #--------------------------
 

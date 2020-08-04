@@ -56,7 +56,7 @@ validate_population(dom_net)
 validate_population(other)
 
 #------------
-
+dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 saveRDS(population, paste0(output_location, "population_ons.rds"))
 saveRDS(births, paste0(output_location, "births_ons.rds"))
 saveRDS(deaths, paste0(output_location, "deaths_ons.rds"))
