@@ -43,6 +43,8 @@ source('input_data_scripts/fertility/additional_births_data.R')
 
 #Iterim 2019 MYE & components
 source("input_data_scripts/mye/initialize_mye_2019.R")
+source("input_data_scripts/fertility/fertility_rates_2019.R")
+source("input_data_scripts/mortality/mortality_rates_2019.R")
 
 #pre calc rates
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")

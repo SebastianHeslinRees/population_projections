@@ -22,6 +22,7 @@ run_trend_model <- function(config_list) {
   expected_config <- c("projection_name",
                        "first_proj_yr", 
                        "n_proj_yr",
+                       "output_dir",
                        "popn_mye_path",
                        "deaths_mye_path",
                        "births_mye_path",
@@ -30,22 +31,21 @@ run_trend_model <- function(config_list) {
                        "dom_out_mye_path",
                        "dom_in_mye_path",
                        "upc_path",
-                       "output_dir",
-                       "mortality_fns",
-                       "fertility_fns",
-                       "int_out_fns",
-                       "int_in_fns",
+                       "mortality_rates",
+                       "fertility_rates",
+                       "int_out_flows_rates",
+                       "int_out_method",
+                       "int_in_flows",
                        "domestic_rates",
                        "constraint_fns",
-                       "int_out_method",
-                       "qa_areas_of_interest",
-                       "write_excel",
-                       "write_QA",
                        "ons_stage1_file_path",
                        "ons_stage2_file_path",
                        "communal_est_pop_path",
                        "dclg_stage1_file_path",
-                       "dclg_stage2_file_path")
+                       "dclg_stage2_file_path",
+                       "qa_areas_of_interest",
+                       "write_QA",
+                       "write_excel")
   
   validate_config_list(config_list, expected_config)
   
@@ -104,17 +104,28 @@ run_trend_model <- function(config_list) {
   
   # get the projected rates
   message("get projected rates")
-  fertility_rates <- evaluate_fns_list(config_list$fertility_fns) %>% complete_fertility(population)
-  mortality_rates <- evaluate_fns_list(config_list$mortality_fns)
-  int_out_flows_rates <- evaluate_fns_list(config_list$int_out_fns) 
+  
+  eval_or_read <- function(string_or_list){
+    if(is.list(string_or_list)){
+      rates <- evaluate_fns_list(string_or_list)
+    }
+    if(is.string(string_or_list)){
+      rates <- readRDS(string_or_list)
+    }
+    return(rates)
+  }
+  
+  fertility_rates <- eval_or_read(config_list$fertility_rates) %>% complete_fertility(population)
+  mortality_rates <- eval_or_read(config_list$mortality_rates)
+  int_out_flows_rates <- eval_or_read(config_list$int_out_flows_rates) 
   
   domestic_rates_info <- get_rates_flows_info(config_list$domestic_rates, first_proj_yr, last_proj_yr)
   domestic_rates <- NULL
   
-  international_flow_info <- get_rates_flows_info(config_list$int_in_fns, first_proj_yr, last_proj_yr)
+  international_flow_info <- get_rates_flows_info(config_list$int_in_flows, first_proj_yr, last_proj_yr)
   int_in_flows <- NULL
   
-  constraints <- evaluate_fns_list(config_list$constraint_fns)
+  constraints <- eval_or_read(config_list$constraint_fns)
   
   #Prep backseries
   population <- population %>% select(year, gss_code, age, sex, popn)
@@ -309,3 +320,4 @@ validate_trend_core_outputs <- function(projection) {
   if(!is.null(projection$upc)){validate_population(projection$upc)}
   
 }
+
