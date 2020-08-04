@@ -3,7 +3,7 @@ library(data.table)
 
 data_location <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/"
 output_location <- "input_data/domestic_migration/2019/"
-
+dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 #--------------------------
 
 file_1 <- fread(paste0(data_location, "raw_data/y2019/Detailed_Estimates_2019_LA_2019_Dataset_1.csv"))
