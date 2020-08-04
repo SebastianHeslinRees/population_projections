@@ -190,8 +190,6 @@ config_list <- list(
   dclg_stage2_file_path = dclg_stage2_file_path
 )
 
-rm(list = setdiff(ls(), "config_list"))
-
 # Run the model
 rm(list = setdiff(ls(), "config_list"))
 projection <- run_trend_model(config_list)
