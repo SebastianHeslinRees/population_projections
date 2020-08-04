@@ -126,6 +126,8 @@ wrangle_datastore_outputs <- function(x){
     reorder_for_output() %>%
     as.data.frame()
   
+  return(wrangled)
+  
 }
 
 filter_to_london <- function(x){
