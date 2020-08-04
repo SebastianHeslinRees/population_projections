@@ -3,6 +3,7 @@
 export("%>%")
 export(adjust_domestic_migration)
 export(aggregate_city_wards)
+export(aggregate_regional_flows)
 export(aggregate_regions)
 export(apply_domestic_migration_rates)
 export(apply_rate_to_population)

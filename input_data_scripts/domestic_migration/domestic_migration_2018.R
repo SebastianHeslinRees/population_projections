@@ -4,10 +4,11 @@ library(assertthat)
 library(data.table)
 library(popmodules)
 
-rm(list=ls()) # we're going to need memory, sorry
+rm(list=ls())
 message("domestic migration")
 
 output_location <- "input_data/domestic_migration/2018/"
+dir.create(output_location, recursive = TRUE, showWarnings = FALSE)
 
 region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
 
@@ -126,3 +127,5 @@ saveRDS(dom_net_all, paste0(output_location, "domestic_migration_net.rds"))
 
 saveRDS(aggregated_flows[[3]], paste0(output_location, "national_domestic_migration_flows.rds"))
 saveRDS(aggregated_flows[[1]], paste0(output_location, "regional_domestic_migration_flows.rds"))
+
+rm(list=ls())

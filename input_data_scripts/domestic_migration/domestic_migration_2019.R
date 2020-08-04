@@ -17,6 +17,7 @@ past_data <- readRDS("input_data/domestic_migration/2018/domestic_migration_flow
 
 #combine and clean 2019 data
 dom_flows <- rbind(file_1, file_2) %>%
+  dtplyr::lazy_dt() %>% 
   rename(gss_in = InLA,
          gss_out = OutLA) %>% 
   mutate(sex = case_when(Sex == "M" ~ "male",
@@ -30,18 +31,17 @@ dom_flows <- rbind(file_1, file_2) %>%
 
 
 #checks
-unique(dom_flows$sex)
-range(dom_flows$age)
-unique(substr(dom_flows$gss_in,1,3))
-unique(substr(dom_flows$gss_out,1,3))
-str(dom_flows)
-sum(is.na(dom_flows))
+# unique(dom_flows$sex)
+# range(dom_flows$age)
+# unique(substr(dom_flows$gss_in,1,3))
+# unique(substr(dom_flows$gss_out,1,3))
+# str(dom_flows)
+# sum(is.na(dom_flows))
 
 #----------------------------
 
 #set past data & new to same geography
 #this will take a while
-devtools::load_all('model_code/popmodules')
 
 past_data <- past_data %>% 
   popmodules::recode_gss_codes(col_geog = "gss_in", data_cols = "value",
@@ -160,3 +160,5 @@ saveRDS(dom_net_all, paste0(output_location, "domestic_migration_net_(2020_geog)
 
 saveRDS(national_flows, paste0(output_location, "national_domestic_migration_flows.rds"))
 saveRDS(aggregated_flows[[1]], paste0(output_location, "regional_domestic_migration_flows.rds"))
+
+rm(list=ls())
