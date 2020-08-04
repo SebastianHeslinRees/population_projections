@@ -31,7 +31,7 @@
 #' @import assertthat
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
-#' @importFrom utils flush.console
+#' @importfrom utils flush.console
 #' 
 #' @export
 
@@ -54,7 +54,7 @@ trend_core <- function(start_population,
   # age is the age the cohort is at 30th June
   aged_popn <- start_population %>%
     popn_age_on() 
-
+  
   # at_risk <- start_population %>%
   #   mutate(age = age+1) %>%
   #   left_join(start_population, by=c("gss_code","year","sex","age")) %>%
@@ -72,13 +72,13 @@ trend_core <- function(start_population,
   if(!is.null(constraints)){
     births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
   }
-
+  
   birthratio_m2f <- 1.05
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
   
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
   validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
-
+  
   deaths <- component_from_popn_rate(popn = aged_popn_w_births,
                                      component_rate = mortality_rates,
                                      col_popn = "popn",
@@ -86,7 +86,7 @@ trend_core <- function(start_population,
                                      col_component = "deaths")
   validate_population(deaths, col_data = "deaths", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE)
-
+  
   if(!is.null(constraints)){
     deaths$country <- substr(deaths$gss_code, 1, 1)
     deaths <- constrain_component(popn=deaths,
@@ -96,11 +96,11 @@ trend_core <- function(start_population,
                                   rows_to_constrain = deaths$country %in% constraints$deaths_constraint$country)
     deaths$country <- NULL
   }
-
+  
   natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
     mutate(popn = popn - deaths) %>%
     select(-deaths)
-
+  
   if(int_out_method=="flow"){
     int_out <- int_out_flows_rates
   } else {
@@ -110,11 +110,11 @@ trend_core <- function(start_population,
                                         col_rate = "int_out",
                                         col_component = "int_out")
   }
-
+  
   validate_population(int_out, col_data = "int_out")
   validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
-
-
+  
+  
   if(!is.null(constraints)){
     int_out$country <- substr(int_out$gss_code, 1, 1)
     int_out <- constrain_component(popn=int_out,
@@ -124,11 +124,11 @@ trend_core <- function(start_population,
                                    rows_to_constrain = int_out$country %in% constraints$international_out_constraint$country)
     int_out$country <- NULL
   }
-
+  
   int_in <- int_in_flows
   validate_population(int_in, col_data = "int_in")
   validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
-
+  
   if(!is.null(constraints)){
     int_in$country <- substr(int_in$gss_code, 1, 1)
     int_in <- constrain_component(popn=int_in,
@@ -136,10 +136,10 @@ trend_core <- function(start_population,
                                   col_aggregation = c("year", "sex", "age", "country"),
                                   col_popn = "int_in",
                                   rows_to_constrain = int_in$country %in% constraints$international_in_constraint$country)
-
+    
     int_in$country <- NULL
   }
-
+  
   domestic_flow <- natural_change_popn %>%
     apply_domestic_migration_rates(mign_rate = domestic_rates,
                                    col_aggregation = c("gss_code"="gss_out", "sex", "age"),
@@ -158,52 +158,36 @@ trend_core <- function(start_population,
                                             out_constraint = constraints$cross_border_out_constraint,
                                             col_flow = "flow")
   }
-
-  #flows between 9 english regions & other 3 home nations
-  regional_flow <- dtplyr::lazy_dt(domestic_flow) %>%
-    left_join(region_lookup, by=c("gss_in"="gss_code")) %>%
-    select(-gss_in) %>%
-    rename(gss_in = region_gss_code) %>%
-    left_join(region_lookup, by=c("gss_out"="gss_code")) %>%
-    select(-gss_out) %>% 
-    rename(gss_out = region_gss_code) %>%
-    filter(gss_in != gss_out) %>%
-    group_by(year, gss_in, gss_out, age, sex) %>%
-    summarise(flow = sum(flow)) %>%
-    as.data.frame()
-
-  #flows between all 4 home nations
-  national_flow <- dtplyr::lazy_dt(domestic_flow) %>%
-    mutate(gss_out = substring(gss_out, 1, 1),
-           gss_in  = substring(gss_in,  1, 1)) %>%
-    mutate(gss_out = recode(gss_out, "E" = "E92000001"),
-           gss_in  = recode(gss_in,  "E" = "E92000001")) %>%
-    filter(gss_in != gss_out) %>%
-    group_by(year, gss_in, gss_out, age, sex) %>%
-    summarise(flow = sum(flow)) %>%
-    as.data.frame()
+  
+  regional_flows <- aggregate_regional_flows(domestic_flow, region_lookup)
   
   #District in E & W, national S, NI gross flows
   dom_out <- sum_domestic_flows(domestic_flow, "out")
   dom_in <- sum_domestic_flows(domestic_flow, "in")
-
+  
   #Region in E, national W, S, NI gross flows
-  reg_dom_out <- sum_domestic_flows(regional_flow, "out")
-  reg_dom_in <- sum_domestic_flows(regional_flow, "in")
+  reg_dom_out <- sum_domestic_flows(regional_flows[['regional_flow']], "out")
+  reg_dom_in <- sum_domestic_flows(regional_flows[['regional_flow']], "in")
   
   #National E, W, S, NI gross flows
-  #nat_dom_out <- sum_domestic_flows(national_flow, "out")
-  #nat_dom_in <- sum_domestic_flows(national_flow, "in")
+  nat_dom_out <- sum_domestic_flows(regional_flows[['national_flow']], "out")
+  nat_dom_in <- sum_domestic_flows(regional_flows[['national_flow']], "in")
   
-  #Bind and de-duplicate
-  dom_out_with_regions <- dom_out %>%
-    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>% # S and NI are already aggregated
-    rbind(reg_dom_out) #%>%
-    #rbind(filter(nat_dom_out, substr(gss_code, 1, 1) == "E"))  # Removed for consistency with backseries
-  dom_in_with_regions <- dom_in %>%
-    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>%
-    rbind(reg_dom_in) #%>%
-    #rbind(filter(nat_dom_in, substr(gss_code, 1, 1) == "E"))
+  #inner and outer London
+  sub_reg_dom_out <- sum_domestic_flows(regional_flows[['sub_regional_flow']], "out") 
+  sub_reg_dom_in <- sum_domestic_flows(regional_flows[['sub_regional_flow']], "in")
+  
+  dom_out_all_geog <- rbind(
+    filter(dom_out, substr(gss_code,1,2) %in% c("E0","W0")),
+    filter(reg_dom_out, substr(gss_code,1,3) == "E12"),
+    filter(sub_reg_dom_out, substr(gss_code,1,3)=="E13"),
+    nat_dom_out)
+  
+  dom_in_all_geog <- rbind(
+    filter(dom_in, substr(gss_code,1,2) %in% c("E0","W0")),
+    filter(reg_dom_in, substr(gss_code,1,3) == "E12"),
+    filter(sub_reg_dom_in, substr(gss_code,1,3)=="E13"),
+    nat_dom_in)
   
   if(is.null(upc)){
     
@@ -212,32 +196,33 @@ trend_core <- function(start_population,
                                                    subtraction_data = list(int_out, dom_out),
                                                    col_aggregation = c("year", "gss_code", "age", "sex"))
   } else {
-
+    
     next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
                                                    addition_data = list(int_in, dom_in, upc),
                                                    subtraction_data = list(int_out, dom_out),
                                                    col_aggregation = c("year", "gss_code", "age", "sex"),
                                                    data_are_subsets = TRUE) 
   }
-
+  
   # FIXME
   # TODO This setup creates negative populations
   # For now just setting -ve pops to zero
   next_yr_popn <- check_negative_values(next_yr_popn, "popn", set_to_zero = TRUE)
-
+  
   next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn)
-
+  
   validate_population(next_yr_popn, col_data = "popn",
                       comparison_pop = start_population,
                       col_comparison = c("gss_code","sex","age"))
-
+  
   return(list(population = next_yr_popn,
               deaths = deaths,
               births = births,
               int_out = int_out,
               int_in = int_in,
-              dom_out = dom_out_with_regions,
-              dom_in = dom_in_with_regions,
+              dom_out = dom_out_all_geog,
+              dom_in = dom_in_all_geog,
               births_by_mothers_age = births_by_mother,
               natural_change = natural_change_popn))
-}
+
+  }
