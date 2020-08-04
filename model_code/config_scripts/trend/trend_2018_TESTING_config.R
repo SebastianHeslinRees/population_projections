@@ -191,5 +191,8 @@ config_list <- list(
 )
 
 # Run the model
+devtools::load_all('model_code/popmodules')
+devtools::load_all('model_code/trendmodel')
+
 rm(list = setdiff(ls(), "config_list"))
 projection <- run_trend_model(config_list)

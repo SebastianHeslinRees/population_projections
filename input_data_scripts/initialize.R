@@ -1,6 +1,6 @@
 #check for packages needed to run the input scripts/models  and install any that are missing
 pkg <- c("assertthat", "data.table", "dtplyr", "minpack.lm", "purrr", 
-         "rmarkdown", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
+         "rmarkdown", "R.utils", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
 
 #needs old version of dplyr - waiting on bug fix in dplyr 1.0.0
 devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")

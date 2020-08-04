@@ -2,7 +2,6 @@ library(dplyr)
 
 new_data_folder <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/model_inputs/"
 existing_data_folder <- "input_data/mye/2018/"
-out_new_data_folder <- "input_data/mye/2018"
 
 ####Population####
 

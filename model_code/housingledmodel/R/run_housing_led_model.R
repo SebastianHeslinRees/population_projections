@@ -356,11 +356,11 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
   assert_that(min(external_ahs$year) <= first_proj_yr)
   assert_that(min(dwelling_trajectory$year) <= first_proj_yr)
   
-  assertthat::assert_that(max(component_rates[['fertility_rates']]$year) >= last_proj_yr)
-  assertthat::assert_that(max(component_rates[['mortality_rates']]$year) >= last_proj_yr)
-  assertthat::assert_that(max(communal_establishment_population$year) >= last_proj_yr)
-  assertthat::assert_that(max(external_ahs$year) >= last_proj_yr)
-  assertthat::assert_that(max(dwelling_trajectory$year) >= last_proj_yr)
+  assert_that(max(component_rates[['fertility_rates']]$year) >= last_proj_yr)
+  assert_that(max(component_rates[['mortality_rates']]$year) >= last_proj_yr)
+  assert_that(max(communal_establishment_population$year) >= last_proj_yr)
+  assert_that(max(external_ahs$year) >= last_proj_yr)
+  assert_that(max(dwelling_trajectory$year) >= last_proj_yr)
 
   
   if(constrain_projection){
@@ -368,16 +368,16 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
     assert_that(min(component_constraints[['death_constraint']]$year) <= first_proj_yr)
     assert_that(min(component_constraints[['international_out_constraint']]$year) <= first_proj_yr)
     
-    assertthat::assert_that(max(component_constraints[['birth_constraint']]$year) >= last_proj_yr)
-    assertthat::assert_that(max(component_constraints[['death_constraint']]$year) >= last_proj_yr)
-    assertthat::assert_that(max(component_constraints[['international_out_constraint']]$year) >= last_proj_yr)
+    assert_that(max(component_constraints[['birth_constraint']]$year) >= last_proj_yr)
+    assert_that(max(component_constraints[['death_constraint']]$year) >= last_proj_yr)
+    assert_that(max(component_constraints[['international_out_constraint']]$year) >= last_proj_yr)
     
-    assertthat::assert_that(min(hma_constraint$year) <= first_proj_yr)
-    assertthat::assert_that(max(hma_constraint$year) >= last_proj_yr)
+    assert_that(min(hma_constraint$year) <= first_proj_yr)
+    assert_that(max(hma_constraint$year) >= last_proj_yr)
 
   }
   
-  assertthat::assert_that(is.numeric(ahs_method) | ahs_method == "tree")
+  assert_that(is.numeric(ahs_method) | ahs_method == "tree")
   
   validate_population(curr_yr_popn, col_aggregation = c("year", "gss_code", "age", "sex"), col_data = "popn")
   for(i in seq_along(component_rates)) {

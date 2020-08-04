@@ -31,7 +31,7 @@
 #' @import assertthat
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
-#' @importfrom utils flush.console
+#' @importFrom utils flush.console
 #' 
 #' @export
 
