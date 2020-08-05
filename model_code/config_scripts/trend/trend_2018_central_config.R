@@ -59,7 +59,7 @@ output_dir <- paste0("outputs/trend/2018/",projection_name,"/")
 
 #-------------------------------------------------
 
-mortality_fns <- list(
+mortality_rates <- list(
   
   
   list(fn = popmodules::scaled_mortality_curve, args = list(popn_mye_path = popn_mye_path,
@@ -81,7 +81,7 @@ mortality_fns <- list(
 
 #------------------------------------------
 
-fertility_fns <- list(
+fertility_rates <- list(
   list(fn = popmodules::scaled_fertility_curve, args = list(popn_mye_path = popn_mye_path,
                                                             births_mye_path = births_mye_path,
                                                             target_curves_filepath = fertility_curve_filepath,
@@ -101,7 +101,7 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
+int_out_flows_rates <- list(
   list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                births_mye_path = births_mye_path,
                                                                                flow_or_rate = int_out_flow_or_rate,
@@ -157,10 +157,10 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   upc_path = upc_path,
   output_dir = output_dir,
-  mortality_fns = mortality_fns,
-  fertility_fns = fertility_fns,
-  int_out_fns = int_out_rate_fns,
-  int_in_fns = int_in,
+  mortality_rates = mortality_rates,
+  fertility_rates = fertility_rates,
+  int_out_flows_rates = int_out_flows_rates,
+  int_in_flows = int_in,
   domestic_rates = domestic_rates,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,

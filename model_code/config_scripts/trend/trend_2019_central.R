@@ -16,20 +16,6 @@ dom_out_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_mig
 dom_in_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_in.rds")
 upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
-mortality_years_to_avg <- 5
-mortality_avg_or_trend <- "trend"
-mortality_last_data_year <- 2019
-mortality_curve_filepath <- "input_data/mortality/ons_asmr_curves_2018_(2020_geog).rds"
-mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
-mortality_npp_variant <- "2018_principal"
-
-fertility_years_to_avg <- 5
-fertility_avg_or_trend <- "average"
-fertility_last_data_year <- 2019
-fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018_(2020_geog).rds"
-fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
-fertility_npp_variant <- "2018_principal"
-
 int_out_last_data_year <- 2019
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
@@ -44,52 +30,22 @@ dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014_(2
 write_excel <- TRUE
 
 #-------------------------------------------------
+
 timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
 output_dir <- paste0("outputs/trend/2019/",projection_name,"/")
 
-mortality_fns <- list(
-  
-  list(fn = popmodules::scaled_mortality_curve, args = list(popn_mye_path = popn_mye_path,
-                                                            births_mye_path = births_mye_path,
-                                                            deaths_mye_path = deaths_mye_path,
-                                                            target_curves_filepath = mortality_curve_filepath,
-                                                            last_data_year = mortality_last_data_year,
-                                                            n_years_to_avg = mortality_years_to_avg,
-                                                            avg_or_trend = mortality_avg_or_trend,
-                                                            data_col = "deaths",
-                                                            output_col = "rate")),
-  
-  list(fn = popmodules::project_rates_npp, args = list(rate_col = "rate",
-                                                       rate_trajectory_filepath = mortality_trajectory_filepath,
-                                                       first_proj_yr = first_proj_yr,
-                                                       n_proj_yr = n_proj_yr,
-                                                       npp_var = mortality_npp_variant))
-)
+#------------------------------------------
+
+mortality_rates <- "input_data/mortality/mort_rates_5yr_trend_2019.rds"
 
 #------------------------------------------
 
-fertility_fns <- list(
-  list(fn = popmodules::scaled_fertility_curve, args = list(popn_mye_path = popn_mye_path,
-                                                            births_mye_path = births_mye_path,
-                                                            target_curves_filepath = fertility_curve_filepath,
-                                                            last_data_year = fertility_last_data_year,
-                                                            n_years_to_avg = fertility_years_to_avg,
-                                                            avg_or_trend = fertility_avg_or_trend,
-                                                            data_col = "births",
-                                                            output_col = "rate")),
-  
-  list(fn = popmodules::project_rates_npp, args = list(rate_col = "rate",
-                                                       rate_trajectory_filepath = fertility_trajectory_filepath,
-                                                       first_proj_yr = first_proj_yr,
-                                                       n_proj_yr = n_proj_yr,
-                                                       npp_var = fertility_npp_variant))
-)
-
+fertility_rates <- "input_data/fertility/fert_rates_5yr_avg_2019.rds"
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
+int_out_flows_rates <- list(
   list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                births_mye_path = births_mye_path,
                                                                                flow_or_rate = int_out_flow_or_rate,
@@ -127,6 +83,8 @@ config_list <- list(
   projection_name = projection_name,
   first_proj_yr = first_proj_yr,
   n_proj_yr = n_proj_yr,
+  output_dir = output_dir,
+  
   popn_mye_path = popn_mye_path,
   deaths_mye_path = deaths_mye_path,
   births_mye_path = births_mye_path,
@@ -135,22 +93,24 @@ config_list <- list(
   dom_out_mye_path = dom_out_mye_path,
   dom_in_mye_path = dom_in_mye_path,
   upc_path = upc_path,
-  output_dir = output_dir,
-  mortality_fns = mortality_fns,
-  fertility_fns = fertility_fns,
-  int_out_fns = int_out_rate_fns,
-  int_in_fns = int_in,
+  
+  mortality_rates = mortality_rates,
+  fertility_rates = fertility_rates,
+  int_out_flows_rates = int_out_flows_rates,
+  int_out_method = int_out_flow_or_rate,
+  int_in_flows = int_in_flows,
   domestic_rates = domestic_rates,
   constraint_fns = constraint_fns,
-  qa_areas_of_interest = qa_areas_of_interest,
-  int_out_method = int_out_flow_or_rate,
-  write_excel  = write_excel,
-  write_QA = FALSE,
+  
   communal_est_pop_path = communal_est_pop_path,
   ons_stage1_file_path = ons_stage1_file_path,
   ons_stage2_file_path = ons_stage2_file_path,
   dclg_stage1_file_path = dclg_stage1_file_path,
-  dclg_stage2_file_path = dclg_stage2_file_path
+  dclg_stage2_file_path = dclg_stage2_file_path,
+  
+  qa_areas_of_interest = FALSE,
+  write_QA = FALSE,
+  write_excel = write_excel
 )
 
 # Save settings
