@@ -15,15 +15,16 @@ write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-0
 rm(polygon_splits)
 
 #necessary packages
-pkg <- c("igraph","smoothr","lwgeom","sf")
+pkg <- c("igraph","smoothr","lwgeom","sf", "rgeos", "sp", "rgdal")
 for(i in seq(pkg)){
   if(!pkg[i] %in% rownames(installed.packages())){
     install.packages(pkg[i])
   }
 }
 
-#source("input_data_scripts/ldd/further_geom_code.R")
-source('input_data_scripts/ldd/ldd.R')
+#source("input_data_scripts/development_data/further_geom_code.R")
+source('input_data_scripts/development_data/ldd.R')
+source('input_data_scripts/development_data/shlaa.R')
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')
 
@@ -35,7 +36,6 @@ source('input_data_scripts/small_area_data/msoa_communal_establishment_populatio
 source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
 source('input_data_scripts/small_area_data/msoa_migration_data.R')
 
-source('input_data_scripts/small_area_data/small_area_development.R')
 
 #TESTS
 rm(list=ls())
