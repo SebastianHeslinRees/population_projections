@@ -26,5 +26,6 @@ Imports:
     dtplyr,
     purrr,
     minpack.lm,
-    testthat (>= 2.1.0)
-RoxygenNote: 7.1.0
+    testthat (>= 2.1.0),
+    stringr
+RoxygenNote: 7.1.1

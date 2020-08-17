@@ -51,9 +51,9 @@ domestic_out <- filter(domestic_out, age == 75) %>%
 #census to mid-year
 domestic_out <- left_join(domestic_out, ward_to_district, by="gss_code_ward") %>%
         constrain_component(borough_domestic_out,
-                                     col_aggregation = c("gss_code","sex","age"),
-                                     col_popn = "domestic_out_migrants",
-                                     col_constraint = "dom_out")
+                            col_aggregation = c("gss_code","sex","age"),
+                            col_popn = "domestic_out_migrants",
+                            col_constraint = "dom_out")
 
 ####DOMESTIC IN####
 borough_domestic_in <- readRDS(borough_dom_in_path) %>% filter(year == 2011) %>% filter_to_LAs()
@@ -164,8 +164,9 @@ ward_births_2011 <- readRDS(ward_births_path) %>%
                male = births * (105/205),
                female = births - male) %>%
         select(-births) %>%
-        pivot_longer(c("male", "female"), values_to = "popn", names_to = "sex") %>%
-        select(year, gss_code_ward, sex, age, popn)
+        pivot_longer(c("male", "female"), values_to = "births", names_to = "sex") %>%
+        select(year, gss_code_ward, sex, age, popn) %>% 
+        data.frame()
 
 borough_deaths <- readRDS(borough_deaths_path) %>% 
         filter(substr(gss_code,1,3)=="E09",
@@ -211,8 +212,8 @@ ward_popn_2010 <- readRDS(ward_popn_path) %>%
 
 denominators <- ward_popn_2010 %>%
         as.data.frame() %>%
-        popn_age_on(col_aggregation = c("year", "gss_code_ward", "sex", "age")) %>%
-        rbind(ward_births_2011) %>%
+        popn_age_on(col_aggregation = c("year", "gss_code_ward", "sex", "age"),
+                    births = ward_births_2011) %>%
         left_join(ward_deaths_2011, by = c("year","gss_code_ward","sex","age")) %>%
         rename(start_popn = popn) %>%
         mutate(popn = start_popn - deaths) %>%

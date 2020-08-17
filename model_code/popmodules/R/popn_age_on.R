@@ -17,19 +17,16 @@
 #' and the age/band below it is added to it. An ageing population will all
 #' eventually be moved into this age band if no other processes are operating.
 #'
-#' When age bands are merged like this, the function combines data in other
-#' columns using the following (crude) rules: if the data are numeric, sum them,
-#' otherwise check they're an identical category (i.e. not age-dependent) and
-#' return the value, otherwise throw an error. (So make sure year data are
-#' specified in \code{col_aggregation})
-#'
 #' @param popn Data frame containing a cohort population.
 #' @param col_aggregation Character vector of columns in \code{popn} acting as
 #'   aggregation levels. Default \code{c("year","gss_code","age","sex")}. In the case
 #'   of multiple geography columns, only supply the highest resolution column;
-#'   other columns will be preserved.
+#'   other columns will be dropped.
 #' @param col_age String denoting the age column. Default "age".
 #' @param col_year String denoting the year column. Can be NULL. Default "year".
+#' @param col_data String or Character denoting the column(s) containing data.
+#'   For multiple columns pass as a vector \code{c("popn","popn_2")}.
+#'   Default "popn".
 #' @param timestep Numeric denoting the model time step in years. If age data
 #'   are numeric, they must be spaced by this interval. If they are an ordered
 #'   factor, the function will advance the age by one age band regardless of
@@ -42,10 +39,10 @@
 #' @param births Data frame, 0 or \code{NULL}. Births data at the same
 #'   aggregation levels as \code{popn} but coded to the lowest age band that can
 #'   be joined to the output with \code{rbind}. If zero, then the output rows for
-#'   zero-year-olds, all of which are zero. These settings currently only work
-#'   when \code{col_aggregation} is set to the default
-#'   \code{c("year","gss_code","age","sex")}. If \code{NULL} then no
+#'   zero-year-olds, all of which are zero. If \code{NULL} then no
 #'   zero-year-olds are included in the output. Default \code{NULL}.
+#' @param col_births String denoting the name of the column containing data in 
+#'   the \code{births} dataframe.
 #'
 #' @return A data frame containing the population with age advanced by one time
 #'   step (or age band). The lowest age will not be present in this output. Rows
@@ -54,7 +51,8 @@
 #' @import assertthat
 #' @import dplyr
 #' @importFrom dtplyr lazy_dt
-#' @importFrom  plyr mapvalues
+#' @importFrom plyr mapvalues
+#' @importFrom stringr str_detect
 #'
 #' @export
 
@@ -78,7 +76,7 @@ popn_age_on <- function(popn,
                              template_age_levels,
                              births,
                              col_births)
-  #browser()
+  
   # Standardise data
   if(!col_age %in% col_aggregation) {
     col_aggregation <- c(col_aggregation, col_age)
@@ -159,13 +157,13 @@ popn_age_on <- function(popn,
       rename(!!col_data := col_births) %>%
       select(names(aged))
     
-    if(!is.null(col_year)){
-      births[[col_year]] <- unique(aged[[col_year]])
-    }
-    
     aged <- rbind(births, aged) %>%
       arrange_at(col_aggregation)
     
+    if(!is.null(col_year)){
+      common_years <- intersect(births[[col_year]], popn[[col_year]])
+      aged <- aged %>% filter(!!sym(col_year) %in% common_years)
+    }
   }
   
   # Standardise and validate output
@@ -189,6 +187,7 @@ popn_age_on <- function(popn,
                               aged,
                               col_aggregation,
                               col_age,
+                              col_year,
                               col_data,
                               births)
   
@@ -309,21 +308,23 @@ validate_popn_age_on_input <- function(popn,
                 msg = "popn_age_on: non-numeric, age-dependent data detected in input. The function can't deal with this.")
   }
   
-  # Validate input births data
-  
+  #Births
   if(!is.null(births)){
-    #browser()
+    
     assert_that(length(col_data) == 1,
                 msg = "in popn_age_on births can only be added if there is 1 data column")
     
     if(is.data.frame(births)) {
       validate_population(births, col_aggregation = col_aggregation)
-      assert_that(setequal(births$gss_code, popn$gss_code))
+      
+      col_geog <- col_aggregation[stringr::str_detect(col_aggregation, "gss_code")]
+      for(i in 1:length(col_geog)){
+        assert_that(setequal(births[[col_geog[i]]], popn[[col_geog[i]]]))
+      }
       
       assert_that(all(col_aggregation %in% names(births)),
                   msg = "in popn_age_on the births dataframe does not contain the columns in specified in col_aggreagtion")
-      assert_that(length(unique(births[[col_year]]))==1,
-                  msg = "in popn_age_on there may only be one year in the births dataframe passed to the function")
+      
     }
   }
   
@@ -338,18 +339,26 @@ validate_popn_age_on_output <- function(popn,
                                         aged,
                                         col_aggregation,
                                         col_age,
+                                        col_year,
                                         col_data,
                                         births) {
-  #browser()
-  popn_totals_in  <- sapply(popn[col_data], sum)   
+  
+  popn_totals_in  <- sapply(popn[col_data], sum) %>% 
+    as.numeric() 
   
   if(!is.null(births)){
-    births_totals_in <- sum(births[[col_data]])
-    popn_totals_in <- popn_totals_in + births_totals_in
+    if(!is.null(col_year)){
+      common_years <- intersect(births[[col_year]], popn[[col_year]])
+      births_totals_df <- births %>% filter(!!sym(col_year) %in% common_years)
+      popn_totals_df <- popn %>% filter(!!sym(col_year) %in% common_years)
+    }
+    births_totals_in <- sum(births_totals_df[[col_data]])
+    popn_totals_in <- sum(popn_totals_df[[col_data]]) + births_totals_in
   }
   
   popn_totals_in <- popn_totals_in %>% round(digits=2)
-  popn_totals_out <- sapply(aged[col_data], sum) %>% round(digits=2)
+  popn_totals_out <- sapply(aged[col_data], sum) %>% round(digits=2) %>% 
+    as.numeric()
   assert_that(identical(popn_totals_in, popn_totals_out),
               msg = "Error in popn_age_on: column sums have changed")
   
@@ -359,12 +368,6 @@ validate_popn_age_on_output <- function(popn,
     assert_that(setequal( setdiff(popn[[col_age]], age_min), aged[[col_age]]),
                 msg = "Output age level mismatch")
   }
-  
-  # comparison_pop <-filter(popn, .data[[col_age]] != age_min)
-  # if(is.factor(comparison_pop[[col_age]])) {
-  #   comparison_pop[[col_age]] <- droplevels(comparison_pop[[col_age]])
-  # }
-  
   
   validate_population(aged,
                       col_aggregation,
