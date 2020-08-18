@@ -187,3 +187,5 @@ deaths_sya_msoa <- data.table::rbindlist(past_deaths) %>%
   select(year, gss_code, gss_code_msoa, sex, age, deaths)
 
 saveRDS(deaths_sya_msoa, "input_data/small_area_model/msoa_sya_deaths.rds")
+
+rm(list = ls())

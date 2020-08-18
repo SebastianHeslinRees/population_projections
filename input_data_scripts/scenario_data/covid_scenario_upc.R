@@ -113,3 +113,5 @@ covid_upc <- rbind(covid_2020, covid_2021) %>%
 
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")
+
+rm(list = ls())

@@ -154,4 +154,4 @@ sum(avg_10_yr$int_in)
 
 saveRDS(redist_to_wse, paste0(int_flows_loc,"int_in_reduced_ldn_increased_wse.rds"))
 
-#------------------------------------------------------------------------------
+rm(list = ls())
