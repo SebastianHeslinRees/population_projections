@@ -12,7 +12,7 @@ dir.create(output_location, recursive = TRUE, showWarnings = FALSE)
 
 region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
 
-domestic_file <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/processed/2002-2018 but codes not changed.rds"
+domestic_file <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/processed/2018/2002-2018 but codes not changed.rds"
 
 domestic <- readRDS(domestic_file) %>%
   mutate(sex = as.character(sex)) %>%

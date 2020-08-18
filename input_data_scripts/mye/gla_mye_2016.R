@@ -79,3 +79,4 @@ for(i in seq(length(df))){
   saveRDS(df[[i]], path[[i]])
 }
 
+rm(list=ls())
