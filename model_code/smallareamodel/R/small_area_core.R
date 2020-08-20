@@ -13,7 +13,7 @@
 #'   at small area resolution.
 #' @param out_migration_rates Data frame. Static outmigration rates at small
 #'   area resolution.
-#' @param in_migration_characteristics Data frame. Static inmigration rates at
+#' @param in_migration_characteristics Data frame. Static in-migration rates at
 #'   small area resolution. Rates should give the number of people by age and
 #'   sex that migrate to an area for each adult (over 18) that migrates to an
 #'   area (that is, the rates will sum to a bit more than 1 for each geography).

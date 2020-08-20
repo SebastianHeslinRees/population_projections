@@ -30,6 +30,8 @@ A list where each element is a data frame containing data for each year
 }
 \description{
 The \code{housing_led_core} outputs a list for each year of the projection.
-Each list is a list of components. This function rearrages those outputs into
-a list of dataframes of components.
+Each list is a list of components. This function rearranges those outputs into
+a list of dataframes of components. The \code{trend_projection} parameter is the
+output of the first stage of the housing-led process, not a full trend model
+projection.
 }

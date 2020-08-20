@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_borough_and_ward_projection.R
 \name{run_borough_and_ward_projection}
 \alias{run_borough_and_ward_projection}
-\title{Run the housing led and ward models with parametrised inputs}
+\title{Run the housing led and ward models with parameterised inputs}
 \usage{
 run_borough_and_ward_projection(
   projection_name,
@@ -50,5 +50,5 @@ an \code{average} or a \code{trend} pf past data.}
 \item{constrain_projection}{Logical. Should the projection be constrained}
 }
 \description{
-Run the housing led and ward models with parametrised inputs
+Run the housing led and ward models with parameterised inputs
 }

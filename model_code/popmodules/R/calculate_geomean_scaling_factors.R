@@ -3,7 +3,7 @@
 #' For a backseries of years, given population for small areas and
 #' fertility/mortality rates for a higher geography, calculate a set of
 #' implied births/deaths. Compare these to observed births/deaths and
-#' create scaling facrots for the rates. Finally, calculate the geometric
+#' create scaling factors for the rates. Finally, calculate the geometric
 #' mean of the scaling factors.
 #'
 #' The function calculates the difference between a population and a (lower

@@ -2,7 +2,7 @@
 % Please edit documentation in R/constrain_to_hma.R
 \name{constrain_to_hma}
 \alias{constrain_to_hma}
-\title{Scale one population to match the totals of another in a houseing market area}
+\title{Scale one population to match the totals of another in a housing market area}
 \usage{
 constrain_to_hma(
   popn,

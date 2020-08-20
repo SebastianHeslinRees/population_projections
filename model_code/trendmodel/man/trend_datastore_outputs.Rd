@@ -18,7 +18,8 @@ trend_datastore_outputs(
 )
 }
 \arguments{
-\item{population, births, deaths, int_in, int_out, dom_in, dom_out}{Dataframes with population and component data.}
+\item{population, births, deaths, int_in, int_out, dom_in, dom_out}{Dataframes with
+population and component data.}
 
 \item{upc}{Dataframe or NULL. Contains upc component data.}
 

@@ -1,12 +1,12 @@
 #' Calculate a residual between populations and convert to domestic migration
 #' flows
 #'
-#' A method of reconciling the differnece between a population and a target
+#' A method of reconciling the difference between a population and a target
 #' constraint. Rather than scaling the whole population to match, the difference
 #' can be used to calculate additional domestic migration flows that are added
 #' or removed from the population.
 #'
-#' Convert origin destiation flow data to gross flow by origin or destination
+#' Convert origin destination flow data to gross flow by origin or destination
 #'
 #' @param domestic_flow A data frame containing sya/sex flows between geographic areas
 #' @param in_or_out A string indicating whether the flows should be summed for

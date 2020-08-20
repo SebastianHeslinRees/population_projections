@@ -25,9 +25,9 @@ distribute_within_age_band(
 
 \item{min_age}{Numeric. The minimum age of the age band.}
 
-\item{max_age}{Numeric. The maximim age of the age band.}
+\item{max_age}{Numeric. The maximum age of the age band.}
 
-\item{col_aggregation}{Character vector. The columns on whoich to join the two
+\item{col_aggregation}{Character vector. The columns on which to join the two
 datasets \code{popn_1} and \code{popn_2}. Cannot contain \code{"age"}.
 Default \code{c("gss_code, "sex)}}
 }
@@ -35,6 +35,6 @@ Default \code{c("gss_code, "sex)}}
 A dataframe of population data by single-year-of-age for the input age range
 }
 \description{
-Where a population is availble for an age band only use the sya distribution
+Where a population is available for an age band only use the sya distribution
 from another population to distribute the total over the single ages in the band.
 }

@@ -12,7 +12,7 @@ sum_births_and_split_by_sex_ratio(
 )
 }
 \arguments{
-\item{births}{Data frame constaining births by mother's age}
+\item{births}{Data frame containing births by mother's age}
 
 \item{birthratio_m2f}{Ratio of male births to female births. Default 1.05}
 

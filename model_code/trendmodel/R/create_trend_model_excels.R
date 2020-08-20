@@ -7,9 +7,8 @@
 #'
 #' @param trend_dir String. The output directory where the projection RDS files are
 #'   saved.
-#' @param excel_file_name String. File name for the population workbook ouput. Must
-#'   include \code{.xslx} suffix.
-#'
+#' @param excel_file_name String. File name for the population workbook output.
+#'  With or without "xlsx" suffix.
 #' @examples
 #' \dontrun{
 #' create_trend_model_excels(
@@ -18,6 +17,10 @@
 #' }
 
 create_trend_model_excels <- function(trend_dir, excel_file_name){
+  
+  if(substr(excel_file_name, nchar(excel_file_name)-4, nchar(excel_file_name)) != ".xlsx"){
+    excel_file_name <- paste0(excel_file_name,".xlsx")
+  }
 
   trend_datastore_outputs(population = readRDS(paste0(trend_dir,"population.rds")),
                     births = readRDS(paste0(trend_dir,"births.rds")),

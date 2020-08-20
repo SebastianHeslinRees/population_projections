@@ -17,11 +17,11 @@ the destination (in) or origin (out) area.}
 A dataframe with flows into or out of an area summed
 }
 \description{
-A method of reconciling the differnece between a population and a target
+A method of reconciling the difference between a population and a target
 constraint. Rather than scaling the whole population to match, the difference
 can be used to calculate additional domestic migration flows that are added
 or removed from the population.
 }
 \details{
-Convert origin destiation flow data to gross flow by origin or destination
+Convert origin destination flow data to gross flow by origin or destination
 }

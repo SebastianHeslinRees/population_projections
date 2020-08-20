@@ -1,7 +1,7 @@
 #' Sum a data frame with births by mother's age, split babies by a sex ratio and
 #' set age to zero
 #'
-#' @param births Data frame constaining births by mother's age
+#' @param births Data frame containing births by mother's age
 #' @param birthratio_m2f Ratio of male births to female births. Default 1.05
 #' @param geog_cols Character vector. Columns to group by when summing births.
 #'   Default "gss_code".
@@ -17,7 +17,7 @@ sum_births_and_split_by_sex_ratio <- function(births,
                                               geog_cols = "gss_code") {
 
   # TODO decide what checks we need to do!!
-  # TODO decide if we need flexbility with column names and aggregation levels
+  # TODO decide if we need flexibility with column names and aggregation levels
 
   check_sum_births_input(births, birthratio_m2f, geog_cols)
 

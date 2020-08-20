@@ -48,10 +48,10 @@ level specified by \code{col_aggregation}.}
 A list of two data frames. \code{dom_in} contains the input domestic
   inflows scaled to include the calculated positive residuals. \code{dom_out}
   contains the input domestic outflows scaled to include the
-  calulatednegative residuals.
+  calculated negative residuals.
 }
 \description{
-A method of reconciling the differnece between a population and a target
+A method of reconciling the difference between a population and a target
 constraint. Rather than scaling the whole population to match, the difference
 can be used to calculate additional domestic migration flows that are added
 or removed from the population.

@@ -1,6 +1,6 @@
 #' Run the 2014 DCLG household model
 #'
-#' Run stages 1 and 2 of the DCLG household model and retuen outputs
+#' Run stages 1 and 2 of the DCLG household model and return outputs
 #'
 #' @param population A data frame containing population data.
 #' @param stage1_file_path String. Path to file containing DCLG

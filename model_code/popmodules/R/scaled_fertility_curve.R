@@ -37,8 +37,10 @@
 #' @export
 
 
-scaled_fertility_curve <- function(popn_mye_path, births_mye_path, target_curves_filepath, last_data_year,
-                                   n_years_to_avg, avg_or_trend, data_col="births", output_col,
+scaled_fertility_curve <- function(popn_mye_path, births_mye_path,
+                                   target_curves_filepath, last_data_year,
+                                   n_years_to_avg, avg_or_trend,
+                                   data_col="births", output_col,
                                    project_rate_from = last_data_year+1){
 
   if(class(popn_mye_path)=="character"){

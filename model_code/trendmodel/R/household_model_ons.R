@@ -1,4 +1,4 @@
-#' Run the 2016 ONS household model
+#' Run the 2016/2018 ONS household model
 #'
 #' Run stages 1 and 2 of the ONS household model and return outputs.
 #'
