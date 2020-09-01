@@ -2,8 +2,7 @@
 % Please edit documentation in R/sum_domestic_flows.R
 \name{sum_domestic_flows}
 \alias{sum_domestic_flows}
-\title{Calculate a residual between populations and convert to domestic migration
-flows}
+\title{Convert origin-destination flow data to gross flow by origin or destination}
 \usage{
 sum_domestic_flows(domestic_flow, in_or_out, flow_col = "flow")
 }
@@ -13,17 +12,15 @@ sum_domestic_flows(domestic_flow, in_or_out, flow_col = "flow")
 \item{in_or_out}{A string indicating whether the flows should be summed for
 the destination (in) or origin (out) area.}
 
-\item{flow_col}{A string. The name of the column containg the flow data. Defaul \code{flow}}
+\item{flow_col}{A string. The name of the column containing the flow data.
+Default \code{flow}}
 }
 \value{
 A dataframe with flows into or out of an area summed
 }
 \description{
-A method of reconciling the differnece between a population and a target
-constraint. Rather than scaling the whole population to match, the difference
-can be used to calculate additional domestic migration flows that are added
-or removed from the population.
-}
-\details{
-Convert origin destiation flow data to gross flow by origin or destination
+Sum origin-destination flows to give total flows by either origin or destination.
+The type of flow is specified in the \code{in_or_out} parameter. The function
+expects column names \code{gss_in} and \code{gss_out}. Net flows cannot be
+calculated using this function.
 }
