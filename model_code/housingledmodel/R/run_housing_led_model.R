@@ -43,7 +43,12 @@ run_housing_led_model <- function(config_list){
                        "last_data_yr",
                        "upc_path")
   
+  
   validate_config_list(config_list, expected_config)
+  
+  #warnings log
+  dir.create(config_list$output_dir, showWarnings = FALSE)
+  loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
@@ -316,6 +321,16 @@ run_housing_led_model <- function(config_list){
                                 dwelling_trajectory,
                                 household_trajectory_static,
                                 first_proj_yr)
+  
+  loggr::deactivate_log()
+  data.table::fread(paste0(config_list$output_dir,"warnings.log"), header = FALSE,
+                    sep = "*") %>%
+    data.frame() %>% 
+    filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
+    data.table::fwrite(paste0(config_list$output_dir,"warnings.log"),
+                       col.names = FALSE, quote=FALSE)
+  
+
 }
 
 #-------
