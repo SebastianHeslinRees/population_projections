@@ -4,10 +4,10 @@
 #' @param start_population Data frame. Initial population at small area
 #'   resolution.
 #' @param births Data frame. Historical births backseries at small area
-#'   resolution. Used when \code{projection_year} is \code{last_data_year} or
+#'   resolution. Used when \code{projection_year} is \code{last_data_yr} or
 #'   earlier.
 #' @param deaths Data frame. Historical deaths backseries at small area
-#'   resolution. Used when \code{projection_year} is \code{last_data_year} or
+#'   resolution. Used when \code{projection_year} is \code{last_data_yr} or
 #'   earlier.
 #' @param communal_est_popn Data frame. Static communal establishment population
 #'   at small area resolution.
@@ -25,11 +25,11 @@
 #'   to.
 #' @param fertility_rates NULL or data frame. Fertility rates at small area
 #'   resolution. Used when \code{projection_year} is after
-#'   \code{last_data_year}.
+#'   \code{last_data_yr}.
 #' @param mortality_rates NULL or data frame. Mortality rates at small area
 #'   resolution. Used when \code{projection_year} is after
-#'   \code{last_data_year}.
-#' @param last_data_year Integer. Year at which the model switches from using
+#'   \code{last_data_yr}.
+#' @param last_data_yr Integer. Year at which the model switches from using
 #'   historical births and deaths from \code{births} and \code{deaths} to
 #'   projected rates from \code{fertility_rates} and \code{mortality_rates}.
 #' @param dwellings Data frame. Number of dwellings at small area resolution.
@@ -46,7 +46,7 @@
 small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             out_migration_rates, in_migration_characteristics,
                             popn_constraint, birth_constraint, death_constraint,
-                            fertility_rates, mortality_rates, last_data_year,
+                            fertility_rates, mortality_rates, last_data_yr,
                             dwellings, adults_per_dwelling,
                             projection_year, small_area_to_district){
 
@@ -55,7 +55,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                               col_aggregation = c("year", "gss_code_small_area", "age", "sex"))
   
   ####Fertility####
-  if(projection_year <= last_data_year){
+  if(projection_year <= last_data_yr){
    
     curr_yr_births <- filter(births, year == projection_year) %>%
       group_by(year, gss_code_small_area) %>%
@@ -77,14 +77,14 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     constrain_component(constraint = birth_constraint,
                         col_aggregation = c("year","gss_code"),
                         col_popn = "births") %>%
-    sum_births_and_split_by_sex_ratio(geog_cols = c("gss_code","gss_code_small_area")) %>%
+    sum_births_and_split_by_sex_ratio(col_aggregation = c("gss_code","gss_code_small_area")) %>%
     rename(popn = births)
   
   popn_w_births <- rbind(aged_on_popn, curr_yr_births) %>%
     arrange(gss_code_small_area, sex, age)
   
   ####Mortality####
-  if(projection_year <= last_data_year){
+  if(projection_year <= last_data_yr){
     
     curr_yr_deaths <- filter(deaths, year == projection_year) %>%
       left_join(small_area_to_district, by = "gss_code_small_area")

@@ -120,7 +120,7 @@ run_borough_and_ward_projection <- function(projection_name,
   borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates.rds")
   borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates.rds")
   
-  last_data_year <- 2018
+  last_data_yr <- 2018
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <- config_list$last_proj_yr
   birth_rate_n_years_to_avg <- 5
@@ -149,7 +149,7 @@ run_borough_and_ward_projection <- function(projection_name,
                            borough_fertility_rates_path = borough_fertility_rates_path,
                            borough_mortality_rates_path = borough_mortality_rates_path,
                            
-                           last_data_year = last_data_year,
+                           last_data_yr = last_data_yr,
                            first_proj_yr = first_proj_yr,
                            last_proj_yr = last_proj_yr,
                            

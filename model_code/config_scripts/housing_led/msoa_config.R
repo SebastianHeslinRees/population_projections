@@ -30,7 +30,7 @@ housing_led_model_path <- paste0("outputs/housing_led/2018/",projection_name,"/"
 borough_fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
 borough_mortality_rates_path <- paste0(external_trend_path,"mortality_rates.rds")
 
-last_data_year <- 2018
+last_data_yr <- 2018
 birth_rate_n_years_to_avg <- 5
 death_rate_n_years_to_avg <- 5
 ldd_final_yr <- 2018
@@ -54,7 +54,7 @@ msoa_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          borough_fertility_rates_path = borough_fertility_rates_path,
                          borough_mortality_rates_path = borough_mortality_rates_path,
                          
-                         last_data_year = last_data_year,
+                         last_data_yr = last_data_yr,
                          first_proj_yr = first_proj_yr,
                          last_proj_yr = last_proj_yr,
                          

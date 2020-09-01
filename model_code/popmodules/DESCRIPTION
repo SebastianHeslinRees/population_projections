@@ -28,4 +28,5 @@ Imports:
     minpack.lm,
     testthat (>= 2.1.0),
     loggr
+
 RoxygenNote: 7.1.1

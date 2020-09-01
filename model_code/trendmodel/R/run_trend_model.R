@@ -195,7 +195,7 @@ run_trend_model <- function(config_list) {
                                            int_out_flows_rates, int_in_flows,
                                            first_proj_yr, last_proj_yr)
   
-  validate_trend_core_outputs(projection)
+  validate_trend_core_outputs(projection, first_proj_yr)
   
   ## household models
   message('')
@@ -239,7 +239,7 @@ run_trend_model <- function(config_list) {
   }
   
   popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
-  
+
   return(projection)
 }
 
@@ -261,7 +261,6 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   if(!is.null(upc)) {
     popmodules::validate_population(upc, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
-  
   
   popmodules::validate_population(fertility_rates, col_data = "rate")
   popmodules::validate_population(mortality_rates, col_data = "rate")
@@ -300,7 +299,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
 
 #===============================================================================
 
-validate_trend_core_outputs <- function(projection) {
+validate_trend_core_outputs <- function(projection, first_proj_yr) {
   
   components <- names(projection)
   expected_components <- c("population", "deaths","births", "int_out", "int_in",
@@ -308,9 +307,32 @@ validate_trend_core_outputs <- function(projection) {
                            "fertility_rates", "mortality_rates", "int_out_rates", "upc")
   
   assert_that(identical(components, expected_components))
+ 
+  for(i in c(1:5,8:12)){ validate_population(projection[[i]]) }
   
-  #warning("Skipping tests on domestic trend output until aggregated domestic backseries are implemented")
-  for(i in 1:12){ validate_population(projection[[i]]) }
+  validate_domestic_components(projection[["dom_out"]],"domestic out", first_proj_yr)
+  validate_domestic_components(projection[["dom_in"]],"domestic in", first_proj_yr)
+  
   if(!is.null(projection$upc)){validate_population(projection$upc)}
+
+}
+
+validate_domestic_components <- function(data, component, first_proj_yr){
+  
+  dom_codes <- setdiff(unique(filter(data, year>=first_proj_yr)$gss_code),
+                       unique(filter(data, year<first_proj_yr)$gss_code))
+  
+  if(length(dom_codes) > 0){
+    warning(paste0("In ", component ,", ",length(dom_codes),
+                   " code(s) in projection but not in backseries: ", dom_codes))
+  }
+  
+  dom_codes <- setdiff(unique(filter(data, year<first_proj_yr)$gss_code),
+                       unique(filter(data, year>=first_proj_yr)$gss_code))
+  
+  if(length(dom_codes) > 0){
+    warning(paste0("In ", component ,", ",length(dom_codes),
+                   " code(s) in backseries but not in projection: ", dom_codes))
+  }
   
 }

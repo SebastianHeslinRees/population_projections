@@ -55,3 +55,5 @@ if(length(unique(msoa_ce_by_sya$gss_code_msoa))!=983){message("Warning: Wrong nu
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(msoa_ce_by_sya, "input_data/small_area_model/msoa_communal_establishment_population.rds")
+
+rm(list = ls())
