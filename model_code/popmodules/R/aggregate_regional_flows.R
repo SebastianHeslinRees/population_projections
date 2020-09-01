@@ -1,12 +1,12 @@
-#' Aggregate LA-level flow data to national, regional and subregional flows 
+#' Aggregate LA-level flow data to national, regional and sub-regional flows 
 #'
-#' Sum data for indiviual LAs for all 4 UK countries, 9 English regions and 2 of
-#' the subregions (Inner & Outer London)
+#' Sum data for individual LAs for all 4 UK countries, 9 English regions and 2 of
+#' the sub-regions (Inner & Outer London)
 #'
 #' @param domestic_flow A dataframe containing origin destination data with the
 #'  columns \code{year, gss_in, gss_out, age, sex}
 #' @param region_lookup A dataframe frame lookup between LA gss codes and region
-#'  gss_codes
+#'  gss_codes. Columns \code{gss_code, gss_code_region}
 #' @param flow_col A string giving the data column name in the input data frame.
 #'  Default \code{flow}
 #'
@@ -22,7 +22,7 @@ aggregate_regional_flows <- function(domestic_flow, region_lookup, flow_col = "f
   
   domestic_flow <- domestic_flow %>% rename(flow = !!flow_col)
   
-  #flows between 9 english regions & other 3 home nations
+  #flows between 9 English regions & other 3 home nations
   regional_flow <- dtplyr::lazy_dt(domestic_flow) %>%
     left_join(region_lookup, by=c("gss_in"="gss_code")) %>%
     select(-gss_in) %>%

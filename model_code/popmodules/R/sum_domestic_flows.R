@@ -1,17 +1,15 @@
-#' Calculate a residual between populations and convert to domestic migration
-#' flows
+#' Convert origin-destination flow data to gross flow by origin or destination
 #'
-#' A method of reconciling the differnece between a population and a target
-#' constraint. Rather than scaling the whole population to match, the difference
-#' can be used to calculate additional domestic migration flows that are added
-#' or removed from the population.
-#'
-#' Convert origin destiation flow data to gross flow by origin or destination
+#' Sum origin-destination flows to give total flows by either origin or destination.
+#' The type of flow is specified in the \code{in_or_out} variable. The function
+#' expects column names \code{gss_in} and \code{gss_out}. Net flows cannot be
+#' calculated using this function.
 #'
 #' @param domestic_flow A data frame containing sya/sex flows between geographic areas
 #' @param in_or_out A string indicating whether the flows should be summed for
 #'  the destination (in) or origin (out) area.
-#' @param flow_col A string. The name of the column containg the flow data. Default \code{flow}
+#' @param flow_col A string. The name of the column containing the flow data.
+#'  Default \code{flow}
 #'
 #' @return A dataframe with flows into or out of an area summed
 #'
