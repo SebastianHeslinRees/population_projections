@@ -77,7 +77,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
     constrain_component(constraint = birth_constraint,
                         col_aggregation = c("year","gss_code"),
                         col_popn = "births") %>%
-    sum_births_and_split_by_sex_ratio(geog_cols = c("gss_code","gss_code_small_area")) %>%
+    sum_births_and_split_by_sex_ratio(col_aggregation = c("gss_code","gss_code_small_area")) %>%
     rename(popn = births)
   
   popn_w_births <- rbind(aged_on_popn, curr_yr_births) %>%

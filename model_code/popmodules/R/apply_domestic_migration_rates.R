@@ -369,6 +369,7 @@ find_matching_column_data <- function(popn, mign_rate, col_known_gss, col_aggreg
               msg = paste("apply_domestic_migration_rates was unable to identify the origin and destination columns in the migration data.",
                           "This is most likely due to geographies in the origin data that aren't present anywhere in the destination data."))
   mign_col_match <- col_aggregation[names(col_aggregation) %in% popn_col_match]
+  return(mign_col_match)
 }
 
 # ---------------------------------------------

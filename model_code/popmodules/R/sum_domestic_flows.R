@@ -40,4 +40,5 @@ sum_domestic_flows <- function(domestic_flow, in_or_out, flow_col = "flow"){
     tidyr::complete(year, gss_code, age=0:90, sex, fill=list(flow=0)) %>%
     rename(!!data_col := flow)
   
+  return(dom)
 }

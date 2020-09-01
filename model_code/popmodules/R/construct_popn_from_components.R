@@ -29,9 +29,7 @@ construct_popn_from_components <- function(start_population,
                                            data_are_subsets = FALSE){
   
   validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation, data_are_subsets)
-  
-  nm <- last(names(start_population))
-  
+
   start_population <- mutate(start_population, var = "start") %>%
     rename(popn = last(names(start_population))) %>%
     select_at(c(col_aggregation, "var", "popn"))
