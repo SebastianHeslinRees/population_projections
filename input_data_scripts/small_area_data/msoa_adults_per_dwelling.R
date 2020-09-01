@@ -49,3 +49,4 @@ if(length(unique(adults_per_dwelling$gss_code_msoa))!=983){message("Warning: Wro
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(adults_per_dwelling, "input_data/small_area_model/msoa_adults_per_dwelling.rds")
 
+rm(list = ls())

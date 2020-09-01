@@ -1,44 +1,77 @@
 library(dplyr)
-library(tidyr)
-library(assertthat)
 library(data.table)
 library(popmodules)
 
-rm(list=ls())
-message("domestic migration")
+data_location <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/"
+output_location <- "input_data/domestic_migration/2019/"
+dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 
-output_location <- "input_data/domestic_migration/2018/"
-dir.create(output_location, recursive = TRUE, showWarnings = FALSE)
+#--------------------------
 
-region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
+file_1 <- fread(paste0(data_location, "raw_data/y2019/Detailed_Estimates_2019_LA_2019_Dataset_1.csv"))
+file_2 <- fread(paste0(data_location, "raw_data/y2019/Detailed_Estimates_2019_LA_2019_Dataset_2.csv"))
 
-domestic_file <- "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/processed/2018/2002-2018 but codes not changed.rds"
+past_data <- readRDS("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
 
-domestic <- readRDS(domestic_file) %>%
-  mutate(sex = as.character(sex)) %>%
-  rename(gss_in = in_la,
-         gss_out = out_la)
+#----------------------------
 
-domestic <- domestic %>%
-  recode_gss_codes(col_geog="gss_in", data_col="value", fun=list(sum), recode_gla_codes = TRUE) %>%
-  recode_gss_codes(col_geog="gss_out", data_col="value", fun=list(sum), recode_gla_codes = TRUE)
-
-domestic <-  domestic %>%
+#combine and clean 2019 data
+dom_flows <- rbind(file_1, file_2) %>%
   dtplyr::lazy_dt() %>% 
-  mutate(year = as.integer(year)) %>%
-  mutate(age = ifelse(age < 90, age, 90)) %>%   
+  rename(gss_in = InLA,
+         gss_out = OutLA) %>% 
+  mutate(sex = case_when(Sex == "M" ~ "male",
+                         Sex == "F" ~ "female",
+                         TRUE ~ "NA"),
+         age = ifelse(Age > 90, 90, Age),
+         year = 2019) %>% 
   group_by(gss_out, gss_in, year, sex, age) %>%
-  summarise(value = sum(value)) %>%
-  data.frame() 
+  summarise(value = sum(Moves)) %>% 
+  data.frame()
 
-saveRDS(domestic, file = paste0(output_location, "domestic_migration_flows_ons.rds"))
+
+#checks
+# unique(dom_flows$sex)
+# range(dom_flows$age)
+# unique(substr(dom_flows$gss_in,1,3))
+# unique(substr(dom_flows$gss_out,1,3))
+# str(dom_flows)
+# sum(is.na(dom_flows))
+
+#----------------------------
+
+#set past data & new to same geography
+#this will take a while
+
+past_data <- past_data %>% 
+  popmodules::recode_gss_codes(col_geog = "gss_in", data_cols = "value",
+                               recode_to_year = 2020) %>%
+  popmodules::recode_gss_codes(col_geog = "gss_out", data_cols = "value",
+                               recode_to_year = 2020)  
+
+dom_flows <- dom_flows %>% 
+  popmodules::recode_gss_codes(col_geog = "gss_in", data_cols = "value",
+                               recode_to_year = 2020) %>%
+  popmodules::recode_gss_codes(col_geog = "gss_out", data_cols = "value",
+                               recode_to_year = 2020) 
+
+popmodules::validate_same_geog(past_data, dom_flows, "gss_in", "gss_in")
+popmodules::validate_same_geog(past_data, dom_flows, "gss_out", "gss_out")
+
+
+#------------------------------------
+
+#combine and save
+dom_flows_output <- rbind(past_data, dom_flows)
+rm(list=setdiff(ls(), c("dom_flows_output","output_location")))
+saveRDS(dom_flows_output, paste0(output_location, "domestic_migration_flows_ons_(2020_geog).rds"))
 
 #------------------------------------
 
 #gross at net flows files
-dom_in <- sum_domestic_flows(domestic, "in", "value")
+dom_in <- sum_domestic_flows(dom_flows_output, "in", "value")
 
-dom_out <- sum_domestic_flows(domestic, "out", "value")
+dom_out <- sum_domestic_flows(dom_flows_output, "out", "value")
 
 dom_net <- dom_out %>%
   mutate(dom_in = dom_out *-1) %>% 
@@ -52,7 +85,7 @@ dom_net <- dom_out %>%
 
 #regional flows
 district_to_region <- readRDS("input_data/lookup/district_to_region.rds")
-aggregated_flows <- aggregate_regional_flows(domestic, district_to_region, "value")
+aggregated_flows <- aggregate_regional_flows(dom_flows_output, district_to_region, "value")
 
 reg_dom_in<- sum_domestic_flows(aggregated_flows[[1]], "in", "value") %>% 
   filter(substr(gss_code,1,1)=="E")
@@ -121,11 +154,11 @@ validate_population(dom_net_all)
 
 #Save
 
-saveRDS(dom_in_all, paste0(output_location, "domestic_migration_in.rds"))
-saveRDS(dom_out_all, paste0(output_location, "domestic_migration_out.rds"))
-saveRDS(dom_net_all, paste0(output_location, "domestic_migration_net.rds"))
+saveRDS(dom_in_all, paste0(output_location, "domestic_migration_in_(2020_geog).rds"))
+saveRDS(dom_out_all, paste0(output_location, "domestic_migration_out_(2020_geog).rds"))
+saveRDS(dom_net_all, paste0(output_location, "domestic_migration_net_(2020_geog).rds"))
 
-saveRDS(aggregated_flows[[3]], paste0(output_location, "national_domestic_migration_flows.rds"))
+saveRDS(national_flows, paste0(output_location, "national_domestic_migration_flows.rds"))
 saveRDS(aggregated_flows[[1]], paste0(output_location, "regional_domestic_migration_flows.rds"))
 
 rm(list=ls())

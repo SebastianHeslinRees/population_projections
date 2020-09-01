@@ -2,22 +2,22 @@ library(dplyr)
 library(popmodules)
 
 #ONS population
-source('input_data_scripts/mye/ons_popn_2019.R')
+source('input_data_scripts/mye/temp_2019_mye/ons_popn_2019.R')
 
 #Births
-source('input_data_scripts/mye/births_2019.R')
+source('input_data_scripts/mye/temp_2019_mye/births_2019.R')
 
 #Deaths
-source('input_data_scripts/mye/deaths_2019.R')
+source('input_data_scripts/mye/temp_2019_mye/deaths_2019.R')
 
 #International (ONS & GLA)
-source('input_data_scripts/mye/international_2019.R')
+source('input_data_scripts/mye/temp_2019_mye/international_2019.R')
 
 #Domestic (takes a minute)
-source('input_data_scripts/mye/domestic_2019.R')
+source('input_data_scripts/mye/temp_2019_mye/domestic_2019.R')
 
 #GLA population
-source('input_data_scripts/mye/gla_popn_2019.R')
+source('input_data_scripts/mye/temp_2019_mye/gla_popn_2019.R')
 
 #household model inputs
 source('input_data_scripts/households/household_model_inputs_(2020 geog).R')

@@ -7,13 +7,13 @@ first_proj_yr <- 2020
 n_proj_yr <- 31
 projection_name <- "remote_revolution"
 
-popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
-deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
-births_mye_path <-  paste0("input_data/mye/2019/temp_births.rds")
-int_out_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_out.rds")
-int_in_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_in.rds")
-dom_out_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_out.rds")
-dom_in_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_in.rds")
+popn_mye_path <- paste0("input_data/mye/2019/population_ons.rds")
+deaths_mye_path <-  paste0("input_data/mye/2019/deaths_ons.rds")
+births_mye_path <-  paste0("input_data/mye/2019/births_ons.rds")
+int_out_mye_path <-  paste0("input_data/mye/2019/int_out_ons.rds")
+int_in_mye_path <-  paste0("input_data/mye/2019/int_in_ons.rds")
+dom_out_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds")
+dom_in_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds")
 upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
 mortality_years_to_avg <- 5
@@ -34,11 +34,6 @@ int_out_last_data_year <- 2019
 int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
-# 
-# int_in_last_data_year <- 2019
-# int_in_years_to_avg <- 10
-# int_in_flow_or_rate <- "flow"
-# modify_rates_and_flows <- 1
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"

@@ -8,21 +8,11 @@ output:
     toc_float: true
 ---
 
-The `2019_development` repository (population_projections on GitHub) contains all the code for the new generation of GLA population models. The resulting product will be an ecosystem of different population cohort models, each built with a similar framework, combining reusable modules and input with model-specific code.
+The `population_projections` repository on GitHub contains all the code for the new generation of GLA population models. The resulting product will be an ecosystem of different population cohort models, each built with a similar framework, combining reusable modules and input with model-specific code.
 
 # Setting up
 
-The most up-to-date version of the repository is on the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. There is also a copy on the GLA Q:/ drive, but this is frequently out of date.
-
-
-### If you're running models only
-
-If you're only running models and have access to the Q:/ drive and know it's up to date ... it's still recommended to follow the instructions below and run things locally.
-
-However, if you don't use git, or need results quickly, you can set up and execute scripts in the `Q:\Teams\D&PA\Demography\Projections\2019_development\model_runs` folder without them being overwritten. See the relevant model documentation on how to do this. See the Workflow and Best Practices document for details on how to update the Q:/ drive repository.
-
-
-### Setting up locally
+The most up-to-date version of the repository is on the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/.
 
 If you want to run models locally or make any changes to the code, you'll need to clone the repository from GitHub.
 
@@ -33,22 +23,33 @@ git clone https://github.com/Greater-London-Authority/population_projections/
 
 Alternately you can do this in RStudio, via File > New Project > Version Control > Git, and filling in the URL above and a location for the repository.
 
-### Installing the popmodules package
+# Creating model input data
 
-Most of the model functionality depends on a package within the repository called `popmodules`. Before you can run the model (either locally or on the Q:/ drive) you'll need to install it. The simplest way to do this is to open the `2019_development.Rproj` project file in RStudio (located in the repository root directory) and, from the console run
+To create the necessary input data run the script `input_data_scripts/initialize.R`. Access to the Q: drive on the GLA network is necessary for this initialisation step however, once completed, models can be run locally without reference to the GLA network drives.
+
+The initialize script will also install the `popmodules`, `trendmodel`, `housingledmodel` and `smallareamodel` packages and any other missing package dependencies.
+
+# GLA models packages
+
+If you want to update the model packages separately from the intialize process the simplest way to do this is to open the `population_projections.Rproj` project file in RStudio (located in the repository root directory) and, from the console run
 ```
 devtools::install("model_code/popmodules")
 ```
-(If you haven't installed the `devtools` package, do that first.)
 
-NOTE: the package will need reinstalling every time you download a new version of the repository - just re-run the above command, and select "None" when asked which dependent packages you want to update.
-
+This will install the current version of the `popmodules` package. You can then run the following `popmodules` function to update the other three packages:
+```
+popmodules::install_gla_models()
+```
+Alternatively, rather than installing a new versions of the packages you can load the development versions using the following `popmodules` function:
+```
+popmodules::load_gla_models()
+```
+This will run `devtools::load()` on all 4 GLA packages. Function parameters in both of the above functions allow you to specify which packages you want to install - see the package documentation for details.
 
 
 # Running a model
 
-If all you want to do is run a model, its documentation should be in the `documentation/` folder, along with a template configuration script that can be edited and executed to run the model. Model output is written to the `output/` folder.
-
+To run a model you will need to use a config script. These text files list the parameters necessary to run the model and draw them together into a `config_list` which is passed to the `run_model` function of the particular model you are running. Examples of config files can be found in the `model_code/configs_scripts` folder.
 
 
 # Repository Structure
@@ -61,23 +62,22 @@ Many folders aren't part of the Git repository - these are mostly folders contai
 
 ### Folder structure
 
-* `documentation`: source code and output for all high-level documentation.
-* `input_data`: data for model input. Once things have got going everything in this folder will be generated by scripts within the `input_data_scripts` folder (so that everything is reproducible). Don't modify files here directly. Ignored by Git.
-* `input_data_scripts`: scripts used to convert and process raw data to create whatever is needed for input to the models. Eventually these scripts will read only from the Demography database.
-* `model_code`: the models themselves. The folder is split into 
-    + `model_scripts`: each model has a subfolder in this directory, containing the high-level model-specific functions that read in data, execute the model from start to finish and produce QA materials
-    + `popmodules`: this is an R package containing functions for shared functionality across models, in particular births, deaths, migration, ageing and internal checks and validation. As it is an R package, function documentation and testing is also included here
-    + `qa`: a family of R Markdown notebooks that will take the output of model runs, various custom parameters, and produce reports with common plots for the QA process
-* `model_runs`: for each model, a plact to store configuration scripts for day-to-day work. These can be copied, editied and executed to run the model from templates in the `documentation/` folder. Ignored by Git
+* `documentation`: high-level documentation on how to use the models
+* `input_data`: model input data. Everything in this folder will be generated by scripts within the `input_data_scripts` folder (so that everything is reproducible). Don't modify files here directly. Ignored by Git.
+* `input_data_scripts`: scripts used to convert and process raw data to create whatever is needed for input to the models.
+* `model_code`: the models themselves, the configs, and associated scripts. The folder is split into 
+    + `config_scripts` containing model configs for all models and for various setups. New configs should be saved here and will then be available to other users.
+    + `model_scripts`: contains scripts that are not specific to individual models and which are not part of the `popmodules` package
+    + `rmarkdown`: markdown files created for QA and BPO outputs.
+    + `popmodules`: this is an R package containing functions for shared functionality across models. Includes functions for model processes, internal checks, tests, and validation. As it is an R package, function documentation and testing is also included here
+    + `trendmodel`, `housingledmodel`, `smallareamodel`: The functions which manage the runing and output of the individual models
 * `notebooks_and_analysis`: a scrappy workspace for data exploration on your own machine. Ignored by Git
 * `outputs`: location for model outputs. Don't modify files here directly. Ignored by Git
 
 
-
-
 ### R project structure and Git
 
-The whole of `2019_development` is a single R project and a single Git repository. The `model_code/popmodules/` folder is also an R project. If you're working on the functions within the package it makes sense to open this project, as it will enable RStudio's package load, package test and similar keyboard shortcuts.
+The whole of `population_projections` is a single R project and a single Git repository. The `model_code/popmodules/` folder is also an R project. If you're working on the functions within the package it makes sense to open this project, as it will enable RStudio's package load, package test and similar keyboard shortcuts.
 
 When pointing to files and folders in the project, don't hard-code locations or assume the current working directory: instead use the `here()` function in ad-hoc scripts (which is initialised in the project root directory), and the `rprojroot` package for more robust formal stuff (such as model scripts or modules).
 

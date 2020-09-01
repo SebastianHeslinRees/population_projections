@@ -53,7 +53,6 @@ run_trend_model <- function(config_list) {
   #Create output directory, warnings log and config log
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
-  write_model_config(config_list)
   
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
@@ -238,7 +237,13 @@ run_trend_model <- function(config_list) {
                                     first_proj_yr = config_list$first_proj_yr))
   }
   
-  popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
+  loggr::deactivate_log()
+  data.table::fread(paste0(config_list$output_dir,"warnings.log"), header = FALSE,
+                    sep = "*") %>%
+    data.frame() %>% 
+    filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
+    data.table::fwrite(paste0(config_list$output_dir,"warnings.log"),
+                       col.names = FALSE, quote=FALSE)
   
   return(projection)
 }
