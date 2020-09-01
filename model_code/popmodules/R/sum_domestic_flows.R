@@ -11,7 +11,7 @@
 #' @param domestic_flow A data frame containing sya/sex flows between geographic areas
 #' @param in_or_out A string indicating whether the flows should be summed for
 #'  the destination (in) or origin (out) area.
-#' @param flow_col A string. The name of the column containg the flow data. Defaul \code{flow}
+#' @param flow_col A string. The name of the column containg the flow data. Default \code{flow}
 #'
 #' @return A dataframe with flows into or out of an area summed
 #'

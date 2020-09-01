@@ -1,6 +1,6 @@
 #' Aggregate LA-level flow data to national, regional and subregional flows 
 #'
-#' Sum data for indiviual LAs for all 4 UK countries, 9 English regions and 2
+#' Sum data for indiviual LAs for all 4 UK countries, 9 English regions and 2 of
 #' the subregions (Inner & Outer London)
 #'
 #' @param domestic_flow A dataframe containing origin destination data with the
@@ -10,7 +10,7 @@
 #' @param flow_col A string giving the data column name in the input data frame.
 #'  Default \code{flow}
 #'
-#' @return A dlist containing 3 data frames of origin destination flow data.
+#' @return A list containing 3 data frames of origin destination flow data.
 #'  List names are: \code{[[1]]regional_flow, [[2]]national_flow, [[3]]sub_regional_flow}
 #' 
 #' @import dplyr
@@ -62,7 +62,7 @@ aggregate_regional_flows <- function(domestic_flow, region_lookup, flow_col = "f
                    "E09000016","E09000017","E09000018","E09000021","E09000024",
                    "E09000026","E09000027","E09000029","E09000031")
   
-  inner_codes <- setdiff(c(paste0("E0900000",1:9),paste0("E0900000",10:33)),outer_codes)
+  inner_codes <- setdiff(c(paste0("E0900000",1:9),paste0("E090000",10:33)),outer_codes)
   
   sub_regional_flow <- dtplyr::lazy_dt(domestic_flow) %>%
     mutate(gss_out = case_when(gss_out %in% outer_codes ~ "E13000002",

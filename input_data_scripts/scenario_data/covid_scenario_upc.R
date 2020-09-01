@@ -43,8 +43,8 @@ sum(deaths_la$deaths)
 sum(deaths_sex_age$deaths)
 
 
-#2018 Mid-year estimates age structure for LAs by sex
-uk_2018_deaths <- readRDS("input_data/mye/2019/deaths_ons.rds") %>%
+#2019 Mid-year estimates age structure for LAs by sex
+uk_2019_deaths <- readRDS("input_data/mye/2019/deaths_ons.rds") %>%
   filter(year == 2019) %>%
   group_by(sex, age) %>%
   summarise(deaths = sum(deaths)) %>%
@@ -54,12 +54,12 @@ uk_2018_deaths <- readRDS("input_data/mye/2019/deaths_ons.rds") %>%
 
 ####SINGLE YEAR OF AGE####
 
-#Apply 2018 age structure to covid19 age group data
+#Apply 2019 age structure to covid19 age group data
 sya_covid <- list()
 for(i in 1:nrow(deaths_sex_age)){
   a <- deaths_sex_age[i,]
   sya_covid[[i]] <- a %>% 
-    distribute_within_age_band(uk_2018_deaths,
+    distribute_within_age_band(uk_2019_deaths,
                                "deaths", "deaths",
                                unique(a$min), unique(a$max),
                                col_aggregation=c("sex"))
