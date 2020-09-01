@@ -323,16 +323,18 @@ validate_domestic_components <- function(data, component, first_proj_yr){
                        unique(filter(data, year<first_proj_yr)$gss_code))
   
   if(length(dom_codes) > 0){
-    warning(paste0("In ", component ,", ",length(dom_codes),
-                   " code(s) in projection but not in backseries: ", dom_codes))
+    warning(paste0("In the ", component ," component there are ",length(dom_codes),
+                   " code(s) present in the projection that are not in the backseries: ",
+                   paste(dom_codes, collapse = ", ")))
   }
   
   dom_codes <- setdiff(unique(filter(data, year<first_proj_yr)$gss_code),
                        unique(filter(data, year>=first_proj_yr)$gss_code))
   
   if(length(dom_codes) > 0){
-    warning(paste0("In ", component ,", ",length(dom_codes),
-                   " code(s) in backseries but not in projection: ", dom_codes))
+    warning(paste0("In the ", component ," component there are ",length(dom_codes),
+                   " code(s) present in the backseries that are not in the projection: ",
+                   paste(dom_codes, collapse = ", ")))
   }
   
 }
