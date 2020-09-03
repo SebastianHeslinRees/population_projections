@@ -1,21 +1,5 @@
-#check for packages needed to run the input scripts/models  and install any that are missing
-pkg <- c("assertthat", "data.table", "dtplyr", "minpack.lm", "purrr", 
-         "rmarkdown", "R.utils", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
-
-#needs old version of dplyr - waiting on bug fix in dplyr 1.0.0
-#devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
-if(packageVersion("dplyr")=="1.0.0"){stop("gla models won't run with dplyr 1.0.0. Install version 0.8.5.")}
-
-
-for(i in seq(pkg)){
-  if(!pkg[i] %in% rownames(installed.packages())){
-    install.packages(pkg[i])
-  }
-}
-
-if(!'loggr' %in% rownames(installed.packages())){
-  devtools::install_github("smbache/loggr", force=TRUE)
-}
+#make sure all the correct CRAN/github packages of the correct versions are installed
+renv::restore()
 
 #install the gla models packages
 devtools::install('model_code/popmodules')
