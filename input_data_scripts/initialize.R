@@ -3,8 +3,8 @@ pkg <- c("assertthat", "data.table", "dtplyr", "minpack.lm", "purrr",
          "rmarkdown", "R.utils", "stats", "stringr", "tibble", "tidyr", "utils", "xlsx")
 
 #needs old version of dplyr - waiting on bug fix in dplyr 1.0.0
-devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
-if(packageVersion("dplyr")=="1.0.0"){stop("gla models won't run with dplyr 1.0.0. Install version 0.8.5.")}
+#devtools::install_version("dplyr", version = "0.8.5", repos = "http://cran.us.r-project.org")
+if(!grepl("^0", packageVersion("dplyr"))){stop("gla models won't run with dplyr 1.0.0. Install version 0.8.5.")}
 
 
 for(i in seq(pkg)){
