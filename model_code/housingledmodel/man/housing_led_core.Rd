@@ -31,14 +31,14 @@ function for the \code{projection_year}}
 
 \item{component_constraints}{A dataframe. The component constraints by borough}
 
-\item{hma_constraint}{A dataframe. The total population constrain by housing
+\item{hma_constraint}{A dataframe. The total population constraint by housing
 market area (HMA)}
 
 \item{communal_establishment_population}{A dataframe. The communal establishment
 population for the \code{projection_year}}
 
 \item{external_ahs}{A set of average household size rates by geographic
-aggreagtion and year consistent with the \code{commual_establishment_population}}
+aggregation and year consistent with the \code{communal_establishment_population}}
 
 \item{households_1}{A dataframe. For each geographic aggregation a number of
 total households to be used in calculating the current year trend AHS}
@@ -55,7 +55,7 @@ form a housing market area (HMA). The name in the list is the name of the HMA.}
 \item{ahs_cap_year}{Numeric. The year in which to set the AHS cap}
 
 \item{ahs_cap}{A dataframe or NULL. When no AHS cap has been set this
-parameter is set to \code{NULL}. Once a set of AHS caps have been
+parameter is set to \code{NULL}. Once a set of AHS caps have been set
 this becomes the dataframe containing those caps}
 
 \item{ahs_method}{A string or Numeric. If the AHS tree method is to be used,

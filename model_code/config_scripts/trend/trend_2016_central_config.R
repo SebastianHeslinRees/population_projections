@@ -156,5 +156,4 @@ config_list <- list(
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
-
 projection <- run_trend_model(config_list)

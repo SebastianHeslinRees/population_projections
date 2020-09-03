@@ -166,5 +166,5 @@ mortality_fns <- list(
   # Run the model
   
   projection <- run_trend_model(config_list)
-  log_warnings(paste0(config_list$output_dir, "warnings.txt"))
+  
   
