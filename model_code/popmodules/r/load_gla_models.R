@@ -7,6 +7,8 @@
 #' @param housing_led Logical Load the housingledmodel package Default \code{TRUE}
 #' @param small_area Logical Load the smallareamodel package Default \code{TRUE}
 #' 
+#' @importFrom devtools load_all
+#' 
 #' @export
 
 load_gla_models <- function(popmodules = TRUE, trend = TRUE, housing_led = TRUE, small_area = TRUE){

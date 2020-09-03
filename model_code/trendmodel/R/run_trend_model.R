@@ -53,7 +53,8 @@ run_trend_model <- function(config_list) {
   #Create output directory, warnings log and config log
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
-  
+  write_model_config(config_list)
+
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
   validate_paths <- lapply(seq(file_list),
@@ -237,14 +238,8 @@ run_trend_model <- function(config_list) {
                                     first_proj_yr = config_list$first_proj_yr))
   }
   
-  loggr::deactivate_log()
-  data.table::fread(paste0(config_list$output_dir,"warnings.log"), header = FALSE,
-                    sep = "*") %>%
-    data.frame() %>% 
-    filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
-    data.table::fwrite(paste0(config_list$output_dir,"warnings.log"),
-                       col.names = FALSE, quote=FALSE)
-  
+  popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
+
   return(projection)
 }
 
@@ -328,16 +323,18 @@ validate_domestic_components <- function(data, component, first_proj_yr){
                        unique(filter(data, year<first_proj_yr)$gss_code))
   
   if(length(dom_codes) > 0){
-    warning(paste0("In ", component ,", ",length(dom_codes),
-                   " code(s) in projection but not in backseries: ", dom_codes))
+    warning(paste0("In the ", component ," component there are ",length(dom_codes),
+                   " code(s) present in the projection that are not in the backseries: ",
+                   paste(dom_codes, collapse = ", ")))
   }
   
   dom_codes <- setdiff(unique(filter(data, year<first_proj_yr)$gss_code),
                        unique(filter(data, year>=first_proj_yr)$gss_code))
   
   if(length(dom_codes) > 0){
-    warning(paste0("In ", component ,", ",length(dom_codes),
-                   " code(s) in backseries but not in projection: ", dom_codes))
+    warning(paste0("In the ", component ," component there are ",length(dom_codes),
+                   " code(s) present in the backseries that are not in the projection: ",
+                   paste(dom_codes, collapse = ", ")))
   }
   
 }

@@ -14,6 +14,7 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tibble enframe
 #' @importFrom tidyr unnest
+#' @importFrom loggr log_file
 #' 
 #' @export
 
@@ -46,10 +47,11 @@ run_housing_led_model <- function(config_list){
   
   validate_config_list(config_list, expected_config)
   
-  #warnings log
-  dir.create(config_list$output_dir, showWarnings = FALSE)
+  #Create output directory, warnings log and config log
+  dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
-  
+  write_model_config(config_list)
+
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -322,15 +324,9 @@ run_housing_led_model <- function(config_list){
                                 household_trajectory_static,
                                 first_proj_yr)
   
-  loggr::deactivate_log()
-  data.table::fread(paste0(config_list$output_dir,"warnings.log"), header = FALSE,
-                    sep = "*") %>%
-    data.frame() %>% 
-    filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
-    data.table::fwrite(paste0(config_list$output_dir,"warnings.log"),
-                       col.names = FALSE, quote=FALSE)
+  popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
   
-
+  return(projection)
 }
 
 #-------

@@ -8,6 +8,8 @@
 #' @param housing_led Logical Document and install the housingledmodel package Default \code{TRUE}
 #' @param small_area Logical Document and install the smallareamodel package Default \code{TRUE}
 #' 
+#' @importFrom devtools document install
+#' 
 #' @export
 
 install_gla_models <- function(trend = TRUE, housing_led = TRUE, small_area = TRUE){

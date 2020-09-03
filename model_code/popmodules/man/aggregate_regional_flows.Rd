@@ -2,7 +2,7 @@
 % Please edit documentation in R/aggregate_regional_flows.R
 \name{aggregate_regional_flows}
 \alias{aggregate_regional_flows}
-\title{Aggregate LA-level flow data to national, regional and subregional flows}
+\title{Aggregate LA-level flow data to national, regional and sub-regional flows}
 \usage{
 aggregate_regional_flows(domestic_flow, region_lookup, flow_col = "flow")
 }
@@ -11,16 +11,16 @@ aggregate_regional_flows(domestic_flow, region_lookup, flow_col = "flow")
 columns \code{year, gss_in, gss_out, age, sex}}
 
 \item{region_lookup}{A dataframe frame lookup between LA gss codes and region
-gss_codes}
+gss_codes. Columns \code{gss_code, gss_code_region}}
 
 \item{flow_col}{A string giving the data column name in the input data frame.
 Default \code{flow}}
 }
 \value{
-A dlist containing 3 data frames of origin destination flow data.
+A list containing 3 data frames of origin destination flow data.
  List names are: \code{[[1]]regional_flow, [[2]]national_flow, [[3]]sub_regional_flow}
 }
 \description{
-Sum data for indiviual LAs for all 4 UK countries, 9 English regions and 2
-the subregions (Inner & Outer London)
+Sum data for individual LAs for all 4 UK countries, 9 English regions and 2 of
+the sub-regions (Inner & Outer London)
 }
