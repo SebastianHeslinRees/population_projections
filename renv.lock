@@ -415,12 +415,6 @@
       "Repository": "CRAN",
       "Hash": "726671f634529d470545f9fd1a9d1869"
     },
-    "housingledmodel": {
-      "Package": "housingledmodel",
-      "Version": "0.1.0",
-      "Source": "unknown",
-      "Hash": "b645b08045679bdd3a6a0ee1ba47dbfd"
-    },
     "htmltools": {
       "Package": "htmltools",
       "Version": "0.5.0",
@@ -657,12 +651,6 @@
       "Repository": "CRAN",
       "Hash": "ec0e5ab4e5f851f6ef32cd1d1984957f"
     },
-    "popmodules": {
-      "Package": "popmodules",
-      "Version": "0.1.0",
-      "Source": "unknown",
-      "Hash": "3a753819c7ab01dacfe299c0e764678a"
-    },
     "praise": {
       "Package": "praise",
       "Version": "1.0.0",
@@ -873,12 +861,6 @@
       "Repository": "CRAN",
       "Hash": "ee4ed72d7a5047d9e73cf922ad66e9c9"
     },
-    "smallareamodel": {
-      "Package": "smallareamodel",
-      "Version": "0.1.0",
-      "Source": "unknown",
-      "Hash": "0c4413ad754f56e7f2326b93b257a567"
-    },
     "smoothr": {
       "Package": "smoothr",
       "Version": "0.1.2",
@@ -962,12 +944,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a4b9662282097d1033c60420dcb83350"
-    },
-    "trendmodel": {
-      "Package": "trendmodel",
-      "Version": "0.1.0",
-      "Source": "unknown",
-      "Hash": "1ff7afd33b35458172bf9b7fdd4243e3"
     },
     "tweenr": {
       "Package": "tweenr",
