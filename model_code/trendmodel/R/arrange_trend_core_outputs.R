@@ -68,6 +68,8 @@ arrange_trend_core_outputs <- function(projection,
                     age = 0:90,
                     fill = list(upc = 0)) %>% 
       data.frame() %>%
+      filter(gss_code %in% unique(population$gss_code),
+             year %in% unique(population$year)) %>% 
       aggregate_regions(england=TRUE)
   }
 
