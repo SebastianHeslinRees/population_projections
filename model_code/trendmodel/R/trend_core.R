@@ -5,14 +5,14 @@
 #' The model outputs are the calculated populations and components of change.
 #'
 #' @param start_population A data frame. The population at the start of the time period
-#' @param fertility_rates A data frame. A set of age-secific fertility rates to be applied to the population
+#' @param fertility_rates A data frame. A set of age-specific fertility rates to be applied to the population
 #' @param mortality_rates A data frame. A set of age/sex-specific mortality probabilities to be
 #'   applied to the population
 #' @param int_out_flows_rates A data frame. A set of international out migration rates to be applied to
 #'   the population, or a set of international out flow totals to be subtracted from the population
 #' @param int_in_flows A data frame. A set of international in migration flows to be added to
 #'   the population
-#' @param domestic_rates A data frame. A set of orgin-destination migration rates by age and sex
+#' @param domestic_rates A data frame. A set of origin-destination migration rates by age and sex
 #'   to be applied to the population
 #' @param int_out_method A string. A switch to define whether international out migration is
 #'   a rate or a flow. Either \code{rate} or \code{flow}
@@ -31,7 +31,7 @@
 #' @import assertthat
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tidyr complete
-#' @importfrom utils flush.console
+#' @importFrom utils flush.console
 #' 
 #' @export
 
@@ -50,7 +50,7 @@ trend_core <- function(start_population,
   
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
-  # change rates are for changes that occured in the 12 months up to 30th June
+  # change rates are for changes that occurred in the 12 months up to 30th June
   # age is the age the cohort is at 30th June
   aged_popn <- start_population %>%
     popn_age_on() 
@@ -158,9 +158,9 @@ trend_core <- function(start_population,
                                             out_constraint = constraints$cross_border_out_constraint,
                                             col_flow = "flow")
   }
-  
+
   regional_flows <- aggregate_regional_flows(domestic_flow, region_lookup)
-  
+
   #District in E & W, national S, NI gross flows
   dom_out <- sum_domestic_flows(domestic_flow, "out")
   dom_in <- sum_domestic_flows(domestic_flow, "in")

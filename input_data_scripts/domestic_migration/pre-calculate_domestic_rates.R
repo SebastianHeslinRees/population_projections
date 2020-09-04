@@ -66,16 +66,16 @@ dom_rates_2yr_avg_2018 <- rates_backseries %>%
                                             rate_cap = 0.8)
 
 #-------------------------------------
- rm(rates_backseries, popn_mye_path, births_mye_path, dom_origin_destination_path)
+rm(rates_backseries, popn_mye_path, births_mye_path, dom_origin_destination_path)
 
 
 #Averages for 2019 based projections
 #Use 2020 geography MYE files
 
 #create domestic inputs rates
-popn_mye_path <- "input_data/mye/2019/temp_gla_population.rds"
-births_mye_path <-  "input_data/mye/2019/temp_births.rds"
-dom_origin_destination_path <- "input_data/domestic_migration/2019/temp_domestic_flows.rds"
+popn_mye_path <- "input_data/mye/2019/population_ons.rds"
+births_mye_path <-  "input_data/mye/2019/births_ons.rds"
+dom_origin_destination_path <- "input_data/domestic_migration/2019/domestic_migration_flows_ons_(2020_geog).rds"
 
 
 #All rates
@@ -107,6 +107,18 @@ dom_rates_15yr_avg_2019 <- rates_backseries %>%
                                             col_rate = "rate",
                                             rate_cap = 0.8)
 
+dom_rates_18yr_avg_2019 <- rates_backseries %>%
+  popmodules::calculate_mean_domestic_rates(last_data_year = 2019,
+                                            n_years_to_avg = 18,
+                                            col_rate = "rate",
+                                            rate_cap = 0.8)
+
+dom_rates_2yr_avg_2019 <- rates_backseries %>%
+  popmodules::calculate_mean_domestic_rates(last_data_year = 2019,
+                                            n_years_to_avg = 2,
+                                            col_rate = "rate",
+                                            rate_cap = 0.8)
+
 #-------------------------------------
 
 #Fractional flows for 2019 scenario projections
@@ -122,11 +134,11 @@ dom_rates_10yr_avg_2019_30pc <- dom_rates_10yr_avg_2019 %>%
 dom_rates_zero <- dom_rates_10yr_avg_2019 %>%
   mutate(rate = 0)
 
-dom_rates_2011 <- calculate_mean_domestic_rates(rates_backseries,
-                                                last_data_year = 2011,
-                                                n_years_to_avg = 1,
-                                                col_rate = "rate",
-                                                rate_cap = 0.8)
+dom_rates_2011_levels <- calculate_mean_domestic_rates(rates_backseries,
+                                                       last_data_year = 2011,
+                                                       n_years_to_avg = 1,
+                                                       col_rate = "rate",
+                                                       rate_cap = 0.8)
 
 #-------------------------------------
 
@@ -162,28 +174,30 @@ increased_in_rate <- dom_rates_10yr_avg_2019 %>%
 
 #save files
 
-saveRDS(dom_rates_10yr_avg_2016, paste0(output_loc, "dom_rates_10yr_avg_2016.rds"))
-saveRDS(dom_rates_5yr_avg_2016, paste0(output_loc, "dom_rates_5yr_avg_2016.rds"))
+output_list <- c("dom_rates_10yr_avg_2016",
+                 "dom_rates_5yr_avg_2016",
+                 "dom_rates_10yr_avg_2018",
+                 "dom_rates_5yr_avg_2018",
+                 "dom_rates_15yr_avg_2018",
+                 "dom_rates_2yr_avg_2018",
+                 "dom_rates_10yr_avg_2019",
+                 "dom_rates_5yr_avg_2019",
+                 "dom_rates_15yr_avg_2019",
+                 "dom_rates_18yr_avg_2019",
+                 "dom_rates_2yr_avg_2019",
+                 "dom_rates_10yr_avg_2019_70pc",
+                 "dom_rates_10yr_avg_2019_50pc",
+                 "dom_rates_10yr_avg_2019_30pc",
+                 "dom_rates_zero",
+                 "dom_rates_2011_levels")
 
-saveRDS(dom_rates_10yr_avg_2018, paste0(output_loc, "dom_rates_10yr_avg_2018.rds"))
-saveRDS(dom_rates_5yr_avg_2018, paste0(output_loc, "dom_rates_5yr_avg_2018.rds"))
-saveRDS(dom_rates_15yr_avg_2018, paste0(output_loc, "dom_rates_15yr_avg_2018.rds"))
-saveRDS(dom_rates_2yr_avg_2018, paste0(output_loc, "dom_rates_2yr_avg_2018.rds"))
+for(i in 1:length(output_list)){
+  saveRDS(get(output_list[i]),
+          paste0(output_loc,output_list[i],'.rds'))
+}
 
-saveRDS(dom_rates_10yr_avg_2019, paste0(output_loc, "dom_rates_10yr_avg_2019.rds"))
-saveRDS(dom_rates_5yr_avg_2019, paste0(output_loc, "dom_rates_5yr_avg_2019.rds"))
-saveRDS(dom_rates_15yr_avg_2019, paste0(output_loc, "dom_rates_15yr_avg_2019.rds"))
-
-saveRDS(dom_rates_10yr_avg_2019_70pc, paste0(output_loc, "dom_rates_10yr_avg_2019_70pc.rds"))
-saveRDS(dom_rates_10yr_avg_2019_50pc, paste0(output_loc, "dom_rates_10yr_avg_2019_50pc.rds"))
-saveRDS(dom_rates_10yr_avg_2019_30pc, paste0(output_loc, "dom_rates_10yr_avg_2019_30pc.rds"))
-
-saveRDS(dom_rates_zero, paste0(output_loc, "dom_rates_zero.rds"))
-
-saveRDS(dom_rates_2011, paste0(output_loc, "dom_rates_2011_levels.rds"))
-
-saveRDS(reduced_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_reduced_ldn_in.rds")
-saveRDS(in_up_out_down, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds")
-saveRDS(increased_in_rate, "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_increased_ldn_in.rds")
+saveRDS(reduced_in_rate, paste0(output_loc,"dom_rates_10yr_avg_2019_reduced_ldn_in.rds"))
+saveRDS(in_up_out_down, paste0(output_loc,"dom_rates_10yr_avg_2019_inc_ldn_in_reduced_ldn_out.rds"))
+saveRDS(increased_in_rate, paste0(output_loc,"dom_rates_10yr_avg_2019_increased_ldn_in.rds"))
 
 rm(list=ls())

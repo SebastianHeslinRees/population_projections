@@ -176,16 +176,6 @@ config_list <- list(
 
 rm(list = setdiff(ls(), "config_list"))
 
-# Save settings
-# TODO this isn't super robust and will only run from RStudio - find a smarter way to do it
-if (!grepl("/$", config_list$output_dir)) config_list$output_dir <- paste0(config_list$output_dir, "/")
-projdir <- rprojroot::find_root(rprojroot::is_git_root)
-copy_dir <- paste0(projdir, "/", config_list$output_dir, config_list$projection_name)
-dir.create(copy_dir, recursive = TRUE, showWarnings = FALSE)
-this_file <- rstudioapi::getSourceEditorContext()$path
-file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".R"))
-
 # Run the model
-
+rm(list = setdiff(ls(), "config_list"))
 projection <- run_trend_model(config_list)
-log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))

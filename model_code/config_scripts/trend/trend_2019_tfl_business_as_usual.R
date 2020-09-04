@@ -7,13 +7,13 @@ first_proj_yr <- 2020
 n_proj_yr <- 31
 projection_name <- "business_as_usual"
 
-popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
-deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
-births_mye_path <-  paste0("input_data/mye/2019/temp_births.rds")
-int_out_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_out.rds")
-int_in_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_in.rds")
-dom_out_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_out.rds")
-dom_in_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_in.rds")
+popn_mye_path <- paste0("input_data/mye/2019/population_ons.rds")
+deaths_mye_path <-  paste0("input_data/mye/2019/deaths_ons.rds")
+births_mye_path <-  paste0("input_data/mye/2019/births_ons.rds")
+int_out_mye_path <-  paste0("input_data/mye/2019/int_out_ons.rds")
+int_in_mye_path <-  paste0("input_data/mye/2019/int_in_ons.rds")
+dom_out_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds")
+dom_in_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds")
 upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
 mortality_years_to_avg <- 5
@@ -163,16 +163,9 @@ config_list <- list(
   dclg_stage2_file_path = dclg_stage2_file_path
 )
 
-# Save settings
-projdir <- rprojroot::find_root(rprojroot::is_git_root)
-# copy_dir <- paste0(projdir, "/", output_dir)
-# dir.create(copy_dir, recursive = TRUE)
-# this_file <- rstudioapi::getSourceEditorContext()$path
-# file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
-
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
 
 projection <- run_trend_model(config_list)
-log_warnings(paste0(config_list$output_dir, "warnings.txt"))
+
