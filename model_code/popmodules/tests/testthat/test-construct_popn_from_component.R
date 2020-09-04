@@ -66,4 +66,14 @@ test_that("construct_popn_from_component works", {
   expect_equal(constructed, output)
 })
 
+expect_error(construct_popn_from_components(start_population = start_population,
+                                            addition_data = list(select(births, births, gss_code, sex, age),
+                                                                 dom_in, int_in),
+                                            subtraction_data = list(deaths, dom_out, int_out),
+                                            col_aggregation = c("gss_code","sex","age")))
 
+expect_error(construct_popn_from_components(start_population = start_population,
+                                            addition_data = list(births, dom_in, int_in),
+                                            subtraction_data = list(select(deaths, deaths, gss_code, sex, age),
+                                                                    dom_out, int_out),
+                                            col_aggregation = c("gss_code","sex","age")))
