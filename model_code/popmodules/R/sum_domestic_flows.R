@@ -1,7 +1,7 @@
 #' Convert origin-destination flow data to gross flow by origin or destination
 #'
 #' Sum origin-destination flows to give total flows by either origin or destination.
-#' The type of flow is specified in the \code{in_or_out} variable. The function
+#' The type of flow is specified in the \code{in_or_out} parameter. The function
 #' expects column names \code{gss_in} and \code{gss_out}. Net flows cannot be
 #' calculated using this function.
 #'

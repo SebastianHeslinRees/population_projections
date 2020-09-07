@@ -43,6 +43,7 @@ sum(deaths_la$deaths)
 sum(deaths_sex_age$deaths)
 
 
+
 #2019 Mid-year estimates age structure for LAs by sex
 uk_2019_deaths <- readRDS("input_data/mye/2019/deaths_ons.rds") %>%
   filter(year == 2019) %>%
@@ -115,3 +116,4 @@ dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_upc, "input_data/scenario_data/covid19_upc.rds")
 
 rm(list = ls())
+

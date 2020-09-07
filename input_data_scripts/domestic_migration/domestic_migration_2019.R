@@ -42,7 +42,6 @@ dom_flows <- rbind(file_1, file_2) %>%
 
 #set past data & new to same geography
 #this will take a while
-
 past_data <- past_data %>% 
   popmodules::recode_gss_codes(col_geog = "gss_in", data_cols = "value",
                                recode_to_year = 2020) %>%

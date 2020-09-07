@@ -39,7 +39,6 @@ source("input_data_scripts/households/household_model_inputs_(2020 geog).R")
 source('input_data_scripts/fertility/asfr_2020_geography.R')
 source('input_data_scripts/mortality/asmr_2020_geography.R')
 
-
 #pre calc rates
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
 source("input_data_scripts/migration/pre-calculate_international_in_flows.R")

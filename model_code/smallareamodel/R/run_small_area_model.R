@@ -11,7 +11,7 @@
 #' @import dplyr
 #' @importFrom assertthat assert_that
 #' @importFrom dtplyr lazy_dt
-#' @importfrom utils flush.console
+#' @importFrom utils flush.console
 #' @importFrom loggr log_file
 #' 
 #' @export
@@ -49,6 +49,7 @@ run_small_area_model <- function(config_list){
   small_area_output_dir <- paste0(config_list$housing_led_model_path, config_list$projection_type,"/")
   dir.create(small_area_output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(small_area_output_dir,"warnings.log"))
+  write_model_config(config_list, small_area_output_dir)
 
   read_small_area_inputs <- function(path){
     df <- readRDS(path)
@@ -256,13 +257,7 @@ run_small_area_model <- function(config_list){
                                              projection_type = config_list$projection_type,
                                              lookup = small_area_to_district)
   
-  loggr::deactivate_log()
-  data.table::fread(paste0(config_list$output_dir,"warnings.log"), header = FALSE,
-                    sep = "*") %>%
-    data.frame() %>% 
-    filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
-    data.table::fwrite(paste0(config_list$output_dir,"warnings.log"),
-                       col.names = FALSE, quote=FALSE)
+  popmodules::deactivate_log(paste0(small_area_output_dir,"warnings.log"))
   
   return(projection)
 }
