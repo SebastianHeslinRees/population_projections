@@ -1,8 +1,6 @@
 #' Apply component rates to a population.
 #'
-#' Given a cohort population and a data frame of component rates that can be
-#' joined to the population, return a data table with the population's
-#' aggregation levels and a component count.
+#' This function has been deprecated. Use \code{apply_rate_to_population}.
 #'
 #' If component would result in a negative population, an error will be thrown
 #' (default) or the component will be capped at the population count.
@@ -52,6 +50,8 @@ component_from_popn_rate <- function(popn,
                                   col_rate = "rate",
                                   col_component = "component") {
 
+  .Deprecated("apply_rate_to_population")
+  
   # Validate input
   # --------------
   validate_component_from_popn_rate_input(popn, component_rate, col_aggregation, col_popn, col_rate, col_component)

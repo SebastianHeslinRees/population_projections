@@ -12,7 +12,7 @@
 #' @param popn_rate A data frame containing rates data per time step (usually
 #'   year).
 #' @param col_aggregation A string or character vector giving the names of
-#'   columns on which to join (\code{by} in \code{dplyr::left_join).
+#'   columns on which to join (\code{by} in \code{dplyr::left_join}).
 #'   If names differ between the two input data frames, use a named character
 #'   vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
 #'   "gss_code", "age", "sex")}.
@@ -72,8 +72,6 @@
 #'
 #' @export
 #'
-
-# TODO simplify the function - the validation steps are making the inputs complicated.
 
 apply_rate_to_population <- function(popn,
                             popn_rate,
@@ -285,7 +283,7 @@ validate_apply_rate_to_population_output <- function(popn, col_aggregation, col_
   }
 
   if(one2many | missing_levels_popn) {
-    output_comparison <- NA # TODO: could we use semi_join(popn_rate, popn, by=...) here?
+    output_comparison <- NA
   } else {
     output_comparison <- popn
   }
