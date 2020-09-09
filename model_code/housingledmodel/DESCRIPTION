@@ -25,6 +25,7 @@ Imports:
     utils,
     xlsx,
     tibble,
-    smallareamodel
+    smallareamodel,
+    loggr
 Suggests:
     testthat

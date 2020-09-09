@@ -54,8 +54,7 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
   proj_births[[1]] <- births_backseries
   proj_migration <- list()
   proj_migration[[1]] <- past_net
-  assumed_dev <- list()
-  
+
   for(projection_year in first_proj_yr:last_proj_yr){
     
     proj_popn[[projection_year]] <- projection[[projection_year]][['population']]

@@ -35,8 +35,6 @@ arrange_trend_core_outputs <- function(projection,
                                        int_out_rates, int_in_flows,
                                        first_proj_yr, last_proj_yr){
   
-  region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
-  
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_int_out <- list(int_out %>% filter(year < first_proj_yr))
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))

@@ -180,11 +180,22 @@ trend_core <- function(start_population,
     as.data.frame()
 
   #flows between all 4 home nations
+  national_lookup <- data.frame(country = c("E","N","S","W"),
+                                gss_code = c("E92000001",
+                                             "N92000002",
+                                             "S92000003",
+                                             "W92000004"),
+                                stringsAsFactors = FALSE)
+  
   national_flow <- dtplyr::lazy_dt(domestic_flow) %>%
-    mutate(gss_out = substring(gss_out, 1, 1),
-           gss_in  = substring(gss_in,  1, 1)) %>%
-    mutate(gss_out = recode(gss_out, "E" = "E92000001"),
-           gss_in  = recode(gss_in,  "E" = "E92000001")) %>%
+    mutate(country_out = substring(gss_out, 1, 1),
+           country_in  = substring(gss_in,  1, 1)) %>%
+    select(-gss_out, -gss_in) %>% 
+    left_join(national_lookup, by=c("country_out"="country")) %>% 
+    rename(gss_out = gss_code) %>% 
+    left_join(national_lookup, by=c("country_in"="country")) %>% 
+    rename(gss_in = gss_code) %>% 
+    select(-country_out, -country_in) %>% 
     filter(gss_in != gss_out) %>%
     group_by(year, gss_in, gss_out, age, sex) %>%
     summarise(flow = sum(flow)) %>%
@@ -199,18 +210,18 @@ trend_core <- function(start_population,
   reg_dom_in <- sum_domestic_flows(regional_flow, "in")
   
   #National E, W, S, NI gross flows
-  #nat_dom_out <- sum_domestic_flows(national_flow, "out")
-  #nat_dom_in <- sum_domestic_flows(national_flow, "in")
+  nat_dom_out <- sum_domestic_flows(national_flow, "out")
+  nat_dom_in <- sum_domestic_flows(national_flow, "in")
   
-  #Bind and de-duplicate
-  dom_out_with_regions <- dom_out %>%
-    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>% # S and NI are already aggregated
-    rbind(reg_dom_out) #%>%
-    #rbind(filter(nat_dom_out, substr(gss_code, 1, 1) == "E"))  # Removed for consistency with backseries
-  dom_in_with_regions <- dom_in %>%
-    filter(substr(gss_code, 1, 1) %in% c("E", "W")) %>%
-    rbind(reg_dom_in) #%>%
-    #rbind(filter(nat_dom_in, substr(gss_code, 1, 1) == "E"))
+  dom_out_all_geog <- rbind(
+    filter(dom_out, substr(gss_code,1,2) %in% c("E0","W0")),
+    filter(reg_dom_out, substr(gss_code,1,3) %in% c("E12","E13")),
+    nat_dom_out)
+  
+  dom_in_all_geog <- rbind(
+    filter(dom_in, substr(gss_code,1,2) %in% c("E0","W0")),
+    filter(reg_dom_in, substr(gss_code,1,3) %in% c("E12","E13")),
+    nat_dom_in)
   
   if(is.null(upc)){
     
@@ -243,8 +254,8 @@ trend_core <- function(start_population,
               births = births,
               int_out = int_out,
               int_in = int_in,
-              dom_out = dom_out_with_regions,
-              dom_in = dom_in_with_regions,
+              dom_out = dom_out_all_geog,
+              dom_in = dom_in_all_geog,
               births_by_mothers_age = births_by_mother,
               natural_change = natural_change_popn))
 }

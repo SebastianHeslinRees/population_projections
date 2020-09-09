@@ -40,9 +40,10 @@ run_bpo_projection <- function(bpo_name,
                                csv_name = bpo_name,
                                housing_led_params = list(),
                                fertility_scenario = "average"){
+  
+  message(paste(bpo_name, "-", migration_scenario))
  
   dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
-
 
   if(migration_scenario == "high"){
     housing_led_params$external_trend_path <- "outputs/trend/2018/high_mig_20-03-10_1436/"
@@ -94,6 +95,6 @@ run_bpo_projection <- function(bpo_name,
                                                     ldd_final_yr = ldd_final_yr,
                                                     constrain_projection = FALSE)
   
-  message(paste(bpo_name, "-",migration_scenario,"complete"))
+  message("complete")
 
 }
