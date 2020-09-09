@@ -48,7 +48,7 @@ A data frame containing rates for the component of change (in the
   "rate" column)
 }
 \description{
-Takes filepaths to the mid year estimates for the desired component of
+Takes file paths to the mid year estimates for the desired component of
 change, total population, and birth rates, and returns a data frame with
 rates.
 }

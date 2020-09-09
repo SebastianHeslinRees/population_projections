@@ -1,4 +1,4 @@
-#' Run the housing led and ward models with parametrised inputs
+#' Run the housing led and ward models with parameterised inputs
 #'
 #' @param projection_name String containing a name for the run. Used in the
 #'   output directory.

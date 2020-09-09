@@ -10,8 +10,8 @@ create_trend_model_excels(trend_dir, excel_file_name)
 \item{trend_dir}{String. The output directory where the projection RDS files are
 saved.}
 
-\item{excel_file_name}{String. File name for the population workbook ouput. Must
-include \code{.xslx} suffix.}
+\item{excel_file_name}{String. File name for the population workbook output.
+With or without "xlsx" suffix.}
 }
 \description{
 If a projection has been run with the \code{write_excel} variable set to

@@ -6,7 +6,7 @@
 .Rhistory
 .RData
 .Ruserdata
-.Rprofile
+# .Rprofile # This is needed for the renv setup to transport properly across peoples' repos
 .Renviron
 
 input_data/*

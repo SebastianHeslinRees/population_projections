@@ -12,7 +12,7 @@
 #' @param additional_dwellings A dataframe. The dwelling trajectory used in the
 #'   projection model.
 #' @param housing_stock A dataframe. The total dwelling stock by year.
-#' @param household_trajectory A dataframe. The household trectory (as opposed
+#' @param household_trajectory A dataframe. The household trajectory (as opposed
 #'   to the dwelling trajectory) used in the model.
 #' @param first_proj_yr Numeric. The first year of the projection
 #' 
