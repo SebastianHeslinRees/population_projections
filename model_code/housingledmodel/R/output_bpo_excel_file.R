@@ -76,6 +76,9 @@ output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_cod
   addDataFrame(date_of_projection, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
   
   #Write xlsx file
+  if(substr(file_suffix, nchar(file_suffix)-4, nchar(file_suffix)) != ".xlsx"){
+    file_suffix <- paste0(file_suffix,".xlsx")
+  }
   wb_filename <- paste0(output_dir, projection_name, file_suffix)
   xlsx::saveWorkbook(wb, wb_filename)
   

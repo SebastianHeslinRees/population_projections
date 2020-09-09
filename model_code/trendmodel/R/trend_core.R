@@ -1,30 +1,37 @@
-#' Run a cohort component population model and output population, components of change and rates
+#' Run a cohort component population model and output population, components
+#' of change and rates
 #'
-#' Given a starting population and set of projected rates for fertility, mortality and migration
-#' the function will produce a population for the next year using a cohort component method.
-#' The model outputs are the calculated populations and components of change.
+#' Given a starting population and set of projected rates for fertility,
+#' mortality and migration the function will produce a population for the next
+#' year using a cohort component method. The model outputs are the calculated
+#' populations and components of change.
 #'
-#' @param start_population A data frame. The population at the start of the time period
-#' @param fertility_rates A data frame. A set of age-secific fertility rates to be applied to the population
-#' @param mortality_rates A data frame. A set of age/sex-specific mortality probabilities to be
-#'   applied to the population
-#' @param int_out_flows_rates A data frame. A set of international out migration rates to be applied to
-#'   the population, or a set of international out flow totals to be subtracted from the population
-#' @param int_in_flows A data frame. A set of international in migration flows to be added to
-#'   the population
-#' @param domestic_rates A data frame. A set of orgin-destination migration rates by age and sex
+#' @param start_population A data frame. The population at the start of the
+#'   time period
+#' @param fertility_rates A data frame. A set of age-specific fertility rates
 #'   to be applied to the population
-#' @param int_out_method A string. A switch to define whether international out migration is
-#'   a rate or a flow. Either \code{rate} or \code{flow}
-#' @param constraints A list. A set of national-level constraints for each component. If the projection
-#'   is to be run unconstrained this is set to NULL. Default \code{NULL}
-#' @param upc A data frame. Unattributable population change component. If no UPC is being applied this
-#'   is set to NULL. Default \code{NULL}
+#' @param mortality_rates A data frame. A set of age/sex-specific mortality
+#'   probabilities to be applied to the population
+#' @param int_out_flows_rates A data frame. A set of international out migration
+#'   rates to be applied to the population, or a set of international out flow
+#'   totals to be subtracted from the population
+#' @param int_in_flows A data frame. A set of international in migration flows
+#'   to be added to the population
+#' @param domestic_rates A data frame. A set of origin-destination migration rates
+#'   by age and sex to be applied to the population
+#' @param int_out_method A string. A switch to define whether international out
+#'   migration is a rate or a flow. Either \code{rate} or \code{flow}
+#' @param constraints A list. A set of national-level constraints for each
+#'   component. If the projection is to be run unconstrained this is set to NULL.
+#'   Default \code{NULL}
+#' @param upc A data frame. Unattributable population change component. If no
+#'   UPC is being applied this is set to NULL. Default \code{NULL}
 #' @param projection_year Numeric. The year being projected
-#' @param region_lookup Dataframe A lookup between LAD gss codes and region gss codes
+#' @param region_lookup Dataframe A lookup between LAD gss codes and region
+#'   gss codes
 #'
-#' @return A list where each element is a data frame containing either projected population or
-#' projected components of change.
+#' @return A list where each element is a data frame containing either projected
+#'  population or projected components of change.
 #'
 #' @import popmodules
 #' @import dplyr

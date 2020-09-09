@@ -27,22 +27,28 @@ scaled_mortality_curve(
 
 \item{target_curves_filepath}{Character. Path to the SNPP target mortality curves}
 
-\item{last_data_year}{numeric. The last year of death and population data on which to calculate averages.}
+\item{last_data_year}{numeric. The last year of death and population data on
+which to calculate averages.}
 
-\item{n_years_to_avg}{numeric. The number of years to use in calculating averages/trending forward.}
+\item{n_years_to_avg}{numeric. The number of years to use in calculating
+averages/trending forward.}
 
-\item{avg_or_trend}{Character. Should the averaged be caulated as the mean \code{Average},
-or by linear regression \code{Trend}.}
+\item{avg_or_trend}{Character. Should the averaged be calculated as the mean
+\code{Average}, or by linear regression \code{Trend}.}
 
-\item{data_col}{Character. The column in the \code{deaths} dataframe containing the rates. Defaults to \code{deaths}}
+\item{data_col}{Character. The column in the \code{deaths} dataframe containing
+the rates. Defaults to \code{deaths}}
 
-\item{output_col}{Character. The name of the column in the output dataframe containing the calculated rates}
+\item{output_col}{Character. The name of the column in the output dataframe
+containing the calculated rates}
 
-\item{project_rate_from}{Numeric. The year for which a rate is being calculated. Default \code{last_data_year+1}.}
+\item{project_rate_from}{Numeric. The year for which a rate is being calculated.
+Default \code{last_data_year+1}.}
 }
 \value{
-A data frame of mortality probabilities rates by LA, year, sex and age with the same age structure
-as the target curves and overall rates scaled so that they are consistent with past deaths.
+A data frame of mortality probabilities rates by LA, year, sex and age
+  with the same age structure as the target curves and overall rates scaled so
+  that they are consistent with past deaths.
 }
 \description{
 Compares past rates by LA and sex to an input

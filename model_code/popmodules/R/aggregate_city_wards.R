@@ -1,13 +1,13 @@
 #' Aggregate City of London ward data up to borough level 
 #'
-#' Sum data for indiviual wards in City of London up to the local authority
+#' Sum data for individual wards in City of London up to the local authority
 #' level. Return the dataframe with all other areas unchanged.
 #'
 #' @param df A dataframe containing ward-level data
 #' @param data_col String. The column name of containing data in \code{df}
 #'
-#' @return A data frame with city of london wards aggregated to a single
-#'   geographic aggreagtion
+#' @return A data frame with City of London wards aggregated to a single
+#'   geographic aggregation
 #' 
 #' @import dplyr
 #' @import assertthat

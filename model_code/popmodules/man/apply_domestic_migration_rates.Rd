@@ -82,7 +82,7 @@ the origin and destination columns (if origin columns differ). This means
 that, with default column names, the population's \code{gss_code} column will
 be renamed to \code{gss_out}.
 
-The function assumes implicity missing origin-destination flows are zero. It
+The function assumes implicitly missing origin-destination flows are zero. It
 permits zero outmigration for an entire aggregation level, and this level
 will **not** be included in the output data frame, meaning you may need to
 call \code{tidyr::complete} on the results (after aggregation to in/out/net

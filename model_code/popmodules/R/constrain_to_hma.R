@@ -1,4 +1,4 @@
-#' Scale one population to match the totals of another in a houseing market area
+#' Scale one population to match the totals of another in a housing market area
 #'
 #' Given a cohort population and a data frame of target marginal population
 #' subtotals, return the input population scaled so that its population

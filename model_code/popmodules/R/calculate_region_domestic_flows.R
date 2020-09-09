@@ -2,9 +2,9 @@
 #'
 #' @param domestic_rates A data frame containing a rates of domestic migration
 #'   between all LAs by age and sex
-#' @param nat_chng_popn A data frame containing natutal change population by
+#' @param nat_chng_popn A data frame containing natural change population by
 #'   sex and age
-#' @param gss_code_list A character vector containing gss_codes
+#' @param gss_code_list A character vector containing gss codes
 #' @param region_name A string giving the name of the region being output
 #'
 #' @return A data frame with domestic in, out and net flows by sex, age and year

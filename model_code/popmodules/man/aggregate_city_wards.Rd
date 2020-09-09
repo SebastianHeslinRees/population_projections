@@ -12,10 +12,10 @@ aggregate_city_wards(df, data_col)
 \item{data_col}{String. The column name of containing data in \code{df}}
 }
 \value{
-A data frame with city of london wards aggregated to a single
-  geographic aggreagtion
+A data frame with City of London wards aggregated to a single
+  geographic aggregation
 }
 \description{
-Sum data for indiviual wards in City of London up to the local authority
+Sum data for individual wards in City of London up to the local authority
 level. Return the dataframe with all other areas unchanged.
 }
