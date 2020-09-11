@@ -15,10 +15,10 @@ calculate_region_domestic_flows(
 \item{domestic_rates}{A data frame containing a rates of domestic migration
 between all LAs by age and sex}
 
-\item{nat_chng_popn}{A data frame containing natutal change population by
+\item{nat_chng_popn}{A data frame containing natural change population by
 sex and age}
 
-\item{gss_code_list}{A character vector containing gss_codes}
+\item{gss_code_list}{A character vector containing gss codes}
 
 \item{region_name}{A string giving the name of the region being output}
 }

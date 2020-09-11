@@ -27,10 +27,10 @@ and geographic aggregation (ward or msoa)}
 
 \item{last_proj_yr}{Numeric. Last projection year}
 
-\item{small_area_births_sya}{A datatframe. Births by single year of age and sex 
+\item{small_area_births_sya}{A dataframe. Births by single year of age and sex 
 for each geographic aggregation and year}
 
-\item{small_area_deaths_sya}{A datatframe. Deaths by single year of age and sex
+\item{small_area_deaths_sya}{A dataframe. Deaths by single year of age and sex
 for each #'  geographic aggregation and year}
 }
 \value{
@@ -39,6 +39,6 @@ A list where each element is a data frame containing data for each year
 }
 \description{
 The \code{small_area_led_core} outputs a list for each year of the projection.
-Each list is a list of components. This function rearrages those outputs into
+Each list is a list of components. This function rearranges those outputs into
 a list of dataframes of components.
 }

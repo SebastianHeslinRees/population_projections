@@ -3,7 +3,7 @@
 #' For a backseries of years, given population for small areas and
 #' fertility/mortality rates for a higher geography, calculate a set of
 #' implied births/deaths. Compare these to observed births/deaths and
-#' create scaling facrots for the rates. Finally, calculate the geometric
+#' create scaling factors for the rates. Finally, calculate the geometric
 #' mean of the scaling factors.
 #'
 #' The function calculates the difference between a population and a (lower
@@ -57,8 +57,6 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
 
 
 validate_geomean_scaling_factors_inputs <- function(popn, future_rates, data_years, constraint, constraint_data_col) {
-
-  col_aggregation <- c("year", "gss_code_small_area", "age", "sex")
 
   validate_population(popn, col_aggregation = c("year", "gss_code_small_area", "age", "sex"), col_data = "popn")
   validate_population(future_rates, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate")

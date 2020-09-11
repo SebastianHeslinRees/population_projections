@@ -75,3 +75,4 @@ dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(adults_per_dwelling, "input_data/small_area_model/ward_adults_per_dwelling.rds")
 saveRDS(revised_ward_estimates, ward_estimates_path)
 
+rm(list = ls())

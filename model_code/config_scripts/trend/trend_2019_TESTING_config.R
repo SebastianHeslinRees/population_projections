@@ -1,5 +1,4 @@
-library(popmodules)
-library(trendmodel)
+# config file for model runs
 
 first_proj_yr <- 2020
 n_proj_yr <- 2
@@ -113,6 +112,6 @@ config_list <- list(
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
+devtools::load_all('model_code/popmodules')
 devtools::load_all('model_code/trendmodel')
 projection <- run_trend_model(config_list)
-log_warnings(paste0(config_list$output_dir, "warnings.txt"))

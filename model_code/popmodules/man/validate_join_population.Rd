@@ -26,7 +26,7 @@ it can be at a lower resolution. Defaults to
 
 \item{pop1_is_subset}{Logical. When TRUE \code{pop1} is allowed to match to
 subset of \code{pop2}.When FALSE the aggregation levels should be the same
-(ignoring duplicates) and the mapping will be surjective, i.e. all
+(ignoring duplicates) and the mapping will be subjective, i.e. all
 aggregation levels must be present in both data frames. Default TRUE.}
 
 \item{many2one}{Logical. Can multiple rows in \code{pop1} map to a single row

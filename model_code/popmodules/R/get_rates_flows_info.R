@@ -13,7 +13,7 @@
 #' and calculate model data
 #'
 #' @param data_list A named list of lists. Each list name is a year. Each list
-#'   contains a list with a \code{path} and \code{transition} varibale
+#'   contains a list with a \code{path} and \code{transition} variable
 #' @param first_proj_yr Numeric. The first projection year
 #' @param last_proj_yr Numeric. The last projection year
 #'
