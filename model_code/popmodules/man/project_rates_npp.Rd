@@ -14,12 +14,15 @@ project_rates_npp(
 )
 }
 \arguments{
-\item{jump_off_rates}{Dataframe. A set of LA/age/sex rates for the first projection year
+\item{jump_off_rates}{Dataframe. A set of LA/age/sex rates for the first
+  projection year
 Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility_curve()}}
 
-\item{rate_col}{Character. The column in the jump_off_rates dataframe containing the rates.}
+\item{rate_col}{Character. The column in the jump_off_rates dataframe
+containing the rates.}
 
-\item{rate_trajectory_filepath}{Character. The filepath for the national-level ASMR/ASFR trajectory.}
+\item{rate_trajectory_filepath}{Character. The file path for the national-level
+ASMR/ASFR trajectory.}
 
 \item{first_proj_yr}{Integer. The first projection year.}
 

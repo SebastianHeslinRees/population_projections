@@ -1,17 +1,18 @@
 #' Calculate average origin-destination domestic migration rates based on past
 #' data
 #'
-#' Given a dataframe of domestic migration rates calculate the mean rate over a given number of years.
-#' If the sum of the outrates for any age/sex/LA combination is greater than a defined cap then scale
-#' all rates so that sum is equal to the cap.
+#' Given a dataframe of domestic migration rates calculate the mean rate over a
+#' given number of years. If the sum of the out rates for any age/sex/LA combination
+#' is greater than a defined cap then scale all rates so that sum is equal to the cap.
 #'
 #' @param origin_destination_rates dataframe. Origin-destination flows by geography, year, sex and age.
 #' @param last_data_year numeric. The last year of data on which to calculate
 #'   averages.
 #' @param n_years_to_avg numeric. The number of years to use in calculating averages.
-#' @param col_rate character. The column in the \code{origin_destinatation_flows} dataframe containing the rates
-#' @param rate_cap numeric. A value which calculated rates cannot exceed. Where rates exceed \code{rate_cap}
-#'   they are limited to the value of \code{rate_cap}.
+#' @param col_rate character. The column in the \code{origin_destinatation_flows}
+#'   dataframe containing the rates
+#' @param rate_cap numeric. A value which calculated rates cannot exceed.
+#'   Where rates exceed \code{rate_cap} they are limited to the value of \code{rate_cap}.
 #'
 #' @return A data frame of origin-destination migration probabilities by LA, year, sex and age.
 #'

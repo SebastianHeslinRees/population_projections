@@ -1,4 +1,4 @@
-#' Run the housing led and ward models with parametrised inputs
+#' Run the housing led and ward models with parameterised inputs
 #'
 #' @param projection_name String containing a name for the run. Used in the
 #'   output directory.
@@ -98,7 +98,6 @@ run_borough_and_ward_projection <- function(projection_name,
   #---------------------
   #run projection
   borough_projection <- run_housing_led_model(config_list)
-  log_warnings(paste0(config_list$output_dir,"warnings.txt"))
   
   #----
   
@@ -121,7 +120,7 @@ run_borough_and_ward_projection <- function(projection_name,
   borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates.rds")
   borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates.rds")
   
-  last_data_year <- 2018
+  last_data_yr <- 2018
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <- config_list$last_proj_yr
   birth_rate_n_years_to_avg <- 5
@@ -150,7 +149,7 @@ run_borough_and_ward_projection <- function(projection_name,
                            borough_fertility_rates_path = borough_fertility_rates_path,
                            borough_mortality_rates_path = borough_mortality_rates_path,
                            
-                           last_data_year = last_data_year,
+                           last_data_yr = last_data_yr,
                            first_proj_yr = first_proj_yr,
                            last_proj_yr = last_proj_yr,
                            
@@ -164,8 +163,7 @@ run_borough_and_ward_projection <- function(projection_name,
   rm(list = setdiff(ls(), c("ward_config_list","config_list","borough_projection","bpo")))
   
   ward_projection <- run_small_area_model(ward_config_list)
-  log_warnings(paste0(ward_config_list$housing_led_model_path, ward_config_list$projection_type,"/warnings.txt"))
-  
+    
   #bpo
   if(bpo != FALSE) {
     output_bpo_excel_file(data = ward_projection[["csvs"]],

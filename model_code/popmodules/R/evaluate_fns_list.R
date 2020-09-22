@@ -1,6 +1,6 @@
 #' Evaluate a chain of functions passed as a list
 #'
-#' Each element of the arugment \code{fns_args_list} is a list.
+#' Each element of the argument \code{fns_args_list} is a list.
 #' These function lists must contain a function \code{fn} and
 #' a list \code{args} of arguments. The output of one function will
 #' be passed to the next as it's first argument (like a dplyr pipe).

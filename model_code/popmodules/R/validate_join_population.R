@@ -1,4 +1,3 @@
-
 #' Check one population is contained within another
 #'
 #' The function checks that every row of one population can be mapped to a row
@@ -29,7 +28,7 @@
 #'   \code{c("year","gss_code","age","sex")}.
 #' @param pop1_is_subset Logical. When TRUE \code{pop1} is allowed to match to
 #'   subset of \code{pop2}.When FALSE the aggregation levels should be the same
-#'   (ignoring duplicates) and the mapping will be surjective, i.e. all
+#'   (ignoring duplicates) and the mapping will be subjective, i.e. all
 #'   aggregation levels must be present in both data frames. Default TRUE.
 #' @param many2one Logical. Can multiple rows in \code{pop1} map to a single row
 #'   in \code{pop2}? Set to FALSE when matching should be unique (i.e.

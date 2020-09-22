@@ -10,16 +10,22 @@
 #' @param births_mye_path Character. Path to the MYE births component data
 #' @param deaths_mye_path Character. Path to the MYE deaths component data
 #' @param target_curves_filepath Character. Path to the SNPP target mortality curves
-#' @param last_data_year numeric. The last year of death and population data on which to calculate averages.
-#' @param n_years_to_avg numeric. The number of years to use in calculating averages/trending forward.
-#' @param avg_or_trend Character. Should the averaged be caulated as the mean \code{Average},
-#'   or by linear regression \code{Trend}.
-#' @param data_col Character. The column in the \code{deaths} dataframe containing the rates. Defaults to \code{deaths}
-#' @param output_col Character. The name of the column in the output dataframe containing the calculated rates
-#' @param project_rate_from Numeric. The year for which a rate is being calculated. Default \code{last_data_year+1}.
+#' @param last_data_year numeric. The last year of death and population data on
+#'   which to calculate averages.
+#' @param n_years_to_avg numeric. The number of years to use in calculating
+#'   averages/trending forward.
+#' @param avg_or_trend Character. Should the averaged be calculated as the mean
+#'   \code{Average}, or by linear regression \code{Trend}.
+#' @param data_col Character. The column in the \code{deaths} dataframe containing
+#'   the rates. Defaults to \code{deaths}
+#' @param output_col Character. The name of the column in the output dataframe
+#'   containing the calculated rates
+#' @param project_rate_from Numeric. The year for which a rate is being calculated.
+#'   Default \code{last_data_year+1}.
 #'
-#' @return A data frame of mortality probabilities rates by LA, year, sex and age with the same age structure
-#' as the target curves and overall rates scaled so that they are consistent with past deaths.
+#' @return A data frame of mortality probabilities rates by LA, year, sex and age
+#'   with the same age structure as the target curves and overall rates scaled so
+#'   that they are consistent with past deaths.
 #'
 #' @import dplyr
 #' @import assertthat
@@ -27,8 +33,10 @@
 #' @export
 
 
-scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_path, target_curves_filepath,
-                                   last_data_year, n_years_to_avg, avg_or_trend, data_col="deaths", output_col,
+scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_path,
+                                   target_curves_filepath, last_data_year,
+                                   n_years_to_avg, avg_or_trend,
+                                   data_col="deaths", output_col,
                                    project_rate_from = last_data_year+1){
 
   population <- data.frame(readRDS(popn_mye_path))
