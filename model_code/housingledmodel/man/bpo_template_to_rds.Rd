@@ -12,15 +12,16 @@ bpo_template_to_rds(
 )
 }
 \arguments{
-\item{csv_name}{String. The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
-With or without the \code{.csv} suffix.}
+\item{csv_name}{String. The name of the dwelling trajectory csv saved in the
+\code{bpo_dir} folder. With or without the "csv" suffix.}
 
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv.}
 
 \item{shlaa_first_yr}{Numeric. The first year in which to use shlaa development data.
 Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.}
 
-\item{dev_first_yr}{Numeric. The first year for which development data is provided. \code{Default 2019}.}
+\item{dev_first_yr}{Numeric. The first year for which development data is provided.
+\code{Default 2019}.}
 }
 \description{
 Take a standard ward-level csv bpo template and create 2

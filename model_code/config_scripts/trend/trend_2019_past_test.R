@@ -7,13 +7,13 @@ first_proj_yr <- 2012
 n_proj_yr <- 20
 projection_name <- "past_testing"
 
-popn_mye_path <- paste0("input_data/mye/2019/temp_gla_population.rds")
-deaths_mye_path <-  paste0("input_data/mye/2019/temp_deaths.rds")
-births_mye_path <-  paste0("input_data/mye/2019/temp_births.rds")
-int_out_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_out.rds")
-int_in_mye_path <-  paste0("input_data/mye/2019/temp_gla_international_in.rds")
-dom_out_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_out.rds")
-dom_in_mye_path <- paste0("input_data/domestic_migration/2019/temp_domestic_migration_in.rds")
+popn_mye_path <- paste0("input_data/mye/2019/population_ons.rds")
+deaths_mye_path <-  paste0("input_data/mye/2019/deaths_ons.rds")
+births_mye_path <-  paste0("input_data/mye/2019/births_ons.rds")
+int_out_mye_path <-  paste0("input_data/mye/2019/int_out_ons.rds")
+int_in_mye_path <-  paste0("input_data/mye/2019/int_in_ons.rds")
+dom_out_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds")
+dom_in_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds")
 upc_path <- "input_data/scenario_data/covid19_upc.rds"
 
 mortality_years_to_avg <- 5
@@ -48,7 +48,7 @@ timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
 output_dir <- paste0("outputs/trend/2019/",projection_name,"/")
 
-mortality_fns <- list(
+mortality_rates <- list(
   
   list(fn = popmodules::scaled_mortality_curve, args = list(popn_mye_path = popn_mye_path,
                                                             births_mye_path = births_mye_path,
@@ -70,7 +70,7 @@ mortality_fns <- list(
   
   #------------------------------------------
   
-  fertility_fns <- list(
+  fertility_rates <- list(
     list(fn = popmodules::scaled_fertility_curve, args = list(popn_mye_path = popn_mye_path,
                                                               births_mye_path = births_mye_path,
                                                               target_curves_filepath = fertility_curve_filepath,
@@ -91,7 +91,7 @@ mortality_fns <- list(
   
   #-----------------------------------------------------
   
-  int_out_rate_fns <- list(
+  int_out_flows_rates <- list(
     list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                  births_mye_path = births_mye_path,
                                                                                  flow_or_rate = int_out_flow_or_rate,
@@ -144,10 +144,10 @@ mortality_fns <- list(
     dom_in_mye_path = dom_in_mye_path,
     upc_path = upc_path,
     output_dir = output_dir,
-    mortality_fns = mortality_fns,
-    fertility_fns = fertility_fns,
-    int_out_fns = int_out_rate_fns,
-    int_in_fns = int_in,
+    mortality_rates = mortality_rates,
+    fertility_rates = fertility_rates,
+    int_out_flows_rates = int_out_flows_rates,
+    int_in_flows = int_in,
     domestic_rates = domestic_rates,
     constraint_fns = constraint_fns,
     qa_areas_of_interest = qa_areas_of_interest,
@@ -161,17 +161,10 @@ mortality_fns <- list(
     dclg_stage2_file_path = dclg_stage2_file_path
   )
   
-  # Save settings
-  projdir <- rprojroot::find_root(rprojroot::is_git_root)
-  # copy_dir <- paste0(projdir, "/", output_dir)
-  # dir.create(copy_dir, recursive = TRUE)
-  # this_file <- rstudioapi::getSourceEditorContext()$path
-  # file.copy(this_file, paste0(copy_dir, "config_list_", projection_name, ".R"))
-  
   rm(list = setdiff(ls(), "config_list"))
   
   # Run the model
   
   projection <- run_trend_model(config_list)
-  log_warnings(paste0(config_list$output_dir, "warnings.txt"))
+  
   

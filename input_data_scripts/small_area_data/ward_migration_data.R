@@ -267,3 +267,5 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
 #Save
 saveRDS(in_migration_characteristics, "input_data/small_area_model/ward_in_migration_characteristics.rds")
 saveRDS(out_migration_rates, "input_data/small_area_model/ward_out_migration_rates.rds")
+
+rm(list = ls())

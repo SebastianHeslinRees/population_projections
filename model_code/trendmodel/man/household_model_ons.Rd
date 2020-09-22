@@ -2,7 +2,7 @@
 % Please edit documentation in R/household_model_ons.R
 \name{household_model_ons}
 \alias{household_model_ons}
-\title{Run the 2016 ONS household model}
+\title{Run the 2016/2018 ONS household model}
 \usage{
 household_model_ons(
   population,

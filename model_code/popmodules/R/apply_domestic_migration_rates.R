@@ -8,7 +8,7 @@
 #' that, with default column names, the population's \code{gss_code} column will
 #' be renamed to \code{gss_out}.
 #'
-#' The function assumes implicity missing origin-destination flows are zero. It
+#' The function assumes implicitly missing origin-destination flows are zero. It
 #' permits zero outmigration for an entire aggregation level, and this level
 #' will **not** be included in the output data frame, meaning you may need to
 #' call \code{tidyr::complete} on the results (after aggregation to in/out/net
@@ -369,6 +369,7 @@ find_matching_column_data <- function(popn, mign_rate, col_known_gss, col_aggreg
               msg = paste("apply_domestic_migration_rates was unable to identify the origin and destination columns in the migration data.",
                           "This is most likely due to geographies in the origin data that aren't present anywhere in the destination data."))
   mign_col_match <- col_aggregation[names(col_aggregation) %in% popn_col_match]
+  return(mign_col_match)
 }
 
 # ---------------------------------------------

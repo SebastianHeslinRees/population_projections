@@ -2,10 +2,10 @@
 #' \code{trend_model_outputs} function
 #'
 #' The \code{trend_core} outputs a list for each year of the projection.
-#' Each list is a list of components. This function rearrages those outputs into
-#' a list of dataframes of components.
+#' Each list is a list of components. This function rearranges those outputs
+#' into a list of dataframes of components.
 #'
-#' @param projection A list. The output list from hte \code{trend_core} function
+#' @param projection A list. The output list from the \code{trend_core} function
 #' @param population Dataframe. Backseries population data
 #' @param births Dataframe. Backseries births data
 #' @param deaths Dataframe. Backseries deaths data
@@ -17,7 +17,7 @@
 #' @param fertility_rates Dataframe. Model fertility rates
 #' @param mortality_rates Dataframe. Model mortality rates
 #' @param int_out_rates Dataframe. Model international out migration rates
-#' @param int_in_flows Dataframe. Model internation in migration flows
+#' @param int_in_flows Dataframe. Model international in migration flows
 #' @param first_proj_yr Numeric. First projection year
 #' @param last_proj_yr Numeric. Last projection year
 #'
@@ -34,8 +34,6 @@ arrange_trend_core_outputs <- function(projection,
                                        fertility_rates, mortality_rates,
                                        int_out_rates, int_in_flows,
                                        first_proj_yr, last_proj_yr){
-  
-  region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_int_out <- list(int_out %>% filter(year < first_proj_yr))
@@ -70,6 +68,8 @@ arrange_trend_core_outputs <- function(projection,
                     age = 0:90,
                     fill = list(upc = 0)) %>% 
       data.frame() %>%
+      filter(gss_code %in% unique(population$gss_code),
+             year %in% unique(population$year)) %>% 
       aggregate_regions(england=TRUE)
   }
 

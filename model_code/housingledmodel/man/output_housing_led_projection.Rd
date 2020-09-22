@@ -28,7 +28,7 @@ projection model.}
 
 \item{housing_stock}{A dataframe. The total dwelling stock by year.}
 
-\item{household_trajectory}{A dataframe. The household trectory (as opposed
+\item{household_trajectory}{A dataframe. The household trajectory (as opposed
 to the dwelling trajectory) used in the model.}
 
 \item{first_proj_yr}{Numeric. The first year of the projection}
