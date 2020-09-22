@@ -5,7 +5,7 @@ library(trendmodel)
 
 first_proj_yr <- 2020
 n_proj_yr <- 31
-projection_name <- "business_as_usual"
+projection_name <- "remote_revolution"
 
 popn_mye_path <- paste0("input_data/mye/2019/population_ons.rds")
 deaths_mye_path <-  paste0("input_data/mye/2019/deaths_ons.rds")
@@ -35,11 +35,6 @@ int_out_years_to_avg <- 10
 int_out_flow_or_rate <- "rate"
 int_out_rate_cap <- 0.8
 
-# int_in_last_data_year <- 2019
-# int_in_years_to_avg <- 10
-# int_in_flow_or_rate <- "flow"
-# modify_rates_and_flows <- 1
-
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"
 communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population_(2020_geog).rds"
@@ -53,7 +48,7 @@ timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
 output_dir <- paste0("outputs/trend/2019/",projection_name,"/")
 
-mortality_fns <- list(
+mortality_rates <- list(
   
   list(fn = popmodules::scaled_mortality_curve, args = list(popn_mye_path = popn_mye_path,
                                                             births_mye_path = births_mye_path,
@@ -74,7 +69,7 @@ mortality_fns <- list(
 
 #------------------------------------------
 
-fertility_fns <- list(
+fertility_rates <- list(
   list(fn = popmodules::scaled_fertility_curve, args = list(popn_mye_path = popn_mye_path,
                                                             births_mye_path = births_mye_path,
                                                             target_curves_filepath = fertility_curve_filepath,
@@ -94,7 +89,7 @@ fertility_fns <- list(
 
 #-----------------------------------------------------
 
-int_out_rate_fns <- list(
+int_out_flows_rates <- list(
   list(fn = popmodules::calculate_mean_international_rates_or_flows, args=list(popn_mye_path = popn_mye_path,
                                                                                births_mye_path = births_mye_path,
                                                                                flow_or_rate = int_out_flow_or_rate,
@@ -113,7 +108,7 @@ int_in  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_
                               transition = F),
                 '2021' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019_50pc.rds"),
                               transition = T),
-                '2024' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019.rds"),
+                '2024' = list(path = paste0(int_flows_loc,"int_in_reduced_ldn_share.rds"),
                               transition = F))
 
 #-----------------------------------------------------
@@ -124,7 +119,7 @@ domestic_rates <- list('2020' = list(path = paste0(dom_rates_loc,"dom_rates_10yr
                                      transition = F),
                        '2021' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_50pc.rds"),
                                      transition = T),
-                       '2024' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019.rds"),
+                       '2024' = list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2019_reduced_ldn_in.rds"),
                                      transition = F))
 
 #-----------------------------------------------------
@@ -146,10 +141,10 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   upc_path = upc_path,
   output_dir = output_dir,
-  mortality_fns = mortality_fns,
-  fertility_fns = fertility_fns,
-  int_out_fns = int_out_rate_fns,
-  int_in_fns = int_in,
+  mortality_rates = mortality_rates,
+  fertility_rates = fertility_rates,
+  int_out_flows_rates = int_out_flows_rates,
+  int_in_flows = int_in,
   domestic_rates = domestic_rates,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,

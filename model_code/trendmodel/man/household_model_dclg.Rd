@@ -20,5 +20,5 @@ A list containing 2 lists: Stage 1 outputs and Stage 2
   outputs.
 }
 \description{
-Run stages 1 and 2 of the DCLG household model and retuen outputs
+Run stages 1 and 2 of the DCLG household model and return outputs
 }

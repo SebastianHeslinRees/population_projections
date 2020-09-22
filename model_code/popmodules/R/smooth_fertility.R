@@ -37,7 +37,6 @@
 #' @import dplyr
 #' @import minpack.lm
 #' @importFrom data.table rbindlist
-#' @import minpack.lm
 #' @importFrom stats deviance nls.control residuals runif setNames
 #' @export
 

@@ -5,10 +5,13 @@
 #' This takes the projection for the first projection year as an input, and
 #' extends it to the required number of projection years
 #'
-#' @param jump_off_rates Dataframe. A set of LA/age/sex rates for the first projection year
+#' @param jump_off_rates Dataframe. A set of LA/age/sex rates for the first
+#'   projection year
 #' Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility_curve()}
-#' @param rate_col Character. The column in the jump_off_rates dataframe containing the rates.
-#' @param rate_trajectory_filepath Character. The filepath for the national-level ASMR/ASFR trajectory.
+#' @param rate_col Character. The column in the jump_off_rates dataframe
+#'   containing the rates.
+#' @param rate_trajectory_filepath Character. The file path for the national-level
+#'   ASMR/ASFR trajectory.
 #' @param first_proj_yr Integer. The first projection year.
 #' @param n_proj_yr Integer. Number of years to project
 #' @param npp_var Character. NPP trend variant. Either \code{2018_principal},
