@@ -153,7 +153,7 @@ config_list <- list(
   mortality_rates = mortality_rates,
   fertility_rates = fertility_rates,
   int_out_flows_rates = int_out_flows_rates,
-  int_in_flows = int_in_flows,
+  int_in_flows = int_in,
   dom_rate_fns = dom_rate_fns,
   constraint_fns = constraint_fns,
   qa_areas_of_interest = qa_areas_of_interest,
@@ -173,4 +173,3 @@ rm(list = setdiff(ls(), "config_list"))
 # Run the model
 
 projection <- run_trend_model(config_list)
-

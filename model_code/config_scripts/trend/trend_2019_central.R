@@ -98,7 +98,7 @@ config_list <- list(
   fertility_rates = fertility_rates,
   int_out_flows_rates = int_out_flows_rates,
   int_out_method = int_out_flow_or_rate,
-  int_in_flows = int_in_flows,
+  int_in_flows = int_in,
   domestic_rates = domestic_rates,
   constraint_fns = constraint_fns,
   
