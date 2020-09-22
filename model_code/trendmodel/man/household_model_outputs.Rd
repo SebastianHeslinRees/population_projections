@@ -20,7 +20,7 @@ household_model_outputs(
 
 \item{output_dir}{Location for output.}
 
-\item{write_excel}{Logical. Whether to output Excel .xls files.}
+\item{write_excel}{Logical. Whether to output Excel .xlsx files.}
 
 \item{projection_name}{String. The projection name}
 }

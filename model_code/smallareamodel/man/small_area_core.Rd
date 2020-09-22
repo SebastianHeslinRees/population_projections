@@ -17,7 +17,7 @@ small_area_core(
   death_constraint,
   fertility_rates,
   mortality_rates,
-  last_data_year,
+  last_data_yr,
   dwellings,
   adults_per_dwelling,
   projection_year,
@@ -29,11 +29,11 @@ small_area_core(
 resolution.}
 
 \item{births}{Data frame. Historical births backseries at small area
-resolution. Used when \code{projection_year} is \code{last_data_year} or
+resolution. Used when \code{projection_year} is \code{last_data_yr} or
 earlier.}
 
 \item{deaths}{Data frame. Historical deaths backseries at small area
-resolution. Used when \code{projection_year} is \code{last_data_year} or
+resolution. Used when \code{projection_year} is \code{last_data_yr} or
 earlier.}
 
 \item{communal_est_popn}{Data frame. Static communal establishment population
@@ -42,7 +42,7 @@ at small area resolution.}
 \item{out_migration_rates}{Data frame. Static outmigration rates at small
 area resolution.}
 
-\item{in_migration_characteristics}{Data frame. Static inmigration rates at
+\item{in_migration_characteristics}{Data frame. Static in-migration rates at
 small area resolution. Rates should give the number of people by age and
 sex that migrate to an area for each adult (over 18) that migrates to an
 area (that is, the rates will sum to a bit more than 1 for each geography).}
@@ -58,13 +58,13 @@ to.}
 
 \item{fertility_rates}{NULL or data frame. Fertility rates at small area
 resolution. Used when \code{projection_year} is after
-\code{last_data_year}.}
+\code{last_data_yr}.}
 
 \item{mortality_rates}{NULL or data frame. Mortality rates at small area
 resolution. Used when \code{projection_year} is after
-\code{last_data_year}.}
+\code{last_data_yr}.}
 
-\item{last_data_year}{Integer. Year at which the model switches from using
+\item{last_data_yr}{Integer. Year at which the model switches from using
 historical births and deaths from \code{births} and \code{deaths} to
 projected rates from \code{fertility_rates} and \code{mortality_rates}.}
 

@@ -1,6 +1,6 @@
 #' Create a single year of age population
 #'
-#' Where a population is availble for an age band only use the sya distribution
+#' Where a population is available for an age band only use the sya distribution
 #' from another population to distribute the total over the single ages in the band.
 #'
 #' @param popn_1 A data frame containing population data for an age group.
@@ -8,8 +8,8 @@
 #' @param popn_1_col String. Name of column in \code{popn_1} containing the population data
 #' @param popn_2_col String. Name of column in \code{popn_2} containing the population data
 #' @param min_age Numeric. The minimum age of the age band.
-#' @param max_age Numeric. The maximim age of the age band.
-#' @param col_aggregation Character vector. The columns on whoich to join the two
+#' @param max_age Numeric. The maximum age of the age band.
+#' @param col_aggregation Character vector. The columns on which to join the two
 #'  datasets \code{popn_1} and \code{popn_2}. Cannot contain \code{"age"}.
 #'  Default \code{c("gss_code, "sex)}
 #'

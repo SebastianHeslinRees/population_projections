@@ -1,6 +1,6 @@
 #' Divide a component of change by population to give historical rates
 #'
-#' Takes filepaths to the mid year estimates for the desired component of
+#' Takes file paths to the mid year estimates for the desired component of
 #' change, total population, and birth rates, and returns a data frame with
 #' rates.
 #'
@@ -75,7 +75,7 @@ get_rate_backseries <- function(component_mye_path,
 
   # population is aged on due to definitions of MYE to ensure the correct denominator
   # population is population at 30th June
-  # changes are changes that occured in the 12 months up to 30th June
+  # changes are changes that occurred in the 12 months up to 30th June
   # age is the age the cohort is at 30th June
   # TODO add link to ONS documentation for the above
   popn <- readRDS(popn_mye_path)
