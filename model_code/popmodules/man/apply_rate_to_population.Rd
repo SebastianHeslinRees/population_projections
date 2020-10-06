@@ -11,23 +11,20 @@ apply_rate_to_population(
   col_popn = "popn",
   col_rate = "rate",
   col_out = "component",
-  pop1_is_subset = FALSE,
+  aggregation_levels_match = FALSE,
   many2one = TRUE,
-  additional_rate_levels = NA,
+  additional_rate_levels = NULL,
   missing_levels_popn = FALSE,
   missing_levels_rate = FALSE
 )
 }
 \arguments{
-\item{popn}{A data frame containing population data.}
+\item{popn}{A data frame containing population data}
 
-\item{popn_rate}{A data frame containing rates data per time step (usually
-year).}
+\item{popn_rate}{A data frame containing rates data}
 
 \item{col_aggregation}{A string or character vector giving the names of
-columns in \code{popn} which the output will be aggregated to. All elements
-must give columns in \code{popn} but not all need to be in
-\code{popn_rate}, (that is, \code{popn_rate} can be at a lower resolution).
+columns on which to join (\code{by} in \code{dplyr::left_join}).
 If names differ between the two input data frames, use a named character
 vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
 "gss_code", "age", "sex")}.}
@@ -38,28 +35,28 @@ counts. Default "popn".}
 \item{col_rate}{String. Name of column in \code{popn_rate} containing rate
 data. Default "rate".}
 
-\item{col_out}{String. Name of column for the output component count
-(popn*rate) in the output. Default "component".}
+\item{col_out}{String. Name of the resulting component count column (popn*rate)
+in the output dataframe. Default "component".}
 
-\item{pop1_is_subset}{Logical. If the two input data frames cover the same
-domain and you expect every level of \code{popn_rate} to be matched to by a
-level in \code{popn} set this to TRUE, and this will be checked. Default
-FALSE.}
+\item{aggregation_levels_match}{Logical. If the two input data frames cover
+the same domain and you expect every level of \code{popn_rate} to be matched
+to by a level in \code{popn} set this to TRUE, and this will be checked.
+Default FALSE.}
 
 \item{many2one}{Logical. Setting this to FALSE will check that no more than
 one level from \code{popn} matches to each level of \code{rate}. Default
 FALSE.}
 
 \item{additional_rate_levels}{String. Names of columns in \code{popn_rate}
-which should be included in the join beyond those named in
+which should be included in the output but which are not included in
 \code{col_aggregation}. Used when multiple rates apply to the same
 aggregation level, e.g. outmigration to multiple locations. The resulting
 left join with \code{popn_rate} can therefore return a much larger data
-frame. Default NA.}
+frame. Default NULL.}
 
 \item{missing_levels_popn}{Logical. Is the popn data frame missing any
-levels? Reminder: \code{pop1_is_subset} will probably be TRUE in this case.
-Default FALSE.}
+levels? Used to relax validation. Reminder: \code{aggregation_levels_match} will
+probably be TRUE in this case. Default FALSE.}
 
 \item{missing_levels_rate}{Logical or character vector. Is the rates data
 missing any levels? If joining the missing levels to the input population
@@ -76,6 +73,12 @@ Given a cohort population and a data frame of rates at the same or lower
 resolution, return a data table of the population's aggregation levels, and a
 component count resulting from the rate applied to the population.
 }
+\details{
+The output dataframe will consist of the columns in the \code{popn} input
+dataframe, plus any columns specified in \code{additional_rate_levels}, and the
+output data column \code{col_out}. Output has 1 row for each distinct level of
+the \code{col_aggregation}.
+}
 \examples{
 
 popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
@@ -87,7 +90,7 @@ component <- apply_rate_to_population(popn,
                              col_popn = "popn",
                              col_rate = "rate",
                              col_out = "component",
-                             pop1_is_subset = FALSE,
+                             aggregation_levels_match = FALSE,
                              many2one = TRUE,
                              missing_levels_popn = FALSE,
                              missing_levels_rate = FALSE)
