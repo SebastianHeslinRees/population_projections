@@ -51,7 +51,7 @@
 #'   migration rates. Default "rate"
 #' @param col_flow String. Name of column to write output flows to. Default
 #'   "flow".
-#' @param pop1_is_subset Logical. Passed to \code{apply_rate_to_population}. If the two
+#' @param aggregation_levels_match Logical. Passed to \code{apply_rate_to_population}. If the two
 #'   input data frames cover the same domain and you expect every level of
 #'   \code{mign_rate} to be matched to by a level in \code{popn} set this to
 #'   TRUE, and this will be checked. Default FALSE.
@@ -93,7 +93,7 @@
 #'                  col_popn = "popn",
 #'                  col_rate = "rate",
 #'                  col_flow = "flow",
-#'                  pop1_is_subset = FALSE,
+#'                  aggregation_levels_match = FALSE,
 #'                  many2one = TRUE,
 #'                  col_origin_destination = NA)
 #'
@@ -114,7 +114,7 @@ apply_domestic_migration_rates <- function(popn,
                              col_popn = "popn",
                              col_rate = "rate",
                              col_flow = "flow",
-                             pop1_is_subset = FALSE,
+                             aggregation_levels_match = FALSE,
                              many2one = FALSE,
                              col_origin_destination = NA) {
 
@@ -122,7 +122,7 @@ apply_domestic_migration_rates <- function(popn,
   # --------------
   validate_apply_domestic_migration_rates_input(popn, mign_rate, col_aggregation, col_gss_destination,
                                   col_popn, col_rate, col_flow,
-                                  pop1_is_subset, many2one, col_origin_destination)
+                                  aggregation_levels_match, many2one, col_origin_destination)
 
   # identify origin and destination columns if we don't have them
   # TODO: make the function require the origin and destination columns to simplify the code? or remove this complexity altogether???? or add gss_origin as input
@@ -149,7 +149,7 @@ apply_domestic_migration_rates <- function(popn,
                                col_popn,
                                col_rate,
                                col_flow,
-                               pop1_is_subset = pop1_is_subset,
+                               aggregation_levels_match = aggregation_levels_match,
                                many2one = many2one,
                                additional_rate_levels = col_gss_destination,
                                missing_levels_popn = FALSE,
@@ -196,7 +196,7 @@ validate_apply_domestic_migration_rates_input <- function(popn,
                                             col_popn,
                                             col_rate,
                                             col_flow,
-                                            pop1_is_subset,
+                                            aggregation_levels_match,
                                             many2one,
                                             col_origin_destination) {
 
@@ -337,7 +337,7 @@ validate_apply_domestic_migration_rates_input <- function(popn,
     validate_join_population(popn,
                              mign_validation,
                              cols_common_aggregation = validation_agg_levels,
-                             pop1_is_subset = pop1_is_subset,
+                             aggregation_levels_match = aggregation_levels_match,
                              many2one = many2one,
                              one2many = FALSE,
                              warn_unused_shared_cols = TRUE)

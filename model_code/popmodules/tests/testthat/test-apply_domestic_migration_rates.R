@@ -34,7 +34,7 @@ mign_out_no_sex <- unique(dplyr::select(mign_out, -sex))
 #                             col_popn = "popn",
 #                             col_rate = "rate",
 #                             col_flow = "flow",
-#                             pop1_is_subset = FALSE,
+#                             aggregation_levels_match = FALSE,
 #                             many2one = FALSE,
 #                             col_origin_destination = NA) {
 
@@ -46,7 +46,7 @@ test_that("apply_domestic_migration_rates creates the expected output", {
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_flow = "flow",
-                                     pop1_is_subset = FALSE,
+                                     aggregation_levels_match = FALSE,
                                      many2one = FALSE,
                                      col_origin_destination = NA),
                     mign_out)
@@ -73,8 +73,8 @@ test_that("apply_domestic_migration_rates lets you specify output column order",
 test_that("apply_domestic_migration_rates lets you migrate to places that aren't in the source data", {
   popn_in <- dplyr::filter(popn, gss_code != "a")
   output_out <- dplyr::filter(mign_out, gss_out != "a")
-  expect_error(apply_domestic_migration_rates(popn_in, mign_rate, pop1_is_subset = FALSE))
-  expect_equivalent(apply_domestic_migration_rates(popn_in, mign_rate, pop1_is_subset = TRUE),
+  expect_error(apply_domestic_migration_rates(popn_in, mign_rate, aggregation_levels_match = FALSE))
+  expect_equivalent(apply_domestic_migration_rates(popn_in, mign_rate, aggregation_levels_match = TRUE),
                     output_out)
 })
 

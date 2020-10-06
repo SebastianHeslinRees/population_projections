@@ -149,7 +149,7 @@ get_rate_backseries <- function(component_mye_path,
   #popmodules::validate_join_population(popn,
   #                                     component,
   #                                     cols_common_aggregation = join_by,
-  #                                     pop1_is_subset = !is.null(col_partial_match),
+  #                                     aggregation_levels_match = !is.null(col_partial_match),
   #                                     many2one = !any(names(popn) %in% col_aggregation),
   #                                     one2many = !any(col_aggregation %in% names(popn)),
   #                                     warn_unused_shared_cols = FALSE)

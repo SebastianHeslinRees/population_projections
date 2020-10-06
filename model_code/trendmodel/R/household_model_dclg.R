@@ -74,7 +74,7 @@ dclg_stage_1 <- function(population, stage1_file_path){
   ### Calculate proportion in each HH type
   ### Multiply proportions by popn
   validate_join_population(sum_hh_type, popn_5yr_bands, cols_common_aggregation = c("year", "gss_code", "sex", "age_group"),
-                           pop1_is_subset = FALSE, many2one=TRUE, one2many = FALSE)
+                           aggregation_levels_match = FALSE, many2one=TRUE, one2many = FALSE)
 
   scaled_projection <- left_join(sum_hh_type, popn_5yr_bands, by=c("gss_code", "year", "sex", "age_group")) %>%
     mutate(scaled_popn = scaling_factor * popn_5yr_bands) %>%

@@ -154,7 +154,7 @@ trend_core <- function(start_population,
                                    col_popn = "popn",
                                    col_rate = "rate",
                                    col_flow = "flow",
-                                   pop1_is_subset = FALSE,
+                                   aggregation_levels_match = FALSE,
                                    many2one = FALSE) %>%
     mutate(year = projection_year) %>%
     select(year, gss_in, gss_out, age, sex, flow)
