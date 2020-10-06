@@ -165,7 +165,8 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
               msg = "apply_rate_to_population needs a logical value for missing_levels_popn")
   assert_that(rlang::is_bool(missing_levels_rate),
               msg = "apply_rate_to_population needs a logical value for missing_levels_rate")
-
+assert_that(col_popn != col_rate,
+              msg = "col_popn and col_rate cannot be the same")
   
   # Other checks
   join_by <- .convert_to_named_vector(col_aggregation)
