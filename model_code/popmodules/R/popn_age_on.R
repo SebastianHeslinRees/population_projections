@@ -124,19 +124,12 @@ popn_age_on <- function(popn,
     aged[[col_age]] <- plyr::mapvalues(aged[[col_age]], old_age_values, new_age_values)
   }
   
-  # Our initial checks established that non-numeric data depends on age, so we can safely group by all non-numeric columns
-  #col_non_numeric <- names(popn)[ !sapply(popn, is.numeric)]
-  numeric_cols <- names(popn)[ sapply(popn, is.numeric) ]
-  cols_to_sum <- setdiff(numeric_cols, col_aggregation)
-  col_agg_and_numeric <- union(col_aggregation, numeric_cols)
-  
+
   aged <- aged %>%
-    lazy_dt %>% 
-    #select_at(c(col_agg_and_numeric)) %>% 
+    lazy_dt() %>% 
     group_by_at(col_aggregation, add=FALSE) %>%
     summarise_at(col_data, sum) %>%
     data.frame()
-  
   
   #Add births
   
