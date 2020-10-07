@@ -60,6 +60,9 @@ validate_population <- function( population,
                                  comparison_pop = NA,
                                  col_comparison = col_aggregation) {
 
+  #make sure col_aggregation is not a named vector
+  col_aggregation <- unname(col_aggregation)
+  
   # Check input parameters are legal and make sense
   check_validate_pop_input(population, col_aggregation, col_data, test_complete, test_unique, check_negative_values, comparison_pop, col_comparison)
 

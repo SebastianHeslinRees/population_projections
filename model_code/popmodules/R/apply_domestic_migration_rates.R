@@ -143,6 +143,7 @@ apply_domestic_migration_rates <- function(popn,
   # TODO: looks like this join will be ~25% faster and the code easier to read
   # if apply_rate_to_population is used to join popn to mign_rate rather than the other
   # way round.
+
   migration <- apply_rate_to_population(popn,
                                         mign_rate,
                                         col_aggregation,
