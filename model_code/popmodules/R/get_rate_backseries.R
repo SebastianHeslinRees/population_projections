@@ -60,19 +60,19 @@ get_rate_backseries <- function(component_mye_path,
                                 col_aggregation = c("year","gss_code","age","sex"),
                                 col_component = NULL,
                                 rate_cap = 1) {
-
+  
   # TODO split this into two functions - can a function for domestic migration matrix be built as a
   # separate function which calls this one?  This function has become hard to read.
-
+  
   # TODO To simplify the function make it strict on passing the col_component name
-
+  
   # List valid names of population components
   usual_col_component <- c("births", "deaths", "popn", "int_in", "int_out", "int_net", "dom_in", "dom_out", "dom_net")
-
-
+  
+  
   # LOAD AND SET UP POPULATION DATA
   # -------------------------------
-
+  
   # population is aged on due to definitions of MYE to ensure the correct denominator
   # population is population at 30th June
   # changes are changes that occurred in the 12 months up to 30th June
@@ -81,44 +81,43 @@ get_rate_backseries <- function(component_mye_path,
   popn <- readRDS(popn_mye_path)
   births <- readRDS(births_mye_path)
   component <- readRDS(component_mye_path)
-
+  
   validate_get_rate_backseries_inputs(popn, births, component, years_backseries,
                                       col_partial_match, col_aggregation, col_component, rate_cap)
-
-
+  
+  
   popn <- popn  %>%
-
-    popmodules::popn_age_on(births = readRDS(births_mye_path))%>%
+    popn_age_on(births = births)%>%
     filter(year %in% years_backseries) %>%
-      popmodules::validate_population(col_data = "popn")
-
+    validate_population(col_data = "popn")
+  
+  
   # LOAD AND SET UP COMPONENT DATA
   # ------------------------------
-
-
+  
   if(is.null(col_component)) {
     col_component <- usual_col_component
   }
   col_component <- intersect(names(component), col_component)
-
+  
   assert_that(length(col_component) == 1,
               msg = paste(c("get_rate_backseries couldn't find a unique column for the component in the file",
                             component_mye_path,
                             "\nColumn names:", names(component),
                             "\nComponent names searched for:", col_component), collapse=" "))
-
+  
   # WRANGLE AND VALIDATE THE DATASETS FOR A JOIN
   # --------------------------------------------
-
-
+  
+  
   # Fill missing values as zero
   # TODO throw error or write a message if there are NAs?
   ix <- is.na(component[[col_component]])
   component[ix, col_component] <- 0
-
+  
   # Set negative values to zero
   component <- check_negative_values(component, col_component, set_to_zero = TRUE)
-
+  
   # TODO Figure out if this is necessary
   # levels <- col_aggregation[ !col_aggregation %in% col_partial_match]
   # if(!is.null(col_partial_match)) {
@@ -132,19 +131,19 @@ get_rate_backseries <- function(component_mye_path,
   #               msg = paste(c("get_rate_backseries found differering aggregation levels in the populations at",
   #                             component_mye_path, "and", popn_mye_path, "when comparing on", levels), collapse=" "))
   # }
-
+  
   # validate the component population and check levels match popn for the join
   col_aggregation <- .convert_to_named_vector(col_aggregation)
   join_by <- col_aggregation[ names(col_aggregation) %in% names(popn)]
-
+  
   popmodules::validate_population(component,
                                   col_aggregation = unname(col_aggregation),
                                   col_data = col_component,
                                   test_complete = is.null(col_partial_match),
                                   test_unique = TRUE)
-
+  
   # TODO investigate another way to validate this join: currently it's failing due to insufficient memory
-
+  
   # (when it's run as part of the model with a bunch of other memory usage)
   #popmodules::validate_join_population(popn,
   #                                     component,
@@ -153,36 +152,36 @@ get_rate_backseries <- function(component_mye_path,
   #                                     many2one = !any(names(popn) %in% col_aggregation),
   #                                     one2many = !any(col_aggregation %in% names(popn)),
   #                                     warn_unused_shared_cols = FALSE)
-
+  
   # TODO check the methodological decision to set value to 0 if popn is 0
-
-
-
+  
+  
+  
   # JOIN THE DATASETS
   # -----------------
-
+  
   # we're gonna use data.table because the data are huge when we're dealing with origin-destination data
   # see below for tidyverse equivalent
-
+  
   popn <- data.table::setDT(popn)
   #data.table::setkeyv(popn, c("year","gss_code","age","sex"))
   component <- data.table::setDT(component)
   #data.table::setkeyv(component, unname(col_aggregation))
-
+  
   rates <- merge(popn, component, by.x = names(join_by), by.y = unname(join_by))
   rates[, rate := ifelse(popn == 0, 0, get(col_component)/popn)]
   data.table::setnames(rates, names(join_by), unname(join_by))
   data.table::setDF(rates)
   rates <- select(rates, -popn, -!!sym(col_component))
-
+  
   if(FALSE) { # the above but with tidyverse
     rates <- left_join(popn, component, by=col_aggregation) %>%
       mutate(rate = ifelse(popn == 0, 0, !!sym(col_component)/popn)) %>%
       select(-popn, -!!sym(col_component)) %>%
       rename(setNames(names(join_by), unname(join_by))) # check this...
   }
-
-
+  
+  
   if(!is.null(rate_cap)) {
     ix <- rates$rate > rate_cap
     if(any(ix)) {
@@ -194,11 +193,11 @@ get_rate_backseries <- function(component_mye_path,
       rates$rate[ix] <- 1
     }
   }
-
+  
   return(rates)
-
+  
   # TODO add module function rules checks - must return fert/mort df
-
+  
 }
 
 validate_get_rate_backseries_inputs <- function(population,
@@ -209,7 +208,7 @@ validate_get_rate_backseries_inputs <- function(population,
                                                 col_aggregation,
                                                 col_component,
                                                 rate_cap){
-
+  
   assert_that(is.data.frame(population),
               msg="get_rate_backseries expects that population is a data frame")
   assert_that(is.data.frame(births),
@@ -224,7 +223,7 @@ validate_get_rate_backseries_inputs <- function(population,
               msg="get_rate_backseries expects that col_aggregation is a character object")
   assert_that(is.null(col_component) | is.string(col_component),
               msg="get_rate_backseries expects that col_component is a single string")
-
+  
   assert_that(is.numeric(population$year),
               msg = "get_rate_backseries expects that year column in the population dataframe is numeric")
   assert_that(is.numeric(births$year),
@@ -233,22 +232,22 @@ validate_get_rate_backseries_inputs <- function(population,
               msg = "get_rate_backseries expects that year column in the component dataframe is numeric")
   assert_that(is.null(rate_cap) | is.number(rate_cap),
               msg = "get_rate_backseries expects a single number for rate_cap")
-
-
+  
+  
   validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn")
   validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births")
-
+  
   #TODO how to do the validation which can also handle the domestic migration matrix
   #validate_population(component, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = col_component)
-
+  
   assert_that(all(years_backseries %in% population$year),
               msg = "get_rate_backseries expects the population dataframe to contain all of the years in years_backseries")
-
+  
   assert_that(all(years_backseries %in% births$year),
               msg = "get_rate_backseries expects the births dataframe to contain all of the years in years_backseries")
-
+  
   assert_that(all(years_backseries %in% component$year),
               msg = "get_rate_backseries expects the component dataframe to contain all of the years in years_backseries")
-
+  
   invisible(TRUE)
 }

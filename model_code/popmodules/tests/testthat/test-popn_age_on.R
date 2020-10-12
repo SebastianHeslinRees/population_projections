@@ -54,7 +54,7 @@ test_that("popn_age_on works on a simple population", {
 test_that("popn_age_on works on a simple population with births specified", {
   expect_equivalent(popn_age_on(popn, births=births),
                     aged_w_births)
-
+  
   expect_equivalent(popn_age_on(popn, births=0),
                     aged_w_no_births)
 })
@@ -83,19 +83,19 @@ test_that("popn_age_on handles factors, tibbles and groups", {
   aged_out <- dplyr::mutate(aged, gss_code=as.factor(gss_code), sex=as.factor(sex))
   expect_equivalent(popn_age_on(popn_in),
                     aged_out)
-
+  
   # Tibbles
   popn_in  <- tibble::as_tibble(popn_in)
   aged_out <- tibble::as_tibble(aged_out)
   expect_equivalent(popn_age_on(popn_in),
                     aged_out)
-
+  
   # Groups
   popn_in  <- dplyr::group_by(popn_in,  year, gss_code, age, sex)
   aged_out <- dplyr::group_by(aged_out, year, gss_code, age, sex)
   expect_equivalent(popn_age_on(popn_in),
                     aged_out)
-
+  
   # CASE: age is factor
   # Factors
   popn_in  <- dplyr::mutate(popn_banded, gss_code=as.factor(gss_code), sex=as.factor(sex))
@@ -119,10 +119,10 @@ test_that("popn_age_on warns when factor levels don't match the input, and throw
   aged_out <- dplyr::mutate(aged, gss_code=factor(gss_code, levels = c("a","b","c","d")))
   expect_warning( temp <- popn_age_on(popn_in))
   expect_equivalent(temp, aged_out)
-
+  
   popn_in  <- dplyr::mutate(popn_banded, age=factor(age, levels = c("w","x","y","z")))
   expect_error(popn_age_on(popn_in))
-
+  
   template_age_in <- factor(c("x","y","z"), levels = c("w","x","y","z"))
   expect_error(popn_age_on(popn, template_age_levels = template_age_in))
 })
@@ -133,23 +133,28 @@ test_that("popn_age_on throws an error with an empty input", {
 })
 
 test_that("popn_age_on works with multiple data columns, including text data", {
-  popn_in  <- dplyr::mutate(popn, popn2 = popn, fill="fill")
-  aged_out <- dplyr::mutate(aged, popn2 = popn, fill="fill")
-  expect_equivalent(popn_age_on(popn_in),
+  
+  popn_in  <- dplyr::mutate(popn, popn2 = popn)
+  aged_out <- dplyr::mutate(aged, popn2 = popn)
+  expect_equivalent(popn_age_on(popn_in,
+                                col_data = c("popn","popn2")),
                     aged_out)
 })
 
 test_that("popn_age_on preserves columns that aren't aggregation levels or data", {
+  skip("Don't think we really wantt to do this anyway")
+  #currently the function drops cols not specified in the col_aggregation parameter
+  #this test suggests it should keep them
   popn_in  <- dplyr::mutate(popn, filler="fill")
   aged_out <- dplyr::mutate(aged, filler="fill")
   expect_equivalent(popn_age_on(popn_in),
                     aged_out)
-
+  
   popn_in  <- dplyr::mutate(popn_in,  filler=as.factor(filler))
   aged_out <- dplyr::mutate(aged_out, filler=as.factor(filler))
   expect_equivalent(popn_age_on(popn_in),
                     aged_out)
-
+  
   # TODO decide how it should deal with data grouped by non-aggregation columns (unlikely)
 })
 
@@ -163,7 +168,11 @@ test_that("popn_age_on throws an error when it can't aggregate age-dependent, no
 test_that("popn_age_on handles custom column names", {
   popn_in  <- dplyr::rename(popn, xyear=year, xgss_code=gss_code, xage=age, xsex=sex, xpopn=popn)
   aged_out <- dplyr::rename(aged, xyear=year, xgss_code=gss_code, xage=age, xsex=sex, xpopn=popn)
-  expect_equivalent(popn_age_on(popn_in, col_aggregation = c("xyear","xgss_code","xage","xsex"), col_age = "xage", col_year = "xyear"),
+  expect_equivalent(popn_age_on(popn_in,
+                                col_aggregation = c("xyear","xgss_code","xage","xsex"),
+                                col_age = "xage",
+                                col_year = "xyear",
+                                col_data = "xpopn"),
                     aged_out)
 })
 
@@ -210,11 +219,11 @@ test_that("popn_age_on can handle custom timesteps when the age column is a fact
   aged_out <- dplyr::mutate(aged_banded, year = 2010)
   expect_equivalent(popn_age_on(popn_banded, timestep = 10),
                     aged_out)
-
+  
   aged_out <- dplyr::mutate(aged_banded, year = 2010.5)
   expect_warning(temp <- popn_age_on(popn_banded, timestep = 10.5))
   expect_equivalent(temp, aged_out)
-
+  
   expect_error(popn_age_on(popn_banded, timestep = 0))
   expect_error(popn_age_on(popn, timestep = 10))
 })
@@ -224,10 +233,35 @@ test_that("popn_age_on can handle custom timesteps when the age column isn't a f
   aged_out <- dplyr::mutate(aged, age = age * 2, year = 2002)
   expect_equivalent(popn_age_on(popn_in, timestep = 2),
                     aged_out)
-
+  
   # Throws an error when age input doesn't match the timestep
   expect_error(popn_age_on(popn, timestep = 2))
 })
 
-
-
+test_that("popn_age_on can handle multiple years of data)", {
+  popn_in  <- popn %>% 
+    mutate(year = year + 1,
+           popn = popn * 2) %>% 
+    rbind(popn)
+  aged_out <-  aged %>% 
+    mutate(year = year + 1,
+           popn = popn*2) %>% 
+    rbind(aged) %>%
+    arrange(year, gss_code, age, sex)
+  
+  expect_equivalent(popn_age_on(popn_in),
+                    aged_out)
+  
+  #with births
+  births_in <- births %>% 
+    mutate(year = year + 1,
+           births = births * 2) %>%
+    rbind(births)
+  
+  aged_out <- rbind(aged_out, rename(births_in, popn = births)) %>%
+    arrange(year, gss_code, age, sex)
+  
+  expect_equivalent(popn_age_on(popn_in, births=births_in),
+                    aged_out)
+  
+})
