@@ -18,49 +18,41 @@
 #'
 #' @import dplyr
 #' @import assertthat
-#' @importFrom data.table setDT setkey
 #' @importFrom utils capture.output
+#' @importFrom dtplyr lazy_dt
 #'
 #' @export
 
 calculate_mean_domestic_rates <- function(origin_destination_rates,
-                                          last_data_year,
-                                          n_years_to_avg,
-                                          col_rate = "rate",
-                                          rate_cap = 0.8) {
+                                           last_data_year,
+                                           n_years_to_avg,
+                                           col_rate = "rate",
+                                           rate_cap = 0.8) {
   # validate input
   check_average_domestic_rate_input(origin_destination_rates, last_data_year, n_years_to_avg, col_rate)
-  if(col_rate != "rate") {
-    i <- names(origin_destination_rates) == col_rate
-    names(origin_destination_rates)[i] <- "rate"
-  }
-
+  
+  if(col_rate != "rate"){origin_destination_rates <- rename(origin_destination_rates, rate = !!col_rate)}
+  
   backseries_years <- (last_data_year - n_years_to_avg + 1):last_data_year
   assert_that(length(backseries_years) == n_years_to_avg)
-
-  # data.table because it's so big
-  data.table::setDT(origin_destination_rates)
-  origin_destination_rates <- origin_destination_rates[year %in% backseries_years, ]
-  origin_destination_rates <- origin_destination_rates[, .(rate = sum(rate)/n_years_to_avg),
-                                                       .(gss_out, gss_in, age, sex)]
-  data.table::setkey(origin_destination_rates, gss_out, sex, age)
-
-  # tidyverse equivalent
-  if(FALSE) {
-    origin_destination_rates <- filter(origin_destination_rates, year %in% backseries_years)
-
-    origin_destination_rates %>%
-      group_by(gss_out, gss_in, age, sex) %>%
-      summarise(rate = rate/n_years_to_avg)
-  }
-
-  outflow_sums <- origin_destination_rates[, .(total_rate = sum(rate)), .(gss_out, age, sex)]
-  data.table::setkey(outflow_sums, gss_out, sex, age)
-
+  
+  pre_average_rates <- origin_destination_rates %>% 
+    dtplyr::lazy_dt() %>% 
+    filter(year %in% backseries_years) %>% 
+    group_by(gss_out, gss_in, age, sex) %>%
+    summarise(rate = rate/n_years_to_avg)
+  
+  outflow_sums <- pre_average_rates %>% 
+    group_by(gss_out, sex, age) %>% 
+    summarise(total_rate = sum(rate)) %>% 
+    data.frame()
+  
+  #check if any areas would have > cap % of persons leaving
   if(any(outflow_sums$total_rate > rate_cap)) {
     ix <- outflow_sums$total_rate > rate_cap
     n <- sum(ix)
-
+    
+    #print a warning show what has been capped
     warning(paste0(capture.output({
       print(paste(c("After averaging the backseries, average_domestic_migration rates created rates with sums exceeding the cap of", rate_cap,
                     "at", n, "aggregation levels - these will be scaled to sum to", rate_cap),
@@ -71,49 +63,48 @@ calculate_mean_domestic_rates <- function(origin_destination_rates,
       } else {
         print("First 30 values:")
         print(outflow_sums[ix,][1:30,])
-        print("Levels affected:")
-        sapply(c("gss_out", "age", "sex"), function(col) {
-          print("col:")
-          print(unique(outflow_sums[ix, get(col)]))
-        })
       }
     }), collapse = "\n"))
-
-    outflow_sums$total_rate[outflow_sums$total_rate > rate_cap] <- rate_cap
-
-    origin_destination_rates <- outflow_sums[origin_destination_rates][
-      , rate := rate * total_rate/sum(rate), by = c("gss_out", "age", "sex")][
-        , total_rate := NULL]
-
+    
+    #do the capping - first set scaling factors for the affected areas
+    outflow_sums <- outflow_sums %>% 
+      dtplyr::lazy_dt() %>% 
+      mutate(scaling = ifelse(total_rate > rate_cap, rate_cap/total_rate, 1))
+    
+    #apply scaling factors
+    pre_average_rates <- pre_average_rates %>% 
+      left_join(outflow_sums, by = c("gss_out", "age", "sex")) %>% 
+      mutate(rate = rate*scaling) 
   }
-
-
-  if(col_rate != "rate") {
-    i <- names(origin_destination_rates) == "rate"
-    names(origin_destination_rates)[i] <- col_rate
-  }
-
+  
+  #sum the individual year rates
+  average_rates <- pre_average_rates %>% 
+    dtplyr::lazy_dt() %>% 
+    group_by(gss_out, gss_in, age, sex) %>% 
+    summarise(!!col_rate := sum(rate)) %>% 
+    data.frame() %>% 
+    arrange(gss_out, gss_in, sex, age)
+  
   #check missing levels
   unmatched_levels <- setdiff(
-    expand.grid(gss_out = unique(origin_destination_rates$gss_out),
-                age = unique(origin_destination_rates$age),
-                sex = unique(origin_destination_rates$sex),
+    expand.grid(gss_out = unique(average_rates$gss_out),
+                age = unique(average_rates$age),
+                sex = unique(average_rates$sex),
                 stringsAsFactors = FALSE),
-    origin_destination_rates %>%
+    average_rates %>%
       dtplyr::lazy_dt() %>%
       select(gss_out, age, sex) %>%
       unique() %>%
       as.data.frame()
-    )
-
-
+  )
+  
   if(nrow(unmatched_levels) > 0) {
     warning(paste(c("calculate_mean_domestic_migration_rates found ", nrow(unmatched_levels), " aggregation levels with no net outmigration.",
                     " These levels will be absent from the output.")), sep=" ")
   }
-
-  return(data.table::setDF(origin_destination_rates))
-
+  
+  return(average_rates)
+  
 }
 
 
@@ -123,7 +114,7 @@ calculate_mean_domestic_rates <- function(origin_destination_rates,
 
 # validate inputs for the above
 check_average_domestic_rate_input <- function(origin_destination_rates, last_data_year, n_years_to_avg, col_rate) {
-
+  
   assert_that(is.data.frame(origin_destination_rates),
               msg="calculate_mean_domestic_migration_rates expects that origin_destination_rates is a data frame")
   assert_that(is.count(last_data_year),
@@ -134,7 +125,7 @@ check_average_domestic_rate_input <- function(origin_destination_rates, last_dat
               msg="calculate_mean_domestic_migration_rates expects that col_rate is a character")
   assert_that(col_rate %in% names(origin_destination_rates),
               msg="calculate_mean_domestic_migration_rates expects that col_rate is a column in component_data dataframe")
-
+  
   backseries_years <- (last_data_year - n_years_to_avg + 1):last_data_year
   assert_that(all(backseries_years %in% origin_destination_rates$year),
               msg = paste(c("calculate_mean_domestic_migration_rates expects these years to be present in the origin-destination data:",

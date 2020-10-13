@@ -9,9 +9,11 @@ popn_age_on(
   col_aggregation = c("year", "gss_code", "age", "sex"),
   col_age = "age",
   col_year = "year",
+  col_data = "popn",
   timestep = 1,
   template_age_levels = NULL,
-  births = NULL
+  births = NULL,
+  col_births = "births"
 )
 }
 \arguments{
@@ -20,11 +22,15 @@ popn_age_on(
 \item{col_aggregation}{Character vector of columns in \code{popn} acting as
 aggregation levels. Default \code{c("year","gss_code","age","sex")}. In the case
 of multiple geography columns, only supply the highest resolution column;
-other columns will be preserved.}
+other columns will be dropped.}
 
 \item{col_age}{String denoting the age column. Default "age".}
 
 \item{col_year}{String denoting the year column. Can be NULL. Default "year".}
+
+\item{col_data}{String or Character denoting the column(s) containing data.
+For multiple columns pass as a vector \code{c("popn","popn_2")}.
+Default "popn".}
 
 \item{timestep}{Numeric denoting the model time step in years. If age data
 are numeric, they must be spaced by this interval. If they are an ordered
@@ -40,10 +46,11 @@ NULL.}
 \item{births}{Data frame, 0 or \code{NULL}. Births data at the same
 aggregation levels as \code{popn} but coded to the lowest age band that can
 be joined to the output with \code{rbind}. If zero, then the output rows for
-zero-year-olds, all of which are zero. These settings currently only work
-when \code{col_aggregation} is set to the default
-\code{c("year","gss_code","age","sex")}. If \code{NULL} then no
+zero-year-olds, all of which are zero. If \code{NULL} then no
 zero-year-olds are included in the output. Default \code{NULL}.}
+
+\item{col_births}{String denoting the name of the column containing data in 
+the \code{births} dataframe.}
 }
 \value{
 A data frame containing the population with age advanced by one time
@@ -68,10 +75,4 @@ The highest age/age band is considered to be unbounded. This means that when
 a population is aged on, the population in this band remains in this band,
 and the age/band below it is added to it. An ageing population will all
 eventually be moved into this age band if no other processes are operating.
-
-When age bands are merged like this, the function combines data in other
-columns using the following (crude) rules: if the data are numeric, sum them,
-otherwise check they're an identical category (i.e. not age-dependent) and
-return the value, otherwise throw an error. (So make sure year data are
-specified in \code{col_aggregation})
 }

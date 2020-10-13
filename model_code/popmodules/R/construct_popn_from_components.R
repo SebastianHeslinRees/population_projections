@@ -29,7 +29,7 @@ construct_popn_from_components <- function(start_population,
                                            data_are_subsets = FALSE){
   
   validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation, data_are_subsets)
-
+  
   start_population <- mutate(start_population, var = "start") %>%
     rename(popn = last(names(start_population))) %>%
     select_at(c(col_aggregation, "var", "popn"))
@@ -70,7 +70,7 @@ validate_construct_popn_from_component_input <- function(start_population,
                                                          col_aggregation,
                                                          data_are_subsets){
   #validation
-  #are addition and subratction lists
+  #are addition and subtraction lists
   assertthat::assert_that(is.list(addition_data),
                           msg="In construct_popn_from_components addition_data must be a list of dataframes")
   assertthat::assert_that(is.list(subtraction_data),
@@ -90,7 +90,7 @@ validate_construct_popn_from_component_input <- function(start_population,
     msg = "construct_popn_from_components: All elements the subtraction_data list must be dataframes"
   )
   
-  #is the final colmn of each df numeric
+  #is the final column of each df numeric
   assertthat::assert_that(
     all(sapply(addition_data, FUN = function(x) is.numeric(x[[ncol(x)]]))),
     msg = "construct_popn_from_components: The final column in every addition_data dataframe must be numeric"
@@ -101,8 +101,18 @@ validate_construct_popn_from_component_input <- function(start_population,
     msg = "construct_popn_from_components: The final column in every subtraction_data dataframe must be numeric"
   )
   
-  #every data frame contains col_aggregation fields
+  #the final column is not a col_aggregation column
+  assertthat::assert_that(
+    all(sapply(addition_data, FUN = function(x) !names(x)[[ncol(x)]] %in% col_aggregation)),
+    msg = "construct_popn_from_components: the final column in 1 of the addition dataframes is one of the col_aggregation columns, das ist verbotten"
+  )
   
+  assertthat::assert_that(
+    all(sapply(subtraction_data, FUN = function(x) !names(x)[[ncol(x)]] %in% col_aggregation)),
+    msg = "construct_popn_from_components: the final column in 1 of the subtraction dataframes is one of the col_aggregation columns, das ist verbotten"
+  )
+  
+  #every data frame contains col_aggregation fields
   assertthat::assert_that(
     all(sapply(addition_data, FUN = function(x) all(col_aggregation %in% names(x)))),
     msg = "construct_popn_from_components: one or more col_aggregation columns not found in one of the addition_data dataframes"
