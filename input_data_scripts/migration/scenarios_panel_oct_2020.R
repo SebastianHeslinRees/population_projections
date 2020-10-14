@@ -22,19 +22,27 @@ out_total <- sum(ldn_out$int_out)
 ldn_in <- filter(int_in_10yr, substr(gss_code,1,3)=="E09")
 in_total <- sum(ldn_in$int_in)
 
-in_target <- 90000 + out_total
+net_total <- in_total - out_total
+
+#90k
+net_adjustment <- 90000 - net_total
+in_target <- in_total + net_adjustment
 in_scale <- in_target / in_total
-sceanrio_90k <- int_in_10yr %>% 
+scenario_90k <- int_in_10yr %>% 
   mutate(int_in = int_in * in_scale)
 
-in_target <- 25000 + out_total
+#25k
+net_adjustment <- 25000 - net_total
+in_target <- in_total + net_adjustment
 in_scale <- in_target / in_total
-sceanrio_25k <- int_in_10yr %>% 
+scenario_25k <- int_in_10yr %>% 
   mutate(int_in = int_in * in_scale)
 
-saveRDS(sceanrio_25k, "input_data/scenario_data/int_in_for_25k_net_scenario.rds")
-saveRDS(sceanrio_90k, "input_data/scenario_data/int_in_for_90k_net_scenario.rds")
+#save
+saveRDS(scenario_25k, "input_data/scenario_data/int_in_for_25k_net_scenario.rds")
+saveRDS(scenario_90k, "input_data/scenario_data/int_in_for_90k_net_scenario.rds")
 
+#out avg
 int_out_10yr <- calculate_mean_international_rates_or_flows(
   popn_mye_path = NULL,
   births_mye_path = NULL,
