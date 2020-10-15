@@ -2,7 +2,7 @@
 #' \code{output_small_area_projection} function
 #'
 #' The \code{small_area_led_core} outputs a list for each year of the projection.
-#' Each list is a list of components. This function rearrages those outputs into
+#' Each list is a list of components. This function rearranges those outputs into
 #' a list of dataframes of components.
 #'
 #' @param projection A list. The output list from the \code{small_area_led_core} function
@@ -11,9 +11,9 @@
 #'   and geographic aggregation (ward or msoa)
 #' @param first_proj_yr Numeric. First projection year
 #' @param last_proj_yr Numeric. Last projection year
-#' @param small_area_births_sya A datatframe. Births by single year of age and sex 
+#' @param small_area_births_sya A dataframe. Births by single year of age and sex 
 #'  for each geographic aggregation and year
-#' @param small_area_deaths_sya  A datatframe. Deaths by single year of age and sex
+#' @param small_area_deaths_sya  A dataframe. Deaths by single year of age and sex
 #'  for each #'  geographic aggregation and year
 #'
 #' @return A list where each element is a data frame containing data for each year
@@ -54,8 +54,7 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
   proj_births[[1]] <- births_backseries
   proj_migration <- list()
   proj_migration[[1]] <- past_net
-  assumed_dev <- list()
-  
+
   for(projection_year in first_proj_yr:last_proj_yr){
     
     proj_popn[[projection_year]] <- projection[[projection_year]][['population']]

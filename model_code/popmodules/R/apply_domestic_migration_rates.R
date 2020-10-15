@@ -8,7 +8,7 @@
 #' that, with default column names, the population's \code{gss_code} column will
 #' be renamed to \code{gss_out}.
 #'
-#' The function assumes implicity missing origin-destination flows are zero. It
+#' The function assumes implicitly missing origin-destination flows are zero. It
 #' permits zero outmigration for an entire aggregation level, and this level
 #' will **not** be included in the output data frame, meaning you may need to
 #' call \code{tidyr::complete} on the results (after aggregation to in/out/net
@@ -51,7 +51,7 @@
 #'   migration rates. Default "rate"
 #' @param col_flow String. Name of column to write output flows to. Default
 #'   "flow".
-#' @param pop1_is_subset Logical. Passed to \code{apply_rate_to_population}. If the two
+#' @param aggregation_levels_match Logical. Passed to \code{apply_rate_to_population}. If the two
 #'   input data frames cover the same domain and you expect every level of
 #'   \code{mign_rate} to be matched to by a level in \code{popn} set this to
 #'   TRUE, and this will be checked. Default FALSE.
@@ -93,7 +93,7 @@
 #'                  col_popn = "popn",
 #'                  col_rate = "rate",
 #'                  col_flow = "flow",
-#'                  pop1_is_subset = FALSE,
+#'                  aggregation_levels_match = FALSE,
 #'                  many2one = TRUE,
 #'                  col_origin_destination = NA)
 #'
@@ -108,70 +108,71 @@
 # the input popn, but doesn't need origin-destination data to be complete)
 
 apply_domestic_migration_rates <- function(popn,
-                             mign_rate,
-                             col_aggregation = c("year", "gss_code"="gss_out", "sex", "age"),
-                             col_gss_destination = "gss_in",
-                             col_popn = "popn",
-                             col_rate = "rate",
-                             col_flow = "flow",
-                             pop1_is_subset = FALSE,
-                             many2one = FALSE,
-                             col_origin_destination = NA) {
-
+                                           mign_rate,
+                                           col_aggregation = c("year", "gss_code"="gss_out", "sex", "age"),
+                                           col_gss_destination = "gss_in",
+                                           col_popn = "popn",
+                                           col_rate = "rate",
+                                           col_flow = "flow",
+                                           aggregation_levels_match = FALSE,
+                                           many2one = FALSE,
+                                           col_origin_destination = NA) {
+  
   # Validate input
   # --------------
   validate_apply_domestic_migration_rates_input(popn, mign_rate, col_aggregation, col_gss_destination,
-                                  col_popn, col_rate, col_flow,
-                                  pop1_is_subset, many2one, col_origin_destination)
-
+                                                col_popn, col_rate, col_flow,
+                                                aggregation_levels_match, many2one, col_origin_destination)
+  
   # identify origin and destination columns if we don't have them
   # TODO: make the function require the origin and destination columns to simplify the code? or remove this complexity altogether???? or add gss_origin as input
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }
   col_aggregation <- .convert_to_named_vector(col_aggregation)
-
+  
   # limit to columns we're interested in, fill missing if requested,
   # and add zero migration rates from each geography to itself
   mign_rate <- standardise_migration_domestic_rates(mign_rate, col_aggregation, col_gss_destination,
                                                     col_rate, col_origin_destination)
   popn <- popn[ c(names(col_aggregation), col_popn)]
-
+  
   # Calculate migration flows
   # -------------------------
   # This will deal with most checks on the input and output
   # TODO: looks like this join will be ~25% faster and the code easier to read
   # if apply_rate_to_population is used to join popn to mign_rate rather than the other
   # way round.
+
   migration <- apply_rate_to_population(popn,
-                               mign_rate,
-                               col_aggregation,
-                               col_popn,
-                               col_rate,
-                               col_flow,
-                               pop1_is_subset = pop1_is_subset,
-                               many2one = many2one,
-                               additional_rate_levels = col_gss_destination,
-                               missing_levels_popn = FALSE,
-                               missing_levels_rate = TRUE)
-
+                                        mign_rate,
+                                        col_aggregation,
+                                        col_popn = col_popn,
+                                        col_rate = col_rate,
+                                        col_out = col_flow,
+                                        aggregation_levels_match = aggregation_levels_match,
+                                        many2one = many2one,
+                                        additional_rate_levels = col_gss_destination,
+                                        missing_levels_popn = FALSE,
+                                        missing_levels_rate = TRUE)
+  
   # moving this warning to the rates' creation
-   unmatched_levels <- is.na(migration[[col_flow]])
-   if(sum(unmatched_levels) > 0) {
-  #   warning(paste(c("apply_domestic_migration_rates found", sum(unmatched_levels), "aggregation levels with no net outmigration.",
-  #                   "These levels will be absent from the output.",
-  #                   "\nAggregation levels:", names(col_aggregation)), collapse=" "))
-     migration <- filter(migration, !unmatched_levels)
-   }
-
+  unmatched_levels <- is.na(migration[[col_flow]])
+  if(sum(unmatched_levels) > 0) {
+    #   warning(paste(c("apply_domestic_migration_rates found", sum(unmatched_levels), "aggregation levels with no net outmigration.",
+    #                   "These levels will be absent from the output.",
+    #                   "\nAggregation levels:", names(col_aggregation)), collapse=" "))
+    migration <- filter(migration, !unmatched_levels)
+  }
+  
   # rename input gss column to match origin column
   old_name <- names(col_aggregation)[col_aggregation == col_origin_destination[1]]
   names(migration)[names(migration) == old_name] <- col_origin_destination[1]
-
-
+  
+  
   # Validate output
   # ---------------
-
+  
   # All that's left is to make sure there are no rates < 0 or rates that exceed
   # the population Note: we *won't* check that the sum total population leaving
   # each geography is less than the total population: the calculation is a
@@ -180,7 +181,7 @@ apply_domestic_migration_rates <- function(popn,
   assert_that(!any(migration[[col_popn]] < migration[[col_flow]]),
               msg = "apply_domestic_migration_rates flows exceeding the population size")
   # TODO surely there's some other validation we should do here
-
+  
   return(as.data.frame(migration))
 }
 
@@ -190,17 +191,17 @@ apply_domestic_migration_rates <- function(popn,
 
 # Check the function input is valid
 validate_apply_domestic_migration_rates_input <- function(popn,
-                                            mign_rate,
-                                            col_aggregation,
-                                            col_gss_destination,
-                                            col_popn,
-                                            col_rate,
-                                            col_flow,
-                                            pop1_is_subset,
-                                            many2one,
-                                            col_origin_destination) {
-
-
+                                                          mign_rate,
+                                                          col_aggregation,
+                                                          col_gss_destination,
+                                                          col_popn,
+                                                          col_rate,
+                                                          col_flow,
+                                                          aggregation_levels_match,
+                                                          many2one,
+                                                          col_origin_destination) {
+  
+  
   # Type checking
   assert_that(is.data.frame(popn),
               msg = "apply_domestic_migration_rates needs a data frame as input for population")
@@ -218,11 +219,11 @@ validate_apply_domestic_migration_rates_input <- function(popn,
               msg = "apply_domestic_migration_rates needs a string as the col_flow parameter")
   assert_that(identical(col_origin_destination, NA) | is.character(col_origin_destination),
               msg = "apply_domestic_migration_rates needs NA or a character vector for the col_origin_destination parameter")
-
+  
   # Other checks
   # TODO most of these checks are actually done by apply_rate_to_population and maybe shouldn't be duplicated here?
   col_aggregation <- .convert_to_named_vector(col_aggregation) # convert to named vector mapping between popn and mign_rate aggregation levels
-
+  
   assert_that(nrow(popn) > 0,
               msg = "apply_domestic_migration_ratese was given an empty population data frame")
   assert_that(nrow(mign_rate) > 0,
@@ -257,15 +258,14 @@ validate_apply_domestic_migration_rates_input <- function(popn,
               msg = paste(c("apply_domestic_migration_rates can't handle a flow column with the same name as one of the requested aggregation column names",
                             "\nFlow column:", col_flow,
                             "\nAggregation columns:", c(names(col_aggregation), col_gss_destination)), collapse = " "))
-  if(col_flow %in% names(popn)) {
-    warning(paste("apply_domestic_migration_rates is writing flow data to a column name that was also in the input:", col_flow,
-                  "\nThe output will contain the calculated flow in this column, so be careful with subsequent joins or binds."))
-  }
+  assertthat::assert_that(!col_flow %in% names(popn),
+                          msg = "in apply_domestic_migration_rates col_flow cannot exist in input pop dataframe")
+  
 
   col_mign_agg <- intersect(names(mign_rate), c(as.character(col_aggregation), col_gss_destination))
   assert_that(all(complete.cases(mign_rate[col_mign_agg])),
               msg = "apply_domestic_migration_rates found missing values in the input migration aggregation levels")
-
+  
   assert_that(!identical(col_origin_destination, NA) | length(col_gss_destination) < 2,
               msg = "apply_domestic_migration_rates requires a character vector for col_origin_destination when joining to multiple additional destination columns (specified in col_gss_destination)")
   if(!identical(col_origin_destination, NA)) {
@@ -276,15 +276,15 @@ validate_apply_domestic_migration_rates_input <- function(popn,
     assert_that(col_origin_destination[1] %in% col_aggregation,
                 msg = "apply_domestic_migration_rates needs col_origin_destination's first value also to be present in col_aggregation")
   }
-
+  
   # TODO do some validation on the input since apply_rate_to_population will expect missing levels and skip the join checks
   # we can at least test that mign[col_agg] is joinable and complete
-
-
+  
+  
   # If we weren't told the origin-destination data columns, figure them out and validate
   # TODO this might be quite slow: see if it shows up in a profvis analysis
   # TODO what is the disadvantage of being strict about specifying origin-destination cols? ML thinks it would increase speed and readability
-
+  
   if(identical(col_origin_destination, NA)) {
     col_origin_destination <- c(find_matching_column_data(popn, mign_rate, col_gss_destination, col_aggregation), col_gss_destination)
   }
@@ -296,21 +296,21 @@ validate_apply_domestic_migration_rates_input <- function(popn,
   assert_that(setequal(popn_out_in_origin, popn_out_in_destination),
               msg = paste(c("apply_domestic_migration_rates seems to have different origin and destination levels in the rate columns",
                             col_origin_destination), collapse = " "))
-
+  
   # We run a couple extra checks here that will be missed in apply_rate_to_population due to the expected incomplete
   # origin-destination data. It works on the assumption that there are no missing levels in the migration data
   # other than missing origin-destination rates.
   validation_agg_levels <- col_aggregation[col_aggregation %in% names(mign_rate)]
-
+  
   validate_population(popn,
                       names(col_aggregation),
                       col_data = NA,
                       test_complete = TRUE,
                       test_unique = TRUE)
-
+  
   try_join <- FALSE
-
-
+  
+  
   tryCatch({
     mign_validation <- unique(data.table::as.data.table(mign_rate[validation_agg_levels])) %>% as.data.frame()
     validate_population(mign_validation,
@@ -322,30 +322,30 @@ validate_apply_domestic_migration_rates_input <- function(popn,
     warning = function(w) {
       warning(paste("apply_domestic_migration_rates threw a warning while validating the migration inputs:\n", w))
     },
-     error = function(e) {
-       # TODO come back and think about how best to validate an incomplete domestic migration matrix
-       # This throws too many warnings to be useful
-
-       # warning(paste("apply_domestic_migration_rates threw an error while validating the migration inputs.",
-       #               "It's being converted to a warning because most origin-destination flows have",
-       #               "some missing levels and the function expects that.",
-       #               "Note that validate_population will fail if run on the output.",
-       #               "\n\nError (converted to warning):\n", e))
-     })
-
+    error = function(e) {
+      # TODO come back and think about how best to validate an incomplete domestic migration matrix
+      # This throws too many warnings to be useful
+      
+      # warning(paste("apply_domestic_migration_rates threw an error while validating the migration inputs.",
+      #               "It's being converted to a warning because most origin-destination flows have",
+      #               "some missing levels and the function expects that.",
+      #               "Note that validate_population will fail if run on the output.",
+      #               "\n\nError (converted to warning):\n", e))
+    })
+  
   if(try_join) {
     validate_join_population(popn,
                              mign_validation,
                              cols_common_aggregation = validation_agg_levels,
-                             pop1_is_subset = pop1_is_subset,
+                             aggregation_levels_match = aggregation_levels_match,
                              many2one = many2one,
                              one2many = FALSE,
                              warn_unused_shared_cols = TRUE)
   }
-
-
+  
+  
   # Other checks (by the more expensive validatepop functions) are done within apply_rate_to_population
-
+  
   invisible(TRUE)
 }
 
@@ -358,7 +358,7 @@ find_matching_column_data <- function(popn, mign_rate, col_known_gss, col_aggreg
   ix <- sapply(popn, function(col_data) test_gss %in% col_data) %>%
     which() # find columns with gss data
   if(length(ix) == 0) {ix <- 1:ncol(popn)} # in the case that the test_gss isn't actually in the popn data: just test everything
-
+  
   popn_col_match <- sapply(ix, function(i) { length(setdiff(popn[[i]], mign_rate[[col_known_gss]])) == 0 }) # find ones with a full match to destination data
   popn_col_match <- names(popn)[ix][popn_col_match]
   assert_that(!length(popn_col_match) >  1,
@@ -369,6 +369,7 @@ find_matching_column_data <- function(popn, mign_rate, col_known_gss, col_aggreg
               msg = paste("apply_domestic_migration_rates was unable to identify the origin and destination columns in the migration data.",
                           "This is most likely due to geographies in the origin data that aren't present anywhere in the destination data."))
   mign_col_match <- col_aggregation[names(col_aggregation) %in% popn_col_match]
+  return(mign_col_match)
 }
 
 # ---------------------------------------------
@@ -381,9 +382,9 @@ standardise_migration_domestic_rates <- function(mign_rate,
   # limit to columns we care about
   col_mign_agg <- c(as.character(col_aggregation), col_gss_destination) %>%
     intersect(names(mign_rate))
-
+  
   mign_rate <- mign_rate[ c(col_mign_agg, col_rate) ]
-
+  
   return(mign_rate)
 }
 

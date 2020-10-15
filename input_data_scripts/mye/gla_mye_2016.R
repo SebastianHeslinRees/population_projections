@@ -36,7 +36,10 @@ int_net <- mye_components %>% filter(var %in% c("international_in","internationa
   select(year,gss_code,sex,age,int_net)
 upc <- mutate(upc, sex = case_when(sex=="F" ~ "female",
                                    sex=="M" ~ "male")) %>%
-  rename(upc = change)
+  rename(upc = change) %>% 
+  mutate(year = 2016) %>% 
+  project_forward_flat(2050) %>% 
+  select(year, gss_code, age, sex, upc)
 
 #WALES
 #datestamp <- "2020-06-03"
@@ -79,3 +82,4 @@ for(i in seq(length(df))){
   saveRDS(df[[i]], path[[i]])
 }
 
+rm(list=ls())

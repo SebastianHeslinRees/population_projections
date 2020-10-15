@@ -12,6 +12,7 @@
 #' @import popmodules
 #' @importFrom rmarkdown render
 #' @import assertthat
+#' @importFrom loggr log_file
 #'
 #' @export
 
@@ -22,6 +23,7 @@ run_trend_model <- function(config_list) {
   expected_config <- c("projection_name",
                        "first_proj_yr", 
                        "n_proj_yr",
+                       "output_dir",
                        "popn_mye_path",
                        "deaths_mye_path",
                        "births_mye_path",
@@ -30,28 +32,29 @@ run_trend_model <- function(config_list) {
                        "dom_out_mye_path",
                        "dom_in_mye_path",
                        "upc_path",
-                       "output_dir",
-                       "mortality_fns",
-                       "fertility_fns",
-                       "int_out_fns",
-                       "int_in_fns",
+                       "mortality_rates",
+                       "fertility_rates",
+                       "int_out_flows_rates",
+                       "int_out_method",
+                       "int_in_flows",
                        "domestic_rates",
                        "constraint_fns",
-                       "int_out_method",
-                       "qa_areas_of_interest",
-                       "write_excel",
-                       "write_QA",
                        "ons_stage1_file_path",
                        "ons_stage2_file_path",
                        "communal_est_pop_path",
                        "dclg_stage1_file_path",
-                       "dclg_stage2_file_path")
+                       "dclg_stage2_file_path",
+                       "qa_areas_of_interest",
+                       "write_QA",
+                       "write_excel")
   
   validate_config_list(config_list, expected_config)
   
-  #Create output directory
+  #Create output directory, warnings log and config log
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
-  
+  loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
+  write_model_config(config_list)
+
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
   validate_paths <- lapply(seq(file_list),
@@ -104,17 +107,28 @@ run_trend_model <- function(config_list) {
   
   # get the projected rates
   message("get projected rates")
-  fertility_rates <- evaluate_fns_list(config_list$fertility_fns) %>% complete_fertility(population)
-  mortality_rates <- evaluate_fns_list(config_list$mortality_fns)
-  int_out_flows_rates <- evaluate_fns_list(config_list$int_out_fns) 
+  
+  eval_or_read <- function(string_or_list){
+    if(is.list(string_or_list)){
+      rates <- evaluate_fns_list(string_or_list)
+    }
+    if(is.string(string_or_list)){
+      rates <- readRDS(string_or_list)
+    }
+    return(rates)
+  }
+  
+  fertility_rates <- eval_or_read(config_list$fertility_rates) %>% complete_fertility(population)
+  mortality_rates <- eval_or_read(config_list$mortality_rates)
+  int_out_flows_rates <- eval_or_read(config_list$int_out_flows_rates) 
   
   domestic_rates_info <- get_rates_flows_info(config_list$domestic_rates, first_proj_yr, last_proj_yr)
   domestic_rates <- NULL
   
-  international_flow_info <- get_rates_flows_info(config_list$int_in_fns, first_proj_yr, last_proj_yr)
+  international_flow_info <- get_rates_flows_info(config_list$int_in_flows, first_proj_yr, last_proj_yr)
   int_in_flows <- NULL
   
-  constraints <- evaluate_fns_list(config_list$constraint_fns)
+  constraints <- eval_or_read(config_list$constraint_fns)
   
   #Prep backseries
   population <- population %>% select(year, gss_code, age, sex, popn)
@@ -192,7 +206,7 @@ run_trend_model <- function(config_list) {
                                            int_out_flows_rates, int_in_flows,
                                            first_proj_yr, last_proj_yr)
   
-  validate_trend_core_outputs(projection)
+  validate_trend_core_outputs(projection, first_proj_yr)
   
   ## household models
   message('')
@@ -235,6 +249,8 @@ run_trend_model <- function(config_list) {
                                     first_proj_yr = config_list$first_proj_yr))
   }
   
+  popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
+
   return(projection)
 }
 
@@ -257,7 +273,6 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
     popmodules::validate_population(upc, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
   
-  
   popmodules::validate_population(fertility_rates, col_data = "rate")
   popmodules::validate_population(mortality_rates, col_data = "rate")
   
@@ -267,13 +282,13 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
-  popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   # TODO move these checks for rates now that they're loaded in dynamically. Also the domestic checks never worked.
-  #popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
+  #popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), aggregation_levels_match = TRUE, many2one = TRUE, one2many = FALSE)
   
   # check that the coverage of years is correct
   last_proj_yr <- first_proj_yr + n_proj_yr -1
@@ -295,7 +310,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
 
 #===============================================================================
 
-validate_trend_core_outputs <- function(projection) {
+validate_trend_core_outputs <- function(projection, first_proj_yr) {
   
   components <- names(projection)
   expected_components <- c("population", "deaths","births", "int_out", "int_in",
@@ -303,9 +318,34 @@ validate_trend_core_outputs <- function(projection) {
                            "fertility_rates", "mortality_rates", "int_out_rates", "upc")
   
   assert_that(identical(components, expected_components))
+ 
+  for(i in c(1:5,8:12)){ validate_population(projection[[i]]) }
   
-  #warning("Skipping tests on domestic trend output until aggregated domestic backseries are implemented")
-  for(i in 1:12){ validate_population(projection[[i]]) }
+  validate_domestic_components(projection[["dom_out"]],"domestic out", first_proj_yr)
+  validate_domestic_components(projection[["dom_in"]],"domestic in", first_proj_yr)
+  
   if(!is.null(projection$upc)){validate_population(projection$upc)}
+
+}
+
+validate_domestic_components <- function(data, component, first_proj_yr){
+  
+  dom_codes <- setdiff(unique(filter(data, year>=first_proj_yr)$gss_code),
+                       unique(filter(data, year<first_proj_yr)$gss_code))
+  
+  if(length(dom_codes) > 0){
+    warning(paste0("In the ", component ," component there are ",length(dom_codes),
+                   " code(s) present in the projection that are not in the backseries: ",
+                   paste(dom_codes, collapse = ", ")))
+  }
+  
+  dom_codes <- setdiff(unique(filter(data, year<first_proj_yr)$gss_code),
+                       unique(filter(data, year>=first_proj_yr)$gss_code))
+  
+  if(length(dom_codes) > 0){
+    warning(paste0("In the ", component ," component there are ",length(dom_codes),
+                   " code(s) present in the backseries that are not in the projection: ",
+                   paste(dom_codes, collapse = ", ")))
+  }
   
 }

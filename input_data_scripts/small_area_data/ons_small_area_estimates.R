@@ -149,3 +149,5 @@ scaled_msoa_data <- msoa_data  %>%
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(scaled_ward_data, "input_data/small_area_model/ward_population_estimates.rds")
 saveRDS(scaled_msoa_data, "input_data/small_area_model/msoa_population_estimates.rds")
+
+rm(list = ls())

@@ -1,4 +1,4 @@
-#' Recode LA GSS Codes to a later geography
+#' Re-code LA GSS Codes to a later geography
 #'
 #' Switches any gss codes to a later vintage
 #'
@@ -17,10 +17,10 @@
 #' @param recode_to_year Numeric. Conform to geography in which year. Default
 #'   \code{2013} (i.e. census geography).
 #' @param aggregate_data Logical. If set to true multiple instances of the same
-#'   gss code will be aggregated using the function specified in \code{fun} parammeter.
+#'   gss code will be aggregated using the function specified in \code{fun} parameter.
 #'   Default to \code{TRUE}.
-#' @param recode_gla_codes Logical. If set to \code{TRUE} recodes to the codes used in
-#'  2018-based and earlier projections. This is introduced for backward
+#' @param recode_gla_codes Logical. If set to \code{TRUE} re-codes to the codes
+#'  used in the 2018-based (& earlier) projections. This is introduced for backward
 #'  compatibility and doesn't correspond to any single vintage year.
 #'  Default \code{FALSE}.
 #' @param code_changes_path string. file path to the code changes database.

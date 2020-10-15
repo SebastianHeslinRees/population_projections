@@ -14,6 +14,7 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tibble enframe
 #' @importFrom tidyr unnest
+#' @importFrom loggr log_file
 #' 
 #' @export
 
@@ -43,8 +44,14 @@ run_housing_led_model <- function(config_list){
                        "last_data_yr",
                        "upc_path")
   
+  
   validate_config_list(config_list, expected_config)
   
+  #Create output directory, warnings log and config log
+  dir.create(config_list$output_dir, recursive = T, showWarnings = F)
+  loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
+  write_model_config(config_list)
+
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -316,6 +323,10 @@ run_housing_led_model <- function(config_list){
                                 dwelling_trajectory,
                                 household_trajectory_static,
                                 first_proj_yr)
+  
+  popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
+  
+  return(projection)
 }
 
 #-------

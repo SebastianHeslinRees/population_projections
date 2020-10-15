@@ -47,10 +47,10 @@ test_that("validate_join_population fails when pop1 isn't a subset", {
 
 test_that("validate_join_population can require complete coverage" , {
   expect_invisible(
-    validate_join_population(pop_test1_partial, pop_full, cols_common_aggregation="gss_code", pop1_is_subset=TRUE))
+    validate_join_population(pop_test1_partial, pop_full, cols_common_aggregation="gss_code", aggregation_levels_match=TRUE))
 
   expect_error(
-    validate_join_population(pop_test1_partial, pop_full, cols_common_aggregation="gss_code", pop1_is_subset=FALSE))
+    validate_join_population(pop_test1_partial, pop_full, cols_common_aggregation="gss_code", aggregation_levels_match=FALSE))
 })
 
 test_that("validate_join_population can require many-to-one and one-to-many mapping" , {

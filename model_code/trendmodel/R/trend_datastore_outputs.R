@@ -1,6 +1,7 @@
 #' Trend Model Datastore outputs
 #'
-#' @param population,births,deaths,int_in,int_out,dom_in,dom_out Dataframes with population and component data.
+#' @param population,births,deaths,int_in,int_out,dom_in,dom_out Dataframes with
+#'   population and component data.
 #' @param upc Dataframe or NULL. Contains upc component data.
 #' @param output_dir Path to output directory.
 #' @param excel_file_name Output file name. With or without xlsx suffix.
@@ -125,6 +126,8 @@ wrangle_datastore_outputs <- function(x){
     arrange(gss_code, sex, age) %>%
     reorder_for_output() %>%
     as.data.frame()
+  
+  return(wrangled)
   
 }
 

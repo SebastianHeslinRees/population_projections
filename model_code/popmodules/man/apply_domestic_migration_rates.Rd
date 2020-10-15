@@ -12,7 +12,7 @@ apply_domestic_migration_rates(
   col_popn = "popn",
   col_rate = "rate",
   col_flow = "flow",
-  pop1_is_subset = FALSE,
+  aggregation_levels_match = FALSE,
   many2one = FALSE,
   col_origin_destination = NA
 )
@@ -53,7 +53,7 @@ migration rates. Default "rate"}
 \item{col_flow}{String. Name of column to write output flows to. Default
 "flow".}
 
-\item{pop1_is_subset}{Logical. Passed to \code{apply_rate_to_population}. If the two
+\item{aggregation_levels_match}{Logical. Passed to \code{apply_rate_to_population}. If the two
 input data frames cover the same domain and you expect every level of
 \code{mign_rate} to be matched to by a level in \code{popn} set this to
 TRUE, and this will be checked. Default FALSE.}
@@ -82,7 +82,7 @@ the origin and destination columns (if origin columns differ). This means
 that, with default column names, the population's \code{gss_code} column will
 be renamed to \code{gss_out}.
 
-The function assumes implicity missing origin-destination flows are zero. It
+The function assumes implicitly missing origin-destination flows are zero. It
 permits zero outmigration for an entire aggregation level, and this level
 will **not** be included in the output data frame, meaning you may need to
 call \code{tidyr::complete} on the results (after aggregation to in/out/net
@@ -120,7 +120,7 @@ apply_domestic_migration_rates(popn,
                  col_popn = "popn",
                  col_rate = "rate",
                  col_flow = "flow",
-                 pop1_is_subset = FALSE,
+                 aggregation_levels_match = FALSE,
                  many2one = TRUE,
                  col_origin_destination = NA)
 
