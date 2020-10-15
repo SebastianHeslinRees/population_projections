@@ -282,13 +282,13 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
-  popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   # TODO move these checks for rates now that they're loaded in dynamically. Also the domestic checks never worked.
-  #popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), pop1_is_subset = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), pop1_is_subset = TRUE, many2one = TRUE, one2many = FALSE)
+  #popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), aggregation_levels_match = TRUE, many2one = TRUE, one2many = FALSE)
   
   # check that the coverage of years is correct
   last_proj_yr <- first_proj_yr + n_proj_yr -1

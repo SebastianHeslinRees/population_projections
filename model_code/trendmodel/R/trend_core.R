@@ -85,12 +85,12 @@ trend_core <- function(start_population,
   
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
   validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
-  
-  deaths <- component_from_popn_rate(popn = aged_popn_w_births,
-                                     component_rate = mortality_rates,
+
+  deaths <- apply_rate_to_population(popn = aged_popn_w_births,
+                                     popn_rate = mortality_rates,
                                      col_popn = "popn",
                                      col_rate = "rate",
-                                     col_component = "deaths")
+                                     col_out = "deaths")
   validate_population(deaths, col_data = "deaths", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE)
   
@@ -111,11 +111,11 @@ trend_core <- function(start_population,
   if(int_out_method=="flow"){
     int_out <- int_out_flows_rates
   } else {
-    int_out <- component_from_popn_rate(popn = natural_change_popn,
-                                        component_rate = int_out_flows_rates,
+    int_out <- apply_rate_to_population(popn = natural_change_popn,
+                                        popn_rate = int_out_flows_rates,
                                         col_popn = "popn",
                                         col_rate = "int_out",
-                                        col_component = "int_out")
+                                        col_out = "int_out")
   }
   
   validate_population(int_out, col_data = "int_out")
@@ -154,7 +154,7 @@ trend_core <- function(start_population,
                                    col_popn = "popn",
                                    col_rate = "rate",
                                    col_flow = "flow",
-                                   pop1_is_subset = FALSE,
+                                   aggregation_levels_match = FALSE,
                                    many2one = FALSE) %>%
     mutate(year = projection_year) %>%
     select(year, gss_in, gss_out, age, sex, flow)

@@ -260,7 +260,7 @@ housing_led_core <- function(start_population,
                                                 col_rate = "ahs",
                                                 col_out = "target_popn",
                                                 col_aggregation = c("year","gss_code"),
-                                                pop1_is_subset = TRUE)
+                                                aggregation_levels_match = TRUE)
   
   #7. This point is intentionaly left blank
   

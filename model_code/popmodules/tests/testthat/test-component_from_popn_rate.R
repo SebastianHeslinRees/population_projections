@@ -2,6 +2,8 @@ context("component_from_popn_rate")
 library(popmodules)
 library(testthat)
 
+skip_if(TRUE, message = "component_from_popn_rate deprecated tests moved to apply_rate_to_population")
+
 pop <- data.frame( area=c("a","b","c"), popn = 100, stringsAsFactors = FALSE)
 pop2 <- expand.grid( age=20:23, area=c("a","b","c"), sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
 

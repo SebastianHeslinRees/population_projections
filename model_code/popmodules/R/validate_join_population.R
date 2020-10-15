@@ -8,7 +8,7 @@
 #' restrictions.
 #'
 #' By default the function just checks that one population's aggregation levels
-#' are contained within another. The option \code{pop1_is_subset} requires the
+#' are contained within another. The option \code{aggregation_levels_match} requires the
 #' levels to match exactly (ignoring duplicates). Turning off \code{one2many}
 #' requires each row in \code{pop1} to map to exactly one level in \code{pop2} -
 #' use this when you expect a left join to return the same number of rows as the
@@ -26,7 +26,7 @@
 #'   columns in \code{popn} but not all need to be in \code{popn_rate}, that is,
 #'   it can be at a lower resolution. Defaults to
 #'   \code{c("year","gss_code","age","sex")}.
-#' @param pop1_is_subset Logical. When TRUE \code{pop1} is allowed to match to
+#' @param aggregation_levels_match Logical. When TRUE \code{pop1} is allowed to match to
 #'   subset of \code{pop2}.When FALSE the aggregation levels should be the same
 #'   (ignoring duplicates) and the mapping will be subjective, i.e. all
 #'   aggregation levels must be present in both data frames. Default TRUE.
@@ -50,12 +50,12 @@
 validate_join_population <- function(pop1,
                                      pop2,
                                      cols_common_aggregation = c("year","gss_code","age","sex"),
-                                     pop1_is_subset = TRUE,
+                                     aggregation_levels_match = TRUE,
                                      many2one = TRUE,
                                      one2many = TRUE,
                                      warn_unused_shared_cols = TRUE) {
 
-  validate_join_population_inputs(pop1, pop2, cols_common_aggregation, pop1_is_subset, many2one, one2many, warn_unused_shared_cols)
+  validate_join_population_inputs(pop1, pop2, cols_common_aggregation, aggregation_levels_match, many2one, one2many, warn_unused_shared_cols)
 
   cols_common_aggregation <- .convert_to_named_vector(cols_common_aggregation)
 
@@ -109,12 +109,12 @@ validate_join_population <- function(pop1,
                          "levels from the source to the target data frame"))
 
   # CHECK (optional) every level in pop2 also maps to a level in pop1
-  if(!pop1_is_subset) {
+  if(!aggregation_levels_match) {
     n_missing_levels <- nrow(test_pop2) - nrow(dplyr::semi_join(test_pop2, test_pop1, by=cols_common_aggregation_reverse))
     assert_that(n_missing_levels == 0,
                msg = paste("validate_join_population couldn't match all levels between inputs.",
                            n_missing_levels,"are present in the second data frame that aren't mapped to from the first.",
-                           "\nIf it's ok that the first is a subset of the second, set pop1_is_subset = TRUE"))
+                           "\nIf it's ok that the first is a subset of the second, set aggregation_levels_match = TRUE"))
   }
 
   # CHECK (optional) every level in pop2 matches at most one level in pop1
@@ -141,7 +141,7 @@ validate_join_population <- function(pop1,
 validate_join_population_inputs <-function(pop1,
                                            pop2,
                                            cols_common_aggregation,
-                                           pop1_is_subset,
+                                           aggregation_levels_match,
                                            many2one,
                                            one2many,
                                            warn_unused_shared_cols) {
@@ -156,8 +156,8 @@ validate_join_population_inputs <-function(pop1,
               msg="validate_join_population was given a zero-length vector of common column names to compare")
   assert_that(!any(is.na(cols_common_aggregation)),
               msg="validate_join_population can't handle missing in common aggreagation column names")
-  assert_that(is.logical(pop1_is_subset),
-              msg="validate_join_population needs a logical value for the pop1_is_subset input parameter")
+  assert_that(is.logical(aggregation_levels_match),
+              msg="validate_join_population needs a logical value for the aggregation_levels_match input parameter")
   assert_that(is.logical(many2one),
               msg="validate_join_population needs a logical value for the many2one input parameter")
   assert_that(is.logical(one2many),

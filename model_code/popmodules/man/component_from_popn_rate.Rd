@@ -39,9 +39,7 @@ A data frame of the component with one row for each distinct value of the
   input \code{col_aggregation} column.
 }
 \description{
-Given a cohort population and a data frame of component rates that can be
-joined to the population, return a data table with the population's
-aggregation levels and a component count.
+This function has been deprecated. Use \code{apply_rate_to_population}.
 }
 \details{
 If component would result in a negative population, an error will be thrown
