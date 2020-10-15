@@ -14,14 +14,6 @@ polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_
 write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)	
 rm(polygon_splits)
 
-#necessary packages
-pkg <- c("igraph","smoothr","lwgeom","sf", "rgeos", "sp", "rgdal")
-for(i in seq(pkg)){
-  if(!pkg[i] %in% rownames(installed.packages())){
-    install.packages(pkg[i])
-  }
-}
-
 #source("input_data_scripts/development_data/further_geom_code.R")
 source('input_data_scripts/development_data/ldd.R')
 source('input_data_scripts/development_data/shlaa.R')
