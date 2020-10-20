@@ -23,6 +23,7 @@ Imports:
     stringr,
     popmodules,
     utils,
-    xlsx
+    xlsx,
+    loggr
 Suggests:
     testthat

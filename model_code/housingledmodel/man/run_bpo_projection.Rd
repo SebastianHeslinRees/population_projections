@@ -19,8 +19,8 @@ run_bpo_projection(
 )
 }
 \arguments{
-\item{bpo_name}{String. The name of the dwelling trajectory csv saved in the folder
-\code{bpo_dir} folder. The output projection will also have this name.}
+\item{bpo_name}{String. The name of the dwelling trajectory csv saved in the
+folder \code{bpo_dir} folder. The output projection will also have this name.}
 
 \item{shlaa_first_yr}{Numeric. The first year to use shlaa development data.
 Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.}
@@ -29,23 +29,30 @@ Effectively the final year of the supplied trajectory plus 1. \code{Default 2042
 
 \item{last_proj_yr}{Numeric. The final projection year \code{default 2050}}
 
-\item{dev_first_yr}{Numeric. The first year for which development data is provided. \code{Default 2019}.}
+\item{dev_first_yr}{Numeric. The first year for which development data is
+provided. \code{Default 2019}.}
 
-\item{ldd_final_yr}{Numeric. The final year of the LDD dwellings backseries. \code{Default 2018}.}
+\item{ldd_final_yr}{Numeric. The final year of the LDD dwellings backseries.
+\code{Default 2018}.}
 
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv}
 
-\item{migration_scenario}{String. The domestic migration scenario \code{high}, \code{medium} or \code{low}.}
+\item{migration_scenario}{String. The domestic migration scenario \code{high},
+\code{medium} or \code{low}.}
 
-\item{csv_name}{String. The name of the dwelling trajectory csv saved in the \code{bpo_dir} folder.
-With or without the \code{.csv} suffix. Default is \code{bpo_name}}
+\item{csv_name}{String. The name of the dwelling trajectory csv saved in the
+\code{bpo_dir} folder. With or without the "csv" suffix. Default is \code{bpo_name}}
 
-\item{housing_led_params}{A list of parameters (a partial config list) to be passed to the housing-led model.
-These will overwrite the default parameters for the bpo projection.}
+\item{housing_led_params}{A list of parameters (a partial config list) to be
+passed to the housing-led model. These will overwrite the default parameters
+for the bpo projection.}
 
-\item{fertility_scenario}{String. Should the model use fertility rates based on an \code{average} or
-a \code{trend} of past data. Default is \code{average}}
+\item{fertility_scenario}{String. Should the model use fertility rates based
+on an \code{average} or a \code{trend} of past data. Default is \code{average}}
 }
 \description{
-A wrapper for create_bpo_trajectory and run_borough_and_ward
+A wrapper for run_borough_and_ward_projection. Takes as input a csv in the
+of the GLA housing trajectory template for any borough and converts it into
+an rds in tidy format. Run the borough housing-led model and the ward small
+area model using a set of standard model parameters.
 }

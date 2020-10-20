@@ -24,7 +24,7 @@ arrange_trend_core_outputs(
 )
 }
 \arguments{
-\item{projection}{A list. The output list from hte \code{trend_core} function}
+\item{projection}{A list. The output list from the \code{trend_core} function}
 
 \item{population}{Dataframe. Backseries population data}
 
@@ -48,7 +48,7 @@ arrange_trend_core_outputs(
 
 \item{int_out_rates}{Dataframe. Model international out migration rates}
 
-\item{int_in_flows}{Dataframe. Model internation in migration flows}
+\item{int_in_flows}{Dataframe. Model international in migration flows}
 
 \item{first_proj_yr}{Numeric. First projection year}
 
@@ -60,6 +60,6 @@ A list where each element is a data frame containing data for each year
 }
 \description{
 The \code{trend_core} outputs a list for each year of the projection.
-Each list is a list of components. This function rearrages those outputs into
-a list of dataframes of components.
+Each list is a list of components. This function rearranges those outputs
+into a list of dataframes of components.
 }

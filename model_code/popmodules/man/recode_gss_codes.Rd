@@ -2,7 +2,7 @@
 % Please edit documentation in R/recode_gss_codes.R
 \name{recode_gss_codes}
 \alias{recode_gss_codes}
-\title{Recode LA GSS Codes to a later geography}
+\title{Re-code LA GSS Codes to a later geography}
 \usage{
 recode_gss_codes(
   df_in,
@@ -31,11 +31,11 @@ data to be aggregated. Defaults to last column of input dataframe.}
 \code{2013} (i.e. census geography).}
 
 \item{aggregate_data}{Logical. If set to true multiple instances of the same
-gss code will be aggregated using the function specified in \code{fun} parammeter.
+gss code will be aggregated using the function specified in \code{fun} parameter.
 Default to \code{TRUE}.}
 
-\item{recode_gla_codes}{Logical. If set to \code{TRUE} recodes to the codes used in
-2018-based and earlier projections. This is introduced for backward
+\item{recode_gla_codes}{Logical. If set to \code{TRUE} re-codes to the codes
+used in the 2018-based (& earlier) projections. This is introduced for backward
 compatibility and doesn't correspond to any single vintage year.
 Default \code{FALSE}.}
 

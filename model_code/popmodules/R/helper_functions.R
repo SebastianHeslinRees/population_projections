@@ -1,6 +1,6 @@
 # ===========================================
 #
-# A place for reusuable code internal to the
+# A place for reusable code internal to the
 # popmodules package. For any short functions
 # that are reused across the package but which
 # aren't exported. By convention function names
@@ -56,7 +56,7 @@
 # Returns the *target* data frame, i.e. the second input parameter. Watch out
 # (sorry).
 
-# The function curently ignores factor levels (i.e. doesn't try to preserve them
+# The function currently ignores factor levels (i.e. doesn't try to preserve them
 # if they've changed), and doesn't check whether the input factor was ordered or not
 
 # Used in the package to make sure that the output of various functions

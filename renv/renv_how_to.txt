@@ -1,0 +1,22 @@
+- renv should initialise itself by running the activate script when you first start up the project containing the renv infrastructure
+
+- renv::restore() installs all the packages from the renv lock file.  You need to do this every time the lock file has changed.  The initialize.R script runs the restore function for you.  This will install the packages listed in renv.lock to your renv cache and the project library (most packages are installed into your project cache and the project library folder contains symlinks to the relevant packages in the cache)
+
+- the cache location should default to "C:/Users/[yourname]/AppData/Local/renv/cache".  It can be changed if you would like (see https://rstudio.github.io/renv/articles/renv.html)
+
+- new packages that we need can be installed using renv::install("package", type = "binary").  To update the renv lock file with these new packages use renv::snapshot(). (type = "binary" is to avoid weird issues with testing on a 32 bit system and DLL files when installing our population packages)
+
+- to install a specific version do e.g. renv::install("dplyr@0.8.5")
+
+- to install from github use the github repo name e.g. renv::install("smbache/loggr")
+
+notes:
+- The Sys.setenv(JAVA_HOME="") in the .Rprofile file is a fix to something to do with Java so that devtools::install works properly. 
+- renv has been set to ignore housingledmodel, popmodules, smallareamodel, trendmodel when creating the snapshot.  This is because having them in the lockfile will cause renv::restore() to fail as it doesn't know where to look for them
+
+
+
+
+
+
+ 

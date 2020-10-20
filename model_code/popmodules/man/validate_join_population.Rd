@@ -8,7 +8,7 @@ validate_join_population(
   pop1,
   pop2,
   cols_common_aggregation = c("year", "gss_code", "age", "sex"),
-  pop1_is_subset = TRUE,
+  aggregation_levels_match = TRUE,
   many2one = TRUE,
   one2many = TRUE,
   warn_unused_shared_cols = TRUE
@@ -24,9 +24,9 @@ columns in \code{popn} but not all need to be in \code{popn_rate}, that is,
 it can be at a lower resolution. Defaults to
 \code{c("year","gss_code","age","sex")}.}
 
-\item{pop1_is_subset}{Logical. When TRUE \code{pop1} is allowed to match to
+\item{aggregation_levels_match}{Logical. When TRUE \code{pop1} is allowed to match to
 subset of \code{pop2}.When FALSE the aggregation levels should be the same
-(ignoring duplicates) and the mapping will be surjective, i.e. all
+(ignoring duplicates) and the mapping will be subjective, i.e. all
 aggregation levels must be present in both data frames. Default TRUE.}
 
 \item{many2one}{Logical. Can multiple rows in \code{pop1} map to a single row
@@ -56,7 +56,7 @@ restrictions.
 }
 \details{
 By default the function just checks that one population's aggregation levels
-are contained within another. The option \code{pop1_is_subset} requires the
+are contained within another. The option \code{aggregation_levels_match} requires the
 levels to match exactly (ignoring duplicates). Turning off \code{one2many}
 requires each row in \code{pop1} to map to exactly one level in \code{pop2} -
 use this when you expect a left join to return the same number of rows as the

@@ -26,6 +26,7 @@ Imports:
     xlsx,
     tibble,
     smallareamodel,
-    ldndatar
+    ldndatar,
+    loggr
 Suggests:
     testthat

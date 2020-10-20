@@ -263,8 +263,9 @@ msoa_births_2011 <- readRDS(msoa_births_path) %>%
                male = births * (105/205),
                female = births - male) %>%
         select(-births) %>%
-        pivot_longer(c("male", "female"), values_to = "popn", names_to = "sex") %>%
-        select(year, gss_code_msoa, sex, age, popn)
+        pivot_longer(c("male", "female"), values_to = "births", names_to = "sex") %>%
+        select(year, gss_code_msoa, sex, age, popn) %>% 
+        data.frame()
 
 borough_deaths <- readRDS(borough_deaths_path) %>%
         filter(substr(gss_code,1,3)=="E09",
@@ -305,8 +306,8 @@ msoa_popn_2010 <- readRDS(msoa_popn_path) %>% filter(year == 2010) %>%
 
 denominators <- msoa_popn_2010 %>%
         as.data.frame() %>%
-        popn_age_on(col_aggregation = c("year", "gss_code_msoa", "sex", "age")) %>%
-        rbind(msoa_births_2011) %>%
+        popn_age_on(col_aggregation = c("year", "gss_code_msoa", "sex", "age"),
+                    births = msoa_births_2011) %>%
         left_join(msoa_deaths_2011, by = c("year","gss_code_msoa","sex","age")) %>%
         mutate(popn = popn - deaths) %>%
         select(-deaths) %>%
@@ -350,3 +351,5 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
 #Save
 saveRDS(in_migration_characteristics, "input_data/small_area_model/msoa_in_migration_characteristics.rds")
 saveRDS(out_migration_rates, "input_data/small_area_model/msoa_out_migration_rates.rds")
+
+rm(list = ls())

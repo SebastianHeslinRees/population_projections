@@ -71,3 +71,5 @@ if(length(unique(ward_ce_by_sya$gss_code_ward))!=625){message("Warning: Wrong nu
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
 saveRDS(ward_ce_by_sya, "input_data/small_area_model/ward_communal_establishment_population.rds")
+
+rm(list = ls())

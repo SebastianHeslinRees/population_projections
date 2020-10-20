@@ -218,7 +218,6 @@ file.copy(this_file, paste0(copy_dir, "/config_list_", config_list$timestamp, ".
 # Run the model
 # TODO Get the household model working as a toy model
 projection <- trendmodel::run_trend_model(config_list)
-popmodules::log_warnings(paste0(copy_dir, "/warnings_", config_list$timestamp, ".txt"))
 
 test_population_output <- readRDS("model_code/model_tests/test_outputs/test_trend_population_output.rds")
 testthat::expect_equal(projection[[1]], test_population_output)

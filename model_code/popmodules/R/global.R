@@ -92,5 +92,10 @@ globalVariables(c(
   ".SD",
   "changed_to_code",
   "changed_from_code",
-  "flow"
+  "flow",
+  "V1",
+  "inner",
+  "popn__",
+  "rate__",
+  "component__"
 ))
