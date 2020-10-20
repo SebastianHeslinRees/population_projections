@@ -34,7 +34,7 @@ mign_out_no_sex <- unique(dplyr::select(mign_out, -sex))
 #                             col_popn = "popn",
 #                             col_rate = "rate",
 #                             col_flow = "flow",
-#                             pop1_is_subset = FALSE,
+#                             aggregation_levels_match = FALSE,
 #                             many2one = FALSE,
 #                             col_origin_destination = NA) {
 
@@ -46,7 +46,7 @@ test_that("apply_domestic_migration_rates creates the expected output", {
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_flow = "flow",
-                                     pop1_is_subset = FALSE,
+                                     aggregation_levels_match = FALSE,
                                      many2one = FALSE,
                                      col_origin_destination = NA),
                     mign_out)
@@ -73,18 +73,15 @@ test_that("apply_domestic_migration_rates lets you specify output column order",
 test_that("apply_domestic_migration_rates lets you migrate to places that aren't in the source data", {
   popn_in <- dplyr::filter(popn, gss_code != "a")
   output_out <- dplyr::filter(mign_out, gss_out != "a")
-  expect_error(apply_domestic_migration_rates(popn_in, mign_rate, pop1_is_subset = FALSE))
-  expect_equivalent(apply_domestic_migration_rates(popn_in, mign_rate, pop1_is_subset = TRUE),
+  expect_error(apply_domestic_migration_rates(popn_in, mign_rate, aggregation_levels_match = FALSE))
+  expect_equivalent(apply_domestic_migration_rates(popn_in, mign_rate, aggregation_levels_match = TRUE),
                     output_out)
 })
 
-
-test_that("apply_domestic_migration_rates can work with rates at a coarser resolution than the population but fails when many2one = FALSE", {
-  expect_equivalent(
-    apply_domestic_migration_rates(popn, mign_rate_no_sex, col_aggregation = c("year", "gss_code"="gss_out", "sex", "age"), many2one = TRUE),
-    mign_out)
-  expect_error(
-    apply_domestic_migration_rates(popn, mign_rate_no_sex, col_aggregation = c("year", "gss_code"="gss_out", "age"), many2one = FALSE))
+test_that("apply_domestic_migration_rates throws an error when col_aggregation names columns not present in input dataframe", {
+  #TODO Look into whether these should be errors or whether we want to code in the ability to pass data at differing aggregation levels
+  expect_error(apply_domestic_migration_rates(popn, mign_rate_no_sex, col_aggregation = c("year", "gss_code"="gss_out", "sex", "age")))
+  expect_error(apply_domestic_migration_rates(popn, mign_rate_no_sex, col_aggregation = c("year", "gss_out", "age")))
 })
 
 test_that("apply_domestic_migration_rates doesn't care about the order of aggregation columns and throws errors if you name a column twice", {
@@ -197,8 +194,7 @@ test_that("apply_domestic_migration_rates handles arbitrary column names", {
 
 test_that("apply_domestic_migration_rates warns when the input already has a flow/col_flow column and throws an error when it's an aggregation level", {
   popn_in <- dplyr::mutate(popn, flow = 50)
-  expect_warning(temp <- apply_domestic_migration_rates(popn_in, mign_rate))
-  expect_equivalent(temp, mign_out)
+  expect_error(apply_domestic_migration_rates(popn_in, mign_rate))
   expect_error(apply_domestic_migration_rates(popn, mign_rate, col_flow = "gss_code")) # yes, even though this column won't actually be in the output
 })
 
@@ -207,15 +203,13 @@ test_that("apply_domestic_migration_rates handles important data column names du
   mign_in  <- dplyr::rename(mign_rate, value = rate)
   output_out <- dplyr::rename(mign_out,  value = flow)
 
-  expect_warning(temp <- apply_domestic_migration_rates(popn_in, mign_rate, col_popn = "value", col_flow = "value"))
-  expect_equivalent(temp,  output_out)
-
+  expect_error(apply_domestic_migration_rates(popn_in, mign_rate, col_popn = "value", col_flow = "value"))
+  
   expect_equivalent(apply_domestic_migration_rates(popn, mign_in, col_rate = "value", col_flow = "value"),
                     output_out)
 
-  expect_warning(temp <- apply_domestic_migration_rates(popn_in, mign_in, col_popn = "value", col_rate = "value", col_flow = "value"))
-  expect_equivalent(temp, output_out)
-
+  expect_error(apply_domestic_migration_rates(popn_in, mign_in, col_popn = "value", col_rate = "value", col_flow = "value"))
+  
   popn_in <- dplyr::rename(popn, value = gss_code)
   expect_error(apply_domestic_migration_rates(popn_in, mign_in, col_aggregation = c("year", "value"="gss_out", "sex", "age"), col_rate = "value")) # this needn't be an error but ¯\_(ツ)_/¯
   expect_error(apply_domestic_migration_rates(popn_in, mign_in, col_aggregation = c("year", "value"="gss_out", "sex", "age"), col_flow = "value"))

@@ -117,7 +117,7 @@ validate_deaths_output <- function(pop, col_aggregation, col_popn, error_negativ
   validate_join_population(pop,
                            deaths,
                            cols_common_aggregation = col_aggregation,
-                           pop1_is_subset = FALSE,
+                           aggregation_levels_match = FALSE,
                            many2one = TRUE,
                            one2many = FALSE)
 

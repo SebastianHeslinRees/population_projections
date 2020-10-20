@@ -117,7 +117,7 @@ validate_births_output <- function(pop, col_aggregation, births, col_age) {
   validate_join_population(pop,
                            births[validation_comparison_cols],
                            cols_common_aggregation = validation_comparison_cols,
-                           pop1_is_subset = FALSE,
+                           aggregation_levels_match = FALSE,
                            many2one = TRUE,
                            one2many = FALSE)
 }
