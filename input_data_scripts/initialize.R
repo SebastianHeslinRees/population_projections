@@ -43,6 +43,7 @@ source("input_data_scripts/mortality/mortality_rates_2019.R")
 #pre calc rates
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
 source("input_data_scripts/migration/pre-calculate_international_in_flows.R")
+source("input_data_scripts/migration/pre-calculate_international_out_flows_rates.R")
 source('input_data_scripts/domestic_migration/pre-calulate_domestic_rates_2018_bpo.R')
 
 #Excel templates
