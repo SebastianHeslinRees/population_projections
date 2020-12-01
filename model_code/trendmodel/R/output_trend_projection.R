@@ -26,10 +26,10 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
      saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
   }
   
-  #upc
-  if(!is.null(projection$upc)){
-    projection$upc <- reorder_for_output(projection$upc)
-    saveRDS(projection$upc, paste0(output_dir, "upc.rds"), compress = "gzip")
+  #popn_adjustment
+  if(!is.null(projection$popn_adjustment)){
+    projection$popn_adjustment <- reorder_for_output(projection$popn_adjustment)
+    saveRDS(projection$popn_adjustment, paste0(output_dir, "popn_adjustment.rds"), compress = "gzip")
   }
  
   #CSV
@@ -97,8 +97,8 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
     make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
   }
   
-  if(!is.null(projection$upc)){
-    make_csvs(projection$upc, paste0(csv_dir, "upc"))
+  if(!is.null(projection$popn_adjustment)){
+    make_csvs(projection$popn_adjustment, paste0(csv_dir, "popn_adjustment"))
   }
   
   #Excel
@@ -110,7 +110,7 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
                             int_out = projection$int_out,
                             dom_in = projection$dom_in,
                             dom_out = projection$dom_out,
-                            upc = projection$upc,
+                            popn_adjustment = projection$popn_adjustment,
                             output_dir = output_dir,
                             excel_file_name = paste0(projection_name,".xlsx"))
   }

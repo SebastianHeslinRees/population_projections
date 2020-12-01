@@ -78,5 +78,7 @@ globalVariables(c(
   "rounded",
   "flow",
   "average_household_size",
-  "borough"
+  "borough",
+  "upc",
+  "adjustment"
 ))

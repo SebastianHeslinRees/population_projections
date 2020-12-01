@@ -2,7 +2,7 @@
 #'
 #' @param population,births,deaths,int_in,int_out,dom_in,dom_out Dataframes with
 #'   population and component data.
-#' @param upc Dataframe or NULL. Contains upc component data.
+#' @param popn_adjustment Dataframe or NULL. Contains popn_adjustment component data.
 #' @param output_dir Path to output directory.
 #' @param excel_file_name Output file name. With or without xlsx suffix.
 #'
@@ -11,7 +11,7 @@
 #' @import popmodules
 
 trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
-                                    dom_in, dom_out, upc,
+                                    dom_in, dom_out, popn_adjustment,
                                     output_dir, excel_file_name){
   
   #datastore directory
@@ -59,35 +59,20 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
     left_join(dom_out, by = c("gss_code", "year")) %>%
     mutate(dom_net = dom_in - dom_out) %>%
     mutate(borough = recode(borough, "London" = "London (total)"))
-  
-  if(!is.null(upc)){
-    upc <- get_component_datastore(upc, "upc")
+
+    popn_adjustment <- get_component_datastore(popn_adjustment, "adjustment")
     
     components <- components %>% 
-      left_join(upc, by = c("gss_code", "year")) %>% 
-      mutate(total_change = births - deaths + int_net + dom_net + upc) %>%
-      select(gss_code, borough, year,
-             population, births, deaths,
-             int_in, int_out, int_net,
-             dom_in, dom_out, dom_net, upc,
-             total_change) %>%
-      reorder_for_output() %>%
-      as.data.frame()
-    
-  } else {
-    
-    components <- components %>% 
-      mutate(total_change = births - deaths + int_net + dom_net) %>%
+      left_join(popn_adjustment, by = c("gss_code", "year")) %>% 
+      mutate(total_change = births - deaths + int_net + dom_net + adjustment) %>%
       select(gss_code, borough, year,
              population, births, deaths,
              int_in, int_out, int_net,
              dom_in, dom_out, dom_net,
-             total_change) %>%
+             adjustment, total_change) %>%
       reorder_for_output() %>%
       as.data.frame()
     
-  }
-  
   #round data for output
   idx <- sapply(components, class)=="numeric"
   components[, idx] <- lapply(components[, idx], round, digits=3)
