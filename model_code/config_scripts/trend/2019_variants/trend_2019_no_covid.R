@@ -14,7 +14,8 @@ int_out_mye_path <-  paste0("input_data/mye/2019/int_out_gla.rds")
 int_in_mye_path <-  paste0("input_data/mye/2019/int_in_gla.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds")
-upc_path <- NULL
+upc_mye_path <- "input_data/mye/2019/upc_ons.rds"
+popn_adjustment_path <- NULL
 
 int_out_flow_or_rate <- "flow"
 
@@ -76,7 +77,8 @@ config_list <- list(
   int_in_mye_path = int_in_mye_path,
   dom_out_mye_path = dom_out_mye_path,
   dom_in_mye_path = dom_in_mye_path,
-  upc_path = upc_path,
+  upc_mye_path = upc_mye_path,
+  popn_adjustment_path = popn_adjustment_path,
   
   mortality_rates = mortality_rates,
   fertility_rates = fertility_rates,
