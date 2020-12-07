@@ -38,6 +38,7 @@ source("input_data_scripts/mye/gla_mye_2019.R")
 
 #Other 2019 data
 source("input_data_scripts/households/household_model_inputs_(2020 geog).R")
+source("input_data_scripts/households/communal_est_popn_2018_model_update.R")
 source('input_data_scripts/fertility/asfr_2020_geography.R')
 source('input_data_scripts/mortality/asmr_2020_geography.R')
 source("input_data_scripts/fertility/fertility_rates_2019.R")
