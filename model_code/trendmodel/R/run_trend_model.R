@@ -157,7 +157,7 @@ run_trend_model <- function(config_list) {
   
   # set up projection
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
-                             dom_out, dom_in, popn_adjustment,
+                             dom_out, dom_in, popn_adjustment, upc_mye,
                              fertility_rates, mortality_rates,
                              int_out_flows_rates,
                              first_proj_yr, config_list$n_proj_yr,
@@ -281,7 +281,7 @@ run_trend_model <- function(config_list) {
 
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, popn_adjustment,
-                                       fertility_rates, mortality_rates, int_out_flows_rates,
+                                       upc_mye, fertility_rates, mortality_rates, int_out_flows_rates,
                                        first_proj_yr, n_proj_yr, int_out_method) {
   
   popmodules::validate_population(population, col_data = "popn")
@@ -294,7 +294,9 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   if(!is.null(popn_adjustment)) {
     popmodules::validate_population(popn_adjustment, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
-  
+  if(!is.null(upc_mye)) {
+    popmodules::validate_population(upc_mye, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+  }
   popmodules::validate_population(fertility_rates, col_data = "rate")
   popmodules::validate_population(mortality_rates, col_data = "rate")
   

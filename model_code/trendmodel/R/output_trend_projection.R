@@ -19,7 +19,7 @@
 output_trend_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                               projection_name) {
   
-  projection[1:12] <- lapply(projection[1:13], reorder_for_output) 
+  projection[1:13] <- lapply(projection[1:13], reorder_for_output) 
   
   #RDS
   for(i in 1:13) {

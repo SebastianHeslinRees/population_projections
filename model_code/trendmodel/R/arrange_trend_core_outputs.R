@@ -14,7 +14,8 @@
 #' @param dom_in Dataframe. Backseries domestic in migration data
 #' @param dom_out Dataframe. Backseries domestic out migration data
 #' @param upc_mye Dataframe or NULL. Backseries UPC data
-#' @param popn_adjustment Dataframe or NULL. Population adjustment (UPC) component data
+#' @param popn_adjustment Dataframe or NULL. Population adjustment data for
+#'   the projection period. Used for UPC or other adjustments
 #' @param fertility_rates Dataframe. Model fertility rates
 #' @param mortality_rates Dataframe. Model mortality rates
 #' @param int_out_rates_flows Dataframe. Model international out migration rates
