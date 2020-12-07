@@ -12,7 +12,7 @@ ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_bo
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
 
-upc_path <- NULL
+popn_adjustment_path <- NULL
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 constrain_projection <- FALSE
@@ -58,7 +58,7 @@ config_list <- list(
   ahs_method = ahs_method,
   additional_births_path = additional_births_path,
   fertility_rates_path = fertility_rates_path,
-  upc_path = NULL)
+  popn_adjustment_path = NULL)
 
 #---------------------
 #run projection
