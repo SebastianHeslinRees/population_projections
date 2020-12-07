@@ -3,11 +3,11 @@ library(data.table)
 library(popmodules)
 library(assertthat)
 
-message("mye data")
+message("mye 2018 data")
 
 ew_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/detailed_mye_coc.rds"
-uk_pop_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/MYEB1_detailed_population_estimates_series_UK_(2018).csv"
-uk_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/MYEB3_summary_components_of_change_series_UK_(2018).csv"
+uk_pop_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/raw/MYEB1_detailed_population_estimates_series_UK_(2018).csv"
+uk_coc_file <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2018/raw/MYEB3_summary_components_of_change_series_UK_(2018).csv"
 
 #England and Wales
 mye_coc <- readRDS(ew_coc_file) %>%
@@ -35,7 +35,7 @@ uk_pop <- fread(uk_pop_file) %>%
   ungroup()
 
 #Scotland & NI Components
-right = function(text, num_char) {
+right <- function(text, num_char) {
   substr(text, nchar(text) - (num_char-1), nchar(text))
 }
 
