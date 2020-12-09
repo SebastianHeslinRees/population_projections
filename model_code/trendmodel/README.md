@@ -2,57 +2,40 @@
 
 The GLA's demographic models are modular, and each model combines different methods to construct its components of change - births, deaths and (most complex) migration.
 
-The `trend` package contains functions for running the GLA cohort component model. It utilises functions from the `popmodules` package to read in, wrangle and process data to calculate rates and flows based on past trends. It then applies these to a starting population in an incremental loop to create a population projection.
+The `trend` package contains functions for running the GLA cohort component projection model. It utilises functions from the `popmodules` to produce population projections which are consistent with past trends in population change.
 
 
-###TODO
-## Installation
+### Installation
 
-To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/. Then open the population_projections RStudio project within the repository (`population_projections.Rproj`) and run
+It is recommended that users follow the instructions in the population projections readme (https://github.com/Greater-London-Authority/population_projections) to install all 4 of the GLA models packages rather than attempting to install them individually.
+
+Should you need to re-install only the trend model there is a `popmodules` function to assist.
 ``` r
-devtools::install('model_code/trendmodel')
+popmodules::install_gla_models(trend = TRUE, housing_led = FALSE, small_area = FALSE)
 ```
 
-It is recommended that users install all 4 GLA model packages (`trendmodel`, `housingledmodel`, `smallareamodel` and `popmodules`) at the same time. This can be done by opening the population_projections RStudio project within the repository and running
-```r
-source('model_scripts/install_gla_models')
-install_gla_models()
-```
-
-
-
-
-## Contents
-
-This package makes use of the `popmodules` package to produce population projections. The stages of a projection are:
-
-###Projection parameters
+### Projection configuration
 Settings, input data file paths and model parameters are defined in a `config` file which collates all necessary input information into an R list object.
 
-###Trend control
-The `trend_control` module takes a single `config_list` parameter containing all of the necessary information to run a projection. The function validates the list and its elements.
+### Run the trend model
+The `run_trend_model` module takes a single `config_list` parameter containing all of the necessary information to run a projection. The function validates the list and it's elements.
 
-The control module uses the parameters passsed to it to read-in and process data ready for use in calculating the projected population. The function makes heavy use of the functionality provided in the `popmodules` package.
+The function uses the parameters passed to it to read-in and process data ready for use in calculating the projected population. The function makes heavy use of the functionality provided in the `popmodules` package.
 
-Processed data is passed into a loop where the `trend_core` function calculates populations in year increments using the output of one year as the input to the next (see below).
+It passes processed data into a loop which contains the `trend_core` and which produces a projected population and associated component outputs.
 
-Once completed the outputs from the `trend_core` are wrangled and arranged.
+Once completed the population is passed to the household models to produce a household projection.
 
-The `trend_control` also passed projected populations into `household` models (see below).
+Finally, the outputs are arranged and written using the `arrange_trend_core_outputs` and `output_trend_projection` functions.
 
-Finally, the `trend_control` manages the outputs of the model (see below).
+### Trend core
 
-###Trend core
-The `trend_core` module takes rates, flows and populations for a single year and combines them using a standard cohort component approach to procude an output population. The module makes heavy use of the `popmodules` package.
+The core module is an implementation of the cohort component projection method. It takes starting population and component data nd rates and combines them to produce a final population. That population is returned to the core again as the starting population for the next year.
 
-The core takes a starting population and ages it on 1 year. Births, deaths and migration are calcualted by applying fertility, mortality and migration rates to the population.
+### Household models
+Both DCLG 2014 and ONS 2018 household models are implemented in the `trendmodel` package. These models take rates and populations and output households. The models form part of the `run_trend_model` module and are passed the projected populations which are returned form the `trend_core`.
 
-The components are added/subtracted as necessary to the start population to reach the final population. The final population is passed back to the `trend_control` and then comes back into the `trend_core` as the start population for the next year.
+### Arrange and output
+The `arrange_trend_core_outputs` function takes the output from the `trend_core` (which are stored in a list of lists) and wrangles them so that they are ready to be passed to `trend_output` function.
 
-###Household models
-Both DCLG 2014 and ONS 2016 household models are implemented in the `trendmodel` package. These models take rates and populations and output households. The models form part of the `trend_control` module and are passed the projected populations which are returned form the `trend_core`.
-
-###Arrange and output
-The `arrange_trend_core_outputs` function takes the output from the `trend_core` and wrangles them so that they are ready to be passed to `trend_output` function. This function sits with the `trend_control` function.
-
-The `trend_output` function writes out `rds`, `csv` and `excel` outputs as required.
+The `ouput_trend_projection` function writes out `rds`, `csv` and `excel` outputs as required.
