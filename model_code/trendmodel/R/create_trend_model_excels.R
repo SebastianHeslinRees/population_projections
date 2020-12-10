@@ -29,6 +29,7 @@ create_trend_model_excels <- function(trend_dir, excel_file_name){
                     int_out = readRDS(paste0(trend_dir,"int_out.rds")),
                     dom_in = readRDS(paste0(trend_dir,"dom_in.rds")),
                     dom_out = readRDS(paste0(trend_dir,"dom_out.rds")),
+                    popn_adjustment =  readRDS(paste0(trend_dir,"popn_adjustment.rds")),
                     output_dir = trend_dir,
                     excel_file_name = excel_file_name)
 

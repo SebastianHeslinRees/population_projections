@@ -24,8 +24,8 @@
 #' @param constraints A list. A set of national-level constraints for each
 #'   component. If the projection is to be run unconstrained this is set to NULL.
 #'   Default \code{NULL}
-#' @param upc A data frame. Unattributable population change component. If no
-#'   UPC is being applied this is set to NULL. Default \code{NULL}
+#' @param popn_adjustment A data frame. Population adjustment component (UPC). If no
+#'   adjustment is being applied this is set to NULL. Default \code{NULL}
 #' @param projection_year Numeric. The year being projected
 #' @param region_lookup Dataframe A lookup between LAD gss codes and region
 #'   gss codes
@@ -47,7 +47,7 @@ trend_core <- function(start_population,
                        int_out_flows_rates, int_in_flows,
                        domestic_rates,
                        int_out_method,
-                       constraints = NULL, upc = NULL,
+                       constraints = NULL, popn_adjustment = NULL,
                        projection_year,
                        region_lookup) {
   
@@ -196,7 +196,7 @@ trend_core <- function(start_population,
     filter(sub_reg_dom_in, substr(gss_code,1,3)=="E13"),
     nat_dom_in)
   
-  if(is.null(upc)){
+  if(is.null(popn_adjustment)){
     
     next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
                                                    addition_data = list(int_in, dom_in),
@@ -205,7 +205,7 @@ trend_core <- function(start_population,
   } else {
     
     next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
-                                                   addition_data = list(int_in, dom_in, upc),
+                                                   addition_data = list(int_in, dom_in, popn_adjustment),
                                                    subtraction_data = list(int_out, dom_out),
                                                    col_aggregation = c("year", "gss_code", "age", "sex"),
                                                    data_are_subsets = TRUE) 

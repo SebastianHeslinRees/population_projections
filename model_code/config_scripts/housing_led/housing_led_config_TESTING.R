@@ -31,7 +31,7 @@ domestic_rates <- list('2019'  = list(path = paste0(dom_rates_loc,"dom_rates_10y
 additional_births_path <- "input_data/fertility/births_2019.rds"
 fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_avg.rds"
 
-upc_path <- "input_data/test_data/test_upc.rds"
+popn_adjustment_path <- "input_data/test_data/test_upc.rds"
 
 # additional_births_path <- NULL
 # fertility_rates_path <- paste0(external_trend_path,"fertility_rates.rds")
@@ -58,7 +58,7 @@ config_list <- list(
   ahs_method = ahs_method,
   additional_births_path = additional_births_path,
   fertility_rates_path = fertility_rates_path,
-  upc_path = upc_path)
+  popn_adjustment_path = popn_adjustment_path)
 
 #---------------------
 #run projection
