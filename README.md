@@ -17,7 +17,7 @@ versions of Java are required.
 The RTools toolchain bundle must be installed before model installation is attempted. RTools contains elements which are required by some of the package dependencies in the models.
 
 ### R packages
-All R packages for the model are managed by `revn`. The initialize script begins with a call to `renv::restore()`. This will ensure that all necessary packages (and the correct versions) are downloaded and installed.
+All R packages for the model are managed by `renv`. The initialize script begins with a call to `renv::restore()`. This will ensure that all necessary packages (and the correct versions) are downloaded and installed.
 
 ## Model Installation
 
@@ -34,4 +34,3 @@ Run `input_data_scripts/intitalize_small_area.R` will create the data needed to 
 ## Running the models
 
 Each model package has a `run_model()` function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `model_code/config_scripts` folder.
-
