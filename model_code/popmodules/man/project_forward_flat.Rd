@@ -2,10 +2,10 @@
 % Please edit documentation in R/project_forward_flat.R
 \name{project_forward_flat}
 \alias{project_forward_flat}
-\title{Project a population data frame forward by taking the most recent year and
-repeating it for each year up to an input last_proj_yr}
+\title{Extend a dataframe containing time series data to a year beyond the current
+maximum year in the data}
 \usage{
-project_forward_flat(df, last_proj_yr)
+project_forward_flat(df, last_proj_yr, showWarnings = FALSE)
 }
 \arguments{
 \item{df}{A population data frame}
@@ -17,5 +17,7 @@ A data frame containing the past years and the projection years
 }
 \description{
 Project a population data frame forward by taking the most recent year and
-repeating it for each year up to an input last_proj_yr
+repeating it for each year up to an input last_proj_yr. If the last_proj_yr
+is less than or equal to the maximum year in the data the input dataframe
+will be returned unchanged.
 }
