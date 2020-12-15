@@ -152,7 +152,7 @@ apply_domestic_migration_rates <- function(popn,
                                         col_out = col_flow,
                                         aggregation_levels_match = aggregation_levels_match,
                                         many2one = many2one,
-                                        additional_rate_levels = col_gss_destination,
+                                        additional_rate_cols = col_gss_destination,
                                         missing_levels_popn = FALSE,
                                         missing_levels_rate = TRUE)
   

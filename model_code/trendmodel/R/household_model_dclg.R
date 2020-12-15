@@ -200,7 +200,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
                                                    col_popn = "hh_popn",
                                                    col_rate = "rate",
                                                    col_out = "hh_stg2_unconstrained",
-                                                   additional_rate_levels = "household_type",
+                                                   additional_rate_cols = "household_type",
                                                    missing_levels_popn = TRUE,
                                                    aggregation_levels_match = TRUE)
   
