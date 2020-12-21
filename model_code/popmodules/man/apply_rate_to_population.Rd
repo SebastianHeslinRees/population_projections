@@ -13,7 +13,8 @@ apply_rate_to_population(
   col_out = "component",
   aggregation_levels_match = FALSE,
   many2one = TRUE,
-  additional_rate_levels = NULL,
+  additional_popn_cols = NULL,
+  additional_rate_cols = NULL,
   missing_levels_popn = FALSE,
   missing_levels_rate = FALSE
 )
@@ -47,7 +48,7 @@ Default FALSE.}
 one level from \code{popn} matches to each level of \code{rate}. Default
 FALSE.}
 
-\item{additional_rate_levels}{String. Names of columns in \code{popn_rate}
+\item{additional_rate_cols}{String. Names of columns in \code{popn_rate}
 which should be included in the output but which are not included in
 \code{col_aggregation}. Used when multiple rates apply to the same
 aggregation level, e.g. outmigration to multiple locations. The resulting
@@ -75,7 +76,7 @@ component count resulting from the rate applied to the population.
 }
 \details{
 The output dataframe will consist of the columns in the \code{popn} input
-dataframe, plus any columns specified in \code{additional_rate_levels}, and the
+dataframe, plus any columns specified in \code{additional_rate_cols}, and the
 output data column \code{col_out}. Output has 1 row for each distinct level of
 the \code{col_aggregation}.
 }

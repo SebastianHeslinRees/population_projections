@@ -14,7 +14,7 @@ dom_in_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration
 upc_mye_path <- "input_data/mye/2019/upc_ons.rds"
 popn_adjustment_path <- "input_data/scenario_data/covid19_upc.rds"
 
-int_out_flow_or_rate <- "rate"
+int_out_flow_or_rate <- "flow"
 
 ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2020_geog).rds"
 ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2020_geog).rds"
@@ -42,14 +42,14 @@ fertility_rates <- "input_data/fertility/fert_rates_5yr_avg_2019.rds"
 
 int_flows_loc <- "input_data/mye/2019/"
 
-int_out_flows_rates <- list('2020' = list(path = paste0(int_flows_loc,"int_out_10yr_avg_rate_2019.rds"),
+int_out_flows_rates <- list('2020' = list(path = "input_data/scenario_data/international_10yr_out_flows.rds",
                                           transition = T),
-                            '2022' = list(path = paste0(int_flows_loc,"int_out_5yr_avg_rate_2019.rds"),
+                            '2022' = list(path = "input_data/scenario_data/international_high_out_flow.rds",
                                           transition = F))
 
 #-----------------------------------------------------
 
-int_in_flows  <- list('2020' = list(path = paste0(int_flows_loc,"int_in_10yr_avg_2019.rds"),
+int_in_flows  <- list('2020' = list(path = "input_data/scenario_data/international_10yr_in_flows.rds",
                                     transition = F))
 
 #-----------------------------------------------------
