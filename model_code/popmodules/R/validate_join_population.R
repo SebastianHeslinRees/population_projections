@@ -55,7 +55,9 @@ validate_join_population <- function(pop1,
                                      one2many = TRUE,
                                      warn_unused_shared_cols = TRUE) {
 
-  validate_join_population_inputs(pop1, pop2, cols_common_aggregation, aggregation_levels_match, many2one, one2many, warn_unused_shared_cols)
+  validate_join_population_inputs(pop1, pop2, cols_common_aggregation,
+                                  aggregation_levels_match, many2one, one2many,
+                                  warn_unused_shared_cols)
 
   cols_common_aggregation <- .convert_to_named_vector(cols_common_aggregation)
 
