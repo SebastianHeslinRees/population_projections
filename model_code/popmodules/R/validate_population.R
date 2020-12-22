@@ -171,7 +171,7 @@ validate_population <- function(population,
     test_population_comparison <- dplyr::select_at(test_population, col_comparison)
     data.table::setDT(comparison_pop)
     data.table::setDT(test_population_comparison)
-    comparison_pop <- unique(comparison_pop)
+    #comparison_pop <- unique(comparison_pop)
     test_population_comparison <- unique(test_population_comparison)
     data.table::setDF(comparison_pop)
     data.table::setDF(test_population_comparison)
