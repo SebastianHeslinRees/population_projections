@@ -8,9 +8,9 @@ validate_population(
   population,
   col_aggregation = c("year", "gss_code", "age", "sex"),
   col_data = NA,
-  test_complete = TRUE,
-  test_unique = TRUE,
-  check_negative_values = TRUE,
+  test_complete = FALSE,
+  test_unique = FALSE,
+  check_negative_values = FALSE,
   comparison_pop = NA,
   col_comparison = col_aggregation
 )
@@ -33,13 +33,13 @@ Default value is NA.}
 \item{test_complete}{Logical. Check all combinations of aggregation variables
 are present. The test will fail when lower geographic resolutions are
 present (e.g. borough and LSOA), so make sure these are not passed to
-\code{col_aggregation}. Default TRUE.}
+\code{col_aggregation}. Default FALSE.}
 
 \item{test_unique}{Logical. Check there are no duplicate combinations of any
-of the given aggregation levels. Default TRUE.}
+of the given aggregation levels. Default FALSE.}
 
 \item{check_negative_values}{Logical value requesting data are checked for
-negative values. Defaults to TRUE.}
+negative values. Defaults to FALSE.}
 
 \item{comparison_pop}{Optional. A data frame containing all aggregation
 levels of the population being tested (e.g. an initial population), so that

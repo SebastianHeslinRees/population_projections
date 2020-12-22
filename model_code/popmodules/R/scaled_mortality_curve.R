@@ -87,7 +87,10 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
                                                                project_rate_from=project_rate_from)
   }
 
-  validate_population(averaged_scaling_factors, col_aggregation = c("year", "gss_code", "sex"), col_data = "scaling")
+  validate_population(averaged_scaling_factors,
+                      col_aggregation = c("year", "gss_code", "sex"),
+                      col_data = "scaling",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
 
   jump_off_rates <- target_curves %>%
     left_join(averaged_scaling_factors, by = c("gss_code", "sex")) %>%
@@ -135,10 +138,14 @@ validate_scaled_mortality_curve_inputs <- function(population, births, deaths, t
   assert_that(data_col %in% names(deaths),
               msg="scaled_mortality_curve expects that data_col is a column in deaths dataframe")
 
-  validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn")
-  validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births")
-  validate_population(deaths, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "deaths")
-  validate_population(target_curves, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate")
+  validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(deaths, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "deaths",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(target_curves, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
 
   invisible(TRUE)
 

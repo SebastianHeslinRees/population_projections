@@ -306,7 +306,8 @@ validate_apply_domestic_migration_rates_input <- function(popn,
                       names(col_aggregation),
                       col_data = NA,
                       test_complete = TRUE,
-                      test_unique = TRUE)
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   
   try_join <- FALSE
   
@@ -317,7 +318,8 @@ validate_apply_domestic_migration_rates_input <- function(popn,
                         col_aggregation = unname(validation_agg_levels),
                         col_data = NA,
                         test_complete = TRUE,
-                        test_unique = FALSE)
+                        test_unique = FALSE,,
+                        check_negative_values = TRUE)
     try_join <- TRUE},
     warning = function(w) {
       warning(paste("apply_domestic_migration_rates threw a warning while validating the migration inputs:\n", w))

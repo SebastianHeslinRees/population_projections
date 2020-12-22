@@ -12,7 +12,7 @@ trend_datastore_outputs(
   int_out,
   dom_in,
   dom_out,
-  upc,
+  popn_adjustment,
   output_dir,
   excel_file_name
 )
@@ -21,7 +21,7 @@ trend_datastore_outputs(
 \item{population, births, deaths, int_in, int_out, dom_in, dom_out}{Dataframes with
 population and component data.}
 
-\item{upc}{Dataframe or NULL. Contains upc component data.}
+\item{popn_adjustment}{Dataframe or NULL. Contains popn_adjustment component data.}
 
 \item{output_dir}{Path to output directory.}
 

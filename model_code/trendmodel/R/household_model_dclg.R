@@ -247,27 +247,45 @@ validate_dclg_outputs <- function(stage_1, stage_2, max_year) {
   
   validate_population(stage_1$detailed_households,
                       col_aggregation = c("year", "gss_code", "household_type", "sex", "age_group"),
-                      col_data = c("households", "household_population", "communal_establishment_population"))
+                      col_data = c("households", "household_population", "communal_establishment_population"),
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   validate_population(stage_1$total_households,
                       col_aggregation = c("year", "gss_code"),
-                      col_data = c("stage_1_households"))
+                      col_data = c("stage_1_households"),
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   validate_population(stage_1$household_population,
                       col_aggregation = c("year", "gss_code", "sex", "age_group"),
-                      col_data = "household_population")
+                      col_data = "household_population",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   validate_population(stage_1$communal_establishment_population,
                       col_aggregation = c("year", "gss_code", "sex", "age_group"),
-                      col_data = "communal_establishment_population")
+                      col_data = "communal_establishment_population",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   
   for(i in 1:2) {
     result <- stage_2[[i]] %>%
       filter(year <= max_year) %>%
       validate_population(col_aggregation = c("gss_code", "year", "age_group", "household_type"),
-                          col_data = "households")
+                          col_data = "households",
+                          test_complete = TRUE,
+                          test_unique = TRUE,
+                          check_negative_values = TRUE)
   }
   for(i in 3:5) {
     result <- stage_2[[i]] %>%
       filter(year <= max_year) %>%
-      validate_population(col_aggregation = c("gss_code", "year", "age_group"))
+      validate_population(col_aggregation = c("gss_code", "year", "age_group"),
+                          test_complete = TRUE,
+                          test_unique = TRUE,
+                          check_negative_values = TRUE)
   }
   return(TRUE)
 }

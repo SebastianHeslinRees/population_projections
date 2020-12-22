@@ -308,7 +308,8 @@ validate_popn_age_on_input <- function(popn,
                 msg = "in popn_age_on births can only be added if there is 1 data column")
     
     if(is.data.frame(births)) {
-      validate_population(births, col_aggregation = col_aggregation)
+      validate_population(births, col_aggregation = col_aggregation,
+                          test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
       
       col_geog <- col_aggregation[stringr::str_detect(col_aggregation, "gss_code")]
       for(i in 1:length(col_geog)){

@@ -7,18 +7,18 @@
 validate_same_geog(df_1, df_2, col_1 = "gss_code", col_2 = "gss_code")
 }
 \arguments{
-\item{df_1}{A dataframe containing a gss_code column.}
+\item{df_1}{A dataframe containing a column of gss codes}
 
-\item{df_2}{A dataframe containing a gss_code column.}
+\item{df_2}{A dataframe containing a column of gss codes}
 
-\item{col_1}{Character. The name of the column containing gss_codes in df_1
+\item{col_1}{Character. The name of the column containing gss codes in df_1
 (default 'gss_code')}
 
-\item{col_2}{Character. The name of the column containing gss_codes in df_2
+\item{col_2}{Character. The name of the column containing gss codes in df_2
 (default 'gss_code')}
 }
 \value{
-A report on whether the test passed
+Warnings if there differences in the gss codes supplied
 }
 \description{
 Performs a check that the unique set of gss_codes in one

@@ -29,11 +29,11 @@
 #' @param test_complete Logical. Check all combinations of aggregation variables
 #'   are present. The test will fail when lower geographic resolutions are
 #'   present (e.g. borough and LSOA), so make sure these are not passed to
-#'   \code{col_aggregation}. Default TRUE.
+#'   \code{col_aggregation}. Default FALSE.
 #' @param test_unique Logical. Check there are no duplicate combinations of any
-#'   of the given aggregation levels. Default TRUE.
+#'   of the given aggregation levels. Default FALSE.
 #' @param check_negative_values Logical value requesting data are checked for
-#'   negative values. Defaults to TRUE.
+#'   negative values. Defaults to FALSE.
 #' @param comparison_pop Optional. A data frame containing all aggregation
 #'   levels of the population being tested (e.g. an initial population), so that
 #'   they can be checked to match. Default to NA.
@@ -51,9 +51,9 @@
 validate_population <- function(population,
                                 col_aggregation = c("year", "gss_code", "age", "sex"),
                                 col_data = NA,
-                                test_complete = TRUE,
-                                test_unique = TRUE,
-                                check_negative_values = TRUE,
+                                test_complete = FALSE,
+                                test_unique = FALSE,
+                                check_negative_values = FALSE,
                                 comparison_pop = NA,
                                 col_comparison = col_aggregation) {
   
@@ -180,7 +180,10 @@ validate_population <- function(population,
     tryCatch(validate_population(comparison_pop,
                                  col_aggregation = col_comparison,
                                  col_data = NA,
-                                 comparison_pop = NA),
+                                 comparison_pop = NA,
+                                 test_unique = TRUE,
+                                 test_complete = TRUE,
+                                 check_negative_values = TRUE),
              error = function(e) stop(paste0("validate_population found an error in the comparison population it was given:\n",e,"\n")),
              warning = function(w) warning(paste0("validate_population threw a warning when checking the given comparison population:\n",w,"\n")))
     

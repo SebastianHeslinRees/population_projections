@@ -89,7 +89,10 @@ get_rate_backseries <- function(component_mye_path,
   popn <- popn  %>%
     popn_age_on(births = births)%>%
     filter(year %in% years_backseries) %>%
-    validate_population(col_data = "popn")
+    validate_population(col_data = "popn",
+                        test_complete = TRUE,
+                        test_unique = TRUE,
+                        check_negative_values = TRUE)
   
   
   # LOAD AND SET UP COMPONENT DATA
@@ -140,7 +143,8 @@ get_rate_backseries <- function(component_mye_path,
                                   col_aggregation = unname(col_aggregation),
                                   col_data = col_component,
                                   test_complete = is.null(col_partial_match),
-                                  test_unique = TRUE)
+                                  test_unique = TRUE,
+                                  check_negative_values = TRUE)
   
   # TODO investigate another way to validate this join: currently it's failing due to insufficient memory
   
@@ -234,11 +238,10 @@ validate_get_rate_backseries_inputs <- function(population,
               msg = "get_rate_backseries expects a single number for rate_cap")
   
   
-  validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn")
-  validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births")
-  
-  #TODO how to do the validation which can also handle the domestic migration matrix
-  #validate_population(component, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = col_component)
+  validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   
   assert_that(all(years_backseries %in% population$year),
               msg = "get_rate_backseries expects the population dataframe to contain all of the years in years_backseries")

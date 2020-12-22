@@ -202,7 +202,7 @@ run_trend_model <- function(config_list) {
       select(year, gss_code, sex, age, int_out)
     
     international_out <- rbind(international_out, curr_yr_int_out)
-
+    
     #run core
     projection[[projection_year]] <- trend_core(
       start_population = curr_yr_popn,
@@ -271,7 +271,7 @@ run_trend_model <- function(config_list) {
                                     first_proj_yr = config_list$first_proj_yr))
   }
   
-  popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
+  deactivate_log(paste0(config_list$output_dir,"warnings.log"))
   
   return(projection)
 }
@@ -284,36 +284,80 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                                        upc_mye, fertility_rates, mortality_rates, int_out_flows_rates,
                                        first_proj_yr, n_proj_yr, int_out_method) {
   
-  popmodules::validate_population(population, col_data = "popn")
-  popmodules::validate_population(births, col_data = "births", comparison_pop = population, col_comparison = c("gss_code", "sex"))
-  popmodules::validate_population(deaths, col_data = "deaths", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
-  popmodules::validate_population(int_out, col_data = "int_out", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
-  popmodules::validate_population(int_in, col_data = "int_in", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
-  popmodules::validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"), comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
-  popmodules::validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"), comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  validate_population(population, col_data = "popn",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
+  
+  validate_population(births, col_data = "births",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = population, col_comparison = c("gss_code", "sex"))
+  
+  validate_population(deaths, col_data = "deaths",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  
+  validate_population(int_out, col_data = "int_out",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  
+  validate_population(int_in, col_data = "int_in",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  
+  validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"),
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  
+  validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"),
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+  
   if(!is.null(popn_adjustment)) {
-    popmodules::validate_population(popn_adjustment, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+    validate_population(popn_adjustment, col_data = "upc",
+                        test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
   if(!is.null(upc_mye)) {
-    popmodules::validate_population(upc_mye, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+    validate_population(upc_mye, col_data = "upc",
+                       test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
-  popmodules::validate_population(fertility_rates, col_data = "rate")
-  popmodules::validate_population(mortality_rates, col_data = "rate")
+  
+  validate_population(fertility_rates, col_data = "rate",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
+  
+  validate_population(mortality_rates, col_data = "rate",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   
   assert_that(int_out_method %in% c("flow", "rate"),
               msg = "the config variable int_out_method must be either 'flow' or 'rate'")
-  #popmodules::validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
+  #validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
-  popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   
   # TODO move these checks for rates now that they're loaded in dynamically. Also the domestic checks never worked.
-  #popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
-  #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), aggregation_levels_match = TRUE, many2one = TRUE, one2many = FALSE)
+  #validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  #validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), aggregation_levels_match = TRUE, many2one = TRUE, one2many = FALSE)
   
   # check that the coverage of years is correct
   last_proj_yr <- first_proj_yr + n_proj_yr -1

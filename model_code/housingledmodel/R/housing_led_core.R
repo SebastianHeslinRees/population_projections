@@ -151,7 +151,8 @@ housing_led_core <- function(start_population,
     left_join(communal_establishment_population, by=c("gss_code","year")) %>%
     mutate(household_popn = popn - communal_est_popn) %>%
     as.data.frame() %>%
-    validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code")) %>%
+    validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE) %>%
     select(-popn, -communal_est_popn)
   
   #4. Calculate trend AHS

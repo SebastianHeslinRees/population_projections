@@ -73,6 +73,8 @@ output_housing_led_projection <- function(projection, output_dir,
                         col_aggregation = col_aggregation,
                         col_data = col_data,
                         check_negative_values = check_negative,
+                        test_complete = TRUE,
+                        test_unique = TRUE,
                         comparison_pop = comparison_pop,
                         col_comparison = col_comparison)
     
@@ -83,7 +85,8 @@ output_housing_led_projection <- function(projection, output_dir,
     saveRDS(projection[['upc']], paste0(output_dir, "upc.rds"))
   }
   
-  validate_population(household_trajectory, col_aggregation = c("gss_code", "year"))
+  validate_population(household_trajectory, col_aggregation = c("gss_code", "year"),
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   saveRDS(household_trajectory, paste0(output_dir, "household_trajectory.rds"))
   
   # Create extra tables to to output
@@ -220,7 +223,9 @@ output_housing_led_projection <- function(projection, output_dir,
     } else {
       validation_data <- csvs[[i]]
     }
-    validate_population(validation_data, col_aggregation = col_agg, col_data = col_data, check_negative_values = FALSE)
+    validate_population(validation_data, col_aggregation = col_agg,
+                        col_data = col_data, check_negative_values = FALSE,
+                        test_complete = TRUE, test_unique = TRUE)
     
     data.table::fwrite(csvs[[i]], paste0(output_dir, "csv/",names(csvs)[i],".csv"))
   }
