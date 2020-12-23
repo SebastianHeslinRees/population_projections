@@ -293,37 +293,43 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
-                      comparison_pop = population, col_comparison = c("gss_code", "sex"))
+                      comparison_pop = filter(population, age==0, year %in% births$year),
+                      col_comparison = c("year","gss_code", "sex","age"))
   
   validate_population(deaths, col_data = "deaths",
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
-                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+                      comparison_pop = filter(population, year %in% deaths$year),
+                      col_comparison =  c("year","gss_code", "sex","age"))
   
   validate_population(int_out, col_data = "int_out",
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
-                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+                      comparison_pop = filter(population, year %in% int_out$year),
+                      col_comparison =  c("year","gss_code", "sex","age"))
   
   validate_population(int_in, col_data = "int_in",
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
-                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+                      comparison_pop = filter(population, year %in% int_in$year),
+                      col_comparison =  c("year","gss_code", "sex","age"))
   
   validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"),
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
-                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+                      comparison_pop = filter(population, year %in% dom_out$year),
+                      col_comparison =  c("year","gss_code", "sex","age"))
   
   validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"),
                       test_complete = TRUE,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
-                      comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
+                      comparison_pop = filter(population, year %in% dom_in$year),
+                      col_comparison =  c("year","gss_code", "sex","age"))
   
   if(!is.null(popn_adjustment)) {
     validate_population(popn_adjustment, col_data = "upc",
