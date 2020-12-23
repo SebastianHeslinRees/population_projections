@@ -44,16 +44,16 @@ other <- rbind(split_components(all_components, "unattrib", "upc", check_neg=FAL
   data.frame()
 
 #------------
-validate_population(population)
-validate_population(births)
-validate_population(deaths)
-validate_population(dom_in)
-validate_population(dom_out)
-validate_population(int_in)
-validate_population(int_out)
-validate_population(int_net)
-validate_population(dom_net)
-validate_population(other)
+validate_population(population, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(births, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(deaths, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(dom_in, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(dom_out, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(int_in, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(int_out, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(int_net, test_complete = TRUE, test_unique = TRUE)
+validate_population(dom_net, test_complete = TRUE, test_unique = TRUE)
+validate_population(other, test_complete = TRUE, test_unique = TRUE)
 
 #------------
 dir.create(output_location, showWarnings = FALSE, recursive = TRUE)

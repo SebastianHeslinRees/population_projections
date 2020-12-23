@@ -162,7 +162,7 @@ validate_population <- function(population,
     }
     
     # after renaming the dataframes, the col_comparison values are redundant.
-    
+   
     # convert when necessary to match factored columns
     comparison_pop <- .match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
     

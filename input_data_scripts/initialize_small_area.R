@@ -52,7 +52,10 @@ test_ward_inputs <- function(data_path, col_aggregation=c("gss_code_ward", "sex"
   
   #all wards are present
   assertthat::assert_that(setequal(data$gss_code_ward, london_wards))	
-  popmodules::validate_population(data, col_aggregation = col_aggregation)
+  popmodules::validate_population(data, col_aggregation = col_aggregation,
+                                  test_complete = TRUE,
+                                  test_unique = TRUE,
+                                  check_negative_values = TRUE)
   
 }
 
@@ -85,7 +88,10 @@ test_msoa_inputs <- function(data_path, col_aggregation=c("gss_code_msoa", "sex"
   
   #all msoas are present
   assertthat::assert_that(setequal(data$gss_code_msoa, london_msoas))	
-  popmodules::validate_population(data, col_aggregation = col_aggregation)
+  popmodules::validate_population(data, col_aggregation = col_aggregation,
+                                  test_complete = TRUE,
+                                  test_unique = TRUE,
+                                  check_negative_values = TRUE)
   
 }
 

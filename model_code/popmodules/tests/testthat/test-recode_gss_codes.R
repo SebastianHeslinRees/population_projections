@@ -3,7 +3,7 @@ library(popmodules)
 library(testthat)
 library(dplyr)
 
-code_changes_path <- "Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds"
+code_changes_path <- "test_data/district_changes_clean.rds"
 code_changes <- readRDS(code_changes_path)
 
 df_1 <- code_changes %>%

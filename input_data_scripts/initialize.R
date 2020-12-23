@@ -7,10 +7,15 @@ popmodules::install_gla_models()
 
 #copy lookups
 dir.create("input_data/lookup", showWarnings = FALSE, recursive = TRUE)
+dir.create("model_code/popmodules/tests/testthat/test_data/",
+           showWarnings = FALSE, recursive = TRUE)
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/model_lookups",
                        "input_data/lookup")
 file.copy("Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds",
           "input_data/lookup/district_changes_clean.rds", overwrite = TRUE)
+file.copy("input_data/lookup/district_changes_clean.rds",
+          "model_code/popmodules/tests/testthat/test_data/district_changes_clean.rds",
+          overwrite = TRUE)
 
 #run data creation scripts
 source("input_data_scripts/mye/mye_2018.R")

@@ -146,9 +146,9 @@ dom_out_all <- rbind(dom_out, reg_dom_out, nat_dom_out, sub_reg_dom_out)
 dom_net_all <- rbind(dom_net, reg_dom_net, nat_dom_net, sub_regional_net)
 
 #validate
-validate_population(dom_in_all)
-validate_population(dom_out_all)
-validate_population(dom_net_all)
+validate_population(dom_in_all, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(dom_out_all, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(dom_net_all, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
 
 
 #Save

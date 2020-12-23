@@ -112,12 +112,12 @@ ons_int_net <- readRDS(paste0(output_location, "int_net_ons.rds")) %>%
   rbind(ni_int_net)
 
 #validate data
-validate_population(ons_popn)
-validate_population(ons_births)
-validate_population(ons_deaths)
-validate_population(ons_int_in)
-validate_population(ons_int_out)
-validate_population(ons_int_net)
+validate_population(ons_popn, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(ons_births, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(ons_deaths, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(ons_int_in, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(ons_int_out, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(ons_int_net, test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
 dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 #Bind to ONS data and save
 saveRDS(ons_popn, paste0(output_location, "population_ons.rds"))
