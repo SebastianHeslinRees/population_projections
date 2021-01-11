@@ -4,11 +4,11 @@ library(tidyr)
 library(popmodules)
 
 #Set these to the location of the final borough components
-borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
-borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
-borough_int_out_path <- "input_data/mye/2018/international_out_gla.rds"
-borough_int_in_path <- "input_data/mye/2018/international_in_gla.rds"
-borough_deaths_path <- "input_data/mye/2018/deaths_ons.rds"
+mye_popn_path <- "input_data/mye/2019/population_gla.rds"
+borough_dom_in_path <- "input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds"
+borough_dom_out_path <- "input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds"
+borough_int_out_path <- "input_data/mye/2019/int_out_gla.rds"
+borough_int_in_path <- "input_data/mye/2019/int_in_gla.rds"
 
 #census data
 census_foreign_born_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/LC2103EW_ward_country_of_birth.csv"
@@ -17,19 +17,21 @@ ward_dom_in_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0354_lo
 ward_in_migration_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0409_london_wards_in_migration_inc_international.csv"
 
 #pre-processed ward model inputs
-ward_births_path <- "input_data/small_area_model/ward_births.rds"
-ward_deaths_path <- "input_data/small_area_model/ward_deaths.rds"
+ward_births_path <- "input_data/small_area_model/ward_sya_births.rds"
+ward_deaths_path <- "input_data/small_area_model/ward_sya_deaths.rds"
 ward_popn_path <- "input_data/small_area_model/ward_population_estimates.rds"
 
 #lookup
-ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
         select(-ward_name)
 
 ####DOMESTIC OUT####
 #Data come from the census
-#Data only goes to age 75 so ages 75-90 are modelled using borough distribution
+#Data only goes to age 75 so ages 75-90 are modeled using borough distribution
 
-borough_domestic_out <- readRDS(borough_dom_out_path) %>% filter(year == 2011) %>% filter_to_LAs()
+borough_domestic_out <- readRDS(borough_dom_out_path) %>%
+        filter(year == 2011) %>%
+        filter_to_LAs()
 
 domestic_out <- data.table::fread(ward_dom_out_path, header = T) %>%
         pivot_longer(cols = as.character(0:75), names_to = "age",
@@ -156,55 +158,12 @@ rm(borough_international_in, ward_int_in, ward_all_in)
 london_wards <- filter(ward_to_district, grepl("E09", gss_code))$gss_code_ward
 
 ward_births_2011 <- readRDS(ward_births_path) %>%
-        filter(year == 2011, gss_code_ward %in% london_wards) %>%
-        group_by(year, gss_code_ward) %>%
-        summarise(births = sum(births)) %>%
-        as.data.frame() %>%
-        mutate(age = 0,
-               male = births * (105/205),
-               female = births - male) %>%
-        select(-births) %>%
-        pivot_longer(c("male", "female"), values_to = "births", names_to = "sex") %>%
-        select(year, gss_code_ward, sex, age, popn) %>% 
-        data.frame()
-
-borough_deaths <- readRDS(borough_deaths_path) %>% 
-        filter(substr(gss_code,1,3)=="E09",
-               year == 2011)
+        select(year, gss_code_ward, sex, age, births) 
 
 ward_deaths_2011 <- readRDS(ward_deaths_path) %>%
         filter(year == 2011, gss_code_ward %in% london_wards) %>%
         as.data.frame()  %>%
         left_join(ward_to_district, by="gss_code_ward")
-
-age_groups <- unique(ward_deaths_2011$age_group)
-
-minmax <- sapply(age_groups, strsplit, split = "_")
-mn <- sapply(minmax, first)
-mn <- ifelse(mn == "85+", 85, mn) %>% as.numeric()
-mx <- sapply(minmax, last)
-mx <- ifelse(mx == "85+", 90, mx) %>% as.numeric()
-
-borough_deaths <- borough_deaths %>%
-        mutate(min = sapply(age, function(x) max(mn[mn <= x])),
-               max = sapply(age, function(x) min(mx[mx >= x])),
-               age_group = paste(min, max, sep="_"),
-               age_group = case_when(age_group == "0_0" ~ "0",
-                                     age_group == "85_90" ~ "85+",
-                                     TRUE ~ age_group)) %>%
-        select(gss_code, year, sex, age, age_group, deaths_unconstrained = deaths)
-
-ward_to_district_citymerge <- filter(ward_to_district, !grepl("E09000001", gss_code)) %>%
-        rbind(data.frame(gss_code = "E09000001", gss_code_ward = "E09000001"))
-
-ward_deaths_2011 <- left_join(borough_deaths, ward_to_district_citymerge, by="gss_code") %>%
-        constrain_component(ward_deaths_2011,
-                            col_aggregation = c("gss_code_ward", "year", "sex", "age_group"),
-                            col_popn = "deaths_unconstrained",
-                            col_constraint = "deaths") %>%
-        select(gss_code_ward, gss_code, year, sex, age, deaths = deaths_unconstrained) %>%
-        as.data.frame()
-
 
 ward_popn_2010 <- readRDS(ward_popn_path) %>%
         filter(year == 2010) %>%

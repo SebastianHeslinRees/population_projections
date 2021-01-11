@@ -1,3 +1,8 @@
+#Where LDD permission polygons are split cross LSOA polygons
+#This script determines what % of the LDD polygon is in what LSOA
+#Output is a csv lookup file between permission & LSOA with a %
+#Original code from Libby Rogers, 2019-12-18
+
 # Be careful with igraph - has lots of masking issues
 library(igraph)
 library(tidyverse)
@@ -5,17 +10,19 @@ library(sf)
 library(smoothr)
 library(lwgeom)
 
-################################################################################
-##################### Determine final permission polygons ######################
-
-# Code from Libby Rogers, 2019-12-18 . Cheers!
+#Its probably worth re-starting R
 rm(list=ls())
 gc()
 
-dir.create("input_data/housing_led_model", showWarnings = FALSE)
+################################################################################
+##################### Determine final permission polygons ######################
+
+#Input data - Check this doesn't need updating
 perm_poly_file <- "N:/LDD/GIS download/ldd_nightly_download.gdb"
-ldd_unit_flow_file <- "N:/LDD/Unit flow analysis/output_data/IMA/2019_12/0_ldd_development_unit_flow.Rda"
-# Remove polygons which superseed earlier permissions
+ldd_unit_flow_file <- "N:/LDD/Unit flow analysis/output_data/IMA/2020_06/0_ldd_development_unit_flow.Rda"
+
+
+# Remove polygons which supersede earlier permissions
 # Should give us a better idea of where units were/will be actually built
 # This takes a while
 load(ldd_unit_flow_file) # ldd_development_unit_flow
@@ -26,7 +33,7 @@ polys_in <- st_read(perm_poly_file, layer = "ldd_polygons_clean",
 polys <- polys_in %>%
   select(permission_id) %>%
   filter(!is.na(st_dimension(., NA_if_empty = TRUE))) %>%
-  lwgeom::st_make_valid(.) %>%
+  sf::st_make_valid(.) %>%
   rename(geometry = SHAPE)
 st_geometry(polys) <- "geometry"
 
@@ -44,7 +51,7 @@ poly_outcomes <- ldd_development_unit_flow %>%
   mutate(cont_prop = cont / (cont + lap + ssd)) %>%
   inner_join(polys, ., by = "permission_id")
 
-# Get seperate networks for demolitions and new units
+# Get separate networks for demolitions and new units
 dev_nodes <- ldd_development_unit_flow %>%
   pull(permission_id) %>%
   unique()
@@ -120,7 +127,7 @@ for (row in 1:nrow(polys_to_adjust)) {
                              / as.numeric(st_area(orig_poly)))
     remain_area_prop <- ifelse(is_empty(remain_area_prop), 10,
                                remain_area_prop)
-    #  Only want to replace if there's a realistic area left
+    # Only want to replace if there's a realistic area left
     # Should be roughly 1ish - anything much larger than this
     # and we've probably removed more than is realistic
     if (remain_area_prop < 2.1) {
@@ -131,12 +138,15 @@ for (row in 1:nrow(polys_to_adjust)) {
     }
   }
 }
+
 st_crs(new_polys) <- 27700
+
 ################################################################################
 ######################## Remove Blue and Green cover ###########################
 
-# # I haven't rerun this - I'd ignore for now
+# # Ignore for now
 # # This is water and large parks
+#
 # blue_and_green <- st_read("N:/LDD/Unit flow analysis/input_data/blue_green_cover.shp", crs = 27700)
 # blue_and_green <- blue_and_green %>%
 #   st_cast(., "POLYGON")
@@ -183,7 +193,12 @@ area_split <- new_polys %>%
   st_intersection(., lsoa) %>%
   mutate(lsoa_area = as.numeric(st_area(.))) %>%
   mutate(area_prop = lsoa_area / area) %>%
-  as.data.frame() %>%
+  mutate(dev_id = as.integer(dev_id))
+  
+#There needs to be a break here I don't know why and right now I don't care
+area_split <- area_split %>% 
+  data.frame() %>% 
   select(permission_id, dev_id, demolition, lsoa11cd, lsoa11nm, area_prop)
 
-saveRDS(area_split, "input_data/housing_led_model/polygon_splits.rds")
+dir.create("input_data/housing_led_model", showWarnings = FALSE)
+saveRDS(area_split, "input_data/housing_led_model/lsoa_polygon_splits.rds")

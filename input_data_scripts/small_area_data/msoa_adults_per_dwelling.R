@@ -2,7 +2,7 @@
 
 library(dplyr)
 
-most_recent_data_year <- 2018
+most_recent_data_year <- 2019
 
 #Data paths
 msoa_estimates_path <- "input_data/small_area_model/msoa_population_estimates.rds"

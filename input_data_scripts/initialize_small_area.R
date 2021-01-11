@@ -10,11 +10,10 @@ dir.create("input_data/small_area_model", showWarnings = FALSE)
 dir.create("input_data/housing_led_model", showWarnings = FALSE)
 
 #LDD Polygon splits file
-polygon_splits <- data.table::fread("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits_16-01-20.csv")	
-write.csv(polygon_splits, "input_data/housing_led_model/lsoa_polygon_splits_16-01-20.csv", row.names = FALSE)	
-rm(polygon_splits)
+file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
+          "input_data/housing_led_model/lsoa_polygon_splits.rds", overwrite = TRUE)
 
-#source("input_data_scripts/development_data/further_geom_code.R")
+#source("input_data_scripts/development_data/calc_polygon_splits.R")
 source('input_data_scripts/development_data/ldd.R')
 source('input_data_scripts/development_data/2017_shlaa.R')
 source('input_data_scripts/development_data/2017_shlaa_original.R')

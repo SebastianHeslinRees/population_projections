@@ -4,12 +4,11 @@ library(tidyr)
 library(popmodules)
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2018/population_gla.rds"
-borough_dom_in_path <- "input_data/domestic_migration/2018/domestic_migration_in.rds"
-borough_dom_out_path <- "input_data/domestic_migration/2018/domestic_migration_out.rds"
-borough_int_out_path <- "input_data/mye/2018/international_out_gla.rds"
-borough_int_in_path <- "input_data/mye/2018/international_in_gla.rds"
-borough_deaths_path <- "input_data/mye/2018/deaths_ons.rds"
+mye_popn_path <- "input_data/mye/2019/population_gla.rds"
+borough_dom_in_path <- "input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds"
+borough_dom_out_path <- "input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds"
+borough_int_out_path <- "input_data/mye/2019/int_out_gla.rds"
+borough_int_in_path <- "input_data/mye/2019/int_in_gla.rds"
 
 #census data
 census_foreign_born_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/LC2103EW_COB_MSOA.csv"
@@ -25,19 +24,18 @@ msoa_int_in_male_path <- "CT0496_male_international_in_to_msoa.csv"
 msoa_int_in_female_path <- "CT0497_female_international_in_to_msoa.csv"
 
 #pre-processed msoa model inputs
-msoa_births_path <- "input_data/small_area_model/msoa_births.rds"
-msoa_deaths_path <- "input_data/small_area_model/msoa_deaths.rds"
+msoa_births_path <- "input_data/small_area_model/msoa_sya_births.rds"
+msoa_deaths_path <- "input_data/small_area_model/msoa_sya_deaths.rds"
 msoa_popn_path <- "input_data/small_area_model/msoa_population_estimates.rds"
 
 #lookup
-msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>%
-        select(-msoa_name)
+msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>% select(-msoa_name)
 london_msoas <- filter(msoa_to_district, grepl("E09", gss_code))$gss_code_msoa
 
 
 ####DOMESTIC OUT####
 #Data come from the census
-#Data only goes to age 75 so ages 75-90 are modelled using borough distribution
+#Data only goes to age 75 so ages 75-90 are modeled using borough distribution
 
 borough_domestic_out <- readRDS(borough_dom_out_path) %>% filter(year == 2011) %>% filter_to_LAs()
 
@@ -255,53 +253,14 @@ international_in <- left_join(international_in, msoa_to_district, by="gss_code_m
 
 ####Out migration rates####
 msoa_births_2011 <- readRDS(msoa_births_path) %>%
-        filter(year == 2011, gss_code_msoa %in% london_msoas) %>%
-        group_by(year, gss_code_msoa) %>%
-        summarise(births = sum(births)) %>%
-        as.data.frame() %>%
-        mutate(age = 0,
-               male = births * (105/205),
-               female = births - male) %>%
-        select(-births) %>%
-        pivot_longer(c("male", "female"), values_to = "births", names_to = "sex") %>%
-        select(year, gss_code_msoa, sex, age, popn) %>% 
-        data.frame()
+        select(year, gss_code_msoa, sex, age, births)
 
-borough_deaths <- readRDS(borough_deaths_path) %>%
-        filter(substr(gss_code,1,3)=="E09",
-               year == 2011)
+msoa_deaths_2011 <- readRDS(msoa_deaths_path) %>% 
+        filter(year == 2011) %>% 
+        select(year, gss_code_msoa, sex, age, deaths)
 
-msoa_deaths_2011 <- readRDS(msoa_deaths_path) %>%
-        filter(year == 2011, gss_code_msoa %in% london_msoas) %>%
-        as.data.frame()  %>%
-        left_join(msoa_to_district, by="gss_code_msoa")
-
-age_groups <- unique(msoa_deaths_2011$age_group)
-
-minmax <- sapply(age_groups, strsplit, split = "_")
-mn <- sapply(minmax, first)
-mn <- ifelse(mn == "85+", 85, mn) %>% as.numeric()
-mx <- sapply(minmax, last)
-mx <- ifelse(mx == "85+", 90, mx) %>% as.numeric()
-
-borough_deaths <- borough_deaths %>%
-        mutate(min = sapply(age, function(x) max(mn[mn <= x])),
-               max = sapply(age, function(x) min(mx[mx >= x])),
-               age_group = paste(min, max, sep="_"),
-               age_group = case_when(age_group == "0_0" ~ "0",
-                                     age_group == "85_90" ~ "85+",
-                                     TRUE ~ age_group)) %>%
-        select(gss_code, year, sex, age, age_group, deaths_unconstrained = deaths)
-
-msoa_deaths_2011 <- left_join(borough_deaths, msoa_to_district, by="gss_code") %>%
-        constrain_component(msoa_deaths_2011,
-                            col_aggregation = c("gss_code_msoa", "year", "sex", "age_group"),
-                            col_popn = "deaths_unconstrained",
-                            col_constraint = "deaths") %>%
-        select(gss_code_msoa, gss_code, year, sex, age, deaths = deaths_unconstrained) %>%
-        as.data.frame()
-
-msoa_popn_2010 <- readRDS(msoa_popn_path) %>% filter(year == 2010) %>%
+msoa_popn_2010 <- readRDS(msoa_popn_path) %>%
+        filter(year == 2010) %>%
         select(-gss_code)
 
 denominators <- msoa_popn_2010 %>%

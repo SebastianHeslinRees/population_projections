@@ -3,28 +3,27 @@ library(stringr)
 library(data.table)
 library(popmodules)
 
-most_recent_data_year <- 2018
+most_recent_data_year <- 2019
+
 #data paths
 lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_estimates/lsoa/machine_readable/by_indiviudal_year"
-mye_pop_path <- "input_data/mye/2018/population_gla.rds"
+mye_pop_path <- "input_data/mye/2019/population_gla.rds"
 
 #lookups
-ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")%>%
-  select(-ward_name)
+ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>% select(-ward_name)
 lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
 
 london_wards <- filter(ward_to_district, str_detect(gss_code, "E09"))
 london_wards <- london_wards$gss_code_ward
 
-msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>%
-  select(-msoa_name)
+msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>% select(-msoa_name)
 lsoa_to_msoa <- readRDS("input_data/lookup/lsoa_to_msoa.rds")
 
 london_msoas <- filter(msoa_to_district, str_detect(gss_code, "E09"))
 london_msoas <- london_msoas$gss_code_msoa
 
-#process data for different years/sexes into signle dataframe
-lsoa_data <- list()
+#process data for different years/sexes into single dataframe
+lsoa_data_raw <- list()
 for(yr in 2010:most_recent_data_year) {
   f <- readRDS(paste0(lsoa_dir,"/sape_lsoa_mid_",yr,"_f.rds")) %>%
     mutate(year = as.numeric(substr(mye_year,5,8)),
@@ -35,9 +34,9 @@ for(yr in 2010:most_recent_data_year) {
            sex = "male") %>%
     select(gss_code_lsoa = LSOA11CD, year, sex, age, popn = value)
   
-  lsoa_data[[yr]] <- rbind(m,f)
+  lsoa_data_raw[[yr]] <- rbind(m,f)
 }
-lsoa_data <- data.table::rbindlist(lsoa_data)
+lsoa_data <- data.table::rbindlist(lsoa_data_raw)
 
 ####Ward data####
 ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
@@ -83,7 +82,7 @@ ward_data <- filter(ward_data, gss_code_ward != "E05000541") %>%
 
 rm(faraday_ldd, faraday_2011_ahs, faraday_scaled)
 
-if(length(unique(ward_data$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
+if(length(unique(ward_data$gss_code_ward))!=625){stop("Wrong number of wards")}
 
 #Scale to borough totals
 borough_scaling_factors_ward <- dtplyr::lazy_dt(ward_data)  %>%
@@ -125,7 +124,7 @@ msoa_data <- dtplyr::lazy_dt(lsoa_data) %>%
   mutate(age = as.numeric(substr(age,1,2))) %>%
   validate_population(col_aggregation = c("year","gss_code_msoa", "sex","age"), col_data = "popn")
 
-if(length(unique(msoa_data$gss_code_msoa))!=983){message("Warning: Wrong number of msoas")}
+if(length(unique(msoa_data$gss_code_msoa))!=983){stop("Wrong number of msoas")}
 
 borough_scaling_factors_msoa <- dtplyr::lazy_dt(msoa_data)  %>%
   group_by(gss_code, year, sex, age) %>%
@@ -147,7 +146,7 @@ scaled_msoa_data <- msoa_data  %>%
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
-saveRDS(scaled_ward_data, "input_data/small_area_model/ward_population_estimates.rds")
-saveRDS(scaled_msoa_data, "input_data/small_area_model/msoa_population_estimates.rds")
+saveRDS(scaled_ward_data, paste0("input_data/small_area_model/ward_population_estimates.rds"))
+saveRDS(scaled_msoa_data, paste0("input_data/small_area_model/msoa_population_estimates.rds"))
 
 rm(list = ls())
