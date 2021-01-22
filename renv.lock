@@ -568,6 +568,18 @@
       "Repository": "CRAN",
       "Hash": "d908914ae53b04d4c0c0fd72ecc35370"
     },
+    "ldndatar": {
+      "Package": "ldndatar",
+      "Version": "0.2.2",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "ldndatar",
+      "RemoteUsername": "Greater-London-Authority",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "c04c6abf51043dd6f3b68e67f7a85d7b44bc7994",
+      "Hash": "e2520471379ca5457b908fef99143f55"
+    },
     "lifecycle": {
       "Package": "lifecycle",
       "Version": "0.2.0",

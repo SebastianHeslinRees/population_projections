@@ -42,5 +42,6 @@ globalVariables(c(
   'gss_in',
   'gss_out',
   'rate',
-  'trend_core'
+  'trend_core',
+  'full'
   ))
