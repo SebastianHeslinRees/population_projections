@@ -93,7 +93,7 @@ run_borough_and_ward_projection <- function(projection_name,
     ahs_method = ahs_method,
     additional_births_path = additional_births_path,
     fertility_rates_path = fertility_rates_path,
-    upc_path = NULL)
+    popn_adjustment_path = NULL)
   
   #---------------------
   #run projection

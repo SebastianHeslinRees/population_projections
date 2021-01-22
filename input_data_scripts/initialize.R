@@ -2,10 +2,10 @@
 renv::restore()
 
 #install the gla models packages
-devtools::install('model_code/popmodules')
+devtools::install('model_code/popmodules', dependencies = FALSE)
 popmodules::install_gla_models()
 
-#copy lookupss
+#copy lookups
 dir.create("input_data/lookup", showWarnings = FALSE, recursive = TRUE)
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/model_lookups",
                        "input_data/lookup")
@@ -34,16 +34,26 @@ source("input_data_scripts/mye/ons_mye_2019.R")
 source("input_data_scripts/mye/northern_ireland_mye_2019.R")
 source("input_data_scripts/mye/scotland_mye_2019.R")
 source("input_data_scripts/domestic_migration/domestic_migration_2019.R")
+source("input_data_scripts/mye/gla_mye_2019.R")
+
+#Other 2019 data
 source("input_data_scripts/households/household_model_inputs_(2020 geog).R")
+source("input_data_scripts/households/communal_est_popn_2018_model_update.R")
 source('input_data_scripts/fertility/asfr_2020_geography.R')
 source('input_data_scripts/mortality/asmr_2020_geography.R')
 source("input_data_scripts/fertility/fertility_rates_2019.R")
 source("input_data_scripts/mortality/mortality_rates_2019.R")
 
-#pre calc rates
+#2018-based projections data
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
+source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates_gla_mye.R")
 source("input_data_scripts/migration/pre-calculate_international_in_flows.R")
+source("input_data_scripts/migration/pre-calculate_international_out_flows_rates.R")
 source('input_data_scripts/domestic_migration/pre-calulate_domestic_rates_2018_bpo.R')
+
+#2019-based projections data
+source("input_data_scripts/scenario_data/covid_scenario_deaths.R")
+source("input_data_scripts/scenario_data/covid_scenario_rates.R")
 
 #Excel templates
 dir.create("input_data/excel_templates")

@@ -42,7 +42,7 @@ run_housing_led_model <- function(config_list){
                        "additional_births_path",
                        "fertility_rates_path",
                        "last_data_yr",
-                       "upc_path")
+                       "popn_adjustment_path")
   
   
   validate_config_list(config_list, expected_config)
@@ -197,10 +197,10 @@ run_housing_led_model <- function(config_list){
   #TODO Sort this out so it can take constraint dataframes here
   npp_constraints <- NULL
   
-  if(is.null(config_list$upc_path)){
-    upc <- NULL
+  if(is.null(config_list$popn_adjustment_path)){
+    popn_adjustment <- NULL
   } else {
-    upc <- readRDS(config_list$upc_path)
+    popn_adjustment <- readRDS(config_list$popn_adjustment_path)
   }
   
   #Starting population
@@ -227,7 +227,7 @@ run_housing_led_model <- function(config_list){
   validate_housing_led_control_variables(first_proj_yr, last_proj_yr,
                                          curr_yr_popn,
                                          component_rates,
-                                         upc,
+                                         popn_adjustment,
                                          component_constraints,
                                          communal_establishment_population,
                                          external_ahs,
@@ -268,10 +268,10 @@ run_housing_led_model <- function(config_list){
     
     curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
     
-    if(is.null(upc)){
-      curr_yr_upc <- NULL
+    if(is.null(popn_adjustment)){
+      curr_yr_popn_adjustment <- NULL
     } else { 
-      curr_yr_upc <- upc %>% filter(year == projection_year)
+      curr_yr_popn_adjustment <- popn_adjustment %>% filter(year == projection_year)
     }
     
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
@@ -282,7 +282,7 @@ run_housing_led_model <- function(config_list){
                                                       domestic_rates = curr_yr_domestic_rates,
                                                       int_out_method = int_out_method,
                                                       constraints = npp_constraints,
-                                                      upc = curr_yr_upc,
+                                                      popn_adjustment = curr_yr_popn_adjustment,
                                                       projection_year,
                                                       region_lookup = region_lookup)
     
@@ -314,7 +314,7 @@ run_housing_led_model <- function(config_list){
                                                  trend_projection,
                                                  first_proj_yr,
                                                  last_proj_yr,
-                                                 upc)
+                                                 popn_adjustment)
   
   output_housing_led_projection(projection,
                                 config_list$output_dir,
@@ -334,7 +334,7 @@ run_housing_led_model <- function(config_list){
 validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
                                                    curr_yr_popn,
                                                    component_rates,
-                                                   upc,
+                                                   popn_adjustment,
                                                    component_constraints,
                                                    communal_establishment_population,
                                                    external_ahs,
@@ -384,8 +384,8 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
                         comparison_pop = curr_yr_popn,
                         col_comparison = c("gss_code", "age", "sex"))
   }
-  if(!is.null(upc)) {
-    validate_population(upc, col_data = "upc", test_complete = FALSE, check_negative_values = FALSE)
+  if(!is.null(popn_adjustment)) {
+    validate_population(popn_adjustment, col_data = "upc", test_complete = FALSE, check_negative_values = FALSE)
   }
   if(!is.null(additional_births)) {
     validate_population(additional_births, col_data = "births", test_complete = FALSE)

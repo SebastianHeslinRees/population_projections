@@ -31,7 +31,8 @@ run_trend_model <- function(config_list) {
                        "int_in_mye_path",
                        "dom_out_mye_path",
                        "dom_in_mye_path",
-                       "upc_path",
+                       "upc_mye_path",
+                       "popn_adjustment_path",
                        "mortality_rates",
                        "fertility_rates",
                        "int_out_flows_rates",
@@ -51,10 +52,11 @@ run_trend_model <- function(config_list) {
   validate_config_list(config_list, expected_config)
   
   #Create output directory, warnings log and config log
+  message(config_list$projection_name)
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
-
+  
   #Validate file paths
   file_list <- config_list[stringr::str_detect(names(config_list), "path")]
   validate_paths <- lapply(seq(file_list),
@@ -98,11 +100,16 @@ run_trend_model <- function(config_list) {
   dom_in <- get_component_from_file(filepath = config_list$dom_in_mye_path,
                                     max_yr = config_list$first_proj_yr - 1)
   
-  
-  if(!is.null(config_list$upc_path)){
-    upc <- readRDS(config_list$upc_path)
+  if(!is.null(config_list$upc_mye_path)){
+    upc_mye <- readRDS(config_list$upc_mye_path)
   } else {
-    upc <- NULL
+    upc_mye <- NULL
+  }
+  
+  if(!is.null(config_list$popn_adjustment_path)){
+    popn_adjustment <- readRDS(config_list$popn_adjustment_path)
+  } else {
+    popn_adjustment <- NULL
   }
   
   # get the projected rates
@@ -120,12 +127,14 @@ run_trend_model <- function(config_list) {
   
   fertility_rates <- eval_or_read(config_list$fertility_rates) %>% complete_fertility(population)
   mortality_rates <- eval_or_read(config_list$mortality_rates)
-  int_out_flows_rates <- eval_or_read(config_list$int_out_flows_rates) 
+  
+  international_out_flow_info <- get_rates_flows_info(config_list$int_out_flows, first_proj_yr, last_proj_yr)
+  int_out_flows_rates <- NULL
   
   domestic_rates_info <- get_rates_flows_info(config_list$domestic_rates, first_proj_yr, last_proj_yr)
   domestic_rates <- NULL
   
-  international_flow_info <- get_rates_flows_info(config_list$int_in_flows, first_proj_yr, last_proj_yr)
+  international_in_flow_info <- get_rates_flows_info(config_list$int_in_flows, first_proj_yr, last_proj_yr)
   int_in_flows <- NULL
   
   constraints <- eval_or_read(config_list$constraint_fns)
@@ -141,30 +150,30 @@ run_trend_model <- function(config_list) {
   
   fertility_rates <- fertility_rates %>% select(year, gss_code, age, sex, rate)
   mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
-  int_out_flows_rates <- int_out_flows_rates %>% select(year, gss_code, age, sex, int_out)
+  international_in <- data.frame()
+  international_out <- data.frame()
   
   curr_yr_popn <- filter(population, year == first_proj_yr-1)
   
   # set up projection
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
-                             dom_out, dom_in, upc,
+                             dom_out, dom_in, popn_adjustment, upc_mye,
                              fertility_rates, mortality_rates,
                              int_out_flows_rates,
                              first_proj_yr, config_list$n_proj_yr,
                              config_list$int_out_method)
   
-  ## run the core
+  ## run year loop
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
     
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
-    curr_yr_int_out <- filter(int_out_flows_rates, year == projection_year)
     
-    if(is.null(upc)){
-      curr_yr_upc <- NULL
+    if(is.null(popn_adjustment)){
+      curr_yr_popn_adjustment <- NULL
     } else { 
-      curr_yr_upc <- upc %>% filter(year == projection_year)
+      curr_yr_popn_adjustment <- popn_adjustment %>% filter(year == projection_year)
     }
     
     domestic_rates <- get_rates_or_flows(domestic_rates, domestic_rates_info,
@@ -174,25 +183,37 @@ run_trend_model <- function(config_list) {
     
     curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
     
-    int_in_flows <- get_rates_or_flows(int_in_flows, international_flow_info,
+    int_in_flows <- get_rates_or_flows(int_in_flows, international_in_flow_info,
                                        projection_year, first_proj_yr,
                                        col_aggregation = c("gss_code","sex","age"),
                                        data_col = "int_in")
     
-    curr_yr_int_in_flows <- int_in_flows %>% 
+    curr_yr_int_in <- int_in_flows %>% 
       mutate(year = projection_year) %>% 
       select(year, gss_code, sex, age, int_in)
     
+    int_out_flows_rates <- get_rates_or_flows(int_out_flows_rates, international_out_flow_info,
+                                              projection_year, first_proj_yr,
+                                              col_aggregation = c("gss_code","sex","age"),
+                                              data_col = "int_out")
+    
+    curr_yr_int_out <- int_out_flows_rates %>% 
+      mutate(year = projection_year) %>% 
+      select(year, gss_code, sex, age, int_out)
+    
+    international_out <- rbind(international_out, curr_yr_int_out)
+
+    #run core
     projection[[projection_year]] <- trend_core(
       start_population = curr_yr_popn,
       fertility_rates = curr_yr_fertility,
       mortality_rates = curr_yr_mortality,
       int_out_flows_rates = curr_yr_int_out,
-      int_in_flows = curr_yr_int_in_flows,
+      int_in_flows = curr_yr_int_in,
       domestic_rates = curr_yr_domestic_rates,
       int_out_method = config_list$int_out_method,
       constraints = constraints,
-      upc = curr_yr_upc,
+      popn_adjustment = curr_yr_popn_adjustment,
       projection_year = projection_year,
       region_lookup = region_lookup)
     
@@ -201,9 +222,10 @@ run_trend_model <- function(config_list) {
   
   projection <- arrange_trend_core_outputs(projection,
                                            population, births, deaths, int_out,
-                                           int_in, dom_in, dom_out, upc,
+                                           int_in, dom_in, dom_out,
+                                           upc_mye, popn_adjustment,
                                            fertility_rates, mortality_rates,
-                                           int_out_flows_rates, int_in_flows,
+                                           international_out,
                                            first_proj_yr, last_proj_yr)
   
   validate_trend_core_outputs(projection, first_proj_yr)
@@ -250,7 +272,7 @@ run_trend_model <- function(config_list) {
   }
   
   popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
-
+  
   return(projection)
 }
 
@@ -258,8 +280,8 @@ run_trend_model <- function(config_list) {
 #===============================================================================
 
 # do checks on the input data
-validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, upc,
-                                       fertility_rates, mortality_rates, int_out_flows_rates,
+validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, popn_adjustment,
+                                       upc_mye, fertility_rates, mortality_rates, int_out_flows_rates,
                                        first_proj_yr, n_proj_yr, int_out_method) {
   
   popmodules::validate_population(population, col_data = "popn")
@@ -269,23 +291,26 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   popmodules::validate_population(int_in, col_data = "int_in", comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
   popmodules::validate_population(filter_to_LAs(dom_out), col_data = c("dom_out"), comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
   popmodules::validate_population(filter_to_LAs(dom_in), col_data = c("dom_in"), comparison_pop = population, col_comparison = c("gss_code", "age", "sex"))
-  if(!is.null(upc)) {
-    popmodules::validate_population(upc, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+  if(!is.null(popn_adjustment)) {
+    popmodules::validate_population(popn_adjustment, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
-  
+  if(!is.null(upc_mye)) {
+    popmodules::validate_population(upc_mye, col_data = "upc", test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+  }
   popmodules::validate_population(fertility_rates, col_data = "rate")
   popmodules::validate_population(mortality_rates, col_data = "rate")
   
   assert_that(int_out_method %in% c("flow", "rate"),
               msg = "the config variable int_out_method must be either 'flow' or 'rate'")
-  popmodules::validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
+  #popmodules::validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
   
   # check that the rates join onto the population
   ## TODO make the aggregations columns flexible. Make this more elegant.
   popmodules::validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   popmodules::validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
-  popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  
   # TODO move these checks for rates now that they're loaded in dynamically. Also the domestic checks never worked.
+  #popmodules::validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   #popmodules::validate_join_population(population, int_in_flows, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   #popmodules::validate_join_population(population, domestic_rates, cols_common_aggregation = c("gss_code"="gss_out","sex","age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
   #popmodules::validate_join_population(domestic_rates, population, cols_common_aggregation = c("gss_out"="gss_code","sex","age"), aggregation_levels_match = TRUE, many2one = TRUE, one2many = FALSE)
@@ -295,14 +320,14 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   assert_that((first_proj_yr - 1) %in% unique(population$year), msg = paste0("the population backseries doesn't contain the projection jump-off year (", first_proj_yr-1,")"))
   assert_that(all(first_proj_yr:last_proj_yr %in% fertility_rates$year), msg = "the projected fertility_rates data doesn't contain all the projection years")
   assert_that(all(first_proj_yr:last_proj_yr %in% mortality_rates$year), msg = "the projected mortality_rates data doesn't contain all the projection years")
-  assert_that(all(first_proj_yr:last_proj_yr %in% int_out_flows_rates$year), msg = "the projected int_out_flows_rates data doesn't contain all the projection years")
+  #assert_that(all(first_proj_yr:last_proj_yr %in% int_out_flows_rates$year), msg = "the projected int_out_flows_rates data doesn't contain all the projection years")
   
   # check that the rates values are always between 0 and 1 
   assert_that(max(fertility_rates$rate) <= 1 & min(fertility_rates$rate) >= 0, msg = "projected fertility_rates contains rates outside the range 0-1")
   assert_that(max(mortality_rates$rate) <= 1 & min(mortality_rates$rate) >= 0, msg = "projected mortality_rates contains rates outside the range 0-1")
-  if(int_out_method == "rate") {
-    assert_that(max(int_out_flows_rates$int_out) <= 1 & min(int_out_flows_rates$int_out) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
-  }
+  # if(int_out_method == "rate") {
+  #   assert_that(max(int_out_flows_rates$int_out) <= 1 & min(int_out_flows_rates$int_out) >= 0, msg = "projected international out migration rate contains rates outside the range 0-1")
+  # }
   
   invisible(TRUE)
 }
@@ -315,17 +340,17 @@ validate_trend_core_outputs <- function(projection, first_proj_yr) {
   components <- names(projection)
   expected_components <- c("population", "deaths","births", "int_out", "int_in",
                            "dom_out", "dom_in", "births_by_mothers_age", "natural_change",
-                           "fertility_rates", "mortality_rates", "int_out_rates", "upc")
+                           "fertility_rates", "mortality_rates", "int_out_rates_flows", "popn_adjustment")
   
   assert_that(identical(components, expected_components))
- 
+  
   for(i in c(1:5,8:12)){ validate_population(projection[[i]]) }
   
   validate_domestic_components(projection[["dom_out"]],"domestic out", first_proj_yr)
   validate_domestic_components(projection[["dom_in"]],"domestic in", first_proj_yr)
   
-  if(!is.null(projection$upc)){validate_population(projection$upc)}
-
+  if(!is.null(projection$popn_adjustment)){validate_population(projection$popn_adjustment)}
+  
 }
 
 validate_domestic_components <- function(data, component, first_proj_yr){

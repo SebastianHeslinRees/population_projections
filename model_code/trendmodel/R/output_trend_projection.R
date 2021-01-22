@@ -19,19 +19,13 @@
 output_trend_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                               projection_name) {
   
-  projection[1:12] <- lapply(projection[1:12], reorder_for_output) 
+  projection[1:13] <- lapply(projection[1:13], reorder_for_output) 
   
   #RDS
-  for(i in 1:12) {
+  for(i in 1:13) {
      saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
   }
   
-  #upc
-  if(!is.null(projection$upc)){
-    projection$upc <- reorder_for_output(projection$upc)
-    saveRDS(projection$upc, paste0(output_dir, "upc.rds"), compress = "gzip")
-  }
- 
   #CSV
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
@@ -96,10 +90,7 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
   for(i in 1:n_csv_elements) { 
     make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
   }
-  
-  if(!is.null(projection$upc)){
-    make_csvs(projection$upc, paste0(csv_dir, "upc"))
-  }
+  make_csvs(projection$popn_adjustment, paste0(csv_dir, "popn_adjustment"))
   
   #Excel
   if(write_excel){
@@ -110,7 +101,7 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
                             int_out = projection$int_out,
                             dom_in = projection$dom_in,
                             dom_out = projection$dom_out,
-                            upc = projection$upc,
+                            popn_adjustment = projection$popn_adjustment,
                             output_dir = output_dir,
                             excel_file_name = paste0(projection_name,".xlsx"))
   }
