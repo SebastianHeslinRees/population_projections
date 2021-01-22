@@ -11,6 +11,9 @@ project_forward_flat(df, last_proj_yr, showWarnings = FALSE)
 \item{df}{A population data frame}
 
 \item{last_proj_yr}{The last year of the projection}
+
+\item{showWarnings}{Logical. If the function returns the input dataframe unchanged
+should this be reported. Default FALSE.}
 }
 \value{
 A data frame containing the past years and the projection years
