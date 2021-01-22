@@ -23,13 +23,14 @@ upload_bpo_to_datastore <- function(bpo_name,
   
   #today's date
   today <- format(Sys.time(), "%d/%m/%Y")
+  bpo_name <- tolower(bpo_name)
   
   #hub names lookup
   borough_name_lookup <- data.frame(full = c("City of London","Barking and Dagenham","Barnet","Bexley","Brent","Bromley",
                                              "Camden","Croydon","Ealing",
                                              "Enfield","Greenwich","Hackney","Hammersmith and Fulham","Haringey","Harrow",
                                              "Havering","Hillingdon","Hounslow","Islington","Kensington and Chelsea", "Kingston",
-                                             "Lambeth","Lewisham","Merton","Newham","Redbridge",
+                                             "Lambeth","Lewisham","Merton","Newham","Redbridge", "Richmond",
                                              "Southwark","Sutton","Tower Hamlets",
                                              "Waltham Forest","Wandsworth","Westminster")) %>%
     mutate(full = tolower(gsub(" ","-",full))) %>%
