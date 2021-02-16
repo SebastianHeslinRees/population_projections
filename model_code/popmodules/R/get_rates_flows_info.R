@@ -27,10 +27,13 @@ get_rates_flows_info <- function(data_list, first_proj_yr, last_proj_yr){
   
   validate_get_rates_or_flows_info(data_list, first_proj_yr)
   
+  last_yr <- data_list %>% names() %>% as.numeric() %>% max()
+  last_yr <- max(c(last_yr, last_proj_yr))
+  
   df_info <- data.table::rbindlist(data_list, idcol="year") %>%
     as.data.frame() %>% 
-    mutate(year= as.numeric(year)) %>%
-    right_join(data.frame(year = first_proj_yr:last_proj_yr), by = "year") %>% 
+    mutate(year = as.numeric(year)) %>%
+    right_join(data.frame(year = first_proj_yr:last_yr), by = "year") %>% 
     tidyr::fill(transition) %>%
     
     mutate(next_path = path) %>%
@@ -43,7 +46,7 @@ get_rates_flows_info <- function(data_list, first_proj_yr, last_proj_yr){
     
     mutate(period_end = lead(period_start),
            period_end = ifelse(period_start==period_end,NA,period_end),
-           period_end = ifelse(year == last_proj_yr, last_proj_yr+1, period_end)) %>%
+           period_end = ifelse(year == last_yr, last_yr+1, period_end)) %>%
     tidyr::fill(period_end, .direction = "up") %>%
     
     mutate(transition_period = period_end-period_start,
