@@ -11,8 +11,8 @@ apply_rate_to_population(
   col_popn = "popn",
   col_rate = "rate",
   col_out = "component",
-  aggregation_levels_match = FALSE,
-  many2one = TRUE,
+  one2many = FALSE,
+  many2one = FALSE,
   additional_popn_cols = NULL,
   additional_rate_cols = NULL,
   missing_levels_popn = FALSE,
@@ -39,14 +39,18 @@ data. Default "rate".}
 \item{col_out}{String. Name of the resulting component count column (popn*rate)
 in the output dataframe. Default "component".}
 
-\item{aggregation_levels_match}{Logical. If the two input data frames cover
-the same domain and you expect every level of \code{popn_rate} to be matched
-to by a level in \code{popn} set this to TRUE, and this will be checked.
-Default FALSE.}
+\item{one2many}{Logical. Setting this to FALSE will check that no more than
+one level from \code{popn_rate} matches to each level of \code{popn}. Default
+FALSE.}
 
 \item{many2one}{Logical. Setting this to FALSE will check that no more than
 one level from \code{popn} matches to each level of \code{rate}. Default
 FALSE.}
+
+\item{additional_popn_cols}{String. Names of columns in \code{popn}
+which should be included in the output but which are not included in
+\code{col_aggregation}. Used when multiple aggregation levels apply to the
+same rates. Default NULL.}
 
 \item{additional_rate_cols}{String. Names of columns in \code{popn_rate}
 which should be included in the output but which are not included in
@@ -56,7 +60,7 @@ left join with \code{popn_rate} can therefore return a much larger data
 frame. Default NULL.}
 
 \item{missing_levels_popn}{Logical. Is the popn data frame missing any
-levels? Used to relax validation. Reminder: \code{aggregation_levels_match} will
+levels? Used to relax validation. Reminder: \code{one2many} will
 probably be TRUE in this case. Default FALSE.}
 
 \item{missing_levels_rate}{Logical or character vector. Is the rates data
@@ -91,8 +95,9 @@ component <- apply_rate_to_population(popn,
                              col_popn = "popn",
                              col_rate = "rate",
                              col_out = "component",
-                             aggregation_levels_match = FALSE,
+                             one2many = FALSE,
                              many2one = TRUE,
+                             additional_popn_cols = NULL,
                              missing_levels_popn = FALSE,
                              missing_levels_rate = FALSE)
 

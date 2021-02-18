@@ -28,6 +28,10 @@
 #' @param many2one Logical. Setting this to FALSE will check that no more than
 #'   one level from \code{popn} matches to each level of \code{rate}. Default
 #'   FALSE.
+#' @param additional_popn_cols String. Names of columns in \code{popn}
+#'   which should be included in the output but which are not included in
+#'   \code{col_aggregation}. Used when multiple aggregation levels apply to the
+#'   same rates. Default NULL.
 #' @param additional_rate_cols String. Names of columns in \code{popn_rate}
 #'   which should be included in the output but which are not included in
 #'   \code{col_aggregation}. Used when multiple rates apply to the same
@@ -62,6 +66,7 @@
 #'                              col_out = "component",
 #'                              one2many = FALSE,
 #'                              many2one = TRUE,
+#'                              additional_popn_cols = NULL,
 #                               additional_rate_cols = NULL,
 #'                              missing_levels_popn = FALSE,
 #'                              missing_levels_rate = FALSE)
@@ -318,12 +323,6 @@ validate_apply_rate_to_population_output <- function(output, col_out, popn, one2
   
   if(!missing_levels_rate) {
     assert_that(all(stats::complete.cases(output)))
-  }
-  
-  if(one2many | missing_levels_popn) {
-    output_comparison <- NA
-  } else {
-    output_comparison <- popn
   }
   
   if(!missing_levels_rate) {

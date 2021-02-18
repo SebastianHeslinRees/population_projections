@@ -14,11 +14,11 @@ arrange_trend_core_outputs(
   int_in,
   dom_in,
   dom_out,
-  upc,
+  upc_mye,
+  popn_adjustment,
   fertility_rates,
   mortality_rates,
-  int_out_rates,
-  int_in_flows,
+  int_out_rates_flows,
   first_proj_yr,
   last_proj_yr
 )
@@ -40,15 +40,16 @@ arrange_trend_core_outputs(
 
 \item{dom_out}{Dataframe. Backseries domestic out migration data}
 
-\item{upc}{Dataframe or NULL. UPC component data.}
+\item{upc_mye}{Dataframe or NULL. Backseries UPC data}
+
+\item{popn_adjustment}{Dataframe or NULL. Population adjustment data for
+the projection period. Used for UPC or other adjustments}
 
 \item{fertility_rates}{Dataframe. Model fertility rates}
 
 \item{mortality_rates}{Dataframe. Model mortality rates}
 
-\item{int_out_rates}{Dataframe. Model international out migration rates}
-
-\item{int_in_flows}{Dataframe. Model international in migration flows}
+\item{int_out_rates_flows}{Dataframe. Model international out migration rates}
 
 \item{first_proj_yr}{Numeric. First projection year}
 

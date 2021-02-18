@@ -35,7 +35,7 @@ mign_out_no_sex <- unique(dplyr::select(mign_out, -sex))
 #                             col_popn = "popn",
 #                             col_rate = "rate",
 #                             col_flow = "flow",
-#                             one2many = FALSE,
+#                             one2many = TRUE,
 #                             many2one = FALSE,
 #                             col_origin_destination = NA) {
 
@@ -290,16 +290,18 @@ test_that("apply_domestic_migration_rates can join to rate data with more than o
 })
   
   test_that("apply_domestic_migration_rates can join to *coarser* rate data with more than one extra aggregation level", {
+    skip("I don't think we need the function to do this. The data can be wrangled before it gets passed to the function.")
     popn_in <- unique(dplyr::select(popn, -sex))
     mign_in <- unique(dplyr::select(mign_rate, -age))
     output_out <- dplyr::select(mign_out, year, gss_out, age, gss_in, sex, flow) %>%
       dplyr::arrange(age, gss_out, sex)
     expect_equivalent(apply_domestic_migration_rates(popn_in,
-                                                     mign_rate,
-                                                     col_aggregation = c("year", "gss_code"="gss_out", "age"),
+                                                     mign_in,
+                                                     col_aggregation = c("year", "gss_code"="gss_out"),
                                                      col_gss_destination = c("gss_in", "sex"),
                                                      col_origin_destination = c("gss_out", "gss_in"),
-                                                     one2many = TRUE),
+                                                     one2many = TRUE,
+                                                     many2one = TRUE),
                       output_out)
   })
   

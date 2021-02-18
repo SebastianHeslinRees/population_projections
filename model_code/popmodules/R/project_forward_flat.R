@@ -8,8 +8,8 @@
 #'
 #' @param df A population data frame
 #' @param last_proj_yr The last year of the projection
-#' @showWarnings Logical. If the function returns the input dataframe unchanged
-#'  should this be reported. Dafault FLASE.
+#' @param showWarnings Logical. If the function returns the input dataframe unchanged
+#'  should this be reported. Default FALSE.
 #'
 #' @return A data frame containing the past years and the projection years
 #'
