@@ -95,7 +95,9 @@ dclg_stage_1 <- function(population, stage1_file_path){
     select(-scaled_popn, -scaled_ce_popn) %>%
     apply_rate_to_population(hh_rep_rates,
                              col_aggregation = c("year", "gss_code", "sex", "age_group", "household_type"),
-                             col_popn = "scaled_hh_popn", col_rate = "hh_rep_rates", col_out = "scaled_households")
+                             col_popn = "scaled_hh_popn",
+                             col_rate = "hh_rep_rates",
+                             col_out = "scaled_households")
   
   household_population <- lazy_dt(scaled_household_popn) %>%
     group_by(year, gss_code, sex, age_group) %>%
@@ -200,9 +202,9 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
                                                    col_popn = "hh_popn",
                                                    col_rate = "rate",
                                                    col_out = "hh_stg2_unconstrained",
-                                                   additional_rate_levels = "household_type",
+                                                   additional_rate_cols = "household_type",
                                                    missing_levels_popn = TRUE,
-                                                   aggregation_levels_match = TRUE)
+                                                   one2many = TRUE)
   
   stage2_constrained <- group_by(stage2_unconstrained, gss_code, year) %>%
     mutate(stg2_total_hh = sum(hh_stg2_unconstrained)) %>%

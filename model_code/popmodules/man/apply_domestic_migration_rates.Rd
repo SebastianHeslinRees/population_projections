@@ -12,7 +12,7 @@ apply_domestic_migration_rates(
   col_popn = "popn",
   col_rate = "rate",
   col_flow = "flow",
-  aggregation_levels_match = FALSE,
+  one2many = TRUE,
   many2one = FALSE,
   col_origin_destination = NA
 )
@@ -53,10 +53,9 @@ migration rates. Default "rate"}
 \item{col_flow}{String. Name of column to write output flows to. Default
 "flow".}
 
-\item{aggregation_levels_match}{Logical. Passed to \code{apply_rate_to_population}. If the two
-input data frames cover the same domain and you expect every level of
-\code{mign_rate} to be matched to by a level in \code{popn} set this to
-TRUE, and this will be checked. Default FALSE.}
+\item{one2many}{Logical. Setting this to FALSE will check that no more than
+one level from \code{popn_rate} matches to each level of \code{popn}. Default
+TRUE}
 
 \item{many2one}{Logical. Passed to \code{apply_rate_to_population}. Setting to FALSE
 will check that no more than one level from \code{popn} matches to each
@@ -120,7 +119,7 @@ apply_domestic_migration_rates(popn,
                  col_popn = "popn",
                  col_rate = "rate",
                  col_flow = "flow",
-                 aggregation_levels_match = FALSE,
+                 one2many = FALSE,
                  many2one = TRUE,
                  col_origin_destination = NA)
 

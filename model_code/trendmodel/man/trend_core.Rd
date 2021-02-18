@@ -14,7 +14,7 @@ trend_core(
   domestic_rates,
   int_out_method,
   constraints = NULL,
-  upc = NULL,
+  popn_adjustment = NULL,
   projection_year,
   region_lookup
 )
@@ -46,8 +46,8 @@ migration is a rate or a flow. Either \code{rate} or \code{flow}}
 component. If the projection is to be run unconstrained this is set to NULL.
 Default \code{NULL}}
 
-\item{upc}{A data frame. Unattributable population change component. If no
-UPC is being applied this is set to NULL. Default \code{NULL}}
+\item{popn_adjustment}{A data frame. Population adjustment component (UPC). If no
+adjustment is being applied this is set to NULL. Default \code{NULL}}
 
 \item{projection_year}{Numeric. The year being projected}
 

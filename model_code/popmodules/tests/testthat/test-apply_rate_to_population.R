@@ -1,212 +1,334 @@
-context("apply_rate_to_population")
-#devtools::load_all('model_code/popmodules')
 library(testthat)
-library(assertthat)
+library(dplyr)
 
-popn <- data.frame( gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
-popn2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
+#### Basic functionality and calculation tests ####
 
-rate <- data.frame( gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
-rate2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
+#test 1: multiply 2 numbers, use function defaults
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), component = 50, stringsAsFactors = FALSE)
 
-output  <- data.frame( gss_code=c("a","b"),  component = 50, stringsAsFactors = FALSE)
-output2 <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), component = 50, stringsAsFactors = FALSE) %>% 
-  data.frame()
-
-test_that("apply_rate_to_population creates the expected output", {
-  expect_equivalent(apply_rate_to_population(popn, rate, col_aggregation = "gss_code"),
-                    output)
-  expect_equivalent(apply_rate_to_population(popn2, rate2),
-                    output2)
+test_that("apply_rate_to_population test 1", {
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code"))
 })
 
-test_that("apply_rate_to_population can work with rates at a coarser resolution than the population, but fails when many2one = FALSE", {
-  skip("TODO: Test failing due to downstream validation")
-  expect_equivalent(apply_rate_to_population(popn2, rate, col_aggregation = "gss_code"),
-                    output2)
-  expect_error(apply_rate_to_population(popn2, rate, many2one = FALSE))
-})
+#test 2: test column name parameters work as expected
+test_popn <- data.frame(gss_code=c("a","b"), population = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate_of_thing = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), thing_output = 50, stringsAsFactors = FALSE)
 
-test_that("apply_rate_to_population fails when there's more than one death rate for each aggregation level", {
-  expect_error(apply_rate_to_population(popn, rate2, col_aggregation = "gss_code"))
-})
-
-test_that("apply_rate_to_population handles mappings between column names in the population and rates data frames", {
-  skip("TODO: Test failing due to downstream validation")
-  rate_in <- dplyr::rename(rate2, xage=age, xsex=sex, xgss_code=gss_code)
-  expect_equivalent(apply_rate_to_population(popn2, rate_in, col_aggregation = c("age"="xage","gss_code"="xgss_code","sex"="xsex", "year")),
-                    output2)
-})
-
-test_that("apply_rate_to_population doesn't care about the order of aggregation columns and throws errors if there are duplicates", {
-  expect_equivalent(apply_rate_to_population(popn2, rate2, col_aggregation = c("gss_code","age","year","sex")),
-                    output2)
-
-  expect_error(apply_rate_to_population(popn2, rate2, col_aggregation = c("gss_code","gss_code","age","sex","year")))
-  expect_error(apply_rate_to_population(popn2, rate2, col_aggregation = c("gss_code"="age","gss_code","sex","year")))
-  expect_error(apply_rate_to_population(popn2, rate2, col_aggregation = c("gss_code"="age","age","sex","year")))
-})
-
-#TODO
-test_that("apply_rate_to_population handles additional, unused input columns", {
-  skip("TODO: is this functionality important?")
-  #The expectation of this test is that the function drops the new columns
-  #because they're not specified in some way in the function call
-  popn_in <- dplyr::mutate(popn, fillpop = "fill") 
-  rate_in <- dplyr::mutate(rate, fillrate = "fill")
-  expect_equivalent(apply_rate_to_population(popn_in, rate_in, col_aggregation = "gss_code"),
-                    output)
+test_that("apply_rate_to_population test 2", {
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code",
+                                                          col_popn = "population",
+                                                          col_rate = "rate_of_thing",
+                                                          col_out = "thing_output"))
 })
 
 
-test_that("apply_rate_to_population handles factors, tibbles and groups", {
+#test 3: output column name can be the same as an input column name
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), popn = 50, stringsAsFactors = FALSE)
 
-  popn_in  <- dplyr::mutate(popn,  gss_code=as.factor(gss_code))
-  rate_in <- dplyr::mutate(rate, gss_code=as.factor(gss_code))
-  output_out <- dplyr::mutate(output, gss_code=as.factor(gss_code))
-  expect_equivalent(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code"),
-                    output_out)
-  expect_equivalent(apply_rate_to_population(popn, rate_in, col_aggregation = "gss_code"),
-                    output)
-
-  popn_in <-  dplyr::as_tibble(popn_in)
-  rate_in <- dplyr::as_tibble(rate_in)
-  output_out <- dplyr::as_tibble(output_out)
-  expect_equivalent(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code"),
-                    output_out)
-  expect_equivalent(apply_rate_to_population(popn, rate_in, col_aggregation = "gss_code"),
-                    output)
-  expect_equivalent(apply_rate_to_population(popn_in, rate_in, col_aggregation = "gss_code"),
-                    output_out)
-
-  popn_in <-  dplyr::group_by(popn_in,  gss_code)
-  rate_in <- dplyr::group_by(rate_in, gss_code)
-  output_out <- dplyr::group_by(output_out, gss_code)
-  expect_equivalent(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code"),
-                    output_out)
-  expect_equivalent(apply_rate_to_population(popn, rate_in, col_aggregation = "gss_code"),
-                    output)
-  expect_equivalent(apply_rate_to_population(popn_in, rate_in, col_aggregation = "gss_code"),
-                    output_out)
-})
-
-
-# TODO
-test_that("apply_rate_to_population handles joining to a larger, factored population", {
-  skip("TODO: make this work :O :O (Chris F)")
-  rate_in <- expand.grid(year=2000, age=20:21, gss_code=factor("a","b","c"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
-  expect_error(apply_rate_to_population(popn2, rate_in, aggregation_levels_match = FALSE))
-  expect_equivalent(apply_rate_to_population(popn2, rate_in, aggregation_levels_match = TRUE))
-})
-
-test_that("apply_rate_to_population warns when factor levels don't match the input", {
-  popn_in  <-  dplyr::mutate(popn,  gss_code=factor(gss_code, levels = c("a","b","c","d")))
-  rate_in  <- dplyr::mutate(rate, gss_code=factor(gss_code, levels = c("a","b","c","d")))
-  output_out <- dplyr::mutate(output, gss_code=factor(gss_code, levels = c("a","b","c","d")))
-
-  expect_warning( temp <- apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code"))
-  expect_equivalent(temp, output) # due to differing factor levels, the output won't have a factor in the gss_code column
-
-  expect_warning( temp <- apply_rate_to_population(popn, rate_in, col_aggregation = "gss_code"))
-  expect_equivalent(temp, output)
-})
-
-test_that("apply_rate_to_population warns with an empty input", {
-  popn_in <- popn[NULL,]
-  output_out <- output[NULL,]
-  expect_warning( temp <- apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code", aggregation_levels_match = TRUE))
-  expect_equivalent(temp, output_out)
-})
-
-
-test_that("apply_rate_to_population warns when the input already has a col_out column and throws an error when it's an aggregation level", {
-  popn_in <- dplyr::mutate(popn, component = 50)
-  expect_error(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code", col_out = "component") )
-  expect_error(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code", col_out = "gss_code") )
-})
-
-test_that("apply_rate_to_population handles important data column names duplicated between the population and rates data", {
-  popn_in     <- dplyr::rename(popn, component = popn)
-  rate_in    <- dplyr::rename(rate, component = rate)
-
-  expect_error(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code", col_popn = "component", col_rate = "rate", col_out = "component"))
+test_that("apply_rate_to_population test 3", {
   
-  expect_equivalent(apply_rate_to_population(popn, rate_in, col_aggregation = "gss_code", col_popn = "popn", col_rate = "component", col_out = "component"),
-                    output)
-
-  expect_error(apply_rate_to_population(popn_in, rate_in, col_aggregation = "gss_code", col_popn = "component", col_rate = "component", col_out = "component"))
+  test_expect <- data.frame(gss_code=c("a","b"), popn = 50, stringsAsFactors = FALSE)
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = "gss_code",
+                                             col_out = "popn"),
+                    test_expect)
   
-  popn_in <- dplyr::rename(popn, component = gss_code)
-  expect_error(apply_rate_to_population(popn_in, rate_in, col_aggregation = c("component"="gss_code"), col_popn = "popn", col_rate = "component", col_out = "component"))
-})
-
-#TODO
-test_that("apply_rate_to_population handles unused columns in the inputs with column names from the other inputs", {
-  skip("TODO: is this functionality important?")
-  #See issue above at line 50
-  popn_in <-  dplyr::mutate(popn, rate = 0.1)
-  rate_in <- dplyr::mutate(rate, popn = 20)
-
-  expect_equivalent(apply_rate_to_population(popn_in, rate_in, col_aggregation = "gss_code"), output)
-
-  rate_in <- dplyr::mutate(rate, xgss_code = gss_code) # creates identical gss_code, xgss_code columns
-  expect_warning(temp <- apply_rate_to_population(popn, rate_in, col_aggregation = c("gss_code"="xgss_code")))
-  expect_equivalent(temp, output)
-})
-
-test_that("apply_rate_to_population throws an error with explicit missing aggregation values", {
-  popn_in <- popn
-  popn_in$gss_code[1] <- NA
-
-  expect_error(apply_rate_to_population(popn_in, rate, col_aggregation = "gss_code"))
-
-  rate_in <- rate
-  rate_in$gss_code[1] <- NA
-
-  expect_error(apply_rate_to_population(popn, rate_in, col_aggregation = "gss_code"))
-})
-
-test_that("apply_rate_to_population throws an error with implicit missing aggregation values", {
-
-  popn_in <- popn2[-1,]
-  output_out <- output2[-1,]
-
-  expect_error(apply_rate_to_population(popn_in, rate2))
-  expect_equivalent(apply_rate_to_population(popn_in, rate2, aggregation_levels_match = TRUE, missing_levels_popn = TRUE),
-                    output_out)
-
-  rate_in <- rate2[-1,]
-  output_out <- output2
-  output_out$component[1] <- NA
-
-  expect_error(apply_rate_to_population(popn2, rate_in, missing_levels_rate = FALSE))
-  expect_equivalent(temp <- apply_rate_to_population(popn2, rate_in, missing_levels_rate = TRUE),
-                    output_out)
+  test_expect <- data.frame(gss_code=c("a","b"), rate = 50, stringsAsFactors = FALSE)
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = "gss_code",
+                                             col_out = "rate"),
+                    test_expect)
 })
 
 
-test_that("apply_rate_to_population throws an error when there is more than one match in the rate data frame for a level", {
-  expect_error(apply_rate_to_population(popn2, rate2, col_aggregation = c("gss_code","sex")))
+#test 4: col_aggregation handles mapping
+test_popn <- expand.grid(xgss_code=c("a","b"), xsex = c("female","male"), year = 2001:2003, popn = 100, stringsAsFactors = FALSE)
+test_rate <- expand.grid(gss_code=c("a","b"), sex = c("female","male"), year = 2001:2003, rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- expand.grid(xgss_code=c("a","b"), xsex = c("female","male"), year = 2001:2003, component = 50, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 4", {
+  
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = c("xgss_code"="gss_code", "xsex"="sex", "year")),
+                    test_expect)
+  
 })
 
-test_that("apply_rate_to_population can deal with a join to a higher resolution (one2many) rate data and that it needn't be complete", {
-  popn_in <- unique(dplyr::select(popn2, -sex))
-  expect_error(apply_rate_to_population(popn2, rate2, one2many=FALSE))
-  expect_equivalent(apply_rate_to_population(popn_in, rate2, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex"),
-                    dplyr::arrange(output2, year, gss_code, age, sex)) # Joining results in a different ordering here
+#test 5: rate columns are dropped
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, y = "nothing", stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), popn = 50, stringsAsFactors = FALSE)
 
-  rate_in <- rate2[-1,]
-  output_out <- output2[-1,]
-  expect_error(apply_rate_to_population(popn_in, rate_in, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex"))
-  expect_equivalent(apply_rate_to_population(popn_in, rate_in, col_aggregation = c("year", "gss_code", "age"), additional_rate_levels = "sex", missing_levels_rate = TRUE),
-                    dplyr::arrange(output_out, year, gss_code, age, sex)) # Joining results in a different ordering here
-
-  # TODO test this but when missing_levels_rate is length >= 2
+test_that("apply_rate_to_population test 5", {
+  
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = "gss_code"),
+                    test_expect)
+  
 })
 
-test_that("apply_rate_to_population can check that all rates are matched to", {
-  rate_in  <- expand.grid(year=2000, age=20:21, gss_code=c("a","b","c"), sex=c("f","m"), rate=0.5, stringsAsFactors = FALSE)
-  expect_equivalent(apply_rate_to_population(popn2, rate_in, aggregation_levels_match = TRUE),
-                    output2)
-  expect_error(apply_rate_to_population(popn2, rate_in, aggregation_levels_match = FALSE))
+
+#test 6: popn columns are dropped
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, x = "nothing", stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), popn = 50, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 6", {
+  
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = "gss_code"),
+                    test_expect)
+  
+})
+
+
+#test 7: specified columns are retained
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, x = "nothing", stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, y = "nothing", stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), x = "nothing", y = "nothing", popn = 50, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 7", {
+  
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = "gss_code",
+                                             additional_popn_cols = "x",
+                                             additional_rate_cols = "y"),
+                    test_expect)
+  
+})
+
+#test 8: check factors work
+test_popn <- data.frame(gss_code = as.factor(c("a","b")), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code = as.factor(c("a","b")), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code = as.factor(c("a","b")), popn = 50, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 8", {
+  
+  expect_equivalent(apply_rate_to_population(test_popn,
+                                             test_rate,
+                                             col_aggregation = "gss_code"),
+                    test_expect)
+  
+})
+
+#--------------------------------
+
+#### Parameter tests ####
+
+#one2many = TRUE
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- expand.grid(gss_code=c("a","b"), year = 2001:2003, rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- expand.grid(gss_code=c("a","b"), year = 2001:2003, popn = 50, stringsAsFactors = FALSE) %>% 
+  arrange(gss_code, year)
+
+test_that("apply_rate_to_population test 10", {
+  
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code",
+                                                          additional_rate_cols = "year",
+                                                          one2many = TRUE))
+  
+})
+
+
+#many2one = TRUE
+test_popn <- expand.grid(gss_code=c("a","b"), year = 2001:2003, popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- expand.grid(gss_code=c("a","b"), year = 2001:2003, popn = 50, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 10", {
+  
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code",
+                                                          additional_popn_cols = "year",
+                                                          many2one = TRUE))
+  
+})
+
+#additional_rate_levels
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- expand.grid(gss_code=c("a","b"), year = 2001:2003, rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- expand.grid(gss_code=c("a","b"), year = 2001:2003, popn = 50, stringsAsFactors = FALSE) %>% 
+  arrange(gss_code, year)
+
+test_that("apply_rate_to_population test 11", {
+  
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code",
+                                                          additional_rate_cols = "year",
+                                                          one2many = TRUE))
+  
+  
+})
+
+#missing_levels_popn = TRUE
+test_popn <- expand.grid(gss_code=c("a"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a"), component = 50, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 12", {
+  
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code",
+                                                          missing_levels_popn = TRUE))
+  
+})
+
+#missing_levels_rate = TRUE
+test_popn <- expand.grid(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a"), rate = 0.5, stringsAsFactors = FALSE)
+test_expect <- data.frame(gss_code=c("a","b"), component = c(50,NA), stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test 13", {
+  expect_equivalent(test_expect, apply_rate_to_population(test_popn,
+                                                          test_rate,
+                                                          col_aggregation = "gss_code",
+                                                          missing_levels_rate = TRUE))
+})
+
+#--------------------------------
+
+#### Expect ERRORs ####
+
+#test error 1: columns with same names in input dataframes
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), popn = 0.5, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test error 1", {
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_rate = "popn",
+                                        col_aggregation = "gss_code"))
+})
+
+
+#test error 2: col name not in dataframe
+test_that("apply_rate_to_population test error 2", {
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_popn = "yellow",
+                                        col_aggregation = "gss_code"))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_rate = "yellow",
+                                        col_aggregation = "gss_code"))
+  
+})
+
+#test error 3: type errors
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test error 3", {
+  
+  expect_error(apply_rate_to_population("a",
+                                        test_rate,
+                                        col_aggregation = "gss_code"))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        "a",
+                                        col_aggregation = "gss_code"))
+  
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = 6))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        col_popn = 14))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        col_rate = NA))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        col_out = FALSE))
+})
+
+#test error 4: col_aggregation
+test_that("apply_rate_to_population test error 4", {
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "year"))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        col_out = "gss_code"))
+})
+
+#test error 5: factor level mismatch
+test_popn <- data.frame(gss_code = as.factor(c("a","b")), popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code = as.factor(c("a","c")), rate = 0.5, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test error 5", {
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code"))
+  
+})
+
+#one2many set wrong
+test_popn <- data.frame(gss_code=c("a","b"), popn = 100, stringsAsFactors = FALSE)
+test_rate <- expand.grid(gss_code=c("a","b"), year = 2001:2003, rate = 0.5, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test error 6", {
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        additional_rate_cols = "year",
+                                        one2many = FALSE))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        additional_rate_cols = "year"))
+  
+})
+
+
+#many2one = set wrong
+test_popn <- expand.grid(gss_code=c("a","b"), year = 2001:2003, popn = 100, stringsAsFactors = FALSE)
+test_rate <- data.frame(gss_code=c("a","b"), rate = 0.5, stringsAsFactors = FALSE)
+
+test_that("apply_rate_to_population test error 7", {
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        additional_popn_cols = "year",
+                                        many2one = FALSE))
+  
+  expect_error(apply_rate_to_population(test_popn,
+                                        test_rate,
+                                        col_aggregation = "gss_code",
+                                        additional_popn_cols = "year"))
+  
 })
