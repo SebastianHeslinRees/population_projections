@@ -19,6 +19,20 @@ The RTools toolchain bundle must be installed before model installation is attem
 ### R packages
 All R packages for the model are managed by `renv`. The initialize script begins with a call to `renv::restore()`. This will ensure that all necessary packages (and the correct versions) are downloaded and installed.
 
+### Renviron
+The housing-led model uses the `ldndatar` package to push projection outputs directly to the London Datastore. In order to install the housing-led model a Github Authentication Token must be saved in an `.Renviron` file at the `population_projections` project root. The `.Reviron` should also contain the LDS API key. The file should look like this:
+lds_api_key="xxx"
+GITHUB_PAT="xxx"
+
+
+## Model development
+
+When adding new features or editing existing code the following commands should be used to test and check code before it is pushed for review:
+`devtools::check("pkg")`
+`devtools::test("pkg")`
+`codetools::checkUsagePackage("pkg", suppressUndefined=TRUE)`
+
+
 ## Model Installation
 
 To install, download the `population_projections` repository from the GLA GitHub at https://github.com/Greater-London-Authority/population_projections/.
@@ -33,4 +47,4 @@ Run `input_data_scripts/intitalize_small_area.R` will create the data needed to 
 
 ## Running the models
 
-Each model package has a `run_model()` function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `model_code/config_scripts` folder.
+Each model package has a `run_model()` function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `config_scripts` folder.
