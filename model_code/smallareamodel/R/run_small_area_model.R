@@ -331,7 +331,6 @@ validate_small_area_input_components <- function(popn_estimates,
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "deaths")
   
-  # TODO add this back in when the rates are fixed
   validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "popn")

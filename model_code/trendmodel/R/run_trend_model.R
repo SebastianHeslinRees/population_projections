@@ -337,7 +337,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   }
   if(!is.null(upc_mye)) {
     validate_population(upc_mye, col_data = "upc",
-                       test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+                        test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
   
   validate_population(fertility_rates, col_data = "rate",
@@ -352,12 +352,16 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   
   assert_that(int_out_method %in% c("flow", "rate"),
               msg = "the config variable int_out_method must be either 'flow' or 'rate'")
-  #validate_population(int_out_flows_rates, col_data = ifelse(int_out_method == "flow", "int_out", "int_out"))
   
   # check that the rates join onto the population
-  ## TODO make the aggregations columns flexible. Make this more elegant.
-  validate_join_population(population, mortality_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
-  validate_join_population(population, fertility_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
+  validate_join_population(population, mortality_rates,
+                           cols_common_aggregation = c("gss_code", "sex", "age"),
+                           aggregation_levels_match = FALSE,
+                           warn_unused_shared_cols = FALSE)
+  validate_join_population(population, fertility_rates,
+                           cols_common_aggregation = c("gss_code", "sex", "age"),
+                           aggregation_levels_match = FALSE,
+                           warn_unused_shared_cols = FALSE)
   
   # TODO move these checks for rates now that they're loaded in dynamically. Also the domestic checks never worked.
   #validate_join_population(population, int_out_flows_rates, cols_common_aggregation = c("gss_code", "sex", "age"), aggregation_levels_match = FALSE, warn_unused_shared_cols = FALSE)
@@ -394,12 +398,22 @@ validate_trend_core_outputs <- function(projection, first_proj_yr) {
   
   assert_that(identical(components, expected_components))
   
-  for(i in c(1:5,8:12)){ validate_population(projection[[i]]) }
+  for(i in c(1:5,8:12)){ 
+    validate_population(projection[[i]],
+                        test_complete = TRUE,
+                        test_unique = TRUE,
+                        check_negative_values = TRUE)
+  }
   
   validate_domestic_components(projection[["dom_out"]],"domestic out", first_proj_yr)
   validate_domestic_components(projection[["dom_in"]],"domestic in", first_proj_yr)
   
-  if(!is.null(projection$popn_adjustment)){validate_population(projection$popn_adjustment)}
+  if(!is.null(projection$popn_adjustment)){
+    validate_population(projection$popn_adjustment,
+                        test_complete = TRUE,
+                        test_unique = TRUE,
+                        check_negative_values = TRUE)
+  }
   
 }
 

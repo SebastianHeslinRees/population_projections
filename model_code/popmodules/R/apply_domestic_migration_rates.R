@@ -318,7 +318,7 @@ validate_apply_domestic_migration_rates_input <- function(popn,
                         col_aggregation = unname(validation_agg_levels),
                         col_data = NA,
                         test_complete = TRUE,
-                        test_unique = FALSE,,
+                        test_unique = FALSE,
                         check_negative_values = TRUE)
     try_join <- TRUE},
     warning = function(w) {
