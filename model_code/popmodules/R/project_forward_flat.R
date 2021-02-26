@@ -9,7 +9,7 @@
 #' @param df A population data frame
 #' @param last_proj_yr The last year of the projection
 #' @param showWarnings Logical. If the function returns the input dataframe unchanged
-#'  should this be reported. Default FLASE.
+#'  should this be reported. Default FALSE.
 #'
 #' @return A data frame containing the past years and the projection years
 #'
@@ -22,11 +22,12 @@ project_forward_flat <- function(df, last_proj_yr, showWarnings = FALSE) {
   hold_yr <- max(df$year)
   first_proj_yr <- hold_yr+1
   
-  if(hold_yr >= last_proj_yr) {
-    if(showWarnings){
-      warning(paste0("project_forward_flat was given a dataframe finishing in year ", hold_yr," and asked to project forward to ", last_proj_yr,
-                     ".\nReturning the input dataframe unchanged."))
-    }
+  if(hold_yr >= last_proj_yr & showWarnings) {
+    
+    warning(paste0("project_forward_flat was given a dataframe finishing in ",
+                   hold_yr," and asked to project forward to ", last_proj_yr,
+                   ".\nReturning the input dataframe unchanged."))
+    
     return(df)
   }
   
@@ -48,6 +49,3 @@ project_forward_flat <- function(df, last_proj_yr, showWarnings = FALSE) {
   
   return(projection)
 }
-
-
-

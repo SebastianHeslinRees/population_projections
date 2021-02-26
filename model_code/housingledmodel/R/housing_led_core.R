@@ -254,16 +254,15 @@ housing_led_core <- function(start_population,
   }
   
   #6. Target population
-  #Probably apply_rate_to_population
   #dw2hh 2018
   target_population <- apply_rate_to_population(households_2, ahs,
                                                 col_popn = "households",
                                                 col_rate = "ahs",
                                                 col_out = "target_popn",
                                                 col_aggregation = c("year","gss_code"),
-                                                aggregation_levels_match = TRUE)
+                                                one2many = TRUE)
   
-  #7. This point is intentionaly left blank
+  #7. This point is intentionally left blank
   
   
   #8. Compare population from step 3 to target from step 5.

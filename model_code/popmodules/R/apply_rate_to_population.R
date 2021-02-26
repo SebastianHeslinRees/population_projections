@@ -5,7 +5,7 @@
 #' component count resulting from the rate applied to the population.
 #' 
 #' The output dataframe will consist of the columns in the \code{popn} input
-#' dataframe, plus any columns specified in \code{additional_rate_levels}, and the
+#' dataframe, plus any columns specified in \code{additional_rate_cols}, and the
 #' output data column \code{col_out}. Output has 1 row for each distinct level of
 #' the \code{col_aggregation}.
 #'
@@ -22,21 +22,24 @@
 #'   data. Default "rate".
 #' @param col_out String. Name of the resulting component count column (popn*rate)
 #'   in the output dataframe. Default "component".
-#' @param aggregation_levels_match Logical. If the two input data frames cover
-#'   the same domain and you expect every level of \code{popn_rate} to be matched
-#'   to by a level in \code{popn} set this to TRUE, and this will be checked.
-#'   Default FALSE.
+#' @param one2many Logical. Setting this to FALSE will check that no more than
+#'   one level from \code{popn_rate} matches to each level of \code{popn}. Default
+#'   FALSE.
 #' @param many2one Logical. Setting this to FALSE will check that no more than
 #'   one level from \code{popn} matches to each level of \code{rate}. Default
 #'   FALSE.
-#' @param additional_rate_levels String. Names of columns in \code{popn_rate}
+#' @param additional_popn_cols String. Names of columns in \code{popn}
+#'   which should be included in the output but which are not included in
+#'   \code{col_aggregation}. Used when multiple aggregation levels apply to the
+#'   same rates. Default NULL.
+#' @param additional_rate_cols String. Names of columns in \code{popn_rate}
 #'   which should be included in the output but which are not included in
 #'   \code{col_aggregation}. Used when multiple rates apply to the same
 #'   aggregation level, e.g. outmigration to multiple locations. The resulting
 #'   left join with \code{popn_rate} can therefore return a much larger data
 #'   frame. Default NULL.
 #' @param missing_levels_popn Logical. Is the popn data frame missing any
-#'   levels? Used to relax validation. Reminder: \code{aggregation_levels_match} will
+#'   levels? Used to relax validation. Reminder: \code{one2many} will
 #'   probably be TRUE in this case. Default FALSE.
 #' @param missing_levels_rate Logical or character vector. Is the rates data
 #'   missing any levels? If joining the missing levels to the input population
@@ -61,9 +64,10 @@
 #'                              col_popn = "popn",
 #'                              col_rate = "rate",
 #'                              col_out = "component",
-#'                              aggregation_levels_match = FALSE,
+#'                              one2many = FALSE,
 #'                              many2one = TRUE,
-#                               additional_rate_levels = NULL,
+#'                              additional_popn_cols = NULL,
+#                               additional_rate_cols = NULL,
 #'                              missing_levels_popn = FALSE,
 #'                              missing_levels_rate = FALSE)
 #'
@@ -79,34 +83,35 @@ apply_rate_to_population <- function(popn,
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_out = "component",
-                                     aggregation_levels_match = FALSE,
-                                     many2one = TRUE,
-                                     additional_rate_levels = NULL,
+                                     one2many = FALSE,
+                                     many2one = FALSE,
+                                     additional_popn_cols = NULL,
+                                     additional_rate_cols = NULL,
                                      missing_levels_popn = FALSE,
                                      missing_levels_rate = FALSE) {
 
   # Validate input
   # --------------
   validate_apply_rate_to_population_input(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
-                                          aggregation_levels_match, many2one, additional_rate_levels,
+                                          one2many, many2one,
+                                          additional_popn_cols, additional_rate_cols,
                                           missing_levels_popn, missing_levels_rate)
   
   
   join_by <- .convert_to_named_vector(col_aggregation)
   
-  if(anyDuplicated(data.table::as.data.table(popn_rate[join_by]))) {
-    one2many <- TRUE
-  } else {
-    one2many = FALSE
-  }
+  all_rate_cols <- c(as.character(join_by), additional_rate_cols, col_rate)
+  all_popn_cols <- c(names(join_by), additional_popn_cols, col_popn)
   
-  all_rate_cols <- c(as.character(join_by), additional_rate_levels, col_rate)
+  col_output_order <- c(setdiff(all_popn_cols, col_popn),
+                        additional_rate_cols, col_out) 
   
-  col_output_order <- c(setdiff(names(popn), col_popn),
-                        additional_rate_levels, col_out)
+  popn <- popn %>% 
+    select_at(all_popn_cols) %>% 
+    rename(popn__ = col_popn)
   
-  popn <- popn %>% rename(popn__ = col_popn)
-  popn_rate <- select_at(popn_rate, all_rate_cols) %>%
+  popn_rate <- popn_rate %>% 
+    select_at(all_rate_cols) %>%
     rename(rate__ = col_rate)
   
   # Make sure the columns that are factors match
@@ -117,13 +122,21 @@ apply_rate_to_population <- function(popn,
     mutate(component__ = popn__ * rate__) %>%
     rename(!!col_out := component__) %>% 
     select_at(col_output_order)
-  #browser()
+  
   # Validate output
+  one2many <- ifelse(anyDuplicated(data.table::as.data.table(popn[names(join_by)])),
+                     TRUE, FALSE) 
+  
+  # if(anyDuplicated(data.table::as.data.table(popn_rate[popn_rate_join_by]))) {
+  #   one2many <- TRUE
+  # } else {
+  #   one2many = FALSE
+  # }
   validate_apply_rate_to_population_output(output,
                                            col_out,
                                            popn,
                                            one2many,
-                                           additional_rate_levels,
+                                           col_output_order,
                                            missing_levels_popn,
                                            missing_levels_rate)
   
@@ -135,8 +148,10 @@ apply_rate_to_population <- function(popn,
 
 
 # Check the function input is valid
-validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggregation, col_popn, col_rate, col_out,
-                                                    aggregation_levels_match, many2one, additional_rate_levels,
+validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggregation,
+                                                    col_popn, col_rate, col_out,
+                                                    one2many, many2one,
+                                                    additional_popn_cols, additional_rate_cols,
                                                     missing_levels_popn, missing_levels_rate) {
   
   # Type checking
@@ -154,12 +169,12 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
               msg = "apply_rate_to_population needs a string as the col_out parameter")
   assert_that(is.string(col_out),
               msg = "apply_rate_to_population needs a string as the col_out parameter")
-  assert_that(rlang::is_bool(aggregation_levels_match),
-              msg = "apply_rate_to_population needs a logical value as the aggregation_levels_match parameter")
+  assert_that(rlang::is_bool(one2many),
+              msg = "apply_rate_to_population needs a logical value as the one2many parameter")
   assert_that(rlang::is_bool(many2one),
               msg = "apply_rate_to_population needs a logical value as the many2one parameter")
-  assert_that(identical(additional_rate_levels, NULL) | is.character(additional_rate_levels),
-              msg = "additional_rate_levels should be NA or a character vector")
+  assert_that(identical(additional_rate_cols, NULL) | is.character(additional_rate_cols),
+              msg = "additional_rate_cols should be NA or a character vector")
   assert_that(rlang::is_bool(missing_levels_popn),
               msg = "apply_rate_to_population needs a logical value for missing_levels_popn")
   assert_that(rlang::is_bool(missing_levels_rate),
@@ -167,7 +182,7 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
   assert_that(col_popn != col_rate,
               msg = "col_popn and col_rate cannot be the same")
   
-  # Other checks
+  # Col_aggreagtion columns are in the input dataframes
   join_by <- .convert_to_named_vector(col_aggregation)
   assertthat::assert_that(all(names(join_by) %in% names(popn)),
                           msg = "in apply_rate_to_population join columns not in popn dataframe")
@@ -176,25 +191,47 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
                           msg = "in apply_rate_to_population join columns not in rates dataframe")
   
   
-  if(!identical(additional_rate_levels, NA)) {
-    assert_that(all(additional_rate_levels %in% names(popn_rate)))
-  } else {
-    additional_rate_levels <- NULL
+  #one2many variable is set properly
+  if(anyDuplicated(data.table::as.data.table(popn_rate[join_by]))) {
+    assertthat::assert_that(one2many==TRUE,
+                            msg = "in apply_rate_to_population, one2many set as FALSE but data contains duplicates")
   }
-  all_rate_cols <- c(as.character(col_aggregation), additional_rate_levels)
-  all_rate_cols <- intersect(all_rate_cols, names(popn_rate))
   
-  assertthat::assert_that(!col_out %in% names(popn),
+  #many2one variable is set properly
+  if(anyDuplicated(data.table::as.data.table(popn[names(join_by)]))) {
+    assertthat::assert_that(many2one==TRUE,
+                            msg = "in apply_rate_to_population, many2one set as FALSE but data contains duplicates")
+  }
+  
+  #Additional columns are in the relevant dataframes
+  if(!identical(additional_rate_cols, NA)) {
+    assert_that(all(additional_rate_cols %in% names(popn_rate)),
+                msg = "in apply_rate_to_population some columns named in additional_rate_cols not in rates dataframe")
+  } else {
+    additional_rate_cols <- NULL
+  }
+  
+  if(!identical(additional_popn_cols, NA)) {
+    assert_that(all(additional_popn_cols %in% names(popn)),
+                msg = "in apply_rate_to_population some columns named in additional_popn_cols not in popn dataframe")
+  } else {
+    additional_popn_cols <- NULL
+  }
+  
+  #output column name doesn't exist elsewhere
+  all_rate_cols <- c(as.character(join_by), additional_rate_cols)
+  all_popn_cols <- c(names(join_by), additional_popn_cols)
+  
+  assertthat::assert_that(!col_out %in% all_popn_cols,
                           msg = "in apply_rate_to_population col_out cannot exist in input pop dataframe")
   assertthat::assert_that(!col_out %in% all_rate_cols,
                           msg = "in apply_rate_to_population col_out cannot exist in input rates dataframe")
   
   assert_that(!col_popn %in% names(col_aggregation),
               msg = "apply_rate_to_population was given a population count column name that is also a named aggregation column")
-  assert_that(!col_rate %in% all_rate_cols,
+  assert_that(!col_rate %in% as.character(col_aggregation),
               msg = "apply_rate_to_population was given a rate column name that is also a named aggregation column")
-  assert_that(all(names(col_aggregation) %in% names(popn)),
-              msg = "in apply_rate_to_population, all columns named in col_aggregation must be columns in the popn table")
+  
   assert_that(!any(duplicated(names(col_aggregation))),
               msg = "duplicated population column names were provided to apply_rate_to_population")
   assert_that(!any(duplicated(as.character(col_aggregation))),
@@ -216,21 +253,11 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
   if(any(popn_rate[[col_rate]] < 0)) {
     warning("apply_rate_to_population was passed negative rates")
   }
-  if(col_out %in% names(popn)) {
-    warning(paste("apply_rate_to_population is writing output count to a column name that was also in the input:", col_out,
-                  "\nThe output will contain the output in this column, so be careful with subsequent joins or binds."))
-  }
   
-  popn_rate_join_by <- col_aggregation[ col_aggregation %in% names(popn_rate) ]
+  popn_rate_join_by <- as.character(join_by)
   
-  if(anyDuplicated(data.table::as.data.table(popn_rate[popn_rate_join_by]))) {
-    one2many <- TRUE
-  } else {
-    one2many = FALSE
-  }
-  
-  if(!identical(additional_rate_levels, NA)) {
-    col_aggregation_rate <- unname(c(popn_rate_join_by, additional_rate_levels))
+  if(!identical(additional_rate_cols, NA)) {
+    col_aggregation_rate <- unname(c(popn_rate_join_by, additional_rate_cols))
   } else {
     col_aggregation_rate <- unname(popn_rate_join_by)
   }
@@ -240,25 +267,40 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
   assert_that(length(join_by) > 0,
               msg = "apply_rate_to_population must share some aggregation column names with the input popn_rate, or a column mapping must be included in the col_aggregation parameter")
   
+  
+  # if(anyDuplicated(data.table::as.data.table(popn[names(join_by)]))) {
+  #   many2one <- TRUE
+  # } else {
+  #   many2one = FALSE
+  # }
+  
   validate_population(popn,
                       col_aggregation = col_aggregation_popn,
                       col_data = col_popn,
                       test_complete = !missing_levels_popn,
-                      test_unique = TRUE,
+                      test_unique = !many2one,
                       check_negative_values = TRUE)
+  
+  # if(anyDuplicated(data.table::as.data.table(popn_rate[as.character(join_by)]))) {
+  #   one2many <- TRUE
+  # } else {
+  #   one2many = FALSE
+  # }
   
   validate_population(popn_rate,
                       col_aggregation = col_aggregation_rate,
                       col_data = col_rate,
                       test_complete = !missing_levels_rate,
-                      test_unique = FALSE,
+                      test_unique = !one2many,
                       check_negative_values = FALSE)
   
-  if(!missing_levels_rate) {
+  if(!missing_levels_rate & !missing_levels_popn) {
+    
+    aggregation_levels_match <- ifelse(many2one | one2many, FALSE, TRUE)
     validate_join_population(popn,
                              popn_rate,
                              cols_common_aggregation = join_by,
-                             aggregation_levels_match = aggregation_levels_match,
+                             aggregation_levels_match =  aggregation_levels_match,
                              many2one = many2one,
                              one2many = one2many,
                              warn_unused_shared_cols = FALSE)
@@ -272,10 +314,10 @@ validate_apply_rate_to_population_input <- function(popn, popn_rate, col_aggrega
 
 # Check the function output isn't doing anything unexpected
 
-validate_apply_rate_to_population_output <- function(output, col_out, popn, one2many, additional_rate_levels, missing_levels_popn, missing_levels_rate) {
+validate_apply_rate_to_population_output <- function(output, col_out, popn, one2many, col_output_order,
+                                                     missing_levels_popn, missing_levels_rate) {
   
-  output_col_aggregation <- unique(c(setdiff(names(popn), "popn__"), additional_rate_levels))
-  assert_that(all(output_col_aggregation %in% names(output)))
+  assert_that(all(col_output_order %in% names(output)))
   
   assert_that(col_out %in% names(output))
   
@@ -283,20 +325,14 @@ validate_apply_rate_to_population_output <- function(output, col_out, popn, one2
     assert_that(all(stats::complete.cases(output)))
   }
   
-  if(one2many | missing_levels_popn) {
-    output_comparison <- NA
-  } else {
-    output_comparison <- popn
-  }
-  
   if(!missing_levels_rate) {
     validate_population(output,
-                        col_aggregation = output_col_aggregation,
+                        col_aggregation = setdiff(col_output_order, col_out),
                         col_data = col_out,
                         test_complete = !missing_levels_popn,
-                        test_unique = TRUE,
+                        test_unique = !one2many,
                         check_negative_values = FALSE,
-                        comparison_pop = output_comparison)
+                        comparison_pop = NA)
   }
   
   invisible(TRUE)

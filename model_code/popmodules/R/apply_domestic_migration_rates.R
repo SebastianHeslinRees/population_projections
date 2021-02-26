@@ -51,10 +51,9 @@
 #'   migration rates. Default "rate"
 #' @param col_flow String. Name of column to write output flows to. Default
 #'   "flow".
-#' @param aggregation_levels_match Logical. Passed to \code{apply_rate_to_population}. If the two
-#'   input data frames cover the same domain and you expect every level of
-#'   \code{mign_rate} to be matched to by a level in \code{popn} set this to
-#'   TRUE, and this will be checked. Default FALSE.
+#' @param one2many Logical. Setting this to FALSE will check that no more than
+#'   one level from \code{popn_rate} matches to each level of \code{popn}. Default
+#'   TRUE
 #' @param many2one Logical. Passed to \code{apply_rate_to_population}. Setting to FALSE
 #'   will check that no more than one level from \code{popn} matches to each
 #'   level of \code{mign_rate}. Default TRUE.
@@ -93,7 +92,7 @@
 #'                  col_popn = "popn",
 #'                  col_rate = "rate",
 #'                  col_flow = "flow",
-#'                  aggregation_levels_match = FALSE,
+#'                  one2many = FALSE,
 #'                  many2one = TRUE,
 #'                  col_origin_destination = NA)
 #'
@@ -114,7 +113,7 @@ apply_domestic_migration_rates <- function(popn,
                                            col_popn = "popn",
                                            col_rate = "rate",
                                            col_flow = "flow",
-                                           aggregation_levels_match = FALSE,
+                                           one2many = TRUE,
                                            many2one = FALSE,
                                            col_origin_destination = NA) {
   
@@ -122,7 +121,7 @@ apply_domestic_migration_rates <- function(popn,
   # --------------
   validate_apply_domestic_migration_rates_input(popn, mign_rate, col_aggregation, col_gss_destination,
                                                 col_popn, col_rate, col_flow,
-                                                aggregation_levels_match, many2one, col_origin_destination)
+                                                one2many, many2one, col_origin_destination)
   
   # identify origin and destination columns if we don't have them
   # TODO: make the function require the origin and destination columns to simplify the code? or remove this complexity altogether???? or add gss_origin as input
@@ -150,9 +149,9 @@ apply_domestic_migration_rates <- function(popn,
                                         col_popn = col_popn,
                                         col_rate = col_rate,
                                         col_out = col_flow,
-                                        aggregation_levels_match = aggregation_levels_match,
+                                        one2many = one2many,
                                         many2one = many2one,
-                                        additional_rate_levels = col_gss_destination,
+                                        additional_rate_cols = col_gss_destination,
                                         missing_levels_popn = FALSE,
                                         missing_levels_rate = TRUE)
   
@@ -197,7 +196,7 @@ validate_apply_domestic_migration_rates_input <- function(popn,
                                                           col_popn,
                                                           col_rate,
                                                           col_flow,
-                                                          aggregation_levels_match,
+                                                          one2many,
                                                           many2one,
                                                           col_origin_destination) {
   
@@ -336,12 +335,13 @@ validate_apply_domestic_migration_rates_input <- function(popn,
     })
   
   if(try_join) {
+    aggregation_levels_match <- ifelse(many2one | one2many, FALSE, TRUE)
     validate_join_population(popn,
                              mign_validation,
                              cols_common_aggregation = validation_agg_levels,
                              aggregation_levels_match = aggregation_levels_match,
                              many2one = many2one,
-                             one2many = FALSE,
+                             one2many = one2many,
                              warn_unused_shared_cols = TRUE)
   }
   
