@@ -322,14 +322,20 @@ validate_small_area_input_components <- function(popn_estimates,
                       col_data = "in_migration_rate", comparison_pop = comparison_pop,
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_comparison = c("gss_code_small_area", "sex", "age"))
-  
-  validate_population(small_area_births_sya, col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
+  #this one
+  validate_population(filter(small_area_births_sya, year %in% unique(popn_estimates$year)),
+                      col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
-                      col_data = "births")
-  
-  validate_population(small_area_deaths_sya, col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
+                      col_data = "births",
+                      comparison_pop = filter(popn_estimates, age == 0),
+                      col_comparison = c("gss_code_small_area", "sex","year"))
+  #this one
+  validate_population(filter(small_area_deaths_sya, year %in% unique(popn_estimates$year)),
+                      col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
-                      col_data = "deaths")
+                      col_data = "deaths",
+                      comparison_pop = popn_estimates,
+                      col_comparison = c("gss_code_small_area", "sex", "age", "year"))
   
   validate_population(popn_constraint, col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
@@ -344,14 +350,18 @@ validate_small_area_input_components <- function(popn_estimates,
   validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "deaths", comparison_pop = popn_constraint)
-  
-  validate_population(fertility_rates, col_aggregation = c("gss_code", "age", "sex", "year"),
+  #this one
+  validate_population(filter(fertility_rates, year %in% unique(popn_constraint$year)),
+                      col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
-                      col_data = "rate")
-  
-  validate_population(mortality_rates, col_aggregation = c("gss_code", "age", "sex", "year"),
+                      col_data = "rate", comparison_pop = popn_constraint,
+                      col_comparison = c("gss_code", "sex", "age", "year"))
+  #this one
+  validate_population(filter(mortality_rates, year %in% unique(popn_constraint$year)),
+                      col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
-                      col_data = "rate")
+                      col_data = "rate", comparison_pop = popn_constraint,
+                      col_comparison = c("gss_code", "sex", "age", "year"))
   
   # Check geographies are all correct
   domain_small_area <- unique(popn_estimates$gss_code_small_area)
