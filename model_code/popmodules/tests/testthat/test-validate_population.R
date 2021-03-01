@@ -258,11 +258,11 @@ test_that("validate_population can handle comparison populations with the same i
   
   #validate_population doesn't allow matching in col_comparison parameter
   #The col_comparison functionality work here - surely that's a good thing?
-  # comp_pop <- rename(pop_test3, zone = area, Age = age)
-  # expect_error(validate_population(mort_test4, col_aggregation = c("area", "age"),
-  #                     col_data = "mort",
-  #                     comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age"),
-  #                     test_complete = FALSE))
+  comp_pop <- rename(pop_test3, zone = area, Age = age)
+  expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age"),
+                      col_data = "mort",
+                      comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age"),
+                      test_complete = FALSE))
   
   #validate_population comparison fails when comparison columns don't match and are a subset of aggregation columns
   expect_error(validate_population(filter(mort_test4, age != 3), col_aggregation = c("area", "age", "year"),
