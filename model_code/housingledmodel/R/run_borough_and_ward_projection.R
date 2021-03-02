@@ -6,6 +6,8 @@
 #'   trajectory.
 #' @param small_area_dev_trajectory_path String containing a path the the input
 #'   development trajectory at small-area resolution.
+#' @param external_trend_path String containing a path to the outputs of the
+#'   trend model run on which to base this housing-led projection
 #' @param first_proj_yr Integer. First year of projection.
 #' @param last_proj_yr Integer. Last year of projection.
 #' @param bpo Logical. Is this a bpo projection. Used in setting the output dir
@@ -30,6 +32,7 @@
 run_borough_and_ward_projection <- function(projection_name,
                                             dev_trajectory_path,
                                             small_area_dev_trajectory_path,
+                                            external_trend_path,
                                             first_proj_yr,
                                             last_proj_yr,
                                             bpo=FALSE,
@@ -38,8 +41,6 @@ run_borough_and_ward_projection <- function(projection_name,
                                             fertility_scenario,
                                             ldd_final_yr,
                                             constrain_projection) {
-
-  external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
   
   communal_est_file <- "dclg_communal_est_population.rds"
   trend_households_file <- "dclg_stage_1_households.rds"
@@ -48,26 +49,28 @@ run_borough_and_ward_projection <- function(projection_name,
   external_ahs_trajectory_path <- paste0(external_trend_path,"households/dclg_ahs.rds")
   
   hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
-  ahs_cap_year <- 2019
+  ahs_cap_year <- 2020
   
   ahs_method <- 0
-  last_data_yr <- 2018
+  last_data_yr <- 2019
   
-  additional_births_path <- "input_data/fertility/births_2019.rds"
+  additional_births_path <- NULL
   
   if(fertility_scenario == "average"){
-    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_avg.rds"
+    fertility_rates_path <- "input_data/fertility/fert_rates_5yr_avg_2019_gla_mye.rds"
   }
   
   if(fertility_scenario == "trend"){
-    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2019_in_london_5yr_trend.rds"
+    fertility_rates_path <- "input_data/fertility/fert_rates_5yr_trend_2019_gla_mye.rds"
   }
   
   if(bpo==FALSE){
-    output_dir <- paste0("outputs/housing_led/2018/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+    output_dir <- paste0("outputs/housing_led/2019/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   } else {
-    output_dir <- paste0("outputs/housing_led/2018/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
+    output_dir <- paste0("outputs/housing_led/2019/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
+  
+  popn_adjustment_path <- "input_data/scenario_data/covid19_upc.rds"
   
   list2env(housing_led_params, environment())
   
@@ -93,7 +96,7 @@ run_borough_and_ward_projection <- function(projection_name,
     ahs_method = ahs_method,
     additional_births_path = additional_births_path,
     fertility_rates_path = fertility_rates_path,
-    popn_adjustment_path = NULL)
+    popn_adjustment_path = popn_adjustment_path)
   
   #---------------------
   #run projection
@@ -120,7 +123,7 @@ run_borough_and_ward_projection <- function(projection_name,
   borough_fertility_rates_path <- paste0(config_list$external_trend_path,"fertility_rates.rds")
   borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates.rds")
   
-  last_data_yr <- 2018
+  last_data_yr <- 2019
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <- config_list$last_proj_yr
   birth_rate_n_years_to_avg <- 5

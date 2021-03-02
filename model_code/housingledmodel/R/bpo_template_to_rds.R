@@ -7,10 +7,7 @@
 #' @param csv_name String. The name of the dwelling trajectory csv saved in the
 #'   \code{bpo_dir} folder. With or without the "csv" suffix.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv.
-#' @param shlaa_first_yr Numeric. The first year in which to use shlaa development data.
-#'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.
-#' @param dev_first_yr Numeric. The first year for which development data is provided.
-#'   \code{Default 2019}.  
+#' @param trajectory_range Numeric. The years covered by the input trajectory.
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom tidyr pivot_longer replace_na
@@ -20,15 +17,13 @@
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
-                                shlaa_first_yr = 2042,
-                                dev_first_yr = 2019){
+                                trajectory_range){
 
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
   csv_path <- paste0(bpo_dir,"csvs/",csv_name)
   bpo_name <- substr(csv_name,1,nchar(csv_name)-4)
-  dev_years <- dev_first_yr:(shlaa_first_yr-1)
-  
+
   #Read in data, do a check and find where the data starts and finishes
   tbl <- data.table::fread(csv_path, header=FALSE) %>% as.data.frame()
   assert_that(ncol(tbl)==32, msg="number of columns in input housing trajectory is wrong")
@@ -49,8 +44,8 @@ bpo_template_to_rds <- function(csv_name,
   assert_that(length(borough_gss) == 1)
   
   #read in standard shlaa trajectories
-  ward_shlaa_trajectory <- readRDS("input_data/small_area_model/ward_shlaa_trajectory.rds")
-  borough_shlaa_trajectory <- readRDS("input_data/housing_led_model/borough_shlaa_trajectory.rds")
+  ward_shlaa_trajectory <- readRDS("input_data/small_area_model/ward_shlaa_trajectory_2020.rds")
+  borough_shlaa_trajectory <- readRDS("input_data/housing_led_model/borough_shlaa_trajectory_2020.rds")
   
   rm(tbl, unc_row, no_of_gss_codes)
   
@@ -65,7 +60,7 @@ bpo_template_to_rds <- function(csv_name,
              dev = as.numeric(dev)) %>%
       rename(gss_code_ward = GSS.Code.Ward) %>%
       select(year, gss_code_ward, dev) %>%
-      filter(year %in% dev_years) %>%
+      filter(year %in% trajectory_range) %>%
       as.data.frame() %>%
       tidyr::replace_na(list(dev = 0))
       

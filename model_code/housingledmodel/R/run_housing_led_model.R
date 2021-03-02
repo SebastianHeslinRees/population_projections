@@ -51,7 +51,7 @@ run_housing_led_model <- function(config_list){
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
-
+  
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -75,9 +75,10 @@ run_housing_led_model <- function(config_list){
   component_rates <- get_data_from_file(
     list(fertility_rates = config_list$fertility_rates_path,
          mortality_rates = paste0(config_list$external_trend_path,"mortality_rates.rds"),
-         int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates.rds"),
+         int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_flows.rds"),
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds")))
   component_rates <- lapply(component_rates, filter_to_LAs)
+  component_rates[[1]] <- complete_fertility(component_rates[[1]], component_rates[[2]])
   
   if(!is.null(config_list$additional_births_path)){
     additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
@@ -147,7 +148,7 @@ run_housing_led_model <- function(config_list){
   ldd_backseries <- readRDS(config_list$ldd_backseries_path) %>%
     filter(year <= config_list$ldd_final_yr) %>%
     select(names(development_trajectory))
-
+  
   additional_dwellings <- ldd_backseries %>%
     rbind(filter(development_trajectory, year > config_list$ldd_final_yr)) %>%
     arrange(gss_code, year)
@@ -357,7 +358,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
   assert_that(max(communal_establishment_population$year) >= last_proj_yr)
   assert_that(max(external_ahs$year) >= last_proj_yr)
   assert_that(max(dwelling_trajectory$year) >= last_proj_yr)
-
+  
   
   if(constrain_projection){
     assert_that(min(component_constraints[['birth_constraint']]$year) <= first_proj_yr)
@@ -370,7 +371,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
     
     assert_that(min(hma_constraint$year) <= first_proj_yr)
     assert_that(max(hma_constraint$year) >= last_proj_yr)
-
+    
   }
   
   assert_that(is.numeric(ahs_method) | ahs_method == "tree")
@@ -381,10 +382,8 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
     col_data = intersect(names(component_rates[[i]]), c("rate", "int_out", "int_in"))
     validate_population(component_rates[[i]],
                         col_aggregation = c("year", "gss_code", "age", "sex"),
-                        col_data = col_data,
-                        comparison_pop = curr_yr_popn,
-                        col_comparison = c("gss_code", "age", "sex"),
-                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+                        col_data = col_data)
+
   }
   if(!is.null(popn_adjustment)) {
     validate_population(popn_adjustment, col_data = "upc",

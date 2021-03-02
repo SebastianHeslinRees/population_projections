@@ -7,16 +7,13 @@
 #'
 #' @param bpo_name String. The name of the dwelling trajectory csv saved in the
 #'   folder \code{bpo_dir} folder. The output projection will also have this name.
-#' @param shlaa_first_yr Numeric. The first year to use shlaa development data.
-#'   Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.
-#' @param first_proj_yr Numeric. The first projection year \code{default 2019}
-#' @param last_proj_yr Numeric. The final projection year \code{default 2050}
-#' @param dev_first_yr Numeric. The first year for which development data is
-#'   provided. \code{Default 2019}.
+#' @param trajectory_range Numeric or NULL. The years covered by the input trajectory.
+#'  \code{Default 2020:2041}. If NULL the SHLAA trajectory is used.
+#' @param projection_range Numeric. The years to project. \code{Default 2020:2050}.
 #' @param ldd_final_yr Numeric. The final year of the LDD dwellings backseries.
-#'   \code{Default 2018}.
+#'   \code{Default 2019}.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv
-#' @param migration_scenario String. The domestic migration scenario \code{high},
+#' @param variant String. The domestic migration scenario \code{high},
 #'   \code{medium} or \code{low}.
 #' @param csv_name String. The name of the dwelling trajectory csv saved in the
 #'   \code{bpo_dir} folder. With or without the "csv" suffix. Default is \code{bpo_name}
@@ -30,63 +27,89 @@
 #' @export
 
 run_bpo_projection <- function(bpo_name,
-                               shlaa_first_yr = 2042,
-                               first_proj_yr = 2019,
-                               last_proj_yr = 2050,
-                               dev_first_yr = 2019,
-                               ldd_final_yr = 2018,
-                               bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/",
-                               migration_scenario,
+                               trajectory_range = 2020:2041,
+                               projection_range = 2020:2050,
+                               ldd_final_yr = 2019,
+                               bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2019_based/",
+                               variant,
                                csv_name = bpo_name,
                                housing_led_params = list(),
-                               fertility_scenario = "average"){
+                               fertility_scenario = "trend"){
   
-  message(paste(bpo_name, "-", migration_scenario))
- 
-  dom_rates_loc <- "input_data/domestic_migration/processed_rates/"
-
-  if(migration_scenario == "high"){
-    housing_led_params$external_trend_path <- "outputs/trend/2018/high_mig_20-03-10_1436/"
-    housing_led_params$domestic_rates <- list('2019'  = list(path = paste0(dom_rates_loc,"dom_rates_3yr_avg_2018.rds"),
-                                                             transition = F))
+  message(paste(bpo_name, "-", variant))
+  
+  first_proj_yr <- min(projection_range)
+  last_proj_yr <- max(projection_range)
+  
+  #Some checks on the LDD year
+  if(ldd_final_yr > 2019){stop("ldd_final_yr cannot be greater than 2019")}
+  if(ldd_final_yr >= min(trajectory_range)){
+    message(paste0("Warning message:\n",
+                   "ldd_final_year is ", ldd_final_yr, " but the trajectory starts in ",
+                   min(trajectory_range), ".\nTrajectory years up to and including ",  ldd_final_yr,
+                   " will be overwritten.\nTo use the input trajectory for those years set the ",
+                   "ldd_final_year parameter to ", min(trajectory_range)-1))
+  }
+  
+  #Set the domestic migration data and paths for the variant projection that's been selected
+  dom_rates_loc <- "input_data/domestipc_migration/processed_rates/"
+  
+  if(variant == "low"){
+    #CH (central, high)
+    external_trend_path <- "outputs/trend/2019/2019_variant_CH_20-11-27_1154/"
+    housing_led_params$domestic_rates <- list('2020' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+                                                            transition = F),
+                                              '2022' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+                                                            transition = T),
+                                              '2028' = list(path = "input_data/scenario_data/domestic_high_out.rds",
+                                                            transition = F))
     
-  } else if(migration_scenario == "medium"){
-    housing_led_params$external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
-    housing_led_params$domestic_rates = list('2019' = list(path = paste0(dom_rates_loc,"dom_rates_5yr_avg_2018.rds"),
+  } else if(variant == "high"){
+    #CC (central, central)
+    external_trend_path <- "outputs/trend/2019/2019_variant_CC_20-11-27_1153/"
+    housing_led_params$domestic_rates = list('2020' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
                                                            transition = F),
-                                             '2024'= list(path = paste0(dom_rates_loc,"dom_rates_10yr_avg_2018.rds"),
-                                                          transition = F))
+                                             '2022' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+                                                           transition = T),
+                                             '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_gla_mye.rds",
+                                                           transition = F))
     
-  } else if(migration_scenario == "low"){
-    housing_led_params$external_trend_path <- "outputs/trend/2018/low_mig_20-03-10_1446/"
+  } else {stop("migration scenario must be low or high") }
+  
+  #process the csv trajectory into an rds file
+  #if no trajectory is supplied then use SHLAA
+  #Also, figure out the gss code for the borough in question
+  if(!is.null(trajectory_range)){
+    borough_gss <- bpo_template_to_rds(csv_name = csv_name,
+                                       bpo_dir = bpo_dir,
+                                       trajectory_range = trajectory_range)
+    dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_borough_trajectory_",csv_name,".rds")
+    small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
     
-    housing_led_params$domestic_rates = list('2019' = list(path = paste0(dom_rates_loc,"dom_rates_5yr_avg_2018.rds"),
-                                                           transition = F),
-                                             '2024'= list(path = paste0(dom_rates_loc,"dom_rates_4yr_avg_2012.rds"),
-                                                          transition = F))
-  }else if(migration_scenario == "other"){
-    housing_led_params$domestic_rates <- list('2019'  = list(path = "input_data/migration/low_domestic_migration_rates_(2009_2012).rds",
-                                                             tranition = F))
-  } else {stop("migration scenario must be low, medium or high") }
+  } else {
+    borough_gss <- readRDS("input_data/lookup/gss_code_to_name.rds") %>% 
+      mutate(short_name = tolower(substr(gss_name,1,4))) %>% 
+      filter(substr(gss_code,1,3)=="E09",
+             short_name == substr(bpo_name,1,4)) %>% 
+      unique() %>% 
+      .$gss_code
+    dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory_2020.rds"
+    small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory_2020.rds"
+  }
   
-  #trajectory
-  borough_gss <- bpo_template_to_rds(csv_name = csv_name,
-                                     bpo_dir = bpo_dir,
-                                     shlaa_first_yr = shlaa_first_yr,
-                                     dev_first_yr = dev_first_yr)
-  
-  dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_borough_trajectory_",csv_name,".rds")
-  small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
-  
-  projection_name <- paste0(bpo_name,"_",migration_scenario,"_migration")
+  #give the projection a name
+  projection_name <- paste0(bpo_name,"_",variant,"_variant")
   if(fertility_scenario == "trend"){
     projection_name <- paste0(projection_name,"_trend_fertility")
+  } else {
+    projection_name <- paste0(projection_name,"_avg_fertility")
   }
- 
-  #projection
+  
+  #run the projection
   bpo_projection <- run_borough_and_ward_projection(projection_name = projection_name,
                                                     dev_trajectory_path = dev_trajectory_path,
                                                     small_area_dev_trajectory_path = small_area_dev_trajectory_path,
+                                                    external_trend_path = external_trend_path,
                                                     first_proj_yr = first_proj_yr,
                                                     last_proj_yr = last_proj_yr,
                                                     bpo = borough_gss,
@@ -96,5 +119,5 @@ run_bpo_projection <- function(bpo_name,
                                                     constrain_projection = FALSE)
   
   message("complete")
-
+  
 }
