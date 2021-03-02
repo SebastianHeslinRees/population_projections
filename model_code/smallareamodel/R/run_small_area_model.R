@@ -322,14 +322,12 @@ validate_small_area_input_components <- function(popn_estimates,
                       col_data = "in_migration_rate", comparison_pop = comparison_pop,
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_comparison = c("gss_code_small_area", "sex", "age"))
-  #this one
   validate_population(filter(small_area_births_sya, year %in% unique(popn_estimates$year)),
                       col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "births",
                       comparison_pop = filter(popn_estimates, age == 0),
                       col_comparison = c("gss_code_small_area", "sex","year"))
-  #this one
   validate_population(filter(small_area_deaths_sya, year %in% unique(popn_estimates$year)),
                       col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
@@ -350,13 +348,11 @@ validate_small_area_input_components <- function(popn_estimates,
   validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "deaths", comparison_pop = popn_constraint)
-  #this one
   validate_population(filter(fertility_rates, year %in% unique(popn_constraint$year)),
                       col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "rate", comparison_pop = popn_constraint,
                       col_comparison = c("gss_code", "sex", "age", "year"))
-  #this one
   validate_population(filter(mortality_rates, year %in% unique(popn_constraint$year)),
                       col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
