@@ -102,7 +102,8 @@ validate_complete_fertility_inputs <- function(fertility, population, col_sex_fe
   if (!is.null(col_age_fert)) assert_that(all(unique(fertility[[col_age_fert]]) %in% unique(population[[col_age_popn]])), msg = "fertility and population dataframes appear to encode age differently")
   if (!is.null(col_age_fert)) assert_that(is.numeric(fertility[[col_age_fert]]) & is.numeric(population[[col_age_popn]]))
 
-  validate_population(fertility, col_aggregation = setdiff(names(fertility), col_rate))
+  validate_population(fertility, col_aggregation = setdiff(names(fertility), col_rate),
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
 
   invisible(TRUE)
 }

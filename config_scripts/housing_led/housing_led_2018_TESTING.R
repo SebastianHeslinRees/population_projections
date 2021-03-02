@@ -1,11 +1,10 @@
 library(popmodules)
 library(smallareamodel)
-library(popmodules)
 library(trendmodel)
 library(housingledmodel)
 
 #Setup
-external_trend_path <- "outputs/trend/2018/2018_central_20-07-14_0951/"
+external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 
 projection_name <- "2018_based_shlaa_test"
 communal_est_file <- "dclg_communal_est_population.rds"
@@ -20,7 +19,7 @@ popn_adjustment_path <- NULL
 hma_list <- NULL
 constrain_projection <- FALSE
 first_proj_yr <- 2019
-last_proj_yr <- 2050
+last_proj_yr <- 2023
 ahs_cap_year <- 2019
 ahs_method <- 0
 
@@ -130,7 +129,6 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          small_area_deaths_sya_path = small_area_deaths_sya_path)
 
 #---------------------
-source('model_code/model_scripts/load_gla_models.R')
 load_gla_models()
 rm(list = setdiff(ls(), c("config_list","ward_config_list")))
 projection <- run_housing_led_model(config_list)

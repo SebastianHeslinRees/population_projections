@@ -51,7 +51,8 @@ smoothed_curves <- smooth_fertility(ons_fert)$data %>%
   rename(rate = fert_rate) %>%
   mutate(gss_code = as.character(gss_code))
 
-validate_population(smoothed_curves, col_data = "rate")
+validate_population(smoothed_curves, col_data = "rate",
+                    test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
 
 
 dir.create("input_data/fertility", recursive = TRUE, showWarnings = FALSE)

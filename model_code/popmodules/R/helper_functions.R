@@ -28,16 +28,16 @@
 .convert_to_named_vector <- function(vec) {
   assert_that(is.vector(vec) | is.factor(vec),
               msg = ".convert_to_named_vector needs a vector or a factor as input")
-
+  
   if (identical(NA, vec)) return(vec)
-
+  
   if(is.null(names(vec))) {
     names(vec) <- vec
   } else {
     ix <- names(vec) == ""
     names(vec)[ix] <- vec[ix]
   }
-
+  
   return(vec)
 }
 
@@ -68,7 +68,7 @@
     icol <- col_mapping[i]
     source_col <- dfsource[[names(icol)]]
     target_col <- dftarget[[icol]]
-
+    
     if(is.factor(source_col) & !is.factor(target_col)) {
       if(setequal(levels(source_col), as.character(dftarget[[icol]]))) {
         dftarget[[icol]] <- factor(dftarget[[icol]])
@@ -77,16 +77,18 @@
                       col_mapping[i],"- a factor conversion will not be performed"))
       }
     }
-
+    
     if(!is.factor(source_col) & is.factor(target_col)) {
       col_class <- class(source_col)
       if(col_class == "numeric") {
         dftarget[[icol]] <- as.numeric(levels(target_col)[target_col])
+      } else if(col_class == "integer"){
+        dftarget[[icol]] <- as.integer(levels(target_col)[target_col])
       } else {
         dftarget[[icol]] <- as.character(target_col)
       }
     }
-
+    
   }
   return(dftarget)
 }

@@ -89,7 +89,8 @@ validate_births_input <- function(pop, col_aggregation, const, col_age) {
   validate_population(pop,
                       col_aggregation = col_aggregation,
                       test_complete = TRUE,
-                      test_unique = TRUE)
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
 
   if(nrow(pop) == 0) {
     warning("null_births was given an empty input table")

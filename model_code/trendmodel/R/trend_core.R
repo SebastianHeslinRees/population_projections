@@ -84,14 +84,25 @@ trend_core <- function(start_population,
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
   
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
-  validate_population(aged_popn_w_births, col_data = "popn", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
+  
+  validate_population(aged_popn_w_births, col_data = "popn",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = mutate(as.data.frame(start_population), year=year+1))
 
   deaths <- apply_rate_to_population(popn = aged_popn_w_births,
                                      popn_rate = mortality_rates,
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_out = "deaths")
-  validate_population(deaths, col_data = "deaths", comparison_pop = mutate(as.data.frame(start_population), year=year+1))
+  
+  validate_population(deaths, col_data = "deaths",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
+                      comparison_pop = mutate(as.data.frame(start_population), year=year+1))
+  
   validate_join_population(aged_popn_w_births, deaths, many2one = FALSE, one2many = FALSE)
   
   if(!is.null(constraints)){
@@ -118,7 +129,11 @@ trend_core <- function(start_population,
                                         col_out = "int_out")
   }
   
-  validate_population(int_out, col_data = "int_out")
+  validate_population(int_out, col_data = "int_out",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
+  
   validate_join_population(aged_popn_w_births, int_out, many2one = FALSE, one2many = FALSE)
   
   
@@ -133,7 +148,12 @@ trend_core <- function(start_population,
   }
   
   int_in <- int_in_flows
-  validate_population(int_in, col_data = "int_in")
+  
+  validate_population(int_in, col_data = "int_in",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
+  
   validate_join_population(aged_popn_w_births, int_in, many2one = FALSE, one2many = FALSE)
   
   if(!is.null(constraints)){
@@ -219,6 +239,9 @@ trend_core <- function(start_population,
   next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn)
   
   validate_population(next_yr_popn, col_data = "popn",
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE,
                       comparison_pop = start_population,
                       col_comparison = c("gss_code","sex","age"))
   

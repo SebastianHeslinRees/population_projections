@@ -151,15 +151,13 @@ missing_deaths <- approx(x = 1:nrow(deaths), y = deaths$deaths, xout = (1:nrow(d
 deaths$deaths[ix] <- missing_deaths$y
 deaths <- arrange(deaths, gss_code, year, sex, age)
 
-
-# TODO: CALL SOME DATA CHECKING FUNCTIONS HERE
-validate_population(births)
-validate_population(deaths)
-validate_population(population)
-validate_population(international_in)
-validate_population(international_out)
-validate_population(international_net)
-validate_population(upc)
+validate_population(births, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(deaths, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(population, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(international_in, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(international_out, test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+validate_population(international_net, test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
+validate_population(upc, test_complete = TRUE, test_unique = TRUE, check_negative_values = FALSE)
 
 validate_same_geog(population, births)
 validate_same_geog(population, deaths)

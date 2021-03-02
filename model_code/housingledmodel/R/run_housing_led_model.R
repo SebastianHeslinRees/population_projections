@@ -375,21 +375,30 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
   
   assert_that(is.numeric(ahs_method) | ahs_method == "tree")
   
-  validate_population(curr_yr_popn, col_aggregation = c("year", "gss_code", "age", "sex"), col_data = "popn")
+  validate_population(curr_yr_popn, col_aggregation = c("year", "gss_code", "age", "sex"), col_data = "popn",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   for(i in seq_along(component_rates)) {
     col_data = intersect(names(component_rates[[i]]), c("rate", "int_out", "int_in"))
     validate_population(component_rates[[i]],
                         col_aggregation = c("year", "gss_code", "age", "sex"),
                         col_data = col_data,
                         comparison_pop = curr_yr_popn,
-                        col_comparison = c("gss_code", "age", "sex"))
+                        col_comparison = c("gss_code", "age", "sex"),
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   }
   if(!is.null(popn_adjustment)) {
-    validate_population(popn_adjustment, col_data = "upc", test_complete = FALSE, check_negative_values = FALSE)
+    validate_population(popn_adjustment, col_data = "upc",
+                        test_complete = FALSE, check_negative_values = FALSE,
+                        test_unique = TRUE)
   }
   if(!is.null(additional_births)) {
-    validate_population(additional_births, col_data = "births", test_complete = FALSE)
+    validate_population(additional_births, col_data = "births", test_complete = FALSE,
+                        test_unique = TRUE, check_negative_values = TRUE)
   }
-  validate_population(household_trajectory_static, col_aggregation = c("gss_code", "year"), col_data = "households")
-  validate_population(household_trajectory_adjusted, col_aggregation = c("gss_code", "year"), col_data = "households")
+  validate_population(household_trajectory_static, col_aggregation = c("gss_code", "year"),
+                      col_data = "households",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(household_trajectory_adjusted, col_aggregation = c("gss_code", "year"),
+                      col_data = "households",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
 }

@@ -29,5 +29,6 @@ Imports:
     testthat (>= 2.1.0),
     stringr,
     loggr,
-    devtools
+    devtools,
+    tidyselect
 RoxygenNote: 7.1.1

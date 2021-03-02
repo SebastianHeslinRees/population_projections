@@ -29,20 +29,20 @@ project_rates_npp <- function(jump_off_rates,
                               first_proj_yr,
                               n_proj_yr,
                               npp_var="2018_principal"){
-
+  
   rate_trajectory <- readRDS(rate_trajectory_filepath)
-
+  
   #Test/validate
   check_validate_proj_rates_npp(jump_off_rates, rate_col, rate_trajectory, first_proj_yr, n_proj_yr, npp_var)
   final_projection_year <- first_proj_yr + n_proj_yr -1
   jump_off_year <- max(jump_off_rates$year)
   assert_that(all((jump_off_year + 1):final_projection_year %in% rate_trajectory$year))
-
+  
   backseries <- filter(jump_off_rates, year < jump_off_year)
   jump_off_rates <- filter(jump_off_rates, year == jump_off_year)
   # calculate the rate changes relative to the first year, and apply this to the
   # jump off rate to calulate the rest of the projection years
-
+  
   rates <- rate_trajectory %>%
     filter(variant == npp_var) %>%
     filter(year > jump_off_year) %>%
@@ -61,13 +61,13 @@ project_rates_npp <- function(jump_off_rates,
     rbind(jump_off_rates, backseries) %>%
     arrange(gss_code,sex,age,year) %>%
     as.data.frame() 
-    
-
-  validate_population(rates, col_aggregation = c("gss_code", "sex", "age", "year"),
-                      col_data = rate_col)
-
+  
+  
+  validate_population(rates, col_aggregation = c("gss_code", "sex", "age", "year"), col_data = rate_col,
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  
   return(rates)
-
+  
 }
 
 
@@ -76,12 +76,12 @@ project_rates_npp <- function(jump_off_rates,
 # Function to check that the input to project_fertility_rates is all legal
 
 check_validate_proj_rates_npp <- function(jump_off_rates,
-                                           rate_col,
-                                           rate_trajectory,
-                                           first_proj_yr,
-                                           n_proj_yr,
-                                           npp_var) {
-
+                                          rate_col,
+                                          rate_trajectory,
+                                          first_proj_yr,
+                                          n_proj_yr,
+                                          npp_var) {
+  
   # test input parameters are of the correct type
   assert_that(is.data.frame(jump_off_rates),
               msg="jump_off_rates expects a data frame as input")
@@ -95,13 +95,13 @@ check_validate_proj_rates_npp <- function(jump_off_rates,
               msg="n_proj_yr expects an integer as input")
   assert_that(is.character(npp_var),
               msg="npp_var expects character input")
-
+  
   #TODO find out why these fall over
-  validate_population(jump_off_rates, col_data = rate_col)
+  validate_population(jump_off_rates, col_data = rate_col,
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   #validate_population(rate_trajectory, col_aggregation = c("sex","age","year","variant"))
   validate_join_population(jump_off_rates, rate_trajectory, cols_common_aggregation = c("sex", "age", "year"))
-
-
+  
 }
 
 

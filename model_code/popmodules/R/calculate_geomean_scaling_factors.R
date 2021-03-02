@@ -59,9 +59,13 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
 
 validate_geomean_scaling_factors_inputs <- function(popn, future_rates, data_years, constraint, constraint_data_col) {
 
-  validate_population(popn, col_aggregation = c("year", "gss_code_small_area", "age", "sex"), col_data = "popn")
-  validate_population(future_rates, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate")
-  validate_population(constraint, col_aggregation = c("year", "gss_code_small_area"), col_data = constraint_data_col)
+  validate_population(popn, col_aggregation = c("year", "gss_code_small_area", "age", "sex"), col_data = "popn",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(future_rates, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate",
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  validate_population(constraint, col_aggregation = c("year", "gss_code_small_area"), col_data = constraint_data_col,
+                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+  
   validate_join_population(popn, future_rates, cols_common_aggregation = c("gss_code", "age", "sex"), one2many=FALSE)
 
   assertthat::assert_that(all(data_years %in% (popn$year+1)),  # +1 because we age on
