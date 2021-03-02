@@ -256,6 +256,7 @@ test_that("validate_population can handle comparison populations with the same i
                                     comparison_pop = pop_test3, col_comparison = c("area", "age")))
   
   #validate_population allows matching in col_comparison parameter
+
   comp_pop <- rename(pop_test3, zone = area, Age = age)
   expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age"),
                                     col_data = "mort",
