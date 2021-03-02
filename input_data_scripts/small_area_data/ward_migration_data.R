@@ -158,6 +158,7 @@ rm(borough_international_in, ward_int_in, ward_all_in)
 london_wards <- filter(ward_to_district, grepl("E09", gss_code))$gss_code_ward
 
 ward_births_2011 <- readRDS(ward_births_path) %>%
+        filter(year == 2011) %>% 
         select(year, gss_code_ward, sex, age, births) 
 
 ward_deaths_2011 <- readRDS(ward_deaths_path) %>%

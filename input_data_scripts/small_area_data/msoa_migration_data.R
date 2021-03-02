@@ -253,6 +253,7 @@ international_in <- left_join(international_in, msoa_to_district, by="gss_code_m
 
 ####Out migration rates####
 msoa_births_2011 <- readRDS(msoa_births_path) %>%
+        filter(year == 2011) %>% 
         select(year, gss_code_msoa, sex, age, births)
 
 msoa_deaths_2011 <- readRDS(msoa_deaths_path) %>% 
