@@ -253,16 +253,19 @@ test_that("validate_population can handle comparison populations with the same i
   #validate_population allows comparison columns to be a subset of aggregation columns"
   expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
                                     col_data = "mort",
-                                    comparison_pop = pop_test3, col_comparison = c("area", "age"),
-                                    test_complete = TRUE))
+                                    comparison_pop = pop_test3, col_comparison = c("area", "age")))
   
-  #validate_population doesn't allow matching in col_comparison parameter
-  #The col_comparison functionality work here - surely that's a good thing?
+  #validate_population allows matching in col_comparison parameter
   comp_pop <- rename(pop_test3, zone = area, Age = age)
   expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age"),
+                                    col_data = "mort",
+                                    comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age")))
+  
+  #validate_population allows matching in col_comparison parameter AND col_comparison to be a subset of aggregation cols
+  #ERROR HERE
+  expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
                       col_data = "mort",
-                      comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age"),
-                      test_complete = FALSE))
+                      comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age")))
   
   #validate_population comparison fails when comparison columns don't match and are a subset of aggregation columns
   expect_error(validate_population(filter(mort_test4, age != 3), col_aggregation = c("area", "age", "year"),

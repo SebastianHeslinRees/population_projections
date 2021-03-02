@@ -56,7 +56,7 @@ validate_population <- function(population,
                                 check_negative_values = FALSE,
                                 comparison_pop = NA,
                                 col_comparison = col_aggregation) {
-  
+ 
   #make sure col_aggregation is not a named vector
   col_aggregation <- unname(col_aggregation)
   
@@ -139,14 +139,13 @@ validate_population <- function(population,
     }
   }
   
-  
   # CHECK: if there's a comparison data frame, make sure the aggregation levels match
   if(!identical(comparison_pop, NA)) {
     
     # drop missing factor levels from the comparison population (we warned about them above)
     comparison_pop <- as.data.frame(droplevels(comparison_pop))
     
-    # rename columns in comparison table
+    # rename columns in comparison table if necessary
     if(!is.null(names(col_comparison))) {
       names(col_comparison) <- ifelse(names(col_comparison)=="",
                                       col_comparison,
@@ -156,7 +155,7 @@ validate_population <- function(population,
       
       assert_that(!any(duplicated(names(comparison_pop))),
                   msg="Renaming columns in the comparison data frame in validate_population resulted in duplicate column names. This occurs when a column in pop2 isn't an aggregation level but has the same name as an aggregation level in pop1") # check no duplicate names
-      assert_that(all(col_aggregation %in% names(comparison_pop)))
+      
       col_comparison <- names(col_comparison)
       
     }
