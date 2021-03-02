@@ -263,7 +263,6 @@ test_that("validate_population can handle comparison populations with the same i
                                     comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age")))
   
   #validate_population allows matching in col_comparison parameter AND col_comparison to be a subset of aggregation cols
-  #ERROR HERE
   expect_silent(validate_population(mort_test4, col_aggregation = c("area", "age", "year"),
                       col_data = "mort",
                       comparison_pop = comp_pop, col_comparison = c("area" = "zone", "age" = "Age")))
