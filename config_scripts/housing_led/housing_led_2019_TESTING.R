@@ -4,6 +4,7 @@ library(trendmodel)
 library(housingledmodel)
 
 #Setup
+#NOTE: This needs to be a trend projection that exists at the path location
 external_trend_path <- "outputs/trend/2019/2019_variant_CC_20-11-27_1153/"
 
 projection_name <- "2019_based_shlaa_test"
@@ -36,7 +37,7 @@ domestic_rates <- list('2020' = list(path = "input_data/scenario_data/dom_covid_
                                      transition = F))
 
 
-fertility_rates_path <- paste0(external_trend_path/"fertility_rates.rds")
+fertility_rates_path <- paste0(external_trend_path,"/fertility_rates.rds")
 
 #------------------
 
