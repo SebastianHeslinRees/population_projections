@@ -8,6 +8,7 @@ run_borough_and_ward_projection(
   projection_name,
   dev_trajectory_path,
   small_area_dev_trajectory_path,
+  external_trend_path,
   first_proj_yr,
   last_proj_yr,
   bpo = FALSE,
@@ -27,6 +28,9 @@ trajectory.}
 
 \item{small_area_dev_trajectory_path}{String containing a path the the input
 development trajectory at small-area resolution.}
+
+\item{external_trend_path}{String containing a path to the outputs of the
+trend model run on which to base this housing-led projection}
 
 \item{first_proj_yr}{Integer. First year of projection.}
 

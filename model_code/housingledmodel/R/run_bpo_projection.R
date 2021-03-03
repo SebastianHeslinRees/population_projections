@@ -14,7 +14,7 @@
 #'   \code{Default 2019}.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv
 #' @param variant String. The domestic migration scenario \code{high},
-#'   \code{medium} or \code{low}.
+#'   \code{high} or \code{low}.
 #' @param csv_name String. The name of the dwelling trajectory csv saved in the
 #'   \code{bpo_dir} folder. With or without the "csv" suffix. Default is \code{bpo_name}
 #' @param housing_led_params A list of parameters (a partial config list) to be
