@@ -2,9 +2,9 @@ library(dplyr)
 library(popmodules)
 
 output_loc <- "input_data/mye/"
-int_out_mye_path <-  "input_data/mye/2019/int_out_ons.rds"
+int_out_mye_path <-  "input_data/mye/2019/int_out_gla.rds"
 births_path <-  "input_data/mye/2019/births_ons.rds"
-popn_path <-  "input_data/mye/2019/population_ons.rds"
+popn_path <-  "input_data/mye/2019/population_gla.rds"
 
 #Average FLOWS
 
