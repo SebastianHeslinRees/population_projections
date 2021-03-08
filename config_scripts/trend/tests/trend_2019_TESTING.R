@@ -12,7 +12,7 @@ int_in_mye_path <-  paste0("input_data/mye/2019/int_in_ons.rds")
 dom_out_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds")
 dom_in_mye_path <- paste0("input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds")
 upc_mye_path <- "input_data/mye/2019/upc_ons.rds"
-popn_adjustment_path <- "input_data/scenario_data/covid19_upc.rds"
+popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
 
 int_out_flow_or_rate <- "flow"
 

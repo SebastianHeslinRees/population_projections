@@ -5,7 +5,7 @@ library(housingledmodel)
 
 #Setup
 #NOTE: This needs to be a trend projection that exists at the path location
-external_trend_path <- "outputs/trend/2019/2019_variant_CC_20-11-27_1153/"
+external_trend_path <- "outputs/trend/2019/2019_test_21-03-08_1400/"
 
 projection_name <- "2019_based_shlaa_test"
 communal_est_file <- "dclg_communal_est_population.rds"
@@ -15,12 +15,12 @@ ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_bo
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory_2020.rds"
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
 
-popn_adjustment_path <- "input_data/scenario_data/covid19_upc.rds"
+popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
 
 hma_list <- NULL
 constrain_projection <- FALSE
 first_proj_yr <- 2020
-last_proj_yr <- 2050
+last_proj_yr <- 2022
 ahs_cap_year <- 2020
 ahs_method <- 0
 

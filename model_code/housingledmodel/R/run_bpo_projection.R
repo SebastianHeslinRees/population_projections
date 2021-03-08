@@ -52,8 +52,7 @@ run_bpo_projection <- function(bpo_name,
   }
   
   #Set the domestic migration data and paths for the variant projection that's been selected
-  dom_rates_loc <- "input_data/domestipc_migration/processed_rates/"
-  
+
   if(variant == "low"){
     #CH (central, high)
     external_trend_path <- "outputs/trend/2019/2019_variant_CH_20-11-27_1154/"

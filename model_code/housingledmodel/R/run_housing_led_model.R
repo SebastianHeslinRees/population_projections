@@ -78,7 +78,8 @@ run_housing_led_model <- function(config_list){
          int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_flows.rds"),
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds")))
   component_rates <- lapply(component_rates, filter_to_LAs)
-  component_rates[[1]] <- complete_fertility(component_rates[[1]], component_rates[[2]])
+  component_rates$fertility_rates <- complete_fertility(component_rates$fertility_rates,
+                                                        component_rates$mortality_rates)
   
   if(!is.null(config_list$additional_births_path)){
     additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
