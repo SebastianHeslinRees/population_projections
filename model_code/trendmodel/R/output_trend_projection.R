@@ -19,33 +19,10 @@
 output_trend_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                                     projection_name) {
   
-  projection[1:13] <- lapply(projection[1:13], reorder_for_output) 
-  
-  #net migration outputs
-  projection$dom_net <- projection[[6]] %>% 
-    mutate(dom_in = dom_out*-1) %>% 
-    select(-dom_out) %>% 
-    rbind(projection[[7]]) %>% 
-    group_by_at(setdiff(names(projection[[7]]),"dom_in")) %>% 
-    summarise(dom_net = sum(dom_in)) %>% 
-    data.frame()
-  
-  projection$int_net <- projection[[4]] %>% 
-    mutate(int_in = int_out*-1) %>% 
-    select(-int_out) %>% 
-    rbind(projection[[5]]) %>% 
-    group_by_at(setdiff(names(projection[[5]]),"int_in")) %>% 
-    summarise(int_net = sum(int_in)) %>% 
-    data.frame()
-  
-  projection$total_net <- left_join(projection$int_net,
-                                    projection$dom_net,
-                                    by = c("year", "gss_code", "age", "sex")) %>% 
-    mutate(total_net = dom_net + int_net) %>% 
-    select(-dom_net, -int_net)
+  projection[1:16] <- lapply(projection[1:16], reorder_for_output) 
   
   #RDS
-  for(i in c(1:13,16:18)) {
+  for(i in c(1:16)) {
     saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
   }
   

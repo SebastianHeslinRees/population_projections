@@ -247,7 +247,7 @@ run_trend_model <- function(config_list) {
   ## write the output data
   message("running outputs")
   output_trend_projection(projection, config_list$output_dir, write_excel = config_list$write_excel,
-                          n_csv_elements=8, projection_name = config_list$projection_name)
+                          n_csv_elements=11, projection_name = config_list$projection_name)
   
   household_model_outputs(projection$ons_households, model = "ons", config_list$output_dir,
                           write_excel = config_list$write_excel, projection_name = config_list$projection_name)
@@ -393,12 +393,14 @@ validate_trend_core_outputs <- function(projection, first_proj_yr) {
   
   components <- names(projection)
   expected_components <- c("population", "deaths","births", "int_out", "int_in",
-                           "dom_out", "dom_in", "births_by_mothers_age", "natural_change",
-                           "fertility_rates", "mortality_rates", "int_out_rates_flows", "popn_adjustment")
+                           "dom_out", "dom_in", "int_net", "dom_net", "total_net",
+                           "births_by_mothers_age", "natural_change",
+                           "fertility_rates", "mortality_rates",
+                           "int_out_rates_flows", "popn_adjustment")
   
   assert_that(identical(components, expected_components))
   
-  for(i in c(1:5,8:12)){ 
+  for(i in c(1:5,8:15)){ 
     validate_population(projection[[i]],
                         test_complete = TRUE,
                         test_unique = TRUE,
