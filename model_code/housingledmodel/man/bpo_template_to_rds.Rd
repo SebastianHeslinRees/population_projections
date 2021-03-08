@@ -4,12 +4,7 @@
 \alias{bpo_template_to_rds}
 \title{Process a standard bpo template csv file into 2 rds files}
 \usage{
-bpo_template_to_rds(
-  csv_name,
-  bpo_dir,
-  shlaa_first_yr = 2042,
-  dev_first_yr = 2019
-)
+bpo_template_to_rds(csv_name, bpo_dir, trajectory_range)
 }
 \arguments{
 \item{csv_name}{String. The name of the dwelling trajectory csv saved in the
@@ -17,11 +12,7 @@ bpo_template_to_rds(
 
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv.}
 
-\item{shlaa_first_yr}{Numeric. The first year in which to use shlaa development data.
-Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.}
-
-\item{dev_first_yr}{Numeric. The first year for which development data is provided.
-\code{Default 2019}.}
+\item{trajectory_range}{Numeric. The years covered by the input trajectory.}
 }
 \description{
 Take a standard ward-level csv bpo template and create 2

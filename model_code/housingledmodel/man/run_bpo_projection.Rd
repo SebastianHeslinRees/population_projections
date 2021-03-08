@@ -6,39 +6,32 @@
 \usage{
 run_bpo_projection(
   bpo_name,
-  shlaa_first_yr = 2042,
-  first_proj_yr = 2019,
-  last_proj_yr = 2050,
-  dev_first_yr = 2019,
-  ldd_final_yr = 2018,
-  bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2018_based/",
-  migration_scenario,
+  trajectory_range = 2020:2041,
+  projection_range = 2020:2050,
+  ldd_final_yr = 2019,
+  bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2019_based/",
+  variant,
   csv_name = bpo_name,
   housing_led_params = list(),
-  fertility_scenario = "average"
+  fertility_scenario = "trend"
 )
 }
 \arguments{
 \item{bpo_name}{String. The name of the dwelling trajectory csv saved in the
 folder \code{bpo_dir} folder. The output projection will also have this name.}
 
-\item{shlaa_first_yr}{Numeric. The first year to use shlaa development data.
-Effectively the final year of the supplied trajectory plus 1. \code{Default 2042}.}
+\item{trajectory_range}{Numeric or NULL. The years covered by the input trajectory.
+\code{Default 2020:2041}. If NULL the SHLAA trajectory is used.}
 
-\item{first_proj_yr}{Numeric. The first projection year \code{default 2019}}
-
-\item{last_proj_yr}{Numeric. The final projection year \code{default 2050}}
-
-\item{dev_first_yr}{Numeric. The first year for which development data is
-provided. \code{Default 2019}.}
+\item{projection_range}{Numeric. The years to project. \code{Default 2020:2050}.}
 
 \item{ldd_final_yr}{Numeric. The final year of the LDD dwellings backseries.
-\code{Default 2018}.}
+\code{Default 2019}.}
 
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv}
 
-\item{migration_scenario}{String. The domestic migration scenario \code{high},
-\code{medium} or \code{low}.}
+\item{variant}{String. The domestic migration scenario \code{high},
+\code{high} or \code{low}.}
 
 \item{csv_name}{String. The name of the dwelling trajectory csv saved in the
 \code{bpo_dir} folder. With or without the "csv" suffix. Default is \code{bpo_name}}

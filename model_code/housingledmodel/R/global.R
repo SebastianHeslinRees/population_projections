@@ -1,6 +1,7 @@
 #' @importFrom utils globalVariables
 globalVariables(c(
-  ":=",
+  '.',
+  ':=',
   'V1',
   'gss_code_ward',
   'gss_code',
@@ -43,5 +44,6 @@ globalVariables(c(
   'gss_out',
   'rate',
   'trend_core',
-  'full'
+  'full',
+  'short_name'
   ))

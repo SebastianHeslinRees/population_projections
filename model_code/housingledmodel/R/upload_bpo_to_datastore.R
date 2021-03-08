@@ -50,7 +50,6 @@ upload_bpo_to_datastore <- function(bpo_name,
   dataset_resources <- lds_meta_dataset(slug = bposlug, api_key = lds_api_key)
   
   #sort out file paths and validate
-  bpo_paths <- character()
   bpo_root <- ifelse(str_sub(bpo_root, -1 ,-1)!="/", paste0(bpo_root,"/"), bpo_root)
   all_bpos <- list.dirs(path = bpo_root, full.names = FALSE, recursive = FALSE)
   all_bpos_no_date <- str_sub(all_bpos,1,-15)
