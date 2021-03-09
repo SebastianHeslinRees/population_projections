@@ -151,7 +151,7 @@ for(i in 1:nrow(deaths_sex_age_2020)){
   sya_covid_2021[[i]] <- b %>% 
     distribute_within_age_band(uk_2019_deaths,
                                "deaths", "deaths",
-                               unique(a$min), unique(a$max),
+                               unique(b$min), unique(b$max),
                                col_aggregation=c("sex"))
 }
 
@@ -188,13 +188,11 @@ for(i in 1:nrow(deaths_la_2020)){
   
 }
 
-#for 2020 deaths by LA data provides better estimate of covid deaths
 covid_2020 <- rbindlist(la_sya_2020) %>% 
   data.frame() %>%
   mutate(year = 2020)
 
-#for the ongoing year the more up-to-date data is the deaths by age
-#so the 2021 dataframe needs to be scaled
+
 covid_2021 <- rbindlist(la_sya_2021) %>% 
   data.frame() %>%
   mutate(year = 2021)
@@ -209,11 +207,18 @@ covid_2021 <- rbindlist(la_sya_2021) %>%
 
 #-------------------------------------------
 
-####SAVE####
-
 covid_deaths <- rbind(covid_2020, covid_2021) %>%
   mutate(upc = deaths * -1) %>%
   select(year, gss_code, sex, age, upc)
+
+popmodules::validate_population(covid_deaths,
+                                col_data = "upc",
+                                test_complete = FALSE, 
+                                test_unique = TRUE,
+                                check_negative_values = FALSE,
+                                col_aggregation = c("year","gss_code","sex","age"))
+
+####SAVE####
 
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_deaths, "input_data/scenario_data/covid19_deaths.rds")
