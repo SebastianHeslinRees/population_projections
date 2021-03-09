@@ -105,7 +105,7 @@ deaths_la_2021 <- ons_weekly_la_totals_2020 %>%
 rest_of_2021 <- deaths_la_2021 %>% 
   mutate(deaths1 = deaths/sum(deaths),
          deaths2 = deaths1 * uk_weekly_future_deaths,
-         deaths3 = deaths2 * (28-max(ons_weekly_la_totals_2021$week_number))) %>% 
+         deaths3 = deaths2 * (27-max(ons_weekly_la_totals_2021$week_number))) %>% 
   select(gss_code, deaths = deaths3)
 
 deaths_la_2021 <- rbind(deaths_la_2021, rest_of_2021) %>%
@@ -147,7 +147,7 @@ for(i in 1:nrow(deaths_sex_age_2020)){
                                unique(a$min), unique(a$max),
                                col_aggregation=c("sex"))
   
-  b <- a <- deaths_sex_age_2021[i,]
+  b <- deaths_sex_age_2021[i,]
   sya_covid_2021[[i]] <- b %>% 
     distribute_within_age_band(uk_2019_deaths,
                                "deaths", "deaths",
