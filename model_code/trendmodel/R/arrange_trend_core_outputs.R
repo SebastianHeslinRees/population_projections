@@ -69,7 +69,7 @@ arrange_trend_core_outputs <- function(projection,
   
   if(is.null(popn_adjustment)){
     popn_adjustment <- data.frame(year = numeric(), gss_code = character(),
-                      sex = character(), age = numeric(), upc = numeric())
+                                  sex = character(), age = numeric(), upc = numeric())
   }
   
   popn_adjustment <- rbind(popn_adjustment, upc_mye) %>% 
@@ -101,6 +101,29 @@ arrange_trend_core_outputs <- function(projection,
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   
+  #net migration outputs
+  proj_dom_net <- proj_dom_out %>% 
+    mutate(dom_in = dom_out*-1) %>% 
+    select(-dom_out) %>% 
+    rbind(proj_dom_in) %>% 
+    group_by(year, gss_code, age, sex) %>%  
+    summarise(dom_net = sum(dom_in)) %>% 
+    data.frame()
+  
+  proj_int_net <- regional_data$proj_int_out %>% 
+    mutate(int_in = int_out*-1) %>% 
+    select(-int_out) %>% 
+    rbind(regional_data$proj_int_in) %>% 
+    group_by(year, gss_code, age, sex) %>% 
+    summarise(int_net = sum(int_in)) %>% 
+    data.frame()
+  
+  total_net <- left_join(proj_int_net,
+                         proj_dom_net,
+                         by = c("year", "gss_code", "age", "sex")) %>% 
+    mutate(total_net = dom_net + int_net) %>% 
+    select(-dom_net, -int_net)
+  
   
   #For int_in its always a flows so outputting the input and the output would be duplication
   #For domestic the rates dataframe is too large to output
@@ -115,11 +138,13 @@ arrange_trend_core_outputs <- function(projection,
               int_in = regional_data$proj_int_in,
               dom_out = proj_dom_out,
               dom_in = proj_dom_in,
+              int_net = proj_int_net,
+              dom_net = proj_dom_net,
+              total_net = total_net,
               births_by_mothers_age = regional_data$proj_births_by_mother,
               natural_change = regional_data$proj_natural_change,
               fertility_rates = fertility_rates,
               mortality_rates = mortality_rates,
               int_out_rates_flows = int_out_rates_flows,
               popn_adjustment = popn_adjustment))
-  
 }
