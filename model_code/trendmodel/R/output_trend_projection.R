@@ -19,11 +19,17 @@
 output_trend_projection <- function(projection, output_dir, write_excel, n_csv_elements,
                                     projection_name) {
   
-  projection[1:16] <- lapply(projection[1:16], reorder_for_output) 
+  output_dfs <- c("population", "deaths", "births", "int_out", "int_in",
+                  "dom_out", "dom_out","int_net", "dom_net", "total_net",
+                  "births_by_mothers_age", "natural_change",
+                  "fertility_rates", "mortality_rates",
+                  "int_out_rates_flows","popn_adjustment")
+  
+  projection[output_dfs] <- lapply(projection[output_dfs], reorder_for_output) 
   
   #RDS
-  for(i in c(1:16)) {
-    saveRDS(projection[[i]], paste0(output_dir, names(projection)[[i]], ".rds"), compress = "gzip")
+  for(i in output_dfs) {
+    saveRDS(projection[i], paste0(output_dir, i, ".rds"), compress = "gzip")
   }
   
   #CSV
