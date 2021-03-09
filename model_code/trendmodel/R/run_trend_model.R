@@ -400,7 +400,12 @@ validate_trend_core_outputs <- function(projection, first_proj_yr) {
   
   assert_that(identical(components, expected_components))
   
-  for(i in c(1:5,8:15)){ 
+  validate_dataframes <- c("population", "deaths", "births", "int_out", "int_in",
+                           "int_net", "dom_net", "total_net", "births_by_mothers_age",
+                           "natural_change", "fertility_rates", "mortality_rates",
+                           "int_out_rates_flows")
+  
+  for(i in validate_dataframes){ 
     validate_population(projection[[i]],
                         test_complete = TRUE,
                         test_unique = TRUE,
