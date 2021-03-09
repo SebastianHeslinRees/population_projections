@@ -29,7 +29,7 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
   
   #RDS
   for(i in output_dfs) {
-    saveRDS(projection[i], paste0(output_dir, i, ".rds"), compress = "gzip")
+    saveRDS(projection[[i]], paste0(output_dir, i, ".rds"), compress = "gzip")
   }
   
   #CSV
