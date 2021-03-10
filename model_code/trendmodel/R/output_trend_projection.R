@@ -20,7 +20,7 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
                                     projection_name) {
   
   output_dfs <- c("population", "deaths", "births", "int_out", "int_in",
-                  "dom_out", "dom_out","int_net", "dom_net", "total_net",
+                  "dom_out", "dom_in","int_net", "dom_net", "total_net",
                   "births_by_mothers_age", "natural_change",
                   "fertility_rates", "mortality_rates",
                   "int_out_rates_flows","popn_adjustment")

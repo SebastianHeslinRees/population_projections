@@ -36,7 +36,7 @@ additional_births <- filter(additional_births, gss_code != "E09000012,E09000001"
   select(year, gss_code, age, sex, births)
 
 rm(city, hackney)
-saveRDS(additional_births, "input_data/fertility/births_2019.rds")
+saveRDS(additional_births, "input_data/fertility/additional_births_2018_based_projections.rds")
 
 london_backseries_births <- filter(ons_births, gss_code %in% unique(additional_births$gss_code)) %>%
   filter(age == 0) %>%
