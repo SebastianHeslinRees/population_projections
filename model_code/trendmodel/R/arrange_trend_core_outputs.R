@@ -129,7 +129,6 @@ arrange_trend_core_outputs <- function(projection,
   #For domestic the rates dataframe is too large to output
   #For int_out if the model is setup to do flows then this will be a duplicate of the
   #output file, if its rates it will be a useful output
-  int_out_rates_flows <- filter(int_out_rates_flows, year <= first_proj_yr)
   
   return(list(population = regional_data$proj_popn,
               deaths = regional_data$proj_deaths,

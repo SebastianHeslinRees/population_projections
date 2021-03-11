@@ -192,8 +192,6 @@ run_housing_led_model <- function(config_list){
     select(gss_code, year, households)
   
   #For trend model
-  #TODO Is this  good idea? Means passing 1 less variable and potentially
-  #avoids a mismatch between methods and data but could it create problems?
   int_out_method <- ifelse(max(component_rates[['int_out_flows_rates']]$int_out)>1 , "flow", "rate") 
   
   #TODO Sort this out so it can take constraint dataframes here
@@ -242,11 +240,11 @@ run_housing_led_model <- function(config_list){
                                          additional_births)
   
   for(projection_year in first_proj_yr:last_proj_yr){
-    
+  
     curr_yr_fertility <- filter(component_rates$fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(component_rates$mortality_rates, year == projection_year)
-    curr_yr_int_out <- mutate(component_rates$int_out, year = projection_year)
-    curr_yr_int_in_flows <- component_rates$int_in %>% filter(year == projection_year)
+    curr_yr_int_out <- filter(component_rates$int_out_flows_rates, year == projection_year)
+    curr_yr_int_in_flows <- filter(component_rates$int_in_flows, year == projection_year)
     curr_yr_ahs <- filter(external_ahs, year == projection_year)
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
