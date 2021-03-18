@@ -3,7 +3,7 @@
 #this script calls on the processed data
 #data created by ML November 2020
 
-message("GLA MYE 2019")
+message("2019 GLA adjusted MYE")
 
 gla_estimates_dir <- "Q:/Teams/D&PA/Data/population_estimates/gla_adjusted_mid_year_estimates/"
  

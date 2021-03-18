@@ -1,6 +1,8 @@
 library(popmodules)
 library(dplyr)
 
+message("ASMR 2020 geography")
+
 mort_curves <- readRDS("input_data/mortality/ons_asmr_curves_2018.rds") %>%
   recode_gss_codes(data_cols = "rate",
                    fun=list(mean),

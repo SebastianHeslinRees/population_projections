@@ -5,6 +5,8 @@ library(dplyr)
 #2019 data for scotland must be modeled from component totals
 #earlier data for scotland are bound on from the 2018 file
 
+message('2019 Scotland MYE')
+
 output_location <- "input_data/mye/2019/"
 data_location <- "Q:/Teams/D&PA/Data/population_estimates/nrs_nisra_estimates/scotland"
 

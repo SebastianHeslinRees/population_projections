@@ -2,6 +2,8 @@
 #Group by ward, msoa and borough for use in models
 library(dplyr)
 
+message("LDD development data")
+
 #Data up to what year is considered good quality
 last_data_year <- 2019
 

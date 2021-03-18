@@ -1,6 +1,8 @@
 #Original 2017 SHLAA Trajectory - used up to and inc 2018-based projections
 #superseded by 'trajectory_2020' files
 
+message("legacy shlaa data")
+
 load("Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/Output/2016 SHLAA.Rdata")
 
 borough_dev <- select(borough_dev, year, gss_code, units = new_homes)

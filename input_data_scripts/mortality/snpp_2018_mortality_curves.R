@@ -3,6 +3,8 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 
+message('2018-based SNPP mortality curves')
+
 mort_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2018-based (March 2020)/model_inputs/2018 snpp sya mort rates.csv"
 national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/national asmrs.csv"
 over90_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/NPP deaths over 90.csv"

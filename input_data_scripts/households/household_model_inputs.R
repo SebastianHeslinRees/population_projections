@@ -3,6 +3,8 @@ library(dplyr)
 library(data.table)
 library(popmodules)
 
+message('Household model inputs')
+
 read_hh_rates_files <- function(file, file_location, yr){
   
   x <- readRDS(paste0(file_location, file)) %>%

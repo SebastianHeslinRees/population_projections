@@ -1,6 +1,8 @@
 library(dplyr)
 library(popmodules)
 
+message("msoa communal establishment population")
+
 #Data paths
 census_msoa_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_MSOA11.rds"
 msoa_estimates_path <- "input_data/small_area_model/msoa_population_estimates.rds"

@@ -1,6 +1,8 @@
 library(dplyr)
 library(popmodules)
 
+message("ward communal establishment population")
+
 #Data paths
 census_ward_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_CMWD11.rds"
 ward_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"

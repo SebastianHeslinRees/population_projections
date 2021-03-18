@@ -5,6 +5,8 @@ library(dplyr)
 library(data.table)
 library(tidyr)
 
+message("small area model data")
+
 #Directory
 dir.create("input_data/small_area_model", showWarnings = FALSE)
 dir.create("input_data/housing_led_model", showWarnings = FALSE)
@@ -17,6 +19,7 @@ file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
 source('input_data_scripts/development_data/ldd.R')
 source('input_data_scripts/development_data/2017_shlaa.R')
 source('input_data_scripts/development_data/2017_shlaa_original.R')
+
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')
 
@@ -103,3 +106,5 @@ test_msoa_inputs(births, c("year", "gss_code_msoa", "age_group"))
 test_msoa_inputs(deaths, c("year", "gss_code_msoa", "sex", "age_group"))
 
 rm(list=ls())
+
+message("small area data complete")

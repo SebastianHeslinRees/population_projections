@@ -3,6 +3,8 @@ library(stringr)
 library(data.table)
 library(popmodules)
 
+message("ONS small area population estimates")
+
 most_recent_data_year <- 2019
 
 #data paths

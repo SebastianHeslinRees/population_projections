@@ -1,6 +1,8 @@
 library(dplyr)
 library(popmodules)
 
+message("domestic migration rates (2018 bpo)")
+
 #create domestic inputs rates
 popn_mye_path <- "input_data/mye/2018/population_gla.rds"
 births_mye_path <-  "input_data/mye/2018/births_ons.rds"

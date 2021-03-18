@@ -11,6 +11,8 @@
 library(dplyr)
 library(popmodules)
 
+message('2018-based model additional births')
+
 popn <- readRDS("input_data/mye/2018/population_gla.rds")
 
 ons_births <- readRDS("input_data/mye/2018/births_ons.rds")

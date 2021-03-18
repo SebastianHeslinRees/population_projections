@@ -1,9 +1,10 @@
 library(dplyr)
 library(popmodules)
 
+message("domestic migration rates (standard)")
+
 output_loc <- "input_data/domestic_migration/processed_rates/"
 dir.create(output_loc)
-
 
 #create domestic inputs rates
 #for 2018 and 2016 use the mye series with gla geography

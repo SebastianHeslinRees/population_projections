@@ -2,10 +2,12 @@
 library(dplyr)
 library(tidyr)
 library(data.table)
+
+message('NPP fertility trend')
+
 max_year <- 2050
 npp_data_2016 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
 npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs"
-
 
 #function to read and wrangle raw data
 fertility_trend <- function(file, var, max_year, npp_data_location){

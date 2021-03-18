@@ -2,6 +2,8 @@
 
 library(dplyr)
 
+message("msoa adults per dwelling")
+
 most_recent_data_year <- 2019
 
 #Data paths

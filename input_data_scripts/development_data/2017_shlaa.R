@@ -29,8 +29,7 @@ library(dplyr)
 library(data.table)
 library(tidyr)
 
-message("processing shlaa dev data")
-message("ignore OGRSpatialRef warnings")
+message("shlaa development data\nignore OGRSpatialRef warnings")
 
 ####LARGE SITES####
 

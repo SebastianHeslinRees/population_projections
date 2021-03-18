@@ -4,6 +4,8 @@ library(tidyr)
 library(data.table)
 library(popmodules)
 
+message('2018-based SNPP fertility curves')
+
 fert_curve_file <- "Q:/Teams/D&PA/Data/population_projections/ons_snpp/2018-based (March 2020)/model_inputs/2018 snpp sya fert rates.csv"
 national_file <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/national asfrs.csv"
 

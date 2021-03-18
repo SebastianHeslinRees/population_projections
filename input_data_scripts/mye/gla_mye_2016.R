@@ -1,6 +1,9 @@
 library(dplyr)
 library(tidyr)
 library(popmodules)
+
+message('2016 GLA adjusted MYE')
+
 load("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
 
 process_rdata_file <- function(component, col_name){

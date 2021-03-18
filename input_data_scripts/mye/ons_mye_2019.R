@@ -1,5 +1,7 @@
 library(dplyr)
 
+message('ONS 2019 MYE')
+
 data_location <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/"
 output_location <- "input_data/mye/2019/"
 dir.create(output_location)

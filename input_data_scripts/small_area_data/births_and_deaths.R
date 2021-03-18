@@ -3,6 +3,8 @@ library(tidyr)
 library(stringr)
 library(popmodules)
 
+message("births and deaths")
+
 #paths
 lsoa_births_path <-"Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2019/birthsbylsoamidyear01to19.rds"
 lsoa_deaths_path <- "Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2019/deathsbylsoamidyear01to19.rds"

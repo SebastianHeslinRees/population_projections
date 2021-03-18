@@ -1,5 +1,6 @@
 library(dplyr)
 library(tidyr)
+message('2017-based fertility rates')
 
 fertility <- readRDS("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model/Outputs/2017 Base/medium_out_migration/Fertility Rates.rds") %>%
   mutate(sex = "female") %>% 

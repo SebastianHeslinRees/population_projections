@@ -1,5 +1,7 @@
 library(dplyr)
 
+message('communal establishment populations')
+
 ons_data_location <- "Q:/Teams/D&PA/Data/household_projections/ONS_data/2018_based/2018_principal/csv/"
 
 ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.csv"), header = T),

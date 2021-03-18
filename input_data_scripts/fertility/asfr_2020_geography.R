@@ -1,6 +1,8 @@
 library(popmodules)
 library(dplyr)
 
+message("ASFR 2020 geography")
+
 fert_curves <- readRDS("input_data/fertility/ons_asfr_curves_2018.rds") %>%
   recode_gss_codes(data_cols = "rate",
                    fun=list(mean),

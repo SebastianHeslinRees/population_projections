@@ -1,5 +1,7 @@
 library(dplyr)
 
+message('2016-based NPP constraints')
+
 npp_location <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/"
 
 #migration components

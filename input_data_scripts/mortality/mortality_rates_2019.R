@@ -1,6 +1,8 @@
 library(popmodules)
 library(dplyr)
 
+message("mortality rates 2019-based model")
+
 popn_mye_path <- paste0("input_data/mye/2019/population_ons.rds")
 gla_popn_mye_path <- paste0("input_data/mye/2019/population_gla.rds")
 

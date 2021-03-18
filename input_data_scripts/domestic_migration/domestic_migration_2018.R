@@ -5,7 +5,7 @@ library(data.table)
 library(popmodules)
 
 rm(list=ls())
-message("domestic migration")
+message("domestic migration 2018")
 
 output_location <- "input_data/domestic_migration/2018/"
 dir.create(output_location, recursive = TRUE, showWarnings = FALSE)

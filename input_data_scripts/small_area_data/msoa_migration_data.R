@@ -3,6 +3,8 @@ library(dplyr)
 library(tidyr)
 library(popmodules)
 
+message("msoa migration data")
+
 #Set these to the location of the final borough components
 mye_popn_path <- "input_data/mye/2019/population_gla.rds"
 borough_dom_in_path <- "input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds"

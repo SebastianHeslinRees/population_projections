@@ -5,6 +5,8 @@ library(dplyr)
 #2019 data for northern_ireland must be modeled from component totals
 #earlier data for northern_ireland are bound on from the 2018 file
 
+message('2019 Northern Ireland MYE')
+
 output_location <- "input_data/mye/2019/"
 data_location <- "Q:/Teams/D&PA/Data/population_estimates/nrs_nisra_estimates/northern_ireland"
 

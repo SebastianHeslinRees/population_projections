@@ -32,7 +32,7 @@ source("input_data_scripts/constraints/npp_2018_constraint.R")
 source("input_data_scripts/households/household_model_inputs.R")
 source("input_data_scripts/mye/gla_mye_2018.R")
 source("input_data_scripts/mye/gla_mye_2016.R")
-source('input_data_scripts/fertility/additional_births_data.R')
+source('input_data_scripts/fertility/additional_births_2018-based.R')
 
 #2019 MYE & components
 source("input_data_scripts/mye/ons_mye_2019.R")
@@ -64,3 +64,5 @@ source("input_data_scripts/scenario_data/covid_scenario_rates.R")
 dir.create("input_data/excel_templates")
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/excel_templates",
                        "input_data/excel_templates")
+
+message("trend and household model data complete")

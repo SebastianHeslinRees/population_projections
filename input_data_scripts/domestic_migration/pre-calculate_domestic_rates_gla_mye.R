@@ -1,10 +1,10 @@
 library(dplyr)
 library(popmodules)
 
+message("domestic migration rates (gla adjusted)")
+
 output_loc <- "input_data/domestic_migration/processed_rates/"
 dir.create(output_loc)
-
-
 
 #Averages for 2019 based projections
 #Using adjusted GLA mye population denominators
