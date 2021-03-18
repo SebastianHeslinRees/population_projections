@@ -70,7 +70,7 @@ run_borough_and_ward_projection <- function(projection_name,
     output_dir <- paste0("outputs/housing_led/2019/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
   
-  popn_adjustment_path <- "input_data/scenario_data/covid19_upc.rds"
+  popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
   
   list2env(housing_led_params, environment())
   

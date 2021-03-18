@@ -52,28 +52,41 @@ run_bpo_projection <- function(bpo_name,
   }
   
   #Set the domestic migration data and paths for the variant projection that's been selected
-
-  if(variant == "low"){
-    #CH (central, high)
-    external_trend_path <- "outputs/trend/2019/2019_variant_CH_20-11-27_1154/"
-    housing_led_params$domestic_rates <- list('2020' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+  
+  if(variant == "scenario_1"){
+    external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_1_21-03-16_1329/"
+    housing_led_params$domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2020.rds",
                                                             transition = F),
-                                              '2022' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+                                              '2021' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2021.rds",
+                                                            transition = F),
+                                              '2022' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2022.rds",
                                                             transition = T),
-                                              '2028' = list(path = "input_data/scenario_data/domestic_high_out.rds",
+                                              '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_5yr_avg_2019_gla_mye.rds",
                                                             transition = F))
     
-  } else if(variant == "high"){
-    #CC (central, central)
-    external_trend_path <- "outputs/trend/2019/2019_variant_CC_20-11-27_1153/"
-    housing_led_params$domestic_rates = list('2020' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+  } else if(variant == "scenario_2"){
+    external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_2_21-03-16_1334/"
+    housing_led_params$domestic_rates = list('2020' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2020.rds",
                                                            transition = F),
-                                             '2022' = list(path = "input_data/scenario_data/dom_covid_70_percent.rds",
+                                             '2021' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2021.rds",
+                                                           transition = F),
+                                             '2022' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2022.rds",
                                                            transition = T),
                                              '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_gla_mye.rds",
                                                            transition = F))
     
-  } else {stop("migration scenario must be low or high") }
+  } else if(variant == "scenario_3"){
+    external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_3_21-03-16_1340/"
+    housing_led_params$domestic_rates = list('2020' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2020.rds",
+                                                           transition = F),
+                                             '2021' = list(path = "input_data/scenario_data/bpo_dom_scenario_3_yr_2021.rds",
+                                                           transition = F),
+                                             '2022' = list(path = "input_data/scenario_data/bpo_dom_scenario_3_yr_2022.rds",
+                                                           transition = T),
+                                             '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_5yr_avg_2019_gla_mye.rds",
+                                                           transition = F))
+    
+  } else {stop("migration scenario must be scenario_1, scenario_2 or scenario_3") }
   
   #process the csv trajectory into an rds file
   #if no trajectory is supplied then use SHLAA
@@ -92,17 +105,20 @@ run_bpo_projection <- function(bpo_name,
              short_name == substr(bpo_name,1,4)) %>% 
       unique() %>% 
       .$gss_code
-    dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory_2020.rds"
+    dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_pandemic_adjusted.rds"
     small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory_2020.rds"
   }
   
   #give the projection a name
-  projection_name <- paste0(bpo_name,"_",variant,"_variant")
+  projection_name <- paste0(bpo_name,"_",variant)
   if(fertility_scenario == "trend"){
     projection_name <- paste0(projection_name,"_trend_fertility")
   } else {
     projection_name <- paste0(projection_name,"_avg_fertility")
   }
+  
+  #Standard 80% trend, 20% dclg for the 2019-based BPOs
+  housing_led_params$ahs_method <- 0.8
   
   #run the projection
   bpo_projection <- run_borough_and_ward_projection(projection_name = projection_name,
