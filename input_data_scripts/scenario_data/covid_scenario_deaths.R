@@ -2,6 +2,8 @@ library(dplyr)
 library(popmodules)
 library(data.table)
 
+message("covid-19 mortality")
+
 #2020 = DATA To WEEK 27 (03/July/20202) - Mid Year
 #2021 = DATA TO WEEK 7 of 2021 (19/02/2021)
 
