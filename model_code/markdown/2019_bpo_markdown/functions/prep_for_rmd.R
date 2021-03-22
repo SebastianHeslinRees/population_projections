@@ -97,8 +97,7 @@ prep_data_for_rmd <- function(bpo_data, gss, area_name){
             select(year, ward_name, variant, popn = value, age_group)) %>% 
     filter(year %in% c(2011, 2019, 2034)) %>% 
     group_by(age_group, year, variant) %>% 
-    summarise(value = format(round(sum(popn),0), big.mark = ","),
-              .groups = "drop_last") %>% 
+    summarise(value = format(round(sum(popn),0), big.mark = ",")) %>% 
     data.frame() %>% 
     mutate(year = ifelse(year == 2034,
                          paste(variant, year),
