@@ -1,6 +1,6 @@
-#BPO scenario 3
+#BPO scenario 1
 #Longer-term: 10year international, 5year domestic = (CH or central lower)
-#Covid: BPO low population assumptions
+#Covid: BPO standard assumptions
 #AHS: 80% trend, 20% dclg
 
 library(popmodules)

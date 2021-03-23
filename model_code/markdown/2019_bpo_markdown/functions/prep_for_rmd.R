@@ -6,43 +6,37 @@ prep_data_for_rmd <- function(bpo_data, gss, area_name){
   
   total_pop <- filtered_bpo[['population']] %>% 
     group_by(year, variant) %>% 
-    summarise(value = sum(popn),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(popn)) %>% 
     data.frame()
   
   short_term <- total_pop %>% 
     filter(year %in% 2019:2030)
   
   primary_pop <- filtered_bpo[['population']] %>%
-    filter(age %in% 5:10) %>% 
+    filter(age %in% 4:10) %>% 
     group_by(year, variant) %>% 
-    summarise(value = sum(popn),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(popn)) %>% 
     data.frame()
   
   secondary_pop <- filtered_bpo[['population']] %>%
     filter(age %in% 11:15) %>% 
     group_by(year, variant) %>% 
-    summarise(value = sum(popn),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(popn)) %>% 
     data.frame() 
   
   births <- filtered_bpo[['births']] %>% 
     group_by(year, variant) %>% 
-    summarise(value = sum(births),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(births)) %>% 
     data.frame() 
   
   deaths <- filtered_bpo[['deaths']] %>% 
     group_by(year, variant) %>% 
-    summarise(value = sum(deaths),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(deaths)) %>% 
     data.frame()
   
   migration <- filtered_bpo[['migration']] %>% 
     group_by(year, variant) %>% 
-    summarise(value = sum(value),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(value)) %>% 
     data.frame() 
   
   popn_2011 <- filter(total_pop, year == 2011)$value
@@ -51,8 +45,7 @@ prep_data_for_rmd <- function(bpo_data, gss, area_name){
   
   assumed_dev <- bpo_data[['assumed_dev']] %>% 
     group_by(gss_code, year, variant) %>% 
-    summarise(value = sum(units),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(units)) %>% 
     data.frame() 
 
   output_list[['total_pop_chart']] <- line_chart_plotly(total_pop, title = "Total population", y_axis="persons", area_name)
@@ -68,8 +61,7 @@ prep_data_for_rmd <- function(bpo_data, gss, area_name){
   age_structure <- filtered_bpo[['population']] %>% 
     filter(year %in% c(2011,2019,2034)) %>% 
     group_by(year, variant, age) %>% 
-    summarise(value = sum(popn),
-              .groups = "drop_last") %>% 
+    summarise(value = sum(popn)) %>% 
     data.frame() 
   
   age_chart_plotlys <- list()

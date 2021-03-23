@@ -17,6 +17,7 @@ read_data <- function(data_list, component, gss){
 
 #-------------------------------------------------------------------------------
 
+#Not currently used - retained just in case
 read_migration <- function(data_list, gss){
   
   dom_in <- read_data(data_list, "dom_in", gss) %>%
@@ -46,7 +47,7 @@ read_migration <- function(data_list, gss){
 #-------------------------------------------------------------------------------
 
 get_bpo_data <- function(x, gss_borough){
-  #browser()
+
   borough <- readRDS("input_data/lookup/gss_code_to_name.rds") %>% 
     filter(gss_code == gss_borough) %>% 
     .$gss_name %>% 

@@ -79,7 +79,6 @@ domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_sc
 #-----------------------------------------------------
 
 constraint_fns <- list(list(fn = function() NULL, args = list()))
-qa_areas_of_interest <- list("London", "E09000001")
 
 # prepare the named list to pass into model
 config_list <- list(
