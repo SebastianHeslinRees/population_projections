@@ -54,14 +54,15 @@ run_borough_and_ward_projection <- function(projection_name,
   ahs_method <- 0
   last_data_yr <- 2019
   
-  additional_births_path <- NULL
+  additional_births_path <- "input_data/fertility/predicted_births_2019-based_projections.rds"
   
   if(fertility_scenario == "average"){
-    fertility_rates_path <- "input_data/fertility/fert_rates_5yr_avg_2019_gla_mye.rds"
+    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_avg.rds"
+    
   }
   
   if(fertility_scenario == "trend"){
-    fertility_rates_path <- "input_data/fertility/fert_rates_5yr_trend_2019_gla_mye.rds"
+    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_trend.rds"
   }
   
   if(bpo==FALSE){
@@ -70,7 +71,7 @@ run_borough_and_ward_projection <- function(projection_name,
     output_dir <- paste0("outputs/housing_led/2019/bpo/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
   }
   
-  popn_adjustment_path <- "input_data/scenario_data/covid19_upc.rds"
+  popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
   
   list2env(housing_led_params, environment())
   
@@ -172,7 +173,8 @@ run_borough_and_ward_projection <- function(projection_name,
     output_bpo_excel_file(data = ward_projection[["csvs"]],
                           output_dir = config_list$output_dir,
                           projection_name = config_list$projection_name,
-                          bpo_gss_code = bpo)
+                          bpo_gss_code = bpo,
+                          popn_adjustment_path = config_list$popn_adjustment_path)
   }
   
   #Finish
