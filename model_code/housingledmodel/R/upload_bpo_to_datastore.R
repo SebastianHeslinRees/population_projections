@@ -65,7 +65,7 @@ upload_bpo_to_datastore <- function(bpo_name,
     bpo_matches <- all_bpos[all_bpos_no_date==full_name]
     
     if(length(bpo_matches)==0){stop(paste0("no mataches found for ", full_name))}
-    if(length(bpo_matches)>10){stop(paste0("more than 1 match found for ", full_name))}
+    if(length(bpo_matches)>1){stop(paste0("more than 1 match found for ", full_name))}
     
     #find excel file inside folder
     bpo_file <- paste0(bpo_root, bpo_matches, "/", full_name, "_BPO_2019.xlsx" )
@@ -103,5 +103,4 @@ upload_bpo_to_datastore <- function(bpo_name,
   
   message(paste(borough, "bpo upload complete"))
 }
-
 
