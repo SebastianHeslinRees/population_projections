@@ -48,6 +48,7 @@ source('input_data_scripts/fertility/asfr_2020_geography.R')
 source('input_data_scripts/mortality/asmr_2020_geography.R')
 source("input_data_scripts/fertility/fertility_rates_2019.R")
 source("input_data_scripts/mortality/mortality_rates_2019.R")
+source('input_data_scripts/fertility/additional_births_2019-based.R')
 
 #2018-based projections data
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates.R")
@@ -64,6 +65,6 @@ source("input_data_scripts/scenario_data/migration_rates_for_2019_BPOs.R")
 #Excel templates
 dir.create("input_data/excel_templates", showWarnings = FALSE)
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/excel_templates",
-                       "input_data/excel_templates")
+                       "input_data/excel_templates", overwrite = TRUE)
 
 message("trend and household model data complete")
