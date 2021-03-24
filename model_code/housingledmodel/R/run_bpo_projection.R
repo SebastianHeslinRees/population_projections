@@ -106,7 +106,7 @@ run_bpo_projection <- function(bpo_name,
       unique() %>% 
       .$gss_code
     dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_pandemic_adjusted.rds"
-    small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_trajectory_2020.rds"
+    small_area_dev_trajectory_path <- "input_data/small_area_model/ward_shlaa_pandemic_adjusted.rds"
   }
   
   #give the projection a name
