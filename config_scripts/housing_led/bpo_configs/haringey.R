@@ -1,5 +1,5 @@
 library(housingledmodel)
 
 bpo_name <- run_bpo_projection(bpo_name = "haringey",
-                               trajectory_range = 2022:2039,
-                               variant = "low")
+                               trajectory_range = 2022:2040,
+                               variant = scenario)

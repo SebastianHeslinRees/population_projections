@@ -1,6 +1,8 @@
 library(dplyr)
 library(popmodules)
 
+message("covid-19 migration scenario rates")
+
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 
 gla_popn_mye_path <- "input_data/mye/2019/population_gla.rds"

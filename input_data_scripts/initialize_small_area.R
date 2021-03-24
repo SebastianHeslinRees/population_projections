@@ -19,6 +19,7 @@ file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
 source('input_data_scripts/development_data/ldd.R')
 source('input_data_scripts/development_data/2017_shlaa.R')
 source('input_data_scripts/development_data/2017_shlaa_original.R')
+source('input_data_scripts/development_data/shlaa_dev_pandemic_adjustments.R')
 
 source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
 source('input_data_scripts/small_area_data/births_and_deaths.R')

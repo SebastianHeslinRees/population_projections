@@ -1,0 +1,156 @@
+---
+title: "2019 BPO Projections"
+author: "GLA demography"
+date: '`r strftime(Sys.time(), format = "%B %Y")`'
+output: html_document
+params: 
+  x: !r x
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r title}
+full_area_name <- ifelse(x$area_name == x$borough_name,
+                     paste("the borough of",x$borough_name),
+                     paste(x$area_name, "ward in", x$borough_name))
+
+area_title <- ifelse(x$area_name == x$borough_name,
+                     paste(x$area_name, "(borough total)"),
+                     paste(x$area_name, "ward"))
+
+space <- " "
+
+```
+
+## `r area_title`
+
+This is a summary of the outputs of the GLA 2019-based Borough Preferred Option (BPO) projections for `r full_area_name`. These projections use the latest 2019 mid-year small area population estimates and a housing development trajectory specified by colleagues in `r x$borough_name`.
+
+This output is provided as a QA tool and a quick reference to the BPO scenario projections. Full ward-level projections are available to download from the borough BPO hub on the London Datastore. If you have any queries please contact demography@london.gov.uk.
+
+### Migration assumptions
+The BPO projections presented here vary in their assumptions about future migration. For full details of the migration assumptions used see the accompanying BPO Notes and FAQ document.\ 
+
+- **Scenario 1**: *Standard* migration in the covid period, *standard* migration in long term
+- **Scenario 2**: *Standard* migration in the covid period, *low domestic* migration in long term
+- **Scenario 3**: *High net out* migration in the covid period, *standard* migration in long term
+
+`r space`\  
+
+#### Covid period (2020-2022) 
+
+The *standard* assumptions for this period model a scenario in which *In* migration is significantly reduced in the first 2 years (2020 & 2021) before recovering to some degree in 2022. Conversely, *Out* migration remains relatively high for the first 2 years before reducing in 2022.\  
+
+The *High Net Out migration* variant assumes that the impacts of the pandemic on migration are more significant than those modelled in the *standard* variant. Both domestic and international flows are adjusted with the overall impact being a higher total net outflow of population from London.\ 
+
+`r space`\  
+
+#### Transition period (2023-2027) 
+
+During this period migration rates and flows are adjusted incrementally until the long-term level is reached in 2028.\ 
+ 
+`r space`\   
+ 
+#### Long-term period (2028-2050)
+
+The **standard** assumptions for this period are that international flows return to the 10-year average while domestic rates return to the 5-year average.\  
+
+The **low domestic** assumptions for this period are that both international flows and domestic rates return to the 10-year average. The 10-year domestic migration average is lower than the 5-year average and so produces lower domestic migration flows. In broad terms this means that population will increase at a greater rate as fewer people out-migrate from London.\ 
+
+`r space`\  
+
+## Total population  {.tabset}
+
+### 2010-2050
+```{r total_pop}
+x$total_pop_chart
+```
+
+### 2019-2030
+```{r pop_short_term}
+x$short_term_chart
+```
+
+## {-}
+
+## School-age population  {.tabset}
+
+### primary age
+```{r primary_pop}
+x$primary_chart
+```
+
+### secondary age
+
+```{r secondary_pop}
+x$secondary_chart
+```
+  
+## {-}
+  
+
+## Age Structure  {.tabset}
+
+### scenario 1
+```{r age_structure_2011}
+x$age_structure_charts[[1]]
+```
+
+### scenario 2
+```{r age_structure_2019}
+x$age_structure_charts[[2]]
+```
+
+### scenario 3
+```{r age_structure_2034}
+x$age_structure_charts[[3]]
+```
+
+## {-}
+
+```{r age_table}
+tbl <- x$age_table %>% rename(` ` = age_group)
+knitr::kable(tbl, caption = "Population by selected age groups")
+```
+
+## Components of Change {.tabset}
+
+The components of population change are births, deaths and net migration. Data up to and including 2019 are adapted from ONS mid-year population estimates. Data for 2020-2050 are modelled and projected by GLA demography.
+
+### births
+  
+```{r total_births}
+x$births_chart
+```
+
+### deaths
+
+```{r total_deaths}
+x$deaths_chart
+```
+
+### migration
+
+```{r net_migration}
+x$migration_chart
+```
+
+## {-}
+
+## Assumed Development
+
+BPO projections use the GLA housing-led model to reconcile projected trends in population change with future housing capacity. The chart shows the development trajectory for `r x$area_name` used in producing the 2019-based BPO scenario projections above. 
+  
+```{r assumed_dev_chart}
+x$assumed_dev_chart
+```
+
+### Notes
+Copyright GLA demography 2021.\
+Contact demography@london.gov.uk\
+BPO projections are not published by the GLA but may be published by the commissioning authority.\
+Thanks to Jonathan West at Waltham Forest.\
+  
+  

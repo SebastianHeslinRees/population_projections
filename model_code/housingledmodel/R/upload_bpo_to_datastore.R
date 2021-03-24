@@ -5,17 +5,18 @@
 #' @param bpo_name String. The folder name within the \code{bpo_root} folder that
 #'  contains the file to be uploaded
 #' @param bpo_root String. The directory path to the bpo outputs folder.
-#'   Default \code{outputs/housing_led/2018/bpo/}
+#'   Default \code{outputs/housing_led/2019/bpo/}
 #' @param variants Character. The projection variants. Defaults to \code{c("high_migration","medium_migration", "low_migration","medium_migration_trend_fertility")}
 #' 
 #' @import dplyr
 #' @import ldndatar
 #' @import stringr
+#' 
+#' @export
 
 upload_bpo_to_datastore <- function(bpo_name,
-                                    variants = c("high_migration","medium_migration",
-                                                 "low_migration","medium_migration_trend_fertility"),
-                                    bpo_root = "outputs/housing_led/2018/bpo/"){
+                                    variants,
+                                    bpo_root = "outputs/housing_led/2019/bpo/"){
   
   #DO NOT SAVE THIS FILE WITH AN API KEY
   lds_api_key <- Sys.getenv("lds_api_key")
@@ -63,19 +64,20 @@ upload_bpo_to_datastore <- function(bpo_name,
     bpo_matches <- all_bpos[all_bpos_no_date==full_name]
     
     if(length(bpo_matches)==0){stop(paste0("no mataches found for ", full_name))}
-    if(length(bpo_matches)>10){stop(paste0("more than 1 match found for ", full_name))}
+    if(length(bpo_matches)>1){stop(paste0("more than 1 match found for ", full_name))}
     
     #find excel file inside folder
-    bpo_file <- paste0(bpo_root, bpo_matches, "/", full_name, "_BPO_2018.xlsx" )
+    bpo_file <- paste0(bpo_root, bpo_matches, "/", full_name, "_BPO_2019.xlsx" )
     if(!file.exists(bpo_file)){stop(paste0("excel file not found for ", full_name))}
     
     #metadata for datastore
-    resource_title <- paste0(str_replace_all(full_name, "_", " "), " BPO 2018")
+    resource_title <- paste0(str_replace_all(full_name, "_", " "), " BPO 2019")
     resource_var <- str_replace_all(variants[i], "_", " ")
     substr(resource_var, 1, 1) <- toupper(substr(resource_var, 1, 1))
-    resource_desc <- paste0("2018-based Borough Preferred Option projection. ",
+    traj <- ifelse(grepl("shlaa", full_name, ignore.case = TRUE), "SHLAA", "Borough-specified")
+    resource_desc <- paste0("2019-based Borough Preferred Option projection. ",
                             resource_var,
-                            " scenario. Uploaded ", today, ".")                  
+                            ". ",traj," trajectory. Uploaded ", today, ".")                  
     
     #check resource doesn't exist and then upload
     if(resource_title %in% dataset_resources$resource_title){
@@ -100,5 +102,3 @@ upload_bpo_to_datastore <- function(bpo_name,
   
   message(paste(borough, "bpo upload complete"))
 }
-
-
