@@ -59,9 +59,10 @@ source('input_data_scripts/domestic_migration/pre-calulate_domestic_rates_2018_b
 #2019-based projections data
 source("input_data_scripts/scenario_data/covid_scenario_deaths.R")
 source("input_data_scripts/scenario_data/covid_scenario_rates.R")
+source("input_data_scripts/scenario_data/migration_rates_for_2019_BPOs.R")
 
 #Excel templates
-dir.create("input_data/excel_templates")
+dir.create("input_data/excel_templates", showWarnings = FALSE)
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/excel_templates",
                        "input_data/excel_templates")
 

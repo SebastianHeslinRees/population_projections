@@ -27,19 +27,21 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
                                             small_area_births_sya,
                                             small_area_deaths_sya){
  
-  popn_backseries <- filter(popn_backseries, year %in% 2010:(first_proj_yr-1))
+  last_data_yr <- first_proj_yr - 1
+  
+  popn_backseries <- filter(popn_backseries, year %in% 2010:last_data_yr)
   
   births_backseries <- small_area_births_sya %>%
-    filter(year %in% 2002:(first_proj_yr-1))
+    filter(year %in% 2002:last_data_yr)
   
   deaths_backseries <- small_area_deaths_sya %>%
-    filter(year %in% 2002:(first_proj_yr-1))
+    filter(year %in% 2002:last_data_yr)
   
   past_net <- popn_backseries %>%
     popn_age_on(col_aggregation = c("year", "gss_code_small_area", "age", "sex"),
                 births = births_backseries) %>%
     left_join(unique(select(popn_backseries, gss_code, gss_code_small_area)), by="gss_code_small_area") %>% 
-    filter(year %in% 2011:2018) %>%
+    filter(year %in% 2011:last_data_yr) %>%
     left_join(deaths_backseries, by = c("gss_code", "gss_code_small_area", "year", "sex", "age")) %>%
     mutate(nat_chg = popn - deaths) %>%
     select(-popn) %>%
