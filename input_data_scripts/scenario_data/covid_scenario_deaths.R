@@ -5,7 +5,7 @@ library(data.table)
 message("covid-19 mortality")
 
 #2020 = DATA To WEEK 27 (03/July/20202) - Mid Year
-#2021 = DATA TO WEEK 7 of 2021 (19/02/2021)
+#2021 = DATA TO WEEK 10 of 2021 (12/03/2021)
 
 ####UPDATE PROCESS####
 #1. Download data from ONS using 2 links below
@@ -39,13 +39,13 @@ ons_weekly_la_totals_2 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_la_calend
 #https://datavis.nisra.gov.uk/vitalstatistics/weekly-deaths-dashboard.html
 #https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/weekly-and-monthly-data-on-births-and-deaths/deaths-involving-coronavirus-covid-19-in-scotland
 
-#Deaths to 21/02/21
-scottish_most_recent_week <- 290
-scottish_all_to_date <- 9345
+#Deaths to 21/03/21
+scottish_most_recent_week <- 65
+scottish_all_to_date <- 9897
 
-#Deaths to 19/02/21
-n_irish_most_recent_week <- 78
-n_irish_all_to_date <- 2751
+#Deaths to 12/03/21
+n_irish_most_recent_week <- 32
+n_irish_all_to_date <- 2871
 
 #-------------------------------------------------------------------------------
 
