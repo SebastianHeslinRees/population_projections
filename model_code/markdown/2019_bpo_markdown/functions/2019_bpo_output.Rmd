@@ -26,7 +26,7 @@ space <- " "
 
 ## `r area_title`
 
-This is summary of the outputs of the GLA 2019-based Borough Preferred Option (BPO) projections for `r full_area_name`. These projections use the latest 2019 mid-year small area population estimates and a housing development trajectory specified by colleagues in `r x$borough_name`.
+This is a summary of the outputs of the GLA 2019-based Borough Preferred Option (BPO) projections for `r full_area_name`. These projections use the latest 2019 mid-year small area population estimates and a housing development trajectory specified by colleagues in `r x$borough_name`.
 
 This output is provided as a QA tool and a quick reference to the BPO scenario projections. Full ward-level projections are available to download from the borough BPO hub on the London Datastore. If you have any queries please contact demography@london.gov.uk.
 
@@ -35,7 +35,7 @@ The BPO projections presented here vary in their assumptions about future migrat
 
 - **Scenario 1**: *Standard* migration in the covid period, *standard* migration in long term
 - **Scenario 2**: *Standard* migration in the covid period, *low domestic* migration in long term
-- **Scenario 3**: *Low net* migration in the covid period, *standard* migration in long term
+- **Scenario 3**: *High net out* migration in the covid period, *standard* migration in long term
 
 `r space`\  
 
@@ -43,7 +43,7 @@ The BPO projections presented here vary in their assumptions about future migrat
 
 The *standard* assumptions for this period model a scenario in which *In* migration is significantly reduced in the first 2 years (2020 & 2021) before recovering to some degree in 2022. Conversely, *Out* migration remains relatively high for the first 2 years before reducing in 2022.\  
 
-The *low net migration* variant assumes that the impacts of the pandemic on migration are more significant than those modelled in the *standard* variant and the recovery to pre-pandemic behaviours is slower. Both domestic and international flows are adjusted with the overall impact being a higher total net outflow of population from London.\ 
+The *High Net Out migration* variant assumes that the impacts of the pandemic on migration are more significant than those modelled in the *standard* variant. Both domestic and international flows are adjusted with the overall impact being a higher total net outflow of population from London.\ 
 
 `r space`\  
 
