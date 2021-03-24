@@ -16,7 +16,6 @@
 
 upload_bpo_to_datastore <- function(bpo_name,
                                     variants,
-                                                 "low_migration","medium_migration_trend_fertility"),
                                     bpo_root = "outputs/housing_led/2019/bpo/"){
   
   #DO NOT SAVE THIS FILE WITH AN API KEY
