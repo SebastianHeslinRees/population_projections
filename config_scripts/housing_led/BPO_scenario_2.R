@@ -6,7 +6,7 @@
 library(popmodules)
 library(housingledmodel)
 
-external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_2_21-03-16_1334/"
+external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_2", full.names = TRUE),"/")
 projection_name <- "BPO_scenario_2"
 
 communal_est_file <- "dclg_communal_est_population.rds"
@@ -40,7 +40,8 @@ domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_sc
                        '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_gla_mye.rds",
                                      transition = F))
 
-fertility_rates_path <- paste0(external_trend_path,"/fertility_rates.rds")
+fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_trend.rds"
+additional_births_path <- "input_data/fertility/predicted_births_2019-based_projections.rds"
 
 #------------------
 
@@ -62,7 +63,7 @@ config_list <- list(
   domestic_rates = domestic_rates,
   constrain_projection = constrain_projection,
   ahs_method = ahs_method,
-  additional_births_path = NULL,
+  additional_births_path = additional_births_path,
   fertility_rates_path = fertility_rates_path,
   popn_adjustment_path = popn_adjustment_path)
 
