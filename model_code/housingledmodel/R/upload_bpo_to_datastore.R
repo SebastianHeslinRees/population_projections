@@ -15,7 +15,7 @@
 #' @export
 
 upload_bpo_to_datastore <- function(bpo_name,
-                                    variants = c("high_migration","medium_migration",
+                                    variants,
                                                  "low_migration","medium_migration_trend_fertility"),
                                     bpo_root = "outputs/housing_led/2019/bpo/"){
   
@@ -103,4 +103,3 @@ upload_bpo_to_datastore <- function(bpo_name,
   
   message(paste(borough, "bpo upload complete"))
 }
-
