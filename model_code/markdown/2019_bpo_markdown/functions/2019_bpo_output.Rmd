@@ -43,18 +43,22 @@ Broadly speaking, the high out migration variant assumes a scenario in which the
 `r space`\  
 
 #### Transition period (2023-2027)
-During this period migration rates and flows are adjusted incrementally until the long-term level is reached in 2028.\
+During this period migration rates and flows are adjusted incrementally until the long-term level is reached in 2028.\ 
 
 `r space`\  
  
 #### Long-term period (2028-2050)
-There are two longer term migration variants: a **standard** and a **low domestic migration** variant. Scenarios 1 and 3 use the standard variant while scenario 2 uses the low migration variant. Again, full details are available in the accompanying BPO documentation.
+There are two longer term migration variants: a **standard** and a **low domestic migration** variant. Scenarios 1 and 3 use the standard migration variant while scenario 2 uses the low migration variant. Again, full details are available in the accompanying BPO documentation.\  
 
-In the both variants, international flows return to the 10-year average (2010-2019) in 2028.
+**Standard migration variant**
+- International flows return to the 10-year average (2010-2019) in 2028 \  
+- Domestic migration rates return to the 5-year average (2015-2019) in 2028 \  
 
-In the standard variant domestic migration rates return to the 5-year average (2015-2019) in 2028.
+**Low domestic migration**
+- International flows return to the 10-year average (2010-2019) in 2028 \   
+- Domestic migration rates return to the 5-year average (2015-2019) in 2028 \   
 
-In the low migration variant domestic migration returns to a 10-year average (2010-2019) in 2028. The 10-year average is lower than the 5-year average and so produces lower domestic migration flows. In broad terms this means that population will increase at a greater rate as fewer people out-migrate from London.\ 
+The 10-year domestic migration average is lower than the 5-year average and so produces lower domestic migration flows. In broad terms this means that population will increase at a greater rate as fewer people out-migrate from London.\ 
 
 `r space`\  
 
