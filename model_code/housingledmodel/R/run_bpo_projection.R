@@ -54,7 +54,7 @@ run_bpo_projection <- function(bpo_name,
   #Set the domestic migration data and paths for the variant projection that's been selected
   
   if(variant == "scenario_1"){
-    external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_1_21-03-16_1329/"
+    external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_1", full.names = TRUE),"/")
     housing_led_params$domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2020.rds",
                                                             transition = F),
                                               '2021' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2021.rds",
@@ -65,7 +65,7 @@ run_bpo_projection <- function(bpo_name,
                                                             transition = F))
     
   } else if(variant == "scenario_2"){
-    external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_2_21-03-16_1334/"
+    external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_2", full.names = TRUE),"/")
     housing_led_params$domestic_rates = list('2020' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2020.rds",
                                                            transition = F),
                                              '2021' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2021.rds",
@@ -76,7 +76,7 @@ run_bpo_projection <- function(bpo_name,
                                                            transition = F))
     
   } else if(variant == "scenario_3"){
-    external_trend_path <- "outputs/trend/2019/2019_BPO_scenario_3_21-03-16_1340/"
+    external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_3", full.names = TRUE),"/")
     housing_led_params$domestic_rates = list('2020' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2020.rds",
                                                            transition = F),
                                              '2021' = list(path = "input_data/scenario_data/bpo_dom_scenario_3_yr_2021.rds",
