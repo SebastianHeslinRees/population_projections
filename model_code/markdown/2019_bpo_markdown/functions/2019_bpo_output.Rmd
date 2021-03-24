@@ -31,36 +31,33 @@ This is summary of the outputs of the GLA 2019-based Borough Preferred Option (B
 This output is provided as a QA tool and a quick reference to the BPO scenario projections. Full ward-level projections are available to download from the borough BPO hub on the London Datastore. If you have any queries please contact demography@london.gov.uk.
 
 ### Migration assumptions
-The BPO projections presented here vary in their assumptions about future migration.\ 
+The BPO projections presented here vary in their assumptions about future migration. For full details of the migration assumptions used see the accompanying BPO Notes and FAQ document.\ 
+
+- **Scenario 1**: *Standard* migration in the covid period, *standard* migration in long term
+- **Scenario 2**: *Standard* migration in the covid period, *low domestic* migration in long term
+- **Scenario 3**: *Low net* migration in the covid period, *standard* migration in long term
 
 `r space`\  
 
-#### Covid period (2020-2022)
-In the initial years of the projection there are two migration variants: the **standard** and the **high out migration** variants. Scenarios 1 and 2 use the standard assumptions while scenario 3 uses the high out migration assumptions. For full details of the migration assumptions used see the accompanying BPO documentation.
+#### Covid period (2020-2022) 
 
-Broadly speaking, the high out migration variant assumes a scenario in which the impacts of the pandemic on migration are more significant and the recovery to pre-pandemic behaviours is slower. Both domestic and international flows are adjusted with the overall impact being a higher total net outflow of population from London.\ 
+The *standard* assumptions for this period model a scenario in which *In* migration is significantly reduced in the first 2 years (2020 & 2021) before recovering to some degree in 2022. Conversely, *Out* migration remains relatively high for the first 2 years before reducing in 2022.\  
+
+The *low net migration* variant assumes that the impacts of the pandemic on migration are more significant than those modelled in the *standard* variant and the recovery to pre-pandemic behaviours is slower. Both domestic and international flows are adjusted with the overall impact being a higher total net outflow of population from London.\ 
 
 `r space`\  
 
-#### Transition period (2023-2027)
+#### Transition period (2023-2027) 
+
 During this period migration rates and flows are adjusted incrementally until the long-term level is reached in 2028.\ 
-
-`r space`\  
+ 
+`r space`\   
  
 #### Long-term period (2028-2050)
-There are two longer term migration variants: a **standard** and a **low domestic migration** variant. Scenarios 1 and 3 use the standard migration variant while scenario 2 uses the low migration variant. Again, full details are available in the accompanying BPO documentation.\  
 
-**Standard migration variant**
+The **standard** assumptions for this period are that international flows return to the 10-year average while domestic rates return to the 5-year average.\  
 
-- International flows return to the 10-year average (2010-2019) in 2028 \  
-- Domestic migration rates return to the 5-year average (2015-2019) in 2028 \  
-
-**Low domestic migration**
-
-- International flows return to the 10-year average (2010-2019) in 2028 \   
-- Domestic migration rates return to the 10-year average (2015-2019) in 2028 \   
-
-The 10-year domestic migration average is lower than the 5-year average and so produces lower domestic migration flows. In broad terms this means that population will increase at a greater rate as fewer people out-migrate from London.\ 
+The **low domestic** assumptions for this period are that both international flows and domestic rates return to the 10-year average. The 10-year domestic migration average is lower than the 5-year average and so produces lower domestic migration flows. In broad terms this means that population will increase at a greater rate as fewer people out-migrate from London.\ 
 
 `r space`\  
 
@@ -144,7 +141,7 @@ x$migration_chart
 
 ## Assumed Development
 
-BPO projections use the GLA housing-led model to reconcile projected trends in population change with future housing capacity. The development trajectory used is specified by the commissioning borough. The chart shows the development trajectory for `r x$area_name` used in the 2019 BPO projections. 
+BPO projections use the GLA housing-led model to reconcile projected trends in population change with future housing capacity. The chart shows the development trajectory for `r x$area_name` used in producing the 2019-based BPO scenario projections above. 
   
 ```{r assumed_dev_chart}
 x$assumed_dev_chart

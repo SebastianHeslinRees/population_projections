@@ -1,5 +1,5 @@
 prep_data_for_rmd <- function(bpo_data, gss, area_name){
-
+  
   output_list <- list()
   
   filtered_bpo <- lapply(bpo_data, function(x) if(is.data.frame(x)){filter(x, gss_code == gss)})
@@ -43,11 +43,20 @@ prep_data_for_rmd <- function(bpo_data, gss, area_name){
   pop_change <- total_pop %>% 
     mutate(value = value - popn_2011) 
   
-  assumed_dev <- bpo_data[['assumed_dev']] %>% 
+  assumed_dev <- bpo_data[['assumed_dev']]
+  
+  if(unique(assumed_dev$gss_code) != gss){
+    
+    assumed_dev <- assumed_dev %>% 
+      filter(gss_code_ward == gss) %>% 
+      mutate(gss_code = gss_code_ward)
+  }
+  
+  assumed_dev <- assumed_dev %>% 
     group_by(gss_code, year, variant) %>% 
     summarise(value = sum(units)) %>% 
-    data.frame() 
-
+    data.frame()
+  
   output_list[['total_pop_chart']] <- line_chart_plotly(total_pop, title = "Total population", y_axis="persons", area_name)
   output_list[['primary_chart']] <- line_chart_plotly(primary_pop, title = "Primary age population", y_axis="persons", area_name)
   output_list[['secondary_chart']] <- line_chart_plotly(secondary_pop, title = "Secondary age population", y_axis="persons", area_name)
@@ -57,7 +66,7 @@ prep_data_for_rmd <- function(bpo_data, gss, area_name){
   output_list[['pop_change_chart']] <- line_chart_plotly(pop_change, title = "Population change", y_axis="Change since 2011 (persons)", area_name)
   output_list[['assumed_dev_chart']] <- bar_chart_plotly(assumed_dev, title = "Assumed development", y_axis="net additional units", area_name)
   output_list[['short_term_chart']] <- line_chart_plotly(short_term, title = "Total population (2019-2030)", y_axis="persons", area_name)
-
+  
   age_structure <- filtered_bpo[['population']] %>% 
     filter(year %in% c(2011,2019,2034)) %>% 
     group_by(year, variant, age) %>% 
