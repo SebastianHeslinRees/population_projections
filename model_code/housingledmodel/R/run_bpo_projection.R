@@ -111,9 +111,8 @@ run_bpo_projection <- function(bpo_name,
   
   #give the projection a name
   projection_name <- paste0(bpo_name,"_",variant)
-  if(fertility_scenario == "trend"){
-    projection_name <- paste0(projection_name,"_trend_fertility")
-  } else {
+
+  if(fertility_scenario == "average"){
     projection_name <- paste0(projection_name,"_avg_fertility")
   }
   
