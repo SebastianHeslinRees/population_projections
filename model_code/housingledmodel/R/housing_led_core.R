@@ -108,6 +108,7 @@ housing_led_core <- function(start_population,
   
   #Overwrite births if there are actuals for the projection year
   if(!is.null(actual_births)){
+    actual_births <- filter(actual_births, gss_code %in% constrain_gss)
     births <- trend_projection[['births']] %>%
       select(year, gss_code, age, sex, births) %>% 
       filter(!gss_code %in% actual_births$gss_code) %>%

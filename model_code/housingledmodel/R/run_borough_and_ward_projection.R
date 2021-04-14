@@ -54,15 +54,15 @@ run_borough_and_ward_projection <- function(projection_name,
   ahs_method <- 0
   last_data_yr <- 2019
   
-  additional_births_path <- "input_data/fertility/predicted_births_2019-based_projections.rds"
+  additional_births_path <- "input_data/fertility/provisional_births_2020_EW.rds"
   
   if(fertility_scenario == "average"){
-    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_avg.rds"
+    fertility_rates_path <- "input_data/fertility/fertility_rates_provisional_2020_5yr_avg.rds"
     
   }
   
   if(fertility_scenario == "trend"){
-    fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_trend.rds"
+    fertility_rates_path <- "input_data/fertility/fertility_rates_provisional_2020_5yr_trend.rds"
   }
   
   if(bpo==FALSE){
@@ -121,7 +121,7 @@ run_borough_and_ward_projection <- function(projection_name,
   
   housing_led_model_path <- config_list$output_dir
   
-  borough_fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_avg.rds"
+  borough_fertility_rates_path <- config_list$fertility_rates_path
   borough_mortality_rates_path <- paste0(config_list$external_trend_path,"mortality_rates.rds")
   
   last_data_yr <- 2019
