@@ -1,17 +1,17 @@
-devtools::load_all("C:/Projects_c/demogtools/")
+devtools::load_all("Q:/Teams/D&PA/Demography/demogtools/")
 library(dplyr)
 library(data.table)
 library(assertthat)  
 
 
-trend_list <- list(CC = "outputs/trend/2019/published_27_nov_2020/2019_variant_CC_20-11-27_1153/",
-                   CH = "outputs/trend/2019/published_27_nov_2020/2019_variant_CH_20-11-27_1154/",
-                   LC = "outputs/trend/2019/published_27_nov_2020/2019_variant_LC_20-11-27_1208/",
-                   LH = "outputs/trend/2019/published_27_nov_2020/2019_variant_LH_20-11-27_1313/")
+trend_list <- list('central upper' = "outputs/trend/2019/published_27_nov_2020/2019_variant_CC_20-11-27_1153/",
+                   'centrral lower' = "outputs/trend/2019/published_27_nov_2020/2019_variant_CH_20-11-27_1154/",
+                   'low population' = "outputs/trend/2019/published_27_nov_2020/2019_variant_LC_20-11-27_1208/",
+                   'high population' = "outputs/trend/2019/published_27_nov_2020/2019_variant_HC_20-11-27_1205/")
 
-housing_list <- list(s1 = "outputs/housing_led/2019/bpo/BPO_scenario_1_21-03-24_1820/",
-                     s2 = "outputs/housing_led/2019/bpo/BPO_scenario_2_21-03-24_1820/",
-                     s3 = "outputs/housing_led/2019/bpo/BPO_scenario_3_21-03-24_1820/")
+housing_list <- list('scenario 1' = "outputs/housing_led/2019/bpo/BPO_scenario_1_21-04-19_1536/",
+                     'scenario 2' = "outputs/housing_led/2019/bpo/BPO_scenario_2_21-04-19_1536/",
+                     'scenario 3' = "outputs/housing_led/2019/bpo/BPO_scenario_3_21-04-19_1536/")
 
 #-------------------------------------------------------------------------------
 
@@ -155,12 +155,14 @@ w <- lapply(w, function(x) x %>%
 ward <- rbindlist(w)
 
 #-------------------------------------------------------------------------------
-rm(t,w,h)
-gc()
+# rm(t,w,h)
+# gc()
 
 all_3 <- rbind(trend, housing_led, ward)
 all_3 <- data.frame(all_3) %>% 
   mutate(value = round(value,0))
+
+print(Sys.time()-tm)
 
 #-------------------------------------------------------------------------------
 
@@ -184,10 +186,9 @@ validate_output(trend, housing_led, ward)
 #-------------------------------------------------------------------------------
 
 #SAVE
-
-#saveRDS(all_3, "c:/temp/mike.rds")
-print(Sys.time()-tm)
 out_dir <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/projections_explorer/"
+#saveRDS(all_3, paste0(out_dir, "2019_based_projections.rds"))
+fwrite(all_3[1:1000,], paste0(out_dir, "FIRST_1000_ROWS_2019_based_projections.csv"))
 system.time(fwrite(all_3, paste0(out_dir, "2019_based_projections.csv")))
 
 
