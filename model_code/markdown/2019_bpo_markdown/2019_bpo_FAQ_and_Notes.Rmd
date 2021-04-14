@@ -1,0 +1,634 @@
+---
+title: '2019-based BPO projections: Notes & FAQ'
+author: "GLA Demography"
+date: "March 2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+```
+
+```{r functions, echo = FALSE}
+gss_code_to_name <- readRDS("input_data/lookup/gss_code_to_name.rds")
+
+filter_ldn <- function(x){filter(x,substr(gss_code,1,3)=="E09")}
+
+nice_number <- function(x){format(round(x,0), big.mark=",")}
+
+space <- " ."
+```
+
+```{r covid_data, include = FALSE}
+covid19_deaths <- readRDS("input_data/scenario_data/covid19_deaths.rds") %>% 
+  filter(substr(gss_code,1,3)=="E09") %>% 
+  group_by(gss_code, year) %>% 
+  summarise(deaths = sum(upc)*-1) %>% 
+  data.frame() %>% 
+  mutate(deaths = round(deaths, 0)) %>% 
+  left_join(gss_code_to_name, by="gss_code") %>% 
+  select(borough = gss_name, year, deaths) %>% 
+  tidyr::pivot_wider(names_from = "year", values_from = "deaths")
+
+covid_ldn_2020 <- sum(covid19_deaths$`2020`)
+covid_ldn_2021 <- sum(covid19_deaths$`2021`)
+```
+
+```{r int_migration, include = FALSE}
+
+int_in_10yr_avg_2019 <- readRDS("input_data/mye/2019/int_in_10yr_avg_2019.rds")
+int_out_10yr_avg_2019 <- readRDS("input_data/mye/2019/int_out_10yr_avg_flow_2019.rds")
+
+ldn_in_10 <- sum(filter_ldn(int_in_10yr_avg_2019)$int_in)
+ldn_out_10 <- sum(filter_ldn(int_out_10yr_avg_2019)$int_out)
+ldn_net_10 <- ldn_in_10-ldn_out_10
+
+```
+
+```{r births, include = FALSE}
+births_ons <- readRDS("input_data/fertility/provisional_births_2020_EW.rds") %>% 
+  filter_ldn() %>% 
+  group_by(year) %>% 
+  summarise(births = sum(births)) %>% 
+  data.frame
+```
+
+```{r shlaa, include = FALSE}
+shlaa <- readRDS("input_data/housing_led_model/borough_shlaa_pandemic_adjusted.rds") %>% 
+  group_by(year) %>% 
+  summarise(units = sum(units)) %>% 
+  data.frame()
+```
+
+```{r proj_data, echo = FALSE, include = FALSE}
+s1_path <- "outputs/housing_led/2019/BPO_scenario_1_21-04-09_1536/"
+s2_path <- "outputs/housing_led/2019/BPO_scenario_2_21-04-09_1536/"
+s3_path <- "outputs/housing_led/2019/BPO_scenario_3_21-04-09_1536/"
+
+popn <- rbind(
+  readRDS(paste0(s1_path,"population.rds")) %>% 
+    mutate(scenario = "scenario 1"),
+  readRDS(paste0(s2_path,"population.rds"))%>% 
+    mutate(scenario = "scenario 2"),
+  readRDS(paste0(s3_path,"population.rds"))%>% 
+    mutate(scenario = "scenario 3")) %>% 
+  filter(substr(gss_code, 1, 3) == "E09") %>% 
+  group_by(year, scenario) %>% 
+  summarise(popn= sum(popn))
+
+mig_levels_1 <- rbind(
+  readRDS(paste0(s1_path,"dom_in.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "dom_in") %>% 
+    rename(value = dom_in),
+  readRDS(paste0(s1_path,"dom_out.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "dom_out") %>% 
+    mutate(value = dom_out*-1) %>% 
+    select(-dom_out),
+  readRDS(paste0(s1_path,"int_in.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "int_in") %>% 
+    rename(value = int_in),
+  readRDS(paste0(s1_path,"int_out.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "int_out") %>% 
+    mutate(value = int_out*-1) %>% 
+    select(-int_out)) %>% 
+  group_by(year) %>% 
+  summarise(value = sum(value)) %>% 
+  data.frame() %>% 
+  mutate(variant = "scenario 1")
+
+mig_levels_2 <- rbind(
+  readRDS(paste0(s2_path,"dom_in.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "dom_in") %>% 
+    rename(value = dom_in),
+  readRDS(paste0(s2_path,"dom_out.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "dom_out") %>% 
+    mutate(value = dom_out*-1) %>% 
+    select(-dom_out),
+  readRDS(paste0(s2_path,"int_in.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "int_in") %>% 
+    rename(value = int_in),
+  readRDS(paste0(s2_path,"int_out.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "int_out") %>% 
+    mutate(value = int_out*-1) %>% 
+    select(-int_out)) %>% 
+  group_by(year) %>% 
+  summarise(value = sum(value)) %>% 
+  data.frame() %>% 
+  mutate(variant = "scenario 2")
+
+mig_levels_3 <- rbind(
+  readRDS(paste0(s3_path,"dom_in.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "dom_in") %>% 
+    rename(value = dom_in),
+  readRDS(paste0(s3_path,"dom_out.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "dom_out") %>% 
+    mutate(value = dom_out*-1) %>% 
+    select(-dom_out),
+  readRDS(paste0(s3_path,"int_in.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "int_in") %>% 
+    rename(value = int_in),
+  readRDS(paste0(s3_path,"int_out.rds")) %>% 
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    mutate(mig = "int_out") %>% 
+    mutate(value = int_out*-1) %>% 
+    select(-int_out)) %>% 
+  group_by(year) %>% 
+  summarise(value = sum(value)) %>% 
+  data.frame() %>% 
+  mutate(variant = "scenario 3")
+
+mig_data <- rbind(mig_levels_1, mig_levels_2, mig_levels_3)
+
+```
+
+The Borough Preferred Option (BPO) projections are a special set of housing-led population projections produced by the GLA for London local authorities and based on a housing development trajectory specified by each borough for this specific purpose.  
+
+In previous years the BPO projections have followed the release of the publicly available housing-led projections. However, the 2019-based housing-led projections are scheduled for May 2021 and so this year the BPOs precede them.
+
+### Model operation
+
+The BPO projections use the GLA housing-led and small area models to produce ward-level population projections. 
+
+The model operates by calculating a population based solely on trends and then separately one based on converting available dwelling stock into population through the application of average household size (AHS). These two populations are then reconciled in the model to produce a final population which accounts for both current trends and relative changes in housing availability.
+
+Full details of the model's operation can be found in the Housing-led methodology paper on the London Datastore (https://data.london.gov.uk/dataset/housing-led-population-projections).
+
+### Scenario projections
+The 2019-based BPO projections comprise 3 scenarios projections:
+
+* **Scenario 1**: standard migration assumptions for the covid period, high domestic out-migration assumptions in the longer-term.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This can be considered the *standard* BPO scenario.
+
+* **Scenario 2**: standard migration assumptions for the covid period, lower domestic out-migration assumptions in the longer-term.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is a high long-term population scenario.
+
+* **Scenario 3**: high out migration assumptions for the covid period, high domestic out-migration assumptions in the longer-term.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is a low short-term population scenario.
+
+```{r total_pop, echo = FALSE}
+p <- popn %>% 
+  data.frame() %>% 
+  plot_ly(x=~year, y=~popn, color=~scenario,
+          colors = c("#6da7de",
+                     "#9e0059",
+                     "#dee000"),
+          type = "scatter",
+          mode = "lines+markers", 
+          line = list(shape = "spline"),
+          text = ~scenario,
+          hovertemplate = paste("%{text}: %{y:,.0f}",
+                                "<extra></extra>"),
+          width = 1000,
+          height = 600) 
+
+y_min_value <- min(popn$popn)
+
+p %>% 
+  layout(title = "Total population, London\n2019-based BPO scenario projections",
+         xaxis = list(title = "",
+                      showgrid = FALSE),
+         yaxis = list(title = "persons",
+                      showgrid = TRUE),
+         legend = list(orientation = "h"),
+         margin = list(b=50),
+         hovermode = "x unified",
+         
+         #3 rectangles for different periods
+         shapes = list(
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.15,
+                x0 = 2019, x1 = 2022,
+                y0 = y_min_value, y1 = max(popn$popn),
+                layer = "below"),
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.1,
+                x0 = 2022, x1 = 2027,
+                y0 = y_min_value, y1 = max(popn$popn),
+                layer = "below"),
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.05,
+                x0 = 2027, x1 = max(popn$year+1),
+                y0 = y_min_value, y1 = max(popn$popn),
+                layer = "below")),
+         
+         #Annotation at the top of the rectangles
+         annotations = list(
+           list(x = 2020.5,
+                y = 0.93,
+                text = "Covid\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           list(x = 2024.5,
+                y = 0.93,
+                text = "Transition\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           list(x = 2040,
+                y = 0.93,
+                text = "Long-term period",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           #Source text in the bottom left
+           list(x = 1,
+                y = -0.10, #position of text adjust as needed 
+                text = "Source: GLA 2019-based BPO projections", 
+                showarrow = F,
+                xref='paper',
+                yref='paper', 
+                xanchor='right',
+                yanchor='auto',
+                xshift=0,
+                yshift=0,
+                font=list(size=11, color="grey"))
+         )
+         
+         
+  )
+```
+
+#### Interpreting scenario projections
+The complex dynamics involved in population change mean that trends at the London level do not necessarily translate directly to the borough and ward level. Which of the three scenarios shows the highest and lowest growth in a borough may differ from the order at the regional level and ward trajectories may not be in the same order as borough trajectories. So, where this document refers to 'low population' scenarios this refers to the London level. For this reason, the 3 BPO projections have been labelled as scenarios 1, 2 & 3, rather than giving them potentially misleading descriptive names.
+
+### Migration assumptions
+
+#### Covid period (2020-2022)
+The BPO scenarios use one of two different sets of migration assumptions for the first three years of the projection. The first is termed 'standard' and is our current best estimate of the impact of the pandemic on migration flows in and out of London. The second is termed 'high net out migration' and, as the name suggests, assumes greater levels of out migration from London during the initial years of the projection. This second set of assumptions is intended to reflect a scenario in which the effects of the pandemic are more severe and the consequences longer-lasting than the standard scenario. 
+
+#### Transition period (2023-2028)
+This period is designed to smooth the transition between the short-term migration assumptions of the covid period and the longer-term migration assumptions which take effect in 2029. During this period migration rates and flows are adjusted incrementally to take them from the levels in the final year of the covid period to the levels in the first year of the long-term period.
+
+#### Long-term period (2029-2050)
+In the long-term levels and rates of migration are assumed to return to the averages observed in recent years. International in and out migration is assumed to return to the 10-year average (2010-2019). At the London level this constitutes an inflow of `r nice_number(ldn_in_10)` and an outflow of `r nice_number(ldn_out_10)`, giving a Net international flow of `r nice_number(ldn_net_10)`.
+
+There are two domestic migration variants. In the first, long-term migration rates are based on the 10-year average (2010-2019) while the second uses the 5-year average (2015-2019). The second variant has larger migration rates meaning more people move around within the UK from and to all destinations. On balance London is a net exporter of population domestically and so higher migration flows tend to lead to lower population trajectories.
+
+In the BPO projections, Scenarios 1 and 3 use the first variant and Scenario 2 uses the second variant.
+
+
+```{r migration, echo = FALSE}
+
+p <- mig_data %>% 
+  plot_ly(x=~year, y=~value, color=~variant,
+          colors = c("#6da7de",
+                     "#9e0059",
+                     "#dee000"),
+          type = "scatter",
+          mode = "lines+markers", 
+          line = list(shape = "spline"),
+          text = ~variant,
+          hovertemplate = paste("%{text}: %{y:,.0f}",
+                                "<extra></extra>"),
+          width = 1000,
+          height = 600) 
+
+y_min_value <- min(mig_data$value)
+
+p %>% 
+  layout(title = "Total net migration, London",
+         xaxis = list(title = "",
+                      showgrid = FALSE),
+         yaxis = list(title = "persons",
+                      showgrid = TRUE),
+         legend = list(orientation = "h"),
+         margin = list(b=50),
+         hovermode = "x unified",
+         
+         #3 rectangles for different periods
+         shapes = list(
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.15,
+                x0 = 2019, x1 = 2022,
+                y0 = y_min_value, y1 = max(mig_data$value),
+                layer = "below"),
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.1,
+                x0 = 2022, x1 = 2027,
+                y0 = y_min_value, y1 = max(mig_data$value),
+                layer = "below"),
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.05,
+                x0 = 2027, x1 = max(mig_data$year+1),
+                y0 = y_min_value, y1 = max(mig_data$value),
+                layer = "below")),
+         
+         #Annotation at the top of the rectangles
+         annotations = list(
+           list(x = 2020.5,
+                y = 0.93,
+                text = "Covid\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           list(x = 2024.5,
+                y = 0.93,
+                text = "Transition\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           list(x = 2040,
+                y = 0.93,
+                text = "Long-term period",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           #Source text in the bottom left
+           list(x = 1,
+                y = -0.10, #position of text adjust as needed 
+                text = "Source: GLA 2019-based BPO projections", 
+                showarrow = F,
+                xref='paper',
+                yref='paper', 
+                xanchor='right',
+                yanchor='auto',
+                xshift=0,
+                yshift=0,
+                font=list(size=11, color="grey"))
+         )
+         
+         
+  )
+```
+
+### Housing development data
+
+#### LDD
+For the years 2012-2019 the development assumptions are taken from the London Development Database (LDD). This data is used in place of borough-supplied data except where the borough has explicitly requested that the LDD not be used.
+
+#### SHLAA
+For the years 2020-2041, the model requires an input trajectory.
+
+Where boroughs have not provided development data, or where the provided trajectory does not cover the entire period, the projections use data from the 2017 Strategic Housing Land Availability Assessment (SHLAA) as a proxy for future housing delivery.
+
+For the years 2020-2024 the SHLAA data is adjusted to account for the impact of the pandemic on housing delivery. For this period an average of LDD completions over the period 2012-2019 is used in place of SHLAA capacity data. SHLAA data is used unadjusted for the period 2025-2041.
+
+For the period 2030-2041 borough-level SHLAA capacity is greater than the sum of the wards. This is because windfall units are only specified at borough level and cannot be distributed down to wards. The model's constraining process ensures that the impact of this additional capacity at borough level is translated into ward-level population.
+
+No development is assumed for 2042 and beyond. 
+
+```{r shlaa_chart, echo = FALSE}
+shlaa %>% 
+  mutate(source = ifelse(year <= 2019, "LDD", "SHLAA")) %>% 
+  plot_ly(x=~year, y=~units, color = ~source,
+          colors = c("#6da7de",
+                     "#9e0059",
+                     "#dee000"),
+          type = "bar",
+          text = ~source,
+          hovertemplate = paste("<b>%{x}</b><br>",
+                                "%{text}: %{y:,.0f}",
+                                "<extra></extra>"),
+          width = 1000,
+          height = 600) %>%  
+  
+  #Global layout and title details
+  layout(title = "SHLAA & LDD development assumptions, London",
+         xaxis = list(title = "",
+                      showgrid = FALSE),
+         yaxis = list(title = "net additional units",
+                      showgrid = TRUE),
+         legend = list(orientation = "h"),
+         margin = list(b=50),
+         
+         #3 rectangles for different periods
+         shapes = list(
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.15,
+                x0 = 2019.5, x1 = 2022.5,
+                y0 =0, y1 = max(shlaa$units),
+                layer = "below"),
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.1,
+                x0 = 2022.5, x1 = 2027.5,
+                y0 = 0, y1 = max(shlaa$units),
+                layer = "below"),
+           list(type = "rect",
+                fillcolor = "#44aad5",
+                line = list(width = 0),
+                opacity = 0.05,
+                x0 = 2027.5, x1 = 2051,
+                y0 = 0, y1 = max(shlaa$units),
+                layer = "below")),
+         
+         #Annotoation at the top of the rectangles
+         annotations = list(
+           list(x = 2021,
+                y = 0.93,
+                text = "Covid\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           list(x = 2025,
+                y = 0.93,
+                text = "Transition\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           list(x = 2039,
+                y = 0.93,
+                text = "Long-term\nperiod",
+                xref = "x",
+                yref = "paper",
+                xanchor = 'center',
+                yanchor = 'top',
+                showarrow = FALSE,
+                font=list(size=11)),
+           
+           #Source text in the bottom left
+           list(x = 1,
+                y = -0.10, #position of text adjust as needed 
+                text = "Source: GLA 2019-based BPO projections", 
+                showarrow = F,
+                xref='paper',
+                yref='paper', 
+                xanchor='right',
+                yanchor='auto',
+                xshift=0,
+                yshift=0,
+                font=list(size=11, color="grey"))
+         )
+         
+         
+  )
+```
+
+### Births data
+Mid-year estimate births are available up to and including the year to mid-2019. Births for 2020 are provisional estimates based on ONS births by month data. Births for 2021 and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
+
+#### Trend fertility
+The 2019-based BPO projections use fertility rates based on trending the most recent years' data forward. In past years the model has used an average of past rates as standard with the trend option provided on request. The trend of declining in births observed in London since the peak in 2012 leads us to believe that a trended fertility rate provides the most reasonable starting point for projecting future births in the 2019-based BPO projections.
+
+```{r births_chart, echo = FALSE}
+#a <- mean(filter(births_ons, year >= 2015)$births)
+# t <- filter(births_ons, year >= 2015) %>% 
+#   lm(formula = births ~ year)
+# t <- t$coefficients['(Intercept)'] + (t$coefficients['year']*2021) 
+#
+# births_x <- data.frame(year=c(2021,2021),
+#                        births = c(t,a),
+#                        projected = c("trend","avg"))
+#rm(a,t)
+
+# ggplot(births_ons, aes(year, births)) +
+#   geom_line() +
+#   geom_point(data = births_x,
+#              aes(year, births, colour = projected))
+
+births_ons %>% 
+  plot_ly(x=~year, y=~births,
+          colors = c("#6da7de",
+                     "#9e0059",
+                     "#dee000"),
+          type = "scatter",
+          mode = "lines+markers", 
+          line = list(shape = "spline"),
+          # text = ~variant,
+          hovertemplate = paste("<b>%{x}</b><br>",
+                                "Births: %{y:,.0f}",
+                                "<extra></extra>"),
+          width = 1000,
+          height = 600) %>% 
+  
+  layout(title = "Total births (2002-2020), London",
+         xaxis = list(title = "",
+                      showgrid = FALSE),
+         yaxis = list(title = "births",
+                      showgrid = TRUE),
+         legend = list(orientation = "h"),
+         margin = list(b=50),
+         annotations = list(
+           list(x = 1,
+                y = -0.10, #position of text adjust as needed 
+                text = "Source: ONS Mid-year Estimates (2002-2019), ONS provisional biths estimate (2020)", 
+                showarrow = F,
+                xref='paper',
+                yref='paper', 
+                xanchor='right',
+                yanchor='auto',
+                xshift=0,
+                yshift=0,
+                font=list(size=11, color="grey"))
+         )
+  )
+```
+
+### Mortality
+
+Projected deaths are calculated by applying mortality rates, based on past data. This method provides a projection of expected deaths based on observed mortality over the period 2015-2019. It does not account for excess deaths from Covid-19.
+
+Deaths from Covid-19 are modelled separately and applied to the population at the end of each projection cycle.
+
+#### Covid-19 mortality
+
+ONS data on deaths from Covid-19 by local authority and age have been used to produce single-year-of age estimates of Covid-19 mortality for the years to mid-2020 and mid-2021.
+
+The most recent data available at the time of running the projections was to the week ending *12 March 2021*. For deaths in the remaining months of 2021 an assumed level of *150* UK deaths per week was used. Deaths from Covid-19 are not calculated separately for 2022 or beyond - it is assumed that deaths calculated through the normal application of averaged mortality rates will include deaths from Covid-19 in these years.
+
+The model assumes `r nice_number(covid_ldn_2020)` deaths in London in 2020 and `r nice_number(covid_ldn_2021)` deaths in 2021.
+
+```{r covid_table, echo = FALSE}
+DT::datatable(covid19_deaths,
+              caption = "Assumed deaths from Covid-19",
+              fillContainer = FALSE,
+              options = list(lengthMenu = list(c(11, 22, -1), c(11, 22, 33)),
+                             pageLength = 11))
+```
+
+In the BPO projections workbooks deaths from Covid-19 are shown as a separate component in the 'Components of Change' tab for boroughs. Deaths from Covid-19 are not modelled at ward level and so are not included in the ward-level outputs. The impact of Covid-19 on
+ward populations is applied in the model through the constraining process.
+
+
+### FAQ
+
+**Why do different migration scenarios produce similar population trajectories?**
+
+Where a development trajectory forecasts particularity high levels of housing growth in a borough the role of migration in affecting the population is tempered. As a result, boroughs with significant projected development are likely to see less variation between the 3 migration scenarios. However, there may be significant differences in age structure between projections
+which, at the total population level, look similar.
+
+**Are the BPO projections published anywhere?**
+
+The GLA do not make BPO projections publicly available. They are only accessible to those in the boroughs who have signed-up to have access to the BPO portal on the London Datastore. However, if you would like to publish your projections we have no objection. 
+
+**Are the projections available on new ward boundaries?**
+
+The underlying migration data used by the small area model is taken from the 2011 census. Unfortunately, there is no other source for small area flow data. As a result, the model is constrained to using the 2011 ward geography. MSOA projections can be provided on request and on completion of an MSOA development trajectory template.
+
+### Further information
+Please contact Wil Tonkiss if you have any questions relating to the BPO projections.
+william.tonkiss@london.gov.uk
+
+For questions about the SRP service or projections please contact Mat Cropper.
+srpservice@london.gov.uk
+
+
+`r space`
+

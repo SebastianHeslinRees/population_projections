@@ -84,7 +84,16 @@ upload_bpo_to_datastore <- function(bpo_name,
     #check resource doesn't exist and then upload
     if(resource_title %in% dataset_resources$resource_title){
       
-      message(paste("a resource named", full_name, "already exisits abandoning upload"))
+      message("replacing ",full_name)
+      
+      resource_id <- filter(dataset_resources, res_title == resource_title)$resource_id
+      
+      lds_replace_resource(file_path = bpo_file,
+                           slug = bposlug,
+                           api_key = lds_api_key,
+                           res_title = res_title,
+                           description = desc,
+                           res_id = resource_id)
       
     } else {
       
