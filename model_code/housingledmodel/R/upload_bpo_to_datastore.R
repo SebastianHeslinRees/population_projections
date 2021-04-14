@@ -59,7 +59,7 @@ upload_bpo_to_datastore <- function(bpo_name,
     
     #expected file name
     full_name <- paste0(bpo_name, "_", variants[i])
-
+    
     #find folder with expected name
     bpo_matches <- all_bpos[all_bpos_no_date==full_name]
     
@@ -71,13 +71,15 @@ upload_bpo_to_datastore <- function(bpo_name,
     if(!file.exists(bpo_file)){stop(paste0("excel file not found for ", full_name))}
     
     #metadata for datastore
-    resource_title <- paste0(str_replace_all(full_name, "_", " "), " BPO 2019")
+    
     resource_var <- str_replace_all(variants[i], "_", " ")
     substr(resource_var, 1, 1) <- toupper(substr(resource_var, 1, 1))
+    resource_title <- paste0("BPO projection - ", resource_var)
+    
     traj <- ifelse(grepl("shlaa", full_name, ignore.case = TRUE), "SHLAA", "Borough-specified")
-    resource_desc <- paste0("2019-based Borough Preferred Option projection. ",
-                            resource_var,
-                            ". ",traj," trajectory. Uploaded ", today, ".")                  
+    resource_desc <- paste0("2019-based BPO projection. ", traj, " development trajectory. ",
+                            resource_var, " migration assumptions. ",
+                            "Uploaded ",today)                
     
     #check resource doesn't exist and then upload
     if(resource_title %in% dataset_resources$resource_title){

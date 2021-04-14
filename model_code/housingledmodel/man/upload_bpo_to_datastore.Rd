@@ -6,9 +6,8 @@
 \usage{
 upload_bpo_to_datastore(
   bpo_name,
-  variants = c("high_migration", "medium_migration", "low_migration",
-    "medium_migration_trend_fertility"),
-  bpo_root = "outputs/housing_led/2018/bpo/"
+  variants,
+  bpo_root = "outputs/housing_led/2019/bpo/"
 )
 }
 \arguments{
@@ -18,7 +17,7 @@ contains the file to be uploaded}
 \item{variants}{Character. The projection variants. Defaults to \code{c("high_migration","medium_migration", "low_migration","medium_migration_trend_fertility")}}
 
 \item{bpo_root}{String. The directory path to the bpo outputs folder.
-Default \code{outputs/housing_led/2018/bpo/}}
+Default \code{outputs/housing_led/2019/bpo/}}
 }
 \description{
 Using the ldndatar package to leverage the datastore api

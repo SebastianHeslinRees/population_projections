@@ -9,7 +9,8 @@ output_bpo_excel_file(
   output_dir,
   projection_name,
   bpo_gss_code,
-  file_suffix = "_BPO_2018.xlsx"
+  popn_adjustment_path,
+  file_suffix = "_BPO_2019.xlsx"
 )
 }
 \arguments{
@@ -21,9 +22,11 @@ output_bpo_excel_file(
 
 \item{bpo_gss_code}{The gss code of the bpo projection}
 
-\item{file_suffix}{A string to append to the end of the filename}
+\item{popn_adjustment_path}{path to the population adjustment RDS file}
+
+\item{file_suffix}{A string to append to the end of the file name}
 }
 \description{
-Process population, components and developmnet data and place it into an
+Process population, components and development data and place it into an
 Excel template.
 }

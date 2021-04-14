@@ -13,6 +13,8 @@
 #' @import xlsx
 #' @import dplyr
 #' @importFrom tidyr pivot_longer
+#' 
+#' @export
 
 output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_code,
                                   popn_adjustment_path,

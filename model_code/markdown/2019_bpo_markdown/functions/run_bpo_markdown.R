@@ -1,4 +1,4 @@
-run_bpo_markdown <- function(projection_name){
+run_bpo_markdown <- function(projection_name, shlaa=FALSE){
   
   # project_root <- 'model_code/markdown/2019_bpo_markdown'
   # g <- getwd()
@@ -13,10 +13,15 @@ run_bpo_markdown <- function(projection_name){
   
   #using the projection name find the relevant projections
   bpo_dir <- "outputs/housing_led/2019/bpo/"
-  scenario_1 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_1"), list.dirs(bpo_dir, recursive=FALSE))]
-  scenario_2 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_2"), list.dirs(bpo_dir, recursive=FALSE))]
-  scenario_3 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_3"), list.dirs(bpo_dir, recursive=FALSE))]
-  
+  if(shlaa == FALSE){
+    scenario_1 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_1"), list.dirs(bpo_dir, recursive=FALSE))]
+    scenario_2 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_2"), list.dirs(bpo_dir, recursive=FALSE))]
+    scenario_3 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_3"), list.dirs(bpo_dir, recursive=FALSE))]
+  } else {
+    scenario_1 <- "outputs/housing_led/2019/BPO_scenario_1_21-03-24_1820"
+    scenario_2 <- "outputs/housing_led/2019/BPO_scenario_2_21-03-24_1820"
+    scenario_3 <- "outputs/housing_led/2019/BPO_scenario_3_21-03-24_1820"
+  }
   #put them in a list
   x <- list('scenario 1' = scenario_1,
             'scenario 2' = scenario_2,
