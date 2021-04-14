@@ -1,193 +1,193 @@
+devtools::load_all("C:/Projects_c/demogtools/")
 library(dplyr)
-library(popmodules)
-
-#####Projection Paths and Timestamps####
-
-cen_proj_path <- "Q:/Teams/D&PA/Demography/Projections/population_projections/outputs/trend/2018/2018_central/"
-cen_proj_timestamp <- "_19-11-13_2056"
-
-long_proj_path <- "Q:/Teams/D&PA/Demography/Projections/population_projections/outputs/trend/2018/2018_long/"
-long_proj_timestamp <- "_19-11-13_2144"
-
-short_proj_path <- "Q:/Teams/D&PA/Demography/Projections/population_projections/outputs/trend/2018/2018_short/"
-short_proj_timestamp <- "_19-11-13_2205"
-
-housing_led_proj_path <- "outputs/housing_led/2018/2018_based_shlaa_dev_20-02-05_1808/"
+library(data.table)
+library(assertthat)  
 
 
-#------
+trend_list <- list(CC = "outputs/trend/2019/published_27_nov_2020/2019_variant_CC_20-11-27_1153/",
+                   CH = "outputs/trend/2019/published_27_nov_2020/2019_variant_CH_20-11-27_1154/",
+                   LC = "outputs/trend/2019/published_27_nov_2020/2019_variant_LC_20-11-27_1208/",
+                   LH = "outputs/trend/2019/published_27_nov_2020/2019_variant_LH_20-11-27_1313/")
 
-####Functions####
+housing_list <- list(s1 = "outputs/housing_led/2019/bpo/BPO_scenario_1_21-03-24_1820/",
+                     s2 = "outputs/housing_led/2019/bpo/BPO_scenario_2_21-03-24_1820/",
+                     s3 = "outputs/housing_led/2019/bpo/BPO_scenario_3_21-03-24_1820/")
 
-names_lookup <- get_gss_names()
-
-process_projection <- function(x){
-  nm <- last(names(x))
-  
-  y <- x %>%
-    mutate(ethnic_group = "All persons",
-           gss_code_ward = NA,
-           ward_name = "Borough Total") %>%
-    left_join(names_lookup, by="gss_code") %>%
-    filter(substr(gss_code,1,3)=="E09") %>%
-    filter(year %in% 2011:2050) %>%
-    mutate(sex = substr(sex,1,1)) %>%
-    select(gss_code, gss_code_ward,
-           ethnic_group, year, sex, age, !!nm)
-  
-  return(y)
-}
+#-------------------------------------------------------------------------------
 
 
-process_trend_projection <- function(proj_path, proj_timestamp, proj_name){
+a <- function(proj_list, file_nm, col_nm = file_nm, comp_nm=file_nm){
+  x <- read_multiple_projections(proj_list,
+                                 component = file_nm,
+                                 col_aggregation = c("gss_code","year","sex","age")) %>% 
+    mutate(component = comp_nm) %>% 
+    rename(projection_name = variant,
+           value = col_nm) %>%
+    select(projection_name, gss_code, year, sex, age, component, value) %>% 
+    filter(substr(gss_code,1,3)=="E09" | gss_code == "E12000007") %>% 
+    filter(year %in% 2011:2050)
   
-  proj <- list()
-  
-  proj[['pop']] <- readRDS(paste0(proj_path,"population",proj_timestamp, ".rds")) %>%
-    rename(!!sym(paste0(proj_name,"_population")) := popn) %>%
-    process_projection()
-  
-  proj[['bth']] <- readRDS(paste0(proj_path,"births",proj_timestamp, ".rds")) %>%
-    rename(!!sym(paste0(proj_name,"_births")) := births)%>%
-    process_projection()
-  
-  proj[['dth']] <- readRDS(paste0(proj_path,"deaths",proj_timestamp, ".rds")) %>%
-    rename(!!sym(paste0(proj_name,"_deaths")) := deaths)%>%
-    process_projection()
-  
-  proj[['di']] <- readRDS(paste0(proj_path,"dom_in",proj_timestamp, ".rds")) %>%
-    rename(!!sym(paste0(proj_name,"_domestic_in")) := dom_in)%>%
-    process_projection()
-  
-  proj[['do']] <- readRDS(paste0(proj_path,"dom_out",proj_timestamp, ".rds")) %>%
-    rename(!!sym(paste0(proj_name,"_domestic_out")) := dom_out)%>%
-    process_projection()
-  
-  proj[['ii']] <- readRDS(paste0(proj_path,"int_in",proj_timestamp, ".rds"))%>%
-    rename(!!sym(paste0(proj_name,"_international_in")) := int_in)%>%
-    process_projection()
-  
-  proj[['io']] <- readRDS(paste0(proj_path,"int_out",proj_timestamp, ".rds"))%>%
-    rename(!!sym(paste0(proj_name,"_international_out")) := int_out) %>%
-    process_projection()
-  
-  proj[['net']] <- rbind(
-    rename(proj[['di']], x  = !!paste0(proj_name,"_domestic_in")),
-    rename(proj[['do']], x = !!paste0(proj_name,"_domestic_out")) %>% mutate(x = x*-1),
-    rename(proj[['ii']], x  = !!paste0(proj_name,"_international_in")),
-    rename(proj[['io']], x = !!paste0(proj_name,"_international_out")) %>% mutate(x = x*-1)
-  )
-  
-  proj[['net']] <- proj[['net']] %>%
-    group_by(gss_code, gss_code_ward, ethnic_group, year, sex, age) %>%
-    summarise(!!sym(paste0(proj_name,"_net_migration")) := sum(x)) %>%
-    as.data.frame()
-  
-  return(proj)
-  
-}
-
-ward_name_lookup <- readRDS("input_data/lookup/2011_ward_to_district.rds")
-
-wrd_func <- function(data, yrs=c(2011:2050)){
-  nm <- last(names(data))
-  
-  x <- data %>%
-    left_join(ward_name_lookup, by=c("gss_code","gss_code_ward")) %>%
-    left_join(names_lookup, by="gss_code") %>%
-    mutate(ethnic_group = "All persons") %>%
-    select(gss_code, gss_code_ward,
-           ethnic_group, year, sex, age, !!nm) %>%
-    mutate(sex = substr(sex,1,1)) %>%
-    filter(gss_code != "E09000001") %>%
-    filter(year %in% yrs)
+  if(!"E12000007" %in% unique(x$gss_code)){
+    y <- filter_london(x, col_aggregation = c("projection_name", "gss_code", "year", "sex", "age", "component"),
+                       data_col = "value")
+    x <- rbind(x, y)
+  }
   
   return(x)
+}
+
+#-------------------------------------------------------------------------------
+
+validate_output <- function(trend, housing_led, ward){
+
+  assert_that(length(unique(trend$gss_code))==34, msg = "problem in trend$gss_code")
+  assert_that(length(unique(housing_led$gss_code))==34, msg = "problem in housing_led$gss_code")
+  assert_that(length(unique(ward$gss_code))==624, msg = "problem in ward$gss_code")
+  
+  assert_that(length(unique(trend$year))==40, msg = "problem in trend$year")
+  assert_that(length(unique(housing_led$year))==40, msg = "problem in housing_led$year")
+  assert_that(length(unique(ward$year))==40, msg = "problem in ward$year")
+  
+  assert_that(length(unique(trend$sex))==2, msg = "problem in trend$sex")
+  assert_that(length(unique(housing_led$sex))==2, msg = "problem in housing_led$sex")
+  assert_that(length(unique(ward$sex))==2, msg = "problem in ward$sex")
+  
+  assert_that(length(unique(trend$age))==91, msg = "problem in trend$age")
+  assert_that(length(unique(housing_led$age))==91, msg = "problem in housing_led$age")
+  assert_that(length(unique(ward$age))==91, msg = "problem in ward$age")
+  
+  assert_that(length(unique(trend$component))==8, msg = "problem in trend$component")
+  assert_that(length(unique(housing_led$component))==8, msg = "problem in housing_led$component")
+  assert_that(length(unique(ward$component))==4, msg = "problem in ward$component")
+  
+  assert_that(nrow(trend)/34/40/2/((91*7)+1)==4, msg = "problem in trend dataframe")
+  assert_that(nrow(housing_led)/34/40/2/((91*7)+1)==3, msg = "problem in housing-led dataframe")
+  assert_that(nrow(ward)/624/40/2/((91*3)+1)==3, msg = "problem in ward dataframe")
   
 }
 
-#-----
+#-------------------------------------------------------------------------------
 
-####Processing####
+t <- list()
+h <- list()
+w <- list()
 
-central <- process_trend_projection(cen_proj_path, cen_proj_timestamp, proj_name="central")
-long <- process_trend_projection(long_proj_path, long_proj_timestamp, proj_name="long")
-short <- process_trend_projection(short_proj_path, short_proj_timestamp, proj_name="short")
-housing_led <- process_trend_projection(housing_led_proj_path, proj_timestamp = "", proj_name="housing_led")
+#-------------------------------------------------------------------------------
+tm <- Sys.time()
 
-#----
+#TREND
 
-####Wards####
+t$popn <- a(trend_list, "population", "popn")
+t$births <- a(trend_list, "births")
+t$deaths <- a(trend_list, "deaths")
+t$dom_in <- a(trend_list, "dom_in", comp_nm = "domestic in")
+t$dom_out <- a(trend_list, "dom_out", comp_nm = "domestic out")
+t$int_in <- a(trend_list, "int_in", comp_nm = "international in")
+t$int_out <- a(trend_list, "int_out", comp_nm = "international out")
+t$total_net <- rbind(t$dom_in, t$dom_out, t$int_in, t$int_out) %>% 
+  mutate(value = ifelse(component %in% c("domestic_out", "international_out"),
+                        value * -1, value)) %>% 
+  mutate(component = "total net") %>% 
+  group_by(projection_name, gss_code, year, sex, age, component) %>% 
+  summarise(value = sum(value)) %>% 
+  data.frame()
 
-ward_path <- paste0(housing_led_proj_path,"ward/")
+trend <- rbindlist(t)
 
-ward_pop <- readRDS(paste0(ward_path,"population_ward.rds")) %>%
-  wrd_func(yrs=c(2011:2050)) %>%
-  rename(housing_led_population = popn)
+#-------------------------------------------------------------------------------
 
-ward_bth <- readRDS(paste0(ward_path,"births_ward.rds")) %>%
-  wrd_func() %>%
-  rename(housing_led_births = births) 
+#HOUSING-LED
 
-ward_dth <- readRDS(paste0(ward_path,"deaths_ward.rds")) %>%
-  wrd_func() %>%
-  rename(housing_led_deaths = deaths) 
+h$popn <- a(housing_list, "population", "popn")
+h$births <- a(housing_list, "births")
+h$deaths <- a(housing_list, "deaths")
+h$dom_in <- a(housing_list, "dom_in", comp_nm = "domestic in")
+h$dom_out <- a(housing_list, "dom_out", comp_nm = "domestic out")
+h$int_in <- a(housing_list, "int_in", comp_nm = "international in")
+h$int_out <- a(housing_list, "int_out", comp_nm = "international out")
+h$total_net <- rbind(h$dom_in, h$dom_out, h$int_in, h$int_out) %>% 
+  mutate(value = ifelse(component %in% c("domestic_out", "international_out"),
+                        value * -1, value)) %>% 
+  mutate(component = "total net") %>% 
+  group_by(projection_name, gss_code, year, sex, age, component) %>% 
+  summarise(value = sum(value)) %>% 
+  data.frame()
 
-ward_net <- readRDS(paste0(ward_path,"migration_ward.rds")) %>%
-  wrd_func() %>%
-  rename(housing_led_net_migration = migration)
+housing_led <- rbindlist(h)
+
+#-------------------------------------------------------------------------------
+
+#WARD
+
+ward_list <- lapply(housing_list, function(x) paste0(x,"ward/"))
+
+w$popn <- read_multiple_projections(ward_list,
+                                    component = "population_ward",
+                                    col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
+  rename(value = popn) %>% 
+  mutate(component = "population")
+
+w$births <- read_multiple_projections(ward_list,
+                                      component = "births_ward",
+                                      col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
+  rename(value = births) %>% 
+  mutate(component = "births")
+
+w$deaths <- read_multiple_projections(ward_list,
+                                      component = "deaths_ward",
+                                      col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
+  rename(value = deaths) %>% 
+  mutate(component = "deaths")
+
+w$total_net <- read_multiple_projections(ward_list,
+                                         component = "migration_ward",
+                                         col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
+  rename(value = migration) %>% 
+  mutate(component = "total net")
+
+w <- lapply(w, function(x) x %>% 
+              filter(gss_code_ward != "E09000001",
+                     year >= 2011)%>% 
+              rename(gss_code = gss_code_ward,
+                     projection_name = variant) %>% 
+              select(projection_name, gss_code, year, sex, age, component, value))
+
+ward <- rbindlist(w)
+
+#-------------------------------------------------------------------------------
+rm(t,w,h)
+gc()
+
+all_3 <- rbind(trend, housing_led, ward)
+all_3 <- data.frame(all_3) %>% 
+  mutate(value = round(value,0))
+
+#-------------------------------------------------------------------------------
+
+#checks
+years <- length(2011:2050)
+sexes <- 2
+ages <- length(0:90)
+boroughs <- 34
+wards <- 624
+components_b <- 7
+components_w <- 3
+births_component <- 1
+ward_rows <- years*sexes*wards*((components_w*ages)+births_component)
+borough_rows <-  years*sexes*boroughs*((components_b*ages)+births_component)
+
+rows_expected <- (ward_rows*3)+(borough_rows*7)
+rows_actual <- nrow(all_3)
+assert_that(rows_actual==rows_expected)
+validate_output(trend, housing_led, ward)
+
+#-------------------------------------------------------------------------------
+
+#SAVE
+
+#saveRDS(all_3, "c:/temp/mike.rds")
+print(Sys.time()-tm)
+out_dir <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/projections_explorer/"
+system.time(fwrite(all_3, paste0(out_dir, "2019_based_projections.csv")))
 
 
-#----
-housing_led[['pop']]<- rbind(housing_led[['pop']], ward_pop)
-housing_led[['bth']] <- rbind(housing_led[['bth']], ward_bth)
-housing_led[['dth']] <- rbind(housing_led[['dth']], ward_dth)
-housing_led[['net']] <- rbind(housing_led[['net']], ward_net)
-
-#----
-
-####OUTPUT####
-
-df_list <- list(central[['pop']], short[['pop']], long[['pop']], housing_led[['pop']],
-                central[['bth']], short[['bth']], long[['bth']], housing_led[['bth']],
-                central[['dth']], short[['dth']], long[['dth']], housing_led[['dth']],
-                central[['di']], short[['di']], long[['di']], housing_led[['di']],
-                central[['do']], short[['do']], long[['do']], housing_led[['do']],
-                central[['ii']], short[['ii']], long[['ii']], housing_led[['ii']],
-                central[['io']], short[['io']], long[['io']], housing_led[['io']],
-                central[['net']], short[['net']], long[['net']], housing_led[['net']])
-
-x <- list()
-for(i in 1:length(df_list)){
-  x[[i]] <- df_list[[i]] %>%
-    tidyr::pivot_longer(cols = ncol(df_list[[i]]), values_to = "value", names_to ="var") %>%
-    mutate(value = round(value, digits = 2))
-  
-}
-
-pop_w_everything <- data.table::rbindlist(x) %>%
-  tidyr::pivot_wider(names_from = var, values_from = value)
-
-
-####
-sum(is.na(pop_w_everything))
-pop_w_everything[is.na(pop_w_everything)] <- ""
-sum(is.na(pop_w_everything))
-
-#91 ages * 2 sexs * (624 wards + 33 boroughs) * 40 years
-assertthat::assert_that(91*2*(624+33)*40 == nrow(pop_w_everything))
-
-data.table::fwrite(pop_w_everything, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool.csv")
-saveRDS("Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool.rds")
-
-#Data structure
-top_1000 <- pop_w_everything[1:1000,]
-
-data.table::fwrite(top_1000, "Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/top_100_rows.csv")
-
-#Check the output
-test_csv_output <- data.table::fread("Q:/Teams/D&PA/Demography/Projections/temp/example_files_for_mike/projections_output_for_explorer_tool_2.csv",
-                       header=TRUE, colClasses = unname(sapply(pop_w_everything,class)))
-test_csv_output[is.na(test_csv_output)] <- ""
-
-all_equal(as.data.frame(test_csv_output),pop_w_everything)
