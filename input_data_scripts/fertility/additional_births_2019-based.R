@@ -112,18 +112,20 @@ births_2020 <- provisional %>%
   select(-births) %>% 
   tidyr::pivot_longer(cols = c("male","female"), names_to = "sex", values_to = "births") %>% 
   mutate(age = 0) %>% 
-  select(names(ons_births)) %>% 
-  complete_fertility(popn, col_rate = "births") %>% 
-  rbind(filter(ons_births, !gss_code %in% c("S92000003","N92000002"))) 
+  select(names(ons_births)) 
 
 saveRDS(births_2020,  "input_data/fertility/provisional_births_2020_EW.rds")
 
-rm(E52E63_2019, E0912E0901_2019)
+rm(E52E63_2019, E0912E0901_2019, E06000052E06000053, E09000012E09000001, provisional)
+
+EW_backseries <- births_2020 %>% 
+  complete_fertility(popn, col_rate = "births") %>% 
+  rbind(filter(ons_births, !gss_code %in% c("S92000003","N92000002"))) 
 
 for(method in c("average", "trend")) {
   
   fert_rates <- scaled_fertility_curve(popn_mye_path = popn,
-                                       births_mye_path = births_2020,
+                                       births_mye_path = EW_backseries,
                                        target_curves_filepath = "input_data/fertility/ons_asfr_curves_2018_(2020_geog).rds",
                                        last_data_year = 2020,
                                        n_years_to_avg = 5,
