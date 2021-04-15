@@ -17,7 +17,7 @@
 upload_bpo_to_datastore <- function(bpo_name,
                                     variants,
                                     bpo_root = "outputs/housing_led/2019/bpo/"){
-  
+
   #DO NOT SAVE THIS FILE WITH AN API KEY
   lds_api_key <- Sys.getenv("lds_api_key")
   if(nchar(lds_api_key)==0){stop("LDS API key is of length zero. Expects an .Renviorn file at the directory root containing the lds_api_key variable")}
@@ -71,28 +71,35 @@ upload_bpo_to_datastore <- function(bpo_name,
     if(!file.exists(bpo_file)){stop(paste0("excel file not found for ", full_name))}
     
     #metadata for datastore
+    bpo_name_title <- gsub("_", " ", bpo_name)
+    bpo_name_title <- gsub("-", " ", bpo_name_title)
+    bpo_name_title <- camel(bpo_name_title)
+    bpo_name_title <- gsub("And", "and", bpo_name_title)
     
     resource_var <- str_replace_all(variants[i], "_", " ")
     substr(resource_var, 1, 1) <- toupper(substr(resource_var, 1, 1))
-    resource_title <- paste0("BPO projection - ", resource_var)
+    res_title <- paste0("BPO projection - ", bpo_name_title, " - ", resource_var)
     
     traj <- ifelse(grepl("shlaa", full_name, ignore.case = TRUE), "SHLAA", "Borough-specified")
     resource_desc <- paste0("2019-based BPO projection. ", traj, " development trajectory. ",
                             resource_var, " migration assumptions. ",
                             "Uploaded ",today)                
     
+    #Stop the datastore breaking
+    Sys.sleep(10)
+    
     #check resource doesn't exist and then upload
-    if(resource_title %in% dataset_resources$resource_title){
+    if(res_title %in% dataset_resources$resource_title){
       
       message("replacing ",full_name)
       
-      resource_id <- filter(dataset_resources, res_title == resource_title)$resource_id
+      resource_id <- filter(dataset_resources, resource_title == res_title)$resource_id
       
       lds_replace_resource(file_path = bpo_file,
                            slug = bposlug,
                            api_key = lds_api_key,
                            res_title = res_title,
-                           description = desc,
+                           description = resource_desc,
                            res_id = resource_id)
       
     } else {
@@ -102,14 +109,19 @@ upload_bpo_to_datastore <- function(bpo_name,
       lds_add_resource(file_path = bpo_file,
                        slug = bposlug,
                        api_key = lds_api_key,
-                       res_title = resource_title,
+                       res_title = res_title,
                        description = resource_desc)
     }
     
     rm(bpo_file, full_name, bpo_matches, 
-       resource_desc, resource_var, resource_title)
+       resource_desc, resource_var, res_title)
     
   }
   
   message(paste(borough, "bpo upload complete"))
+}
+
+camel <- function(x){ #function for camel case
+  capit <- function(x) paste0(toupper(substring(x, 1, 1)), substring(x, 2, nchar(x)))
+  sapply(strsplit(x, " "), function(x) paste(capit(x), collapse=" "))
 }

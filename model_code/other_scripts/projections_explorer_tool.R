@@ -9,9 +9,9 @@ trend_list <- list('central upper' = "outputs/trend/2019/published_27_nov_2020/2
                    'low population' = "outputs/trend/2019/published_27_nov_2020/2019_variant_LC_20-11-27_1208/",
                    'high population' = "outputs/trend/2019/published_27_nov_2020/2019_variant_HC_20-11-27_1205/")
 
-housing_list <- list('scenario 1' = "outputs/housing_led/2019/bpo/BPO_scenario_1_21-04-19_1536/",
-                     'scenario 2' = "outputs/housing_led/2019/bpo/BPO_scenario_2_21-04-19_1536/",
-                     'scenario 3' = "outputs/housing_led/2019/bpo/BPO_scenario_3_21-04-19_1536/")
+housing_list <- list('scenario 1' = "outputs/housing_led/2019/BPO_scenario_1_21-04-09_1536/",
+                     'scenario 2' = "outputs/housing_led/2019/BPO_scenario_2_21-04-09_1536/",
+                     'scenario 3' = "outputs/housing_led/2019/BPO_scenario_3_21-04-09_1536/")
 
 #-------------------------------------------------------------------------------
 
