@@ -120,4 +120,4 @@ rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
 devtools::load_all('model_code/trendmodel')
-projection <- run_trend_model(config_list)♣
+projection <- run_trend_model(config_list)
