@@ -40,8 +40,8 @@ domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_sc
                        '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_5yr_avg_2019_gla_mye.rds",
                                      transition = F))
 
-fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_trend.rds"
-additional_births_path <- "input_data/fertility/predicted_births_2019-based_projections.rds"
+fertility_rates_path <- "input_data/fertility/fertility_rates_provisional_2020_5yr_trend.rds"
+additional_births_path <- "input_data/fertility/provisional_births_2020_EW.rds"
 
 #------------------
 
@@ -97,7 +97,7 @@ small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
 out_migration_rates_path <- "input_data/small_area_model/ward_out_migration_rates.rds"
 in_migration_characteristics_path <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
 
-borough_fertility_rates_path <- "input_data/fertility/fertility_rates_inc_2020_in_london_5yr_trend.rds"
+borough_fertility_rates_path <- config_list$fertility_rates_path
 borough_mortality_rates_path <- paste0(external_trend_path,"mortality_rates.rds")
 
 birth_rate_n_years_to_avg <- 5

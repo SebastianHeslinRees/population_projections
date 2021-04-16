@@ -55,7 +55,7 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
   
   proj_popn   <- data.frame(rbindlist(proj_popn, use.names=TRUE))
   proj_deaths <- data.frame(rbindlist(proj_deaths, use.names=TRUE))
-  proj_births <- data.frame(rbindlist(proj_births, use.names=TRUE))
+  proj_births <- data.frame(rbindlist(proj_births, use.names=TRUE)) %>% filter(age == 0)
   proj_int_out <- data.frame(rbindlist(proj_int_out, use.names=TRUE))
   proj_int_in <- data.frame(rbindlist(proj_int_in, use.names=TRUE))
   proj_dom_out <- data.frame(rbindlist(proj_dom_out, use.names=TRUE))

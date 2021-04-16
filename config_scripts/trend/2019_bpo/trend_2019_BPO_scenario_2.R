@@ -41,7 +41,7 @@ mortality_rates <- "input_data/mortality/mort_rates_5yr_trend_2019_gla_mye.rds"
 
 #------------------------------------------
 
-fertility_rates <- "input_data/fertility/fert_rates_5yr_trend_2019_gla_mye.rds"
+fertility_rates <- "input_data/fertility/fertility_rates_provisional_2020_5yr_trend.rds"
 
 #-----------------------------------------------------
 
