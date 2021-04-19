@@ -34,6 +34,7 @@ get_rates_flows_info <- function(data_list, first_proj_yr, last_proj_yr){
     as.data.frame() %>% 
     mutate(year = as.numeric(year)) %>%
     right_join(data.frame(year = first_proj_yr:last_yr), by = "year") %>% 
+    arrange(year) %>% 
     tidyr::fill(transition) %>%
     
     mutate(next_path = path) %>%
