@@ -54,7 +54,7 @@ dom <- readRDS(dom_origin_destination_path) %>%
          gss_out %in% interested_in_gss)
 
 dom_in <- group_by(dom, year, gss_code = gss_in, sex, age) %>%
-  summarise(dom_in = sum(value)) %>%
+  summarise(dom_in = sum(value), .groups = 'drop_last') %>%
   as.data.frame() %>%
   tidyr::complete(year = interested_in_yrs,
                   gss_code = unique(int_out$gss_code),
@@ -62,7 +62,7 @@ dom_in <- group_by(dom, year, gss_code = gss_in, sex, age) %>%
                   age = 0:90, fill = list(dom_in = 0))
 
 dom_out <- group_by(dom, year, gss_code = gss_out, sex, age) %>%
-  summarise(dom_out = sum(value)) %>%
+  summarise(dom_out = sum(value), .groups = 'drop_last') %>%
   as.data.frame()%>%
   tidyr::complete(year = interested_in_yrs,
                   gss_code = unique(int_out$gss_code),
@@ -85,7 +85,7 @@ summarise_by_country_and_extend_to_2020 <- function(df){
   df %>%
     mutate(country = substr(gss_code,1,1)) %>%
     group_by(country, year, sex, age) %>%
-    summarise(value = sum(!!sym(data_col))) %>%
+    summarise(value = sum(!!sym(data_col)), .groups = 'drop_last') %>%
     as.data.frame() %>%
     mutate(value = value*1.3) %>%
     filter(year == 2018) %>%
@@ -105,7 +105,7 @@ births_constraint <- readRDS(births_constraint_path) %>%
   filter(year == 2019) %>%
   popmodules::complete_fertility(population = pop_constraint, col_rate = "births") %>%
   group_by(country, year, sex, age) %>%
-  summarise(births = sum(births)) %>%
+  summarise(births = sum(births), .groups = 'drop_last') %>%
   ungroup() %>%
   # Correct the constraints for countries we're only modelling part of
   mutate(births = case_when(country == "E" ~ 3 * births / 326,

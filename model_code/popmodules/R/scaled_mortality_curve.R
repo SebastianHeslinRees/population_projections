@@ -64,7 +64,8 @@ scaled_mortality_curve <- function(popn_mye_path, births_mye_path, deaths_mye_pa
     rename(value = data_col) %>%
     group_by(gss_code, year, sex) %>%
     summarise(actual = sum(value),
-              curve_count = sum(curve_count)) %>%
+              curve_count = sum(curve_count),
+              .groups = 'drop_last') %>%
     as.data.frame() %>%
     mutate(scaling = ifelse(curve_count == 0,
                             0,

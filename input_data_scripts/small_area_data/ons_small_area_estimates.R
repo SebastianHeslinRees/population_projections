@@ -48,7 +48,7 @@ ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
   as.data.frame() %>%
   aggregate_city_wards("popn") %>%
   group_by(year, gss_code_ward, gss_code, sex, age) %>%
-  summarise(popn = sum(popn)) %>%
+  summarise(popn = sum(popn), .groups = 'drop_last') %>%
   as.data.frame() %>%
   mutate(age = as.numeric(substr(age,1,2))) %>%
   validate_population(col_aggregation = c("year","gss_code_ward", "sex","age"),
@@ -68,7 +68,7 @@ faraday_ldd <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_war
 
 faraday_total <- filter(ward_data, gss_code_ward == "E05000541") %>%
   group_by(year) %>%
-  summarise(total_pop = sum(popn)) %>%
+  summarise(total_pop = sum(popn), .groups = 'drop_last') %>%
   as.data.frame()
 
 faraday_2011_ahs <- (filter(faraday_total, year == 2011)$total_pop)/(filter(faraday_ldd, year == 2011)$total_units)
@@ -119,7 +119,7 @@ scaled_ward_data <- ward_data  %>%
 ####Check on Faraday
 faraday_check <- filter(scaled_ward_data, gss_code_ward == "E05000541") %>%
   group_by(year) %>%
-  summarise(scaled_pop = sum(popn)) %>%
+  summarise(scaled_pop = sum(popn), .groups = 'drop_last') %>%
   as.data.frame() %>%
   left_join(faraday_total, by="year") %>%
   rename(unscaled_pop = total_popn)
@@ -132,7 +132,7 @@ msoa_data <- dtplyr::lazy_dt(lsoa_data) %>%
   left_join(msoa_to_district, by="gss_code_msoa") %>%
   as.data.frame() %>%
   group_by(year, gss_code_msoa, gss_code, sex, age) %>%
-  summarise(popn = sum(popn)) %>%
+  summarise(popn = sum(popn), .groups = 'drop_last') %>%
   as.data.frame() %>%
   mutate(age = as.numeric(substr(age,1,2))) %>%
   validate_population(col_aggregation = c("year","gss_code_msoa", "sex","age"),

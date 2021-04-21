@@ -40,8 +40,12 @@ saveRDS(deaths, file = "test_data/test-get_rates_backseries_deaths.rds")
 saveRDS(migration, file = "test_data/test-get_rates_backseries_migration.rds")
 
 popn_aged <- mutate(popn, age = age + 1, year = year + 1, age = ifelse(age == 4, 3, age)) %>%
-  group_by(year, gss_code, age, sex) %>% summarise(popn = sum(popn)) %>% as.data.frame() %>%
-  rbind(filter(births, age == 0) %>% rename(popn = births)) %>% filter(year %in% c(2013, 2014))
+  group_by(year, gss_code, age, sex) %>%
+  summarise(popn = sum(popn), .groups = 'drop_last') %>%
+  as.data.frame() %>%
+  rbind(filter(births, age == 0) %>%
+          rename(popn = births)) %>%
+  filter(year %in% c(2013, 2014))
 
 mort_answer <- left_join(popn_aged, deaths, by = c("year", "gss_code", "age", "sex")) %>%
   mutate(rate = deaths/popn) %>%
@@ -54,15 +58,15 @@ mig_rate_answer <- left_join(popn_aged, migration, by = c("year", "gss_code", "a
   select(-popn, -dom_out)
 
 mortality <- get_rate_backseries(component_mye_path = "test_data/test-get_rates_backseries_deaths.rds",
-                         popn_mye_path = "test_data/test-get_rates_backseries_popn.rds",
-                         births_mye_path = "test_data/test-get_rates_backseries_births.rds",
-                         years_backseries = c(2013,2014)) %>%
+                                 popn_mye_path = "test_data/test-get_rates_backseries_popn.rds",
+                                 births_mye_path = "test_data/test-get_rates_backseries_births.rds",
+                                 years_backseries = c(2013,2014)) %>%
   arrange(year, gss_code, age, sex)
 
 migration_rate <- get_rate_backseries(component_mye_path = "test_data/test-get_rates_backseries_migration.rds",
-                         popn_mye_path = "test_data/test-get_rates_backseries_popn.rds",
-                         births_mye_path = "test_data/test-get_rates_backseries_births.rds",
-                         years_backseries = c(2013, 2014)) %>%
+                                      popn_mye_path = "test_data/test-get_rates_backseries_popn.rds",
+                                      births_mye_path = "test_data/test-get_rates_backseries_births.rds",
+                                      years_backseries = c(2013, 2014)) %>%
   arrange(year, gss_code, age, sex)
 
 test_that("get_rate_backseries creates expected output for mortality test case", {

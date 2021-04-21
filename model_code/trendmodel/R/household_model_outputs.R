@@ -33,21 +33,21 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
   stage_2_sheet <- model_output$stage_2$constrained %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, age_group, household_type) %>%
-    summarise(households = sum(households)) %>%
+    summarise(households = sum(households), .groups = 'drop_last') %>%
     ungroup() %>%
     tidyr::pivot_wider(names_from = year, values_from = households)
   
   ce_pop <- model_output$stage_1$communal_establishment_population %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
-    summarise(ce_popn = sum(communal_establishment_population)) %>%
+    summarise(ce_popn = sum(communal_establishment_population), .groups = 'drop_last') %>%
     tidyr::pivot_wider(names_from = year, values_from = ce_popn)
   
 
   hh_pop <- model_output$stage_1$household_population %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
-    summarise(hh_popn = sum(household_population)) %>%
+    summarise(hh_popn = sum(household_population), .groups = 'drop_last') %>%
     tidyr::pivot_wider(names_from = year, values_from = hh_popn)
   
   household_summary_sheet <- model_output$stage_1$detailed_households %>%
@@ -55,7 +55,8 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     group_by(gss_code, year) %>%
     summarise(households = sum(households),
               household_population = sum(household_population),
-              communal_establishment_population = sum(communal_establishment_population)) %>%
+              communal_establishment_population = sum(communal_establishment_population),
+              .groups = 'drop_last') %>%
     ungroup() %>%
     mutate(average_household_size = household_population / households)
   

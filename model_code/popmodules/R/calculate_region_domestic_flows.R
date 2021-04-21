@@ -42,13 +42,17 @@ calculate_region_domestic_flows <- function(domestic_rates, nat_chng_popn, gss_c
   }
 
   dom_out <- data.table::rbindlist(dom_out_list) %>%
+    dtplyr::lazy_dt() %>% 
     group_by(year) %>%
-    summarise(dom_out = sum(dom_out)) #%>%
+    summarise(dom_out = sum(dom_out)) %>% 
+    data.frame() #%>%
    # rbind(historic_out)
 
   dom_in <- data.table::rbindlist(dom_in_list) %>%
+    dtplyr::lazy_dt() %>% 
     group_by(year) %>%
-    summarise(dom_in = sum(dom_in)) #%>%
+    summarise(dom_in = sum(dom_in)) %>% 
+    data.frame() #%>%
     #rbind(historic_in)
 
   dom_net <- left_join(dom_out, dom_in, by="year") %>%

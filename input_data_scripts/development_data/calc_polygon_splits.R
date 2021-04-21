@@ -45,7 +45,7 @@ poly_outcomes <- ldd_development_unit_flow %>%
     status_line_flow %in% c("comp", "start", "sub") ~ "cont",
     TRUE ~ "lap")) %>%
   group_by(dev_id, permission_id, outcome, demolition) %>%
-  summarise(units = sum(unit_line_flow)) %>%
+  summarise(units = sum(unit_line_flow), .groups = 'drop_last') %>%
   as.data.frame() %>%
   spread(outcome, units, 0) %>%
   mutate(cont_prop = cont / (cont + lap + ssd)) %>%

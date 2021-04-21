@@ -54,7 +54,7 @@ ons_deaths <- readRDS(paste0(output_location, "deaths_ons.rds"))
 sc_deaths <- ons_deaths %>% 
   filter(substr(gss_code,1,1)=="E", year == 2019) %>% 
   group_by(year, sex, age) %>% 
-  summarise(eng_deaths = sum(deaths)) %>% 
+  summarise(eng_deaths = sum(deaths), .groups = 'drop_last') %>% 
   data.frame() %>% 
   left_join(sc_deaths_total, by="year") %>% 
   mutate(deaths = (eng_deaths/sum(eng_deaths))*value) %>% 
@@ -72,7 +72,7 @@ ons_int_in <- readRDS(paste0(output_location, "int_in_ons.rds"))
 sc_int_in <- ons_int_in %>% 
   filter(substr(gss_code,1,1)=="E", year == 2019) %>% 
   group_by(year, sex, age) %>% 
-  summarise(eng_int_in = sum(int_in)) %>% 
+  summarise(eng_int_in = sum(int_in), .groups = 'drop_last') %>% 
   data.frame() %>% 
   left_join(sc_int_in_total, by="year") %>% 
   mutate(int_in = (eng_int_in/sum(eng_int_in))*value) %>% 
@@ -91,7 +91,7 @@ ons_int_out <- readRDS(paste0(output_location, "int_out_ons.rds"))
 sc_int_out <- ons_int_out %>% 
   filter(substr(gss_code,1,1)=="E", year == 2019) %>% 
   group_by(year, sex, age) %>% 
-  summarise(eng_int_out = sum(int_out)) %>% 
+  summarise(eng_int_out = sum(int_out), .groups = 'drop_last') %>% 
   data.frame() %>% 
   left_join(sc_int_out_total, by="year") %>% 
   mutate(int_out = (eng_int_out/sum(eng_int_out))*value) %>% 
@@ -107,7 +107,7 @@ sc_int_net <- mutate(sc_int_out, int_net = int_out*-1) %>%
   rbind(rename(sc_int_in, int_net = int_in)) %>%
   filter(year == 2019) %>% 
   group_by(gss_code,year,sex,age) %>% 
-  summarise(int_net = sum(int_net)) %>% 
+  summarise(int_net = sum(int_net), .groups = 'drop_last') %>% 
   data.frame() %>%
   fetch_2018_data("international_net_ons")
 

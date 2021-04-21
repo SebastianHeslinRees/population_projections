@@ -107,7 +107,7 @@ arrange_trend_core_outputs <- function(projection,
     select(-dom_out) %>% 
     rbind(proj_dom_in) %>% 
     group_by(year, gss_code, age, sex) %>%  
-    summarise(dom_net = sum(dom_in)) %>% 
+    summarise(dom_net = sum(dom_in), .groups = 'drop_last') %>% 
     data.frame()
   
   proj_int_net <- regional_data$proj_int_out %>% 
@@ -115,7 +115,7 @@ arrange_trend_core_outputs <- function(projection,
     select(-int_out) %>% 
     rbind(regional_data$proj_int_in) %>% 
     group_by(year, gss_code, age, sex) %>% 
-    summarise(int_net = sum(int_in)) %>% 
+    summarise(int_net = sum(int_in), .groups = 'drop_last') %>% 
     data.frame()
   
   total_net <- left_join(proj_int_net,

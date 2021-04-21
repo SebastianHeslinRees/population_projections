@@ -43,7 +43,7 @@ domestic_migration_net <- readRDS("input_data/domestic_migration/2018/domestic_m
 #spoiler: its 2004
 london_net <- filter(domestic_migration_net, substr(gss_code,1,3)=="E09") %>% 
   group_by(year) %>%
-  summarise(dom_net = sum(dom_net)) %>% 
+  summarise(dom_net = sum(dom_net), .groups = 'drop_last') %>% 
   ungroup()
 
 domestic_migration_flows_ons <- readRDS("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds") %>%
@@ -68,7 +68,7 @@ regional <- filter(regional, year == 2004) %>%
 dom_in <- dom_flows %>%
   rbind(regional) %>% 
   group_by(year, gss_in, sex, age) %>%
-  summarise(dom_in = sum(value)) %>%
+  summarise(dom_in = sum(value), .groups = 'drop_last') %>%
   data.frame() %>% 
   rename(gss_code = gss_in) %>%
   complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_in = 0))
@@ -76,7 +76,7 @@ dom_in <- dom_flows %>%
 dom_out <- dom_flows %>%
   rbind(regional) %>% 
   group_by(year, gss_out, sex, age) %>%
-  summarise(dom_out = sum(value)) %>%
+  summarise(dom_out = sum(value), .groups = 'drop_last') %>%
   data.frame() %>% 
   rename(gss_code = gss_out) %>%
   complete(year = 2002:2019, gss_code, age = 0:90, sex, fill = list(dom_out = 0))

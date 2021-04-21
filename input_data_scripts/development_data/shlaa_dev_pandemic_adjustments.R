@@ -6,16 +6,16 @@ ldd <- readRDS("input_data/housing_led_model/ldd_backseries_dwellings_borough.rd
 
 #just a look at what the london-level data is like
 shlaa_ldn <- group_by(shlaa, year) %>% 
-  summarise(units = sum(units))
+  summarise(units = sum(units), .groups = 'drop_last')
 
 ldd_ldn <- group_by(ldd, year) %>% 
-  summarise(units = sum(units)) %>% 
+  summarise(units = sum(units), .groups = 'drop_last') %>% 
   data.frame() 
 
 #find the ldd averages for the boroughs for 2012-2019
 ldd_avg <- filter(ldd, year > 2011) %>% 
   group_by(gss_code) %>% 
-  summarise(units = mean(units)) %>% 
+  summarise(units = mean(units), .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(year = 2020) %>% 
   select(names(ldd)) %>% 
@@ -23,7 +23,7 @@ ldd_avg <- filter(ldd, year > 2011) %>%
 
 #compare the average data to the shlaa
 group_by(ldd_avg, year) %>% 
-  summarise(avg = sum(units)) %>% 
+  summarise(avg = sum(units), .groups = 'drop_last') %>% 
   data.frame() %>% 
   left_join(shlaa_ldn, by="year")
 
@@ -41,7 +41,7 @@ new_trajectory <- shlaa %>%
 
 new_london <- new_trajectory %>% 
   group_by(year) %>% 
-  summarise(units = sum(units)) %>% 
+  summarise(units = sum(units), .groups = 'drop_last') %>% 
   data.frame() 
 
 saveRDS(new_trajectory, "input_data/housing_led_model/borough_shlaa_pandemic_adjusted.rds")
@@ -79,7 +79,7 @@ rm(list=ls())
 #   mutate(x = as.numeric(substr(Quarter,1,4))) %>% 
 #   mutate(year = ifelse(substr(Quarter,7,7) %in% c("1"), x-1, x)) %>% 
 #   group_by(year) %>% 
-#   summarise(EPCs = sum(EPCs)) %>% 
+#   summarise(EPCs = sum(EPCs), .groups = 'drop_last') %>% 
 #   data.frame() %>% 
 #   left_join(ldd_ldn, by="year") %>% 
 #   mutate(diff = units - EPCs,

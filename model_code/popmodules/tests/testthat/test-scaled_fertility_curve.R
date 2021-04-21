@@ -84,13 +84,13 @@ curves <- readRDS(target_curves_filepath) %>%
 birth_dom <- filter(pop_data, sex == "female")
 
 births_data <- group_by(births_data, year, gss_code) %>%
-  summarise(births = sum(births))
+  summarise(births = sum(births), .groups = 'drop_last')
 
 scaling_backseries <- popn_age_on(birth_dom, births = 0) %>%
   inner_join(curves, by = c("gss_code", "age", "sex")) %>%
   mutate(curve_births = rate * popn) %>%
   group_by(gss_code, year) %>%
-  summarise(curve_births = sum(curve_births)) %>%
+  summarise(curve_births = sum(curve_births), .groups = 'drop_last') %>%
   ungroup() %>%
   inner_join(births_data, by = c("gss_code", "year")) %>%
   mutate(scaling = births / curve_births) %>%
@@ -101,7 +101,7 @@ back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
 
 mean <- filter(scaling_backseries, year %in% back_years) %>%
   group_by(gss_code) %>%
-  summarise(scaling = sum(scaling)/years_to_avg) %>%
+  summarise(scaling = sum(scaling)/years_to_avg, .groups = 'drop_last') %>%
   data.frame() %>%
   mutate(year = last_data_year+1) %>%
   select(gss_code, year, scaling) %>%

@@ -19,7 +19,7 @@ mig_constraints <- function(file, component, in_out, country_id) {
            year = as.numeric(year),
            age = ifelse(age > 90, 90, age)) %>%
     group_by(year, sex, age) %>%
-    summarise(value = sum(value)) %>%
+    summarise(value = sum(value), .groups = 'drop_last') %>%
     ungroup() %>%
     rename(!!component := value) %>%
     mutate(country = country_id) %>%
@@ -48,7 +48,7 @@ for(i in 1:4){
            age = ifelse(age < 90, age, 90)) %>%
     mutate(year = as.numeric(year)) %>%
     group_by(year, sex, age) %>%
-    summarise(popn = sum(popn)) %>%
+    summarise(popn = sum(popn), .groups = 'drop_last') %>%
     ungroup() %>%
     mutate(country = country_id[[i]]) %>%
     select(country, year, sex, age, popn)
@@ -67,7 +67,7 @@ for(i in 1:4){
            year = as.numeric(year),
            age = ifelse(age > 90, 90, age)) %>%
     group_by(year, sex, age) %>%
-    summarise(deaths = sum(deaths)) %>%
+    summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
     ungroup() %>%
     mutate(country = country_id[[i]]) %>%
     select(country, year, sex, age, deaths)

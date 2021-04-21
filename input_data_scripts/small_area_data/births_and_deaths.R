@@ -44,7 +44,7 @@ if(length(unique(ward_births$gss_code_ward))!=625){message("Warning: Wrong numbe
 msoa_births <- left_join(lsoa_births, lsoa_to_msoa, by="gss_code_lsoa") %>%
   filter(gss_code_msoa %in% london_msoas) %>%
   group_by(year, gss_code_msoa, age_group) %>%
-  summarise(births = sum(births)) %>%
+  summarise(births = sum(births), .groups = 'drop_last') %>%
   as.data.frame() %>%
   mutate(year = as.numeric(year))
 

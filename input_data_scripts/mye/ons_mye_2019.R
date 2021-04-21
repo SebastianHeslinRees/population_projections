@@ -42,7 +42,7 @@ other <- rbind(split_components(all_components, "unattrib", "upc", check_neg=FAL
                split_components(all_components, "other_adjust", "upc", check_neg=FALSE),
                split_components(all_components, "special_change", "upc", check_neg=FALSE)) %>%
   group_by(gss_code, year, sex, age) %>% 
-  summarise(upc = sum(upc)) %>% 
+  summarise(upc = sum(upc), .groups = 'drop_last') %>% 
   data.frame()
 
 #------------
