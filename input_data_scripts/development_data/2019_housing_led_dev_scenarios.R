@@ -5,9 +5,10 @@ message('Development trajectories - 2019-based housing-led projections')
 #-------------------------------------------------------------------------------
 
 shlaa <- readRDS("input_data/housing_led_model/borough_shlaa_trajectory_2020.rds")
+ldd_backseries <- readRDS("input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
+
 
 #Savills forecast 41.7k for 2020 & 43k for the period 2021-25
-backseries <- filter(shlaa, year <= 2019)
 
 adjust_2020 <- filter(shlaa, year == 2020) %>% 
   mutate(distribution = units / sum(units)) %>% 
@@ -24,7 +25,7 @@ adjust_2021_2025 <- filter(shlaa, year %in% 2021:2025) %>%
   rename(units = new_units)
 
 savills <- filter(shlaa, year > 2025) %>% 
-  rbind(backseries,
+  rbind(ldd_backseries,
         adjust_2020,
         adjust_2021_2025) %>% 
   arrange(year, gss_code) %>% 
@@ -33,7 +34,7 @@ savills <- filter(shlaa, year > 2025) %>%
 rm(adjust_2020, adjust_2021_2025)
 
 #Low scenario just uses the 8-year LDD average (2012-2019)
-mean_ldd <- shlaa %>%
+mean_ldd <- ldd_backseries %>%
   filter(year %in% 2012:2019) %>% 
   group_by(gss_code) %>% 
   summarise(units = mean(units)) %>% 
@@ -42,7 +43,7 @@ mean_ldd <- shlaa %>%
   popmodules::project_forward_flat(2042) %>% 
   mutate(units = ifelse(year == 2042, 0, units)) %>% 
   popmodules::project_forward_flat(2050) %>% 
-  rbind(backseries) %>% 
+  rbind(ldd_backseries) %>% 
   arrange(year, gss_code) %>% 
   data.frame()
 
