@@ -181,7 +181,7 @@ rm(large_sites, large_input, total_units)
 # The other element to small sites is the non-specific windfall development
 # This is a borough-wide number and can't be distributed to ward or msoa
 # Its therefore only added into the borough trajectory
-# This data has provied by planning in 2 files: 1 for TH, Hackney, Islington and
+# This data has provided by planning in 2 files: 1 for TH, Hackney, Islington and
 # one for everything else
 
 # All small sites data is one number which is the same in each year of the projection
@@ -273,59 +273,24 @@ small_trend_windfall <- rbind(small_trend_windfall_1,
         as.data.frame() %>% 
         select(gss_code, year, units)
 
-# borough_windfall <-  rbind(small_windfall_1,
-#                            small_windfall_2,
-#                            small_windfall_opdc,
-#                            small_windfall_lldc) %>%
-#         group_by(gss_code) %>%
-#         summarise(units = sum(units)) %>%
-#         as.data.frame()
 
-rm(small_windfall_1, small_windfall_2, small_windfall_opdc, small_windfall_lldc)
+rm(small_trend_windfall_1, small_trend_windfall_2, small_windfall_opdc, small_windfall_lldc)
 
-
-# Apply the small sites intensification total to every year for 2020-2029
-
-# ward_intense <- expand.grid(gss_code_ward = unique(london_wards$gss_code_ward),
-#                             year = 2020:2029,
-#                             stringsAsFactors = FALSE) %>% 
-#         left_join(ward_intense, by = "gss_code_ward") %>% 
-#         tidyr::replace_na(list(units = 0))
 
 ward_intense <- ward_intense %>% 
         mutate(year = 2020) %>% 
         popmodules::project_forward_flat(2029) %>% 
         select(gss_code_ward, year, units)
-       
-# msoa_intense <- expand.grid(gss_code_msoa = unique(london_msoas$gss_code_msoa),
-#                             year = 2020:2029,
-#                             stringsAsFactors = FALSE)  %>% 
-#         left_join(msoa_intense, by = "gss_code_msoa") %>% 
-#         tidyr::replace_na(list(units = 0))
 
 msoa_intense <- msoa_intense %>% 
         mutate(year = 2020) %>% 
         popmodules::project_forward_flat(2029) %>% 
         select(gss_code_msoa, year, units)
 
-# borough_intense <- expand.grid(gss_code = unique(borough_intense$gss_code),
-#                                year = 2020:2029,
-#                                stringsAsFactors = FALSE)  %>% 
-#         left_join(borough_intense, by="gss_code") %>% 
-#         tidyr::replace_na(list(units = 0))
-
 borough_intense <- borough_intense %>% 
         mutate(year = 2020) %>% 
         popmodules::project_forward_flat(2029) %>% 
         select(gss_code, year, units)
-
-#windfall is for years 2030-2041
-
-# borough_windfall <- expand.grid(gss_code = unique(borough_intense$gss_code),
-#                                 year = 2030:2041,
-#                                 stringsAsFactors = FALSE)  %>% 
-#         left_join(borough_windfall, by="gss_code") %>% 
-#         tidyr::replace_na(list(units = 0))
 
 borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall)
 
@@ -333,9 +298,16 @@ borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall)
 #Add zeros for years 2012-2019 and 2042-2050
 #include 2011 in borough file
 ward_shlaa <- rbind(ward_large, ward_intense) %>%
+        filter(!gss_code_ward %in% london_wards$gss_code_ward) %>% 
+        popmodules::aggregate_city_wards("units") %>% 
+        rbind(ward_large, ward_intense) %>% 
+        filter(gss_code_ward %in% london_wards$gss_code_ward) %>%
         group_by(year, gss_code_ward) %>%
         summarise(units = sum(units)) %>%
-        data.frame()
+        data.frame() %>% 
+        tidyr::complete(year = 2012:2050,
+                        gss_code_ward = unique(london_wards$gss_code_ward),
+                        fill = list(units = 0))
 
 msoa_shlaa <- rbind(msoa_large, msoa_intense) %>%
         group_by(year, gss_code_msoa) %>%

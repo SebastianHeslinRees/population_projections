@@ -4,6 +4,7 @@
 
 library(popmodules)
 library(housingledmodel)
+library(smallareamodel)
 
 external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_2", full.names = TRUE),"/")
 projection_name <- "housing_led_scenario_2"
