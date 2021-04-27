@@ -228,6 +228,7 @@ rm(small_intensification, msoa_to_district, oa_to_msoa, oa_to_ward)
 
 #Remainder windfall
 small_windfall_1 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Windfall.csv")) %>%
+        data.frame() %>% 
         filter(!Borough %in% c("City of London","Islington","LLDC","OPDC")) %>%
         select(-Borough) %>%
         rename(units = Windfall)
