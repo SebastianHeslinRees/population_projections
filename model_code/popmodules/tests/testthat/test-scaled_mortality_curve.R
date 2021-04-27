@@ -69,7 +69,7 @@ aged <- pop_data %>%
   mutate(year = year + 1) %>%
   mutate(age = ifelse(age == 90, 90, age + 1)) %>%
   group_by(gss_code, age, sex, year) %>%
-  summarise(popn = sum(popn)) %>%
+  summarise(popn = sum(popn), .groups = 'drop_last') %>%
   data.frame() %>%
   filter(year != max(year))
 
@@ -86,7 +86,8 @@ scaling_backseries <- left_join(aged, curves, by = c("gss_code", "age", "sex")) 
   left_join(deaths, by = c("gss_code", "age", "sex", "year")) %>%
   group_by(gss_code, year, sex) %>%
   summarise(actual_deaths = sum(deaths),
-            curve_deaths = sum(curve_deaths)) %>%
+            curve_deaths = sum(curve_deaths),
+            .groups = 'drop_last') %>%
   mutate(scaling = actual_deaths / curve_deaths) %>%
   select(gss_code, year, sex, scaling) %>%
   data.frame()
@@ -95,7 +96,7 @@ back_years <- c((last_data_year - years_to_avg + 1):last_data_year)
 
 mean <- filter(scaling_backseries, year %in% back_years) %>%
   group_by(gss_code, sex) %>%
-  summarise(scaling = sum(scaling)/years_to_avg) %>%
+  summarise(scaling = sum(scaling)/years_to_avg, .groups = 'drop_last') %>%
   data.frame() %>%
   mutate(year = last_data_year+1) %>%
   select(gss_code, sex, year, scaling) %>%

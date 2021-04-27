@@ -34,7 +34,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   persons <- population %>%
     mutate(sex = "persons") %>%
     group_by(year, gss_code, sex, age) %>%
-    summarise(popn = sum(popn)) %>%
+    summarise(popn = sum(popn), .groups = 'drop_last') %>%
     ungroup() %>%
     wrangle_datastore_outputs()
   

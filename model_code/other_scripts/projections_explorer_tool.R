@@ -89,7 +89,7 @@ t$total_net <- rbind(t$dom_in, t$dom_out, t$int_in, t$int_out) %>%
                         value * -1, value)) %>% 
   mutate(component = "total net") %>% 
   group_by(projection_name, gss_code, year, sex, age, component) %>% 
-  summarise(value = sum(value)) %>% 
+  summarise(value = sum(value), .groups = 'drop_last') %>% 
   data.frame()
 
 trend <- rbindlist(t)
@@ -110,7 +110,7 @@ h$total_net <- rbind(h$dom_in, h$dom_out, h$int_in, h$int_out) %>%
                         value * -1, value)) %>% 
   mutate(component = "total net") %>% 
   group_by(projection_name, gss_code, year, sex, age, component) %>% 
-  summarise(value = sum(value)) %>% 
+  summarise(value = sum(value), .groups = 'drop_last') %>% 
   data.frame()
 
 housing_led <- rbindlist(h)

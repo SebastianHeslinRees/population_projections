@@ -21,7 +21,7 @@
 #' @export
 
 sum_domestic_flows <- function(domestic_flow, in_or_out, flow_col = "flow"){
-  
+
   assert_that(in_or_out %in% c("in", "out"),
               msg = "In sum_domestic_flows in_or_out must be either in or out")
   assert_that(flow_col %in% names(domestic_flow),
@@ -31,14 +31,17 @@ sum_domestic_flows <- function(domestic_flow, in_or_out, flow_col = "flow"){
   
   data_col <- ifelse(in_or_out == "in", "dom_in", "dom_out")
   
+  col_aggregation <- c("year", gss_col, "sex", "age")
+  
   dom <- dtplyr::lazy_dt(domestic_flow) %>%
     rename(flow = !!flow_col) %>%
-    group_by_at(c("year", gss_col, "sex", "age")) %>%
+    group_by_at(col_aggregation) %>%
     summarise(flow = sum(flow)) %>%
     as.data.frame() %>%
     rename(gss_code = !!gss_col) %>%
     tidyr::complete(year, gss_code, age=0:90, sex, fill=list(flow=0)) %>%
-    rename(!!data_col := flow)
+    rename(!!data_col := flow) %>%
+    as.data.frame()
   
   return(dom)
 }

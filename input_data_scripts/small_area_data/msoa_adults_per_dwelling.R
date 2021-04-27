@@ -30,7 +30,7 @@ base_household_adults <- msoa_popn %>%
   mutate(household_popn = popn - ce_popn) %>%
   filter(age >= 18) %>%
   group_by(gss_code_msoa, year) %>%
-  summarise(adults = sum(household_popn)) %>%
+  summarise(adults = sum(household_popn), .groups = 'drop_last') %>%
   as.data.frame()
 
 adults_per_dwelling <- left_join(base_household_adults, ldd_units, by = c("gss_code_msoa","year")) %>%

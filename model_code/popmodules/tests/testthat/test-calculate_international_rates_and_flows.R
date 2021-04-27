@@ -52,7 +52,7 @@ aged <- popn %>%
   mutate(year = year +1,
          age = ifelse(age == 3, 3, age +1))%>%
   group_by(year, gss_code, age, sex) %>%
-  summarise(popn = sum(popn)) %>%
+  summarise(popn = sum(popn), .groups = 'drop_last') %>%
   ungroup() %>%
   #filter(year != max(year)) %>%
   rbind(rename(births, popn = births))
@@ -65,7 +65,7 @@ out_rates <- int_out %>%
 out_flow <- out_rates %>%
   filter(year %in% c(2003:2005)) %>%
   group_by(gss_code, sex, age) %>%
-  summarise(int_out = sum(int_out)/3) %>%
+  summarise(int_out = sum(int_out)/3, .groups = 'drop_last') %>%
   ungroup()
 
 out_traj <- list()
@@ -82,7 +82,7 @@ out_traj <- data.table::rbindlist(out_traj) %>%
 
 in_flow <- filter(int_in, year %in% c(2003:2005)) %>%
   group_by(gss_code, sex, age) %>%
-  summarise(int_in = sum(int_in)/3) %>%
+  summarise(int_in = sum(int_in)/3, .groups = 'drop_last') %>%
   ungroup()
 
 in_traj <- list()

@@ -73,7 +73,7 @@ get_bpo_data <- function(x, gss_borough){
     mutate(gss_code = gss_borough,
            ward_name = borough) %>% 
     group_by(year, gss_code, ward_name, sex, age, variant) %>% 
-    summarise(births = sum(births)) %>% 
+    summarise(births = sum(births), .groups = 'drop_last') %>% 
     data.frame() %>% 
     rbind(births_ward)
   
@@ -81,7 +81,7 @@ get_bpo_data <- function(x, gss_borough){
     mutate(gss_code = gss_borough,
            ward_name = borough) %>% 
     group_by(year, gss_code, ward_name, sex, age, variant) %>% 
-    summarise(deaths = sum(deaths)) %>% 
+    summarise(deaths = sum(deaths), .groups = 'drop_last') %>% 
     data.frame() %>% 
     rbind(deaths_ward)
   
@@ -89,7 +89,7 @@ get_bpo_data <- function(x, gss_borough){
     mutate(gss_code = gss_borough,
            ward_name = borough) %>% 
     group_by(year, gss_code, ward_name, sex, age, variant) %>% 
-    summarise(popn = sum(popn)) %>% 
+    summarise(popn = sum(popn), .groups = 'drop_last') %>% 
     data.frame() %>% 
     rbind(population_ward)
   
@@ -97,7 +97,7 @@ get_bpo_data <- function(x, gss_borough){
     mutate(gss_code = gss_borough,
            ward_name = borough) %>% 
     group_by(year, gss_code, ward_name, sex, age, variant) %>% 
-    summarise(value = sum(value)) %>% 
+    summarise(value = sum(value), .groups = 'drop_last') %>% 
     data.frame() %>% 
     rbind(migration_ward)
   

@@ -107,7 +107,7 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
       rename(value = data_col) %>%
       filter(year %in% back_years) %>%
       group_by(gss_code, sex, age) %>%
-      summarise(value = sum(value)/n_years_to_avg) %>%
+      summarise(value = sum(value)/n_years_to_avg, .groups = 'drop_last') %>%
       ungroup() %>%
       mutate(value = value*modify_rates_and_flows) %>%
       rename(!!data_col := value) %>%

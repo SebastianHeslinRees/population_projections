@@ -129,7 +129,7 @@ ward_all_in <- data.table::fread(ward_in_migration_path, header = T) %>%
 ward_int_in <- domestic_in %>%
         mutate(age = ifelse(age>75, 75, age)) %>%
         group_by(gss_code_ward, sex, age) %>%
-        summarise(domestic = sum(domestic_in_migrants)) %>%
+        summarise(domestic = sum(domestic_in_migrants), .groups = 'drop_last') %>%
         data.frame() %>%
         left_join(ward_all_in, by=c("gss_code_ward","sex","age")) %>%
         mutate(international = all_in_migrants - domestic) %>%

@@ -29,7 +29,7 @@ gla_int_in <- neg_pop %>%
   select(-popn) %>% 
   rbind(gla_int_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
-  summarise(int_in = sum(int_in)) %>% 
+  summarise(int_in = sum(int_in), .groups = 'drop_last') %>% 
   data.frame()
 
 #combine gla estimates for London with ONS for everywhere else

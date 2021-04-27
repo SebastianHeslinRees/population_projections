@@ -72,7 +72,7 @@ bpo_template_to_rds <- function(csv_name,
     rbind(conventional) %>%
     mutate(gss_code = borough_gss) %>%
     group_by(year, gss_code) %>%
-    summarise(dev = sum(dev)) %>%
+    summarise(dev = sum(dev), .groups = 'drop_last') %>%
     as.data.frame()
 
   #Ward trajectory

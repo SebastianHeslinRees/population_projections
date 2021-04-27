@@ -22,7 +22,7 @@ census_ward_ce <- readRDS(census_ward_ce_path) %>%
 city_ce <- filter(census_ward_ce, GEOGRAPHY_CODE %in% city_merged_wards) %>%
   mutate(gss_code_ward = "E09000001") %>%
   group_by(gss_code_ward, sex = C_SEX_NAME, age_group = C_AGE_NAME) %>%
-  summarise(ce_popn = sum(OBS_VALUE)) %>%
+  summarise(ce_popn = sum(OBS_VALUE), .groups = 'drop_last') %>%
   as.data.frame()
 
 census_ward_ce <- census_ward_ce %>%
@@ -30,7 +30,7 @@ census_ward_ce <- census_ward_ce %>%
   filter(substr(LA,1,3)=="E09") %>%
   filter(LA != "E09000001") %>%
   group_by(gss_code_ward = WARD, sex = C_SEX_NAME, age_group = C_AGE_NAME) %>%
-  summarise(ce_popn = sum(OBS_VALUE)) %>%
+  summarise(ce_popn = sum(OBS_VALUE), .groups = 'drop_last') %>%
   as.data.frame() %>%
   rbind(city_ce) %>%
   mutate(sex = case_when(sex == "Males" ~ "male",

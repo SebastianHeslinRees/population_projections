@@ -36,21 +36,21 @@ expect_2009 <- code_changes %>%
                            changed_from_code),
          value = 5) %>%
   group_by(gss_code) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame()
 
 expect_2012 <- expect_2009 %>% 
   left_join(code_changes_2012, by=c("gss_code"="changed_from_code")) %>%
   mutate(gss_code = ifelse(is.na(changed_to_code), gss_code, changed_to_code)) %>% 
   group_by(gss_code) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame()
 
 expect_2013 <- expect_2012 %>% 
   left_join(code_changes_2013, by=c("gss_code"="changed_from_code")) %>%
   mutate(gss_code = ifelse(is.na(changed_to_code), gss_code, changed_to_code)) %>% 
   group_by(gss_code) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame() %>%
   mutate(value=ifelse(gss_code == "E06000057", 35, value),
          value=ifelse(gss_code == "E07000243", 5, value))
@@ -59,21 +59,21 @@ expect_2018 <- expect_2013 %>%
   left_join(code_changes_2018, by=c("gss_code"="changed_from_code")) %>%
   mutate(gss_code = ifelse(is.na(changed_to_code), gss_code, changed_to_code)) %>% 
   group_by(gss_code) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame()
 
 expect_2019 <- expect_2018 %>% 
   left_join(code_changes_2019, by=c("gss_code"="changed_from_code")) %>%
   mutate(gss_code = ifelse(is.na(changed_to_code), gss_code, changed_to_code)) %>% 
   group_by(gss_code) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame()
 
 expect_2020 <- expect_2019 %>% 
   left_join(code_changes_2019, by=c("gss_code"="changed_from_code")) %>%
   mutate(gss_code = ifelse(is.na(changed_to_code), gss_code, changed_to_code)) %>% 
   group_by(gss_code) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame()
  
 output_2009 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2009, code_changes_path = code_changes_path)

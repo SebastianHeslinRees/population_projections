@@ -70,6 +70,7 @@ bpo_markdown_data_and_render <- function(bpo_name, output_dir = "C:/temp", root_
       as.data.frame()
     
     borough_age_structure <- borough_pop %>%
+      dtplyr::lazy_dt() %>% 
       filter(year %in% c(2011,2018,2033)) %>%
       group_by(year, gss_code, borough, age) %>%
       summarise(popn = sum(popn)) %>%
@@ -106,6 +107,7 @@ bpo_markdown_data_and_render <- function(bpo_name, output_dir = "C:/temp", root_
                                    age %in% 16:64 ~ "working age (16-64)",
                                    age %in% 65:79 ~ "older (65-79)",
                                    age >79 ~ "elderly (80+)")) %>%
+      dtplyr::lazy_dt() %>% 
       group_by(year, gss_code_ward, age_group) %>%
       summarise(popn = sum(popn)) %>%
       as.data.frame() %>%
@@ -119,6 +121,7 @@ bpo_markdown_data_and_render <- function(bpo_name, output_dir = "C:/temp", root_
                                    age %in% 16:64 ~ "working age (16-64)",
                                    age %in% 65:79 ~ "older (65-79)",
                                    age >79 ~ "elderly (80+)")) %>%
+      dtplyr::lazy_dt() %>% 
       group_by(year, gss_code, age_group) %>%
       summarise(popn = sum(popn)) %>%
       as.data.frame() %>%

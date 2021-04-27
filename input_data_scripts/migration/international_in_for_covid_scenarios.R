@@ -50,7 +50,7 @@ int_in_proportions <- avg_10_yr %>%
   left_join(district_to_region, by="gss_code") %>%
   mutate(london = region_gss_code == "E12000007") %>%
   group_by(london) %>%
-  summarise(int_in = sum(int_in)) %>%
+  summarise(int_in = sum(int_in), .groups = 'drop_last') %>%
   ungroup() %>%
   mutate(proportion = 100*(int_in/sum(int_in))) %>%
   data.frame()

@@ -87,7 +87,7 @@ E09000012E09000001 <- filter(provisional, gss_code == "E09000012, E09000001")
 E52E63_2019 <- filter(ons_births, gss_code %in% c("E06000052", "E06000053"),
                       year == 2019, age == 0) %>%
   group_by(gss_code) %>% 
-  summarise(combined_births = sum(births)) %>% 
+  summarise(combined_births = sum(births), .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(share = combined_births / sum(combined_births)) %>% 
   mutate(births = share * E06000052E06000053$births,
@@ -97,7 +97,7 @@ E52E63_2019 <- filter(ons_births, gss_code %in% c("E06000052", "E06000053"),
 E0912E0901_2019 <- filter(ons_births, gss_code %in% c("E09000012", "E09000001"),
                           year == 2019, age == 0) %>%
   group_by(gss_code) %>% 
-  summarise(combined_births = sum(births)) %>% 
+  summarise(combined_births = sum(births), .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(share = combined_births / sum(combined_births)) %>% 
   mutate(births = share * E09000012E09000001$births,
