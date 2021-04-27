@@ -42,6 +42,7 @@
 #' @import popmodules
 #' @importFrom dtplyr lazy_dt
 #' @importFrom data.table rbindlist
+#' @importFrom assertthat are_equal
 
 small_area_core <- function(start_population, births, deaths, communal_est_popn,
                             out_migration_rates, in_migration_characteristics,
@@ -180,6 +181,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   
   #constrain borough populations to match constraint
   constrained_popn <- left_join(unconstrained_popn, small_area_to_district, by="gss_code_small_area") %>%
+    check_negative_values("popn", alt_value = 0.001) %>% 
     as.data.frame() %>%
     constrain_component(constraint = popn_constraint,
                         col_popn = "popn",
@@ -188,6 +190,9 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   final_popn <- constrained_popn %>%
     select(year, gss_code, gss_code_small_area, sex, age, popn) %>%
     check_negative_values("popn")
+  
+  are_equal(sum(constrained_popn$popn), sum(popn_constraint$popn, tolerance = 0.1),
+               msg = paste("Constraining error in ward model. Year", projection_year))
   
   final_migration <- rename(natural_change_popn, nat_chng = popn) %>%
     left_join(final_popn, by=c("year","gss_code","gss_code_small_area","sex","age")) %>%
