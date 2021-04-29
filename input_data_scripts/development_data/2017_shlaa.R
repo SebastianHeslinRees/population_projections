@@ -132,7 +132,7 @@ london_msoas <- readRDS("input_data/lookup/msoa_to_district.rds") %>%
 
 ward_large <- large_sites %>%
         group_by(gss_code_ward, year) %>%
-        summarise(units = sum(dev)) %>%
+        summarise(units = sum(dev), .groups = 'drop_last') %>%
         as.data.frame() %>%
         tidyr::complete(gss_code_ward = london_wards$gss_code_ward,
                         year = 2012:2050,
@@ -140,7 +140,7 @@ ward_large <- large_sites %>%
 
 msoa_large <- large_sites %>%
         group_by(gss_code_msoa, year) %>%
-        summarise(units = sum(dev)) %>%
+        summarise(units = sum(dev), .groups = 'drop_last') %>%
         as.data.frame() %>% 
         tidyr::complete(gss_code_msoa = london_msoas$gss_code_msoa,
                         year = 2012:2050,
@@ -148,7 +148,7 @@ msoa_large <- large_sites %>%
 
 borough_large <- large_sites %>%
         group_by(gss_code, year) %>%
-        summarise(units = sum(dev)) %>%
+        summarise(units = sum(dev), .groups = 'drop_last') %>%
         as.data.frame() %>% 
         tidyr::complete(gss_code,
                         year = 2011:2050,
@@ -204,19 +204,19 @@ small_intensification <- fread(paste0(shlaa_data_loc,"/Small_Sites_Intensificati
 #aggregate to ward
 ward_intense <- small_intensification %>%
         group_by(gss_code_ward) %>%
-        summarise(units = sum(intense)) %>%
+        summarise(units = sum(intense), .groups = 'drop_last') %>%
         as.data.frame()
 
 #aggregate to msoa
 msoa_intense <- small_intensification %>%
         group_by(gss_code_msoa) %>%
-        summarise(units = sum(intense)) %>%
+        summarise(units = sum(intense), .groups = 'drop_last') %>%
         as.data.frame()
 
 #aggregate to borough
 borough_intense <- small_intensification %>%
         group_by(gss_code) %>%
-        summarise(units = sum(intense)) %>%
+        summarise(units = sum(intense), .groups = 'drop_last') %>%
         as.data.frame() 
 
 rm(small_intensification, msoa_to_district, oa_to_msoa, oa_to_ward)
@@ -231,7 +231,8 @@ small_windfall_1 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Windfall.csv")) %
         data.frame() %>% 
         filter(!Borough %in% c("City of London","Islington","LLDC","OPDC")) %>%
         select(-Borough) %>%
-        rename(units = Windfall)
+        rename(units = Windfall) %>% 
+        data.frame()
 
 small_windfall_opdc <- data.frame(gss_code=c("E09000012","E09000025","E09000030"),
                                   units=c(0,68,2),
@@ -245,7 +246,7 @@ small_remainder_windfall <- rbind(small_windfall_1,
                                   small_windfall_opdc,
                                   small_windfall_lldc) %>%
         group_by(gss_code) %>%
-        summarise(units = sum(units)) %>%
+        summarise(units = sum(units), .groups = 'drop_last') %>%
         as.data.frame() %>% 
         mutate(year = 2020) %>% 
         popmodules::project_forward_flat(2029) %>% 
@@ -274,9 +275,7 @@ small_trend_windfall <- rbind(small_trend_windfall_1,
         as.data.frame() %>% 
         select(gss_code, year, units)
 
-
 rm(small_trend_windfall_1, small_trend_windfall_2, small_windfall_opdc, small_windfall_lldc)
-
 
 ward_intense <- ward_intense %>% 
         mutate(year = 2020) %>% 
@@ -304,7 +303,7 @@ ward_shlaa <- rbind(ward_large, ward_intense) %>%
         rbind(ward_large, ward_intense) %>% 
         filter(gss_code_ward %in% london_wards$gss_code_ward) %>%
         group_by(year, gss_code_ward) %>%
-        summarise(units = sum(units)) %>%
+        summarise(units = sum(units), .groups = 'drop_last') %>%
         data.frame() %>% 
         tidyr::complete(year = 2012:2050,
                         gss_code_ward = unique(london_wards$gss_code_ward),
@@ -312,12 +311,12 @@ ward_shlaa <- rbind(ward_large, ward_intense) %>%
 
 msoa_shlaa <- rbind(msoa_large, msoa_intense) %>%
         group_by(year, gss_code_msoa) %>%
-        summarise(units = sum(units)) %>%
+        summarise(units = sum(units), .groups = 'drop_last') %>%
         data.frame()
 
 borough_shlaa <- rbind(borough_large, borough_intense, borough_windfall) %>%
         group_by(year, gss_code) %>%
-        summarise(units = sum(units)) %>%
+        summarise(units = sum(units), .groups = 'drop_last') %>%
         data.frame()
 
 #Save
@@ -330,7 +329,8 @@ shlaa_breakdown <- left_join(borough_large, borough_intense, by = c('gss_code','
         group_by(year) %>% 
         summarise(large_sites = sum(units.x),
                   intensification = sum(units.y),
-                  windfall = sum(units)) %>% 
+                  windfall = sum(units),
+                  .groups = 'drop_last') %>% 
         data.frame() %>% 
         tidyr::replace_na(list(large_sites = 0,
                                intensification = 0,

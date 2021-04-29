@@ -89,7 +89,7 @@ lsoa_units <- lsoa_census_dwellings %>%
   select_at(names(additional_units)) %>%
   rbind(additional_units) %>%
   group_by(year, gss_code_lsoa) %>%
-  summarise(units = sum(add_units)) %>%
+  summarise(units = sum(add_units), .groups = 'drop_last') %>%
   as.data.frame()
 
 #group it into different geographies
@@ -97,19 +97,19 @@ ward_units <- left_join(lsoa_units, lsoa_to_ward, by="gss_code_lsoa") %>%
   left_join(ward_to_district, by = "gss_code_ward") %>%
   mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>%
   group_by(year, gss_code_ward) %>%
-  summarise(units = sum(units)) %>%
+  summarise(units = sum(units), .groups = 'drop_last') %>%
   ungroup() %>%
   as.data.frame()
 
 msoa_units <- left_join(lsoa_units, lsoa_to_msoa, by="gss_code_lsoa") %>%
   group_by(year, gss_code_msoa) %>%
-  summarise(units = sum(units)) %>%
+  summarise(units = sum(units), .groups = 'drop_last') %>%
   ungroup() %>%
   as.data.frame()
 
 borough_units <- left_join(lsoa_units, lsoa_to_borough, by="gss_code_lsoa") %>%
   group_by(year, gss_code) %>%
-  summarise(units = sum(units)) %>%
+  summarise(units = sum(units), .groups = 'drop_last') %>%
   ungroup() %>%
   as.data.frame()
 

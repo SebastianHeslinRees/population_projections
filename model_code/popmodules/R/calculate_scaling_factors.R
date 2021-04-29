@@ -106,7 +106,7 @@ calculate_scaling_factors <- function(popn,
 
   if(any(ix)) {
     unable_to_scale <- dtplyr::lazy_dt(scaling) %>%
-      filter(ix) %>%
+      filter(ix==TRUE) %>%
       group_by_at(names(col_aggregation)) %>%
       summarise(!!col_constraint_new := first(!!sym(col_constraint_new))) %>%
       data.frame()

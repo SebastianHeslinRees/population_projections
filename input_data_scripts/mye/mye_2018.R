@@ -31,7 +31,7 @@ uk_pop <- fread(uk_pop_file) %>%
                               country=="N" ~ "Northern Ireland")) %>%
   mutate(sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female")) %>%
   group_by(gss_code, gss_name, country, sex, age, component, year, geography) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   ungroup()
 
 #Scotland & NI Components
@@ -53,7 +53,7 @@ uk_coc <- fread(uk_coc_file) %>%
                               substr(ladcode18,1,1)=="N" ~ "Northern Ireland")) %>%
   #mutate(sex = case_when(sex == 1 ~ "male", sex == 2 ~ "female")) %>%
   group_by(gss_code, gss_name, country, component, year, geography) %>%
-  summarise(value = sum(value)) %>%
+  summarise(value = sum(value), .groups = 'drop_last') %>%
   ungroup()
 
 #Scotland & NI births
@@ -72,7 +72,7 @@ rm(x,i)
 international_curves <- filter(mye_coc, component %in% c("international_in","international_out")) %>%
   #filter(year == 2017) %>%
   group_by(component, age, sex, year) %>%
-  summarise(estimate = sum(value)) %>%
+  summarise(estimate = sum(value), .groups = 'drop_last') %>%
   group_by(component) %>%
   mutate(total = sum(estimate),
          structure = estimate/total) %>%
@@ -93,7 +93,7 @@ uk_net_international <- uk_international %>%
 death_curves <- filter(mye_coc, component == "deaths") %>%
   #filter(year == 2017) %>%
   group_by(component, age, sex, year) %>%
-  summarise(estimate = sum(value)) %>%
+  summarise(estimate = sum(value), .groups = 'drop_last') %>%
   group_by(component) %>%
   mutate(total = sum(estimate),
          structure = estimate/total) %>%
@@ -136,7 +136,7 @@ uk_upc <- filter(births, country %in% c("N","S")) %>%
 
 upc <- filter(mye_coc, component %in% c("special_change", "unattrib", "other_adjust")) %>%
   group_by(gss_code, gss_name, country, sex, age, year, geography) %>%
-  summarise(upc = sum(value)) %>%
+  summarise(upc = sum(value), .groups = 'drop_last') %>%
   ungroup() %>%
   select(names(uk_upc)) %>%
   rbind(uk_upc)

@@ -61,7 +61,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
    
     curr_yr_births <- filter(births, year == projection_year) %>%
       group_by(year, gss_code_small_area) %>%
-      summarise(births = sum(births)) %>%
+      summarise(births = sum(births), .groups = 'drop_last') %>%
       as.data.frame()
     
   } else {
@@ -70,7 +70,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
                                by=c("year","gss_code_small_area","age","sex")) %>%
       mutate(births = fert_rate * popn) %>%
       group_by(year, gss_code_small_area) %>%
-      summarise(births = sum(births)) %>%
+      summarise(births = sum(births), .groups = 'drop_last') %>%
       as.data.frame()
   }
 

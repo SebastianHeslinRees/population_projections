@@ -225,7 +225,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
   households_stage_2_ages <- stage1_detailed_households %>%
     mutate(age_group = recode(age_group, !!!recoding_ages)) %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(households = sum(households)) %>%
+    summarise(households = sum(households), .groups = 'drop_last') %>%
     ungroup()
   
   ce_popn <- stage1_output$communal_establishment_population %>%

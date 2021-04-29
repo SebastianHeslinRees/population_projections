@@ -62,7 +62,7 @@ deaths_sex_age_2021 <- rbind(
   data.frame(fread(ons_weekly_age_sex_2)),
   data.frame(fread(ons_weekly_age_sex_3))) %>% 
   group_by(min_age, max_age, sex) %>% 
-  summarise(deaths = sum(deaths)) %>% 
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>% 
   data.frame()
 
 ons_weekly_la_totals_2020 <- fread(ons_weekly_la_totals_1) %>% data.frame() 
@@ -73,7 +73,7 @@ deaths_la_2020 <- ons_weekly_la_totals_2020 %>%
          week_number <= 27) %>%
   filter_to_LAs() %>%
   group_by(gss_code) %>%
-  summarise(deaths = sum(deaths)) %>%
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame() %>%
   recode_gss_codes(recode_to_year = 2020) %>% 
   rbind(scottish_deaths_2020, n_irish_deaths_2020)
@@ -84,7 +84,7 @@ deaths_la_2021 <- ons_weekly_la_totals_2020 %>%
   filter(cause_of_death == "COVID 19") %>%
   filter_to_LAs() %>%
   group_by(gss_code) %>%
-  summarise(deaths = sum(deaths)) %>%
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame() %>%
   recode_gss_codes(recode_to_year = 2020) %>% 
   rbind(scottish_deaths_2021, n_irish_deaths_2021)
@@ -96,7 +96,7 @@ deaths_la_2021 <- ons_weekly_la_totals_2020 %>%
 #   filter(cause_of_death == "COVID 19") %>%
 #   filter_to_LAs() %>%
 #   group_by(gss_code) %>%
-#   summarise(deaths = sum(deaths)) %>%
+#   summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
 #   as.data.frame() %>%
 #   recode_gss_codes(recode_to_year = 2020) %>%
 #   rbind(data.frame(gss_code = c("N92000002", "S92000004"),
@@ -112,7 +112,7 @@ rest_of_2021 <- deaths_la_2021 %>%
 
 deaths_la_2021 <- rbind(deaths_la_2021, rest_of_2021) %>%
   group_by(gss_code) %>%
-  summarise(deaths = sum(deaths)) %>%
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame()
 
 #-----------------------------------------
@@ -135,7 +135,7 @@ rm(list=setdiff(ls(), c("deaths_la_2020","deaths_la_2021",
 uk_2019_deaths <- readRDS("input_data/mye/2019/deaths_ons.rds") %>%
   filter(year == 2019) %>%
   group_by(sex, age) %>%
-  summarise(deaths = sum(deaths)) %>%
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame()
 
 #Apply 2019 age structure to covid-19 age group data

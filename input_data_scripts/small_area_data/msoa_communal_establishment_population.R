@@ -15,7 +15,7 @@ census_msoa_ce <- readRDS(census_msoa_ce_path) %>%
          C_SEX != 0,
          C_AGE != 0) %>%
   group_by(gss_code_msoa = GEOGRAPHY_CODE, sex = C_SEX_NAME, age_group = C_AGE_NAME) %>%
-  summarise(ce_popn = sum(OBS_VALUE)) %>%
+  summarise(ce_popn = sum(OBS_VALUE), .groups = 'drop_last') %>%
   as.data.frame() %>%
   mutate(sex = case_when(sex == "Males" ~ "male",
                          sex == "Females" ~ "female")) %>%

@@ -19,13 +19,13 @@ answer_in <- filter(pop, !gss_code %in% c("E01","E02")) %>%
   left_join(rates_in, by=c("gss_code"="gss_out","sex","age")) %>%
   mutate(flow = rate*popn) %>%
   group_by(year) %>%
-  summarise(dom_in = sum(flow))
+  summarise(dom_in = sum(flow), .groups = 'drop_last')
 
 answer_out <- filter(pop, gss_code %in% c("E01","E02")) %>%
   left_join(rates_out, by=c("gss_code"="gss_out","sex","age")) %>%
   mutate(flow = rate*popn) %>%
   group_by(year) %>%
-  summarise(dom_out = sum(flow))
+  summarise(dom_out = sum(flow), .groups = 'drop_last')
 
 answer_net <- left_join(answer_in, answer_out, by="year") %>%
   mutate(dom_net = dom_in-dom_out,

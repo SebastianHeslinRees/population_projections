@@ -142,17 +142,17 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
   hh_rates_male <- filter(headship_rates, household_type == "One person households: Male")
   
   hh_pop_total <- group_by(household_popn, gss_code, year, age_group) %>%
-    summarise(household_popn = sum(household_population)) %>%
+    summarise(household_popn = sum(household_population), .groups = 'drop_last') %>%
     ungroup()
   
   hh_pop_female <- filter(household_popn, sex == "female") %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(household_popn = sum(household_population)) %>%
+    summarise(household_popn = sum(household_population), .groups = 'drop_last') %>%
     ungroup()
   
   hh_pop_male <- filter(household_popn, sex == "male") %>%
     group_by(gss_code, year, age_group) %>%
-    summarise(household_popn = sum(household_population)) %>%
+    summarise(household_popn = sum(household_population), .groups = 'drop_last') %>%
     ungroup()
   
   unconstrained_total <- left_join(hh_rates_no_sex, hh_pop_total, by = c("gss_code", "year", "age_group"))
@@ -163,7 +163,7 @@ ons_stage_2 <- function(stage2_file_path, stage1_output){
     mutate(unconstrained = household_popn * rate)
   
   stg1_total_households <- group_by(stg1_total_households, year, gss_code, age_group) %>%
-    summarise(stg1_total = sum(households)) %>%
+    summarise(stg1_total = sum(households), .groups = 'drop_last') %>%
     ungroup()
   
   constrained_hh <- group_by(unconstrained_hh, year, gss_code, age_group) %>%
@@ -251,7 +251,7 @@ get_household_popn <- function(population, communal_establishment){
 constrain_regional_hh <- function(unconstrained_regional, england_proj){
   
   regional_constraint <- group_by(unconstrained_regional, year, sex, age_group) %>%
-    summarise(reg_hh = sum(households)) %>%
+    summarise(reg_hh = sum(households), .groups = 'drop_last') %>%
     ungroup() %>%
     left_join(england_proj, by=c("year", "sex", "age_group")) %>%
     rename(eng_hh = households) %>%
@@ -272,7 +272,7 @@ constrain_district_hh <- function(unconstrained_la, constrained_regional, distri
   
   la_constraint <- left_join(unconstrained_la, district_to_region, by="gss_code") %>%
     group_by(region_gss_code, year, sex, age_group) %>%
-    summarise(la_hh = sum(households)) %>%
+    summarise(la_hh = sum(households), .groups = 'drop_last') %>%
     ungroup() %>%
     left_join(constrained_regional, by=c("region_gss_code"="gss_code","year","sex","age_group")) %>%
     rename(reg_hh = households) %>%

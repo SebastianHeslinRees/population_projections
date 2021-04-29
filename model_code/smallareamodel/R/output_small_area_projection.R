@@ -90,7 +90,7 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     select_at(col_aggregation)
 
   #components of change output sheet
-  #and residual migration claculation
+  #and residual migration calculation
   components <- list()
   for(i in names(projection)[1:4]){
     nm <- last(names(projection[[i]]))

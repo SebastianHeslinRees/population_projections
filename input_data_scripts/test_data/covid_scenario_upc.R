@@ -34,7 +34,7 @@ deaths_la <- data.table::fread(ons_weekly_file_2) %>%
   filter(cause_of_death == "COVID 19") %>%
   filter_to_LAs() %>%
   group_by(gss_code) %>%
-  summarise(deaths = sum(deaths)) %>%
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame() %>%
   recode_gss_codes(recode_to_year = 2020) %>% 
   rbind(scottish_deaths, n_irish_deaths)
@@ -47,7 +47,7 @@ sum(deaths_sex_age$deaths)
 uk_2018_deaths <- readRDS("input_data/mye/2018/deaths_ons.rds") %>%
   filter(year == 2018) %>%
   group_by(sex, age) %>%
-  summarise(deaths = sum(deaths)) %>%
+  summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame()
 
 #-----------------------------------------

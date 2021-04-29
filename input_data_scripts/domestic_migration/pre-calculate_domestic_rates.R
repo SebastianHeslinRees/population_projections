@@ -144,7 +144,7 @@ dom_rates_2011_levels <- calculate_mean_domestic_rates(rates_backseries,
 #-------------------------------------
 
 #In some scenarios we want to affect the amount of migration coming into
-#or going out of London without ammending the rest of the rates
+#or going out of London without amending the rest of the rates
 
 reduce_rates_to <- 0.8 #80% of average
 increase_rates_to <- 1.2 #120% of average

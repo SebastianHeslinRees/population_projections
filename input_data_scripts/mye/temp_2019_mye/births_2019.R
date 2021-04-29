@@ -15,7 +15,7 @@ births_2 <- fread("Q:/Teams/D&PA/Data/births_and_deaths/births_by_month/births_s
 
 births_2019 <- rbind(births_1, births_2) %>%
   group_by(gss_code, sex) %>%
-  summarise(births = sum(births)) %>%
+  summarise(births = sum(births), .groups = 'drop_last') %>%
   data.frame() %>%
   popmodules::recode_gss_codes(data_cols = "births", recode_to_year = 2020) %>%
   filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09","W06","N92","S92"))

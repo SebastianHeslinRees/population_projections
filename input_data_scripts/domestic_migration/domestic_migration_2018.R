@@ -23,7 +23,7 @@ domestic <- domestic %>%
   recode_gss_codes(col_geog="gss_in", data_col="value", fun=list(sum), recode_gla_codes = TRUE) %>%
   recode_gss_codes(col_geog="gss_out", data_col="value", fun=list(sum), recode_gla_codes = TRUE)
 
-domestic <-  domestic %>%
+domestic <- domestic %>%
   dtplyr::lazy_dt() %>% 
   mutate(year = as.integer(year)) %>%
   mutate(age = ifelse(age < 90, age, 90)) %>%   
@@ -45,7 +45,7 @@ dom_net <- dom_out %>%
   select(-dom_out) %>% 
   rbind(dom_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
-  summarise(dom_net = sum(dom_in)) %>% 
+  summarise(dom_net = sum(dom_in), .groups = 'drop_last') %>% 
   data.frame()
 
 #--------------------------------------
@@ -65,7 +65,7 @@ reg_dom_net <- reg_dom_out %>%
   select(-dom_out) %>% 
   rbind(reg_dom_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
-  summarise(dom_net = sum(dom_in)) %>% 
+  summarise(dom_net = sum(dom_in), .groups = 'drop_last') %>% 
   data.frame() %>% 
   filter(substr(gss_code,1,1)=="E")
 
@@ -82,7 +82,7 @@ sub_regional_net <- sub_reg_dom_out %>%
   select(-dom_out) %>% 
   rbind(sub_reg_dom_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
-  summarise(dom_net = sum(dom_in)) %>% 
+  summarise(dom_net = sum(dom_in), .groups = 'drop_last') %>% 
   data.frame()
 
 #---------------------------------------------------
@@ -103,7 +103,7 @@ nat_dom_net <- nat_dom_out %>%
   select(-dom_out) %>% 
   rbind(nat_dom_in) %>% 
   group_by(gss_code, year, sex, age) %>% 
-  summarise(dom_net = sum(dom_in)) %>% 
+  summarise(dom_net = sum(dom_in), .groups = 'drop_last') %>% 
   data.frame() %>%
   filter(gss_code %in% c("E92000001","W92000004"))
 

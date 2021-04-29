@@ -50,7 +50,7 @@ output_bpo_excel_file <- function(data, output_dir, projection_name, bpo_gss_cod
            gss_code_ward = gss_code,
            ward_name = paste0(borough, " (total)")) %>% 
     group_by(gss_code, borough, gss_code_ward, ward_name, year) %>% 
-    summarise(covid_deaths = sum(upc)*-1) %>%
+    summarise(covid_deaths = sum(upc)*-1, .groups = 'drop_last') %>%
     data.frame() %>% 
     mutate(covid_deaths = round(covid_deaths, 2))
   

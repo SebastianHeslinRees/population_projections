@@ -28,7 +28,7 @@ s <- rename(x, steve = rate)
 
 expect_1 <- filter(x, year %in% 2015:2019) %>% 
   group_by(gss_out, gss_in, age, sex) %>% 
-  summarise(rate = sum(rate)/5) %>% 
+  summarise(rate = sum(rate)/5, .groups = 'drop_last') %>% 
   data.frame() %>% 
   arrange(gss_out, gss_in, sex, age)
 
@@ -37,13 +37,13 @@ expect_2 <- y %>%
   rbind(z) %>% 
   filter(year %in% 2015:2019) %>% 
   group_by(gss_out, gss_in, age, sex) %>% 
-  summarise(rate = sum(rate)/5) %>% 
+  summarise(rate = sum(rate)/5, .groups = 'drop_last') %>% 
   data.frame() %>% 
   arrange(gss_out, gss_in, sex, age)
 
 expect_3 <- filter(z, year %in% 2015:2019) %>% 
   group_by(gss_out, gss_in, age, sex) %>% 
-  summarise(rate = sum(rate)/5) %>% 
+  summarise(rate = sum(rate)/5, .groups = 'drop_last') %>% 
   data.frame() %>% 
   arrange(gss_out, gss_in, sex, age)
 
