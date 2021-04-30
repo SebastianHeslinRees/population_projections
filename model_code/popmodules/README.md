@@ -35,3 +35,12 @@ Functions which validate data inputs and process outputs. These can be general a
 
 ### Wrangle
 Helper functions which filter, combine and create data for use at various points and in different processes throughout the models. Functions which include the keywords `order`, `filter`, `aggregate`, etc.
+
+### Testing
+Testing infrastructure is setup. To test the current state of the package, run: 
+
+`devtools::test('model_code/popmodules')` 
+
+`devtools::check('model_code/popmodules')` 
+
+`codetools::checkUsagePackage('popmodules', suppressUndefined = TRUE)`
