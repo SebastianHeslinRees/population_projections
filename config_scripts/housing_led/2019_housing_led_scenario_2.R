@@ -1,12 +1,12 @@
 #Housing-led scenario 2
-#Migration = BPO scenario 2
+#Migration = BPO scenario 1
 #Development = low scenario
 
 library(popmodules)
 library(housingledmodel)
 library(smallareamodel)
 
-external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_2", full.names = TRUE),"/")
+external_trend_path <- paste0(list.files(path="outputs/trend/2019/", pattern= "2019_BPO_scenario_1", full.names = TRUE),"/")
 projection_name <- "housing_led_scenario_2"
 
 communal_est_file <- "dclg_communal_est_population.rds"
@@ -37,7 +37,7 @@ domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_sc
                                      transition = F),
                        '2022' = list(path = "input_data/scenario_data/bpo_dom_scenario_1_yr_2022.rds",
                                      transition = T),
-                       '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_10yr_avg_2019_gla_mye.rds",
+                       '2028' = list(path = "input_data/domestic_migration/processed_rates/dom_rates_5yr_avg_2019_gla_mye.rds",
                                      transition = F))
 
 fertility_rates_path <- "input_data/fertility/fertility_rates_provisional_2020_5yr_trend.rds"

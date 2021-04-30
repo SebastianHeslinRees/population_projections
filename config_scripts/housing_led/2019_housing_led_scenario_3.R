@@ -1,6 +1,6 @@
-#Housing-led scenario 3 - outer growth
+#Housing-led scenario 3 - London Plan
 #Migration = BPO scenario 1
-#Development = hybrid scenario
+#Development = london plan scenario (52k)
 
 library(popmodules)
 library(housingledmodel)
@@ -13,7 +13,7 @@ communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
 ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
 
-dev_trajectory_path <- "input_data/housing_led_model/borough_2019_based_hybrid.rds"
+dev_trajectory_path <- "input_data/housing_led_model/borough_london_plan_trajectory.rds"
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
 
 popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
