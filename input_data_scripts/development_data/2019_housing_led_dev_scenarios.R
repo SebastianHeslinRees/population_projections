@@ -95,6 +95,8 @@ rm(start_dir, large_sites_points, msoa_polygon_loc, msoa_polygons,
 #-------------------------------------------------------------------------------
 
 #Savills forecast 41.7k for 2020 & 43k for the period 2021-25
+#Then distribute the difference between the new trajectory and the SHLAA
+#to the later years (2026-41)
 
 adjust_2020 <- filter(shlaa, year == 2020) %>% 
   mutate(distribution = units / sum(units)) %>% 
@@ -110,14 +112,31 @@ adjust_2021_2025 <- filter(shlaa, year %in% 2021:2025) %>%
   select(year, gss_code, new_units) %>% 
   rename(units = new_units)
 
-savills <- filter(shlaa, year > 2025) %>% 
-  rbind(ldd_backseries,
-        adjust_2020,
-        adjust_2021_2025) %>% 
+excess <- rbind(adjust_2020, adjust_2021_2025) %>% 
+  rename(savils = units) %>% 
+  left_join(shlaa, by=c("gss_code","year")) %>% 
+  rename(shlaa = units) %>% 
+  group_by(gss_code) %>% 
+  summarise(excess = sum(shlaa)-sum(savils)) %>% 
+  data.frame()
+
+adjust_2026_2050 <- filter(shlaa, year >= 2026) %>% 
+  group_by(gss_code) %>% 
+  mutate(dist = units/sum(units)) %>% 
+  data.frame() %>% 
+  left_join(excess, by="gss_code") %>% 
+  mutate(excess_dist = dist*excess,
+         new_units = units+excess_dist) %>% 
+  select(year, gss_code, units = new_units)
+
+savills <- rbind(ldd_backseries,
+                 adjust_2020,
+                 adjust_2021_2025,
+                 adjust_2026_2050) %>% 
   arrange(year, gss_code) %>% 
   data.frame()
 
-rm(adjust_2020, adjust_2021_2025)
+rm(adjust_2020, adjust_2021_2025, adjust_2026_2041)
 
 #-------------------------------------------------------------------------------
 
