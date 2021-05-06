@@ -13,7 +13,7 @@ dir.create(output_location, showWarnings = FALSE, recursive = TRUE)
 file_1 <- fread(paste0(data_location, "raw_data/y2019/Detailed_Estimates_2019_LA_2019_Dataset_1.csv"))
 file_2 <- fread(paste0(data_location, "raw_data/y2019/Detailed_Estimates_2019_LA_2019_Dataset_2.csv"))
 
-past_data <- readRDS("input_data/domestic_migration/2018/domestic_migration_flows_ons.rds")
+past_data <- readRDS(paste0(data_location, "processed/2018/2002-2018 (GLA codes).rds"))
 
 #----------------------------
 

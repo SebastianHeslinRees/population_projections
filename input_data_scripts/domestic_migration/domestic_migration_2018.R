@@ -32,6 +32,7 @@ domestic <- domestic %>%
   data.frame() 
 
 saveRDS(domestic, file = paste0(output_location, "domestic_migration_flows_ons.rds"))
+saveRDS(domestic, file = "Q:/Teams/D&PA/Data/domestic_migration/current_series_from_2002/processed/2018/2002-2018 (GLA codes).rds")
 
 #------------------------------------
 

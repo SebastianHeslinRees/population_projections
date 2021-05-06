@@ -123,6 +123,7 @@ faraday_check <- filter(scaled_ward_data, gss_code_ward == "E05000541") %>%
   as.data.frame() %>%
   left_join(faraday_total, by="year") %>%
   rename(unscaled_pop = total_popn)
+message("Faraday ward in Southwark - check")
 print(faraday_check)
 
 ####MSOA data####

@@ -146,3 +146,5 @@ for(method in c("average", "trend")) {
   filename_suffix <- ifelse(method == "average", "_5yr_avg", "_5yr_trend")
   saveRDS(fertility_rates, paste0("input_data/fertility/fertility_rates_provisional_2020",filename_suffix,".rds"))
 }
+
+rm(list=ls())
