@@ -49,6 +49,7 @@ source('input_data_scripts/fertility/additional_births_2019-based.R')
 source("input_data_scripts/scenario_data/covid_scenario_deaths.R")
 source("input_data_scripts/scenario_data/covid_scenario_rates.R")
 source("input_data_scripts/scenario_data/migration_rates_for_2019_BPOs.R")
+source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates_gla_mye.R")
 
 #Excel templates
 dir.create("input_data/excel_templates", showWarnings = FALSE)
