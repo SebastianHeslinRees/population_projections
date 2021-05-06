@@ -26,8 +26,16 @@ ldd_unit_flow_file <- "N:/LDD/Unit flow analysis/output_data/IMA/2020_06/0_ldd_d
 # Should give us a better idea of where units were/will be actually built
 # This takes a while
 load(ldd_unit_flow_file) # ldd_development_unit_flow
+
+ldd_development_unit_flow <- ldd_development_unit_flow %>%
+  group_by(permission_id, dev_id, ssd_by, borough_ref, lsoa11cd, status_line_flow, ssd,
+           date_work_start, date_work_comp, demolition) %>% 
+  summarise(unit_line_flow = sum(unit_line_flow),
+            .groups = 'drop_last') %>% 
+  data.frame()
+
 polys_in <- st_read(perm_poly_file, layer = "ldd_polygons_clean",
-                 stringsAsFactors = FALSE)
+                    stringsAsFactors = FALSE)
 
 # Initial poly data cleaning
 polys <- polys_in %>%
@@ -38,17 +46,27 @@ polys <- polys_in %>%
 st_geometry(polys) <- "geometry"
 
 # Get the outcomes for permissions with polygons associated
-poly_outcomes <- ldd_development_unit_flow %>%
-  mutate(outcome = case_when(
-    status_line_flow == "ssd-rep" ~ "ssd",
-    # Only need to make adjustment for polys which have/could complete
-    status_line_flow %in% c("comp", "start", "sub") ~ "cont",
-    TRUE ~ "lap")) %>%
+poly_outcomes <- ldd_development_unit_flow
+
+poly_comps <- poly_outcomes %>% 
+  filter(status_line_flow == "comp",
+         demolition == FALSE)
+
+poly_demos <- poly_outcomes %>% 
+  filter(status_line_flow %in% c("comp","start"),
+         demolition == TRUE)
+
+poly_others <- setdiff(poly_outcomes, rbind(poly_comps, poly_demos)) %>% 
+  mutate(outcome = ifelse(status_line_flow == "ssd-rep", "ssd", "lap"))
+  
+poly_outcomes <- rbind(poly_comps, poly_demos) %>% 
+  mutate(outcome = "cont") %>% 
+  rbind(poly_others) %>% 
   group_by(dev_id, permission_id, outcome, demolition) %>%
   summarise(units = sum(unit_line_flow), .groups = 'drop_last') %>%
   as.data.frame() %>%
   spread(outcome, units, 0) %>%
-  mutate(cont_prop = cont / (cont + lap + ssd)) %>%
+  #mutate(cont_prop = cont / (cont + lap + ssd)) %>%
   inner_join(polys, ., by = "permission_id")
 
 # Get separate networks for demolitions and new units
@@ -90,11 +108,11 @@ for (row in 1:nrow(polys_to_adjust)) {
   perm <- polys_to_adjust[[row, "permission_id"]]
   demo <- polys_to_adjust[[row, "demolition"]]
   cont_prop <- polys_to_adjust[[row, "cont_prop"]]
-  print(perm)
+  print(paste0(row,": ",perm))
   orig_poly <- polys_to_adjust %>%
     filter(permission_id == perm) %>%
     filter(demolition == demo)
-  # Extract descendents
+  # Extract descendants
   if (demo == TRUE) {
     ssders <- distances(demo_graph, perm, mode = "out") %>%
       as.data.frame() %>%
@@ -123,8 +141,8 @@ for (row in 1:nrow(polys_to_adjust)) {
       smoothr::drop_crumbs(., units::set_units(100, m^2))
     # Compare % of units left with % of area left
     remain_area_prop <- cont_prop / (
-                             as.numeric(st_area(remain_ssded))
-                             / as.numeric(st_area(orig_poly)))
+      as.numeric(st_area(remain_ssded))
+      / as.numeric(st_area(orig_poly)))
     remain_area_prop <- ifelse(is_empty(remain_area_prop), 10,
                                remain_area_prop)
     # Only want to replace if there's a realistic area left
@@ -194,7 +212,7 @@ area_split <- new_polys %>%
   mutate(lsoa_area = as.numeric(st_area(.))) %>%
   mutate(area_prop = lsoa_area / area) %>%
   mutate(dev_id = as.integer(dev_id))
-  
+
 #There needs to be a break here I don't know why and right now I don't care
 area_split <- area_split %>% 
   data.frame() %>% 
