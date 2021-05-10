@@ -114,7 +114,7 @@ borough_units <- left_join(lsoa_units, lsoa_to_borough, by="gss_code_lsoa") %>%
   as.data.frame()
 
 #save it all
-dir.create("input_data/small_area_model", showWarnings = FALSE)
+dir.create("input_data/small_area_model/development_data/", showWarnings = FALSE)
 saveRDS(borough_units, "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
-saveRDS(ward_units, "input_data/small_area_model/ldd_backseries_dwellings_ward.rds")
-saveRDS(msoa_units, "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds")
+saveRDS(ward_units, "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds")
+saveRDS(msoa_units, "input_data/small_area_model/development_data/ldd_backseries_dwellings_msoa.rds")

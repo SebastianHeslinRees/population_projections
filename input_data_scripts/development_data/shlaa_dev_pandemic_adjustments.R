@@ -47,7 +47,7 @@ new_london <- new_trajectory %>%
 saveRDS(new_trajectory, "input_data/housing_led_model/borough_shlaa_pandemic_adjusted.rds")
 
 #constrain ward data in 2020-2024
-ward_shlaa <- readRDS("input_data/small_area_model/ward_shlaa_trajectory_2020.rds")
+ward_shlaa <- readRDS("input_data/small_area_model/development_data/ward_shlaa_trajectory_2020.rds")
 
 ward_constrain <- filter(ward_shlaa, year %in% 2020:2024) %>% 
   left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by="gss_code_ward") %>% 
@@ -61,7 +61,7 @@ ward_constrain <- filter(ward_shlaa, year %in% 2020:2024) %>%
   rbind(filter(ward_shlaa, !year %in% 2020:2024)) %>% 
   arrange(gss_code_ward, year)
 
-saveRDS(ward_constrain, "input_data/small_area_model/ward_shlaa_pandemic_adjusted.rds")
+saveRDS(ward_constrain, "input_data/small_area_model/development_data/ward_shlaa_pandemic_adjusted.rds")
 
 rm(list=ls())
 

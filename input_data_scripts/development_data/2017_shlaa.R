@@ -30,6 +30,7 @@ library(data.table)
 library(tidyr)
 
 message("shlaa development data\nignore OGRSpatialRef warnings")
+dir.create("input_data/small_area_model/development_data/", recursive = TRUE, showWarnings = FALSE)
 
 ####LARGE SITES####
 
@@ -320,8 +321,8 @@ borough_shlaa <- rbind(borough_large, borough_intense, borough_windfall) %>%
         data.frame()
 
 #Save
-saveRDS(ward_shlaa, "input_data/small_area_model/ward_shlaa_trajectory_2020.rds")
-saveRDS(msoa_shlaa, "input_data/small_area_model/msoa_shlaa_trajectory_2020.rds")
+saveRDS(ward_shlaa, "input_data/small_area_model/development_data/ward_shlaa_trajectory_2020.rds")
+saveRDS(msoa_shlaa, "input_data/small_area_model/development_data/msoa_shlaa_trajectory_2020.rds")
 saveRDS(borough_shlaa, "input_data/housing_led_model/borough_shlaa_trajectory_2020.rds")
 
 shlaa_breakdown <- left_join(borough_large, borough_intense, by = c('gss_code','year')) %>% 
@@ -338,7 +339,7 @@ shlaa_breakdown <- left_join(borough_large, borough_intense, by = c('gss_code','
         mutate(total = large_sites + intensification + windfall) %>% 
         filter(year %in% 2017:2041)
 
-clipr::write_clip(shlaa_breakdown)
+#clipr::write_clip(shlaa_breakdown)
 
 rm(list=ls())
 

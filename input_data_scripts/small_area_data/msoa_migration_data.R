@@ -26,9 +26,9 @@ msoa_int_in_male_path <- "CT0496_male_international_in_to_msoa.csv"
 msoa_int_in_female_path <- "CT0497_female_international_in_to_msoa.csv"
 
 #pre-processed msoa model inputs
-msoa_births_path <- "input_data/small_area_model/msoa_sya_births.rds"
-msoa_deaths_path <- "input_data/small_area_model/msoa_sya_deaths.rds"
-msoa_popn_path <- "input_data/small_area_model/msoa_population_estimates.rds"
+msoa_births_path <- "input_data/small_area_model/msoa_data/msoa_sya_births.rds"
+msoa_deaths_path <- "input_data/small_area_model/msoa_data/msoa_sya_deaths.rds"
+msoa_popn_path <- "input_data/small_area_model/msoa_data/msoa_population_estimates.rds"
 
 #lookup
 msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds") %>% select(-msoa_name)
@@ -311,7 +311,7 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
         select(-gss_code)
 
 #Save
-saveRDS(in_migration_characteristics, "input_data/small_area_model/msoa_in_migration_characteristics.rds")
-saveRDS(out_migration_rates, "input_data/small_area_model/msoa_out_migration_rates.rds")
+saveRDS(in_migration_characteristics, "input_data/small_area_model/msoa_data/msoa_in_migration_characteristics.rds")
+saveRDS(out_migration_rates, "input_data/small_area_model/msoa_data/msoa_out_migration_rates.rds")
 
 rm(list = ls())

@@ -7,9 +7,9 @@ message("ward adults per dwelling")
 most_recent_data_year <- 2019
 
 #Data paths
-ward_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"
-ward_communal_est_path <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-ward_ldd_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
+ward_estimates_path <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
+ward_communal_est_path <- "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds"
+ward_ldd_path <- "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds"
 
 #Load previously processed LDD, ward pop and communal est pop data
 #LDD data has been converted to total dwelling stock by ward by year
@@ -74,7 +74,7 @@ if(length(unique(adults_per_dwelling$gss_code_ward))!=625){message("Warning: Wro
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
-saveRDS(adults_per_dwelling, "input_data/small_area_model/ward_adults_per_dwelling.rds")
+saveRDS(adults_per_dwelling, "input_data/small_area_model/ward_data/ward_adults_per_dwelling.rds")
 saveRDS(revised_ward_estimates, ward_estimates_path)
 
 rm(list = ls())

@@ -50,8 +50,8 @@ msoa_births <- left_join(lsoa_births, lsoa_to_msoa, by="gss_code_lsoa") %>%
 
 if(length(unique(msoa_births$gss_code_msoa))!=983){message("Warning: Wrong number of msoas")}
 
-saveRDS(ward_births, "input_data/small_area_model/ward_births.rds")
-saveRDS(msoa_births, "input_data/small_area_model/msoa_births.rds")
+saveRDS(ward_births, "input_data/small_area_model/ward_data/ward_births.rds")
+saveRDS(msoa_births, "input_data/small_area_model/msoa_data/msoa_births.rds")
 
 #births by sex
 births_sya_ward <- lsoa_births %>% 
@@ -79,8 +79,8 @@ births_sya_msoa <- lsoa_births %>%
   select(year, gss_code, gss_code_msoa, sex, age, births) %>%
   as.data.frame() 
 
-saveRDS(births_sya_ward, "input_data/small_area_model/ward_sya_births.rds")
-saveRDS(births_sya_msoa, "input_data/small_area_model/msoa_sya_births.rds")
+saveRDS(births_sya_ward, "input_data/small_area_model/ward_data/ward_sya_births.rds")
+saveRDS(births_sya_msoa, "input_data/small_area_model/msoa_data/msoa_sya_births.rds")
 
 #deaths
 lsoa_deaths <- readRDS(lsoa_deaths_path)
@@ -104,8 +104,8 @@ msoa_deaths <- left_join(lsoa_deaths, lsoa_to_msoa, by="gss_code_lsoa") %>%
 
 if(length(unique(msoa_deaths$gss_code_msoa))!=983){message("Warning: Wrong number of msoas")}
 
-saveRDS(ward_deaths, "input_data/small_area_model/ward_deaths.rds")
-saveRDS(msoa_deaths, "input_data/small_area_model/msoa_deaths.rds")
+saveRDS(ward_deaths, "input_data/small_area_model/ward_data/ward_deaths.rds")
+saveRDS(msoa_deaths, "input_data/small_area_model/msoa_data/msoa_deaths.rds")
 
 
 #Single year ward deaths
@@ -138,7 +138,7 @@ deaths_sya_ward <- data.table::rbindlist(past_deaths) %>%
   as.data.frame() %>%
   select(year, gss_code, gss_code_ward, sex, age, deaths)
 
-saveRDS(deaths_sya_ward, "input_data/small_area_model/ward_sya_deaths.rds")
+saveRDS(deaths_sya_ward, "input_data/small_area_model/ward_data/ward_sya_deaths.rds")
 
 
 #Single year msoa deaths
@@ -168,6 +168,6 @@ deaths_sya_msoa <- data.table::rbindlist(past_deaths) %>%
   as.data.frame() %>%
   select(year, gss_code, gss_code_msoa, sex, age, deaths)
 
-saveRDS(deaths_sya_msoa, "input_data/small_area_model/msoa_sya_deaths.rds")
+saveRDS(deaths_sya_msoa, "input_data/small_area_model/msoa_data/msoa_sya_deaths.rds")
 
 rm(list = ls())

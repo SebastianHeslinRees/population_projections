@@ -5,7 +5,7 @@ message("msoa communal establishment population")
 
 #Data paths
 census_msoa_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_MSOA11.rds"
-msoa_estimates_path <- "input_data/small_area_model/msoa_population_estimates.rds"
+msoa_estimates_path <- "input_data/small_area_model/msoa_data/msoa_population_estimates.rds"
 
 #The census total population is compared to the msoa estimates at mid-year
 #Scaling factors are derived to convert the census population
@@ -56,6 +56,6 @@ if(length(unique(msoa_ce_by_sya$gss_code_msoa))!=983){message("Warning: Wrong nu
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
-saveRDS(msoa_ce_by_sya, "input_data/small_area_model/msoa_communal_establishment_population.rds")
+saveRDS(msoa_ce_by_sya, "input_data/small_area_model/msoa_data/msoa_communal_establishment_population.rds")
 
 rm(list = ls())

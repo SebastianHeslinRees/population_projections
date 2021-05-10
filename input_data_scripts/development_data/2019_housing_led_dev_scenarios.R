@@ -164,10 +164,10 @@ saveRDS(london_plan_trajectory, "input_data/housing_led_model/borough_london_pla
 #-------------------------------------------------------------------------------
 
 #Wards
-ldd_ward <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_ward.rds") %>% 
+ldd_ward <- readRDS("input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds") %>% 
   filter(year > 2011)
 
-ward_shlaa <- readRDS("input_data/small_area_model/ward_shlaa_trajectory_2020.rds") %>% 
+ward_shlaa <- readRDS("input_data/small_area_model/development_data/ward_shlaa_trajectory_2020.rds") %>% 
   left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by = "gss_code_ward") %>% 
   filter(year %in% 2020:2041) %>% 
   group_by(year, gss_code) %>%
@@ -206,8 +206,8 @@ ward_london_plan <- left_join(ward_shlaa, london_plan_trajectory, by = c("gss_co
   data.frame()
 
 #Save
-saveRDS(ward_savills, "input_data/small_area_model/ward_2019_based_savills.rds")
-saveRDS(ward_ldd_mean, "input_data/small_area_model/ward_2019_based_low.rds")
-saveRDS(ward_london_plan, "input_data/housing_led_model/ward_london_plan_trajectory.rds")
+saveRDS(ward_savills, "input_data/small_area_model/development_data/ward_2019_based_savills.rds")
+saveRDS(ward_ldd_mean, "input_data/small_area_model/development_data/ward_2019_based_ldd_mean.rds")
+saveRDS(ward_london_plan, "input_data/small_area_model/development_data/ward_london_plan_trajectory.rds")
 
 rm(list=ls())

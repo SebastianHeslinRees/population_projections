@@ -7,21 +7,21 @@ first_proj_yr <- 2019
 last_proj_yr <- 2050
 
 dev_trajectory_path <- "input_data/housing_led_model/borough_shlaa_trajectory.rds"
-small_area_dev_trajectory_path <- "input_data/small_area_model/msoa_shlaa_trajectory.rds"
+small_area_dev_trajectory_path <- "input_data/small_area_model/msoa_data/msoa_shlaa_trajectory.rds"
 
-small_area_popn_estimates_path <- "input_data/small_area_model/msoa_population_estimates.rds"
-small_area_communal_est_popn_path  <- "input_data/small_area_model/msoa_communal_establishment_population.rds"
-small_area_births_backseries_path <- "input_data/small_area_model/msoa_births.rds"
-small_area_deaths_backseries_path <- "input_data/small_area_model/msoa_deaths.rds"
-small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds"
+small_area_popn_estimates_path <- "input_data/small_area_model/msoa_data/msoa_population_estimates.rds"
+small_area_communal_est_popn_path  <- "input_data/small_area_model/msoa_data/msoa_communal_establishment_population.rds"
+small_area_births_backseries_path <- "input_data/small_area_model/msoa_data/msoa_births.rds"
+small_area_deaths_backseries_path <- "input_data/small_area_model/msoa_data/msoa_deaths.rds"
+small_area_ldd_data_path <- input_data/small_area_model/development_data/ldd_backseries_dwellings_msoa.rds"
 
-small_area_births_sya_path <- "input_data/small_area_model/msoa_sya_births.rds"
-small_area_deaths_sya_path <- "input_data/small_area_model/msoa_sya_deaths.rds"
+small_area_births_sya_path <- "input_data/small_area_model/msoa_data/msoa_sya_births.rds"
+small_area_deaths_sya_path <- "input_data/small_area_model/msoa_data/msoa_sya_deaths.rds"
 
-adults_per_dwelling_path <- "input_data/small_area_model/msoa_adults_per_dwelling.rds"
+adults_per_dwelling_path <- "input_data/small_area_model/msoa_data/msoa_adults_per_dwelling.rds"
 small_area_to_district_path <- "input_data/lookup/msoa_to_district.rds"
-out_migration_rates_path <- "input_data/small_area_model/msoa_out_migration_rates.rds"
-in_migration_characteristics_path <- "input_data/small_area_model/msoa_in_migration_characteristics.rds"
+out_migration_rates_path <- "input_data/small_area_model/msoa_data/msoa_out_migration_rates.rds"
+in_migration_characteristics_path <- "input_data/small_area_model/msoa_data/msoa_in_migration_characteristics.rds"
 
 external_trend_path <- "outputs/trend/2018/2018_central_19-11-13_2056/"
 

@@ -19,9 +19,9 @@ ward_dom_in_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0354_lo
 ward_in_migration_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/CT0409_london_wards_in_migration_inc_international.csv"
 
 #pre-processed ward model inputs
-ward_births_path <- "input_data/small_area_model/ward_sya_births.rds"
-ward_deaths_path <- "input_data/small_area_model/ward_sya_deaths.rds"
-ward_popn_path <- "input_data/small_area_model/ward_population_estimates.rds"
+ward_births_path <- "input_data/small_area_model/ward_data/ward_sya_births.rds"
+ward_deaths_path <- "input_data/small_area_model/ward_data/ward_sya_deaths.rds"
+ward_popn_path <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
 
 #lookup
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>%
@@ -227,7 +227,7 @@ in_migration_characteristics <- left_join(domestic_in, international_in,
         as.data.frame()
 
 #Save
-saveRDS(in_migration_characteristics, "input_data/small_area_model/ward_in_migration_characteristics.rds")
-saveRDS(out_migration_rates, "input_data/small_area_model/ward_out_migration_rates.rds")
+saveRDS(in_migration_characteristics, "input_data/small_area_model/ward_data/ward_in_migration_characteristics.rds")
+saveRDS(out_migration_rates, "input_data/small_area_model/ward_data/ward_out_migration_rates.rds")
 
 rm(list = ls())
