@@ -181,7 +181,7 @@ rm(large_sites, large_input, total_units)
 # The other element to small sites is the non-specific windfall development
 # This is a borough-wide number and can't be distributed to ward or msoa
 # Its therefore only added into the borough trajectory
-# This data has provied by planning in 2 files: 1 for TH, Hackney, Islington and
+# This data has provided by planning in 2 files: 1 for TH, Hackney, Islington and
 # one for everything else
 
 # All small sites data is one number which is the same in each year of the projection
@@ -194,6 +194,7 @@ oa_to_ward <- readRDS("input_data/lookup/oa_to_ward.rds")
 msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds")
 
 small_intensification <- fread(paste0(shlaa_data_loc,"/Small_Sites_Intensification.csv")) %>%
+        as.data.frame() %>% 
         setnames(c("gss_code_oa","intense")) %>%
         left_join(oa_to_msoa, by="gss_code_oa") %>%
         left_join(oa_to_ward, by="gss_code_oa") %>%
@@ -203,19 +204,19 @@ small_intensification <- fread(paste0(shlaa_data_loc,"/Small_Sites_Intensificati
 #aggregate to ward
 ward_intense <- small_intensification %>%
         group_by(gss_code_ward) %>%
-        summarise(units = sum(intense)) %>%
+        summarise(units = sum(intense), .groups = 'drop_last') %>%
         as.data.frame()
 
 #aggregate to msoa
 msoa_intense <- small_intensification %>%
         group_by(gss_code_msoa) %>%
-        summarise(units = sum(intense)) %>%
+        summarise(units = sum(intense), .groups = 'drop_last') %>%
         as.data.frame()
 
 #aggregate to borough
 borough_intense <- small_intensification %>%
         group_by(gss_code) %>%
-        summarise(units = sum(intense)) %>%
+        summarise(units = sum(intense), .groups = 'drop_last') %>%
         as.data.frame() 
 
 rm(small_intensification, msoa_to_district, oa_to_msoa, oa_to_ward)
@@ -225,14 +226,10 @@ rm(small_intensification, msoa_to_district, oa_to_msoa, oa_to_ward)
 #file 1 is windfalls for all boroughs except City of London and Islington
 #Standard windfall calc is for 2020-41
 
+#Remainder windfall
 small_windfall_1 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Windfall.csv")) %>%
+        data.frame() %>% 
         filter(!Borough %in% c("City of London","Islington","LLDC","OPDC")) %>%
-        select(-Borough) %>%
-        rename(units = Windfall) %>% 
-        data.frame()
-
-small_windfall_2 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Other_Windfall.csv")) %>%
-        filter(Borough %in% c("City of London","Islington")) %>%
         select(-Borough) %>%
         rename(units = Windfall) %>% 
         data.frame()
@@ -245,54 +242,72 @@ small_windfall_lldc <- data.frame(gss_code="E09000009",
                                   units=5,
                                   stringsAsFactors = F)
 
-borough_windfall <-  rbind(small_windfall_1,
-                           small_windfall_2,
-                           small_windfall_opdc,
-                           small_windfall_lldc) %>%
+small_remainder_windfall <- rbind(small_windfall_1,
+                                  small_windfall_opdc,
+                                  small_windfall_lldc) %>%
         group_by(gss_code) %>%
         summarise(units = sum(units), .groups = 'drop_last') %>%
-        as.data.frame()
+        as.data.frame() %>% 
+        mutate(year = 2020) %>% 
+        popmodules::project_forward_flat(2029) %>% 
+        select(gss_code, year, units)
 
-rm(small_windfall_1, small_windfall_2, small_windfall_opdc, small_windfall_lldc)
+#Trend windfall
+small_trend_windfall_1 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Other_Windfall.csv")) %>%
+        data.frame() %>% 
+        filter(Borough %in% c("City of London","Islington")) %>%
+        select(-Borough) %>%
+        rename(units = Windfall) %>% 
+        mutate(year = 2020) %>% 
+        popmodules::project_forward_flat(2029)
 
+small_trend_windfall_2 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Other_Windfall.csv")) %>%
+        data.frame() %>% 
+        filter(!Borough %in% c("OPDC","LLDC")) %>%
+        select(-Borough) %>%
+        rename(units = Windfall) %>% 
+        mutate(year = 2017) %>% 
+        popmodules::project_forward_flat(2041) %>% 
+        filter(!year %in% 2020:2029)
 
-# Apply the small sites intensification total to every year for 2020-2029
+small_trend_windfall <- rbind(small_trend_windfall_1,
+                              small_trend_windfall_2) %>%
+        as.data.frame() %>% 
+        select(gss_code, year, units)
 
-ward_intense <- expand.grid(gss_code_ward = london_wards$gss_code_ward,
-                            year = 2020:2029,
-                            stringsAsFactors = FALSE) %>% 
-        left_join(ward_intense, by = "gss_code_ward") %>% 
-        tidyr::replace_na(list(units = 0))
+rm(small_trend_windfall_1, small_trend_windfall_2, small_windfall_opdc, small_windfall_lldc)
 
-msoa_intense <- expand.grid(gss_code_msoa = london_msoas$gss_code_msoa,
-                             year = 2020:2029,
-                             stringsAsFactors = FALSE)  %>% 
-        left_join(msoa_intense, by = "gss_code_msoa") %>% 
-        tidyr::replace_na(list(units = 0))
+ward_intense <- ward_intense %>% 
+        mutate(year = 2020) %>% 
+        popmodules::project_forward_flat(2029) %>% 
+        select(gss_code_ward, year, units)
 
-borough_intense <- expand.grid(gss_code = borough_intense$gss_code,
-                              year = 2020:2029,
-                              stringsAsFactors = FALSE)  %>% 
-        left_join(borough_intense, by="gss_code") %>% 
-        tidyr::replace_na(list(units = 0))
+msoa_intense <- msoa_intense %>% 
+        mutate(year = 2020) %>% 
+        popmodules::project_forward_flat(2029) %>% 
+        select(gss_code_msoa, year, units)
 
+borough_intense <- borough_intense %>% 
+        mutate(year = 2020) %>% 
+        popmodules::project_forward_flat(2029) %>% 
+        select(gss_code, year, units)
 
-#windfall is for years 2030-2041
-
-borough_windfall <- expand.grid(gss_code = borough_intense$gss_code,
-                                year = 2030:2041,
-                                stringsAsFactors = FALSE)  %>% 
-        left_join(borough_windfall, by="gss_code") %>% 
-        tidyr::replace_na(list(units = 0))
-
+borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall)
 
 #Join the small sites data to the large sites data
 #Add zeros for years 2012-2019 and 2042-2050
 #include 2011 in borough file
 ward_shlaa <- rbind(ward_large, ward_intense) %>%
+        filter(!gss_code_ward %in% london_wards$gss_code_ward) %>% 
+        popmodules::aggregate_city_wards("units") %>% 
+        rbind(ward_large, ward_intense) %>% 
+        filter(gss_code_ward %in% london_wards$gss_code_ward) %>%
         group_by(year, gss_code_ward) %>%
         summarise(units = sum(units), .groups = 'drop_last') %>%
-        data.frame()
+        data.frame() %>% 
+        tidyr::complete(year = 2012:2050,
+                        gss_code_ward = unique(london_wards$gss_code_ward),
+                        fill = list(units = 0))
 
 msoa_shlaa <- rbind(msoa_large, msoa_intense) %>%
         group_by(year, gss_code_msoa) %>%
@@ -308,6 +323,22 @@ borough_shlaa <- rbind(borough_large, borough_intense, borough_windfall) %>%
 saveRDS(ward_shlaa, "input_data/small_area_model/ward_shlaa_trajectory_2020.rds")
 saveRDS(msoa_shlaa, "input_data/small_area_model/msoa_shlaa_trajectory_2020.rds")
 saveRDS(borough_shlaa, "input_data/housing_led_model/borough_shlaa_trajectory_2020.rds")
+
+shlaa_breakdown <- left_join(borough_large, borough_intense, by = c('gss_code','year')) %>% 
+        left_join(borough_windfall, by = c('gss_code','year')) %>% 
+        group_by(year) %>% 
+        summarise(large_sites = sum(units.x),
+                  intensification = sum(units.y),
+                  windfall = sum(units),
+                  .groups = 'drop_last') %>% 
+        data.frame() %>% 
+        tidyr::replace_na(list(large_sites = 0,
+                               intensification = 0,
+                               windfall = 0)) %>% 
+        mutate(total = large_sites + intensification + windfall) %>% 
+        filter(year %in% 2017:2041)
+
+clipr::write_clip(shlaa_breakdown)
 
 rm(list=ls())
 

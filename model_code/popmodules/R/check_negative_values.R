@@ -8,25 +8,33 @@
 #'   numeric data.
 #' @param set_to_zero Logical. When TRUE, set negative values to zero. When
 #'   FALSE return the data frame as is.
+#' @param alt_value Numeric or NULL. If `set_to_zero = TRUE` this parameter can
+#'  be used to set to a value other than zero
 #'
 #' @return The input data frame. If \code{set_to_zero} is TRUE, negative values
 #'   of \code{data_col} are set to zero.
 #'
 #' @export
 
-check_negative_values <- function(x, data_col, set_to_zero = TRUE){
+check_negative_values <- function(x, data_col, set_to_zero = TRUE, alt_value = NULL){
 
   assertthat::assert_that(data_col %in% names(x))
   assertthat::assert_that(any(c("numeric", "integer") %in% class(x[[data_col]])),
                           msg = paste("check_negative_values was passed a non-numeric column:", data_col))
 
-
+  if(set_to_zero == TRUE & !is.null(alt_value)){
+    change_value <- alt_value
+  } else {
+    change_value <- 0
+  }
+  
   ix <- x[[data_col]] < 0
-
+  
+  
   if(any(ix)) {
 
     zero_msg <- ifelse(set_to_zero == TRUE,
-                       "Setting negative values to zero",
+                       paste("Setting negative values to", change_value),
                        "Warning only, returning dataframe unchanged")
 
     n <- sum(ix)
@@ -47,7 +55,7 @@ check_negative_values <- function(x, data_col, set_to_zero = TRUE){
     }), collapse = "\n"))
 
     if(set_to_zero){
-      x[[data_col]][ix] <- 0
+      x[[data_col]][ix] <- change_value
     }
   }
 

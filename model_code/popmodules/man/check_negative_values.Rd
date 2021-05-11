@@ -4,7 +4,7 @@
 \alias{check_negative_values}
 \title{Test a column in a dataframe for negatives, optionally setting to zero}
 \usage{
-check_negative_values(x, data_col, set_to_zero = TRUE)
+check_negative_values(x, data_col, set_to_zero = TRUE, alt_value = NULL)
 }
 \arguments{
 \item{x}{A data frame.}
@@ -14,6 +14,9 @@ numeric data.}
 
 \item{set_to_zero}{Logical. When TRUE, set negative values to zero. When
 FALSE return the data frame as is.}
+
+\item{alt_value}{Numeric or NULL. If `set_to_zero = TRUE` this parameter can
+be used to set to a value other than zero}
 }
 \value{
 The input data frame. If \code{set_to_zero} is TRUE, negative values

@@ -3,6 +3,7 @@
 export(run_small_area_model)
 import(dplyr)
 import(popmodules)
+importFrom(assertthat,are_equal)
 importFrom(assertthat,assert_that)
 importFrom(data.table,fwrite)
 importFrom(data.table,rbindlist)
