@@ -94,7 +94,7 @@ rm(start_dir, large_sites_points, msoa_polygon_loc, msoa_polygons,
 
 #-------------------------------------------------------------------------------
 
-#Savills forecast 41.7k for 2020 & 43k for the period 2021-25
+#Savills forecast 41.7k for 2020 & 43k per year for the period 2021-25
 #Then distribute the difference between the new trajectory and the SHLAA
 #to the later years (2026-41)
 
