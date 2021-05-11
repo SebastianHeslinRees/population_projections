@@ -136,7 +136,7 @@ savills <- rbind(ldd_backseries,
   arrange(year, gss_code) %>% 
   data.frame()
 
-rm(adjust_2020, adjust_2021_2025, adjust_2026_2041)
+rm(adjust_2020, adjust_2021_2025, adjust_2026_2050)
 
 #-------------------------------------------------------------------------------
 
