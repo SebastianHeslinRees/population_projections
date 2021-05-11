@@ -11,7 +11,8 @@ constraint <- expand.grid(year=2000, gss_code=c("E01","E02","S03"), popn = 800, 
 
 output <- expand.grid(year=2000, age=20:21, gss_code=c("E01","E02"), sex=c("female","male"), popn = 100, scaling = 2, stringsAsFactors = FALSE) %>%
   rbind(expand.grid(year=2000, age=20:21, gss_code="S03", sex=c("female","male"), popn = 100, scaling = 1, stringsAsFactors = FALSE)) %>%
-  arrange(sex, gss_code, age)
+  arrange(sex, gss_code, age) %>% 
+  data.frame()
 
 #-------------------------------------------------------------------------
 
@@ -38,7 +39,8 @@ test_that("calculate_scaling_factors can scale up and down", {
   # but warns when the population it's trying to scale is zero
   popn_in <- mutate(popn, popn = 0)
   output_out <- mutate(popn_in, scaling = 0) %>%
-    arrange(sex, gss_code, age)
+    arrange(sex, gss_code, age) %>% 
+    data.frame()
   expect_warning(temp <- calculate_scaling_factors(popn_in,
                                                    constraint,
                                                    col_aggregation = c("year", "gss_code"),
