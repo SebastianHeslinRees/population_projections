@@ -234,3 +234,4 @@ area_split <- area_split %>%
 
 dir.create("input_data/housing_led_model", showWarnings = FALSE)
 saveRDS(area_split, "input_data/housing_led_model/lsoa_polygon_splits.rds")
+saveRDS(area_split, "Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds")
