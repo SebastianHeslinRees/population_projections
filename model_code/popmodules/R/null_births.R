@@ -43,14 +43,16 @@ null_births <- function(pop,
   validate_births_input(pop, col_aggregation, const, col_age)
   col_aggregation <- col_aggregation[ col_aggregation != col_age] # validate_births_input warns if this is necessary
   col_aggregation <- names(pop)[ names(pop) %in% col_aggregation ] # reorder to match column ordering in pop
-
+  output_cols <- c(col_aggregation, col_age, "births")
+  
   births <- dplyr::group_by_at(pop, .vars = col_aggregation) %>%
     dplyr::summarise(births = const, !!sym(col_age) := 0) %>%
-    dplyr::ungroup()
+    data.frame() %>% 
+    select_at(output_cols)
 
   validate_births_output(pop, col_aggregation, births, col_age)
 
-  births
+  return(births)
 }
 
 

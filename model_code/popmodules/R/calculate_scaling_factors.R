@@ -131,7 +131,8 @@ calculate_scaling_factors <- function(popn,
   scaling <- scaling %>%
     rename(!!col_popn := !!sym(col_popn_new)) %>%
     select(!!names(cols), scaling)  %>%
-    setNames(c(cols, "scaling"))
+    setNames(c(cols, "scaling")) %>% 
+    data.frame()
 
   return(scaling)
 }
