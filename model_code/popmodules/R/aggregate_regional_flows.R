@@ -59,15 +59,15 @@ aggregate_regional_flows <- function(domestic_flow, region_lookup, flow_col = "f
   
   inner_outer_lookup <- readRDS("input_data/lookup/inner_and_outer_london.rds")
   
-  outer_codes <- filter(inner_outer_lookup, outer == TRUE)
-  inner_codes <- filter(inner_outer_lookup, inner == TRUE)
+  outer_codes <- filter(inner_outer_lookup, outer == TRUE)$gss_code
+  inner_codes <- filter(inner_outer_lookup, inner == TRUE)$gss_code
   
   sub_regional_flow <- dtplyr::lazy_dt(domestic_flow) %>%
-    mutate(gss_out = case_when(gss_out %in% outer_codes$gss_code ~ "E13000002",
-                               gss_out %in% inner_codes$gss_code ~ "E13000001",
+    mutate(gss_out = case_when(gss_out %in% outer_codes ~ "E13000002",
+                               gss_out %in% inner_codes ~ "E13000001",
                                TRUE ~ gss_out),
-           gss_in = case_when(gss_in %in% outer_codes$gss_code ~ "E13000002",
-                              gss_in %in% inner_codes$gss_code ~ "E13000001",
+           gss_in = case_when(gss_in %in% outer_codes ~ "E13000002",
+                              gss_in %in% inner_codes ~ "E13000001",
                               TRUE ~ gss_in)) %>% 
     filter(gss_in != gss_out) %>%
     group_by(year, gss_in, gss_out, age, sex) %>%

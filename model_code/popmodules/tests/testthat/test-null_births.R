@@ -5,8 +5,9 @@ library(testthat)
 pop <- data.frame(area = c("a","b","c"), popn = 100, stringsAsFactors = FALSE)
 pop2 <- expand.grid( age=20:23, area=c("a","b","c"), sex=c("f","m"), popn = 100, stringsAsFactors = FALSE)
 
-births <- data.frame(area = c("a","b","c"), births = 0, age = 0, stringsAsFactors = FALSE)
-births2 <- expand.grid( area=c("a","b","c"), sex=c("f","m"), births = 0, age = 0, stringsAsFactors = FALSE)
+births <- data.frame(area = c("a","b","c"), age = 0, births = 0, stringsAsFactors = FALSE)
+births2 <- expand.grid( area=c("a","b","c"), sex=c("f","m"), age = 0, births = 0, stringsAsFactors = FALSE) %>% 
+  arrange(area,sex,age) %>% data.frame()
 
 
 #--------------------------------------------------------------
@@ -25,15 +26,14 @@ test_that("null_births doesn't care about the order of input aggregation columns
 
 test_that("null_births handles factors, tibbles and groups", {
   pop_in <- dplyr::mutate(pop, area=as.factor(area))
-  births_out <- dplyr::mutate(births, area=as.factor(area))
+  births_out <- dplyr::mutate(births, area=as.factor(area)) %>% data.frame()
   expect_equal(null_births(pop_in, col_aggregation = "area"), births_out)
 
   pop_in <-  dplyr::as_tibble(pop_in)
-  births_out <- dplyr::as_tibble(births_out)
   expect_equal(null_births(pop_in, col_aggregation = "area"), births_out)
 
   pop_in <-  dplyr::group_by(pop_in, area)
-  births_out <- dplyr::group_by(births_out, area)
+  births_out <- dplyr::group_by(births_out, area, age) %>% summarise(births = sum(births)) %>% data.frame()
   expect_equal(null_births(pop_in, col_aggregation = "area"), births_out)
 })
 
