@@ -9,9 +9,9 @@ gla_estimates_dir <- "Q:/Teams/D&PA/Data/population_estimates/gla_adjusted_mid_y
 
 
 # #read in data
-gla_popn <- readRDS(paste0(gla_estimates_dir, "mye_popn.rds"))
-gla_int_in <- readRDS(paste0(gla_estimates_dir, "mye_int_in.rds"))
-gla_int_out <- readRDS(paste0(gla_estimates_dir, "mye_int_out.rds"))
+gla_popn <- readRDS(paste0(gla_estimates_dir, "gla_popn.rds"))
+gla_int_in <- readRDS(paste0(gla_estimates_dir, "gla_int_in.rds"))
+gla_int_out <- readRDS(paste0(gla_estimates_dir, "gla_int_out.rds"))
 
 ons_popn <- readRDS("input_data/mye/2019/population_ons.rds")
 ons_int_in <- readRDS("input_data/mye/2019/int_in_ons.rds")
