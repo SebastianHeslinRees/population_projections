@@ -5,7 +5,7 @@ library(data.table)
 message("covid-19 mortality")
 
 #2020 = DATA To WEEK 27 (03/July/20202) - Mid Year
-#2021 = DATA TO WEEK 10 of 2021 (12/03/2021)
+#2021 = DATA TO WEEK 16 of 2021 (23/04/2021)
 
 ####UPDATE PROCESS####
 #1. Download data from ONS using 2 links below
@@ -34,18 +34,17 @@ ons_weekly_la_totals_1 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_la_calend
 ons_weekly_age_sex_3 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_age_sex_2021.csv"
 ons_weekly_la_totals_2 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_la_calendar_2021.csv"
 
-
 #national deaths sc and ni
 #https://datavis.nisra.gov.uk/vitalstatistics/weekly-deaths-dashboard.html
 #https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/weekly-and-monthly-data-on-births-and-deaths/deaths-involving-coronavirus-covid-19-in-scotland
 
-#Deaths to 21/03/21
-scottish_most_recent_week <- 65
-scottish_all_to_date <- 9897
+#Deaths to 02/05/21
+scottish_most_recent_week <- 19
+scottish_all_to_date <- 10097
 
-#Deaths to 12/03/21
-n_irish_most_recent_week <- 32
-n_irish_all_to_date <- 2871
+#Deaths to 30/04/21
+n_irish_most_recent_week <- 8
+n_irish_all_to_date <- 2957
 
 #-------------------------------------------------------------------------------
 
@@ -104,10 +103,12 @@ deaths_la_2021 <- ons_weekly_la_totals_2020 %>%
 #                    stringsAsFactors = F)) %>% 
 #   mutate(deaths = deaths * (28-max(ons_weekly_la_totals_2021$week_number)))
 
+week_no <- max(ons_weekly_la_totals_2021$week_number)
+
 rest_of_2021 <- deaths_la_2021 %>% 
   mutate(deaths1 = deaths/sum(deaths),
          deaths2 = deaths1 * uk_weekly_future_deaths,
-         deaths3 = deaths2 * (27-max(ons_weekly_la_totals_2021$week_number))) %>% 
+         deaths3 = deaths2 * (27-week_no)) %>% 
   select(gss_code, deaths = deaths3)
 
 deaths_la_2021 <- rbind(deaths_la_2021, rest_of_2021) %>%
@@ -124,7 +125,7 @@ sum(deaths_la_2021$deaths)
 sum(deaths_sex_age_2021$deaths)
 
 #tidy up
-rm(list=setdiff(ls(), c("deaths_la_2020","deaths_la_2021",
+rm(list=setdiff(ls(), c("deaths_la_2020","deaths_la_2021","week_no",
                         "deaths_sex_age_2020","deaths_sex_age_2021")))
 
 #-----------------------------------------
@@ -224,7 +225,7 @@ popmodules::validate_population(covid_deaths,
 
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 saveRDS(covid_deaths, "input_data/scenario_data/covid19_deaths.rds")
-
+saveRDS(covid_deaths, paste0("input_data/scenario_data/covid19_deaths_week_", week_no, ".rds"))
 #-------------------------------------------
 
 #Report
@@ -233,7 +234,7 @@ message(paste0("Total UK 2020 deaths: ", sum(covid_2020$deaths),"\n",
                "Total UK 2021 deaths projected: ", sum(covid_2021$deaths),"\n",
                #"Total UK 2022 deaths projected: ", sum(covid_2022$deaths),"\n",
                "Overall UK 2020-2021: ", sum(covid_deaths$upc)*-1))
-
+message(" ")
 message(paste0("Total London 2020 deaths: ", sum(filter(covid_2020, substr(gss_code, 1, 3)=="E09")$deaths),"\n",
                "Total London 2021 deaths projected: ", round(sum(filter(covid_2021, substr(gss_code, 1, 3)=="E09")$deaths),0),"\n",
                #"Total London 2022 deaths projected: ", sum(filter(covid_2022, substr(gss_code, 1, 3)=="E09")$deaths),"\n",
