@@ -42,7 +42,7 @@ comp_date <- ldd_raw %>%
          status_line_flow == "comp") %>%
   mutate(date = as.character(date_work_comp)) 
 
-#for demos completions is starts
+#for demos use start date if possible, if not then use completion date
 demos_date <- ldd_raw %>%
   filter(demolition==TRUE,
          status_line_flow %in% c("comp","start")) %>%
@@ -101,48 +101,10 @@ demos_w_polygons <- select(ldd_demos, -lsoa11cd) %>%
   right_join(polygon_split_demo, by=c("permission_id", "demolition"))
 
 demos_no_polygons <- ldd_demos %>% 
-  filter(!permission_id %in% polygon_split_comp$permission_id,
+  filter(!permission_id %in% polygon_split_demo$permission_id,
          demolition == TRUE) %>%
   mutate(area_prop = 1) %>%
   select(names(demos_w_polygons))
-
-#-------------------------------------------------------------------------------
-
-#THIS IS ALL TEMPORARY - DELETE WHEN HAPPY WITH OUTPUTS
-
-sum(is.na(comps_w_polygons$mid_year))
-sum(is.na(demos_w_polygons$mid_year))
-sum(is.na(demos_no_polygons$mid_year))
-sum(is.na(comps_no_polygons$mid_year))
-
-a <- comps_w_polygons %>% 
-  group_by(permission_id, unit_line_flow, mid_year) %>% 
-  summarise(n = sum(area_prop)) %>% 
-  data.frame() %>% 
-  filter(n >= 1.05) %>% 
-  arrange(desc(n)) %>% 
-  mutate(overcount = unit_line_flow * n)
-
-b <- demos_w_polygons %>% 
-  group_by(permission_id, unit_line_flow, mid_year) %>% 
-  summarise(n = sum(area_prop)) %>% 
-  data.frame() %>% 
-  filter(n >= 1.05) %>% 
-  arrange(desc(n)) %>% 
-  mutate(undercount = unit_line_flow * n)
-
-sum(a$overcount)
-sum(b$undercount)
-
-overcount <- group_by(a, mid_year) %>% summarise(o = sum(overcount)) %>% data.frame()
-undercount <- group_by(b, mid_year) %>% summarise(u = sum(undercount)) %>% data.frame()
-left_join(overcount, undercount, by="mid_year") %>% 
-  mutate(u = ifelse(is.na(u),0,u),
-         diff = o-u)
-
-x <- polygon_split %>% group_by(permission_id, demolition) %>%
-  summarise(total_prop = sum(area_prop)) %>%
-  filter(total_prop>=1.05)
 
 #-------------------------------------------------------------------------------
 #Bring everything together
@@ -228,3 +190,5 @@ dir.create("input_data/small_area_model", showWarnings = FALSE)
 saveRDS(borough_units, "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
 saveRDS(ward_units, "input_data/small_area_model/ldd_backseries_dwellings_ward.rds")
 saveRDS(msoa_units, "input_data/small_area_model/ldd_backseries_dwellings_msoa.rds")
+
+rm(list=ls())
