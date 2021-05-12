@@ -5,8 +5,8 @@
 
 message("2019 GLA adjusted MYE")
 
-# gla_estimates_dir <- "Q:/Teams/D&PA/Data/population_estimates/gla_adjusted_mid_year_estimates/"
-gla_estimates_dir <- "Q:/Teams/D&PA/Demography/data/adjusted_mye/"
+gla_estimates_dir <- "Q:/Teams/D&PA/Data/population_estimates/gla_adjusted_mid_year_estimates/"
+
 
 # #read in data
 gla_popn <- readRDS(paste0(gla_estimates_dir, "gla_popn.rds"))

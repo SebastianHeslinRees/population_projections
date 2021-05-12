@@ -1,10 +1,11 @@
 library(dplyr)
+library(popmodules)
 
 message('ONS 2019 MYE')
 
 data_location <- "Q:/Teams/D&PA/Data/population_estimates/ons_mid_year_estimates/current_series/mye_2019/"
 output_location <- "input_data/mye/2019/"
-dir.create(output_location)
+dir.create(output_location, recursive = TRUE)
 
 all_components <- readRDS(paste0(data_location, "mye_2019_detailed_components_of_change_(2020_geog).rds"))
 
