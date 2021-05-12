@@ -1,21 +1,36 @@
-#make sure all the correct CRAN/github packages of the correct versions are installed
+#Make sure all the correct CRAN/github packages of the correct versions are installed
 renv::restore()
 
-#install the gla models packages
+#Install the gla models packages
 devtools::install('model_code/popmodules', dependencies = FALSE)
 popmodules::install_gla_models()
 
-#copy lookups
+#-------------------------------------------------------------------------------
+
+#Create directories
 dir.create("input_data/lookup", showWarnings = FALSE, recursive = TRUE)
+dir.create("input_data/small_area_model", showWarnings = FALSE)
+dir.create("input_data/housing_led_model", showWarnings = FALSE)
 dir.create("model_code/popmodules/tests/testthat/test_data/",
            showWarnings = FALSE, recursive = TRUE)
+
+#-------------------------------------------------------------------------------
+
+#Copy lookups
+
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/model_lookups",
                        "input_data/lookup")
+
 file.copy("Q:/Teams/D&PA/Data/code_history_database/district_changes_clean.rds",
           "input_data/lookup/district_changes_clean.rds", overwrite = TRUE)
+
 file.copy("input_data/lookup/district_changes_clean.rds",
           "model_code/popmodules/tests/testthat/test_data/district_changes_clean.rds",
           overwrite = TRUE)
+
+#-------------------------------------------------------------------------------
+
+#### Trend model data
 
 #NPP & SNPP data
 source("input_data_scripts/fertility/npp_fertility_trend.R")
@@ -51,9 +66,53 @@ source("input_data_scripts/scenario_data/covid_scenario_rates.R")
 source("input_data_scripts/scenario_data/migration_rates_for_2019_BPOs.R")
 source("input_data_scripts/domestic_migration/pre-calculate_domestic_rates_gla_mye.R")
 
+#-------------------------------------------------------------------------------
+
 #Excel templates
 dir.create("input_data/excel_templates", showWarnings = FALSE)
 R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/excel_templates",
                        "input_data/excel_templates", overwrite = TRUE)
 
-message("trend and household model data complete")
+#-------------------------------------------------------------------------------
+
+#### Dev Data
+
+#Initialize script for LDD, SHLAA and dev scenario data
+#Some scripts read data from Q:/
+message("development data")
+
+#LDD Polygon splits file
+file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
+          "input_data/housing_led_model/lsoa_polygon_splits.rds", overwrite = TRUE)
+#source("input_data_scripts/development_data/calc_polygon_splits.R") #20min runtime
+
+#Dev data
+source('input_data_scripts/development_data/ldd.R')
+source('input_data_scripts/development_data/2017_shlaa.R')
+source('input_data_scripts/development_data/shlaa_dev_pandemic_adjustments.R')
+source('input_data_scripts/development_data/2019_housing_led_dev_scenarios.R')
+
+#-------------------------------------------------------------------------------
+
+#### Small area data
+
+#Needs to be done in this order as subsequent steps use data created in precedent steps
+#Some scripts read data from Q:/
+message("small area model data")
+
+source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
+source('input_data_scripts/small_area_data/births_and_deaths.R')
+
+source('input_data_scripts/small_area_data/ward_communal_establishment_population.R')
+source('input_data_scripts/small_area_data/ward_adults_per_dwelling.R')
+source('input_data_scripts/small_area_data/ward_migration_data.R')
+
+source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
+source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
+source('input_data_scripts/small_area_data/msoa_migration_data.R')
+
+#-------------------------------------------------------------------------------
+
+source('input_data_scripts/small_area_data/test_small_area_inputs.R')
+message("small area data complete")
+message("initialize complete")

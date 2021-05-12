@@ -1,40 +1,11 @@
-#Initialize script for small area model data
-#Needs to be done in this order as subsequent steps use data created in precedent steps
-#Some scripts read data from Q:/
+#Test Small Area input data
+library(assertthat)
+library(popmodules)
 library(dplyr)
-library(data.table)
-library(tidyr)
 
-message("small area model data")
-
-#Directory
-dir.create("input_data/small_area_model", showWarnings = FALSE)
-dir.create("input_data/housing_led_model", showWarnings = FALSE)
-
-#LDD Polygon splits file
-file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
-          "input_data/housing_led_model/lsoa_polygon_splits.rds", overwrite = TRUE)
-
-#source("input_data_scripts/development_data/calc_polygon_splits.R")
-source('input_data_scripts/development_data/ldd.R')
-source('input_data_scripts/development_data/2017_shlaa.R')
-source('input_data_scripts/development_data/shlaa_dev_pandemic_adjustments.R')
-source('input_data_scripts/development_data/2019_housing_led_dev_scenarios.R')
-
-source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
-source('input_data_scripts/small_area_data/births_and_deaths.R')
-
-source('input_data_scripts/small_area_data/ward_communal_establishment_population.R')
-source('input_data_scripts/small_area_data/ward_adults_per_dwelling.R')
-source('input_data_scripts/small_area_data/ward_migration_data.R')
-
-source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
-source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
-source('input_data_scripts/small_area_data/msoa_migration_data.R')
-
-
-#TESTS
 rm(list=ls())
+message("small area input data tests")
+
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds")
 
 london_wards <- filter(ward_to_district, substr(gss_code,1,3) == "E09") %>%
@@ -54,11 +25,11 @@ test_ward_inputs <- function(data_path, col_aggregation=c("gss_code_ward", "sex"
   data <- readRDS(data_path)
   
   #all wards are present
-  assertthat::assert_that(setequal(data$gss_code_ward, london_wards))	
-  popmodules::validate_population(data, col_aggregation = col_aggregation,
-                                  test_complete = TRUE,
-                                  test_unique = TRUE,
-                                  check_negative_values = TRUE)
+  assert_that(setequal(data$gss_code_ward, london_wards))	
+  validate_population(data, col_aggregation = col_aggregation,
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   
 }
 
@@ -90,11 +61,11 @@ test_msoa_inputs <- function(data_path, col_aggregation=c("gss_code_msoa", "sex"
   data <- readRDS(data_path)
   
   #all msoas are present
-  assertthat::assert_that(setequal(data$gss_code_msoa, london_msoas))	
-  popmodules::validate_population(data, col_aggregation = col_aggregation,
-                                  test_complete = TRUE,
-                                  test_unique = TRUE,
-                                  check_negative_values = TRUE)
+  assert_that(setequal(data$gss_code_msoa, london_msoas))	
+  validate_population(data, col_aggregation = col_aggregation,
+                      test_complete = TRUE,
+                      test_unique = TRUE,
+                      check_negative_values = TRUE)
   
 }
 
@@ -107,5 +78,3 @@ test_msoa_inputs(births, c("year", "gss_code_msoa", "age_group"))
 test_msoa_inputs(deaths, c("year", "gss_code_msoa", "sex", "age_group"))
 
 rm(list=ls())
-
-message("small area data complete")
