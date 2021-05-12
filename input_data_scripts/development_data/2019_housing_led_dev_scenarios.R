@@ -94,7 +94,7 @@ rm(start_dir, large_sites_points, msoa_polygon_loc, msoa_polygons,
 
 #-------------------------------------------------------------------------------
 
-#Savills forecast 41.7k for 2020 & 43k for the period 2021-25
+#Savills forecast 41.7k for 2020 & 43k per year for the period 2021-25
 #Then distribute the difference between the new trajectory and the SHLAA
 #to the later years (2026-41)
 
@@ -136,7 +136,7 @@ savills <- rbind(ldd_backseries,
   arrange(year, gss_code) %>% 
   data.frame()
 
-rm(adjust_2020, adjust_2021_2025, adjust_2026_2041)
+rm(adjust_2020, adjust_2021_2025, adjust_2026_2050)
 
 #-------------------------------------------------------------------------------
 
@@ -209,5 +209,4 @@ ward_london_plan <- left_join(ward_shlaa, london_plan_trajectory, by = c("gss_co
 saveRDS(ward_savills, "input_data/small_area_model/development_data/ward_2019_based_savills.rds")
 saveRDS(ward_ldd_mean, "input_data/small_area_model/development_data/ward_2019_based_ldd_mean.rds")
 saveRDS(ward_london_plan, "input_data/small_area_model/development_data/ward_london_plan_trajectory.rds")
-
 rm(list=ls())
