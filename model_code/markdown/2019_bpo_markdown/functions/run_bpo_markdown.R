@@ -18,9 +18,9 @@ run_bpo_markdown <- function(projection_name, shlaa=FALSE){
     scenario_2 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_2"), list.dirs(bpo_dir, recursive=FALSE))]
     scenario_3 <- list.dirs(bpo_dir, recursive=FALSE)[grepl(paste0(projection_name, "_scenario_3"), list.dirs(bpo_dir, recursive=FALSE))]
   } else {
-    scenario_1 <- "outputs/housing_led/2019/BPO_scenario_1_21-04-09_1536"
-    scenario_2 <- "outputs/housing_led/2019/BPO_scenario_2_21-04-09_1536"
-    scenario_3 <- "outputs/housing_led/2019/BPO_scenario_3_21-04-09_1536"
+    scenario_1 <- "outputs/housing_led/2019/BPO_scenario_1_21-05-12_1258"
+    scenario_2 <- "outputs/housing_led/2019/BPO_scenario_2_21-05-12_1258"
+    scenario_3 <- "outputs/housing_led/2019/BPO_scenario_3_21-05-12_1258"
   }
   #put them in a list
   x <- list('scenario 1' = scenario_1,

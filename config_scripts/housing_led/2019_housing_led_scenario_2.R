@@ -1,6 +1,6 @@
 #Housing-led scenario 2
 #Migration = BPO scenario 1
-#Development = low scenario
+#Development = ldd mean scenario (31k)
 
 library(popmodules)
 library(housingledmodel)
@@ -13,7 +13,7 @@ communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
 ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
 
-dev_trajectory_path <- "input_data/housing_led_model/borough_2019_based_low.rds"
+dev_trajectory_path <- "input_data/housing_led_model/borough_2019_based_ldd_mean.rds"
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
 
 popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
@@ -84,7 +84,7 @@ ldd_final_yr <- config_list$ldd_final_yr
 last_data_yr <- config_list$last_data_yr
 housing_led_model_path <- paste0(config_list$output_dir)
 
-small_area_dev_trajectory_path <- "input_data/small_area_model/ward_2019_based_low.rds"
+small_area_dev_trajectory_path <- "input_data/small_area_model/ward_2019_based_ldd_mean.rds"
 small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"
 small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
 small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rds"
@@ -137,7 +137,6 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          small_area_deaths_sya_path = small_area_deaths_sya_path)
 
 #---------------------
-load_gla_models()
 rm(list = setdiff(ls(), c("config_list","ward_config_list")))
 projection <- run_housing_led_model(config_list)
 ward_projection <- run_small_area_model(ward_config_list)
