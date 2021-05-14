@@ -584,27 +584,27 @@ births_ons %>%
 
 ### Mortality
 
-Projected deaths are calculated by applying mortality rates, based on past data. This method provides a projection of expected deaths based on observed mortality over the period 2015-2019. It does not account for excess deaths from Covid-19.
+Projected deaths are calculated by applying mortality rates, based on past data. This method provides a projection of expected deaths based on observed mortality over the period 2015-2019. It does not account for excess deaths from COVID-19.
 
-Deaths from Covid-19 are modelled separately and applied to the population at the end of each projection cycle.
+Deaths from COVID-19 are modelled separately and applied to the population at the end of each projection cycle.
 
-#### Covid-19 mortality
+#### COVID-19 mortality
 
-ONS data on deaths from Covid-19 by local authority and age have been used to produce single-year-of age estimates of Covid-19 mortality for the years to mid-2020 and mid-2021.
+ONS data on deaths from COVID-19 by local authority and age have been used to produce single-year-of age estimates of COVID-19 mortality for the years to mid-2020 and mid-2021.
 
-The most recent data available at the time of running the projections was to the week ending *12 March 2021*. For deaths in the remaining months of 2021 an assumed level of *150* UK deaths per week was used. Deaths from Covid-19 are not calculated separately for 2022 or beyond - it is assumed that deaths calculated through the normal application of averaged mortality rates will include deaths from Covid-19 in these years.
+The most recent data available at the time of running the projections was to the week ending *23 April 2021*. For deaths in the remaining months of 2021 an assumed level of *150* UK deaths per week was used. Deaths from COVID-19 are not calculated separately for 2022 or beyond - it is assumed that deaths calculated through the normal application of averaged mortality rates will include deaths from COVID-19 in these years.
 
 The model assumes `r nice_number(covid_ldn_2020)` deaths in London in 2020 and `r nice_number(covid_ldn_2021)` deaths in 2021.
 
 ```{r covid_table, echo = FALSE}
 DT::datatable(covid19_deaths,
-              caption = "Assumed deaths from Covid-19",
+              caption = "Assumed deaths from COVID-19",
               fillContainer = FALSE,
               options = list(lengthMenu = list(c(11, 22, -1), c(11, 22, 33)),
                              pageLength = 11))
 ```
 
-In the BPO projections workbooks deaths from Covid-19 are shown as a separate component in the 'Components of Change' tab for boroughs. Deaths from Covid-19 are not modelled at ward level and so are not included in the ward-level outputs. The impact of Covid-19 on
+In the BPO projections workbooks deaths from COVID-19 are shown as a separate component in the 'Components of Change' tab for boroughs. Deaths from COVID-19 are not modelled at ward level and so are not included in the ward-level outputs. The impact of COVID-19 on
 ward populations is applied in the model through the constraining process.
 
 
