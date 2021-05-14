@@ -160,7 +160,7 @@ mig_data <- rbind(mig_levels_1, mig_levels_2, mig_levels_3)
 
 The Borough Preferred Option (BPO) projections are a special set of housing-led population projections produced by the GLA for London local authorities and based on a housing development trajectory specified by each borough for this specific purpose.  
 
-In previous years the BPO projections have followed the release of the publicly available housing-led projections. However, the 2019-based housing-led projections are scheduled for May 2021 and so this year the BPOs precede them.
+In previous years the BPO projections have followed the release of the publicly available housing-led projections. However, the 2019-based housing-led projections are scheduled for June 2021 and so this year the BPOs precede them.
 
 ### Model operation
 
