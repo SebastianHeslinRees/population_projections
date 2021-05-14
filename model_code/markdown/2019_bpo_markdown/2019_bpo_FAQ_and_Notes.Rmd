@@ -67,9 +67,9 @@ shlaa <- readRDS("input_data/housing_led_model/borough_shlaa_pandemic_adjusted.r
 ```
 
 ```{r proj_data, echo = FALSE, include = FALSE}
-s1_path <- "outputs/housing_led/2019/BPO_scenario_1_21-05-12_1258/"
-s2_path <- "outputs/housing_led/2019/BPO_scenario_2_21-05-12_1258/"
-s3_path <- "outputs/housing_led/2019/BPO_scenario_3_21-05-12_1258/"
+s1_path <- paste0(list.files(path="outputs/housing_led/2019/", pattern= "BPO_scenario_1", full.names = TRUE),"/")
+s2_path <- paste0(list.files(path="outputs/housing_led/2019/", pattern= "BPO_scenario_2", full.names = TRUE),"/")
+s3_path <- paste0(list.files(path="outputs/housing_led/2019/", pattern= "BPO_scenario_3", full.names = TRUE),"/")
 
 popn <- rbind(
   readRDS(paste0(s1_path,"population.rds")) %>% 
