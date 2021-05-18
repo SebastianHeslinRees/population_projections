@@ -22,6 +22,8 @@
 #' @import dplyr
 #' @importFrom tibble enframe
 #' @importFrom tidyr unnest
+#' 
+#' @export
 
 constrain_to_hma <- function(popn, constraint, hma_list,
                              col_aggregation = c("year","hma","sex","age"),
