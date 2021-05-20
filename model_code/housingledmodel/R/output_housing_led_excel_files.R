@@ -1,4 +1,4 @@
-#' Create the BPO excel output
+#' Create the 2019-based projection excel output
 #' 
 #' Process population, components and development data and place it into an
 #' Excel template.
@@ -16,7 +16,7 @@
 #' @export
 
 output_housing_led_excel_file <- function(data, output_dir, projection_name,
-                                          popn_adjustment_path, dev_trajectory_path,
+                                          popn_adjustment_path,
                                           file_suffix = "_2019.xlsx"){
   
   prep_data <- function(x, col_aggregation = c("gss_code", "borough", "sex", "age")){
@@ -43,10 +43,7 @@ output_housing_led_excel_file <- function(data, output_dir, projection_name,
       as.data.frame()
     
     return(rbind(y,z))
-    
-    x <- filter(a, substr(gss_code,1,3)=="E09") %>% 
-      arrange(gss_code, year, sex, age)
-    
+
   }
   
   persons <- data[["persons"]] %>% prep_data()
@@ -59,24 +56,8 @@ output_housing_led_excel_file <- function(data, output_dir, projection_name,
   
   names(components) <- stringr::str_replace_all(names(components), "_", " ")
   
-  assumed_dev_dataframe <- readRDS(dev_trajectory_path) %>%
-    as.data.frame() %>% 
-    filter(year > 2011) %>% 
-    mutate(units = round(units,0)) %>% 
-    left_join(unique(select(persons, gss_code, borough)), by= "gss_code") %>% 
-    tidyr::pivot_wider(names_from = "year", values_from = "units") %>% 
-    as.data.frame() %>% 
-    prep_data(col_aggregation = c("gss_code","borough"))
-  
-  stock_dataframe <- readRDS(dev_trajectory_path) %>%
-    as.data.frame() %>% 
-    group_by(gss_code) %>% 
-    mutate(units = round(cumsum(units),0)) %>% 
-    data.frame() %>% 
-    left_join(unique(select(persons, gss_code, borough)), by= "gss_code") %>% 
-    tidyr::pivot_wider(names_from = "year", values_from = "units") %>% 
-    as.data.frame() %>% 
-    prep_data(col_aggregation = c("gss_code","borough"))
+  assumed_dev_dataframe <- data.table::fread(paste0(output_dir,"csv/assumed_dev.csv"), header = TRUE)
+  stock_dataframe <- data.table::fread(paste0(output_dir,"csv/housing_stock.csv"), header = TRUE)
   
   wb <- xlsx::loadWorkbook("input_data/excel_templates/housing_led_2019_based_template.xlsx")
   wb_sheets<- xlsx::getSheets(wb)

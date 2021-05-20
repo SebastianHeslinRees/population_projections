@@ -145,5 +145,4 @@ output_housing_led_excel_file(ward_projection[["csvs"]],
                               config_list$output_dir,
                               config_list$projection_name,
                               config_list$popn_adjustment_path,
-                              config_list$dev_trajectory_path,
                               file_suffix = "_2019.xlsx")
