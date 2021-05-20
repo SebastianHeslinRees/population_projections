@@ -159,7 +159,7 @@ output_housing_led_projection <- function(projection, output_dir,
   # 'value' so we can rbind them
   for(x in names(projection)){
     nm <- last(names(projection[[x]]))
-    if(x %in% c("population","births","deaths","int_out","int_in","dom_out","dom_in")){
+    if(x %in% c("population","births","deaths","int_out","int_in","dom_out","dom_in","upc")){
       components[[x]] <- rename(projection[[x]], value := !!sym(nm)) %>%
         mutate(component = nm) %>%
         filter(substr(gss_code,1,3)=="E09")%>%
@@ -172,16 +172,17 @@ output_housing_led_projection <- function(projection, output_dir,
     }
   }
   
-
   components <- data.table::rbindlist(components, use.names = TRUE) %>%
     london_totals(data_col = "value") %>%
     tidyr::pivot_wider(names_from = component, values_from = value) %>%
-    mutate(int_net = round(int_in - int_out, 2),
+    mutate(covid_deaths = ifelse(is.na(upc), 0, upc*-1),
+           dom_in = dom_in + covid_deaths,
+           int_net = round(int_in - int_out, 2),
            dom_net = round(dom_in - dom_out, 2),
-           total_change = round(births - deaths + int_net + dom_net, 2),
+           total_change = round(births - deaths + int_net + dom_net - covid_deaths, 2),
            borough = gss_name) %>%
     select(gss_code, borough, year, popn, births, deaths, int_in, int_out, int_net,
-           dom_in, dom_out, dom_net, total_change) %>%
+           dom_in, dom_out, dom_net, covid_deaths, total_change) %>%
     arrange(gss_code, year) %>%
     order_gss_with_london_total_first()
   
