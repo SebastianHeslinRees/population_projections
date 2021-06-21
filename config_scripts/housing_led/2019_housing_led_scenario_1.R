@@ -22,7 +22,7 @@ constrain_projection <- F
 
 hma_list <- list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33)))
 first_proj_yr <- 2020
-last_proj_yr <- 2022#2050
+last_proj_yr <- 2050
 ahs_cap_year <- 2020
 ahs_method <- 0.8
 

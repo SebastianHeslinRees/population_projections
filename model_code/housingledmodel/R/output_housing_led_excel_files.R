@@ -3,7 +3,7 @@
 #' Process population, components and development data and place it into an
 #' Excel template.
 #'
-#' @param data The \code{[['csv']]} element from a ward projection
+#' @param data The \code{[['csvs']]} element from a ward projection
 #' @param output_dir The directory in which to save the Excel file
 #' @param projection_name The name of the output Excel file
 #' @param popn_adjustment_path path to the population adjustment RDS file
@@ -12,6 +12,7 @@
 #' @import xlsx
 #' @import dplyr
 #' @importFrom tidyr pivot_longer
+#' @importFrom data.table fread
 #' 
 #' @export
 
@@ -56,8 +57,8 @@ output_housing_led_excel_file <- function(data, output_dir, projection_name,
   
   names(components) <- stringr::str_replace_all(names(components), "_", " ")
   
-  assumed_dev_dataframe <- data.table::fread(paste0(output_dir,"csv/assumed_dev.csv"), header = TRUE)
-  stock_dataframe <- data.table::fread(paste0(output_dir,"csv/housing_stock.csv"), header = TRUE)
+  assumed_dev_dataframe <- fread(paste0(output_dir,"csv/assumed_dev.csv"), header = TRUE)
+  stock_dataframe <- fread(paste0(output_dir,"csv/housing_stock.csv"), header = TRUE)
   
   wb <- xlsx::loadWorkbook("input_data/excel_templates/housing_led_2019_based_template.xlsx")
   wb_sheets<- xlsx::getSheets(wb)
