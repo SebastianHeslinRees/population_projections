@@ -72,12 +72,12 @@ new_not_aylesbury <- ward_estimates %>%
   group_by(gss_code, year, sex, age) %>%
   summarise(not_popn = sum(popn), .groups = 'drop_last') %>%
   as.data.frame() %>%
-  left_join(aylesbury_popn, by = c("year","sex","age")) %>% 
+  left_join(aylesbury_popn, by = c("gss_code", "year", "sex", "age")) %>% 
   mutate(new_not_aylesbury = not_popn - popn) %>% 
-  select(-not_popn, -popn)
+  select(-not_popn, -popn, -gss_code_ward)
 
 scaling <- left_join(not_aylesbury, new_not_aylesbury,
-                     by = c("year","sex","age")) %>% 
+                     by = c("gss_code", "year", "sex", "age")) %>% 
   mutate(scaling = new_not_aylesbury / not_aylesbury) %>% 
   select(year, sex, age, scaling)
 
