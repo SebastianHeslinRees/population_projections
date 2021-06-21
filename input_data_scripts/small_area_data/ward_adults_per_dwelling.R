@@ -58,17 +58,41 @@ aylesbury_popn <- filter(base_household_adults, gss_code_ward == "E05000541") %>
   filter(year >= 2011) %>%
   select(names(ward_estimates))
 
-revised_ward_estimates <- filter(ward_estimates, gss_code_ward == "E05000541" & year < 2011) %>%
-  rbind(aylesbury_popn) %>%
-  rbind(filter(ward_estimates, gss_code_ward != "E05000541"))
+# Scale so borough totals are consistent
 
-#Some data checks - delete when happy
-# test <- adults_per_dwelling %>%
-#   group_by(gss_code_ward) %>%
-#   mutate(change = adults_per_dwelling - lag(adults_per_dwelling))
-# summary(test$change)
-# 
-# test_2 <- filter(test, sqrt(change^2) > 0.1) %>% arrange(gss_code_ward, year) %>% View()
+not_aylesbury <- ward_estimates  %>%
+  filter(gss_code == "E09000028", year >= 2011) %>% 
+  filter(gss_code_ward != "E05000541") %>% 
+  group_by(gss_code, year, sex, age) %>%
+  summarise(not_aylesbury = sum(popn), .groups = 'drop_last') %>%
+  as.data.frame()
+
+new_not_aylesbury <- ward_estimates %>% 
+  filter(gss_code == "E09000028", year >= 2011) %>% 
+  group_by(gss_code, year, sex, age) %>%
+  summarise(not_popn = sum(popn), .groups = 'drop_last') %>%
+  as.data.frame() %>%
+  left_join(aylesbury_popn, by = c("gss_code", "year", "sex", "age")) %>% 
+  mutate(new_not_aylesbury = not_popn - popn) %>% 
+  select(-not_popn, -popn, -gss_code_ward)
+
+scaling <- left_join(not_aylesbury, new_not_aylesbury,
+                     by = c("gss_code", "year", "sex", "age")) %>% 
+  mutate(scaling = new_not_aylesbury / not_aylesbury) %>% 
+  select(year, sex, age, scaling)
+
+scaled <-  ward_estimates  %>%
+  filter(gss_code == "E09000028", year >= 2011) %>% 
+  filter(gss_code_ward != "E05000541") %>% 
+  left_join(scaling, by = c("year","sex","age")) %>% 
+  mutate(popn = popn * scaling) %>% 
+  select(-scaling)
+
+revised_ward_estimates <- filter(ward_estimates, gss_code != "E09000028" | year < 2011) %>%
+  rbind(aylesbury_popn, scaled) 
+
+testthat::expect_equal(nrow(revised_ward_estimates), nrow(ward_estimates))
+testthat::expect_equal(sum(revised_ward_estimates$popn), sum(ward_estimates$popn))
 
 if(length(unique(adults_per_dwelling$gss_code_ward))!=625){message("Warning: Wrong number of wards")}
 
