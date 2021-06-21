@@ -14,8 +14,8 @@
 #'   data to be aggregated. Defaults to last column of input dataframe.
 #' @param fun List. Function to be applied in aggregating data. Passed to the
 #'   .funs argument of \code{dplyr::summarise_all}. Default \code{list(sum)}.
-#' @param recode_to_year Numeric. Conform to geography in which year. Default
-#'   \code{2013} (i.e. census geography).
+#' @param recode_to_year Numeric. Conform to geography in which year. Must be one of
+#'   \code{2009,2012,2013,2018,2019,2020,2021} (2013 is census geography).
 #' @param aggregate_data Logical. If set to true multiple instances of the same
 #'   gss code will be aggregated using the function specified in \code{fun} parameter.
 #'   Default to \code{TRUE}.
@@ -37,7 +37,7 @@ recode_gss_codes <- function(df_in,
                              col_geog="gss_code",
                              data_cols = last(names(df_in)),
                              fun = list(sum),
-                             recode_to_year = 2013,
+                             recode_to_year,
                              aggregate_data = TRUE,
                              recode_gla_codes = FALSE,
                              code_changes_path = "input_data/lookup/district_changes_clean.rds"){
@@ -56,10 +56,10 @@ recode_gss_codes <- function(df_in,
   }
   
   #prepare recoding
-  recode_years <- c(2009,2012,2013,2018,2019,2020)
+  recode_years <- c(2009,2012,2013,2018,2019,2020,2021)
   assertthat::assert_that(recode_to_year %in% recode_years,
                           msg=paste("recode_to_year variable must be one of",
-                                    2009,2012,2013,2018,2019,2020))
+                                    2009,2012,2013,2018,2019,2020,2021))
   
   recode_merges <- list()
   recode_name_changes <- list()
@@ -67,12 +67,12 @@ recode_gss_codes <- function(df_in,
   code_changes <- readRDS(code_changes_path) %>%
     select(changed_to_code, changed_from_code, year, split, merge)
   
-  #splits
+  #### Splits
   #there have thus far been 2 splits, both in 2013
   #both were minor alterations to boundaries
   #northumberland = 1 bungalow
   #east hertfordshire = part of a row of houses
-  #both can effectivley be treated as code changes with no transer of
+  #both can effectively be treated as code changes with no tranfser of
   #population.
   #Therefore ignore E08000020 to E06000057
   #and ignore E07000097 to E06000243
@@ -82,7 +82,7 @@ recode_gss_codes <- function(df_in,
     filter(!(changed_from_code == "E07000097" & changed_to_code == "E07000243"))
   
   #for each year make the changes a named vector inside a list
-  #the x=X is necessary becuase the vector must not be empty
+  #the x=X is necessary because the vector must not be empty
   for(yr in recode_years){
     
     recode_merges[[yr]] <- filter(code_changes, year == yr,
@@ -98,13 +98,6 @@ recode_gss_codes <- function(df_in,
     recode_name_changes[[yr]] <- c(setNames(as.character(recode_name_changes[[yr]]$changed_to_code),
                                             recode_name_changes[[yr]]$changed_from_code), "x"="X")
   }
-  
-  #april 2020 changes - not yet in code history database
-  recode_merges[[2020]] <- c("E07000004" = "E06000060", #Aylesbury Vale => Buckinghamshire
-                             "E07000005" = "E06000060", #Chiltern => Buckinghamshire
-                             "E07000006" = "E06000060", #South Bucks => Buckinghamshire
-                             "E07000007" = "E06000060") #Wycombe => Buckinghamshire
-  recode_name_changes[[2020]] <- c("x" = "X")
   
   recode_years <- recode_years[recode_years <= recode_to_year]
 
