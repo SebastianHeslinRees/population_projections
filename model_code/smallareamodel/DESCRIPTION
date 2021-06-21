@@ -20,6 +20,7 @@ Imports:
     dtplyr,
     tidyr,
     utils,
-    loggr
+    loggr,
+    stringr
 Suggests:
     testthat
