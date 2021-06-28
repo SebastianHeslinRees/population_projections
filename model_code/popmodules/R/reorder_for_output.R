@@ -1,19 +1,17 @@
 #' Reorder a dataframe by geographies for output
 #'
-#' Reorders a data frame to put national GSS codes first, followed by regional,
-#' then local authorities. Uses the file in
-#' \code{input_data/lookup/output_order.rds} to reorder by default.
+#' Sorts a data frame to put gss codes in a specified order. Codes are sorted
+#' in the first instance by the type of geographic entity (eg. nation, region, district)
+#' and the alphabetically within those groups.
 #'
 #' @param df A data frame.
 #' @param gss_col A string containing the name of the column with gss codes.
 #'   Default "gss_code".
-#' @param path_to_reorder A string with a path to a file with data to reorder
-#'   by. Default \code{"input_data/lookup/output_order.rds"}. Must contain a
-#'   column matching \code{gss_col} and a column named \code{output_order}.
-#' @param desc Logical. Reverse the order.
+#' @param order A character string of the gss code geographic identifiers
+#'   (i.e. the first 3 characters of the gss code) to determine the order of
+#'   sorting. Default c("E92","N92","S92","W92","E12","S12","E06","E07","E08","E09","W06").
 #' 
-#' @return The input data frame, reordered by the rankings in the file given by
-#'   \code{path_to_reorder}.
+#' @return The input data frame, reordered by the rankings in the order parameter
 #'   
 #' @import dplyr
 #' @export
@@ -21,18 +19,21 @@
 
 reorder_for_output <- function(df,
                                gss_col = "gss_code",
-                               path_to_reorder = "input_data/lookup/output_order.rds",
-                               desc = FALSE) {
+                               order = NULL) {
   
-  output_order <- readRDS(path_to_reorder)
-  
-  if(desc) {
-    output_order <- output_order %>% 
-      mutate(output_order = max(output_order) - output_order)
+  if(!gss_col %in% names(df)){
+    message(paste("In reorder_for_output, the column", gss_col, "is not in the dataframe. Returning dataframe unsorted."))
+    return(df)
   }
   
-  df %>%
-    left_join(output_order, by = gss_col) %>%
-    arrange(output_order) %>%
-    select(-output_order)
+  if(is.null(order)){
+    order <- c("E92","N92","S92","W92","E12","S12","E06","E07","E08","E09","W06")
+  }
+  
+  df %>% 
+    mutate(gss_factor = !!sym(gss_col)) %>% 
+    mutate(gss_factor = substr(gss_factor,1,3)) %>% 
+    arrange(factor(gss_factor, levels = order), !!gss_col) %>% 
+    select(-gss_factor)
+  
 }
