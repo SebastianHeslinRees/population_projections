@@ -2,7 +2,7 @@
 #'
 #' Sorts a data frame to put gss codes in a specified order. Codes are sorted
 #' in the first instance by the type of geographic entity (eg. nation, region, district)
-#' and the alphabetically within those groups.
+#' and then alphabetically within those groups.
 #'
 #' @param df A data frame.
 #' @param gss_col A string containing the name of the column with gss codes.
