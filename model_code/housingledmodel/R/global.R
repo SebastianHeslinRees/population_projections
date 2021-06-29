@@ -45,5 +45,10 @@ globalVariables(c(
   'rate',
   'trend_core',
   'full',
-  'short_name'
+  'short_name',
+  'upc',
+  'covid_deaths',
+  'migration',
+  'scenario',
+  'resource_title'
   ))
