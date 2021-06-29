@@ -70,7 +70,7 @@ expect_2019 <- expect_2018 %>%
   data.frame()
 
 expect_2020 <- expect_2019 %>% 
-  left_join(code_changes_2019, by=c("gss_code"="changed_from_code")) %>%
+  left_join(code_changes_2020, by=c("gss_code"="changed_from_code")) %>%
   mutate(gss_code = ifelse(is.na(changed_to_code), gss_code, changed_to_code)) %>% 
   group_by(gss_code) %>%
   summarise(value = sum(value), .groups = 'drop_last') %>%
@@ -87,11 +87,7 @@ expect_2_vars <- mutate(expect_2020, value_2=value)
 output_2_vars <- mutate(df_1, value_2 = value) %>% 
   recode_gss_codes(data_cols = c("value","value_2"), recode_to_year = 2020, code_changes_path = code_changes_path)
 
-expect_mean <- code_changes %>%
-  select(changed_to_code) %>%
-  rename(gss_code = changed_to_code) %>% 
-  unique() %>%
-  filter(gss_code != "E06000048") %>% 
+expect_mean <- expect_2020 %>%
   mutate(value = 5) %>% 
   arrange(gss_code)
 
@@ -120,3 +116,4 @@ test_that("recode_gss_codes produces the expected output", {
 test_that("recode_gss_codes produces the expected output", {
   expect_equivalent(expect_mean, output_mean)
 })
+

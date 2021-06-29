@@ -9,7 +9,7 @@ recode_gss_codes(
   col_geog = "gss_code",
   data_cols = last(names(df_in)),
   fun = list(sum),
-  recode_to_year = 2013,
+  recode_to_year,
   aggregate_data = TRUE,
   recode_gla_codes = FALSE,
   code_changes_path = "input_data/lookup/district_changes_clean.rds"
@@ -27,8 +27,8 @@ data to be aggregated. Defaults to last column of input dataframe.}
 \item{fun}{List. Function to be applied in aggregating data. Passed to the
 .funs argument of \code{dplyr::summarise_all}. Default \code{list(sum)}.}
 
-\item{recode_to_year}{Numeric. Conform to geography in which year. Default
-\code{2013} (i.e. census geography).}
+\item{recode_to_year}{Numeric. Conform to geography in which year. Must be one of
+\code{2009,2012,2013,2018,2019,2020,2021} (2013 is census geography).}
 
 \item{aggregate_data}{Logical. If set to true multiple instances of the same
 gss code will be aggregated using the function specified in \code{fun} parameter.
