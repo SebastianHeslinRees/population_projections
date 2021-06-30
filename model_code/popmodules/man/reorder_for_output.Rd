@@ -4,12 +4,7 @@
 \alias{reorder_for_output}
 \title{Reorder a dataframe by geographies for output}
 \usage{
-reorder_for_output(
-  df,
-  gss_col = "gss_code",
-  path_to_reorder = "input_data/lookup/output_order.rds",
-  desc = FALSE
-)
+reorder_for_output(df, gss_col = "gss_code", order = NULL)
 }
 \arguments{
 \item{df}{A data frame.}
@@ -17,18 +12,15 @@ reorder_for_output(
 \item{gss_col}{A string containing the name of the column with gss codes.
 Default "gss_code".}
 
-\item{path_to_reorder}{A string with a path to a file with data to reorder
-by. Default \code{"input_data/lookup/output_order.rds"}. Must contain a
-column matching \code{gss_col} and a column named \code{output_order}.}
-
-\item{desc}{Logical. Reverse the order.}
+\item{order}{A character string of the gss code geographic identifiers
+(i.e. the first 3 characters of the gss code) to determine the order of
+sorting. Default c("E92","N92","S92","W92","E12","S12","E06","E07","E08","E09","W06").}
 }
 \value{
-The input data frame, reordered by the rankings in the file given by
-  \code{path_to_reorder}.
+The input data frame, reordered by the rankings in the order parameter
 }
 \description{
-Reorders a data frame to put national GSS codes first, followed by regional,
-then local authorities. Uses the file in
-\code{input_data/lookup/output_order.rds} to reorder by default.
+Sorts a data frame to put gss codes in a specified order. Codes are sorted
+in the first instance by the type of geographic entity (eg. nation, region, district)
+and then alphabetically within those groups.
 }
