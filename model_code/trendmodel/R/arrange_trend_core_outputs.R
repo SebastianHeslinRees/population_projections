@@ -72,7 +72,9 @@ arrange_trend_core_outputs <- function(projection,
                                   sex = character(), age = numeric(), upc = numeric())
   }
   
-  popn_adjustment <- rbind(popn_adjustment, upc_mye) %>% 
+  popn_adjustment <- popn_adjustment %>% 
+    filter(year >= first_proj_yr) %>% 
+    rbind(upc_mye) %>% 
     tidyr::complete(year = min(population$year):last_proj_yr,
                     gss_code = unique(population$gss_code),
                     sex = c("male", "female"),
