@@ -27,6 +27,7 @@ Imports:
     tibble,
     smallareamodel,
     ldndatar,
-    loggr
+    loggr,
+    rstudioapi
 Suggests:
     testthat

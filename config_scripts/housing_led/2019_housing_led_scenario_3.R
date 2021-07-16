@@ -148,3 +148,8 @@ ward_projection <- run_small_area_model(ward_config_list)
 msoa_projection <- run_small_area_model(msoa_config_list)
 
 
+output_housing_led_excel_file(ward_projection[["csvs"]],
+                              config_list$output_dir,
+                              config_list$projection_name,
+                              config_list$popn_adjustment_path,
+                              file_suffix = "_2019.xlsx")
