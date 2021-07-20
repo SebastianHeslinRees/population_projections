@@ -8,6 +8,7 @@ output:
 ---
 
 ```{r setup, include = FALSE}
+#Change Knit Directory to Project Directory in the drop-down before running
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
@@ -15,7 +16,8 @@ library(plotly)
 ```
 
 ```{r functions, echo = FALSE}
-gss_code_to_name <- readRDS("input_data/lookup/gss_code_to_name.rds")
+
+gss_code_to_name <- readRDS("input_data/lookup/gss_code_to_name_(2020 geog).rds")
 
 filter_ldn <- function(x){filter(x,substr(gss_code,1,3)=="E09")}
 
@@ -624,11 +626,10 @@ The GLA do not make BPO projections publicly available. They are only accessible
 The underlying migration data used by the small area model is taken from the 2011 census. Unfortunately, there is no other source for small area flow data. As a result, the model is constrained to using the 2011 ward geography. MSOA projections can be provided on request and on completion of an MSOA development trajectory template.
 
 ### Further information
-Please contact Wil Tonkiss if you have any questions relating to the BPO projections.
-william.tonkiss@london.gov.uk
+Please contact the demography team if you have any questions relating to the BPO projections.
+demography@london.gov.uk
 
-For questions about the SRP service or projections please contact Mat Cropper.
-srpservice@london.gov.uk
+For questions about the SRP service or projections please contact srpservice@london.gov.uk
 
 
 `r space`
