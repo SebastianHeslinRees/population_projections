@@ -112,6 +112,12 @@ run_trend_model <- function(config_list) {
     popn_adjustment <- NULL
   }
   
+  if(!is.null(config_list$additional_births_path)){
+    additional_births <-  readRDS(config_list$additional_birth_path)
+  } else {
+    additional_births <- NULL
+  }
+  
   # get the projected rates
   message("get projected rates")
   
@@ -159,6 +165,7 @@ run_trend_model <- function(config_list) {
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              dom_out, dom_in, popn_adjustment, upc_mye,
                              fertility_rates, mortality_rates,
+                             additional_births,
                              int_out_flows_rates,
                              first_proj_yr, config_list$n_proj_yr,
                              config_list$int_out_method)
@@ -169,6 +176,12 @@ run_trend_model <- function(config_list) {
     
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
+    
+    if(!is.null(additional_births) & projection_year %in% unique(additional_births$year)){
+      curr_yr_additional_births <- filter(additional_births, year == projection_year)
+    } else {
+      curr_yr_additional_births <- NULL
+    }
     
     if(is.null(popn_adjustment)){
       curr_yr_popn_adjustment <- NULL
@@ -208,6 +221,7 @@ run_trend_model <- function(config_list) {
       start_population = curr_yr_popn,
       fertility_rates = curr_yr_fertility,
       mortality_rates = curr_yr_mortality,
+      additional_births = curr_yr_additional_births,
       int_out_flows_rates = curr_yr_int_out,
       int_in_flows = curr_yr_int_in,
       domestic_rates = curr_yr_domestic_rates,
@@ -338,6 +352,11 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
   if(!is.null(upc_mye)) {
     validate_population(upc_mye, col_data = "upc",
                         test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
+  }
+  if(!is.null(additional_births)){
+    validate_population(additional_births, col_data = "births",
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
+                        col_aggregation = c("year", "gss_code"))
   }
   
   validate_population(fertility_rates, col_data = "rate",

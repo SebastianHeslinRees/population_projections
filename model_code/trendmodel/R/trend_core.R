@@ -44,6 +44,7 @@
 
 trend_core <- function(start_population,
                        fertility_rates, mortality_rates,
+                       additional_births = NULL,
                        int_out_flows_rates, int_in_flows,
                        domestic_rates,
                        int_out_method,
@@ -62,26 +63,28 @@ trend_core <- function(start_population,
   aged_popn <- start_population %>%
     popn_age_on() 
   
-  # at_risk <- start_population %>%
-  #   mutate(age = age+1) %>%
-  #   left_join(start_population, by=c("gss_code","year","sex","age")) %>%
-  #   mutate(popn = (popn.x + popn.y)/2)       %>%
-  #   mutate(popn = ifelse(is.na(popn),0,popn),
-  #          year = year +1) %>%
-  #   select(gss_code, year, sex, age, popn) %>%
-  #   arrange(gss_code, year, sex, age) %>%
-  #   filter(age <=90)
-  births_by_mother <- apply_rate_to_population(aged_popn,
-                                               filter(fertility_rates, age != 0),
-                                               col_out = "births",
-                                               many2one = FALSE)
-  
-  if(!is.null(constraints)){
-    births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
-  }
-  
   birthratio_m2f <- 1.05
-  births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
+  
+  if(is.null(additional_births)){
+    
+    births_by_mother <- apply_rate_to_population(aged_popn,
+                                                 filter(fertility_rates, age != 0),
+                                                 col_out = "births",
+                                                 many2one = FALSE)
+    
+    
+    
+    if(!is.null(constraints)){
+      births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
+    }
+    
+    births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
+    
+  } else {
+    
+    births <- sum_births_and_split_by_sex_ratio(additional_births, birthratio_m2f)
+    
+  }
   
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
   
@@ -90,7 +93,7 @@ trend_core <- function(start_population,
                       test_unique = TRUE,
                       check_negative_values = TRUE,
                       comparison_pop = mutate(as.data.frame(start_population), year=year+1))
-
+  
   deaths <- apply_rate_to_population(popn = aged_popn_w_births,
                                      popn_rate = mortality_rates,
                                      col_popn = "popn",
@@ -185,9 +188,9 @@ trend_core <- function(start_population,
                                             out_constraint = constraints$cross_border_out_constraint,
                                             col_flow = "flow")
   }
-
+  
   regional_flows <- aggregate_regional_flows(domestic_flow, region_lookup)
-
+  
   #District in E & W, national S, NI gross flows
   dom_out <- sum_domestic_flows(domestic_flow, "out")
   dom_in <- sum_domestic_flows(domestic_flow, "in")
@@ -254,5 +257,5 @@ trend_core <- function(start_population,
               dom_in = dom_in_all_geog,
               births_by_mothers_age = births_by_mother,
               natural_change = natural_change_popn))
-
-  }
+  
+}
