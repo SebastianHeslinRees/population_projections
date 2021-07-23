@@ -158,7 +158,7 @@ mean_ldd <- ldd_backseries %>%
 
 #Save
 saveRDS(savills, "input_data/housing_led_model/borough_2019_based_savills.rds")
-saveRDS(mean_ldd, "input_data/housing_led_model/borough_2019_based_low.rds")
+saveRDS(mean_ldd, "input_data/housing_led_model/borough_2019_based_ldd_mean.rds")
 saveRDS(london_plan_trajectory, "input_data/housing_led_model/borough_london_plan_trajectory.rds")
 
 #-------------------------------------------------------------------------------
@@ -209,4 +209,5 @@ ward_london_plan <- left_join(ward_shlaa, london_plan_trajectory, by = c("gss_co
 saveRDS(ward_savills, "input_data/small_area_model/development_data/ward_2019_based_savills.rds")
 saveRDS(ward_ldd_mean, "input_data/small_area_model/development_data/ward_2019_based_ldd_mean.rds")
 saveRDS(ward_london_plan, "input_data/small_area_model/development_data/ward_london_plan_trajectory.rds")
+
 rm(list=ls())

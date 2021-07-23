@@ -2,6 +2,7 @@
 
 export(bpo_template_to_rds)
 export(output_bpo_excel_file)
+export(output_housing_led_excel_file)
 export(run_bpo_config_Jobscript)
 export(run_bpo_projection)
 export(run_housing_led_model)

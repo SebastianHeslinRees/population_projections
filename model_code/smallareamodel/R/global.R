@@ -32,7 +32,8 @@ globalVariables(c(
   'sex',
   'target',
   'value',
-  'year'
+  'year',
+  'x'
 ))
 
 

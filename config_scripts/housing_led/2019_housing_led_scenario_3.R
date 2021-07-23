@@ -43,7 +43,7 @@ domestic_rates <- list('2020' = list(path = "input_data/scenario_data/bpo_dom_sc
 fertility_rates_path <- "input_data/fertility/fertility_rates_provisional_2020_5yr_trend.rds"
 additional_births_path <- "input_data/fertility/provisional_births_2020_EW.rds"
 
-#------------------
+#-------------------------------------------------------------------------------
 
 config_list <- list(
   projection_name = projection_name,
@@ -67,11 +67,11 @@ config_list <- list(
   fertility_rates_path = fertility_rates_path,
   popn_adjustment_path = popn_adjustment_path)
 
-#---------------------
+#-------------------------------------------------------------------------------
 
 rm(list=setdiff(ls(),"config_list"))
 
-#---------------------
+#-------------------------------------------------------------------------------
 
 #WARD SETUP
 
@@ -136,8 +136,20 @@ ward_config_list <- list(small_area_popn_estimates_path = small_area_popn_estima
                          small_area_births_sya_path = small_area_births_sya_path,
                          small_area_deaths_sya_path = small_area_deaths_sya_path)
 
-#---------------------
-rm(list = setdiff(ls(), c("config_list","ward_config_list")))
+#-------------------------------------------------------------------------------
+
+msoa_config_list <- convert_ward_config_to_msoa_config(ward_config_list)
+
+#-------------------------------------------------------------------------------
+
+rm(list = setdiff(ls(), c("config_list","ward_config_list","msoa_config_list")))
 projection <- run_housing_led_model(config_list)
 ward_projection <- run_small_area_model(ward_config_list)
+msoa_projection <- run_small_area_model(msoa_config_list)
 
+
+output_housing_led_excel_file(ward_projection[["csvs"]],
+                              config_list$output_dir,
+                              config_list$projection_name,
+                              config_list$popn_adjustment_path,
+                              file_suffix = "_2019.xlsx")
