@@ -25,7 +25,8 @@
 
 get_rates_flows_info <- function(data_list, first_proj_yr, last_proj_yr){
   
-  validate_get_rates_or_flows_info(data_list, first_proj_yr)
+  list_name <- deparse(substitute(data_list))
+  validate_get_rates_or_flows_info(data_list, first_proj_yr, list_name)
   
   last_yr <- data_list %>% names() %>% as.numeric() %>% max()
   last_yr <- max(c(last_yr, last_proj_yr))
@@ -57,29 +58,29 @@ get_rates_flows_info <- function(data_list, first_proj_yr, last_proj_yr){
   return(df_info)
 }
 
-validate_get_rates_or_flows_info <- function(data_list, first_proj_yr){
+validate_get_rates_or_flows_info <- function(data_list, first_proj_yr, list_name){
   
   x <- as.numeric(as.numeric(names(data_list)))
   assertthat::assert_that(!any(is.na(x)),
-                          msg = "names in data_list must be years and convertable to numeric")
+                          msg =  paste0(list_name, ": names in data_list must be years and convertable to numeric"))
   
   x <- min(x)
   assertthat::assert_that(x==first_proj_yr,
-                          msg=(paste0("the first year in data_list is ", x,
-                          ", it must be the same as first_proj_yr (",first_proj_yr,")")))
+                          msg=( paste0(list_name, ": the first year in data_list is ", x,
+                                       ", it must be the same as first_proj_yr (",first_proj_yr,")")))
   
   
   for(i in 1:length(data_list)){
     assertthat::assert_that(is.list(data_list[[i]]),
-                            msg=paste0("data_list[",i,"] must be a list"))
+                            msg=paste0(list_name, "[",i,"] must be a list"))
     
     assertthat::assert_that(setequal(names(data_list[[i]]), c("path","transition")),
-                            msg=paste0("data_list[",i,"] must have elements 'path' and 'transition'"))
-
+                            msg=paste0(list_name, ": data_list[",i,"] must have elements 'path' and 'transition'"))
+    
     
     assertthat::assert_that(file.exists(data_list[[i]]$path),
-                            msg = paste0("data_list[", i, "] file does not exist"))
+                            msg = paste0(list_name, "[", i, "] file does not exist"))
   }
   assertthat::assert_that(!data_list[[length(data_list)]]$transition,
-                          msg = "The last entry in data_list can't have transition = TRUE")
+                          msg = paste0(list_name, ": The last entry in data_list can't have transition = TRUE"))
 }
