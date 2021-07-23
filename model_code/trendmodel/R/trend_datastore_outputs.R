@@ -78,7 +78,7 @@ trend_datastore_outputs <- function(population, births, deaths, int_in, int_out,
   components[, idx] <- lapply(components[, idx], round, digits=3)
   
   #excel
-  wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template.xlsx")
+  wb <- xlsx::loadWorkbook("input_data/excel_templates/trend_template_2020.xlsx")
   wb_sheets<- xlsx::getSheets(wb)
   
   xlsx::addDataFrame(persons, wb_sheets$persons, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
