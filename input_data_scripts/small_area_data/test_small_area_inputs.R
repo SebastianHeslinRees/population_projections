@@ -12,13 +12,13 @@ london_wards <- filter(ward_to_district, substr(gss_code,1,3) == "E09") %>%
   filter(gss_code != "E09000001")
 london_wards <- sort(c(unique(london_wards$gss_code_ward), "E09000001"))
 
-adults_per_dwelling <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
-pop_est <- "input_data/small_area_model/ward_population_estimates.rds"
-ce_est <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-out_migration_rates <- "input_data/small_area_model/ward_out_migration_rates.rds"
-in_migration_characteristics <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
-births <- "input_data/small_area_model/ward_births.rds"
-deaths <- "input_data/small_area_model/ward_deaths.rds"
+adults_per_dwelling <- "input_data/small_area_model/ward_data/ward_adults_per_dwelling.rds"
+pop_est <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
+ce_est <- "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds"
+out_migration_rates <- "input_data/small_area_model/ward_data/ward_out_migration_rates.rds"
+in_migration_characteristics <- "input_data/small_area_model/ward_data/ward_in_migration_characteristics.rds"
+births <- "input_data/small_area_model/ward_data/ward_births.rds"
+deaths <- "input_data/small_area_model/ward_data/ward_deaths.rds"
 
 test_ward_inputs <- function(data_path, col_aggregation=c("gss_code_ward", "sex", "age")){
   
@@ -48,13 +48,13 @@ msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds")
 london_msoas <- filter(msoa_to_district, substr(gss_code,1,3) == "E09")
 london_msoas <- sort(c(unique(london_msoas$gss_code_msoa)))
 
-adults_per_dwelling <- "input_data/small_area_model/msoa_adults_per_dwelling.rds"
-pop_est <- "input_data/small_area_model/msoa_population_estimates.rds"
-ce_est <- "input_data/small_area_model/msoa_communal_establishment_population.rds"
-out_migration_rates <- "input_data/small_area_model/msoa_out_migration_rates.rds"
-in_migration_characteristics <- "input_data/small_area_model/msoa_in_migration_characteristics.rds"
-births <- "input_data/small_area_model/msoa_births.rds"
-deaths <- "input_data/small_area_model/msoa_deaths.rds"
+adults_per_dwelling <- "input_data/small_area_model/msoa_data/msoa_adults_per_dwelling.rds"
+pop_est <- "input_data/small_area_model/msoa_data/msoa_population_estimates.rds"
+ce_est <- "input_data/small_area_model/msoa_data/msoa_communal_establishment_population.rds"
+out_migration_rates <- "input_data/small_area_model/msoa_data/msoa_out_migration_rates.rds"
+in_migration_characteristics <- "input_data/small_area_model/msoa_data/msoa_in_migration_characteristics.rds"
+births <- "input_data/small_area_model/msoa_data/msoa_births.rds"
+deaths <- "input_data/small_area_model/msoa_data/msoa_deaths.rds"
 
 test_msoa_inputs <- function(data_path, col_aggregation=c("gss_code_msoa", "sex", "age")){
   

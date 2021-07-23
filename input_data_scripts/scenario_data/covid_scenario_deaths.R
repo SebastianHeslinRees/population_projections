@@ -31,7 +31,7 @@ ons_weekly_age_sex_2 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_age_sex_Jul
 ons_weekly_la_totals_1 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_la_calendar_2020.csv"
 
 #THESE NEED TO BE EDITTED TO POINT AT THE MOST RECENT DATA
-ons_weekly_age_sex_3 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_age_sex_2021.csv"
+ons_weekly_age_sex_3 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_age_sex_Jan_to_June_2021.csv"
 ons_weekly_la_totals_2 <- "Q:/Teams/D&PA/Data/covid19/ons/covid_deaths_la_calendar_2021.csv"
 
 #national deaths sc and ni
