@@ -88,33 +88,38 @@ deaths_la_2021 <- ons_weekly_la_totals_2020 %>%
   recode_gss_codes(recode_to_year = 2020) %>% 
   rbind(scottish_deaths_2021, n_irish_deaths_2021)
 
-# assumes that E&W will be same as most recent week
-# Note: Too complicated
-# rest_of_2021 <- ons_weekly_la_totals_2021 %>% 
-#   filter(week_number == max(ons_weekly_la_totals_2021$week_number)) %>% 
-#   filter(cause_of_death == "COVID 19") %>%
-#   filter_to_LAs() %>%
-#   group_by(gss_code) %>%
-#   summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
-#   as.data.frame() %>%
-#   recode_gss_codes(recode_to_year = 2020) %>%
-#   rbind(data.frame(gss_code = c("N92000002", "S92000004"),
-#                    deaths = c(n_irish_most_recent_week, scottish_most_recent_week),
-#                    stringsAsFactors = F)) %>% 
-#   mutate(deaths = deaths * (28-max(ons_weekly_la_totals_2021$week_number)))
-
 week_no <- max(ons_weekly_la_totals_2021$week_number)
 
 rest_of_2021 <- deaths_la_2021 %>% 
   mutate(deaths1 = deaths/sum(deaths),
          deaths2 = deaths1 * uk_weekly_future_deaths,
-         deaths3 = deaths2 * (27-week_no)) %>% 
+         deaths3 = deaths2 * (26-week_no)) %>% 
   select(gss_code, deaths = deaths3)
 
 deaths_la_2021 <- rbind(deaths_la_2021, rest_of_2021) %>%
   group_by(gss_code) %>%
   summarise(deaths = sum(deaths), .groups = 'drop_last') %>%
   as.data.frame()
+
+#-----------------------------------------
+
+#Convert 2021 geography back to 2020 geography
+
+check <- sum(deaths_la_2021$deaths)
+
+E06000061_2021 <- filter(deaths_la_2021, gss_code == "E06000061")
+E06000062_2021 <- filter(deaths_la_2021, gss_code == "E06000062")
+
+E06000061_2020 <- filter(deaths_la_2020, gss_code %in% c("E07000150","E07000152","E07000153","E07000156"))
+E06000062_2020 <- filter(deaths_la_2020, gss_code %in% c("E07000151","E07000154","E07000155"))
+
+E06000061_2021 <- E06000061_2020 %>% mutate(deaths = (deaths / sum(E06000061_2020$deaths))*sum(E06000061_2021$deaths))
+E06000062_2021 <- E06000062_2020 %>% mutate(deaths = (deaths / sum(E06000062_2020$deaths))*sum(E06000062_2021$deaths))
+
+deaths_la_2021 <- filter(deaths_la_2021, !gss_code %in% c("E06000061","E06000062")) %>% 
+  rbind(E06000061_2021, E06000062_2021)
+
+assertthat::are_equal(check, sum(deaths_la_2021$deaths))
 
 #-----------------------------------------
 
