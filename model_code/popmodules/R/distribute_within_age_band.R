@@ -11,7 +11,9 @@
 #' @param max_age Numeric. The maximum age of the age band.
 #' @param col_aggregation Character vector. The columns on which to join the two
 #'  datasets \code{popn_1} and \code{popn_2}. Cannot contain \code{"age"}.
-#'  Default \code{c("gss_code, "sex)}
+#'  Default \code{c("gss_code", "sex")}
+#' @param additional_dist_cols Character vector. Columns that are in popn_2 but not in
+#'  popn_1 that you would like to retain in the output (e.g. "sex").
 #'
 #' @return A dataframe of population data by single-year-of-age for the input age range
 #'
@@ -21,19 +23,19 @@
 
 distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
                                        min_age, max_age,
-                                       col_aggregation=c("gss_code","sex")){
+                                       col_aggregation=c("gss_code","sex"),
+                                       additional_dist_cols = NULL){
 
-  
   assert_that(!"age" %in% col_aggregation,
               msg = "In distribute_within_age_band, {age} cannot be specified in the col_aggreation variable")
 
   distribution <- filter(popn_2, age >= min_age) %>%
     filter(age <= max_age) %>%
-    group_by_at(col_aggregation) %>%
+    group_by_at(c(col_aggregation)) %>%
     mutate(popn_total = sum(!!sym(popn_2_col))) %>%
     mutate(age_distribution = ifelse(popn_total == 0, 1/n(), !!sym(popn_2_col) / popn_total)) %>%
     as.data.frame() %>%
-    select(c(col_aggregation, age, age_distribution))
+    select(c(col_aggregation, additional_dist_cols, age, age_distribution))
 
   if("age" %in% names(popn_1)){
     popn_1 <- select(popn_1, -age)
@@ -59,7 +61,7 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
 
   distributed <- distributed %>%
     mutate(!!popn_1_col := !!sym(popn_1_col)* age_distribution) %>%
-    select(c(names(popn_1),"age"))%>%
+    select_at(c(names(popn_1), additional_dist_cols, "age")) %>%
     as.data.frame()
 
   return(distributed)

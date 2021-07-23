@@ -11,7 +11,8 @@ distribute_within_age_band(
   popn_2_col,
   min_age,
   max_age,
-  col_aggregation = c("gss_code", "sex")
+  col_aggregation = c("gss_code", "sex"),
+  additional_dist_cols = NULL
 )
 }
 \arguments{
@@ -29,7 +30,10 @@ distribute_within_age_band(
 
 \item{col_aggregation}{Character vector. The columns on which to join the two
 datasets \code{popn_1} and \code{popn_2}. Cannot contain \code{"age"}.
-Default \code{c("gss_code, "sex)}}
+Default \code{c("gss_code", "sex")}}
+
+\item{additional_dist_cols}{Character vector. Columns that are in popn_2 but not in
+popn_1 that you would like to retain in the output (e.g. "sex").}
 }
 \value{
 A dataframe of population data by single-year-of-age for the input age range
