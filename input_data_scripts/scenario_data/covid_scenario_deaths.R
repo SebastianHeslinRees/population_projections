@@ -117,7 +117,10 @@ E06000061_2021 <- E06000061_2020 %>% mutate(deaths = (deaths / sum(E06000061_202
 E06000062_2021 <- E06000062_2020 %>% mutate(deaths = (deaths / sum(E06000062_2020$deaths))*sum(E06000062_2021$deaths))
 
 deaths_la_2021 <- filter(deaths_la_2021, !gss_code %in% c("E06000061","E06000062")) %>% 
-  rbind(E06000061_2021, E06000062_2021)
+  rbind(E06000061_2021, E06000062_2021) %>% 
+  group_by(gss_code) %>% 
+  summarise(deaths = sum(deaths)) %>% 
+  data.frame()
 
 assertthat::are_equal(check, sum(deaths_la_2021$deaths))
 
