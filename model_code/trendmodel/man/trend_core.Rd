@@ -9,6 +9,7 @@ trend_core(
   start_population,
   fertility_rates,
   mortality_rates,
+  additional_births = NULL,
   int_out_flows_rates,
   int_in_flows,
   domestic_rates,

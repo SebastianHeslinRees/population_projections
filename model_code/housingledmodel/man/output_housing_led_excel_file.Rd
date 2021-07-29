@@ -13,7 +13,7 @@ output_housing_led_excel_file(
 )
 }
 \arguments{
-\item{data}{The \code{[['csv']]} element from a ward projection}
+\item{data}{The \code{[['csvs']]} element from a ward projection}
 
 \item{output_dir}{The directory in which to save the Excel file}
 
