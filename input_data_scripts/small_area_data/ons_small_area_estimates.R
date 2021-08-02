@@ -61,7 +61,7 @@ ward_data <- dtplyr::lazy_dt(lsoa_data) %>%
 #Due to large amounts of demolitions the pop ests don't track the total units well
 #Population for this ward is calculated by applying the 2011 AHS for the ward
 #to the LDD dev data for the ward
-faraday_ldd <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_ward.rds") %>%
+faraday_ldd <- readRDS("input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds") %>%
   filter(gss_code_ward == "E05000541") %>%
   mutate(total_units = cumsum(units)) %>%
   select(year, total_units)
@@ -170,8 +170,9 @@ scaled_msoa_data <- msoa_data  %>%
                       check_negative_values = TRUE)
 
 #Save
-dir.create("input_data/small_area_model", showWarnings = F)
-saveRDS(scaled_ward_data, paste0("input_data/small_area_model/ward_population_estimates.rds"))
-saveRDS(scaled_msoa_data, paste0("input_data/small_area_model/msoa_population_estimates.rds"))
+dir.create("input_data/small_area_model/ward_data/", showWarnings = F)
+dir.create("input_data/small_area_model/msoa_data/", showWarnings = F)
+saveRDS(scaled_ward_data, paste0("input_data/small_area_model/ward_data/ward_population_estimates.rds"))
+saveRDS(scaled_msoa_data, paste0("input_data/small_area_model/msoa_data/msoa_population_estimates.rds"))
 
 rm(list = ls())

@@ -84,18 +84,18 @@ ldd_final_yr <- config_list$ldd_final_yr
 last_data_yr <- config_list$last_data_yr
 housing_led_model_path <- paste0(config_list$output_dir)
 
-small_area_dev_trajectory_path <- "input_data/small_area_model/ward_2019_based_savills.rds"
-small_area_popn_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"
-small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_communal_establishment_population.rds"
-small_area_births_backseries_path <- "input_data/small_area_model/ward_births.rds"
-small_area_deaths_backseries_path <- "input_data/small_area_model/ward_deaths.rds"
-small_area_ldd_data_path <- "input_data/small_area_model/ldd_backseries_dwellings_ward.rds"
-small_area_births_sya_path <- "input_data/small_area_model/ward_sya_births.rds"
-small_area_deaths_sya_path <- "input_data/small_area_model/ward_sya_deaths.rds"
-adults_per_dwelling_path <- "input_data/small_area_model/ward_adults_per_dwelling.rds"
+small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_2019_based_savills.rds"
+small_area_popn_estimates_path <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
+small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds"
+small_area_births_backseries_path <- "input_data/small_area_model/ward_data/ward_births.rds"
+small_area_deaths_backseries_path <- "input_data/small_area_model/ward_data/ward_deaths.rds"
+small_area_ldd_data_path <- "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds"
+small_area_births_sya_path <- "input_data/small_area_model/ward_data/ward_sya_births.rds"
+small_area_deaths_sya_path <- "input_data/small_area_model/ward_data/ward_sya_deaths.rds"
+adults_per_dwelling_path <- "input_data/small_area_model/ward_data/ward_adults_per_dwelling.rds"
 small_area_to_district_path <- "input_data/lookup/2011_ward_to_district.rds"
-out_migration_rates_path <- "input_data/small_area_model/ward_out_migration_rates.rds"
-in_migration_characteristics_path <- "input_data/small_area_model/ward_in_migration_characteristics.rds"
+out_migration_rates_path <- "input_data/small_area_model/ward_data/ward_out_migration_rates.rds"
+in_migration_characteristics_path <- "input_data/small_area_model/ward_data/ward_in_migration_characteristics.rds"
 
 borough_fertility_rates_path <- config_list$fertility_rates_path
 borough_mortality_rates_path <- paste0(external_trend_path,"mortality_rates.rds")

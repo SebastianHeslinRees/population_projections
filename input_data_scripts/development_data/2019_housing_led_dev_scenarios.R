@@ -164,10 +164,10 @@ saveRDS(london_plan_trajectory, "input_data/housing_led_model/borough_london_pla
 #-------------------------------------------------------------------------------
 
 #Wards
-ldd_ward <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_ward.rds") %>% 
+ldd_ward <- readRDS("input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds") %>% 
   filter(year > 2011)
 
-ward_shlaa <- readRDS("input_data/small_area_model/ward_shlaa_trajectory_2020.rds") %>% 
+ward_shlaa <- readRDS("input_data/small_area_model/development_data/ward_shlaa_trajectory_2020.rds") %>% 
   left_join(readRDS("input_data/lookup/2011_ward_to_district.rds"), by = "gss_code_ward") %>% 
   filter(year %in% 2020:2041) %>% 
   group_by(year, gss_code) %>%
@@ -206,58 +206,8 @@ ward_london_plan <- left_join(ward_shlaa, london_plan_trajectory, by = c("gss_co
   data.frame()
 
 #Save
-saveRDS(ward_savills, "input_data/small_area_model/ward_2019_based_savills.rds")
-saveRDS(ward_ldd_mean, "input_data/small_area_model/ward_2019_based_ldd_mean.rds")
-saveRDS(ward_london_plan, "input_data/small_area_model/ward_london_plan_trajectory.rds")
+saveRDS(ward_savills, "input_data/small_area_model/development_data/ward_2019_based_savills.rds")
+saveRDS(ward_ldd_mean, "input_data/small_area_model/development_data/ward_2019_based_ldd_mean.rds")
+saveRDS(ward_london_plan, "input_data/small_area_model/development_data/ward_london_plan_trajectory.rds")
 
-#-------------------------------------------------------------------------------
-
-#msoas
-ldd_msoa <- readRDS("input_data/small_area_model/ldd_backseries_dwellings_msoa.rds") %>% 
-  filter(year > 2011)
-
-msoa_shlaa <- readRDS("input_data/small_area_model/msoa_shlaa_trajectory_2020.rds") %>% 
-  left_join(readRDS("input_data/lookup/msoa_to_district.rds"), by = "gss_code_msoa") %>% 
-  filter(year %in% 2020:2041) %>% 
-  group_by(year, gss_code) %>%
-  mutate(distribution = units/sum(units)) %>% 
-  select(-units) %>% 
-  data.frame()
-
-msoa_ldd_mean <- left_join(msoa_shlaa, mean_ldd, by = c("gss_code", "year")) %>% 
-  mutate(units = units*distribution) %>% 
-  select(-distribution) %>% 
-  popmodules::project_forward_flat(2050) %>% 
-  mutate(units = ifelse(year > 2041, 0, units)) %>% 
-  select(year, gss_code_msoa, units) %>% 
-  rbind(ldd_msoa) %>% 
-  arrange(year, gss_code_msoa) %>% 
-  data.frame()
-
-msoa_savills <- left_join(msoa_shlaa, savills, by = c("gss_code", "year")) %>% 
-  mutate(units = units*distribution) %>% 
-  select(-distribution) %>% 
-  popmodules::project_forward_flat(2050) %>% 
-  mutate(units = ifelse(year > 2041, 0, units)) %>% 
-  select(year, gss_code_msoa, units) %>% 
-  rbind(ldd_msoa) %>% 
-  arrange(year, gss_code_msoa) %>% 
-  data.frame()
-
-msoa_london_plan <- left_join(msoa_shlaa, london_plan_trajectory, by = c("gss_code", "year")) %>% 
-  mutate(units = units*distribution) %>% 
-  select(-distribution) %>% 
-  popmodules::project_forward_flat(2050) %>% 
-  mutate(units = ifelse(year > 2041, 0, units)) %>% 
-  select(year, gss_code_msoa, units) %>% 
-  rbind(ldd_msoa) %>% 
-  arrange(year, gss_code_msoa) %>% 
-  data.frame()
-
-#Save
-saveRDS(msoa_savills, "input_data/small_area_model/msoa_2019_based_savills.rds")
-saveRDS(msoa_ldd_mean, "input_data/small_area_model/msoa_2019_based_ldd_mean.rds")
-saveRDS(msoa_london_plan, "input_data/small_area_model/msoa_london_plan_trajectory.rds")
-
-#-------------------------------------------------------------------------------
 rm(list=ls())

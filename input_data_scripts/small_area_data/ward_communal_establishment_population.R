@@ -5,7 +5,7 @@ message("ward communal establishment population")
 
 #Data paths
 census_ward_ce_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/DC1104EW_London_CMWD11.rds"
-ward_estimates_path <- "input_data/small_area_model/ward_population_estimates.rds"
+ward_estimates_path <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
 
 #lookup
 merged_to_electoral_ward <- readRDS("input_data/lookup/2011_merged_ward_to_electoral_ward.rds")#The population at mid-year is different than at census day
@@ -72,6 +72,6 @@ if(length(unique(ward_ce_by_sya$gss_code_ward))!=625){message("Warning: Wrong nu
 
 #Save
 dir.create("input_data/small_area_model", showWarnings = F)
-saveRDS(ward_ce_by_sya, "input_data/small_area_model/ward_communal_establishment_population.rds")
+saveRDS(ward_ce_by_sya, "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds")
 
 rm(list = ls())

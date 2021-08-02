@@ -44,7 +44,7 @@ bpo_template_to_rds <- function(csv_name,
   assert_that(length(borough_gss) == 1)
   
   #read in standard shlaa trajectories
-  ward_shlaa_trajectory <- readRDS("input_data/small_area_model/ward_shlaa_pandemic_adjusted.rds")
+  ward_shlaa_trajectory <- readRDS("input_data/small_area_model/development_data/ward_shlaa_pandemic_adjusted.rds")
   borough_shlaa_trajectory <- readRDS("input_data/housing_led_model/borough_shlaa_pandemic_adjusted.rds")
   
   rm(tbl, unc_row, no_of_gss_codes)

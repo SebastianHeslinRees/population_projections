@@ -8,7 +8,7 @@ library(dplyr)
 message('2019 Northern Ireland MYE')
 
 output_location <- "input_data/mye/2019/"
-data_location <- "Q:/Teams/D&PA/Data/population_estimates/nrs_nisra_estimates/northern_ireland"
+data_location <- "Q:/Teams/D&PA/Data/population_estimates/nrs_nisra_estimates/northern_ireland/mye_2019"
 
 fetch_2018_data <- function(x, component){
   readRDS(paste0("input_data/mye/2018/",component,".rds")) %>%
