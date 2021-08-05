@@ -2,7 +2,7 @@
 library(trendmodel)
 
 first_proj_yr <- 2021
-n_proj_yr <- 30
+n_proj_yr <- 3
 projection_name <- "2020_test"
 
 popn_mye_path <- "input_data/mye/2020/population_ons.rds"
@@ -14,6 +14,7 @@ dom_out_mye_path <- "input_data/domestic_migration/2020/domestic_migration_out_(
 dom_in_mye_path <- "input_data/domestic_migration/2020/domestic_migration_in_(2021_geog).rds"
 upc_mye_path <- "input_data/mye/2020/upc_ons.rds"
 popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
+additional_births_path <- NULL
 
 int_out_flow_or_rate <- "flow"
 
@@ -42,29 +43,30 @@ fertility_rates <- "input_data/fertility/fert_rates_5yr_trend_2020.rds"
 #-----------------------------------------------------
 
 int_out_flows_rates <- list(
+
   '2021' = list(path =  "input_data/scenario_data/2020_int_out_scenario_1_yr_2021.rds",
                 transition = F),
   '2022' = list(path = "input_data/scenario_data/2020_int_out_scenario_1_yr_2022.rds",
                 transition = T),
-  '2028' = list(path = "input_data/scenario_data/2020_int_out_5yr_avg.rds",
+  '2028' = list(path = "input_data/scenario_data/2019_int_out_10yr_avg.rds",
                 transition = F))
 
-#-----------------------------------------------------
+#-------------------------------------------------------------------------------
 
 int_in  <- list(
   '2021' = list(path =  "input_data/scenario_data/2020_int_in_scenario_1_yr_2021.rds",
                 transition = F),
   '2022' = list(path = "input_data/scenario_data/2020_int_in_scenario_1_yr_2022.rds",
                 transition = T),
-  '2028' = list(path = "input_data/scenario_data/2020_int_in_5yr_avg.rds",
-                transition = F))
 
-#-----------------------------------------------------
+  '2028' = list(path = "input_data/scenario_data/2019_int_in_10yr_avg.rds",
+                transition = F))
+#-------------------------------------------------------------------------------
 
 domestic_rates <- list(
   '2021' = list(path =  "input_data/scenario_data/2020_dom_scenario_1_yr_2021.rds",
                 transition = F),
-  '2022' = list(path =  "input_data/scenario_data/2020_dom_scenario_1_yr_2021.rds",
+  '2022' = list(path =  "input_data/scenario_data/2020_dom_scenario_1_yr_2022.rds",
                 transition = T),
   '2028' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
                 transition = F))
@@ -89,7 +91,8 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   upc_mye_path = upc_mye_path,
   popn_adjustment_path = popn_adjustment_path,
-  
+  additional_births_path = additional_births_path,
+
   mortality_rates = mortality_rates,
   fertility_rates = fertility_rates,
   int_out_flows_rates = int_out_flows_rates,

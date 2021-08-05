@@ -33,6 +33,7 @@ run_trend_model <- function(config_list) {
                        "dom_in_mye_path",
                        "upc_mye_path",
                        "popn_adjustment_path",
+                       "additional_births_path",
                        "mortality_rates",
                        "fertility_rates",
                        "int_out_flows_rates",
