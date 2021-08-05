@@ -3,7 +3,7 @@ library(tidyr)
 library(stringr)
 library(popmodules)
 
-message("births and deaths")
+message("small area births and deaths")
 
 #paths
 lsoa_births_path <-"Q:/Teams/D&PA/Data/births_and_deaths/lsoa_births_by_aom_deaths_2001_2019/birthsbylsoamidyear01to19.rds"
@@ -109,7 +109,7 @@ saveRDS(msoa_deaths, "input_data/small_area_model/msoa_data/msoa_deaths.rds")
 
 
 #Single year ward deaths
-borough_deaths <- readRDS("input_data/mye/2019/deaths_ons.rds") %>%
+borough_deaths <- readRDS("input_data/mye/2020/deaths_ons.rds") %>%
   select(gss_code, year, sex, age, deaths)
 
 deaths_sya_ward <- ward_deaths %>%

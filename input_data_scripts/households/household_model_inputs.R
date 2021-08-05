@@ -3,7 +3,7 @@ library(dplyr)
 library(data.table)
 library(popmodules)
 
-message('Household model inputs')
+message('household model inputs')
 
 read_hh_rates_files <- function(file, file_location, yr){
   

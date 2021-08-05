@@ -15,7 +15,7 @@ ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.cs
   filter(age_group != "All ages") %>% 
   popmodules::recode_gss_codes(data_cols = "ce_pop",
                                col_geog="gss_code",
-                               recode_to_year = 2020)
+                               recode_to_year = 2021)
 
 hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
                 data.table::fread(paste0(ons_data_location, "hh_population_male.csv"), header = T)) %>%
@@ -28,12 +28,11 @@ hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_femal
   filter(age_group != "All ages") %>% 
   popmodules::recode_gss_codes(data_cols = "hh_pop",
                                col_geog="gss_code",
-                               recode_to_year = 2020)
+                               recode_to_year = 2021)
 
-ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
+communal_est <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
   mutate(ce_rate = ifelse(age_group %in% c("75_79","80_84","85_89","90+"), ce_pop/(ce_pop+hh_pop), NA)) %>%
   select(-hh_pop)
 
-saveRDS(ce, "input_data/household_model/ons_communal_establishment_population_2018_(2020_model).rds")
+saveRDS(communal_est,"input_data/household_model/ons_communal_establishment_population_(2021_geog).rds")
 
-rm(list = ls())

@@ -37,7 +37,7 @@ run_small_area_model <- function(config_list){
                        "borough_mortality_rates_path",
                        "last_data_yr",
                        "first_proj_yr",
-                       "last_proj_yr",
+                       "n_proj_yr",
                        "birth_rate_n_years_to_avg",
                        "death_rate_n_years_to_avg",
                        "ldd_final_yr",
@@ -50,6 +50,7 @@ run_small_area_model <- function(config_list){
   dir.create(small_area_output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(small_area_output_dir,"warnings.log"))
   write_model_config(config_list, small_area_output_dir)
+  last_proj_yr <- config_list$first_proj_yr + config_list$n_proj_yr - 1
 
   read_small_area_inputs <- function(path){
     df <- readRDS(path)
@@ -60,7 +61,7 @@ run_small_area_model <- function(config_list){
   
   #Read Data
   adults_per_dwelling <- read_small_area_inputs(config_list$adults_per_dwelling_path) %>%
-    project_forward_flat(config_list$last_proj_yr)
+    project_forward_flat(last_proj_yr)
   
   small_area_to_district <- read_small_area_inputs(config_list$small_area_to_district_path)
   out_migration_rates <- read_small_area_inputs(config_list$out_migration_rates_path)
@@ -88,7 +89,9 @@ run_small_area_model <- function(config_list){
   #------------
   
   fertility_rates <- readRDS(config_list$borough_fertility_rates_path) %>%
-    filter(substr(gss_code,1,3)=="E09")
+    filter(substr(gss_code,1,3)=="E09") %>% 
+    complete(gss_code, age=0:90, sex=c("male","female"), year, fill=list(rate = 0))
+  
   mortality_rates <- readRDS(config_list$borough_mortality_rates_path) %>%
     filter(substr(gss_code,1,3)=="E09")
   
@@ -130,13 +133,14 @@ run_small_area_model <- function(config_list){
                                        popn_constraint,
                                        fertility_rates,
                                        mortality_rates,
-                                       config_list)
+                                       config_list,
+                                       last_proj_yr)
   
   #Projection loop
   curr_yr_popn <- filter(popn_estimates, year == config_list$first_proj_yr-1)
   projection <- list()
   
-  for(projection_year in config_list$first_proj_yr:config_list$last_proj_yr){
+  for(projection_year in config_list$first_proj_yr:last_proj_yr){
     
     cat('\r',paste("  Projecting year", projection_year))
     utils::flush.console()
@@ -206,7 +210,7 @@ run_small_area_model <- function(config_list){
       
       # Validate these new data frames
       validate_small_area_fert_mort_components(popn_estimates, small_area_fertility_rates, small_area_mortality_rates,
-                                               fertility_rates, mortality_rates, config_list)
+                                               fertility_rates, mortality_rates, config_list, last_proj_yr)
     }
     
     #-----------------
@@ -252,7 +256,7 @@ run_small_area_model <- function(config_list){
   message(" ")
   message("Running outputs")
   projection <- arrange_small_area_core_outputs(projection, popn_estimates, dwelling_trajectory,
-                                                config_list$first_proj_yr, config_list$last_proj_yr,
+                                                config_list$first_proj_yr, last_proj_yr,
                                                 small_area_births_sya, small_area_deaths_sya)
   
   projection <- output_small_area_projection(projection = projection,
@@ -283,7 +287,8 @@ validate_small_area_input_components <- function(popn_estimates,
                                                  popn_constraint,
                                                  fertility_rates,
                                                  mortality_rates,
-                                                 config_list) {
+                                                 config_list,
+                                                 last_proj_yr) {
 
   # Validate inputs
   validate_population(popn_estimates, col_aggregation = c("gss_code_small_area", "age", "sex", "year"),
@@ -322,12 +327,14 @@ validate_small_area_input_components <- function(popn_estimates,
                       col_data = "in_migration_rate", comparison_pop = comparison_pop,
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_comparison = c("gss_code_small_area", "sex", "age"))
+  
   validate_population(filter(small_area_births_sya, year %in% unique(popn_estimates$year)),
                       col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "births",
                       comparison_pop = filter(popn_estimates, age == 0),
                       col_comparison = c("gss_code_small_area", "sex","year"))
+  
   validate_population(filter(small_area_deaths_sya, year %in% unique(popn_estimates$year)),
                       col_aggregation = c("gss_code_small_area", "sex", "age", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
@@ -348,11 +355,13 @@ validate_small_area_input_components <- function(popn_estimates,
   validate_population(death_constraint, col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "deaths", comparison_pop = popn_constraint)
+  
   validate_population(filter(fertility_rates, year %in% unique(popn_constraint$year)),
                       col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                       col_data = "rate", comparison_pop = popn_constraint,
                       col_comparison = c("gss_code", "sex", "age", "year"))
+  
   validate_population(filter(mortality_rates, year %in% unique(popn_constraint$year)),
                       col_aggregation = c("gss_code", "age", "sex", "year"),
                       test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
@@ -378,8 +387,8 @@ validate_small_area_input_components <- function(popn_estimates,
   
   # Check years are all correct
   past_years <- (config_list$first_proj_yr - 1):config_list$last_data_yr
-  proj_years <- (config_list$last_data_yr + 1):config_list$last_proj_yr
-  if(config_list$last_proj_yr > config_list$last_data_yr) {
+  proj_years <- (config_list$last_data_yr + 1):last_proj_yr
+  if(last_proj_yr > config_list$last_data_yr) {
     all_years <- c(past_years, proj_years)
   } else {
     all_years <- past_years
@@ -404,9 +413,10 @@ validate_small_area_fert_mort_components <- function(popn_estimates,
                                                      small_area_mortality_rates,
                                                      fertility_rates,
                                                      mortality_rates,
-                                                     config_list) {
+                                                     config_list,
+                                                     last_proj_yr) {
   domain <- unique(popn_estimates$gss_code)
-  proj_years <- (config_list$last_data_yr + 1):config_list$last_proj_yr
+  proj_years <- (config_list$last_data_yr + 1):last_proj_yr
   
   validate_population(small_area_fertility_rates,
                       col_aggregation = c("gss_code_small_area", "age", "sex", "year"),

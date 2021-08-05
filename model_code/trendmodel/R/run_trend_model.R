@@ -295,7 +295,7 @@ run_trend_model <- function(config_list) {
 
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, popn_adjustment,
-                                       upc_mye, fertility_rates, mortality_rates, int_out_flows_rates,
+                                       upc_mye, fertility_rates, mortality_rates, additional_births, int_out_flows_rates,
                                        first_proj_yr, n_proj_yr, int_out_method) {
   
   validate_population(population, col_data = "popn",

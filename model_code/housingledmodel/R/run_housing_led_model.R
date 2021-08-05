@@ -33,7 +33,7 @@ run_housing_led_model <- function(config_list){
                        "ahs_cap_year",
                        "external_trend_path",
                        "first_proj_yr",
-                       "last_proj_yr",
+                       "n_proj_yr",
                        "ldd_final_yr",
                        "output_dir",
                        "constrain_projection",
@@ -51,6 +51,7 @@ run_housing_led_model <- function(config_list){
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
+  last_proj_yr <- config_list$first_proj_yr + config_list$n_proj_yr - 1
   
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
@@ -90,7 +91,7 @@ run_housing_led_model <- function(config_list){
   }
   
   #domestic rates
-  domestic_rates_info <- get_rates_flows_info(config_list$domestic_rates, config_list$first_proj_yr, config_list$last_proj_yr)
+  domestic_rates_info <- get_rates_flows_info(config_list$domestic_rates, config_list$first_proj_yr, last_proj_yr)
   domestic_rates <- NULL
   
   #borough constraining & actual component data for backseries
@@ -133,7 +134,7 @@ run_housing_led_model <- function(config_list){
     as.data.frame()
   
   external_ahs <- readRDS(config_list$external_ahs_trajectory_path) %>% as.data.frame()
-  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(config_list$last_proj_yr)
+  development_trajectory <- readRDS(config_list$dev_trajectory_path) %>% project_forward_flat(last_proj_yr)
   
   #housing trajectory
   external_trend_households <- readRDS(external_trend_households_path) %>%
@@ -168,7 +169,7 @@ run_housing_led_model <- function(config_list){
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
     mutate(dw2hh_ratio = dwellings/households) %>%
     select(year, gss_code, dw2hh_ratio) %>%
-    project_forward_flat(config_list$last_proj_yr)
+    project_forward_flat(last_proj_yr)
   
   dwelling2household_ratio_static <- filter(external_trend_households,
                                             year == 2011,
@@ -176,17 +177,17 @@ run_housing_led_model <- function(config_list){
     left_join(dwelling_trajectory, by=c("gss_code","year")) %>%
     mutate(dw2hh_ratio = dwellings/households) %>%
     select(year, gss_code, dw2hh_ratio) %>%
-    project_forward_flat(config_list$last_proj_yr)
+    project_forward_flat(last_proj_yr)
   
   #development_trajectories
   household_trajectory_static <- dwelling_trajectory %>% 
-    filter(year <= config_list$last_proj_yr) %>%
+    filter(year <= last_proj_yr) %>%
     left_join(dwelling2household_ratio_static, by=c("year","gss_code")) %>%
     mutate(households = dwellings / dw2hh_ratio) %>%
     select(gss_code, year, households)
   
   household_trajectory_adjusted <- dwelling_trajectory %>% 
-    filter(year <= config_list$last_proj_yr) %>%
+    filter(year <= last_proj_yr) %>%
     left_join(dwelling2household_ratio_adjusted, by=c("year", "gss_code")) %>%
     mutate(households = dwellings / dw2hh_ratio) %>%
     select(gss_code, year, households)
@@ -211,7 +212,7 @@ run_housing_led_model <- function(config_list){
   #Other variables
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
-  last_proj_yr <- config_list$last_proj_yr
+  last_proj_yr <- last_proj_yr
   if(exists("additional_births")) {
     additional_births_years <- unique(additional_births$year)
   } else {
@@ -277,6 +278,7 @@ run_housing_led_model <- function(config_list){
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility, 
                                                       mortality_rates = curr_yr_mortality,
+                                                      additional_births = curr_yr_actual_births,
                                                       int_out_flows_rates = curr_yr_int_out,
                                                       int_in_flows = curr_yr_int_in_flows,
                                                       domestic_rates = curr_yr_domestic_rates,

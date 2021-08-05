@@ -6,11 +6,11 @@ library(popmodules)
 message("ward migration data")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2019/population_gla.rds"
-borough_dom_in_path <- "input_data/domestic_migration/2019/domestic_migration_in_(2020_geog).rds"
-borough_dom_out_path <- "input_data/domestic_migration/2019/domestic_migration_out_(2020_geog).rds"
-borough_int_out_path <- "input_data/mye/2019/int_out_gla.rds"
-borough_int_in_path <- "input_data/mye/2019/int_in_gla.rds"
+mye_popn_path <- "input_data/mye/2019/population_gla.rds" #TODO Update to GLA estimates
+borough_dom_in_path <- "input_data/mye/2020/dom_in_ons.rds"
+borough_dom_out_path <- "input_data/mye/2020/dom_out_ons.rds"
+borough_int_out_path <- "input_data/mye/2020/int_out_ons.rds" #TODO Update to GLA estimates
+borough_int_in_path <- "input_data/mye/2020/int_in_ons.rds" #TODO Update to GLA estimates
 
 #census data
 census_foreign_born_path <- "Q:/Teams/D&PA/Data/census_tables/small_area_model/LC2103EW_ward_country_of_birth.csv"
