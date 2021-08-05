@@ -13,7 +13,7 @@ small_area_popn_estimates_path <- "input_data/small_area_model/msoa_data/msoa_po
 small_area_communal_est_popn_path  <- "input_data/small_area_model/msoa_data/msoa_communal_establishment_population.rds"
 small_area_births_backseries_path <- "input_data/small_area_model/msoa_data/msoa_births.rds"
 small_area_deaths_backseries_path <- "input_data/small_area_model/msoa_data/msoa_deaths.rds"
-small_area_ldd_data_path <- input_data/small_area_model/development_data/ldd_backseries_dwellings_msoa.rds"
+small_area_ldd_data_path <- "input_data/small_area_model/development_data/ldd_backseries_dwellings_msoa.rds"
 
 small_area_births_sya_path <- "input_data/small_area_model/msoa_data/msoa_sya_births.rds"
 small_area_deaths_sya_path <- "input_data/small_area_model/msoa_data/msoa_sya_deaths.rds"
