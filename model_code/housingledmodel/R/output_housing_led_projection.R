@@ -24,12 +24,13 @@
 
 output_housing_led_projection <- function(projection, output_dir,
                                           external_trend_path,
-                                          additional_dwellings, housing_stock,
+                                          additional_dwellings,
+                                          housing_stock,
                                           household_trajectory,
                                           first_proj_yr){
   
   dir.create(output_dir, recursive = T, showWarnings = FALSE)
-
+  
   # Add backseries to projection
   backseries <- get_data_from_file(
     list(population = paste0(external_trend_path,"population.rds"),
@@ -38,7 +39,8 @@ output_housing_led_projection <- function(projection, output_dir,
          int_out = paste0(external_trend_path,"int_out.rds"),
          int_in = paste0(external_trend_path,"int_in.rds"),
          dom_out = paste0(external_trend_path,"dom_out.rds"),
-         dom_in = paste0(external_trend_path,"dom_in.rds")
+         dom_in = paste0(external_trend_path,"dom_in.rds"),
+         upc = paste0(external_trend_path, "popn_adjustment.rds")
     )) %>%
     lapply(filter_to_LAs)
   
@@ -48,8 +50,11 @@ output_housing_led_projection <- function(projection, output_dir,
     backseries[[x]] <- filter(backseries[[x]], year %in% 2011:(first_proj_yr-1))
     projection[[x]] <- filter(projection[[x]], year >= first_proj_yr)
     
-    projection[[x]] <- rbindlist(list(backseries[[x]], projection[[x]]),
-                                             use.names = TRUE) %>%
+    if(x=="upc"){
+      projection[['upc']] <- projection[['upc']] %>% rename(adjustment = upc)
+    }
+    
+    projection[[x]] <- rbindlist(list(backseries[[x]], projection[[x]]), use.names = TRUE) %>%
       as.data.frame()
   }
   
@@ -84,7 +89,7 @@ output_housing_led_projection <- function(projection, output_dir,
   }
   
   if(!is.null(projection[['upc']])){
-    saveRDS(projection[['upc']], paste0(output_dir, "upc.rds"))
+    saveRDS(projection[['upc']], paste0(output_dir, "popn_adjustment.rds"))
   }
   
   validate_population(household_trajectory, col_aggregation = c("gss_code", "year"),
@@ -93,29 +98,29 @@ output_housing_led_projection <- function(projection, output_dir,
   
   # Create extra tables to to output
   names_lookup <- get_gss_names()
-
+  
   popn <- left_join(projection[["population"]], names_lookup, by="gss_code") %>%
     filter(substr(gss_code,1,3)=="E09")
-
+  
   london_totals <- function(data, col_aggregation=setdiff(names(data),data_col), data_col){
-
+    
     assertthat::assert_that("gss_code" %in% names(data))
     assertthat::assert_that(all(grepl("E09", data$gss_code)))
     
-
-      x <- arrange(data, gss_code, year)
-
-      x <- x %>%
-        mutate(gss_code = "E12000007") %>%
-        mutate(gss_name = "London (total)") %>%
-        dtplyr::lazy_dt() %>%
-        group_by_at(col_aggregation) %>%
-        summarise(!!data_col := sum(!!sym(data_col))) %>%
-        as.data.frame() %>%
-        select(names(data)) %>%
-        rbind(x)
-      
-      return(x)
+    
+    x <- arrange(data, gss_code, year)
+    
+    x <- x %>%
+      mutate(gss_code = "E12000007") %>%
+      mutate(gss_name = "London (total)") %>%
+      dtplyr::lazy_dt() %>%
+      group_by_at(col_aggregation) %>%
+      summarise(!!data_col := sum(!!sym(data_col))) %>%
+      as.data.frame() %>%
+      select(names(data)) %>%
+      rbind(x)
+    
+    return(x)
     
   }
   
@@ -154,9 +159,10 @@ output_housing_led_projection <- function(projection, output_dir,
     select(gss_code, borough, sex, age, as.character(min(popn$year):max(popn$year)))
   
   components <- list()
-
+  
   # Rename last column (containing component data) in each output dataframe to
   # 'value' so we can rbind them
+  
   for(x in names(projection)){
     nm <- last(names(projection[[x]]))
     if(x %in% c("population","births","deaths","int_out","int_in","dom_out","dom_in","upc")){
@@ -171,18 +177,16 @@ output_housing_led_projection <- function(projection, output_dir,
         mutate(value = round(value, digits=2))
     }
   }
-  
+
   components <- data.table::rbindlist(components, use.names = TRUE) %>%
     london_totals(data_col = "value") %>%
     tidyr::pivot_wider(names_from = component, values_from = value) %>%
-    mutate(covid_deaths = ifelse(is.na(upc), 0, upc*-1),
-           dom_in = dom_in + covid_deaths,
-           int_net = round(int_in - int_out, 2),
+    mutate(int_net = round(int_in - int_out, 2),
            dom_net = round(dom_in - dom_out, 2),
-           total_change = round(births - deaths + int_net + dom_net - covid_deaths, 2),
+           total_change = round(births - deaths + int_net + dom_net + adjustment, 2),
            borough = gss_name) %>%
     select(gss_code, borough, year, popn, births, deaths, int_in, int_out, int_net,
-           dom_in, dom_out, dom_net, covid_deaths, total_change) %>%
+           dom_in, dom_out, dom_net, adjustment, total_change) %>%
     arrange(gss_code, year) %>%
     order_gss_with_london_total_first()
   
@@ -204,7 +208,7 @@ output_housing_led_projection <- function(projection, output_dir,
     mutate(dwellings = round(dwellings, 2)) %>%
     tidyr::pivot_wider(names_from = "year", values_from = "dwellings") %>%
     rename(borough = gss_name)
-
+  
   annual_dev <- additional_dwellings %>%
     filter(year != 2011) %>%
     arrange(gss_code, year) %>%

@@ -13,6 +13,7 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom utils flush.console
 #' @importFrom loggr log_file
+#' @importFrom tidyr complete
 #' 
 #' @export
 

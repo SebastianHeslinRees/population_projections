@@ -20,8 +20,10 @@ standard$int_in_mye_path <-  paste0("input_data/mye/2020/int_in_ons.rds")
 standard$dom_out_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_out_(2021_geog).rds")
 standard$dom_in_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_in_(2021_geog).rds")
 standard$upc_mye_path <- "input_data/mye/2020/upc_ons.rds"
-standard$popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
-standard$additional_births_path <- NULL
+standard$popn_adjustment_path <- NULL
+standard$external_births_path <- NULL
+standard$external_deaths_path <- "input_data/mortality/external_deaths_2021.rds"
+
 
 #-------------------------------------------------------------------------------
 #Household model
@@ -68,9 +70,16 @@ if(standard_covid_migration){
   domestic_rates <- mig[[3]]
 }
 
-if(!"additional_births_path" %in% ls()){
-  additional_births_path <- NULL
+if(!"external_births_path" %in% ls()){
+  external_births_path <- NULL
 }
+if(!"external_deaths_path" %in% ls()){
+  external_deaths_path <- NULL
+}
+if(!"popn_adjustment_path" %in% ls()){
+  popn_adjustment_path <- NULL
+}
+
 
 #-------------------------------------------------------------------------------
 
@@ -89,8 +98,9 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   upc_mye_path = upc_mye_path,
   popn_adjustment_path = popn_adjustment_path,
-  additional_births_path = additional_births_path,
-  
+  external_births_path = external_births_path,
+  external_deaths_path = external_deaths_path,
+
   mortality_rates = mortality_rates,
   fertility_rates = fertility_rates,
   int_out_flows_rates = int_out_flows_rates,

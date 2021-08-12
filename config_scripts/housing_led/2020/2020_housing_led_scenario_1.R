@@ -8,7 +8,7 @@ library(smallareamodel)
 
 #Borough Model config
 first_proj_yr <- 2021
-n_proj_yr <- 30
+n_proj_yr <- 3
 projection_name <- "2020_test"
 
 #Paths
@@ -18,9 +18,10 @@ trend_households_file <- "dclg_stage_1_households.rds"
 ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
 dev_trajectory_path <- "input_data/housing_led_model/borough_2019_based_savills.rds"
 external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
-popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
+popn_adjustment_path <- NULL #"input_data/scenario_data/covid19_deaths.rds"
 fertility_rates_path <- "input_data/fertility/fert_rates_5yr_trend_2020.rds"
-additional_births_path <- NULL #"input_data/fertility/provisional_births_2020_EW.rds"
+external_births_path <- NULL #"input_data/fertility/provisional_births_2020_EW.rds"
+external_deaths_path <- "input_data/mortality/external_deaths_2021.rds"
 output_dir <- paste0("outputs/housing_led/2020/",projection_name,"_",format(Sys.time(), "%y-%m-%d_%H%M"),"/")
 
 #other parameters
@@ -60,7 +61,8 @@ config_list <- list(
   domestic_rates = domestic_rates,
   constrain_projection = constrain_projection,
   ahs_method = ahs_method,
-  additional_births_path = additional_births_path,
+  external_births_path = external_births_path,
+  external_deaths_path = external_deaths_path,
   fertility_rates_path = fertility_rates_path,
   popn_adjustment_path = popn_adjustment_path)
 
@@ -73,7 +75,7 @@ rm(list=setdiff(ls(),"config_list"))
 #WARD SETUP
 
 first_proj_yr <- 2020
-n_proj_yr <- 31
+n_proj_yr <- 4
 projection_name <- config_list$projection_name
 
 #Other parameters
@@ -143,6 +145,7 @@ msoa_config_list$small_area_dev_trajectory_path <- "input_data/small_area_model/
 rm(list = setdiff(ls(), c("config_list","ward_config_list","msoa_config_list")))
 devtools::load_all("model_code/housingledmodel")
 devtools::load_all("model_code/smallareamodel")
+
 projection <- run_housing_led_model(config_list)
 ward_projection <- run_small_area_model(ward_config_list)
 msoa_projection <- run_small_area_model(msoa_config_list)

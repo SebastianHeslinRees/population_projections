@@ -36,8 +36,10 @@
 #' @param constrain_projection Logical. If \code{TRUE} then the projection will
 #'   be constrained (at the borough level for components and at hma level for
 #'   population totals.) If \code{FALSE} the model is run unconstrained.
-#' @param actual_births A dataframe containing actual births data to be used in
+#' @param external_births A dataframe containing actual births data to be used in
 #'   core in place of calculated births
+#' @param external_deaths A dataframe containing actual deaths data to be used in
+#'   core in place of calculated deaths
 #'
 #' @return A list where each element is a data frame containing either projected population or
 #' projected components of change.
@@ -62,7 +64,8 @@ housing_led_core <- function(start_population,
                              ahs_method,
                              ldd_final_yr,
                              constrain_projection,
-                             actual_births){
+                             external_births,
+                             external_deaths){
   
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
@@ -107,16 +110,25 @@ housing_led_core <- function(start_population,
   }
   
   #Overwrite births if there are actuals for the projection year
-  if(!is.null(actual_births)){
-    actual_births <- filter(actual_births, gss_code %in% constrain_gss)
+  if(!is.null(external_births)){
     births <- trend_projection[['births']] %>%
       select(year, gss_code, age, sex, births) %>% 
-      filter(!gss_code %in% actual_births$gss_code) %>%
-      rbind(actual_births)
+      filter(!gss_code %in% external_births$gss_code) %>%
+      rbind(external_births) %>% 
+      filter(gss_code %in% constrain_gss)
+  }
+  
+  if(!is.null(external_deaths)){
+    deaths <- trend_projection[['deaths']] %>%
+      select(year, gss_code, age, sex, deaths) %>% 
+      filter(!gss_code %in% external_deaths$gss_code) %>%
+      rbind(external_deaths) %>% 
+      filter(gss_code %in% constrain_gss)
   }
   
 
   if(is.null(trend_projection[['upc']])) {
+    
     initial_population <- aged_on_population %>%
       construct_popn_from_components(addition_data = list(births,
                                                           trend_projection[['int_in']],
@@ -298,6 +310,7 @@ housing_led_core <- function(start_population,
     rbind(areas_with_no_housing_data[['population']]) 
   
   #Join the non-adjusted components data back to the adjusted
+
   births <- rbind(births, areas_with_no_housing_data[['births']])
   deaths <- rbind(deaths, areas_with_no_housing_data[['deaths']])
   int_out <- rbind(int_out, areas_with_no_housing_data[['int_out']])

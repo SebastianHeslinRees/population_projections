@@ -76,6 +76,10 @@ arrange_housing_led_core_outputs <- function(projection, trend_projection, first
                       age = 0:90,
                       fill = list(upc = 0)) %>% 
       data.frame()
+  } else {
+    upc <- proj_popn %>% 
+      mutate(upc = 0) %>% 
+      select(-popn)
   }
   
   projection <- list(population = proj_popn,

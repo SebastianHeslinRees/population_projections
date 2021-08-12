@@ -15,9 +15,10 @@ standard$n_proj_yr <- 30
 standard$communal_est_file <- "dclg_communal_est_population.rds"
 standard$trend_households_file <- "dclg_stage_1_households.rds"
 standard$ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
-standard$popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
+standard$popn_adjustment_path <- NULL
 standard$external_ahs_trajectory_path <- paste0(external_trend_path, "households/dclg_ahs.rds")
-standard$additional_births_path <- NULL
+standard$external_births_path <- NULL
+standard$external_deaths_path <- "input_data/mortality/external_deaths_2021.rds"
 standard$fertility_rates_path <- "input_data/fertility/fert_rates_5yr_trend_2020.rds"
 
 #-------------------------------------------------------------------------------
@@ -57,8 +58,14 @@ if(standard_covid_migration){
   domestic_rates <- mig[[3]]
 }
 
-if(!"additional_births_path" %in% ls()){
-  additional_births_path <- NULL
+if(!"external_births_path" %in% ls()){
+  external_births_path <- NULL
+}
+if(!"external_deaths_path" %in% ls()){
+  external_deaths_path <- NULL
+}
+if(!"popn_adjustment_path" %in% ls()){
+  popn_adjustment_path <- NULL
 }
 
 #-------------------------------------------------------------------------------
@@ -82,7 +89,8 @@ config_list <- list(
   domestic_rates = domestic_rates,
   constrain_projection = constrain_projection,
   ahs_method = ahs_method,
-  additional_births_path = additional_births_path,
+  external_births_path = external_births_path,
+  external_deaths_path = external_deaths_path,
   fertility_rates_path = fertility_rates_path,
   popn_adjustment_path = popn_adjustment_path)
 
@@ -104,7 +112,6 @@ standard$projection_type <- "ward"
 
 #-------------------------------------------------------------------------------
 #Input data paths
-
 standard$small_area_popn_estimates_path <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
 standard$small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds"
 standard$small_area_births_backseries_path <- "input_data/small_area_model/ward_data/ward_births.rds"

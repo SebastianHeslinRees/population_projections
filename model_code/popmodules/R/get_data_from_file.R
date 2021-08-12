@@ -4,6 +4,8 @@
 #'  name is the name of the list element to write the data to
 #'
 #' @return List of dataframes
+#' 
+#' @importFrom assertthat assert_that
 #'
 #' @export
 #'
@@ -19,13 +21,19 @@
 #' }
 
 get_data_from_file <- function(files) {
-
+  
   x <- list()
-
+  
   for(i in seq(files)){
+    
+    assert_that(file.exists(files[[i]]),
+                msg = paste0(names(files)[[i]], ": ", files[[i]],
+                             "\nFile does not exist at specified path"))
+    
+    
     x[[names(files)[[i]]]] <- readRDS(files[[i]])
   }
-
+  
   return(x)
-
+  
 }

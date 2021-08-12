@@ -54,6 +54,7 @@ source("input_data_scripts/fertility/fertility_rates_2020_(2021 geog).R")
 source("input_data_scripts/mortality/mortality_rates_2020_(2021 geog).R")
 #source("input_data_scripts/fertility/additional_births_2019-based.R")
 source("input_data_scripts/scenario_data/covid_scenario_deaths.R")
+source("input_data_scripts/mortality/external_deaths_2021.R")
 
 #2020-based migration rates and flows
 source("input_data_scripts/scenario_data/domestic_rates_for_2020_projections.R")

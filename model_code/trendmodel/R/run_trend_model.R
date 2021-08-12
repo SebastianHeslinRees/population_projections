@@ -33,7 +33,8 @@ run_trend_model <- function(config_list) {
                        "dom_in_mye_path",
                        "upc_mye_path",
                        "popn_adjustment_path",
-                       "additional_births_path",
+                       "external_births_path",
+                       "external_deaths_path",
                        "mortality_rates",
                        "fertility_rates",
                        "int_out_flows_rates",
@@ -113,11 +114,18 @@ run_trend_model <- function(config_list) {
     popn_adjustment <- NULL
   }
   
-  if(!is.null(config_list$additional_births_path)){
-    additional_births <-  readRDS(config_list$additional_birth_path)
+  if(!is.null(config_list$external_births_path)){
+    external_births <-  readRDS(config_list$additional_birth_path)
   } else {
-    additional_births <- NULL
+    external_births <- NULL
   }
+  
+  if(!is.null(config_list$external_deaths_path)){
+    external_deaths <- readRDS(config_list$external_deaths_path)
+  } else {
+    external_deaths <- NULL
+  }
+  
   
   # get the projected rates
   message("get projected rates")
@@ -166,7 +174,8 @@ run_trend_model <- function(config_list) {
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              dom_out, dom_in, popn_adjustment, upc_mye,
                              fertility_rates, mortality_rates,
-                             additional_births,
+                             external_births,
+                             external_deaths,
                              int_out_flows_rates,
                              first_proj_yr, config_list$n_proj_yr,
                              config_list$int_out_method)
@@ -178,10 +187,16 @@ run_trend_model <- function(config_list) {
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     
-    if(!is.null(additional_births) & projection_year %in% unique(additional_births$year)){
-      curr_yr_additional_births <- filter(additional_births, year == projection_year)
+    if(!is.null(external_births) & projection_year %in% unique(external_births$year)){
+      curr_yr_external_births <- filter(external_births, year == projection_year)
     } else {
-      curr_yr_additional_births <- NULL
+      curr_yr_external_births <- NULL
+    }
+    
+    if(!is.null(external_deaths) & projection_year %in% unique(external_deaths$year)){
+      curr_yr_external_deaths <- filter(external_deaths, year == projection_year)
+    } else {
+      curr_yr_external_deaths <- NULL
     }
     
     if(is.null(popn_adjustment)){
@@ -222,7 +237,8 @@ run_trend_model <- function(config_list) {
       start_population = curr_yr_popn,
       fertility_rates = curr_yr_fertility,
       mortality_rates = curr_yr_mortality,
-      additional_births = curr_yr_additional_births,
+      external_births = curr_yr_external_births,
+      external_deaths = curr_yr_external_deaths,
       int_out_flows_rates = curr_yr_int_out,
       int_in_flows = curr_yr_int_in,
       domestic_rates = curr_yr_domestic_rates,
@@ -296,8 +312,9 @@ run_trend_model <- function(config_list) {
 
 # do checks on the input data
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, popn_adjustment,
-                                       upc_mye, fertility_rates, mortality_rates, additional_births, int_out_flows_rates,
-                                       first_proj_yr, n_proj_yr, int_out_method) {
+                                       upc_mye, fertility_rates, mortality_rates, external_births, external_deaths,
+                                       int_out_flows_rates, first_proj_yr, n_proj_yr, int_out_method) {
+
   
   validate_population(population, col_data = "popn",
                       test_complete = TRUE,
@@ -350,14 +367,21 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
     validate_population(popn_adjustment, col_data = "upc",
                         test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
+  
   if(!is.null(upc_mye)) {
     validate_population(upc_mye, col_data = "upc",
                         test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
-  if(!is.null(additional_births)){
-    validate_population(additional_births, col_data = "births",
+  
+  if(!is.null(external_births)){
+    validate_population(external_births, col_data = "births",
                         test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                         col_aggregation = c("year", "gss_code"))
+  }
+  
+  if(!is.null(external_deaths)){
+    validate_population(external_deaths, col_data = "deaths",
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   }
   
   validate_population(fertility_rates, col_data = "rate",

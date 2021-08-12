@@ -13,8 +13,9 @@ int_in_mye_path <-  "input_data/mye/2020/int_in_ons.rds"
 dom_out_mye_path <- "input_data/domestic_migration/2020/domestic_migration_out_(2021_geog).rds"
 dom_in_mye_path <- "input_data/domestic_migration/2020/domestic_migration_in_(2021_geog).rds"
 upc_mye_path <- "input_data/mye/2020/upc_ons.rds"
-popn_adjustment_path <- "input_data/scenario_data/covid19_deaths.rds"
-additional_births_path <- NULL
+popn_adjustment_path <- NULL
+external_births_path <- NULL
+external_deaths_path <- "input_data/mortality/external_deaths_2021.rds"
 
 int_out_flow_or_rate <- "flow"
 
@@ -43,7 +44,6 @@ fertility_rates <- "input_data/fertility/fert_rates_5yr_trend_2020.rds"
 #-----------------------------------------------------
 
 int_out_flows_rates <- list(
-
   '2021' = list(path =  "input_data/scenario_data/2020_int_out_scenario_1_yr_2021.rds",
                 transition = F),
   '2022' = list(path = "input_data/scenario_data/2020_int_out_scenario_1_yr_2022.rds",
@@ -58,7 +58,6 @@ int_in  <- list(
                 transition = F),
   '2022' = list(path = "input_data/scenario_data/2020_int_in_scenario_1_yr_2022.rds",
                 transition = T),
-
   '2028' = list(path = "input_data/scenario_data/2019_int_in_10yr_avg.rds",
                 transition = F))
 #-------------------------------------------------------------------------------
@@ -91,8 +90,8 @@ config_list <- list(
   dom_in_mye_path = dom_in_mye_path,
   upc_mye_path = upc_mye_path,
   popn_adjustment_path = popn_adjustment_path,
-  additional_births_path = additional_births_path,
-
+  external_births_path = external_births_path,
+  external_deaths_path = external_deaths_path,
   mortality_rates = mortality_rates,
   fertility_rates = fertility_rates,
   int_out_flows_rates = int_out_flows_rates,

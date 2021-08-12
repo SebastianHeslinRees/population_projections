@@ -92,3 +92,11 @@
   }
   return(dftarget)
 }
+
+#A function to check if a file path ends with a slash and add one if not
+.add_slash <- function(x){
+  if(substr(x,nchar(x),nchar(x)) != "/"){
+    x <- paste0(x,"/")
+  }
+  return(x)
+}

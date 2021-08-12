@@ -43,12 +43,16 @@
 #' @export
 
 trend_core <- function(start_population,
-                       fertility_rates, mortality_rates,
-                       additional_births = NULL,
-                       int_out_flows_rates, int_in_flows,
+                       fertility_rates,
+                       mortality_rates,
+                       external_births = NULL,
+                       external_deaths = NULL,
+                       int_out_flows_rates,
+                       int_in_flows,
                        domestic_rates,
                        int_out_method,
-                       constraints = NULL, popn_adjustment = NULL,
+                       constraints = NULL,
+                       popn_adjustment = NULL,
                        projection_year,
                        region_lookup) {
   
@@ -65,7 +69,7 @@ trend_core <- function(start_population,
   
   birthratio_m2f <- 1.05
   
-  if(is.null(additional_births)){
+  if(is.null(external_births)){
     
     births_by_mother <- apply_rate_to_population(aged_popn,
                                                  filter(fertility_rates, age != 0),
@@ -82,7 +86,7 @@ trend_core <- function(start_population,
     
   } else {
     
-    births <- sum_births_and_split_by_sex_ratio(additional_births, birthratio_m2f)
+    births <- sum_births_and_split_by_sex_ratio(external_births, birthratio_m2f)
     
   }
   
@@ -94,11 +98,18 @@ trend_core <- function(start_population,
                       check_negative_values = TRUE,
                       comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   
-  deaths <- apply_rate_to_population(popn = aged_popn_w_births,
-                                     popn_rate = mortality_rates,
-                                     col_popn = "popn",
-                                     col_rate = "rate",
-                                     col_out = "deaths")
+  if(!is.null(external_deaths)){
+    
+    deaths <- external_deaths
+    
+  } else {
+    
+    deaths <- apply_rate_to_population(popn = aged_popn_w_births,
+                                       popn_rate = mortality_rates,
+                                       col_popn = "popn",
+                                       col_rate = "rate",
+                                       col_out = "deaths")
+  }
   
   validate_population(deaths, col_data = "deaths",
                       test_complete = TRUE,
@@ -120,7 +131,8 @@ trend_core <- function(start_population,
   
   natural_change_popn <- left_join(aged_popn_w_births, deaths, by=c("year","gss_code","sex","age")) %>%
     mutate(popn = popn - deaths) %>%
-    select(-deaths)
+    select(-deaths) %>% 
+    check_negative_values(data_col = "popn")
   
   if(int_out_method=="flow"){
     int_out <- int_out_flows_rates
@@ -169,7 +181,7 @@ trend_core <- function(start_population,
     
     int_in$country <- NULL
   }
-  
+
   domestic_flow <- natural_change_popn %>%
     apply_domestic_migration_rates(mign_rate = domestic_rates,
                                    col_aggregation = c("gss_code"="gss_out", "sex", "age"),

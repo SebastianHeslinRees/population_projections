@@ -39,7 +39,8 @@ run_housing_led_model <- function(config_list){
                        "constrain_projection",
                        "domestic_rates",
                        "ahs_method",
-                       "additional_births_path",
+                       "external_births_path",
+                       "external_deaths_path",
                        "fertility_rates_path",
                        "last_data_yr",
                        "popn_adjustment_path")
@@ -52,7 +53,7 @@ run_housing_led_model <- function(config_list){
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
   last_proj_yr <- config_list$first_proj_yr + config_list$n_proj_yr - 1
-  
+
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -71,7 +72,7 @@ run_housing_led_model <- function(config_list){
   
   external_trend_households_path <- paste0(config_list$external_trend_path,"households/",config_list$trend_households_file)
   external_communal_est_path <- paste0(config_list$external_trend_path,"households/",config_list$communal_est_file)
-  
+
   #component rates
   component_rates <- get_data_from_file(
     list(fertility_rates = config_list$fertility_rates_path,
@@ -82,12 +83,18 @@ run_housing_led_model <- function(config_list){
   component_rates$fertility_rates <- complete_fertility(component_rates$fertility_rates,
                                                         component_rates$mortality_rates)
   
-  if(!is.null(config_list$additional_births_path)){
-    additional_births <- get_data_from_file(list(additional_births = config_list$additional_births_path)) %>%
-      data.table::rbindlist() %>% 
+  if(!is.null(config_list$external_births_path)){
+    external_births <- readRDS(config_list$external_births_path) %>%
       as.data.frame()
   } else {
-    additional_births <- NULL
+    external_births <- NULL
+  }
+  
+  if(!is.null(config_list$external_deaths_path)){
+    external_deaths <- readRDS(config_list$external_deaths_path) %>%
+      as.data.frame()
+  } else {
+    external_deaths <- NULL
   }
   
   #domestic rates
@@ -213,12 +220,7 @@ run_housing_led_model <- function(config_list){
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <- last_proj_yr
-  if(exists("additional_births")) {
-    additional_births_years <- unique(additional_births$year)
-  } else {
-    additional_births_years <- 0
-  }
-  
+
   region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
   projection <- list()
@@ -238,7 +240,8 @@ run_housing_led_model <- function(config_list){
                                          config_list$ahs_method,
                                          household_trajectory_static,
                                          household_trajectory_adjusted,
-                                         additional_births)
+                                         external_births,
+                                         external_deaths)
   
   for(projection_year in first_proj_yr:last_proj_yr){
   
@@ -250,10 +253,16 @@ run_housing_led_model <- function(config_list){
     curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
     curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
     
-    if(projection_year %in% additional_births_years){
-      curr_yr_actual_births <- filter(additional_births, year == projection_year)
+    if(!is.null(external_births) & projection_year %in% external_births$year){
+      curr_yr_external_births <- filter(external_births, year == projection_year)
     } else {
-      curr_yr_actual_births <- NULL
+      curr_yr_external_births <- NULL
+    }
+    
+    if(!is.null(external_deaths) & projection_year %in% external_deaths$year){
+      curr_yr_external_deaths <- filter(external_deaths, year == projection_year)
+    } else {
+      curr_yr_external_deaths <- NULL
     }
     
     if(config_list$constrain_projection){
@@ -278,7 +287,8 @@ run_housing_led_model <- function(config_list){
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility, 
                                                       mortality_rates = curr_yr_mortality,
-                                                      additional_births = curr_yr_actual_births,
+                                                      external_births = curr_yr_external_births,
+                                                      external_deaths = curr_yr_external_deaths,
                                                       int_out_flows_rates = curr_yr_int_out,
                                                       int_in_flows = curr_yr_int_in_flows,
                                                       domestic_rates = curr_yr_domestic_rates,
@@ -303,7 +313,8 @@ run_housing_led_model <- function(config_list){
                                                       ahs_method = config_list$ahs_method,
                                                       ldd_final_yr = config_list$ldd_final_yr,
                                                       constrain_projection = curr_yr_constrain,
-                                                      actual_births = curr_yr_actual_births)
+                                                      external_births = curr_yr_external_births,
+                                                      external_deaths = curr_yr_external_deaths)
     
     ahs_cap <- projection[[projection_year]][['ahs_cap']]
     curr_yr_popn <- projection[[projection_year]][['population']]
@@ -346,7 +357,8 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
                                                    ahs_method,
                                                    household_trajectory_static,
                                                    household_trajectory_adjusted,
-                                                   additional_births){
+                                                   external_births,
+                                                   external_deaths){
   
   assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
@@ -391,8 +403,12 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
                         test_complete = FALSE, check_negative_values = FALSE,
                         test_unique = TRUE)
   }
-  if(!is.null(additional_births)) {
-    validate_population(additional_births, col_data = "births", test_complete = FALSE,
+  if(!is.null(external_births)) {
+    validate_population(external_births, col_data = "births", test_complete = FALSE,
+                        test_unique = TRUE, check_negative_values = TRUE)
+  }
+  if(!is.null(external_deaths)) {
+    validate_population(external_deaths, col_data = "deaths", test_complete = FALSE,
                         test_unique = TRUE, check_negative_values = TRUE)
   }
   validate_population(household_trajectory_static, col_aggregation = c("gss_code", "year"),
