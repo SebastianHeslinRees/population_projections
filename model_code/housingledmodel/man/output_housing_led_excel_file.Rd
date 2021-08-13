@@ -2,14 +2,13 @@
 % Please edit documentation in R/output_housing_led_excel_files.R
 \name{output_housing_led_excel_file}
 \alias{output_housing_led_excel_file}
-\title{Create the 2019-based projection excel output}
+\title{Create the 2020-based housing-led projection excel output}
 \usage{
 output_housing_led_excel_file(
   data,
   output_dir,
   projection_name,
-  popn_adjustment_path,
-  file_suffix = "_2019.xlsx"
+  file_suffix = ".xlsx"
 )
 }
 \arguments{
@@ -19,11 +18,9 @@ output_housing_led_excel_file(
 
 \item{projection_name}{The name of the output Excel file}
 
-\item{popn_adjustment_path}{path to the population adjustment RDS file}
-
 \item{file_suffix}{A string to append to the end of the file name}
 }
 \description{
 Process population, components and development data and place it into an
-Excel template.
+Excel template. London borough data.
 }

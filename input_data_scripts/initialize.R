@@ -6,6 +6,9 @@ devtools::document('model_code/popmodules')
 devtools::install('model_code/popmodules', dependencies = FALSE)
 popmodules::install_gla_models()
 
+#python
+reticulate::py_install(c("pandas","openpyxl"))
+
 #-------------------------------------------------------------------------------
 
 #Create directories
