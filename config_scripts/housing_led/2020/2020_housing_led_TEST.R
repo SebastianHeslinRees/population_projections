@@ -20,8 +20,6 @@ domestic_rates <- list(
 
 source('config_scripts/housing_led/2020/standard_2020_housingled_parameters.R')
 
-#load_gla_models()
-#devtools::load_all('model_code/housingledmodel')
 projection <- run_housing_led_model(config_list)
 ward_projection <- run_small_area_model(ward_config_list)
 msoa_projection <- run_small_area_model(msoa_config_list)
