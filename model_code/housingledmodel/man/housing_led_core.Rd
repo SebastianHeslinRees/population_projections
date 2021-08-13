@@ -20,7 +20,8 @@ housing_led_core(
   ahs_method,
   ldd_final_yr,
   constrain_projection,
-  actual_births
+  external_births,
+  external_deaths
 )
 }
 \arguments{
@@ -71,8 +72,11 @@ is available.}
 be constrained (at the borough level for components and at hma level for
 population totals.) If \code{FALSE} the model is run unconstrained.}
 
-\item{actual_births}{A dataframe containing actual births data to be used in
+\item{external_births}{A dataframe containing actual births data to be used in
 core in place of calculated births}
+
+\item{external_deaths}{A dataframe containing actual deaths data to be used in
+core in place of calculated deaths}
 }
 \value{
 A list where each element is a data frame containing either projected population or

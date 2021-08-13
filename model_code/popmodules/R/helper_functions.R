@@ -93,7 +93,14 @@
   return(dftarget)
 }
 
-#A function to check if a file path ends with a slash and add one if not
+#' #A function to check if a file path ends with a slash and add one if not
+#'
+#' @param x A Character string
+#'
+#' @return The input string with a slash (`/`) on the end
+#'
+#' @export
+
 .add_slash <- function(x){
   if(substr(x,nchar(x),nchar(x)) != "/"){
     x <- paste0(x,"/")

@@ -9,7 +9,8 @@ trend_core(
   start_population,
   fertility_rates,
   mortality_rates,
-  additional_births = NULL,
+  external_births = NULL,
+  external_deaths = NULL,
   int_out_flows_rates,
   int_in_flows,
   domestic_rates,
@@ -29,6 +30,12 @@ to be applied to the population}
 
 \item{mortality_rates}{A data frame. A set of age/sex-specific mortality
 probabilities to be applied to the population}
+
+\item{external_births}{A dataframe containing additional births data beyond
+the last data year available in the mid-estimates. Default NULL}
+
+\item{external_deaths}{A dataframe containing additional deaths data beyond
+the last data year available in the mid-estimates Default NULL}
 
 \item{int_out_flows_rates}{A data frame. A set of international out migration
 rates to be applied to the population, or a set of international out flow
@@ -52,7 +59,7 @@ adjustment is being applied this is set to NULL. Default \code{NULL}}
 
 \item{projection_year}{Numeric. The year being projected}
 
-\item{region_lookup}{Dataframe A lookup between LAD gss codes and region
+\item{region_lookup}{A data frame. A lookup between LAD gss codes and region
 gss codes}
 }
 \value{

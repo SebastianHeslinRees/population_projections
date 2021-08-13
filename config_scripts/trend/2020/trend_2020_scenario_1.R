@@ -92,6 +92,7 @@ config_list <- list(
   popn_adjustment_path = popn_adjustment_path,
   external_births_path = external_births_path,
   external_deaths_path = external_deaths_path,
+
   mortality_rates = mortality_rates,
   fertility_rates = fertility_rates,
   int_out_flows_rates = int_out_flows_rates,
@@ -117,4 +118,3 @@ rm(list = setdiff(ls(), "config_list"))
 devtools::load_all('model_code/popmodules')
 devtools::load_all('model_code/trendmodel')
 projection <- run_trend_model(config_list)
-

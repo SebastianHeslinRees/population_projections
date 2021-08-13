@@ -115,18 +115,18 @@ run_trend_model <- function(config_list) {
   }
   
   if(!is.null(config_list$external_births_path)){
-    external_births <-  readRDS(config_list$additional_birth_path)
+    external_births <-  readRDS(config_list$external_births_path)
   } else {
     external_births <- NULL
   }
   
+
   if(!is.null(config_list$external_deaths_path)){
     external_deaths <- readRDS(config_list$external_deaths_path)
   } else {
     external_deaths <- NULL
   }
-  
-  
+
   # get the projected rates
   message("get projected rates")
   
@@ -305,7 +305,10 @@ run_trend_model <- function(config_list) {
   deactivate_log(paste0(config_list$output_dir,"warnings.log"))
   
   return(projection)
+
 }
+  
+
 
 
 #===============================================================================
@@ -315,7 +318,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                                        upc_mye, fertility_rates, mortality_rates, external_births, external_deaths,
                                        int_out_flows_rates, first_proj_yr, n_proj_yr, int_out_method) {
 
-  
+
   validate_population(population, col_data = "popn",
                       test_complete = TRUE,
                       test_unique = TRUE,
@@ -373,12 +376,14 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                         test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
   
+
   if(!is.null(external_births)){
     validate_population(external_births, col_data = "births",
                         test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
                         col_aggregation = c("year", "gss_code"))
   }
   
+
   if(!is.null(external_deaths)){
     validate_population(external_deaths, col_data = "deaths",
                         test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)

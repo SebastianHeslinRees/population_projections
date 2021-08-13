@@ -12,6 +12,10 @@
 #'   to be applied to the population
 #' @param mortality_rates A data frame. A set of age/sex-specific mortality
 #'   probabilities to be applied to the population
+#' @param external_births A dataframe containing additional births data beyond
+#'   the last data year available in the mid-estimates. Default NULL
+#' @param external_deaths A dataframe containing additional deaths data beyond
+#'   the last data year available in the mid-estimates Default NULL
 #' @param int_out_flows_rates A data frame. A set of international out migration
 #'   rates to be applied to the population, or a set of international out flow
 #'   totals to be subtracted from the population
@@ -27,7 +31,7 @@
 #' @param popn_adjustment A data frame. Population adjustment component (UPC). If no
 #'   adjustment is being applied this is set to NULL. Default \code{NULL}
 #' @param projection_year Numeric. The year being projected
-#' @param region_lookup Dataframe A lookup between LAD gss codes and region
+#' @param region_lookup A data frame. A lookup between LAD gss codes and region
 #'   gss codes
 #'
 #' @return A list where each element is a data frame containing either projected
@@ -98,10 +102,11 @@ trend_core <- function(start_population,
                       check_negative_values = TRUE,
                       comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   
+
   if(!is.null(external_deaths)){
     
     deaths <- external_deaths
-    
+
   } else {
     
     deaths <- apply_rate_to_population(popn = aged_popn_w_births,

@@ -50,5 +50,6 @@ globalVariables(c(
   'covid_deaths',
   'migration',
   'scenario',
-  'resource_title'
+  'resource_title',
+  'adjustment'
   ))

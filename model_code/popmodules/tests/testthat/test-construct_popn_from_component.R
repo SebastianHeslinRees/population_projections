@@ -54,7 +54,8 @@ output <- left_join(start_population, births, by = c("gss_code","sex","age")) %>
   left_join(dom_out, by = c("gss_code","sex","age")) %>%
   mutate(popn = popn + births - deaths + int_in - int_out + dom_in - dom_out) %>%
   select(gss_code, sex, age, popn) %>%
-  arrange(gss_code, sex, age)
+  arrange(gss_code, sex, age) %>% 
+  data.frame()
 
 
 constructed <- construct_popn_from_components(start_population = start_population,

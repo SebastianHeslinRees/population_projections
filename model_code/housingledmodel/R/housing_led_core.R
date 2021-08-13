@@ -66,7 +66,7 @@ housing_led_core <- function(start_population,
                              constrain_projection,
                              external_births,
                              external_deaths){
-  
+
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
   
@@ -126,7 +126,6 @@ housing_led_core <- function(start_population,
       filter(gss_code %in% constrain_gss)
   }
   
-
   if(is.null(trend_projection[['upc']])) {
     
     initial_population <- aged_on_population %>%

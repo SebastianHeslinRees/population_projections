@@ -9,6 +9,8 @@ standard <- list()
 standard$first_proj_yr <- 2021
 standard$n_proj_yr <- 30
 
+external_trend_path <- .add_slash(external_trend_path)
+
 #-------------------------------------------------------------------------------
 #Input data paths
 
@@ -61,8 +63,10 @@ if(standard_covid_migration){
 if(!"external_births_path" %in% ls()){
   external_births_path <- NULL
 }
+
 if(!"external_deaths_path" %in% ls()){
   external_deaths_path <- NULL
+
 }
 if(!"popn_adjustment_path" %in% ls()){
   popn_adjustment_path <- NULL
@@ -112,6 +116,7 @@ standard$projection_type <- "ward"
 
 #-------------------------------------------------------------------------------
 #Input data paths
+
 standard$small_area_popn_estimates_path <- "input_data/small_area_model/ward_data/ward_population_estimates.rds"
 standard$small_area_communal_est_popn_path  <- "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds"
 standard$small_area_births_backseries_path <- "input_data/small_area_model/ward_data/ward_births.rds"
@@ -180,3 +185,4 @@ msoa_config_list <- convert_ward_config_to_msoa_config(ward_config_list)
 #-------------------------------------------------------------------------------
 
 rm(list = setdiff(ls(), c("config_list","ward_config_list","msoa_config_list")))
+

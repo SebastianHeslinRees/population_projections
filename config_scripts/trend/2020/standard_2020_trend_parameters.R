@@ -24,7 +24,6 @@ standard$popn_adjustment_path <- NULL
 standard$external_births_path <- NULL
 standard$external_deaths_path <- "input_data/mortality/external_deaths_2021.rds"
 
-
 #-------------------------------------------------------------------------------
 #Household model
 
@@ -73,13 +72,14 @@ if(standard_covid_migration){
 if(!"external_births_path" %in% ls()){
   external_births_path <- NULL
 }
+
 if(!"external_deaths_path" %in% ls()){
   external_deaths_path <- NULL
+
 }
 if(!"popn_adjustment_path" %in% ls()){
   popn_adjustment_path <- NULL
 }
-
 
 #-------------------------------------------------------------------------------
 
@@ -121,7 +121,3 @@ config_list <- list(
 )
 
 rm(list = setdiff(ls(), "config_list"))
-
-
-
-

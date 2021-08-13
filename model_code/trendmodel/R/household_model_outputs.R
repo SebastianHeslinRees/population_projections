@@ -107,7 +107,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
       
     } else {
       #ons excel file can be written
-      wb <- xlsx::loadWorkbook("input_data/excel_templates/household_template.xlsx")
+      wb <- xlsx::loadWorkbook("input_data/excel_templates/household_template_2020.xlsx")
       wb_sheets<- xlsx::getSheets(wb)
       
       xlsx::addDataFrame(output_dataframes[[1]], wb_sheets$`stage 1 households`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)

@@ -47,13 +47,17 @@ run_housing_led_model <- function(config_list){
   
   
   validate_config_list(config_list, expected_config)
+  assert_that(length(config_list$external_trend_path)==1,
+              msg=paste0("external_trend_path must be a single value:\n",
+                        paste(config_list$external_trend_path, collapse = "\n")))
   
   #Create output directory, warnings log and config log
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
   last_proj_yr <- config_list$first_proj_yr + config_list$n_proj_yr - 1
-
+  config_list$external_trend_path <- .add_slash(config_list$external_trend_path)
+  
   create_constraints <- function(dfs, col_aggregation=c("year","gss_code")){
     
     for(i in seq(dfs)){
@@ -72,7 +76,7 @@ run_housing_led_model <- function(config_list){
   
   external_trend_households_path <- paste0(config_list$external_trend_path,"households/",config_list$trend_households_file)
   external_communal_est_path <- paste0(config_list$external_trend_path,"households/",config_list$communal_est_file)
-
+  
   #component rates
   component_rates <- get_data_from_file(
     list(fertility_rates = config_list$fertility_rates_path,
@@ -220,7 +224,6 @@ run_housing_led_model <- function(config_list){
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <- last_proj_yr
-
   region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
   projection <- list()
@@ -243,8 +246,9 @@ run_housing_led_model <- function(config_list){
                                          external_births,
                                          external_deaths)
   
-  for(projection_year in first_proj_yr:last_proj_yr){
   
+  for(projection_year in first_proj_yr:last_proj_yr){
+    
     curr_yr_fertility <- filter(component_rates$fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(component_rates$mortality_rates, year == projection_year)
     curr_yr_int_out <- filter(component_rates$int_out_flows_rates, year == projection_year)
@@ -360,6 +364,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
                                                    external_births,
                                                    external_deaths){
   
+  
   assert_that(min(component_rates[['fertility_rates']]$year) <= first_proj_yr)
   assert_that(min(component_rates[['mortality_rates']]$year) <= first_proj_yr)
   assert_that(min(communal_establishment_population$year) <= first_proj_yr)
@@ -396,7 +401,7 @@ validate_housing_led_control_variables <- function(first_proj_yr, last_proj_yr,
     validate_population(component_rates[[i]],
                         col_aggregation = c("year", "gss_code", "age", "sex"),
                         col_data = col_data)
-
+    
   }
   if(!is.null(popn_adjustment)) {
     validate_population(popn_adjustment, col_data = "upc",
