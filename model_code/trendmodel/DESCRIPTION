@@ -7,7 +7,7 @@ Authors@R: c(
    person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = c("aut", "cre"))
    )
 Description: Functions required to project forward the UK population using the GLA Trend Model methodology.
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 License: Currently internal to the GLA - contact the authors with any questions
 Encoding: UTF-8
 LazyData: true

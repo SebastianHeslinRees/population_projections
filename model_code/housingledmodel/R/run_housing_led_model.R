@@ -223,14 +223,14 @@ run_housing_led_model <- function(config_list){
   #Other variables
   ahs_cap <- NULL
   first_proj_yr <- config_list$first_proj_yr
-  last_proj_yr <- last_proj_yr
   region_lookup <- readRDS("input_data/lookup/district_to_region.rds")
   
   projection <- list()
   trend_projection <- list()
   
   #check
-  validate_housing_led_control_variables(first_proj_yr, last_proj_yr,
+  validate_housing_led_control_variables(first_proj_yr,
+                                         last_proj_yr,
                                          curr_yr_popn,
                                          component_rates,
                                          popn_adjustment,

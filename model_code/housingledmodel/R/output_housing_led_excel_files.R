@@ -14,8 +14,7 @@
 #' 
 #' @export
 
-output_housing_led_excel_file <- function(data, output_dir, projection_name,
-                                          file_suffix = ".xlsx"){
+output_borough_excels <- function(data, output_dir, projection_name, file_suffix = ".xlsx"){
   
   prep_data <- function(x, col_aggregation = c("gss_code", "borough", "sex", "age")){
     
@@ -82,7 +81,5 @@ output_housing_led_excel_file <- function(data, output_dir, projection_name,
   dir.create(output_dir, showWarnings = FALSE)
   wb_filename <- paste0(output_dir, projection_name, file_suffix)
   xlsx::saveWorkbook(wb, wb_filename)
-  
-  
 
 }
