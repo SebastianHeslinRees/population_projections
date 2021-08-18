@@ -1,7 +1,18 @@
-#2020 trend projections
-#Standard variables
+#' Create a trend model config list using standard parameters for the 2020-based
+#' projections.
+#'
+#' @param params A named list of trend model parameters which will overwrite the
+#'   standard parameters
+#'
+#' @return A named config list ready for input into `run_trend_model`
+#'
 
-params <- ls()
+standard_trend_parameters <- function(params){
+  
+  assertthat::assert_that("projection_name" %in% names(params),
+                          msg = "projection_name must be specified")
+  
+  list2env(params, environment())
 standard <- list()
 
 #-------------------------------------------------------------------------------
@@ -120,4 +131,5 @@ config_list <- list(
   write_excel = write_excel
 )
 
-rm(list = setdiff(ls(), "config_list"))
+return(config_list)
+}

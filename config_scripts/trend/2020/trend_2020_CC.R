@@ -1,10 +1,9 @@
-#library(popmodules)
-#library(trendmodel)
+library(popmodules)
+library(trendmodel)
 
 #CC
 #Central International
 #Central Domestic
-
 
 projection_name <- "2020_CC"
 standard_covid_migration <- TRUE
@@ -28,9 +27,14 @@ domestic_rates <- list(
 
 #-------------------------------------------------------------------------------
 
-source('config_scripts/trend/2020/standard_2020_trend_parameters.R')
+source("config_scripts/trend/2020/standard_trend_parameters.R")
+
+config_list <- standard_trend_parameters(list(projection_name = projection_name,
+                                             standard_covid_migration = standard_covid_migration,
+                                             int_out_flows_rates = int_out_flows_rates,
+                                             int_in = int_in,
+                                             domestic_rates = domestic_rates))
+rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
-devtools::load_all('model_code/popmodules')
-devtools::load_all('model_code/trendmodel')
 projection <- run_trend_model(config_list)
