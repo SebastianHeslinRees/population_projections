@@ -156,8 +156,6 @@ housing_led_core <- function(start_population,
   
   #3. Calculate household population
   household_population <- lazy_dt(initial_population) %>%
-    #I think we were using the wrong population here - it should be the initial not the trend
-    #dtplyr::lazy_dt(trend_projection[['population']]) %>%
     group_by(gss_code, year) %>%
     summarise(popn = sum(popn)) %>%
     left_join(communal_establishment_population, by=c("gss_code","year")) %>%
@@ -299,6 +297,8 @@ housing_led_core <- function(start_population,
   
   #9. Add components from step 6 to domestic from step 8 & start population
   #Join the non-adjusted population data back to the adjusted
+  #This implicitly adds back in the communal establishment pop because we're
+  #rolling back to a point before it was removed
   unconstrained_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(births,
                                                         trend_projection[['int_in']],
@@ -307,7 +307,7 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
-  
+
   #Join the non-adjusted components data back to the adjusted
 
   births <- rbind(births, areas_with_no_housing_data[['births']])
@@ -349,6 +349,30 @@ housing_led_core <- function(start_population,
     
   }
   
+  #Recalculate the household population
+  household_population <- lazy_dt(output_population) %>%
+    filter(gss_code %in% communal_establishment_population$gss_code) %>% 
+    group_by(gss_code, year) %>%
+    summarise(popn = sum(popn)) %>%
+    left_join(communal_establishment_population, by=c("gss_code","year")) %>%
+    mutate(household_popn = popn - communal_est_popn) %>%
+    as.data.frame() %>%
+    validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+
+  summary <- left_join(households_2, household_population, by = c("gss_code","year")) %>% 
+    mutate(actual_ahs = household_popn/households) %>% 
+    left_join(ahs, by = c("gss_code", "year")) %>% 
+    rename(applied_ahs = ahs) %>% 
+    select(gss_code, year, popn, communal_est_popn,
+           household_popn, households, applied_ahs, actual_ahs)
+  
+  household_population <- household_population %>%
+    filter(gss_code %in% constrain_gss) %>%
+    select(-popn, -communal_est_popn)
+  
+  ahs <- select(summary, gss_code, year, ahs = actual_ahs)
+  
   return(list(population = output_population,
               births = births,
               deaths = deaths,
@@ -361,5 +385,6 @@ housing_led_core <- function(start_population,
               ahs_cap = ahs_cap,
               household_population = household_population,
               adjusted_domestic_migration = out_adjusted_dom,
-              unconstrained_population =  unconstrained_population))
+              unconstrained_population =  unconstrained_population,
+              summary = summary))
 }
