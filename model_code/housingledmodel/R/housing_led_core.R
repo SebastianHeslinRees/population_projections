@@ -66,7 +66,7 @@ housing_led_core <- function(start_population,
                              constrain_projection,
                              external_births,
                              external_deaths){
-
+  
   #1. GSS codes present in housing trajectory
   constrain_gss <- unique(households_1$gss_code)
   
@@ -162,15 +162,14 @@ housing_led_core <- function(start_population,
     mutate(household_popn = popn - communal_est_popn) %>%
     as.data.frame() %>%
     validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
-                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE) %>%
-    select(-popn, -communal_est_popn)
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   
   #4. Calculate trend AHS
   #Population divided by households_1
   #2011 dw2hh ratio
   curr_yr_trend_ahs <- left_join(households_1, household_population, by=c("year","gss_code")) %>%
     mutate(trend = household_popn/households) %>%
-    select(-household_popn, -households)
+    select(-household_popn, -households, -popn, -communal_est_popn)
   
   #Initially the ahs_cap is passed as NULL
   #In the year where the cap is set the variable is changed to be a dataframe of AHS values
@@ -210,56 +209,12 @@ housing_led_core <- function(start_population,
   }
   
   if(ahs_method == "tree"){
-    
-    #AHS decision tree
-    average_household_size <- external_ahs %>%
-      filter(gss_code %in% constrain_gss) %>%
-      rename(external = ahs) %>%
-      left_join(curr_yr_trend_ahs, by = c("year","gss_code"))
-    
-    if(projection_year <= ldd_final_yr){
-      if(is.null(ahs_cap)){
-        #before the max LDD data year always select the trend
-        average_household_size <- average_household_size %>%
-          mutate(cap = NA, ahs = trend, ahs_choice = "trend")
-      } else {
-        average_household_size <- average_household_size %>%
-          left_join(ahs_cap, by = "gss_code") %>%
-          mutate(ahs_choice = case_when(trend > cap ~ "cap",
-                                        trend <= cap ~ "trend"),
-                 ahs = case_when(trend > cap ~ cap,
-                                 trend <= cap ~ trend))
-      }
-    } else {
-      if(is.null(ahs_cap)){
-        #after LDD but before cap is set select the higher of the trend or external AHS
-        average_household_size <- average_household_size %>%
-          mutate(cap = NA,
-                 ahs_choice = case_when(trend > external ~ "trend",
-                                        external > trend ~ "external"),
-                 ahs = case_when(trend > external ~ trend,
-                                 external > trend ~ external))
-      } else {
-        average_household_size <- external_ahs %>%
-          filter(gss_code %in% constrain_gss) %>%
-          rename(external = ahs) %>%
-          left_join(curr_yr_trend_ahs, by = c("year","gss_code")) %>%
-          left_join(ahs_cap, by = "gss_code") %>%
-          mutate(ahs_choice = case_when(cap < trend ~ "cap",
-                                        cap < external ~ "cap",
-                                        trend > external ~ "trend",
-                                        external > trend ~ "external",
-                                        TRUE ~ "trend"),
-                 ahs = case_when(cap < trend ~ cap,
-                                 cap < external ~ cap,
-                                 trend > external ~ trend,
-                                 external > trend ~ external,
-                                 TRUE ~ trend))
-      }
-    }
-    
-    ahs_choice <- select(average_household_size, year, gss_code, external, cap, trend, ahs_choice)
-    ahs <- select(average_household_size, year, gss_code, ahs)
+
+    ahs <- ahs_decision_tree(external_ahs, curr_yr_trend_ahs, ahs_cap,
+                             projection_year, ldd_final_yr, constrain_gss)
+    ahs_choice <- ahs[[1]]
+    ahs_cap <- ahs[[3]]
+    ahs <- ahs[[2]]
     
   }
   
@@ -278,13 +233,14 @@ housing_led_core <- function(start_population,
   #8. Compare population from step 3 to target from step 5.
   #   Difference = domestic adjustment
   #   Adjust domestic
-  adjusted_domestic_migration <- adjust_domestic_migration(popn = household_population,
-                                                           target = target_population,
-                                                           dom_in = trend_projection[['dom_in']],
-                                                           dom_out = trend_projection[['dom_out']],
-                                                           col_aggregation = c("year","gss_code"),
-                                                           col_popn = "household_popn",
-                                                           col_target = "target_popn")
+  adjusted_domestic_migration <- household_population %>% 
+    select(-popn, -communal_est_popn) %>%
+    adjust_domestic_migration(target = target_population,
+                              dom_in = trend_projection[['dom_in']],
+                              dom_out = trend_projection[['dom_out']],
+                              col_aggregation = c("year","gss_code"),
+                              col_popn = "household_popn",
+                              col_target = "target_popn")
   
   #This is a QA output only
   out_adjusted_dom <- left_join(adjusted_domestic_migration[["dom_in"]],
@@ -307,9 +263,9 @@ housing_led_core <- function(start_population,
                                                            int_out,
                                                            adjusted_domestic_migration[['dom_out']])) %>%
     rbind(areas_with_no_housing_data[['population']]) 
-
+  
   #Join the non-adjusted components data back to the adjusted
-
+  
   births <- rbind(births, areas_with_no_housing_data[['births']])
   deaths <- rbind(deaths, areas_with_no_housing_data[['deaths']])
   int_out <- rbind(int_out, areas_with_no_housing_data[['int_out']])
@@ -340,8 +296,18 @@ housing_led_core <- function(start_population,
     dom_in <- final_domestic_migration[['dom_in']]
     dom_out <- final_domestic_migration[['dom_out']]
     
-    #TODO More validation needed here?
     output_population <- check_negative_values(constrained_population, "popn")
+    
+    #Recalculate the household population
+    household_population <- lazy_dt(output_population) %>%
+      filter(gss_code %in% communal_establishment_population$gss_code) %>% 
+      group_by(gss_code, year) %>%
+      summarise(popn = sum(popn)) %>%
+      left_join(communal_establishment_population, by=c("gss_code","year")) %>%
+      mutate(household_popn = popn - communal_est_popn) %>%
+      as.data.frame() %>%
+      validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
+                          test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
     
   } else {
     
@@ -349,17 +315,6 @@ housing_led_core <- function(start_population,
     
   }
   
-  #Recalculate the household population
-  household_population <- lazy_dt(output_population) %>%
-    filter(gss_code %in% communal_establishment_population$gss_code) %>% 
-    group_by(gss_code, year) %>%
-    summarise(popn = sum(popn)) %>%
-    left_join(communal_establishment_population, by=c("gss_code","year")) %>%
-    mutate(household_popn = popn - communal_est_popn) %>%
-    as.data.frame() %>%
-    validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
-                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
-
   summary <- left_join(households_2, household_population, by = c("gss_code","year")) %>% 
     mutate(actual_ahs = household_popn/households) %>% 
     left_join(ahs, by = c("gss_code", "year")) %>% 
@@ -369,7 +324,7 @@ housing_led_core <- function(start_population,
   
   household_population <- household_population %>%
     filter(gss_code %in% constrain_gss) %>%
-    select(-popn, -communal_est_popn)
+    select(gss_code, year, household_popn)
   
   ahs <- select(summary, gss_code, year, ahs = actual_ahs)
   
