@@ -298,22 +298,23 @@ housing_led_core <- function(start_population,
     
     output_population <- check_negative_values(constrained_population, "popn")
     
-    #Recalculate the household population
-    household_population <- lazy_dt(output_population) %>%
-      filter(gss_code %in% communal_establishment_population$gss_code) %>% 
-      group_by(gss_code, year) %>%
-      summarise(popn = sum(popn)) %>%
-      left_join(communal_establishment_population, by=c("gss_code","year")) %>%
-      mutate(household_popn = popn - communal_est_popn) %>%
-      as.data.frame() %>%
-      validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
-                          test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
     
   } else {
     
     output_population <- check_negative_values(unconstrained_population, "popn")
     
   }
+  
+  #Recalculate the household population
+  household_population <- lazy_dt(output_population) %>%
+    filter(gss_code %in% communal_establishment_population$gss_code) %>% 
+    group_by(gss_code, year) %>%
+    summarise(popn = sum(popn)) %>%
+    left_join(communal_establishment_population, by=c("gss_code","year")) %>%
+    mutate(household_popn = popn - communal_est_popn) %>%
+    as.data.frame() %>%
+    validate_population(col_data = "household_popn", col_aggregation = c("year","gss_code"),
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   
   summary <- left_join(households_2, household_population, by = c("gss_code","year")) %>% 
     mutate(actual_ahs = household_popn/households) %>% 
