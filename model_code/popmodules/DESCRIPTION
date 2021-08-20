@@ -8,7 +8,7 @@ Authors@R: c(
    person("Wil", "Tonkiss", email="william.tonkiss@london.gov.uk", role = "aut")
    )
 Description: The GLA's cohort population models work by combining modular functions to calcula and validate components of change. This package contains the functions to do this, with methods to calculate births, deaths, and migration, to age on a population, to apply rates and to validate population data frames. See the README for a more detailed breakdown.
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 License: Currently internal to the GLA - contact the authors with any questions
 Encoding: UTF-8
 LazyData: true
