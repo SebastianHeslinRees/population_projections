@@ -33,7 +33,8 @@ globalVariables(c(
   'target',
   'value',
   'year',
-  'x'
+  'x',
+  'python_to_excel'
 ))
 
 

@@ -12,7 +12,7 @@ n_proj_yr <- 3
 projection_name <- "2020_test"
 
 #Paths
-external_trend_path <- paste0(list.files(path="outputs/trend/2020/", pattern= "2020_test", full.names = TRUE),"/")
+external_trend_path <- paste0(list.files(path="outputs/trend/2020/", pattern= "2020_test", full.names = TRUE),"/")[1]
 communal_est_file <- "dclg_communal_est_population.rds"
 trend_households_file <- "dclg_stage_1_households.rds"
 ldd_backseries_path <- "input_data/housing_led_model/ldd_backseries_dwellings_borough.rds"
@@ -143,15 +143,22 @@ msoa_config_list$small_area_dev_trajectory_path <- "input_data/small_area_model/
 #-------------------------------------------------------------------------------
 
 rm(list = setdiff(ls(), c("config_list","ward_config_list","msoa_config_list")))
-devtools::load_all("model_code/housingledmodel")
-devtools::load_all("model_code/smallareamodel")
 
 projection <- run_housing_led_model(config_list)
 ward_projection <- run_small_area_model(ward_config_list)
 msoa_projection <- run_small_area_model(msoa_config_list)
 
-# output_housing_led_excel_file(ward_projection[["csvs"]],
-#                               config_list$output_dir,
-#                               config_list$projection_name,
-#                               config_list$popn_adjustment_path,
-#                               file_suffix = "_2020.xlsx")
+output_borough_excels(ward_projection[["csvs"]],
+                              config_list$output_dir,
+                              config_list$projection_name,
+                              file_suffix = "_2020.xlsx")
+
+output_small_area_excels(config_list$output_dir,
+                         config_list$projection_name,
+                         ward = TRUE, msoa = TRUE)
+
+# output_dir = "outputs/housing_led/2020/2020_test_21-08-13_1025"
+# wb_filename <- "test"
+# devtools::load_all("model_code/smallareamodel")
+# output_small_area_excels(output_dir, wb_filename, ward = TRUE, msoa = FALSE)
+# output_small_area_excels(output_dir, wb_filename, ward = FALSE, msoa = TRUE)
