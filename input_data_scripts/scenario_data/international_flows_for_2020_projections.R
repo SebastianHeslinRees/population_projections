@@ -112,8 +112,8 @@ out_70 = in_70 - 70000
 in_scaling_70 <- in_70/ldn_10_year_in
 out_scaling_70 <- out_70/ldn_10_year_out
 
-scaled_in_70 <- mutate(int_in_avg_2010_2019, int_in = int_in * in_scaling_10)
-scaled_out_70 <- mutate(int_out_avg_2010_2019, int_out = int_out * out_scaling_10)
+scaled_in_70 <- mutate(int_in_avg_2010_2019, int_in = int_in * in_scaling_70)
+scaled_out_70 <- mutate(int_out_avg_2010_2019, int_out = int_out * out_scaling_70)
 
 saveRDS(scaled_in_70, "input_data/scenario_data/2020_int_in_scenario_1_yr_2022.rds")
 saveRDS(scaled_out_70, "input_data/scenario_data/2020_int_out_scenario_1_yr_2022.rds")
