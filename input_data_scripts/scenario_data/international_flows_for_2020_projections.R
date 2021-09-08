@@ -92,44 +92,42 @@ saveRDS(int_out_avg_2010_2019, "input_data/scenario_data/2019_int_out_10yr_avg.r
 #long term int
 ldn_10_year_in <- sum(filter(int_in_avg_2010_2019, substr(gss_code,1,3)=="E09")$int_in)
 ldn_10_year_out <- sum(filter(int_out_avg_2010_2019, substr(gss_code,1,3)=="E09")$int_out)
-ldn_10_year_net <- ldn_10_year_in - ldn_10_year_out
+
+all_in <- sum(int_in_avg_2010_2019$int_in)
+all_out <- sum(int_out_avg_2010_2019$int_out)
+
+in_to_out_ratio <- ldn_10_year_out/ldn_10_year_in
 
 #-------------------------------------------------------------------------------
 
 #125k net
+in_125 = 125000 / (1-in_to_out_ratio)
+out_125 = in_125 - 125000
 
-diff_125k_net <- 125000-ldn_10_year_net
-add_in_125k <- ldn_10_year_in + (diff_125k_net*(2/3))
-sub_out_125k <- ldn_10_year_out - (diff_125k_net*(1/3))
-scale_in_125k <- add_in_125k / ldn_10_year_in
-scale_out_125k <- sub_out_125k / ldn_10_year_out
+in_scaling_125 <- in_125/ldn_10_year_in
+out_scaling_125 <- out_125/ldn_10_year_out
 
-int_in_125k_ldn <- int_in_avg_2010_2019 %>%
-  mutate(int_in = int_in * scale_in_125k)
-
-int_out_125k_ldn <- int_out_avg_2010_2019 %>%
-  mutate(int_out = int_out * scale_out_125k)
+scaled_in_125 <- mutate(int_in_avg_2010_2019, int_in = int_in * in_scaling_125)
+scaled_out_125 <- mutate(int_out_avg_2010_2019, int_out = int_out * out_scaling_125)
 
 #-------------------------------------------------------------------------------
 
 #50k net
+in_50 = 50000 / (1-in_to_out_ratio)
+out_50 = in_50 - 50000
 
-diff_50k_net <- 50000-ldn_10_year_net
-add_in_50k <- ldn_10_year_in + (diff_50k_net*(2/3))
-sub_out_50k <- ldn_10_year_out - (diff_50k_net*(1/3))
-scale_in_50k <- add_in_50k / ldn_10_year_in
-scale_out_50k <- sub_out_50k / ldn_10_year_out
+in_scaling_50 <- in_50/ldn_10_year_in
+out_scaling_50 <- out_50/ldn_10_year_out
 
-int_in_50k_ldn <- int_in_avg_2010_2019 %>%
-  mutate(int_in = int_in * scale_in_50k)
+scaled_in_50 <- mutate(int_in_avg_2010_2019, int_in = int_in * in_scaling_50)
+scaled_out_50 <- mutate(int_out_avg_2010_2019, int_out = int_out * out_scaling_50)
 
-int_out_50k_ldn <- int_out_avg_2010_2019 %>%
-  mutate(int_out = int_out * scale_out_50k)
+#-------------------------------------------------------------------------------
 
-saveRDS(int_in_125k_ldn, "input_data/scenario_data/2020_int_in_125k.rds")
-saveRDS(int_out_125k_ldn, "input_data/scenario_data/2020_int_out_125k.rds")
-saveRDS(int_in_50k_ldn, "input_data/scenario_data/2020_int_in_50k.rds")
-saveRDS(int_out_50k_ldn, "input_data/scenario_data/2020_int_out_50k.rds")
+saveRDS(scaled_in_125, "input_data/scenario_data/2020_int_in_125k.rds")
+saveRDS(scaled_out_125, "input_data/scenario_data/2020_int_out_125k.rds")
+saveRDS(scaled_in_50, "input_data/scenario_data/2020_int_in_50k.rds")
+saveRDS(scaled_out_50, "input_data/scenario_data/2020_int_out_50k.rds")
 
 #-------------------------------------------------------------------------------
 
