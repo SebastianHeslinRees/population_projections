@@ -1,18 +1,18 @@
 library(popmodules)
 library(housingledmodel)
 library(smallareamodel)
-
+ 
 n_proj_yr <- 30
 projection_name <- "SHLAA"
 
-external_trend_path <- "outputs/trend/2020/2020_CC_21-08-16_0917"
+external_trend_path <- "outputs/trend/2020/2020_CH_21-09-08_1659"
 dev_trajectory_path <- "input_data/housing_led_model/borough_2019_based_savills.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_2019_based_savills.rds"
 
 standard_covid_migration <- TRUE
 
 domestic_rates <- list(
-  '2028' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
@@ -25,7 +25,10 @@ config_list <- standard_housingled_parameters(list(projection_name = projection_
                                               dev_trajectory_path = dev_trajectory_path,
                                               small_area_dev_trajectory_path = small_area_dev_trajectory_path,
                                               domestic_rates = domestic_rates,
-                                              standard_covid_migration = standard_covid_migration))
+                                              standard_covid_migration = standard_covid_migration,
+                                              communal_est_file = communal_est_file,
+                                              trend_households_file = trend_households_file,
+                                              external_ahs_trajectory_path = external_ahs_trajectory_path))
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model

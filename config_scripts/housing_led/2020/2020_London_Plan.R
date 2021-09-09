@@ -1,18 +1,18 @@
 library(popmodules)
 library(housingledmodel)
 library(smallareamodel)
-
+ 
 n_proj_yr <- 30
 projection_name <- "London_Plan"
 
-external_trend_path <- "outputs/trend/2020/2020_CC_21-08-16_0917"
+external_trend_path <- "outputs/trend/2020/2020_CH_21-09-08_1659"
 dev_trajectory_path <- "input_data/housing_led_model/borough_london_plan_trajectory.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_london_plan_trajectory.rds"
 
 standard_covid_migration <- TRUE
 
 domestic_rates <- list(
-  '2028' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
