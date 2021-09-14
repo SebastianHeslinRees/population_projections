@@ -160,9 +160,9 @@ mean_ldd <- ldd_backseries %>%
 #-------------------------------------------------------------------------------
 
 #Save
-saveRDS(savills, "input_data/housing_led_model/borough_2019_based_savills.rds")
-saveRDS(mean_ldd, "input_data/housing_led_model/borough_2019_based_ldd_mean.rds")
-saveRDS(london_plan_trajectory, "input_data/housing_led_model/borough_london_plan_trajectory.rds")
+saveRDS(savills, "input_data/housing_led_model/borough_2020-based_savills.rds")
+saveRDS(mean_ldd, "input_data/housing_led_model/borough_2020-based_ldd_mean.rds")
+saveRDS(london_plan_trajectory, "input_data/housing_led_model/borough_2020-based_london_plan.rds")
 
 #-------------------------------------------------------------------------------
 
@@ -209,9 +209,9 @@ ward_london_plan <- left_join(ward_shlaa, london_plan_trajectory, by = c("gss_co
   data.frame()
 
 #Save
-saveRDS(ward_savills, "input_data/small_area_model/development_data/ward_2019_based_savills.rds")
-saveRDS(ward_ldd_mean, "input_data/small_area_model/development_data/ward_2019_based_ldd_mean.rds")
-saveRDS(ward_london_plan, "input_data/small_area_model/development_data/ward_london_plan_trajectory.rds")
+saveRDS(ward_savills, "input_data/small_area_model/development_data/ward_2020-based_savills.rds")
+saveRDS(ward_ldd_mean, "input_data/small_area_model/development_data/ward_2020-based_ldd_mean.rds")
+saveRDS(ward_london_plan, "input_data/small_area_model/development_data/ward_2020-based_london_plan.rds")
 
 #-------------------------------------------------------------------------------
 
@@ -258,8 +258,8 @@ msoa_london_plan <- left_join(msoa_shlaa, london_plan_trajectory, by = c("gss_co
   data.frame()
 
 #Save
-saveRDS(msoa_savills, "input_data/small_area_model/development_data/msoa_2019_based_savills.rds")
-saveRDS(msoa_ldd_mean, "input_data/small_area_model/development_data/msoa_2019_based_ldd_mean.rds")
-saveRDS(msoa_london_plan, "input_data/small_area_model/development_data/msoa_london_plan_trajectory.rds")
+saveRDS(msoa_savills, "input_data/small_area_model/development_data/msoa_2020-based_savills.rds")
+saveRDS(msoa_ldd_mean, "input_data/small_area_model/development_data/msoa_2020-based_ldd_mean.rds")
+saveRDS(msoa_london_plan, "input_data/small_area_model/development_data/msoa_2020-based_london_plan.rds")
 
 rm(list=ls())
