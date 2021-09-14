@@ -5,9 +5,9 @@ library(popmodules)
 
 message("scenario international migration flows (2020 projections)")
 
-popn_mye_path <- "input_data/mye/2020/population_ons.rds" #TODO Change to GLA est
-int_in_mye_path <-  "input_data/mye/2020/int_in_ons.rds" #TODO Change to GLA est
-int_out_mye_path <-  "input_data/mye/2020/int_out_ons.rds" #TODO Change to GLA est
+popn_mye_path <- "input_data/mye/2020/population_gla.rds"
+int_in_mye_path <-  "input_data/mye/2020/int_in_gla.rds"
+int_out_mye_path <-  "input_data/mye/2020/int_out_gla.rds"
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 
 #Don't use 2020 international data
