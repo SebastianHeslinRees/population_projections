@@ -1,194 +1,170 @@
-devtools::load_all("Q:/Teams/D&PA/Demography/demogtools/")
+devtools::load_all("Q:/Teams/D&PA/Demography/demogtools")
 library(dplyr)
 library(data.table)
-library(assertthat)  
 
+options(scipen=999)
 
-trend_list <- list('central upper' = "outputs/trend/2019/published_27_nov_2020/2019_variant_CC_20-11-27_1153/",
-                   'centrral lower' = "outputs/trend/2019/published_27_nov_2020/2019_variant_CH_20-11-27_1154/",
-                   'low population' = "outputs/trend/2019/published_27_nov_2020/2019_variant_LC_20-11-27_1208/",
-                   'high population' = "outputs/trend/2019/published_27_nov_2020/2019_variant_HC_20-11-27_1205/")
+components <- c("population","births","deaths","dom_in","dom_out",
+                "int_in","int_out")
 
-housing_list <- list('scenario 1' = "outputs/housing_led/2019/BPO_scenario_1_21-04-09_1536/",
-                     'scenario 2' = "outputs/housing_led/2019/BPO_scenario_2_21-04-09_1536/",
-                     'scenario 3' = "outputs/housing_led/2019/BPO_scenario_3_21-04-09_1536/")
+ward_components <- c("population","births","deaths", "migration")
+
+projections_list <- list('projection 1' = "outputs/housing_led/2020/LDD_Mean_ONS_21-08-20_1300",
+                         'projection 2' = "outputs/housing_led/2020/London_Plan_ONS_21-08-20_1300",
+                         'projection 3' = "outputs/housing_led/2020/SHLAA_21-08-16_1548")
+
+borough_data_list <- list()
 
 #-------------------------------------------------------------------------------
 
+#Read in borough data all components
 
-a <- function(proj_list, file_nm, col_nm = file_nm, comp_nm=file_nm){
-  x <- read_multiple_projections(proj_list,
-                                 component = file_nm,
-                                 col_aggregation = c("gss_code","year","sex","age")) %>% 
-    mutate(component = comp_nm) %>% 
-    rename(projection_name = variant,
-           value = col_nm) %>%
-    select(projection_name, gss_code, year, sex, age, component, value) %>% 
-    filter(substr(gss_code,1,3)=="E09" | gss_code == "E12000007") %>% 
-    filter(year %in% 2011:2050)
+for(i in components){
+  print(i)
+  borough_data_list[[i]] <- read_multiple_projections(projections_list,
+                                                      component = i,
+                                                      col_aggregation = c("gss_code","year","sex","age")) %>% 
+    mutate(component = i) %>% 
+    filter(substr(gss_code,1,3)=="E09")
   
-  if(!"E12000007" %in% unique(x$gss_code)){
-    y <- filter_london(x, col_aggregation = c("projection_name", "gss_code", "year", "sex", "age", "component"),
-                       data_col = "value")
-    x <- rbind(x, y)
-  }
+  nm <- names(borough_data_list[[i]])
+  nm <- nm[length(nm)-2]
   
-  return(x)
+  borough_data_list[[i]] <- rename(borough_data_list[[i]], value := all_of(nm)) %>% 
+    select(gss_code, year, sex, age, component, variant, value)
 }
 
-#-------------------------------------------------------------------------------
-
-validate_output <- function(trend, housing_led, ward){
-
-  assert_that(length(unique(trend$gss_code))==34, msg = "problem in trend$gss_code")
-  assert_that(length(unique(housing_led$gss_code))==34, msg = "problem in housing_led$gss_code")
-  assert_that(length(unique(ward$gss_code))==624, msg = "problem in ward$gss_code")
-  
-  assert_that(length(unique(trend$year))==40, msg = "problem in trend$year")
-  assert_that(length(unique(housing_led$year))==40, msg = "problem in housing_led$year")
-  assert_that(length(unique(ward$year))==40, msg = "problem in ward$year")
-  
-  assert_that(length(unique(trend$sex))==2, msg = "problem in trend$sex")
-  assert_that(length(unique(housing_led$sex))==2, msg = "problem in housing_led$sex")
-  assert_that(length(unique(ward$sex))==2, msg = "problem in ward$sex")
-  
-  assert_that(length(unique(trend$age))==91, msg = "problem in trend$age")
-  assert_that(length(unique(housing_led$age))==91, msg = "problem in housing_led$age")
-  assert_that(length(unique(ward$age))==91, msg = "problem in ward$age")
-  
-  assert_that(length(unique(trend$component))==8, msg = "problem in trend$component")
-  assert_that(length(unique(housing_led$component))==8, msg = "problem in housing_led$component")
-  assert_that(length(unique(ward$component))==4, msg = "problem in ward$component")
-  
-  assert_that(nrow(trend)/34/40/2/((91*7)+1)==4, msg = "problem in trend dataframe")
-  assert_that(nrow(housing_led)/34/40/2/((91*7)+1)==3, msg = "problem in housing-led dataframe")
-  assert_that(nrow(ward)/624/40/2/((91*3)+1)==3, msg = "problem in ward dataframe")
-  
-}
+borough_data <- rbindlist(borough_data_list) %>% data.frame()
+rm(borough_data_list, i, components, nm)
+gc()
 
 #-------------------------------------------------------------------------------
 
-t <- list()
-h <- list()
-w <- list()
+#Create borough components for Net and Total migration from gross inputs
 
-#-------------------------------------------------------------------------------
-tm <- Sys.time()
-
-#TREND
-
-t$popn <- a(trend_list, "population", "popn")
-t$births <- a(trend_list, "births")
-t$deaths <- a(trend_list, "deaths")
-t$dom_in <- a(trend_list, "dom_in", comp_nm = "domestic in")
-t$dom_out <- a(trend_list, "dom_out", comp_nm = "domestic out")
-t$int_in <- a(trend_list, "int_in", comp_nm = "international in")
-t$int_out <- a(trend_list, "int_out", comp_nm = "international out")
-t$total_net <- rbind(t$dom_in, t$dom_out, t$int_in, t$int_out) %>% 
-  mutate(value = ifelse(component %in% c("domestic_out", "international_out"),
-                        value * -1, value)) %>% 
-  mutate(component = "total net") %>% 
-  group_by(projection_name, gss_code, year, sex, age, component) %>% 
+dom_net <- borough_data %>% 
+  filter(component %in% c("dom_in","dom_out")) %>% 
+  mutate(value = ifelse(component == "dom_out", value *-1, value),
+         component = "dom_net") %>% 
+  group_by(gss_code, year, sex , age, component, variant) %>% 
   summarise(value = sum(value), .groups = 'drop_last') %>% 
   data.frame()
 
-trend <- rbindlist(t)
-
-#-------------------------------------------------------------------------------
-
-#HOUSING-LED
-
-h$popn <- a(housing_list, "population", "popn")
-h$births <- a(housing_list, "births")
-h$deaths <- a(housing_list, "deaths")
-h$dom_in <- a(housing_list, "dom_in", comp_nm = "domestic in")
-h$dom_out <- a(housing_list, "dom_out", comp_nm = "domestic out")
-h$int_in <- a(housing_list, "int_in", comp_nm = "international in")
-h$int_out <- a(housing_list, "int_out", comp_nm = "international out")
-h$total_net <- rbind(h$dom_in, h$dom_out, h$int_in, h$int_out) %>% 
-  mutate(value = ifelse(component %in% c("domestic_out", "international_out"),
-                        value * -1, value)) %>% 
-  mutate(component = "total net") %>% 
-  group_by(projection_name, gss_code, year, sex, age, component) %>% 
+int_net <- borough_data %>% 
+  filter(component %in% c("int_in","int_out")) %>% 
+  mutate(value = ifelse(component == "int_out", value *-1, value),
+         component = "int_net") %>% 
+  group_by(gss_code, year, sex , age, component, variant) %>% 
   summarise(value = sum(value), .groups = 'drop_last') %>% 
   data.frame()
 
-housing_led <- rbindlist(h)
+total_in <-  borough_data %>% 
+  filter(component %in% c("dom_in","int_in")) %>% 
+  mutate(component = "total_in") %>% 
+  group_by(gss_code, year, sex , age, component, variant) %>% 
+  summarise(value = sum(value), .groups = 'drop_last') %>% 
+  data.frame()
+
+total_out <-  borough_data %>% 
+  filter(component %in% c("dom_out","int_out")) %>% 
+  mutate(component = "total_out") %>% 
+  group_by(gss_code, year, sex , age, component, variant) %>% 
+  summarise(value = sum(value), .groups = 'drop_last') %>% 
+  data.frame()
+
+total_net <- rbind(total_in, total_out) %>% 
+  mutate(value = ifelse(component == "total_out", value *-1, value),
+         component = "total_net") %>% 
+  group_by(gss_code, year, sex , age, component, variant) %>% 
+  summarise(value = sum(value), .groups = 'drop_last') %>% 
+  data.frame()
 
 #-------------------------------------------------------------------------------
 
-#WARD
+#Bind all borough data into one massive dataframe
 
-ward_list <- lapply(housing_list, function(x) paste0(x,"ward/"))
+all_borough_data <- rbind(borough_data, dom_net, int_net, total_in, total_out, total_net)
 
-w$popn <- read_multiple_projections(ward_list,
-                                    component = "population_ward",
-                                    col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
-  rename(value = popn) %>% 
-  mutate(component = "population")
-
-w$births <- read_multiple_projections(ward_list,
-                                      component = "births_ward",
-                                      col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
-  rename(value = births) %>% 
-  mutate(component = "births")
-
-w$deaths <- read_multiple_projections(ward_list,
-                                      component = "deaths_ward",
-                                      col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
-  rename(value = deaths) %>% 
-  mutate(component = "deaths")
-
-w$total_net <- read_multiple_projections(ward_list,
-                                         component = "migration_ward",
-                                         col_aggregation = c("gss_code_ward","year","sex","age")) %>% 
-  rename(value = migration) %>% 
-  mutate(component = "total net")
-
-w <- lapply(w, function(x) x %>% 
-              filter(gss_code_ward != "E09000001",
-                     year >= 2011)%>% 
-              rename(gss_code = gss_code_ward,
-                     projection_name = variant) %>% 
-              select(projection_name, gss_code, year, sex, age, component, value))
-
-ward <- rbindlist(w)
-
-#-------------------------------------------------------------------------------
-# rm(t,w,h)
-# gc()
-
-all_3 <- rbind(trend, housing_led, ward)
-all_3 <- data.frame(all_3) %>% 
-  mutate(value = round(value,0))
-
-print(Sys.time()-tm)
+rm(borough_data, dom_net, int_net, total_in, total_out, total_net)
+gc()
 
 #-------------------------------------------------------------------------------
 
-#checks
-years <- length(2011:2050)
-sexes <- 2
-ages <- length(0:90)
-boroughs <- 34
-wards <- 624
-components_b <- 7
-components_w <- 3
-births_component <- 1
-ward_rows <- years*sexes*wards*((components_w*ages)+births_component)
-borough_rows <-  years*sexes*boroughs*((components_b*ages)+births_component)
+#Create London data from borough data
 
-rows_expected <- (ward_rows*3)+(borough_rows*7)
-rows_actual <- nrow(all_3)
-assert_that(rows_actual==rows_expected)
-validate_output(trend, housing_led, ward)
+final_london <- all_borough_data %>% 
+  mutate(gss_code = "E12000007") %>% 
+  group_by(gss_code, year, sex , age, component, variant) %>% 
+  summarise(value = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(!component %in% c("dom_in", "dom_out", "total_in", "total_out")) %>% 
+  mutate(gss_code_ward = NA) %>% 
+  rename(projection = variant) %>% 
+  select(projection, gss_code, gss_code_ward, year, sex, age, component, value) 
 
 #-------------------------------------------------------------------------------
 
-#SAVE
-out_dir <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/projections_explorer/"
-#saveRDS(all_3, paste0(out_dir, "2019_based_projections.rds"))
-fwrite(all_3[1:1000,], paste0(out_dir, "FIRST_1000_ROWS_2019_based_projections.csv"))
-system.time(fwrite(all_3, paste0(out_dir, "2019_based_projections.csv")))
+#Read in ward data all components
 
+ward_data_list <- list()
+projections_list <- lapply(projections_list, function(x) paste0(x, "/ward"))
+
+for(i in ward_components){
+  
+  print(i)
+  j <- paste0(i, "_ward")
+  
+  ward_data_list[[i]] <- read_multiple_projections(projections_list,
+                                                   component = j,
+                                                   col_aggregation = c("gss_code","gss_code_ward","year","sex","age")) %>% 
+    mutate(component = i)
+  
+  nm <- names(ward_data_list[[i]])
+  nm <- nm[length(nm)-2]
+  
+  ward_data_list[[i]] <- rename(ward_data_list[[i]], value := all_of(nm)) %>% 
+    select(gss_code_ward, year, sex, age, component, variant, value)
+}
+
+ward_data <- rbindlist(ward_data_list) %>% data.frame() %>% 
+  mutate(component = ifelse(component == "migration", "total_net", component))
+
+rm(ward_data_list, i, j, ward_components, nm)
+
+#-------------------------------------------------------------------------------
+
+#Add borough and ward names to data and tidy into final format
+
+borough_names <- readRDS("input_data/lookup/gss_code_to_name_(2021_geog).rds")
+ward_district_lookup <- readRDS("input_data/lookup/2011_ward_to_district.rds")
+
+final_borough <- all_borough_data
+rename(projection = variant) %>% 
+  mutate(gss_code_ward = NA) %>%
+  select(projection, gss_code, gss_code_ward, year, sex, age, component, value)
+
+final_ward <- left_join(ward_data, ward_district_lookup, by="gss_code_ward") %>% 
+  left_join(borough_names, by="gss_code") %>% 
+  rename(projection = variant)  %>%
+  select(projection, gss_code, gss_code_ward, year, sex, age, component, value)
+
+rm(all_borough_data, ward_data, borough_names, ward_district_lookup)
+gc()
+
+#-------------------------------------------------------------------------------
+
+#Bind everything together and write out
+
+final_ALL <- rbind(final_london, final_borough, final_ward) %>% 
+  data.frame() %>% 
+  mutate(value = round(value,0)) %>% 
+  mutate(value = ifelse(is.na(value),"NULL",value))
+
+proj_1 <- filter(final_ALL, projection == 'projection 1')
+proj_2 <- filter(final_ALL, projection == 'projection 2')
+proj_3 <- filter(final_ALL, projection == 'projection 3')
+
+fwrite(proj_1, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
+fwrite(proj_2, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
+fwrite(proj_3, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
 
