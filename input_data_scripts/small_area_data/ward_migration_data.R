@@ -6,7 +6,7 @@ library(popmodules)
 message("ward migration data")
 
 #Set these to the location of the final borough components
-mye_popn_path <- "input_data/mye/2019/population_gla.rds"
+mye_popn_path <- "input_data/mye/2020/population_gla.rds"
 borough_dom_in_path <- "input_data/mye/2020/dom_in_ons.rds"
 borough_dom_out_path <- "input_data/mye/2020/dom_out_ons.rds"
 borough_int_out_path <- "input_data/mye/2020/int_out_gla.rds"
