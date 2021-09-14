@@ -9,8 +9,7 @@ most_recent_data_year <- 2019
 
 #data paths
 lsoa_dir <- "Q:/Teams/D&PA/Data/population_estimates/ons_small_area_population_estimates/lsoa/machine_readable/by_indiviudal_year"
-#TODO Update to GLA estimate series
-mye_pop_path <- "input_data/mye/2020/population_ons.rds"
+mye_pop_path <- "input_data/mye/2020/population_gla.rds"
 
 #lookups
 ward_to_district <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>% select(-ward_name)
