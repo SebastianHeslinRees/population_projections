@@ -23,11 +23,11 @@ standard$n_proj_yr <- 30
 #-------------------------------------------------------------------------------
 #Backseries
 
-standard$popn_mye_path <- paste0("input_data/mye/2020/population_ons.rds")
+standard$popn_mye_path <- paste0("input_data/mye/2020/population_gla.rds")
 standard$deaths_mye_path <-  paste0("input_data/mye/2020/deaths_ons.rds")
 standard$births_mye_path <-  paste0("input_data/mye/2020/births_ons.rds")
-standard$int_out_mye_path <-  paste0("input_data/mye/2020/int_out_ons.rds")
-standard$int_in_mye_path <-  paste0("input_data/mye/2020/int_in_ons.rds")
+standard$int_out_mye_path <-  paste0("input_data/mye/2020/int_out_gla.rds")
+standard$int_in_mye_path <-  paste0("input_data/mye/2020/int_in_gla.rds")
 standard$dom_out_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_out_(2021_geog).rds")
 standard$dom_in_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_in_(2021_geog).rds")
 standard$upc_mye_path <- "input_data/mye/2020/upc_ons.rds"
