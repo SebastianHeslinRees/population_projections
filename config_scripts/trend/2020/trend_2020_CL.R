@@ -1,13 +1,12 @@
 library(popmodules)
 library(trendmodel)
 
-#CC
+#CL
 #Central International
 #Low Domestic
 
-#Low population
  
-projection_name <- "2020_CL_low"
+projection_name <- "2020_CL"
 standard_covid_migration <- TRUE
 
 #-------------------------------------------------------------------------------
