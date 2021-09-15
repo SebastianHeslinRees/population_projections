@@ -1,7 +1,7 @@
 #revised GLA estimates of population & international flows
 #data created in a separate process
 #this script calls on the processed data
-#data created by ML November 2020
+#data created by ML September 2021
 
 message("2020 GLA adjusted MYE")
 
