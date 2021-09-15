@@ -4,7 +4,7 @@
 \alias{create_trend_model_excels}
 \title{Produce 3 Excel workbooks from a set of projection RDS files}
 \usage{
-create_trend_model_excels(trend_dir, excel_file_name)
+create_trend_model_excels(trend_dir, excel_file_name, household_models = TRUE)
 }
 \arguments{
 \item{trend_dir}{String. The output directory where the projection RDS files are
@@ -25,4 +25,5 @@ create_trend_model_excels(
   trend_dir = "outputs/trend/2018/2018_long_19-11-13_2144",
   excel_file_name = "2018_long_trend.xlsx")
 }
+
 }

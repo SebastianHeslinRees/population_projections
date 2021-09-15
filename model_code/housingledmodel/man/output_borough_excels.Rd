@@ -4,12 +4,10 @@
 \alias{output_borough_excels}
 \title{Create the 2020-based housing-led projection excel output}
 \usage{
-output_borough_excels(data, output_dir, projection_name, file_suffix = ".xlsx")
+output_borough_excels(output_dir, projection_name, file_suffix = ".xlsx")
 }
 \arguments{
-\item{data}{The \code{[['csvs']]} element from a ward projection}
-
-\item{output_dir}{The directory in which to save the Excel file}
+\item{output_dir}{The directory from which to read the data and save the Excel file}
 
 \item{projection_name}{The name of the output Excel file}
 
