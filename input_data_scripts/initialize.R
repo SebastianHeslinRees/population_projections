@@ -45,7 +45,7 @@ source("input_data_scripts/constraints/npp_2018_constraint.R")
 
 #2020 MYE & components
 source("input_data_scripts/mye/ons_mye_2020.R")
-#source("input_data_scripts/mye/gla_mye_2020.R")
+source("input_data_scripts/mye/gla_mye_2020.R")
 source("input_data_scripts/domestic_migration/domestic_migration_2020.R")
 
 #Other 2020 data (2021 geography)
