@@ -100,15 +100,6 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
   
   #Excel
   if(write_excel){
-    trend_datastore_outputs(population = projection$population,
-                            births = projection$births,
-                            deaths = projection$deaths,
-                            int_in = projection$int_in,
-                            int_out = projection$int_out,
-                            dom_in = projection$dom_in,
-                            dom_out = projection$dom_out,
-                            popn_adjustment = projection$popn_adjustment,
-                            output_dir = output_dir,
-                            excel_file_name = paste0(projection_name,".xlsx"))
+    create_trend_model_excels(output_dir, excel_file_name="wil5")
   }
 }
