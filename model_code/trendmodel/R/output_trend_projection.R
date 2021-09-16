@@ -100,6 +100,6 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
   
   #Excel
   if(write_excel){
-    create_trend_model_excels(output_dir, excel_file_name="wil5")
+    create_trend_model_excels(output_dir, projection_name, FALSE)
   }
 }
