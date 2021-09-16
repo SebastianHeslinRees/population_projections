@@ -78,6 +78,10 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
       select_at(c("gss_code", "gss_name", nm)) %>% 
       datastore_csv()
     
+    output_dataframes$household_summary <- output_dataframes$household_summary %>%
+      mutate(average_household_size = (household_population / households) %>%
+               round(digits = 3)) # since the summing in datastore_csv gets this wrong
+    
     fwrite(output_dataframes[[i]],
            paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))
   }
