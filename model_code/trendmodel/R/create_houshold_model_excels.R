@@ -12,10 +12,14 @@
 #' 
 #' @export
 
-create_household_model_excels <- function(output_dir, projection_name){
+create_household_model_excels <- function(output_dir, projection_name, model="both"){
   
   source_python('model_code/other_scripts/python_to_excel_households.py') 
-  python_to_excel_households(output_dir, paste0(projection_name,"_ons_households.xlsx"), "ons")
-  python_to_excel_households(output_dir, paste0(projection_name,"_dclg_households.xlsx"), "dclg")
+  if(model %in% c("ons", "both")){
+    python_to_excel_households(output_dir, paste0(projection_name,"_ons_households.xlsx"), "ons")
+  }
+  if(model %in% c("dclg", "both")){
+    python_to_excel_households(output_dir, paste0(projection_name,"_dclg_households.xlsx"), "dclg")
+  }
   
 }
