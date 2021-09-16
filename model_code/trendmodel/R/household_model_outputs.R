@@ -97,7 +97,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
           paste0(hh_output_dir, model, "_", "ahs.rds"))
   
   if(write_excel){
-    create_household_model_excels(output_dir, projection_name)
+    create_household_model_excels(output_dir, projection_name, model)
   }
   
 }
