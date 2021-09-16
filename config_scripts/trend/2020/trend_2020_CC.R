@@ -40,5 +40,13 @@ config_list <- standard_trend_parameters(list(projection_name = projection_name,
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model
-projection <- run_trend_model(config_list)
-create_household_model_excels(config_list$output_dir, config_list$projection_name)
+#projection <- run_trend_model(config_list)
+
+library(popmodules)
+library(trendmodel)
+
+# try(create_household_model_excels(config_list$output_dir,
+#                                   config_list$projection_name),
+#     silent = TRUE)
+create_household_model_excels(config_list$output_dir,
+                              config_list$projection_name)

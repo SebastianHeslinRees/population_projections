@@ -30,6 +30,16 @@ output_small_area_excels <- function(output_dir, wb_filename, ward = TRUE, msoa 
   msoa_filename <- paste0(wb_filename,"_msoa.xlsx")
   
   #Source python function
+  
+  #TODO
+  #FIXME
+  #There is a problem with reticulate/python/renv that I can't get to the bottom of
+  #The first time a python script is sourced the function throws an error. It can't find
+  #rpytools. If you source again it works. The temp work arund is to wrap the source in
+  #try() so the error is caught and then run it a second time. Its ugly but it works.
+  #See also trendmodel::create_household_model_excels
+  
+  try(source_python('model_code/other_scripts/python_to_excel_small_area.py'))
   source_python('model_code/other_scripts/python_to_excel_small_area.py') 
   
   if(ward==TRUE){
