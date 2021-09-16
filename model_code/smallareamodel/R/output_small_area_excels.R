@@ -11,7 +11,7 @@
 #' 
 #' @return Output Excel workbooks
 #' 
-#' @import reticulate
+#' @importFrom reticulate source_python
 #'
 #' @export
 
@@ -30,15 +30,15 @@ output_small_area_excels <- function(output_dir, wb_filename, ward = TRUE, msoa 
   msoa_filename <- paste0(wb_filename,"_msoa.xlsx")
   
   #Source python function
-  reticulate::source_python('model_code/other_scripts/python_to_excel.py') 
+  source_python('model_code/other_scripts/python_to_excel_small_area.py') 
   
   if(ward==TRUE){
-    python_to_excel(output_dir, ward_filename, "ward") #~3.5 mins
+    python_to_excel_small_area(output_dir, ward_filename, "ward") #~3.5 mins
     message("ward output complete")
   }
   
   if(msoa==TRUE){
-    python_to_excel(output_dir, msoa_filename, "msoa") #~5 mins
+    python_to_excel_small_area(output_dir, msoa_filename, "msoa") #~5 mins
     message("MSOA output complete")
   }
   
