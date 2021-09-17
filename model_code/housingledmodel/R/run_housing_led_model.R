@@ -338,7 +338,7 @@ run_housing_led_model <- function(config_list){
                                 config_list$external_trend_path,
                                 additional_dwellings,
                                 dwelling_trajectory,
-                                household_trajectory_static,
+                                household_trajectory_adjusted,
                                 first_proj_yr)
   
   popmodules::deactivate_log(paste0(config_list$output_dir,"warnings.log"))
