@@ -33,16 +33,29 @@ def python_to_excel_households(output_dir, wb_filename, model):
   detailed_hh_pop.to_excel(writer, "communal est popn", index=False)
   household_summary.to_excel(writer, "summary", index=False)
   
-  # Format the header row - no border, left aligned
+  #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)
   no_border = openpyxl.styles.borders.Border(
     left=side, right=side, top=side, bottom=side,
   )
 
+  #Left alight header row
   for ws in book.worksheets:
     for cell in ws["1:1"]:
       cell.border = no_border
       cell.alignment = openpyxl.styles.Alignment(horizontal='left')
+      
+  #Set Excel number format
+  for ws in book.worksheets:
+    if ws.title != "Metadata" and ws.title != "summary":
+      for row_cells in ws.iter_rows(min_col=3, max_col=44):
+        for cell in row_cells:
+          cell.number_format = '0'
+          
+  ws = book['summary']
+  for row_cells in ws.iter_rows(min_col=3, max_col=6):
+    for cell in row_cells:
+      cell.number_format = '0'
   
   # Save the workbook
   writer.save()

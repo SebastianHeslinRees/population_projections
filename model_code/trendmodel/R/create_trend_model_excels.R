@@ -11,6 +11,12 @@
 #'  With or without "xlsx" suffix.
 #' @param household_models Logical. Should the household model excel files also
 #'  be created.
+#'  
+#' @import dplyr
+#' @import reticulate
+#' @import popmodules
+#' @importFrom tidyr pivot_wider
+#' @importFrom dtplyr lazy_dt
 #' 
 #' @export
 
@@ -102,16 +108,16 @@ create_trend_model_excels <- function(output_dir, excel_file_name, household_mod
   #The first time a python script is sourced the function throws an error. It can't find
   #rpytools. If you source again it works. The temp work around is to wrap the source in
   #try() so the error is caught and then run it a second time. Its ugly but it works.
-  #See also smallareamodel::output_small_area_excels
+  #See also smallareamodel::create_small_area_excels, etc
   
-  try( reticulate::source_python('model_code/other_scripts/python_to_excel_trend_model.py'), silent = TRUE)
+  try( reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py'), silent = TRUE)
   reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py') 
-  python_to_excel_trendmodel(persons, female, male, components, output_dir, excel_file_name)
+  python_to_excel_trendmodel(persons, female, male, components, datastore_dir, excel_file_name)
   
   if(household_models){
     excel_file_name <- substr(excel_file_name, 1, nchar(excel_file_name)-5)
     for(model in c("ons","dclg")){
-      create_household_model_excels(output_dir, excel_file_name, model)
+      create_household_model_excels(datastore_dir, excel_file_name, model)
     }
   }
 }

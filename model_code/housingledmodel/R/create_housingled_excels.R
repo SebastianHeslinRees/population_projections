@@ -8,7 +8,9 @@
 #' @param file_suffix A string to append to the end of the file name
 #' 
 #' @import dplyr
+#' @import reticulate
 #' @importFrom data.table fread
+#' @importFrom stringr str_replace_all
 #' 
 #' @export
 
@@ -18,18 +20,33 @@ create_housingled_excels <- function(output_dir, projection_name, file_suffix = 
     output_dir <- paste0(output_dir,"/")
   }
   
-  persons <- fread(paste0(output_dir,"csv/persons.csv"), header = TRUE) %>% as.data.frame() 
-  females <- fread(paste0(output_dir,"csv/females.csv"), header = TRUE) %>% as.data.frame() 
-  males <- fread(paste0(output_dir,"csv/males.csv"), header = TRUE) %>% as.data.frame() 
+  persons <- fread(paste0(output_dir,"csv/persons.csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
+  females <- fread(paste0(output_dir,"csv/females.csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050))) 
+  males <- fread(paste0(output_dir,"csv/males.csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
   
   components <- fread(paste0(output_dir,"csv/components.csv"), header = TRUE) %>% 
     as.data.frame() %>% 
-    rename(population = popn)
+    rename(population = popn) %>%
+    filter(year <= 2041)
+    #TODO Figure out a way of output these as not blank cells but in a way
+    #that doesn't coerce the whole column to character
+    # mutate(dom_in = ifelse(is.na(dom_in),"#N/A", dom_in),
+    #        dom_out = ifelse(is.na(dom_out),"#N/A", dom_out))
   
-  names(components) <- stringr::str_replace_all(names(components), "_", " ")
+  names(components) <- str_replace_all(names(components), "_", " ")
   
-  assumed_dev <- fread(paste0(output_dir,"csv/assumed_dev.csv"), header = TRUE)
-  stock <- fread(paste0(output_dir,"csv/housing_stock.csv"), header = TRUE)
+  assumed_dev <- fread(paste0(output_dir,"csv/assumed_dev.csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
+  stock <- fread(paste0(output_dir,"csv/housing_stock.csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
   
 
   if(substr(file_suffix, nchar(file_suffix)-4, nchar(file_suffix)) != ".xlsx"){
@@ -47,7 +64,7 @@ create_housingled_excels <- function(output_dir, projection_name, file_suffix = 
   #The first time a python script is sourced the function throws an error. It can't find
   #rpytools. If you source again it works. The temp work around is to wrap the source in
   #try() so the error is caught and then run it a second time. Its ugly but it works.
-  #See also smallareamodel::output_small_area_excels
+  #See also trendmodel::create_household_model_excels, etc
   
   try( reticulate::source_python('model_code/other_scripts/python_to_excel_housingled.py'), silent = TRUE)
   reticulate::source_python('model_code/other_scripts/python_to_excel_housingled.py') 

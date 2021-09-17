@@ -12,10 +12,13 @@
 #' @return Output Excel workbooks
 #' 
 #' @import reticulate
+#' @import dplyr
+#' @import popmodules
+#' @importFrom data.table fread
 #'
 #' @export
 
-output_small_area_excels <- function(output_dir, wb_filename, ward = TRUE, msoa = FALSE){
+create_small_area_excels <- function(output_dir, wb_filename, smallarea = "ward"){
   
   #Create excels output directory
   output_dir <- .add_slash(output_dir)
@@ -26,8 +29,25 @@ output_small_area_excels <- function(output_dir, wb_filename, ward = TRUE, msoa 
     wb_filename <- substr(wb_filename,1,nchar(wb_filename)-5)
   } 
   
-  ward_filename <- paste0(wb_filename,"_ward.xlsx")
-  msoa_filename <- paste0(wb_filename,"_msoa.xlsx")
+  filename <- paste0(wb_filename,"_",smallarea,".xlsx")
+  
+  #read in the data from csv
+  persons = fread(paste0(output_dir, smallarea,"/persons_",smallarea,".csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
+  
+  females = fread(paste0(output_dir, smallarea,"/females_",smallarea,".csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
+  
+  males = fread(paste0(output_dir, smallarea,"/males_",smallarea,".csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    select(-c(as.character(2042:2050)))
+  
+  components = fread(paste0(output_dir, smallarea,"/components_",smallarea,".csv"), header = TRUE) %>%
+    as.data.frame() %>% 
+    filter(year <= 2041)
+  
   
   #Source python function
   
@@ -37,19 +57,12 @@ output_small_area_excels <- function(output_dir, wb_filename, ward = TRUE, msoa 
   #The first time a python script is sourced the function throws an error. It can't find
   #rpytools. If you source again it works. The temp work arund is to wrap the source in
   #try() so the error is caught and then run it a second time. Its ugly but it works.
-  #See also trendmodel::create_household_model_excels
+  #See also trendmodel::create_household_model_excels, etc
   
   try(source_python('model_code/other_scripts/python_to_excel_small_area.py'))
   source_python('model_code/other_scripts/python_to_excel_small_area.py') 
   
-  if(ward==TRUE){
-    python_to_excel_small_area(output_dir, ward_filename, "ward") #~3.5 mins
-    message("ward output complete")
-  }
-  
-  if(msoa==TRUE){
-    python_to_excel_small_area(output_dir, msoa_filename, "msoa") #~5 mins
-    message("MSOA output complete")
-  }
+  python_to_excel_smallarea(persons, females, males, components, output_dir, filename, smallarea) #~3.5 mins
+  message(paste(smallarea, "excel output complete"))
   
 }

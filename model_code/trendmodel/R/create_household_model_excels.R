@@ -20,7 +20,7 @@ create_household_model_excels <- function(output_dir, projection_name, model="bo
   #The first time a python script is sourced the function throws an error. It can't find
   #rpytools. If you source again it works. The temp work around is to wrap the source in
   #try() so the error is caught and then run it a second time. Its ugly but it works.
-  #See also smallareamodel::output_small_area_excels
+  #See also trendmodel::create_household_model_excels, etc
   
   try(source_python('model_code/other_scripts/python_to_excel_households.py'), silent = TRUE)
   source_python('model_code/other_scripts/python_to_excel_households.py') 
