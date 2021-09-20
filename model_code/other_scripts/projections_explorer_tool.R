@@ -9,9 +9,10 @@ components <- c("population","births","deaths","dom_in","dom_out",
 
 ward_components <- c("population","births","deaths", "migration")
 
-projections_list <- list('projection 1' = "outputs/housing_led/2020/LDD_Mean_ONS_21-08-20_1300",
-                         'projection 2' = "outputs/housing_led/2020/London_Plan_ONS_21-08-20_1300",
-                         'projection 3' = "outputs/housing_led/2020/SHLAA_21-08-16_1548")
+projections_list <- list('projection 1' = "Identified_Capacity_21-09-14_1403",
+                         'projection 2' = "Past_Delivery_21-09-14_1403",
+                         'projection 3' = "Housing_Targets_21-09-14_1403") %>% 
+  lapply(function(x){paste0("outputs/housing_led/2020/",x)})
 
 borough_data_list <- list()
 
@@ -138,8 +139,8 @@ rm(ward_data_list, i, j, ward_components, nm)
 borough_names <- readRDS("input_data/lookup/gss_code_to_name_(2021_geog).rds")
 ward_district_lookup <- readRDS("input_data/lookup/2011_ward_to_district.rds")
 
-final_borough <- all_borough_data
-rename(projection = variant) %>% 
+final_borough <- all_borough_data %>% 
+  rename(projection = variant) %>% 
   mutate(gss_code_ward = NA) %>%
   select(projection, gss_code, gss_code_ward, year, sex, age, component, value)
 
@@ -167,4 +168,10 @@ proj_3 <- filter(final_ALL, projection == 'projection 3')
 fwrite(proj_1, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
 fwrite(proj_2, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
 fwrite(proj_3, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
+
+q_drive <- "Q:/Teams/D&PA/Demography/Projections/population_models/temp/"
+
+fwrite(proj_1, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
+fwrite(proj_2, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
+fwrite(proj_3, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
 
