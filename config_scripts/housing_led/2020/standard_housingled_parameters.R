@@ -1,7 +1,19 @@
-#2020 housing-led projections
-#Standard variables
+#' Create housing-led, ward and MSOA model config lists using standard parameters
+#' for the 2020-based projections.
+#'
+#' @param params A named list of trend model parameters which will overwrite the
+#'   standard parameters
+#'
+#' @return A list of config lists ready for input into `run_housingled_model` and
+#'   `run_small_area_model`
+#'
 
-params <- ls()
+standard_housingled_parameters <- function(params){
+  
+  assertthat::assert_that("projection_name" %in% names(params),
+                          msg = "projection_name must be specified")
+  
+  list2env(params, environment())
 standard <- list()
 
 #-------------------------------------------------------------------------------
@@ -9,7 +21,7 @@ standard <- list()
 standard$first_proj_yr <- 2021
 standard$n_proj_yr <- 30
 
-external_trend_path <- .add_slash(external_trend_path)
+external_trend_path <- popmodules::.add_slash(external_trend_path)
 
 #-------------------------------------------------------------------------------
 #Input data paths
@@ -98,12 +110,11 @@ config_list <- list(
   fertility_rates_path = fertility_rates_path,
   popn_adjustment_path = popn_adjustment_path)
 
-rm(list = setdiff(ls(), c("config_list", params)))
+rm(list = setdiff(ls(), c("config_list", names(params), "params")))
 
 #-------------------------------------------------------------------------------
 #Ward model
 standard <- list()
-params <- setdiff(ls(), "config_list")
 
 #Variables
 standard$first_proj_yr <- 2020
@@ -184,5 +195,9 @@ msoa_config_list <- convert_ward_config_to_msoa_config(ward_config_list)
 
 #-------------------------------------------------------------------------------
 
-rm(list = setdiff(ls(), c("config_list","ward_config_list","msoa_config_list")))
+return(list(config_list = config_list,
+            ward_config_list = ward_config_list,
+            msoa_config_list = msoa_config_list))
+
+}
 
