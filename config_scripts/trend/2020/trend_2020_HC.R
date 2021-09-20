@@ -5,8 +5,10 @@ library(trendmodel)
 #High International
 #Central Domestic
 
+#High Population
 
-projection_name <- "2020_HC"
+
+projection_name <- "2020_HC_high"
 standard_covid_migration <- TRUE
 
 #-------------------------------------------------------------------------------

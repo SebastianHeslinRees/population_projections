@@ -1,18 +1,18 @@
 library(popmodules)
 library(housingledmodel)
 library(smallareamodel)
-git 
+
 n_proj_yr <- 30
-projection_name <- "SHLAA"
+projection_name <- "Identified_Capacity"
 
 external_trend_path <- "outputs/trend/2020/2020_CH_21-09-08_1659"
-dev_trajectory_path <- "input_data/housing_led_model/borough_2019_based_savills.rds"
-small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_2019_based_savills.rds"
+dev_trajectory_path <- "input_data/housing_led_model/borough_2020-based_savills.rds"
+small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_2020-based_savills.rds"
 
 standard_covid_migration <- TRUE
 
 domestic_rates <- list(
-  '2025' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_dom_5yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ rm(list = setdiff(ls(), "config_list"))
 # Run the model
 projection <- run_housing_led_model(config_list[[1]])
 ward_projection <- run_small_area_model(config_list[[2]])
-ward_projection <- run_small_area_model(config_list[[3]])
+msoa_projection <- run_small_area_model(config_list[[3]])
 
 # output_housing_led_excel_file(ward_projection[["csvs"]],
 #                               config_list$output_dir,

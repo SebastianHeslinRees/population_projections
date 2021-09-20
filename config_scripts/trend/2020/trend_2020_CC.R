@@ -4,8 +4,10 @@ library(trendmodel)
 #CC
 #Central International
 #Central Domestic
+
+#Central Upper
  
-projection_name <- "2020_CC"
+projection_name <- "2020_CC_central_upper"
 standard_covid_migration <- TRUE
 
 #-------------------------------------------------------------------------------

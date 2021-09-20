@@ -1,30 +1,29 @@
 library(popmodules)
 library(trendmodel)
 
-#LH
-#Low International
-#Central Domestic
+#HH
+#High International
+#High Domestic
 
-#Low population
 
-projection_name <- "2020_LC_low"
+projection_name <- "2020_HH"
 standard_covid_migration <- TRUE
 
 #-------------------------------------------------------------------------------
 
 int_out_flows_rates <- list(
-  '2025' = list(path = "input_data/scenario_data/2020_int_out_50k.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_int_out_125k.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
 
 int_in  <- list(
-  '2025' = list(path = "input_data/scenario_data/2020_int_in_50k.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_int_in_125k.rds",
                 transition = F))
 #-------------------------------------------------------------------------------
 
 domestic_rates <- list(
-  '2025' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_dom_5yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
