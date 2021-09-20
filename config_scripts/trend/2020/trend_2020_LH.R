@@ -3,11 +3,10 @@ library(trendmodel)
 
 #LH
 #Low International
-#Central Domestic
+#High Domestic
+ 
 
-#Low population
-
-projection_name <- "2020_LC_low"
+projection_name <- "2020_LH"
 standard_covid_migration <- TRUE
 
 #-------------------------------------------------------------------------------
@@ -24,7 +23,7 @@ int_in  <- list(
 #-------------------------------------------------------------------------------
 
 domestic_rates <- list(
-  '2025' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_dom_5yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------

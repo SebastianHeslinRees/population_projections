@@ -3,7 +3,7 @@ library(popmodules)
 
 message("scenario domestic migration rates (2020 projections)")
 
-popn_mye_path <- "input_data/mye/2020/population_ons.rds" #TODO Change to GLA est
+popn_mye_path <- "input_data/mye/2020/population_gla.rds"
 births_mye_path <-  "input_data/mye/2020/births_ons.rds"
 dom_origin_destination_path <- "input_data/domestic_migration/2020/domestic_migration_flows_ons_(2021_geog).rds"
 dir.create("input_data/scenario_data", showWarnings = FALSE)

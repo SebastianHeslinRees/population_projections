@@ -1,8 +1,9 @@
 library(dplyr)
 library(popmodules)
+
 message("External deaths for 2021")
 
-popn_path <- "input_data/mye/2020/population_ons.rds" #TODO change to GLA estimates
+popn_path <- "input_data/mye/2020/population_gla.rds"
 mort_rates_path <- "input_data/mortality/mort_rates_5yr_trend_2020.rds"
 fert_rates_path <- "input_data/fertility/fert_rates_5yr_trend_2020.rds"
 covid_deaths_path <- "input_data/scenario_data/covid19_deaths.rds"

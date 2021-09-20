@@ -1,7 +1,18 @@
-#2020 trend projections
-#Standard variables
+#' Create a trend model config list using standard parameters for the 2020-based
+#' projections.
+#'
+#' @param params A named list of trend model parameters which will overwrite the
+#'   standard parameters
+#'
+#' @return A named config list ready for input into `run_trend_model`
+#'
 
-params <- ls()
+standard_trend_parameters <- function(params){
+  
+  assertthat::assert_that("projection_name" %in% names(params),
+                          msg = "projection_name must be specified")
+  
+  list2env(params, environment())
 standard <- list()
 
 #-------------------------------------------------------------------------------
@@ -12,11 +23,11 @@ standard$n_proj_yr <- 30
 #-------------------------------------------------------------------------------
 #Backseries
 
-standard$popn_mye_path <- paste0("input_data/mye/2020/population_ons.rds")
+standard$popn_mye_path <- paste0("input_data/mye/2020/population_gla.rds")
 standard$deaths_mye_path <-  paste0("input_data/mye/2020/deaths_ons.rds")
 standard$births_mye_path <-  paste0("input_data/mye/2020/births_ons.rds")
-standard$int_out_mye_path <-  paste0("input_data/mye/2020/int_out_ons.rds")
-standard$int_in_mye_path <-  paste0("input_data/mye/2020/int_in_ons.rds")
+standard$int_out_mye_path <-  paste0("input_data/mye/2020/int_out_gla.rds")
+standard$int_in_mye_path <-  paste0("input_data/mye/2020/int_in_gla.rds")
 standard$dom_out_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_out_(2021_geog).rds")
 standard$dom_in_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_in_(2021_geog).rds")
 standard$upc_mye_path <- "input_data/mye/2020/upc_ons.rds"
@@ -120,4 +131,5 @@ config_list <- list(
   write_excel = write_excel
 )
 
-rm(list = setdiff(ls(), "config_list"))
+return(config_list)
+}

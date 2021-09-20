@@ -45,7 +45,7 @@ source("input_data_scripts/constraints/npp_2018_constraint.R")
 
 #2020 MYE & components
 source("input_data_scripts/mye/ons_mye_2020.R")
-#source("input_data_scripts/mye/gla_mye_2020.R")
+source("input_data_scripts/mye/gla_mye_2020.R")
 source("input_data_scripts/domestic_migration/domestic_migration_2020.R")
 
 #Other 2020 data (2021 geography)
@@ -90,7 +90,7 @@ assertthat::assert_that(
 source('input_data_scripts/development_data/ldd.R')
 source('input_data_scripts/development_data/2017_shlaa.R')
 source('input_data_scripts/development_data/shlaa_dev_pandemic_adjustments.R')
-source('input_data_scripts/development_data/2019_housing_led_dev_scenarios.R')
+source('input_data_scripts/development_data/2020_housing_led_dev_scenarios.R')
 
 #-------------------------------------------------------------------------------
 

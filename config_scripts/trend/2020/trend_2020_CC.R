@@ -5,25 +5,26 @@ library(trendmodel)
 #Central International
 #Central Domestic
 
-
-projection_name <- "2020_CC"
+#Central Upper
+ 
+projection_name <- "2020_CC_central_upper"
 standard_covid_migration <- TRUE
 
 #-------------------------------------------------------------------------------
 
 int_out_flows_rates <- list(
-  '2028' = list(path = "input_data/scenario_data/2019_int_out_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2019_int_out_10yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
 
 int_in  <- list(
-  '2028' = list(path = "input_data/scenario_data/2019_int_in_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2019_int_in_10yr_avg.rds",
                 transition = F))
 #-------------------------------------------------------------------------------
 
 domestic_rates <- list(
-  '2028' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
@@ -35,8 +36,8 @@ config_list <- standard_trend_parameters(list(projection_name = projection_name,
                                               int_out_flows_rates = int_out_flows_rates,
                                               int_in = int_in,
                                               domestic_rates = domestic_rates,
-                                              write_excel = TRUE,
-                                              n_proj_yr = 1))
+                                              write_excel = TRUE))
+
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model

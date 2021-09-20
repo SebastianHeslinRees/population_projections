@@ -58,17 +58,18 @@ output_housing_led_projection <- function(projection, output_dir,
       as.data.frame()
   }
   
-  for(i in 1:13) {
+  for(i in 1:14) {
     col_aggregation = intersect(c("year", "gss_code", "age", "sex"), names(projection[[i]]))
     col_data <- setdiff(names(projection[[i]]), col_aggregation)
     comparison_pop <- projection$population %>% 
       select_at(col_aggregation) %>% 
       unique()
     
-    if(names(projection)[i] %in% c("ahs", "ahs_choice", "household_population", "adjusted_domestic_migration")) {
+    if(names(projection)[i] %in% c("ahs", "ahs_choice", "household_population", "adjusted_domestic_migration", "summary")) {
       comparison_pop <- filter(comparison_pop, substr(gss_code, 1, 3) == "E09")
     }
-    if(names(projection)[i] %in% c("ahs", "ahs_choice", "household_population", "trend_population", "adjusted_domestic_migration", "unconstrained_population")) {
+    if(names(projection)[i] %in% c("ahs", "ahs_choice", "household_population", "trend_population",
+                                   "adjusted_domestic_migration", "unconstrained_population", "summary")) {
       comparison_pop <- filter(comparison_pop, year >= min(projection[[i]]$year))
     }
     if(identical(col_data, "births")) {
