@@ -5,7 +5,9 @@ library(smallareamodel)
 n_proj_yr <- 30
 projection_name <- "Past_Delivery"
 
-external_trend_path <- "outputs/trend/2020/2020_CH_21-09-08_1659"
+external_trend_path <- list.dirs("outputs/trend/2020", recursive = FALSE)
+external_trend_path <- dplyr::last(stringr::str_sort(x[stringr::str_detect(x, "CH")]))
+
 dev_trajectory_path <- "input_data/housing_led_model/borough_2020-based_ldd_mean.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_2020-based_ldd_mean.rds"
 
