@@ -97,7 +97,9 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
           paste0(hh_output_dir, model, "_", "ahs.rds"))
   
   if(write_excel){
-    create_household_model_excels(output_dir, projection_name, model)
+    excel_wb_name <- substr(projection_name,1,nchar(projection_name)-14)
+    variant_name <- paste("Variant trend projection:",str_replace_all(excel_wb_name, "_", " "))
+    create_household_model_excels(output_dir, excel_wb_name, variant_name, model)
   }
   
 }

@@ -4,7 +4,7 @@
 \alias{create_housingled_excels}
 \title{Create the 2020-based housing-led projection excel output}
 \usage{
-create_housingled_excels(output_dir, projection_name, file_suffix = ".xlsx")
+create_housingled_excels(output_dir, wb_filename, projection_name)
 }
 \arguments{
 \item{output_dir}{The directory from which to read the data and save the Excel file}

@@ -4,7 +4,12 @@
 \alias{create_small_area_excels}
 \title{Source a python function to output Ward and/or MSOA excel files}
 \usage{
-create_small_area_excels(output_dir, wb_filename, smallarea = "ward")
+create_small_area_excels(
+  output_dir,
+  wb_filename,
+  projection_name,
+  smallarea = "ward"
+)
 }
 \arguments{
 \item{output_dir}{Character. The root model output directory.}

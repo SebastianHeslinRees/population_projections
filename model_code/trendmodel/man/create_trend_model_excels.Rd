@@ -4,13 +4,18 @@
 \alias{create_trend_model_excels}
 \title{Produce 3 Excel workbooks from a set of projection RDS files}
 \usage{
-create_trend_model_excels(output_dir, excel_file_name, household_models = TRUE)
+create_trend_model_excels(
+  output_dir,
+  wb_filename,
+  projection_name,
+  household_models = TRUE
+)
 }
 \arguments{
 \item{output_dir}{String. The output directory where the projection RDS files are
 saved.}
 
-\item{excel_file_name}{String. File name for the population workbook output.
+\item{wb_filename}{String. File name for the population workbook output.
 With or without "xlsx" suffix.}
 
 \item{household_models}{Logical. Should the household model excel files also

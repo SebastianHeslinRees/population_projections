@@ -4,7 +4,12 @@
 \alias{create_household_model_excels}
 \title{A wrapper for a Python function to output household projection Excels}
 \usage{
-create_household_model_excels(output_dir, projection_name, model = "both")
+create_household_model_excels(
+  output_dir,
+  wb_filename,
+  projection_name,
+  model = "both"
+)
 }
 \arguments{
 \item{output_dir}{String. The root output directory of the projection}
