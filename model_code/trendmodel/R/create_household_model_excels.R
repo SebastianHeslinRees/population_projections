@@ -9,10 +9,21 @@
 #' @return Output Excel workbooks
 #' 
 #' @import reticulate
+#' @import popmodules
 #' 
 #' @export
 
-create_household_model_excels <- function(output_dir, projection_name, model="both"){
+create_household_model_excels <- function(output_dir, wb_filename, projection_name, model="both"){
+  
+  #datastore directory
+  output_dir <- .add_slash(output_dir)
+  datastore_dir <- paste0(output_dir,"datastore")
+  dir.create(datastore_dir, recursive = T, showWarnings = F)
+  
+  #excel file name
+  if(str_sub(wb_filename,-5,-1)==".xlsx"){
+    wb_filename <- substr(wb_filename,1,nchar(wb_filename)-5)
+  }
   
   #TODO
   #FIXME
@@ -26,10 +37,10 @@ create_household_model_excels <- function(output_dir, projection_name, model="bo
   source_python('model_code/other_scripts/python_to_excel_households.py') 
   
   if(model %in% c("ons", "both")){
-    python_to_excel_households(output_dir, paste0(projection_name,"_ons_households.xlsx"), "ons")
+    python_to_excel_households(output_dir, paste0(wb_filename,"_ons_households.xlsx"), projection_name, "ons")
   }
   if(model %in% c("dclg", "both")){
-    python_to_excel_households(output_dir, paste0(projection_name,"_dclg_households.xlsx"), "dclg")
+    python_to_excel_households(output_dir, paste0(wb_filename,"_dclg_households.xlsx"), projection_name, "dclg")
   }
   
 }

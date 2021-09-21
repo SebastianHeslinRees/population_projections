@@ -7,7 +7,7 @@
 #'
 #' @param output_dir String. The output directory where the projection RDS files are
 #'   saved.
-#' @param excel_file_name String. File name for the population workbook output.
+#' @param wb_filename String. File name for the population workbook output.
 #'  With or without "xlsx" suffix.
 #' @param household_models Logical. Should the household model excel files also
 #'  be created.
@@ -15,25 +15,23 @@
 #' @import dplyr
 #' @import reticulate
 #' @import popmodules
+#' @import stringr
 #' @importFrom tidyr pivot_wider
 #' @importFrom dtplyr lazy_dt
 #' 
 #' @export
 
-create_trend_model_excels <- function(output_dir, excel_file_name, household_models = TRUE){
-  
-  if(substr(excel_file_name, nchar(excel_file_name)-4, nchar(excel_file_name)) != ".xlsx"){
-    excel_file_name <- paste0(excel_file_name,".xlsx")
-  }
+create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
+                                      household_models = TRUE){
   
   #datastore directory
-  if(!grepl("/$", output_dir)){ output_dir <- paste0(output_dir, "/") }
+  output_dir <- .add_slash(output_dir)
   datastore_dir <- paste0(output_dir,"datastore")
   dir.create(datastore_dir, recursive = T, showWarnings = F)
   
   #excel file name
-  if(substr(excel_file_name, nchar(excel_file_name)-4, nchar(excel_file_name))!=".xlsx"){
-    excel_file_name <- paste0(excel_file_name,".xlsx")
+  if(str_sub(wb_filename,-5,-1)!=".xlsx"){
+    wb_filename <- paste0(wb_filename,".xlsx")
   }
   
   #read data
@@ -112,12 +110,12 @@ create_trend_model_excels <- function(output_dir, excel_file_name, household_mod
   
   try( reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py'), silent = TRUE)
   reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py') 
-  python_to_excel_trendmodel(persons, female, male, components, datastore_dir, excel_file_name)
+  python_to_excel_trendmodel(persons, female, male, components, datastore_dir, wb_filename, projection_name)
   
   if(household_models){
-    excel_file_name <- substr(excel_file_name, 1, nchar(excel_file_name)-5)
+    wb_filename <- substr(wb_filename, 1, nchar(wb_filename)-5)
     for(model in c("ons","dclg")){
-      create_household_model_excels(datastore_dir, excel_file_name, model)
+      create_household_model_excels(output_dir, wb_filename, projection_name, model)
     }
   }
 }

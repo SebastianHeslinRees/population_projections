@@ -1,7 +1,7 @@
 import pandas as pd
 import openpyxl
 
-def python_to_excel_households(output_dir, wb_filename, model):
+def python_to_excel_households(output_dir, wb_filename, projection_name, model):
 
   #read in the template
   book = openpyxl.load_workbook('input_data/excel_templates/household_template_2020.xlsx')
@@ -32,6 +32,8 @@ def python_to_excel_households(output_dir, wb_filename, model):
   detailed_ce_pop.to_excel(writer, "household popn", index=False)
   detailed_hh_pop.to_excel(writer, "communal est popn", index=False)
   household_summary.to_excel(writer, "summary", index=False)
+  
+  book.get_sheet_by_name('Metadata')['A3'] = projection_name+" - "+model.upper()+" houshold model"
   
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)

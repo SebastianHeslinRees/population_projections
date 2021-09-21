@@ -100,6 +100,8 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
   
   #Excel
   if(write_excel){
-    create_trend_model_excels(output_dir, projection_name, FALSE)
+    excel_wb_name <- substr(projection_name,1,nchar(projection_name)-14)
+    variant_name <- paste("Variant trend projection:",str_replace_all(excel_wb_name, "_", " "))
+    create_trend_model_excels(output_dir, excel_wb_name, variant_name, TRUE)
   }
 }

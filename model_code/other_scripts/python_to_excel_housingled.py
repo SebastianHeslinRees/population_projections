@@ -1,7 +1,7 @@
 import pandas as pd
 import openpyxl
 
-def python_to_excel_housingled(persons, females, males, components, assumed_dev, stock, output_dir, wb_filename):
+def python_to_excel_housingled(persons, females, males, components, assumed_dev, stock, output_dir, wb_filename, projection_name):
 
   #read in the template
   book = openpyxl.load_workbook('input_data/excel_templates/housing_led_2020_based_template.xlsx')
@@ -18,6 +18,8 @@ def python_to_excel_housingled(persons, females, males, components, assumed_dev,
   components.to_excel(writer, "components of change", index=False)
   assumed_dev.to_excel(writer, "assumed development", index=False)
   stock.to_excel(writer, "housing stock", index=False)
+  
+  book.get_sheet_by_name('Metadata')['A3'] = projection_name
   
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)

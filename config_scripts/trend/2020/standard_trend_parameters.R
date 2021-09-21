@@ -57,7 +57,7 @@ standard$fertility_rates <- "input_data/fertility/fert_rates_5yr_trend_2020.rds"
 timestamp <- format(Sys.time(), "%y-%m-%d_%H%M")
 projection_name <- paste0(projection_name,"_",timestamp)
 standard$output_dir <- paste0("outputs/trend/2020/",projection_name,"/")
-standard$write_excel <- FALSE
+standard$write_excel <- TRUE
 standard$constraint_fns <- list(list(fn = function() NULL, args = list()))
 standard$int_out_flow_or_rate <- "flow"
 

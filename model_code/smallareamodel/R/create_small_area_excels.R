@@ -18,18 +18,18 @@
 #'
 #' @export
 
-create_small_area_excels <- function(output_dir, wb_filename, smallarea = "ward"){
+create_small_area_excels <- function(output_dir, wb_filename, projection_name, smallarea = "ward"){
   
   #Create excels output directory
   output_dir <- .add_slash(output_dir)
-  dir.create(paste0(output_dir,"excels"), showWarnings = FALSE)
+  excel_dir <- paste0(output_dir,"excels/")
+  dir.create(excel_dir, showWarnings = FALSE)
   
   #Create workbook names
-  if(substr(wb_filename, nchar(wb_filename)-4, nchar(wb_filename)) == ".xlsx"){
+  if(str_sub(wb_filename,-5,-1)==".xlsx"){
     wb_filename <- substr(wb_filename,1,nchar(wb_filename)-5)
-  } 
-  
-  filename <- paste0(wb_filename,"_",smallarea,".xlsx")
+  }
+  wb_filename <- paste0(wb_filename,"_",smallarea,".xlsx")
   
   #read in the data from csv
   persons = fread(paste0(output_dir, smallarea,"/persons_",smallarea,".csv"), header = TRUE) %>%
@@ -62,7 +62,8 @@ create_small_area_excels <- function(output_dir, wb_filename, smallarea = "ward"
   try(source_python('model_code/other_scripts/python_to_excel_small_area.py'))
   source_python('model_code/other_scripts/python_to_excel_small_area.py') 
   
-  python_to_excel_smallarea(persons, females, males, components, output_dir, filename, smallarea) #~3.5 mins
+  python_to_excel_smallarea(persons, females, males, components,
+                            excel_dir, wb_filename, projection_name, smallarea) #~3.5 mins
   message(paste(smallarea, "excel output complete"))
   
 }

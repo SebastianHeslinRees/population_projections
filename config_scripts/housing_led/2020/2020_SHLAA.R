@@ -33,8 +33,13 @@ projection <- run_housing_led_model(config_list[[1]])
 ward_projection <- run_small_area_model(config_list[[2]])
 msoa_projection <- run_small_area_model(config_list[[3]])
 
-# output_housing_led_excel_file(ward_projection[["csvs"]],
-#                               config_list$output_dir,
-#                               config_list$projection_name,
-#                               config_list$popn_adjustment_path,
-#                               file_suffix = "_2020.xlsx")
+#-------------------------------------------------------------------------------
+#Excel workbooks
+
+output_dir <- config_list$output_dir
+wb_filename <- "identified_capacity_scenario"
+projection_name <- "2020-based Scenario Projection: Identified Capacity Scenario"
+
+create_housingled_excels(output_dir, wb_filename, projection_name)
+create_small_area_excels(output_dir, wb_filename, projection_name, smallarea = "ward")
+create_small_area_excels(output_dir, wb_filename, projection_name, smallarea = "msoa")

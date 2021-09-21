@@ -1,7 +1,7 @@
 import pandas as pd
 import openpyxl
 
-def python_to_excel_trendmodel(persons, females, males, components, output_dir, wb_filename):
+def python_to_excel_trendmodel(persons, females, males, components, output_dir, wb_filename, projection_name):
 
   #read in the template
   book = openpyxl.load_workbook('input_data/excel_templates/trend_template_2020.xlsx')
@@ -17,6 +17,8 @@ def python_to_excel_trendmodel(persons, females, males, components, output_dir, 
   males.to_excel(writer, "males", index=False)
   components.to_excel(writer, "components of change", index=False)
   
+  book.get_sheet_by_name('Metadata')['A3'] = projection_name
+
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)
   no_border = openpyxl.styles.borders.Border(

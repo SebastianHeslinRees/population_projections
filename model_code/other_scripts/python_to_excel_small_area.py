@@ -1,7 +1,7 @@
 import pandas as pd
 import openpyxl
 
-def python_to_excel_smallarea(persons, females, males, components, output_dir, wb_filename, small_area):
+def python_to_excel_smallarea(persons, females, males, components, output_dir, wb_filename, projection_name, small_area):
 
   #read in the template
   if(small_area == "ward"):
@@ -18,7 +18,7 @@ def python_to_excel_smallarea(persons, females, males, components, output_dir, w
   components.columns = components.columns.str.replace('_',' ')
 
   #Set the output name and prep the file for writing
-  writer = pd.ExcelWriter(output_dir+"excels/"+wb_filename, engine='openpyxl') 
+  writer = pd.ExcelWriter(output_dir+wb_filename, engine='openpyxl') 
   writer.book = book
   writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
 
@@ -27,6 +27,8 @@ def python_to_excel_smallarea(persons, females, males, components, output_dir, w
   females.to_excel(writer, "females", index=False)
   males.to_excel(writer, "males", index=False)
   components.to_excel(writer, "components of change", index=False)
+  
+  book.get_sheet_by_name('Metadata')['A3'] = projection_name
   
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)
