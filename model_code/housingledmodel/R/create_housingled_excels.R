@@ -19,7 +19,7 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
   
   output_dir <- .add_slash(output_dir)
   excel_dir <- paste0(output_dir, "excels/")
-  dir.create(output_dir, showWarnings = FALSE)
+  dir.create(excel_dir, showWarnings = FALSE)
   
   if(str_sub(wb_filename,-5,-1)!=".xlsx"){
     wb_filename <- paste0(wb_filename,".xlsx")

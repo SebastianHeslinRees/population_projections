@@ -38,7 +38,7 @@ msoa_projection <- run_small_area_model(config_list[[3]])
 #-------------------------------------------------------------------------------
 #Excel workbooks
 
-output_dir <- config_list$output_dir
+output_dir <- config_lis[[1]]$output_dir
 wb_filename <- "past_delivery_scenario"
 projection_name <- "2020-based Scenario Projection: Past Delivery Scenario"
 
