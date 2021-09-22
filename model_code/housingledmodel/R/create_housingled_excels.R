@@ -29,11 +29,11 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
   
   #-----------------------------------------------------------------------------
   
-  persons <- doob("persons")
-  females <- doob("females")
-  males <- doob("males")
-  assumed_dev <- doob("assumed_dev")
-  stock <- doob("housing_stock")
+  persons <- doob("persons", output_dir)
+  females <- doob("females", output_dir)
+  males <- doob("males", output_dir)
+  assumed_dev <- doob("assumed_dev", output_dir)
+  stock <- doob("housing_stock", output_dir)
   
   components <- fread(paste0(output_dir,"csv/components.csv"), header = TRUE) %>%
     as.data.frame() %>%
@@ -68,7 +68,7 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
 }
 
 #If the projection horizon is >2041 remove extra years, if not use max(year)
-doob <- function(x){
+doob <- function(x, output_dir){
   
   a <- fread(paste0(output_dir,"csv/",x,".csv"), header = TRUE) %>%
     as.data.frame()

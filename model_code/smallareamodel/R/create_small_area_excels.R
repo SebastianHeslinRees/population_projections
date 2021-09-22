@@ -34,9 +34,9 @@ create_small_area_excels <- function(output_dir, wb_filename, projection_name, s
   wb_filename <- paste0(wb_filename,"_",smallarea,".xlsx")
   
   #read in the data from csv
-  persons <- doob("persons", smallarea)
-  females <- doob("females", smallarea)
-  males <- doob("males", smallarea)
+  persons <- doob("persons", smallarea, output_dir)
+  females <- doob("females", smallarea, output_dir)
+  males <- doob("males", smallarea, output_dir)
   
   components = fread(paste0(output_dir, smallarea,"/components_",smallarea,".csv"), header = TRUE) %>%
     as.data.frame() %>% 
@@ -60,7 +60,7 @@ create_small_area_excels <- function(output_dir, wb_filename, projection_name, s
 }
 
 #If the projection horizon is >2041 remove extra years, if not use max(year)
-doob <- function(x, smallarea){
+doob <- function(x, smallarea, output_dir){
   
   a <- fread(paste0(output_dir, smallarea,"/",x,"_",smallarea,".csv"), header = TRUE) %>%
     as.data.frame()
