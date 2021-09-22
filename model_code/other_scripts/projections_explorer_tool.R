@@ -9,9 +9,9 @@ components <- c("population","births","deaths","dom_in","dom_out",
 
 ward_components <- c("population","births","deaths", "migration")
 
-projections_list <- list('projection 1' = "Identified_Capacity_21-09-14_1403",
-                         'projection 2' = "Past_Delivery_21-09-14_1403",
-                         'projection 3' = "Housing_Targets_21-09-14_1403") %>% 
+projections_list <- list('projection 1' = "Identified_Capacity_21-09-22_1121",
+                         'projection 2' = "Past_Delivery_21-09-22_1121",
+                         'projection 3' = "Housing_Targets_21-09-22_1121") %>% 
   lapply(function(x){paste0("outputs/housing_led/2020/",x)})
 
 borough_data_list <- list()
@@ -166,12 +166,12 @@ proj_2 <- filter(final_ALL, projection == 'projection 2')
 proj_3 <- filter(final_ALL, projection == 'projection 3')
 
 fwrite(proj_1, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
-fwrite(proj_2, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
-fwrite(proj_3, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
+fwrite(proj_2, "notebooks_and_analysis/2020_based_projections_tool_data_2.csv")
+fwrite(proj_3, "notebooks_and_analysis/2020_based_projections_tool_data_3.csv")
 
 q_drive <- "Q:/Teams/D&PA/Demography/Projections/population_models/temp/"
 
 fwrite(proj_1, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
-fwrite(proj_2, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
-fwrite(proj_3, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
+fwrite(proj_2, paste0(q_drive, "2020_based_projections_tool_data_2.csv"))
+fwrite(proj_3, paste0(q_drive, "2020_based_projections_tool_data_3.csv"))
 
