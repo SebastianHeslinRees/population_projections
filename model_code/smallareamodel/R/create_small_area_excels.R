@@ -14,6 +14,7 @@
 #' @import reticulate
 #' @import dplyr
 #' @import popmodules
+#' @import stringr
 #' @importFrom data.table fread
 #'
 #' @export
