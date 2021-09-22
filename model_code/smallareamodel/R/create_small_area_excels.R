@@ -20,6 +20,8 @@
 
 create_small_area_excels <- function(output_dir, wb_filename, projection_name, smallarea = "ward"){
   
+  message(paste("Creating", smallarea, "Excel workbook"))
+  
   #Create excels output directory
   output_dir <- .add_slash(output_dir)
   excel_dir <- paste0(output_dir,"excels/")
@@ -32,30 +34,20 @@ create_small_area_excels <- function(output_dir, wb_filename, projection_name, s
   wb_filename <- paste0(wb_filename,"_",smallarea,".xlsx")
   
   #read in the data from csv
-  persons = fread(paste0(output_dir, smallarea,"/persons_",smallarea,".csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
-  
-  females = fread(paste0(output_dir, smallarea,"/females_",smallarea,".csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
-  
-  males = fread(paste0(output_dir, smallarea,"/males_",smallarea,".csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
+  persons <- doob("persons", smallarea)
+  females <- doob("females", smallarea)
+  males <- doob("males", smallarea)
   
   components = fread(paste0(output_dir, smallarea,"/components_",smallarea,".csv"), header = TRUE) %>%
     as.data.frame() %>% 
     filter(year <= 2041)
   
-  
   #Source python function
-  
   #TODO
   #FIXME
   #There is a problem with reticulate/python/renv that I can't get to the bottom of
   #The first time a python script is sourced the function throws an error. It can't find
-  #rpytools. If you source again it works. The temp work arund is to wrap the source in
+  #rpytools. If you source again it works. The temp work around is to wrap the source in
   #try() so the error is caught and then run it a second time. Its ugly but it works.
   #See also trendmodel::create_household_model_excels, etc
   
@@ -63,7 +55,22 @@ create_small_area_excels <- function(output_dir, wb_filename, projection_name, s
   source_python('model_code/other_scripts/python_to_excel_small_area.py') 
   
   python_to_excel_smallarea(persons, females, males, components,
-                            excel_dir, wb_filename, projection_name, smallarea) #~3.5 mins
-  message(paste(smallarea, "excel output complete"))
+                            excel_dir, wb_filename, projection_name, smallarea)
+  
+}
+
+#If the projection horizon is >2041 remove extra years, if not use max(year)
+doob <- function(x, smallarea){
+  
+  a <- fread(paste0(output_dir, smallarea,"/",x,"_",smallarea,".csv"), header = TRUE) %>%
+    as.data.frame()
+  
+  b <- as.numeric(last(names(a)))
+  
+  if(b>2041){
+    a <- select(a, -c(as.character(2042:b)))
+  }
+  
+  return(a)
   
 }

@@ -16,6 +16,8 @@
 #' @export
 
 create_housingled_excels <- function(output_dir, wb_filename, projection_name){
+
+  message("Creating borough Excel workbook")
   
   output_dir <- .add_slash(output_dir)
   excel_dir <- paste0(output_dir, "excels/")
@@ -27,20 +29,14 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
   
   #-----------------------------------------------------------------------------
   
-  persons <- fread(paste0(output_dir,"csv/persons.csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
+  persons <- doob("persons")
+  females <- doob("females")
+  males <- doob("males")
+  assumed_dev <- doob("assumed_dev")
+  stock <- doob("housing_stock")
   
-  females <- fread(paste0(output_dir,"csv/females.csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050))) 
-  
-  males <- fread(paste0(output_dir,"csv/males.csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
-  
-  components <- fread(paste0(output_dir,"csv/components.csv"), header = TRUE) %>% 
-    as.data.frame() %>% 
+  components <- fread(paste0(output_dir,"csv/components.csv"), header = TRUE) %>%
+    as.data.frame() %>%
     rename(population = popn) %>%
     filter(year <= 2041)
   
@@ -52,14 +48,6 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
   #        dom_out = ifelse(is.na(dom_out),"#N/A", dom_out))
   
   names(components) <- str_replace_all(names(components), "_", " ")
-  
-  assumed_dev <- fread(paste0(output_dir,"csv/assumed_dev.csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
-  
-  stock <- fread(paste0(output_dir,"csv/housing_stock.csv"), header = TRUE) %>%
-    as.data.frame() %>% 
-    select(-c(as.character(2042:2050)))
 
   #-----------------------------------------------------------------------------
   
@@ -76,5 +64,21 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
   reticulate::source_python('model_code/other_scripts/python_to_excel_housingled.py') 
   python_to_excel_housingled(persons, females, males, components, assumed_dev, stock, 
                              excel_dir, wb_filename, projection_name)
+  
+}
+
+#If the projection horizon is >2041 remove extra years, if not use max(year)
+doob <- function(x){
+  
+  a <- fread(paste0(output_dir,"csv/",x,".csv"), header = TRUE) %>%
+    as.data.frame()
+  
+  b <- as.numeric(last(names(a)))
+  
+  if(b>2041){
+    a <- select(a, -c(as.character(2042:b)))
+  }
+  
+  return(a)
   
 }
