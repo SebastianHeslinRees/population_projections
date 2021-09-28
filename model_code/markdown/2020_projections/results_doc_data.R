@@ -56,6 +56,9 @@ data_list[['sya']] <- read_multiple_projections(projections,
                                                 col_aggregation = c("year","gss_code","age")) %>% 
   mutate(variant = factor(variant, levels = trend_factor_levels))
 
+
+
+print('households')
 projections <- lapply(projections, function(x) paste0(x,"households/"))
 
 for(i in households){
@@ -143,8 +146,12 @@ f <- f+1
 
 charts[['age structure']] <- data_list[['sya']] %>% 
   filter_london(data_col = "popn") %>% 
-  filter(year == 2036) %>%
+  filter(year %in% c(2020,2036)) %>% 
+  mutate(variant = as.character(variant)) %>% 
+  mutate(variant = ifelse(year == 2020, "2020 structure", variant)) %>% 
+  unique() %>% 
   mutate(value = popn) %>% 
+  mutate(variant = factor(variant, levels = c("2020 structure", trend_factor_levels))) %>% 
   data.frame() %>% 
   age_chart_plotly(chart_title, colour = "variant", figure = f)
 
