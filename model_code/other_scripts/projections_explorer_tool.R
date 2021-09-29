@@ -145,6 +145,7 @@ final_borough <- all_borough_data %>%
   select(projection, gss_code, gss_code_ward, year, sex, age, component, value)
 
 final_ward <- left_join(ward_data, ward_district_lookup, by="gss_code_ward") %>% 
+  filter(gss_code_ward != "E09000001") %>% 
   left_join(borough_names, by="gss_code") %>% 
   rename(projection = variant)  %>%
   select(projection, gss_code, gss_code_ward, year, sex, age, component, value)
@@ -158,12 +159,13 @@ gc()
 
 final_ALL <- rbind(final_london, final_borough, final_ward) %>% 
   data.frame() %>% 
-  mutate(value = round(value,0)) %>% 
-  mutate(value = ifelse(is.na(value),"NULL",value))
+  mutate(value = round(value,0))
 
 final_ALL <- final_ALL %>% 
-  filter(year %in% 2011:2041) %>% 
-  filter(gss_code_ward != "E09000001")
+  filter(year %in% 2011:2041)
+
+final_ALL <- final_ALL %>% 
+  mutate(value = ifelse(is.na(value),"NULL",value))
 
 #filter into separate projections dataframes
 
@@ -183,3 +185,36 @@ fwrite(proj_1, paste0(q_drive, "2020_based_projections_tool_data_1.csv"))
 fwrite(proj_2, paste0(q_drive, "2020_based_projections_tool_data_2.csv"))
 fwrite(proj_3, paste0(q_drive, "2020_based_projections_tool_data_3.csv"))
 
+#-------------------------------------------------------------------------------
+message("tests")
+library(testthat)
+
+test_that("proj 1", {
+  expect_equal(length(unique(proj_1$gss_code)),34)
+  expect_equal(length(unique(proj_1$gss_code_ward)),625)
+  expect_equal(range(proj_1$year),c(2011,2041))
+  expect_equal(unique(proj_1$sex),c("female","male"))
+  expect_equal(range(proj_1$age),c(0,90))
+  expect_equal(length(unique(proj_1$age)),91)
+  expect_equal(length(unique(proj_1$component)),12)
+})
+
+test_that("proj 2", {
+  expect_equal(length(unique(proj_2$gss_code)),34)
+  expect_equal(length(unique(proj_2$gss_code_ward)),625)
+  expect_equal(range(proj_2$year),c(2011,2041))
+  expect_equal(unique(proj_2$sex),c("female","male"))
+  expect_equal(range(proj_2$age),c(0,90))
+  expect_equal(length(unique(proj_2$age)),91)
+  expect_equal(length(unique(proj_2$component)),12)
+})
+
+test_that("proj 3", {
+  expect_equal(length(unique(proj_3$gss_code)),34)
+  expect_equal(length(unique(proj_3$gss_code_ward)),625)
+  expect_equal(range(proj_3$year),c(2011,2041))
+  expect_equal(unique(proj_3$sex),c("female","male"))
+  expect_equal(range(proj_3$age),c(0,90))
+  expect_equal(length(unique(proj_3$age)),91)
+  expect_equal(length(unique(proj_3$component)),12)
+})
