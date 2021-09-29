@@ -154,16 +154,24 @@ gc()
 
 #-------------------------------------------------------------------------------
 
-#Bind everything together and write out
+#bind everything together and do final filter
 
 final_ALL <- rbind(final_london, final_borough, final_ward) %>% 
   data.frame() %>% 
   mutate(value = round(value,0)) %>% 
   mutate(value = ifelse(is.na(value),"NULL",value))
 
+final_ALL <- final_ALL %>% 
+  filter(year %in% 2011:2041) %>% 
+  filter(gss_code_ward != "E09000001")
+
+#filter into separate projections dataframes
+
 proj_1 <- filter(final_ALL, projection == 'projection 1')
 proj_2 <- filter(final_ALL, projection == 'projection 2')
 proj_3 <- filter(final_ALL, projection == 'projection 3')
+
+#write out
 
 fwrite(proj_1, "notebooks_and_analysis/2020_based_projections_tool_data_1.csv")
 fwrite(proj_2, "notebooks_and_analysis/2020_based_projections_tool_data_2.csv")
