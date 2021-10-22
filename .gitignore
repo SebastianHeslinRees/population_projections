@@ -18,6 +18,7 @@ outputs/*
 *.Rcheck*
 # *.html
 # *.pdf
+*.svg
 
 # knitr and R markdown default cache directories
 *_cache/
