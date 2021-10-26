@@ -62,7 +62,7 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
   distributed <- distributed %>%
     mutate(!!popn_1_col := !!sym(popn_1_col)* age_distribution) %>%
     select_at(c(names(popn_1), additional_dist_cols, "age")) %>%
-    as.data.frame()
+    data.frame()
 
   return(distributed)
 
