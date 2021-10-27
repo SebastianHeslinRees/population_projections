@@ -98,5 +98,6 @@ globalVariables(c(
   "popn__",
   "rate__",
   "component__",
-  "gss_factor"
+  "gss_factor",
+  "gss___"
 ))

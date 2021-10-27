@@ -4,12 +4,18 @@
 \alias{aggregate_city_wards}
 \title{Aggregate City of London ward data up to borough level}
 \usage{
-aggregate_city_wards(df, data_col)
+aggregate_city_wards(
+  df,
+  data_col,
+  ward_lookup = "input_data/lookup/2011_ward_to_district.rds"
+)
 }
 \arguments{
 \item{df}{A dataframe containing ward-level data}
 
 \item{data_col}{String. The column name of containing data in \code{df}}
+
+\item{ward_lookup}{A dataframe. Ward to local authority gss code lookup}
 }
 \value{
 A data frame with City of London wards aggregated to a single

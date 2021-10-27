@@ -24,10 +24,10 @@ cap values. If the cap hasn't been set then NULL.}
 
 \item{projection_year}{Numeric. The projection year}
 
+\item{ldd_final_yr}{Numeric. The final year for which LDD is available}
+
 \item{gss_code_list}{Character. A vector of gss_codes which need to have an
 AHS value returned}
-
-\item{ldd_final_year}{Numeric. The final year for which LDD is available}
 }
 \value{
 A list where element 1 is the choice the tree made and element 2 is a

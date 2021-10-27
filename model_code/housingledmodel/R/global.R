@@ -51,5 +51,8 @@ globalVariables(c(
   'migration',
   'scenario',
   'resource_title',
-  'adjustment'
+  'adjustment',
+  'applied_ahs',
+  'actual_ahs',
+  'scenario'
   ))

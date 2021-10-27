@@ -9,6 +9,7 @@
 #'   "sex")}.
 #' @param england Logical indicating whether or not an England total should also
 #'   be calculated. Default \code{FALSE}
+#' @param lookup String. File path for a gss_code to region gss code lookup
 #'
 #' @return The input data frame with additional rows for English regions and
 #'   Wales
@@ -20,10 +21,11 @@
 aggregate_regions <- function(x,
                               gss_col = "gss_code",
                               col_aggregation = c("year", "age", "sex"),
-                              england = FALSE){
+                              england = FALSE,
+                              lookup = "input_data/lookup/district_to_region.rds"){
   
 
-  lookup <- readRDS("input_data/lookup/district_to_region.rds")
+  lookup <- readRDS(lookup)
   
   col_aggregation <- union(col_aggregation, "region_gss_code")
   
@@ -71,6 +73,6 @@ aggregate_regions <- function(x,
     }   
   }
   
-  return(output_df)
+  return(data.frame(output_df))
   
 }

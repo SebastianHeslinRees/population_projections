@@ -4,7 +4,12 @@
 \alias{aggregate_regional_flows}
 \title{Aggregate LA-level flow data to national, regional and sub-regional flows}
 \usage{
-aggregate_regional_flows(domestic_flow, region_lookup, flow_col = "flow")
+aggregate_regional_flows(
+  domestic_flow,
+  region_lookup,
+  flow_col = "flow",
+  inner_outer_lookup = "input_data/lookup/inner_and_outer_london.rds"
+)
 }
 \arguments{
 \item{domestic_flow}{A dataframe containing origin destination data with the
@@ -15,6 +20,9 @@ gss_codes. Columns \code{gss_code, gss_code_region}}
 
 \item{flow_col}{A string giving the data column name in the input data frame.
 Default \code{flow}}
+
+\item{inner_outer_lookup}{A file path to the location of a lookup between London
+Boroughs and the Inner London/Outer London subregions}
 }
 \value{
 A list containing 3 data frames of origin destination flow data.

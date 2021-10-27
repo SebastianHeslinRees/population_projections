@@ -8,7 +8,8 @@ aggregate_regions(
   x,
   gss_col = "gss_code",
   col_aggregation = c("year", "age", "sex"),
-  england = FALSE
+  england = FALSE,
+  lookup = "input_data/lookup/district_to_region.rds"
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ group by when aggregating to region. Default \code{c("year", "age",
 
 \item{england}{Logical indicating whether or not an England total should also
 be calculated. Default \code{FALSE}}
+
+\item{lookup}{String. File path for a gss_code to region gss code lookup}
 }
 \value{
 The input data frame with additional rows for English regions and

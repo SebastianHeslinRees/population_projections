@@ -9,7 +9,7 @@
 #' @param ahs_cap A ataframe or NULL. If the cap has been set then a dataframe of
 #'  cap values. If the cap hasn't been set then NULL.
 #' @param projection_year Numeric. The projection year
-#' @param ldd_final_year Numeric. The final year for which LDD is available
+#' @param ldd_final_yr Numeric. The final year for which LDD is available
 #' @param gss_code_list Character. A vector of gss_codes which need to have an
 #'  AHS value returned
 #'
