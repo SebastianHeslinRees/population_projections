@@ -4,21 +4,31 @@
 \alias{validate_same_geog}
 \title{Confirm two datasets have matching geography}
 \usage{
-validate_same_geog(df_1, df_2, col_1 = "gss_code", col_2 = "gss_code")
+validate_same_geog(
+  df_1,
+  df_2,
+  col_1 = "gss_code",
+  col_2 = col_1,
+  error_or_warn = "error"
+)
 }
 \arguments{
-\item{df_1}{A dataframe containing a column of gss codes}
+\item{df_1}{A dataframe containing a column with geography codes or names}
 
-\item{df_2}{A dataframe containing a column of gss codes}
+\item{df_2}{A dataframe containing a column with geography codes or names}
 
-\item{col_1}{Character. The name of the column containing gss codes in df_1
+\item{col_1}{Character. The name of the column to be tested in df_1
 (default 'gss_code')}
 
-\item{col_2}{Character. The name of the column containing gss codes in df_2
-(default 'gss_code')}
+\item{col_2}{Character. The name of the column to be tested in df_2
+(default to same as col_1)}
+
+\item{error_or_warn}{String. Should the function return a warning or an error.
+Set to either 'error' to stop operation or 'warn' to give a warning only.
+Default 'error'.}
 }
 \value{
-Warnings if there differences in the gss codes supplied
+Warnings or errors if there differences in the gss codes supplied
 }
 \description{
 Performs a check that the unique set of gss_codes in one
