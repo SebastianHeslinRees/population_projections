@@ -6,23 +6,21 @@
 \usage{
 apply_rate_to_population(
   popn,
-  popn_rate,
+  rates,
   col_aggregation = c("year", "gss_code", "sex", "age"),
   col_popn = "popn",
   col_rate = "rate",
   col_out = "component",
-  one2many = FALSE,
-  many2one = FALSE,
   additional_popn_cols = NULL,
   additional_rate_cols = NULL,
-  missing_levels_popn = FALSE,
-  missing_levels_rate = FALSE
+  validate_geog = FALSE,
+  col_geog = NULL
 )
 }
 \arguments{
 \item{popn}{A data frame containing population data}
 
-\item{popn_rate}{A data frame containing rates data}
+\item{rates}{A data frame containing rates data}
 
 \item{col_aggregation}{A string or character vector giving the names of
 columns on which to join (\code{by} in \code{dplyr::left_join}).
@@ -33,41 +31,30 @@ vector, e.g. \code{c("gss_code"="LSOA11CD")}. Default \code{c("year",
 \item{col_popn}{String. Name of column in \code{popn} containing population
 counts. Default "popn".}
 
-\item{col_rate}{String. Name of column in \code{popn_rate} containing rate
+\item{col_rate}{String. Name of column in \code{rates} containing rate
 data. Default "rate".}
 
 \item{col_out}{String. Name of the resulting component count column (popn*rate)
 in the output dataframe. Default "component".}
-
-\item{one2many}{Logical. Setting this to FALSE will check that no more than
-one level from \code{popn_rate} matches to each level of \code{popn}. Default
-FALSE.}
-
-\item{many2one}{Logical. Setting this to FALSE will check that no more than
-one level from \code{popn} matches to each level of \code{rate}. Default
-FALSE.}
 
 \item{additional_popn_cols}{String. Names of columns in \code{popn}
 which should be included in the output but which are not included in
 \code{col_aggregation}. Used when multiple aggregation levels apply to the
 same rates. Default NULL.}
 
-\item{additional_rate_cols}{String. Names of columns in \code{popn_rate}
+\item{additional_rate_cols}{String. Names of columns in \code{rates}
 which should be included in the output but which are not included in
 \code{col_aggregation}. Used when multiple rates apply to the same
-aggregation level, e.g. outmigration to multiple locations. The resulting
-left join with \code{popn_rate} can therefore return a much larger data
+aggregation level, e.g. out migration to multiple locations. The resulting
+left join with \code{rates} can therefore return a much larger data
 frame. Default NULL.}
 
-\item{missing_levels_popn}{Logical. Is the popn data frame missing any
-levels? Used to relax validation. Reminder: \code{one2many} will
-probably be TRUE in this case. Default FALSE.}
+\item{validate_geog}{Boolean. Should the geography in the two input dataframes
+be checked using the \code{popmodules::validate_same_geog} function. Default FALSE.}
 
-\item{missing_levels_rate}{Logical or character vector. Is the rates data
-missing any levels? If joining the missing levels to the input population
-would create NAs, the missing values in the output column will be NA. Note:
-setting this to TRUE will disable some of the checks on the input and join
-datasets. Default FALSE.}
+\item{col_geog}{String or NULL. The column containing geographic codes/names.
+Must be set if \code{validate_geog = TRUE}. Column must be present in both
+input dataframes. Default NULL.}
 }
 \value{
 A data frame of component counts calculated as input popn * rate, with one row
@@ -83,25 +70,4 @@ The output dataframe will consist of the columns in the \code{popn} input
 dataframe, plus any columns specified in \code{additional_rate_cols}, and the
 output data column \code{col_out}. Output has 1 row for each distinct level of
 the \code{col_aggregation}.
-}
-\examples{
-
-popn <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), popn = 100)
-rate <- expand.grid(year=2000, age=20:21, gss_code=c("a","b"), sex=c("f","m"), rate = 0.5)
-
-component <- apply_rate_to_population(popn,
-                             rate,
-                             col_aggregation = c("year", "gss_code", "sex", "age"),
-                             col_popn = "popn",
-                             col_rate = "rate",
-                             col_out = "component",
-                             one2many = FALSE,
-                             many2one = TRUE,
-                             additional_popn_cols = NULL,
-                             missing_levels_popn = FALSE,
-                             missing_levels_rate = FALSE)
-
-# Due to default parameter values, this is equivalent to
-component <- apply_rate_to_population(popn, rate)
-
 }

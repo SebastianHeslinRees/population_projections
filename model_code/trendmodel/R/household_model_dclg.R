@@ -202,9 +202,7 @@ dclg_stage_2 <- function(stage2_file_path, stage1_output){
                                                    col_popn = "hh_popn",
                                                    col_rate = "rate",
                                                    col_out = "hh_stg2_unconstrained",
-                                                   additional_rate_cols = "household_type",
-                                                   missing_levels_popn = TRUE,
-                                                   one2many = TRUE)
+                                                   additional_rate_cols = "household_type")
   
   stage2_constrained <- group_by(stage2_unconstrained, gss_code, year) %>%
     mutate(stg2_total_hh = sum(hh_stg2_unconstrained)) %>%

@@ -220,12 +220,12 @@ housing_led_core <- function(start_population,
   
   #6. Target population
   #dw2hh 2018
-  target_population <- apply_rate_to_population(households_2, ahs,
+  target_population <- apply_rate_to_population(popn = households_2,
+                                                rates = ahs,
                                                 col_popn = "households",
                                                 col_rate = "ahs",
                                                 col_out = "target_popn",
-                                                col_aggregation = c("year","gss_code"),
-                                                one2many = TRUE)
+                                                col_aggregation = c("year","gss_code"))
   
   #7. This point is intentionally left blank
   

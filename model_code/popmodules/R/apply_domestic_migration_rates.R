@@ -143,17 +143,13 @@ apply_domestic_migration_rates <- function(popn,
   # if apply_rate_to_population is used to join popn to mign_rate rather than the other
   # way round.
 
-  migration <- apply_rate_to_population(popn,
-                                        mign_rate,
-                                        col_aggregation,
+  migration <- apply_rate_to_population(popn = popn,
+                                        rates = mign_rate,
+                                        col_aggregation = col_aggregation,
                                         col_popn = col_popn,
                                         col_rate = col_rate,
                                         col_out = col_flow,
-                                        one2many = one2many,
-                                        many2one = many2one,
-                                        additional_rate_cols = col_gss_destination,
-                                        missing_levels_popn = FALSE,
-                                        missing_levels_rate = TRUE)
+                                        additional_rate_cols = col_gss_destination)
   
   # moving this warning to the rates' creation
   unmatched_levels <- is.na(migration[[col_flow]])
