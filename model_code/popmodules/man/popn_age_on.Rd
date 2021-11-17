@@ -13,7 +13,8 @@ popn_age_on(
   timestep = 1,
   template_age_levels = NULL,
   births = NULL,
-  col_births = "births"
+  col_births = "births",
+  col_geog = "gss_code"
 )
 }
 \arguments{
@@ -51,11 +52,14 @@ zero-year-olds are included in the output. Default \code{NULL}.}
 
 \item{col_births}{String denoting the name of the column containing data in 
 the \code{births} dataframe.}
+
+\item{col_geog}{String denoting the geography column. Default "gss_code".
+Only used in validation. Only used when births dataframe is specified.}
 }
 \value{
 A data frame containing the population with age advanced by one time
   step (or age band). The lowest age will not be present in this output. Rows
-  are arranged iby \code{col_aggregation}, in that order.
+  are arranged by \code{col_aggregation}, in that order.
 }
 \description{
 Given a cohort population, advance the cohort's age by one timestep/age band

@@ -9,7 +9,7 @@
 #'
 #' Ageing of the population is done by either adding the timestep to the age
 #' (for a numeric age) or by incrementing to the next level of the factor (for
-#' age as an ordered factor)./ If \code{col_year} is given, the year will also
+#' age as an ordered factor). If \code{col_year} is given, the year will also
 #' be increased by \code{timestep}.
 #'
 #' The highest age/age band is considered to be unbounded. This means that when
@@ -43,10 +43,12 @@
 #'   zero-year-olds are included in the output. Default \code{NULL}.
 #' @param col_births String denoting the name of the column containing data in 
 #'   the \code{births} dataframe.
+#' @param col_geog String denoting the geography column. Default "gss_code".
+#'   Only used in validation. Only used when births dataframe is specified.
 #'
 #' @return A data frame containing the population with age advanced by one time
 #'   step (or age band). The lowest age will not be present in this output. Rows
-#'   are arranged iby \code{col_aggregation}, in that order.
+#'   are arranged by \code{col_aggregation}, in that order.
 #'
 #' @import assertthat
 #' @import dplyr
@@ -64,14 +66,17 @@ popn_age_on <- function(popn,
                         timestep = 1,
                         template_age_levels = NULL,
                         births=NULL,
-                        col_births="births") {
+                        col_births="births",
+                        col_geog = "gss_code") {
   
   # Validate inputs
+  
   validate_popn_age_on_input(popn,
                              col_aggregation,
                              col_age,
                              col_year,
                              col_data,
+                             col_geog,
                              timestep,
                              template_age_levels,
                              births,
@@ -82,22 +87,11 @@ popn_age_on <- function(popn,
     col_aggregation <- c(col_aggregation, col_age)
   }
   
-  #TODO: Why is this necessary?
-  if(floor(timestep)==timestep) {
-    timestep <- as.integer(timestep)
-  }
-  
   # reorder col_aggregation to match input column order
   col_aggregation <- intersect(names(popn), col_aggregation)
   
-  # Save some properties of the input for later
-  popn_is_tibble <- "tbl" %in% class(popn)
-  popn_groups <- group_vars(popn)
-  popn_factors <- names(popn)[ sapply(popn, is.factor) ]
-  age_is_integer <- is.integer(popn[[col_age]]) && (is.null(col_year) || floor(timestep)==timestep)
   
   # Increment the year
-  # We do this here so we can use this population for validation later
   if(!is.null(col_year)) {
     popn <- ungroup(popn) %>% 
       mutate(!!col_year := !!sym(col_year) + timestep)
@@ -112,7 +106,6 @@ popn_age_on <- function(popn,
   }
   
   # Otherwise build vector of unique age bands and what they map to
-  # (NB this method would also work for numeric age, but it's slower)
   else {
     old_age_values <- levels(popn[[col_age]]) # we've checked this is an ordered factor
     
@@ -124,25 +117,25 @@ popn_age_on <- function(popn,
     aged[[col_age]] <- plyr::mapvalues(aged[[col_age]], old_age_values, new_age_values)
   }
   
-
   aged <- aged %>%
     lazy_dt() %>% 
     group_by_at(col_aggregation, add=FALSE) %>%
     summarise_at(col_data, sum) %>%
     data.frame()
   
+  #-----------------------------------------------------------------------------
+  
   #Add births
   
   if(!is.null(births)) {
     
-    if(is.numeric(births) && births == 0) {
+    if(!is.data.frame(births) && births == 0) {
       
       births <- aged %>% 
         select_at(col_aggregation) %>% 
         mutate(!!col_age := 0) %>% 
         mutate(!!col_births := 0) %>% 
         unique()
-      
     }
     
     births <- births %>%
@@ -159,45 +152,25 @@ popn_age_on <- function(popn,
     }
   }
   
-  # Standardise and validate output
+  #-----------------------------------------------------------------------------
+  
   # Match input formatting
-  aged <- mutate_at(aged, .vars = popn_factors, .funs = as.factor)
+  popn_factors <- names(popn)[ sapply(popn, is.factor) ]
   popn_not_factors <- setdiff(names(aged), popn_factors)
+  aged <- mutate_at(aged, .vars = popn_factors, .funs = as.factor)
   aged <- mutate_at(aged, .vars = popn_not_factors, .funs = as.vector)
-  
-  if(age_is_integer) {
-    aged[[col_age]] <- as.integer(aged[[col_age]])
-  }
-  
-  if(popn_is_tibble) {
-    aged <- tibble::as_tibble(aged)
-    if(length(popn_groups) > 0) {
-      aged <- group_by_at(aged, popn_groups, add=FALSE)
-    }
-  }
-  
-  validate_popn_age_on_output(popn,
-                              aged,
-                              col_aggregation,
-                              col_age,
-                              col_year,
-                              col_data,
-                              births)
   
   return(aged)
 }
 
-
-
 # -------------------------------------------------------------------------
-
-
 
 validate_popn_age_on_input <- function(popn,
                                        col_aggregation,
                                        col_age,
                                        col_year,
                                        col_data,
+                                       col_geog,
                                        timestep,
                                        template_age_levels,
                                        births,
@@ -205,29 +178,52 @@ validate_popn_age_on_input <- function(popn,
   
   # Type checking
   assert_that(is.data.frame(popn),
-              msg = "popn_age_on needs a data frame as input")
+              msg = "popn_age_on: popn parameter must be a data frame")
   assert_that(is.character(col_aggregation),
-              msg = "popn_age_on needs a string or character vector as the col_aggregation parameter")
+              msg = "popn_age_on: col_aggregation parameter must be a string or character vector")
   assert_that(is.string(col_age),
-              msg = "popn_age_on needs a string as the col_age parameter")
+              msg = "popn_age_on: col_age parameter must be a string")
+  assert_that(is.string(col_data) | is.character(col_data),
+              msg = "popn_age_on: col_data parameter must be a string or character vector")
+  assert_that(is.string(col_geog),
+              msg = "popn_age_on: col_geog parameter must be a string")
   assert_that(is.null(col_year) || is.string(col_year),
-              msg = "popn_age_on needs NULL or a string as the col_year parameter")
+              msg = "popn_age_on: col_year parameter must be NULL or a string")
   assert_that(is.number(timestep),
-              msg = "popn_age_on needs a number as the timestep parameter")
+              msg = "popn_age_on: timestep parameter must be a number")
   assert_that(is.null(template_age_levels) || is.vector(template_age_levels) || is.factor(template_age_levels)  ,
               msg = "popn_age_on needs a vector, a factor, or NULL as the template_age_levels parameter")
   assert_that(is.null(births) || (is.numeric(births) && births == 0) || is.data.frame(births),
-              msg = "popn_age_on needs NULL, 0 or a data frame as the births parameter")
+              msg = "popn_age_on: births parameter must be NULL, 0 or a data frame")
+  assert_that(is.string(col_births),
+              msg = "popn_age_on: col_births parameter must be a string")
   
   # Check for naming conflicts
   assert_that(all(names(col_aggregation) %in% names(popn)),
-              msg = "in popn_age_on, all columns named in col_aggregation must be columns in the popn table")
+              msg = "in popn_age_on, all columns named in col_aggregation must be columns in the popn data frame")
   assert_that(col_age %in% names(popn),
               msg = "popn_age_on was given a col_age parameter that isn't a column in the input popn data frame")
   assert_that(is.null(col_year) || col_year %in% names(popn),
               msg = "popn_age_on was given a col_year parameter that isn't a column in the input popn data frame")
+  assert_that(all(col_data %in% names(popn)),
+              msg = "popn_age_on was given a col_data parameter that isn't a column in the input popn data frame")
+  assert_that(col_geog %in% names(popn),
+              msg = "popn_age_on was given a col_geog parameter that isn't a column in the input popn data frame")
   assert_that(!any(duplicated(col_aggregation)),
               msg = "duplicated aggregation column names were provided to popn_age_on")
+  
+  
+  if(is.data.frame(births)){
+    assert_that(all(names(col_aggregation) %in% names(popn)),
+                msg = "in popn_age_on, all columns named in col_aggregation must be columns in the births data frame")
+    assert_that(col_births %in% names(births),
+                msg = "popn_age_on was given a col_births parameter that isn't a column in the input births data frame")
+  }
+  
+  #Check geographies are consistent
+  if(is.data.frame(births)){
+    validate_same_geog(popn, births, col_1 = col_geog, col_2 = col_geog)
+  }
   
   # Validate template age levels (if supplied)
   if(!is.null(template_age_levels)) {
@@ -251,11 +247,15 @@ validate_popn_age_on_input <- function(popn,
   
   # Other checks
   assert_that(nrow(popn) > 0,
-              msg = "popn_age_on was given a data frame with 0 rows of input")
+              msg = "popn_age_on was given a 'popn' data frame with 0 rows of input")
   assert_that(length(unique(popn[[col_age]])) > 1,
               msg = "popn_age_on was given a data frame containing only one age value")
   assert_that(is.null(col_year) || is.numeric(popn[[col_year]]),
               msg = "popn_age_on needs numeric values in the col_year year column")
+  if(is.data.frame(births)){
+    assert_that(nrow(popn) > 0,
+                msg = "popn_age_on was given a 'births' data frame with 0 rows of input")
+  }
   
   if(is.factor(popn[[col_age]])) {
     assert_that(setequal(popn[[col_age]], levels(popn[[col_age]])),
@@ -274,100 +274,31 @@ validate_popn_age_on_input <- function(popn,
                 msg = "popn_age_on needs all ages to be equally spaced (by timestep) in its input data (alternately, convert to an ordered factor)")
   }
   
-  tryCatch(validate_population(popn,
-                               col_aggregation,
-                               test_complete = TRUE,
-                               test_unique = TRUE,
-                               check_negative_values = FALSE),
-           error = function(e) stop(paste0("popn_age_on found an error in the input population it was given:\n",e,"\n")),
-           warning = function(w) warning(paste0("popn_age_on threw a warning when checking the input population:\n",w,"\n"))
-  )
+  #Test for duplicate rows
+  assert_that(!any(duplicated(popn[col_aggregation])),
+              msg = "popn_age_on: duplicated aggregation levels in input dataframe. Is the col_aggregation parameter set correctly?")
   
-  # Check no non-numeric columns depend on age
-  col_non_numeric <- names(popn)[ !sapply(popn, is.numeric)]
-  col_non_numeric <- union(col_aggregation, col_non_numeric)
-  if(!identical(col_aggregation, col_non_numeric)) {
-    col_agg_without_age <- setdiff(col_aggregation, col_age)
-    test_unique <- as.data.frame(popn) %>%
-      group_by_at(col_agg_without_age) %>%
-      select(!!!syms(col_non_numeric), -!!sym(col_age))
-    
-    unique_levels_agg <- nrow(dplyr::summarise(test_unique)) # number of aggregation levels
-    
-    test_unique <-group_by_all(test_unique)
-    unique_levels_all <- nrow(dplyr::summarise(test_unique))       # number of unique rows of data
-    
-    assert_that(unique_levels_agg == unique_levels_all,
-                msg = "popn_age_on: non-numeric, age-dependent data detected in input. The function can't deal with this.")
+  #Crude test for missing data
+  a <- 1
+  for(i in col_aggregation){
+    a <- a*length(unique(popn[[i]]))
   }
+  assert_that(nrow(popn)==a,
+              msg = "popn_age_on: missing values in input dataframe. Is the col_aggregation parameter set correctly?")
+  
+  
+  #Test for NAs
+  assert_that(sum(is.na(popn[col_aggregation]))==0,
+              msg = "popn_age_on: NAs in one or more of the col_aggregation columns")
   
   #Births
-  if(!is.null(births)){
+  if(is.data.frame(births)){
     
     assert_that(length(col_data) == 1,
                 msg = "in popn_age_on births can only be added if there is 1 data column")
     
-    if(is.data.frame(births)) {
-      validate_population(births, col_aggregation = col_aggregation,
-                          test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
-      
-      col_geog <- col_aggregation[stringr::str_detect(col_aggregation, "gss_code")]
-      for(i in 1:length(col_geog)){
-        assert_that(setequal(births[[col_geog[i]]], popn[[col_geog[i]]]))
-      }
-      
-      assert_that(all(col_aggregation %in% names(births)),
-                  msg = "in popn_age_on the births dataframe does not contain the columns in specified in col_aggreagtion")
-      
-    }
   }
-  
   
   invisible(TRUE)
-}
-
-
-# -------------------------------------------------------------
-
-validate_popn_age_on_output <- function(popn,
-                                        aged,
-                                        col_aggregation,
-                                        col_age,
-                                        col_year,
-                                        col_data,
-                                        births) {
   
-  popn_totals_in  <- sapply(popn[col_data], sum) %>% 
-    as.numeric() 
-  
-  if(!is.null(births)){
-    if(!is.null(col_year)){
-      common_years <- intersect(births[[col_year]], popn[[col_year]])
-      births_totals_df <- births %>% filter(!!sym(col_year) %in% common_years)
-      popn_totals_df <- popn %>% filter(!!sym(col_year) %in% common_years)
-    }
-    births_totals_in <- sum(births_totals_df[[col_data]])
-    popn_totals_in <- sum(popn_totals_df[[col_data]]) + births_totals_in
-  }
-  
-  popn_totals_in <- popn_totals_in %>% round(digits=2)
-  popn_totals_out <- sapply(aged[col_data], sum) %>% round(digits=2) %>% 
-    as.numeric()
-  assert_that(identical(popn_totals_in, popn_totals_out),
-              msg = "Error in popn_age_on: column sums have changed")
-  
-  # FIXME does this check take ages on large datasets?
-  if(is.null(births)){
-    age_min <- min(popn[[col_age]])
-    assert_that(setequal( setdiff(popn[[col_age]], age_min), aged[[col_age]]),
-                msg = "Output age level mismatch")
-  }
-  
-  validate_population(aged,
-                      col_aggregation,
-                      col_data,
-                      test_complete = TRUE,
-                      test_unique = TRUE,
-                      check_negative_values = FALSE,
-                      comparison_pop = NA)
 }
