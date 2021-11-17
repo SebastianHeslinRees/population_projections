@@ -6,26 +6,28 @@
 first projection year}
 \usage{
 scaled_mortality_curve(
-  popn_mye_path,
-  births_mye_path,
-  deaths_mye_path,
-  target_curves_filepath,
+  popn,
+  births,
+  deaths,
+  target_curves,
   last_data_year,
   n_years_to_avg,
   avg_or_trend,
   data_col = "deaths",
   output_col,
-  project_rate_from = last_data_year + 1
+  project_rate_from = last_data_year + 1,
+  col_aggregation = c("gss_code", "year", "sex"),
+  col_geog = "gss_code"
 )
 }
 \arguments{
-\item{popn_mye_path}{Character. Path to the MYE population data}
+\item{popn}{Character. Path to the MYE population data}
 
-\item{births_mye_path}{Character. Path to the MYE births component data}
+\item{births}{Character. Path to the MYE births component data}
 
-\item{deaths_mye_path}{Character. Path to the MYE deaths component data}
+\item{deaths}{Character. Path to the MYE deaths component data}
 
-\item{target_curves_filepath}{Character. Path to the SNPP target mortality curves}
+\item{target_curves}{Character. Path to the SNPP target mortality curves}
 
 \item{last_data_year}{numeric. The last year of death and population data on
 which to calculate averages.}

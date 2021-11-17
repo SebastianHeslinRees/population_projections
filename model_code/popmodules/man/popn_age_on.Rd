@@ -72,7 +72,7 @@ equally spaced by the interval given in \code{timestep}, usually 1.
 
 Ageing of the population is done by either adding the timestep to the age
 (for a numeric age) or by incrementing to the next level of the factor (for
-age as an ordered factor)./ If \code{col_year} is given, the year will also
+age as an ordered factor). If \code{col_year} is given, the year will also
 be increased by \code{timestep}.
 
 The highest age/age band is considered to be unbounded. This means that when

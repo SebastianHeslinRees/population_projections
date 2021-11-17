@@ -107,3 +107,21 @@
   }
   return(x)
 }
+
+#' So that functions can either be passed the path to some data
+#' or a dataframe
+#'
+#' @param x A string or a dataframe
+#' 
+#' @import assertthat
+#'
+#' @return dataframe
+#'
+#' @export
+
+.path_or_dataframe <- function(x){
+  assert_that(is.string(x) | is.data.frame(x),
+             msg = paste('.path_or_dataframe: x must be string or dataframe, function was passed', class(x)))
+  if(is.string(x)){x <- readRDS(x)}
+  return(data.frame(x))
+}
