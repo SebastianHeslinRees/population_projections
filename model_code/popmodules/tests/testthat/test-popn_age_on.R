@@ -239,3 +239,76 @@ test_that("popn_age_on can handle multiple years of data)", {
                     aged_out)
   
 })
+
+#-------------------------------------------------------------------------------
+
+#small area data
+
+small_area_popn <- data.frame(gss_code = c(rep("a",3),rep("b",3),rep("c",4)),
+                              gss_code_ward = c("l","m","o","p","q","r","s","t","u","v")) %>% 
+  left_join(popn, by = "gss_code")
+
+small_area_births <- small_area_popn %>% 
+  mutate(age = 0) %>% 
+  mutate(births = 15,
+         year = 2001) %>% 
+  select(-popn) %>% 
+  unique() %>% 
+  select(gss_code, gss_code_ward, year, age, sex, births)
+
+small_area_out <- small_area_popn %>% 
+  mutate(age = ifelse(age == 22, 22, age + 1),
+         year = year + 1) %>% 
+  group_by(gss_code, gss_code_ward, year, age, sex) %>% 
+  summarise(popn = sum(popn), .groups = 'drop_last') %>% 
+  data.frame()
+
+small_area_out_births <- rename(small_area_births, popn = births) %>% 
+  rbind(small_area_out) %>% 
+  arrange(gss_code_ward, age, sex)
+
+small_area_wrong <- small_area_popn %>% 
+  mutate(gss_code_ward = ifelse(gss_code_ward == "l", "z", gss_code_ward))
+
+test_that("popn_age_on can handle small area data - errors)", {
+  
+  expect_error(popn_age_on(small_area_popn))
+  
+  expect_error(popn_age_on(small_area_popn,
+                           col_aggregation = c("year","gss_code","sex","age")))
+  
+  expect_error(popn_age_on(small_area_popn,
+                           col_aggregation = c("year","gss_code","gss_code_ward","sex","age")))
+  
+})
+
+
+#Note: This one will change to an error when the validate_same_geog function is updated
+test_that("popn_age_on can handle small area data - errors)", {
+  
+expect_warning(popn_age_on(small_area_wrong,
+                           col_aggregation = c("year","gss_code_ward","sex","age"),
+                           births = small_area_births,
+                           col_geog = "gss_code_ward"))
+})
+
+
+test_that("popn_age_on can handle small area data - normal operation", {
+  
+  expect_equivalent(popn_age_on(small_area_popn,
+                                col_aggregation = c("year","gss_code_ward","sex","age")),
+                    select(small_area_out, -gss_code))
+  
+  expect_equivalent(popn_age_on(small_area_popn,
+                                col_aggregation = c("year","gss_code_ward","sex","age"),
+                                births = small_area_births),
+                    select(small_area_out_births, -gss_code))
+  
+  expect_equivalent(popn_age_on(small_area_popn,
+                                col_aggregation = c("year","gss_code_ward","sex","age"),
+                                births = small_area_births,
+                                col_geog = "gss_code_ward"),
+                    select(small_area_out_births, -gss_code))
+  
+  
+})
