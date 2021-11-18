@@ -17,10 +17,10 @@ mortality_trajectory_filepath <- "input_data/mortality/npp_mortality_trend.rds"
 
 # 5 year average rates
 
-average_5yrs <- scaled_mortality_curve(popn_mye_path = gla_popn_mye_path,
-                                       births_mye_path = births_mye_path,
-                                       deaths_mye_path = deaths_mye_path,
-                                       target_curves_filepath = mortality_curve_filepath,
+average_5yrs <- scaled_mortality_curve(popn = gla_popn_mye_path,
+                                       births = births_mye_path,
+                                       deaths = deaths_mye_path,
+                                       target_curves = mortality_curve_filepath,
                                        last_data_year = 2019,
                                        n_years_to_avg = 5,
                                        avg_or_trend = "average",
@@ -37,10 +37,10 @@ average_5yrs <- scaled_mortality_curve(popn_mye_path = gla_popn_mye_path,
 
 # 5 year trended rates
 
-trend_5yrs <- scaled_mortality_curve(popn_mye_path = gla_popn_mye_path,
-                                     births_mye_path = births_mye_path,
-                                     deaths_mye_path = deaths_mye_path,
-                                     target_curves_filepath = mortality_curve_filepath,
+trend_5yrs <- scaled_mortality_curve(popn = gla_popn_mye_path,
+                                     births = births_mye_path,
+                                     deaths = deaths_mye_path,
+                                     target_curves = mortality_curve_filepath,
                                      last_data_year = 2019,
                                      n_years_to_avg = 5,
                                      avg_or_trend = "trend",

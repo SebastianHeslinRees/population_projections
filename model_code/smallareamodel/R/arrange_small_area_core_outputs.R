@@ -39,7 +39,8 @@ arrange_small_area_core_outputs <- function(projection, popn_backseries,
   
   past_net <- popn_backseries %>%
     popn_age_on(col_aggregation = c("year", "gss_code_small_area", "age", "sex"),
-                births = births_backseries) %>%
+                births = births_backseries,
+                col_geog = "gss_code_small_area") %>%
     left_join(unique(select(popn_backseries, gss_code, gss_code_small_area)), by="gss_code_small_area") %>% 
     filter(year %in% 2011:last_data_yr) %>%
     left_join(deaths_backseries, by = c("gss_code", "gss_code_small_area", "year", "sex", "age")) %>%
