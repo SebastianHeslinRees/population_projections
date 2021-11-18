@@ -34,16 +34,17 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
               msg = paste0("in validte_same_geog, col_2 not in df_2"))
   assert_that(length(col_1)==length(col_2),
               msg = "in validate_same_geog vectors of different lengths passed to col_1 and col_2")
-  browser()
+  
   #check that the geography columns contain the same set of codes
   for(i in 1:length(col_1)){
     
     are_equal <- setequal(df_1[[col_1[i]]], df_2[[col_2[i]]])
 
     if(!are_equal){
-      same_geog_report(df_1, df_2, col_1[i], col_2[i])
+      same_geog_report(df_1, df_2, col_1[i], col_2[i], warn_only,
+                       deparse(substitute(df_1)),
+                       deparse(substitute(df_2)))
     }
-
   }
   
   invisible()
@@ -52,10 +53,10 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
 
 #if they don't match then output useful info about the differences
 
-same_geog_report <- function(df_1, df_2, col_1, col_2){
+same_geog_report <- function(df_1, df_2, col_1, col_2, warn_only,
+                             nm_1, nm_2){
   
-  nm_1 <- deparse(substitute(df_1))
-  nm_2 <- deparse(substitute(df_2))
+
   
   df_1 <- df_1[all_of(col_1)] %>% unique() %>% rename("gss_code___" = col_1)
   df_2 <- df_2[all_of(col_2)] %>% unique() %>% rename("gss_code___" = col_2)
