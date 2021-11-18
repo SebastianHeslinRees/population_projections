@@ -1,0 +1,101 @@
+library(dplyr)
+library(data.table)
+library(assertthat)
+devtools::load_all('model_code/popmodules')
+
+data_dir <- "model_code/newwardmodel/data/"
+
+ward_pop <- paste0(data_dir, "ward_population_WD20CD.rds") %>% readRDS()
+ward_births <- paste0(data_dir, "ward_births_WD20CD.rds") %>% readRDS()
+ward_deaths <- paste0(data_dir, "ward_deaths_WD20CD.rds") %>% readRDS()
+ward_in_mig <- paste0(data_dir, "ward_inflow_WD20CD.rds") %>% readRDS() %>% data.frame()
+ward_out_mig <- paste0(data_dir, "ward_outflow_WD20CD.rds") %>% readRDS() %>% data.frame()
+
+#-------------------------------------------------------------------------------
+denominator_popn <- ward_pop %>%
+  popn_age_on(births = ward_births,
+              col_aggregation=c("gss_code_ward", "year", "sex", "age"),
+              col_geog = "gss_code_ward")
+
+#-------------------------------------------------------------------------------
+
+mort_rates <- scaled_mortality_curve(popn_mye_path = ward_pop,
+                                     births_mye_path = ward_births,
+                                     deaths_mye_path = ward_deaths,
+                                     target_curves_filepath = "input_data/mortality/ons_asmr_curves_2018_(2021_geog).rds",
+                                     last_data_year = 2019,
+                                     n_years_to_avg = 5,
+                                     avg_or_trend = "trend",
+                                     data_col = "deaths",
+                                     output_col = "rate",
+                                     col_aggregation=c("gss_code", "gss_code_ward", "year", "sex"),
+                                     col_geog = "gss_code_ward")
+mort_rates_a <- mort_rates %>% 
+  project_rates_npp(rate_col = "rate",
+                    rate_trajectory_filepath = "input_data/mortality/npp_mortality_trend.rds",
+                    first_proj_yr = 2020,
+                    n_proj_yr = 30,
+                    npp_var = "2018_principal")
+
+#-------------------------------------------------------------------------------
+
+fert_rates <- scaled_fertility_curve(popn_mye_path = ward_pop,
+                                     births_mye_path = ward_births,
+                                     target_curves_filepath = "input_data/fertility/ons_asfr_curves_2018_(2021_geog).rds",
+                                     last_data_year = 2019,
+                                     n_years_to_avg = 5,
+                                     avg_or_trend = "trend",
+                                     data_col = "births",
+                                     output_col = "rate",
+                                     col_geog = "gss_code_ward")  %>% 
+  project_rates_npp(rate_col = "rate",
+                    rate_trajectory_filepath = "input_data/fertility/npp_fertility_trend.rds",
+                    first_proj_yr = 2020,
+                    n_proj_yr = 30,
+                    npp_var = "2018_principal") #%>% 
+#complete_fertility(ward_pop)
+
+zero_fert <- expand.grid(gss_code_ward = unique(fert_rates$gss_code_ward),
+                         year = unique(fert_rates$year), 
+                         sex = c("female","male"),
+                         age = 0:90) %>%
+  filter(!(sex == "female" & age %in% 15:49)) %>% 
+  data.frame() %>% 
+  left_join(unique(select(fert_rates, gss_code, gss_code_ward)), by="gss_code_ward") %>% 
+  mutate(rate = 0) %>% 
+  select(names(fert_rates))
+
+fert_rates <- rbind(fert_rates, zero_fert)
+
+#-------------------------------------------------------------------------------
+
+out_mig_rates <- denominator_popn %>% 
+  left_join(ward_out_mig, by = c("gss_code_ward", "year", "sex", "age")) %>% 
+  mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
+  calculate_mean_from_backseries(n_years_to_avg = 5,
+                                 last_data_year = 2019,
+                                 data_col = "out_rate",
+                                 col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+                                 project_rate_from = 2020) %>% 
+  project_forward_flat(2050)
+
+
+#-------------------------------------------------------------------------------
+
+in_mig_flows <- ward_in_mig %>% 
+  calculate_mean_from_backseries(n_years_to_avg = 5,
+                                 last_data_year = 2019,
+                                 data_col = "inflow",
+                                 col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+                                 project_rate_from = 2020) %>% 
+  rename(in_flow = inflow) %>% 
+  project_forward_flat(2050)
+
+#-------------------------------------------------------------------------------
+
+saveRDS(mort_rates, paste0(data_dir, "mortality_rates_WD20CD.rds"))
+saveRDS(fert_rates,  paste0(data_dir, "fertility_rates_WD20CD.rds"))
+saveRDS(in_mig_flows,  paste0(data_dir, "in_migration_flows_WD20CD.rds"))
+saveRDS(out_mig_rates,  paste0(data_dir, "out_migration_rates_WD20CD.rds"))
+
+rm(list=ls())
