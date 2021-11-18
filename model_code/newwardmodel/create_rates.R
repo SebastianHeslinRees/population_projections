@@ -18,18 +18,18 @@ denominator_popn <- ward_pop %>%
               col_geog = "gss_code_ward")
 
 #-------------------------------------------------------------------------------
-
-mort_rates <- scaled_mortality_curve(popn_mye_path = ward_pop,
-                                     births_mye_path = ward_births,
-                                     deaths_mye_path = ward_deaths,
-                                     target_curves_filepath = "input_data/mortality/ons_asmr_curves_2018_(2021_geog).rds",
+ward_pop_x <- filter(ward_pop, gss_code_ward != "E05000026")
+mort_rates <- scaled_mortality_curve(popn = ward_pop_x,
+                                     births = ward_births,
+                                     deaths = ward_deaths,
+                                     target_curves = "input_data/mortality/ons_asmr_curves_2018_(2021_geog).rds",
                                      last_data_year = 2019,
                                      n_years_to_avg = 5,
                                      avg_or_trend = "trend",
                                      data_col = "deaths",
                                      output_col = "rate",
                                      col_aggregation=c("gss_code", "gss_code_ward", "year", "sex"),
-                                     col_geog = "gss_code_ward")
+                                     col_geog = c("gss_code","gss_code_ward"))
 mort_rates_a <- mort_rates %>% 
   project_rates_npp(rate_col = "rate",
                     rate_trajectory_filepath = "input_data/mortality/npp_mortality_trend.rds",

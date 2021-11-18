@@ -7,7 +7,7 @@
 project_rates_npp(
   jump_off_rates,
   rate_col,
-  rate_trajectory_filepath,
+  rates_trajectory,
   first_proj_yr,
   n_proj_yr,
   npp_var = "2018_principal"
@@ -21,8 +21,8 @@ Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility
 \item{rate_col}{Character. The column in the jump_off_rates dataframe
 containing the rates.}
 
-\item{rate_trajectory_filepath}{Character. The file path for the national-level
-ASMR/ASFR trajectory.}
+\item{rates_trajectory}{String or dataframe. The file path for the national-level
+ASMR/ASFR trajectory or a dataframe containing the data.}
 
 \item{first_proj_yr}{Integer. The first projection year.}
 

@@ -15,12 +15,12 @@ test_that("validate_same_geography basic operation", {
 test_that("validate_same_geography throws errors as expected", {
   expect_error(validate_same_geog(test_df_1, test_df_5, col_1="gss"))
   expect_error(validate_same_geog(test_df_5, test_df_1, col_1="gss"))
-  expect_error(validate_same_geog(test_df_1, test_df_2, col_1="gss", error_or_warn = "dave grohl"))
+  expect_error(validate_same_geog(test_df_1, test_df_2, col_1="gss", warn_only = "dave grohl"))
   expect_error(validate_same_geog(test_df_1, test_df_2, col_1="kurt cobain"))
   expect_error(validate_same_geog(test_df_1, test_df_2, col_2="krist novoselic"))
 })
 
 test_that("validate_same_geography throws warnings as expected", {
-  expect_warning(validate_same_geog(test_df_1, test_df_5, col_1="gss", error_or_warn = "warn"))
-  expect_warning(validate_same_geog(test_df_5, test_df_1, col_1="gss", error_or_warn = "warn"))
+  expect_warning(validate_same_geog(test_df_1, test_df_5, col_1="gss", warn_only = TRUE))
+  expect_warning(validate_same_geog(test_df_5, test_df_1, col_1="gss", warn_only = TRUE))
 })

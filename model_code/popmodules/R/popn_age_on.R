@@ -43,7 +43,7 @@
 #'   zero-year-olds are included in the output. Default \code{NULL}.
 #' @param col_births String denoting the name of the column containing data in 
 #'   the \code{births} dataframe.
-#' @param col_geog String denoting the geography column. Default "gss_code".
+#' @param col_geog Character vector denoting the geography column(s). Default "gss_code".
 #'   Only used in validation. Only used when births dataframe is specified.
 #'
 #' @return A data frame containing the population with age advanced by one time
@@ -185,7 +185,7 @@ validate_popn_age_on_input <- function(popn,
               msg = "popn_age_on: col_age parameter must be a string")
   assert_that(is.string(col_data) | is.character(col_data),
               msg = "popn_age_on: col_data parameter must be a string or character vector")
-  assert_that(is.string(col_geog),
+  assert_that(is.character(col_geog),
               msg = "popn_age_on: col_geog parameter must be a string")
   assert_that(is.null(col_year) || is.string(col_year),
               msg = "popn_age_on: col_year parameter must be NULL or a string")
@@ -207,7 +207,7 @@ validate_popn_age_on_input <- function(popn,
               msg = "popn_age_on was given a col_year parameter that isn't a column in the input popn data frame")
   assert_that(all(col_data %in% names(popn)),
               msg = "popn_age_on was given a col_data parameter that isn't a column in the input popn data frame")
-  assert_that(col_geog %in% names(popn),
+  assert_that(all(col_geog %in% names(popn)),
               msg = "popn_age_on was given a col_geog parameter that isn't a column in the input popn data frame")
   assert_that(!any(duplicated(col_aggregation)),
               msg = "duplicated aggregation column names were provided to popn_age_on")
@@ -278,14 +278,8 @@ validate_popn_age_on_input <- function(popn,
   assert_that(!any(duplicated(popn[col_aggregation])),
               msg = "popn_age_on: duplicated aggregation levels in input dataframe. Is the col_aggregation parameter set correctly?")
   
-  #Crude test for missing data
-  a <- 1
-  for(i in col_aggregation){
-    a <- a*length(unique(popn[[i]]))
-  }
-  assert_that(nrow(popn)==a,
-              msg = "popn_age_on: missing values in input dataframe. Is the col_aggregation parameter set correctly?")
-  
+  #Check for missing data
+  validate_complete(popn, col_aggregation, col_geog)
   
   #Test for NAs
   assert_that(sum(is.na(popn[col_aggregation]))==0,
