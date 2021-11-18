@@ -10,9 +10,9 @@
 #'   (default 'gss_code')
 #' @param col_2 Character. The name of the column to be tested in df_2
 #'   (default to same as col_1)
-#' @param error_or_warn String. Should the function return a warning or an error.
-#'   Set to either 'error' to stop operation or 'warn' to give a warning only.
-#'   Default 'error'. 
+#' @param warn_only Boolean. Should the function return a warning or an error.
+#'   If set to TRUE the function returns a warning, set to FALSE returns an error.
+#'   Default FALSE. 
 #' @return Warnings or errors if there differences in the gss codes supplied
 #'
 #' @import dplyr
@@ -22,12 +22,12 @@
 #' @export
 
 validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
-                               error_or_warn = "error"){
+                               warn_only = FALSE){
   
   #validate function inputs
-  assert_that(error_or_warn %in% c("warn","error"),
+  assert_that(is_bool(warn_only),
               msg = paste0("in validte_same_geog, param error_or_warn is '",
-                           error_or_warn, "' - must be 'error' or 'warn'"))
+                           error_or_warn, "' - must be 'TRUE' or 'FALSE'"))
   assert_that(col_1 %in% names(df_1),
               msg = paste0("in validte_same_geog, col_1 not in df_1"))
   assert_that(col_2 %in% names(df_2),
@@ -46,19 +46,19 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
     df_2 <- df_2[all_of(col_2)] %>% unique() %>% rename("gss_code___" = col_2)
     
     x <- setdiff(df_1$gss_code___, df_2$gss_code___)
-    if(length(x)>0 && error_or_warn == "warn"){
+    if(length(x)>0 && warn_only){
       warning(paste(length(x),"codes in",nm_1,"not in",nm_2, ": " , x))
     }
-    if(length(x)>0 && error_or_warn == "error"){
+    if(length(x)>0 && !warn_only){
       stop(paste(length(x),"codes in",nm_1,"not in",nm_2, ": " , x))
     }
     
     
     y <- setdiff(df_2$gss_code___, df_1$gss_code___)
-    if(length(y)>0 && error_or_warn == "warn"){
+    if(length(y)>0 && warn_only){
       warning(paste(length(y),"codes in",nm_2,"not in",nm_1, ": " , y))
     }
-    if(length(y)>0 && error_or_warn == "error"){
+    if(length(y)>0 && !warn_only){
       stop(paste(length(y),"codes in",nm_2,"not in",nm_1, ": " , y))
     }
     
