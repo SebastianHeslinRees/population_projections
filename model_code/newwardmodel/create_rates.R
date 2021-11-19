@@ -19,7 +19,7 @@ denominator_popn <- ward_pop %>%
 
 #-------------------------------------------------------------------------------
 ward_pop_x <- filter(ward_pop, gss_code_ward != "E05000026")
-mort_rates <- scaled_mortality_curve(popn = ward_pop_x,
+mort_rates <- scaled_mortality_curve(popn = ward_pop,
                                      births = ward_births,
                                      deaths = ward_deaths,
                                      target_curves = "input_data/mortality/ons_asmr_curves_2018_(2021_geog).rds",
@@ -29,31 +29,30 @@ mort_rates <- scaled_mortality_curve(popn = ward_pop_x,
                                      data_col = "deaths",
                                      output_col = "rate",
                                      col_aggregation=c("gss_code", "gss_code_ward", "year", "sex"),
-                                     col_geog = c("gss_code","gss_code_ward"))
-mort_rates_a <- mort_rates %>% 
+                                     col_geog = c("gss_code","gss_code_ward")) %>% 
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = "input_data/mortality/npp_mortality_trend.rds",
+                    rates_trajectory = "input_data/mortality/npp_mortality_trend.rds",
                     first_proj_yr = 2020,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")
 
 #-------------------------------------------------------------------------------
 
-fert_rates <- scaled_fertility_curve(popn_mye_path = ward_pop,
-                                     births_mye_path = ward_births,
-                                     target_curves_filepath = "input_data/fertility/ons_asfr_curves_2018_(2021_geog).rds",
+fert_rates <- scaled_fertility_curve(popn = ward_pop,
+                                     births = ward_births,
+                                     target_curves = "input_data/fertility/ons_asfr_curves_2018_(2021_geog).rds",
                                      last_data_year = 2019,
                                      n_years_to_avg = 5,
                                      avg_or_trend = "trend",
                                      data_col = "births",
                                      output_col = "rate",
-                                     col_geog = "gss_code_ward")  %>% 
+                                     col_geog = c("gss_code","gss_code_ward"))  %>% 
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = "input_data/fertility/npp_fertility_trend.rds",
+                    rates_trajectory = "input_data/fertility/npp_fertility_trend.rds",
                     first_proj_yr = 2020,
                     n_proj_yr = 30,
-                    npp_var = "2018_principal") #%>% 
-#complete_fertility(ward_pop)
+                    npp_var = "2018_principal") %>% 
+complete_popn_dataframe()
 
 zero_fert <- expand.grid(gss_code_ward = unique(fert_rates$gss_code_ward),
                          year = unique(fert_rates$year), 
