@@ -1,14 +1,6 @@
 #' Complete the sex and age of a fertility dataframe
 #'
-#' Makes sure a fertility dataframe contains records for sexes contained in population.
-#'
-#' Makes sure it goes down to the min popn age and max popn age.
-#'
-#' Doesn't fill in any gaps in the fertility age as can't think of a situation where
-#' that could be acceptable.
-#'
-#' All new records are created with a vaule of 0 for fertility.
-#'
+#' #' This function has been deprecated. Use \code{complete_popn_dataframe}.
 #'
 #' @param fertility A dataframe containing fertility data. Any age column must be numeric.
 #' @param population A dataframe containing population data. Must contain sex/age if
@@ -40,6 +32,8 @@ complete_fertility <- function(fertility, population,
                                col_age_popn = col_age_fert,
                                col_rate = "rate") {
 
+  .Deprecated("complete_popn_dataframe")
+  
   # check fertility and population exist
   force(population)
   force(fertility)

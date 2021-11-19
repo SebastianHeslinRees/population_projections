@@ -140,7 +140,7 @@ run_trend_model <- function(config_list) {
     return(rates)
   }
   
-  fertility_rates <- eval_or_read(config_list$fertility_rates) %>% complete_fertility(population)
+  fertility_rates <- eval_or_read(config_list$fertility_rates) %>% complete_popn_dataframe()
   mortality_rates <- eval_or_read(config_list$mortality_rates)
   
   international_out_flow_info <- get_rates_flows_info(config_list$int_out_flows, first_proj_yr, last_proj_yr)
