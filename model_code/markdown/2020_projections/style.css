@@ -1,0 +1,65 @@
+h1 {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 3em;
+  margin:0;
+  padding:0;
+}
+
+div.h1-title {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 3em;
+}
+
+h1:before {
+  content:' ';
+  display:block;
+  border-style: inset;
+  border-width: 1px;
+  border-color: WhiteSmoke;
+}
+
+h2 {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+div.h2-title {
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 3em;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+div.table-title {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+div.source {
+  font-size: 12px;
+  font-style: italic;
+  text-align: right;
+}
+
+
+div#TOC li {
+    list-style:none;
+    background-image:none;
+    background-repeat:none;
+    background-position:0;
+}
+
+.leaflet-container {
+    background: #FFF;
+}

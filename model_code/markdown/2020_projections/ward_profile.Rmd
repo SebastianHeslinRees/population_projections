@@ -1,0 +1,351 @@
+---
+params:
+  set_title: !r paste0("Ward Profile - ",ward_name)
+title: "`r params$set_title`"
+output:
+  html_document:
+    number_sections: no
+    includes:
+      before_body: header.html
+      after_body: footer.html
+    css: "style.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(fig.width=12)
+```
+
+```{r library, include=FALSE}
+source("model_code/markdown/2020_projections/demog_plotly.R")
+library(dplyr)
+library(knitr)
+```
+
+```{r make_nice, include = FALSE, echo = FALSE}
+make_nice <- function(x){
+  
+  if(is.null(x)){return(x)}
+  if(x < 1000){
+    return(round(x,0))
+  }
+  if(x < 999999){
+    return(format(round(x,-1), big.mark=","))
+  }
+  return(paste0(round(x/1000000,2),"m"))
+}
+
+
+make_nice(c(200.45, 6782.5, 123134356)) %>% print()
+```
+
+```{r variables, echo = FALSE}
+ward_name <- ward_profile_data[[ward_code]]$ward_name
+borough_name <- ward_profile_data[[ward_code]]$borough_name
+popn_2020 <- ward_profile_data[[ward_code]]$popn_2020 %>% make_nice()
+growth <- ward_profile_data[[ward_code]]$growth %>% make_nice()
+growth_percent <- ward_profile_data[[ward_code]]$growth_percent %>% make_nice()
+borough_growth_percent <- ward_profile_data[[ward_code]]$borough_growth_percent %>% make_nice()
+future_growth_min <- ward_profile_data[[ward_code]]$future_growth_min %>% make_nice()
+future_growth_max <- ward_profile_data[[ward_code]]$future_growth_max %>% make_nice()
+area <- ward_profile_data[[ward_code]]$ward_area  %>% make_nice()
+density <- (ward_profile_data[[ward_code]]$popn_2020/str_remove_all(565, ",") %>% as.numeric()) %>% make_nice()
+ward_ahs <- filter(ward_profile_data[[ward_code]]$ward_ahs, year == 2020)$ahs %>% unique() %>% round(2)
+borough_ahs <- ward_profile_data[[ward_code]]$borough_ahs %>% unique() %>% round(2)
+
+london_growth_percent <- ward_profile_data[['london']]$london_growth_percent %>% make_nice()
+london_ahs <- ward_profile_data[['london']]$london_ahs %>% unique() %>%  round(2)
+
+f <- 1
+```
+
+```{r growth_vars, echo = FALSE}
+growth_s1 <- ward_profile_data[[ward_code]]$future_growth_s1
+growth_s2 <- ward_profile_data[[ward_code]]$future_growth_s2
+growth_s3 <- ward_profile_data[[ward_code]]$future_growth_s3
+
+inc_dec_s1 <- ifelse(growth_s1>0, "increase", "decrease")
+inc_dec_s2 <- ifelse(growth_s2>0, "increase", "decrease")
+inc_dec_s3 <- ifelse(growth_s3>0, "increase", "decrease")
+
+future_s1 <- paste0(ward_profile_data[[ward_code]]$popn_2030_s1 %>% make_nice(),
+                    " (", make_nice(sqrt(growth_s1^2)), " ", inc_dec_s1, ")")
+
+future_s2 <- paste0(ward_profile_data[[ward_code]]$popn_2030_s2 %>% make_nice(),
+                    " (", make_nice(sqrt(growth_s2^2)), " ", inc_dec_s2, ")")
+
+future_s3 <- paste0(ward_profile_data[[ward_code]]$popn_2030_s3 %>% make_nice(),
+                    " (", make_nice(sqrt(growth_s3^2)), " ", inc_dec_s3, ")")
+```
+
+This report provides an overview of the GLA 2020-based housing-led population projections for the ward of `r ward_name` in `r borough_name`. For full data downloads see <https://data.london.gov.uk/dataset/housing-led-population-projections>. The data can also be explored using the <a target="_blank" href="https://maps.london.gov.uk/population-projections">Population Projections Explorer</a>.
+
+## Scenarios
+
+The 2020-based housing-led projections comprise 3 housing delivery scenarios. In each of these the underlying migration, fertility and mortality assumptions are the same with the only difference being the level of future housing delivery. The 3 scenarios are:
+
+- **Identified Capacity** - A trajectory adapted from the 2017 London Strategic Housing Land Availability Assessment (SHLAA) which provides information on identified future capacity and likely delivery times.
+- **Past Delivery** - A trajectory which takes average past delivery over the period 2011-2019, as recorded in the London Development Database (LDD), and assumes that level of delivery in each year of the projection.
+- **Housing Targets** - A trajectory which assumes that the London Plan delivery target of 52,300 homes per year will be delivered in each year of the projection.
+
+More details are available in the housing-led model documentation on the <a target="_blank" href="https://data.london.gov.uk/demography/population-and-household-projections/">London Datastore</a>.
+
+## Charts
+
+The charts on this page are interactive. Lines can be switched on and off by clicking the legend. There are chart appearance options in the the top right corner of each chart, as well as the option to download the chart as a png image.
+
+## Summary
+
+<div class="table-title">Table 1: Ward summary</div>
+```{r summary_table, echo = FALSE}
+summary_table <- data.frame(Summary = c('GSS code',
+                                        'Ward name',
+                                        'Borough',
+                                        'Area',
+                                        '2020 population',
+                                        '2020 population density',
+                                        '2030 population (Identified Capacity)',
+                                        '2030 population (Past Delivery)',
+                                        '2030 population (Housing Targets)'),
+                            Value = c(ward_code,
+                                      ward_name,
+                                      borough_name,
+                                      paste(area, "hectares"),
+                                      popn_2020,
+                                      paste(density, "persons per ha"),
+                                      future_s1,
+                                      future_s2,
+                                      future_s3)) %>% 
+  DT::datatable(rownames = FALSE, colnames = "", filter = "none", options = list(paging=FALSE, searching=FALSE, info=FALSE))
+summary_table
+```
+<div class="source">Source: GLA 2020-based population projections</div>
+
+## Population Change {.tabset}
+
+The estimated population of `r ward_name` in 2020 was `r popn_2020`. That constitutes growth of `r growth` persons (`r growth_percent`%) since 2011. That is in the context of `r borough_growth_percent`% growth in `r borough_name` as a whole and `r london_growth_percent`% across London over the same period.
+
+Over the decade to 2030, the population of `r ward_name` is projected change by between `r future_growth_min` and `r future_growth_max` persons.
+
+### Population
+```{r total_pop, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Total Population: ", ward_name)
+ward_profile_data[[ward_code]]$total_population %>% 
+  line_chart_plotly(chart_title, "year", "value", "variant",
+                    "population", figure = f)
+f <- f+1
+
+```
+
+### Annual change
+```{r percentage_change, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Population Change: ", ward_name)
+ward_profile_data[[ward_code]]$population_change %>% 
+  line_chart_plotly(chart_title, "year", "change", "variant",
+                    "population", figure = f)
+f <- f+1
+```
+
+
+## 
+
+<div class="table-title">Table 2: Total population</div>
+```{r growth_table, echo = FALSE}
+
+growth_table <- ward_profile_data[[ward_code]]$total_population %>% 
+  mutate(value = format(round(value,-1),big.mark=",")) %>% 
+  tidyr::pivot_wider(names_from = variant, values_from = value) %>% 
+  filter(year %in% c(2011, seq(2020,2050,5))) %>% 
+  select(-gss_code_ward) %>% 
+  DT::datatable(rownames = FALSE, filter = "none", options = list(paging=FALSE, searching=FALSE, info=FALSE,
+                                                                  columnDefs = list(list(className = 'dt-right', targets = 1:3),
+                                                                                    list(className = 'dt-left', targets = 0)))) 
+growth_table
+
+```
+<div class="source">Source: GLA 2020-based population projections</div>
+
+
+## Age Structure {.tabset}
+
+### Identified Capacity
+
+The chart shows the **Identified Capacity scenario** projection age structure of `r ward_name` at three points in time: 2011, 2020, 2030.
+
+```{r age_structure_chart_1, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Age Structure: ", ward_name, " (Identified Capacity)")
+ward_profile_data[[ward_code]]$age_structure %>% 
+  filter(variant == "Identified Capacity") %>% 
+  age_chart_plotly(chart_title, "year", figure = f)
+f <- f+1
+```
+
+<div class="table-title">Table 3: Age Structure, Identified Capacity scenario</div>
+```{r age_structure_table_1, echo = FALSE}
+age_table_1 <- ward_profile_data[[ward_code]]$age_groups %>% 
+  filter(variant == "Identified Capacity") %>% 
+  select(-variant) %>% 
+  tidyr::pivot_wider(names_from = year, values_from = value) %>% 
+  mutate(change = `2030`-`2020`,
+         `percentage change` = (change/2020)*100) %>% 
+  mutate(`2020` = format(round(`2020`,-1),big.mark=","),
+         `2030` = format(round(`2030`,-1),big.mark=","),
+         change = format(round(change,-1),big.mark=","),
+         `percentage change` = round(`percentage change`,1)) %>% 
+  rename(`age group` = age_group) %>% 
+  DT::datatable(rownames = FALSE, filter = "none", options = list(paging=FALSE, searching=FALSE, info=FALSE,
+                                                                  columnDefs = list(list(className = 'dt-right', targets = 1:4),
+                                                                                    list(className = 'dt-left', targets = 0),
+                                                                                    list(width = '20%', targets=0:4))))
+age_table_1
+```
+<div class="source">Source: GLA 2020-based population projections</div>
+
+### Past Delivery
+
+The chart shows the **Past Delivery scenario** projection age structure of `r ward_name` at three points in time: 2011, 2020, 2030.
+
+```{r age_structure_chart_2, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Age Structure: ", ward_name, " (Past Delivery)")
+ward_profile_data[[ward_code]]$age_structure %>% 
+  filter(variant == "Past Delivery") %>% 
+  age_chart_plotly(chart_title, "year", figure = f)
+f <- f+1
+```
+
+
+<div class="table-title">Table 4: Age Structure, Past Delivery scenario</div>
+```{r age_structure_table_2, echo = FALSE}
+age_table_2 <- ward_profile_data[[ward_code]]$age_groups %>% 
+  filter(variant == "Past Delivery") %>% 
+  select(-variant) %>% 
+  tidyr::pivot_wider(names_from = year, values_from = value) %>% 
+  mutate(change = `2030`-`2020`,
+         `percentage change` = (change/2020)*100) %>% 
+  mutate(`2020` = format(round(`2020`,-1),big.mark=","),
+         `2030` = format(round(`2030`,-1),big.mark=","),
+         change = format(round(change,-1),big.mark=","),
+         `percentage change` = round(`percentage change`,1)) %>%
+  rename(`age group` = age_group) %>% 
+  DT::datatable(rownames = FALSE, filter = "none", options = list(paging=FALSE, searching=FALSE, info=FALSE,
+                                                                  columnDefs = list(list(className = 'dt-right', targets = 1:4),
+                                                                                    list(className = 'dt-left', targets = 0),
+                                                                                    list(width = '20%', targets=0:4))))
+age_table_2
+```
+<div class="source">Source: GLA 2020-based population projections</div>
+
+### Housing Targets
+
+The chart shows the **Housing Targets scenario** projection age structure of `r ward_name` at three points in time: 2011, 2020, 2030.
+
+```{r age_structure_chart_3, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Age Structure: ", ward_name, " (Housing Targets)")
+ward_profile_data[[ward_code]]$age_structure %>% 
+  filter(variant == "Housing Targets") %>% 
+  age_chart_plotly(chart_title, "year", figure = f)
+f <- f+1
+```
+
+
+<div class="table-title">Table 5: Age Structure, Housing Targets scenario</div>
+```{r age_structure_table_3, echo = FALSE}
+age_table_3 <- ward_profile_data[[ward_code]]$age_groups %>% 
+  filter(variant == "Housing Targets") %>% 
+  select(-variant) %>% 
+  tidyr::pivot_wider(names_from = year, values_from = value) %>% 
+  mutate(change = `2030`-`2020`,
+         `percentage change` = (change/2020)*100) %>% 
+  mutate(`2020` = format(round(`2020`,-1),big.mark=","),
+         `2030` = format(round(`2030`,-1),big.mark=","),
+         change = format(round(change,-1),big.mark=","),
+         `percentage change` = round(`percentage change`,1)) %>%  
+  rename(`age group` = age_group) %>% 
+  DT::datatable(rownames = FALSE, filter = "none", options = list(paging=FALSE, searching=FALSE, info=FALSE,
+                                                                  columnDefs = list(list(className = 'dt-right', targets = 1:4),
+                                                                                    list(className = 'dt-left', targets = 0),
+                                                                                    list(width = '20%', targets=0:4))))
+age_table_3
+```
+<div class="source">Source: GLA 2020-based population projections</div>
+
+### 2030
+
+The chart shows the age structure in all 3 scenario projections in the year 2030 for `r ward_name`.
+
+```{r age_structure_chart_4, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Age Structure: ", ward_name, " (2030)")
+ward_profile_data[[ward_code]]$age_structure %>% 
+  filter(year == "2030") %>%
+  age_chart_plotly(chart_title, "variant", figure = f)
+f <- f+1
+```
+
+<div class="table-title">Table 6: Age Structure in 2030</div>
+```{r age_structure_table_4, echo = FALSE}
+age_table_4 <- ward_profile_data[[ward_code]]$age_groups %>% 
+  filter(year == "2030") %>% 
+  select(-year) %>% 
+  mutate(value = format(round(value,-1),big.mark=",")) %>% 
+  tidyr::pivot_wider(names_from = variant, values_from = value) %>% 
+  rename(`age group` = age_group) %>% 
+  DT::datatable(rownames = FALSE, filter = "none", options = list(paging=FALSE, searching=FALSE, info=FALSE,
+                                                                  columnDefs = list(list(className = 'dt-right', targets = 1:3),
+                                                                                    list(className = 'dt-left', targets = 0),
+                                                                                    list(width = '25%', targets=0:3))))
+age_table_4
+```
+<div class="source">Source: GLA 2020-based population projections</div>
+
+## Average Household Size
+
+Average Household Size (AHS) is a measure of the average number of people living in a household in an area. It is simply the household population divided by the number of households. Where AHS rises population is growing at a faster rate than housing delivery and where it falls the opposite is true. In 2020, AHS in `r ward_name` was `r ward_ahs`. This compares to `r borough_ahs` across all of `r borough_name` and `r london_ahs` in London as a whole.
+
+```{r ahs, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Average Household Size: ", ward_name)
+ward_profile_data[[ward_code]]$ward_ahs %>% 
+  line_chart_plotly(chart_title, "year", "ahs", "variant",
+                    "AHS", figure = f, round_y = 2)
+f <- f+1
+```
+
+## Components of Change {.tabset}
+
+Births and deaths data for the period 2011-2019 are 'actuals' and are taken from ONS outputs. Net migration data for the same period is derived as a residual by subtracting births and adding deaths to total population change. Data from 2020 onward is modelled.
+
+### Births
+
+```{r births, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Total births: ", ward_name)
+ward_profile_data[[ward_code]]$total_births %>% 
+  line_chart_plotly(chart_title, "year", "value", "variant",
+                    "births", figure = f, zero_y = TRUE)
+f <- f+1
+```
+
+<a href="#top">Back to top</a>
+
+### Deaths
+
+```{r deaths, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Total deaths: ", ward_name)
+ward_profile_data[[ward_code]]$total_deaths %>% 
+  line_chart_plotly(chart_title, "year", "value", "variant",
+                    "deaths", figure = f, zero_y = TRUE)
+f <- f+1
+```
+
+<a href="#top">Back to top</a>
+
+### Migration
+
+```{r migration, echo=FALSE, out.width="100%"}
+chart_title <- paste0("Total net migration: ", ward_name)
+ward_profile_data[[ward_code]]$total_migration %>% 
+  line_chart_plotly(chart_title, "year", "value", "variant",
+                    "net migration (persons)", figure = f)
+f <- f+1
+```
+
+<a href="#top">Back to top</a>
