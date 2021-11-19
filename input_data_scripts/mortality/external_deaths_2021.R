@@ -16,7 +16,7 @@ aged_popn <- readRDS(popn_path) %>%
 
 fertility_rates <- readRDS(fert_rates_path) %>%
   filter(year == 2021) %>%
-  complete_fertility(aged_popn)
+  complete_popn_dataframe(ages = 1:90)
 
 mortality_rates <- readRDS(mort_rates_path) %>%
   filter(year == 2021)

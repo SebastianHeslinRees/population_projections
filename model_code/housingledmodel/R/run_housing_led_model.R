@@ -84,8 +84,7 @@ run_housing_led_model <- function(config_list){
          int_out_flows_rates = paste0(config_list$external_trend_path,"int_out_rates_flows.rds"),
          int_in_flows = paste0(config_list$external_trend_path,"int_in.rds")))
   component_rates <- lapply(component_rates, filter_to_LAs)
-  component_rates$fertility_rates <- complete_fertility(component_rates$fertility_rates,
-                                                        component_rates$mortality_rates)
+  component_rates$fertility_rates <- complete_popn_dataframe(component_rates$fertility_rates)
   
   if(!is.null(config_list$external_births_path)){
     external_births <- readRDS(config_list$external_births_path) %>%
