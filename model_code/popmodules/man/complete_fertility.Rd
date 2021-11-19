@@ -42,13 +42,5 @@ A fertility dataframe that contains entries for all sexes present in the
   to the highest population age.  New entries are created with a rate value of 0.
 }
 \description{
-Makes sure a fertility dataframe contains records for sexes contained in population.
-}
-\details{
-Makes sure it goes down to the min popn age and max popn age.
-
-Doesn't fill in any gaps in the fertility age as can't think of a situation where
-that could be acceptable.
-
-All new records are created with a vaule of 0 for fertility.
+#' This function has been deprecated. Use \code{complete_popn_dataframe}.
 }

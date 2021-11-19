@@ -53,7 +53,7 @@ zero-year-olds are included in the output. Default \code{NULL}.}
 \item{col_births}{String denoting the name of the column containing data in 
 the \code{births} dataframe.}
 
-\item{col_geog}{String denoting the geography column. Default "gss_code".
+\item{col_geog}{Character vector denoting the geography column(s). Default "gss_code".
 Only used in validation. Only used when births dataframe is specified.}
 }
 \value{

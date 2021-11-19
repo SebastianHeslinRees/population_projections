@@ -9,7 +9,7 @@ validate_same_geog(
   df_2,
   col_1 = "gss_code",
   col_2 = col_1,
-  error_or_warn = "error"
+  warn_only = FALSE
 )
 }
 \arguments{
@@ -23,9 +23,9 @@ validate_same_geog(
 \item{col_2}{Character. The name of the column to be tested in df_2
 (default to same as col_1)}
 
-\item{error_or_warn}{String. Should the function return a warning or an error.
-Set to either 'error' to stop operation or 'warn' to give a warning only.
-Default 'error'.}
+\item{warn_only}{Boolean. Should the function return a warning or an error.
+If set to TRUE the function returns a warning, set to FALSE returns an error.
+Default FALSE.}
 }
 \value{
 Warnings or errors if there differences in the gss codes supplied
