@@ -24,6 +24,7 @@ Imports:
     popmodules,
     utils,
     xlsx,
-    loggr
+    loggr,
+    reticulate
 Suggests:
     testthat

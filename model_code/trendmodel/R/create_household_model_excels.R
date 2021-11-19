@@ -3,8 +3,10 @@
 #' The Python function read-in model output CSV files and outputs 2 Excel files:
 #' one for the ONS model and one for the DCLG model
 #'
-#' @param output_dir String. The root output directory of the projection
-#' @param projection_name String. The name of the projection
+#' @param output_dir string. The directory from which to read the data and save the Excel file
+#' @param wb_filename String. The name of the output Excel file. With or without '.xlsx'
+#' @param projection_name String. The projection name.
+#' @param model String. Household to output: 'ons', 'dclg' or 'both'. Default 'both'.
 #' 
 #' @return Output Excel workbooks
 #' 

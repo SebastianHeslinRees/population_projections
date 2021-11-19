@@ -3,9 +3,9 @@
 #' Process population, components and development data and place it into an
 #' Excel template. London borough data.
 #'
-#' @param output_dir The directory from which to read the data and save the Excel file
-#' @param projection_name The name of the output Excel file
-#' @param file_suffix A string to append to the end of the file name
+#' @param output_dir string. The directory from which to read the data and save the Excel file
+#' @param wb_filename String. The name of the output Excel file. With or without '.xlsx'
+#' @param projection_name String. The projection name.
 #' 
 #' @import dplyr
 #' @import reticulate
@@ -29,11 +29,11 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
   
   #-----------------------------------------------------------------------------
   
-  persons <- doob("persons", output_dir)
-  females <- doob("females", output_dir)
-  males <- doob("males", output_dir)
-  assumed_dev <- doob("assumed_dev", output_dir)
-  stock <- doob("housing_stock", output_dir)
+  persons <- filter_max_2041("persons", output_dir)
+  females <- filter_max_2041("females", output_dir)
+  males <- filter_max_2041("males", output_dir)
+  assumed_dev <- filter_max_2041("assumed_dev", output_dir)
+  stock <- filter_max_2041("housing_stock", output_dir)
   
   components <- fread(paste0(output_dir,"csv/components.csv"), header = TRUE) %>%
     as.data.frame() %>%
@@ -68,7 +68,7 @@ create_housingled_excels <- function(output_dir, wb_filename, projection_name){
 }
 
 #If the projection horizon is >2041 remove extra years, if not use max(year)
-doob <- function(x, output_dir){
+filter_max_2041 <- function(x, output_dir){
   
   a <- fread(paste0(output_dir,"csv/",x,".csv"), header = TRUE) %>%
     as.data.frame()

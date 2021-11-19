@@ -7,11 +7,11 @@
 create_housingled_excels(output_dir, wb_filename, projection_name)
 }
 \arguments{
-\item{output_dir}{The directory from which to read the data and save the Excel file}
+\item{output_dir}{string. The directory from which to read the data and save the Excel file}
 
-\item{projection_name}{The name of the output Excel file}
+\item{wb_filename}{String. The name of the output Excel file. With or without '.xlsx'}
 
-\item{file_suffix}{A string to append to the end of the file name}
+\item{projection_name}{String. The projection name.}
 }
 \description{
 Process population, components and development data and place it into an

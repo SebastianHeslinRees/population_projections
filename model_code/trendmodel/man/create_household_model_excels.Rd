@@ -12,9 +12,13 @@ create_household_model_excels(
 )
 }
 \arguments{
-\item{output_dir}{String. The root output directory of the projection}
+\item{output_dir}{string. The directory from which to read the data and save the Excel file}
 
-\item{projection_name}{String. The name of the projection}
+\item{wb_filename}{String. The name of the output Excel file. With or without '.xlsx'}
+
+\item{projection_name}{String. The projection name.}
+
+\item{model}{String. Household to output: 'ons', 'dclg' or 'both'. Default 'both'.}
 }
 \value{
 Output Excel workbooks

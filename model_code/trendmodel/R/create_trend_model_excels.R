@@ -5,12 +5,10 @@
 #' will produce those workbooks. Creates a population workbook, an ONS household
 #' workbook and a DCLG household workbook.
 #'
-#' @param output_dir String. The output directory where the projection RDS files are
-#'   saved.
-#' @param wb_filename String. File name for the population workbook output.
-#'  With or without "xlsx" suffix.
-#' @param household_models Logical. Should the household model excel files also
-#'  be created.
+#' @param output_dir string. The directory from which to read the data and save the Excel file
+#' @param wb_filename String. The name of the output Excel file. With or without '.xlsx'
+#' @param projection_name String. The projection name.
+#' @param household_models Logical. Should the household model excel files also be created.
 #'  
 #' @import dplyr
 #' @import reticulate

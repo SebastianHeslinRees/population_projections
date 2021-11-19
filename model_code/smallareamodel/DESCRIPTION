@@ -21,6 +21,7 @@ Imports:
     tidyr,
     utils,
     loggr,
-    stringr
+    stringr,
+    reticulate
 Suggests:
     testthat

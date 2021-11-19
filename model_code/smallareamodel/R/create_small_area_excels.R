@@ -4,10 +4,10 @@
 #' Excel files. Run time is 3 minutes for a ward projection and 5 minutes for
 #' an MSOA projection.
 #'
-#' @param output_dir Character. The root model output directory.
-#' @param wb_filename Character. The name of the output Excel Workbook.
-#' @param ward Logical. Should the ward file be output
-#' @param msoa Logical. Should the MSOA file be output
+#' @param output_dir string. The directory from which to read the data and save the Excel file
+#' @param wb_filename String. The name of the output Excel file. With or without '.xlsx'
+#' @param projection_name String. The projection name.
+#' @param smallarea String. Projection type: either 'ward' or 'msoa'. Default 'ward'.
 #' 
 #' @return Output Excel workbooks
 #' 
@@ -35,9 +35,9 @@ create_small_area_excels <- function(output_dir, wb_filename, projection_name, s
   wb_filename <- paste0(wb_filename,"_",smallarea,".xlsx")
   
   #read in the data from csv
-  persons <- doob("persons", smallarea, output_dir)
-  females <- doob("females", smallarea, output_dir)
-  males <- doob("males", smallarea, output_dir)
+  persons <- filter_max_2041("persons", smallarea, output_dir)
+  females <- filter_max_2041("females", smallarea, output_dir)
+  males <- filter_max_2041("males", smallarea, output_dir)
   
   components = fread(paste0(output_dir, smallarea,"/components_",smallarea,".csv"), header = TRUE) %>%
     as.data.frame() %>% 
@@ -61,7 +61,7 @@ create_small_area_excels <- function(output_dir, wb_filename, projection_name, s
 }
 
 #If the projection horizon is >2041 remove extra years, if not use max(year)
-doob <- function(x, smallarea, output_dir){
+filter_max_2041 <- function(x, smallarea, output_dir){
   
   a <- fread(paste0(output_dir, smallarea,"/",x,"_",smallarea,".csv"), header = TRUE) %>%
     as.data.frame()

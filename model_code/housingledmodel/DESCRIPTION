@@ -28,6 +28,7 @@ Imports:
     smallareamodel,
     ldndatar,
     loggr,
-    rstudioapi
+    rstudioapi,
+    reticulate
 Suggests:
     testthat

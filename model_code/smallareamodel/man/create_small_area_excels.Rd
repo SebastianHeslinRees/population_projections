@@ -12,13 +12,13 @@ create_small_area_excels(
 )
 }
 \arguments{
-\item{output_dir}{Character. The root model output directory.}
+\item{output_dir}{string. The directory from which to read the data and save the Excel file}
 
-\item{wb_filename}{Character. The name of the output Excel Workbook.}
+\item{wb_filename}{String. The name of the output Excel file. With or without '.xlsx'}
 
-\item{ward}{Logical. Should the ward file be output}
+\item{projection_name}{String. The projection name.}
 
-\item{msoa}{Logical. Should the MSOA file be output}
+\item{smallarea}{String. Projection type: either 'ward' or 'msoa'. Default 'ward'.}
 }
 \value{
 Output Excel workbooks

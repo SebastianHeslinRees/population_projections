@@ -12,14 +12,13 @@ create_trend_model_excels(
 )
 }
 \arguments{
-\item{output_dir}{String. The output directory where the projection RDS files are
-saved.}
+\item{output_dir}{string. The directory from which to read the data and save the Excel file}
 
-\item{wb_filename}{String. File name for the population workbook output.
-With or without "xlsx" suffix.}
+\item{wb_filename}{String. The name of the output Excel file. With or without '.xlsx'}
 
-\item{household_models}{Logical. Should the household model excel files also
-be created.}
+\item{projection_name}{String. The projection name.}
+
+\item{household_models}{Logical. Should the household model excel files also be created.}
 }
 \description{
 If a projection has been run with the \code{write_excel} variable set to
