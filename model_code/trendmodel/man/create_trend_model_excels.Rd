@@ -4,25 +4,25 @@
 \alias{create_trend_model_excels}
 \title{Produce 3 Excel workbooks from a set of projection RDS files}
 \usage{
-create_trend_model_excels(trend_dir, excel_file_name)
+create_trend_model_excels(
+  output_dir,
+  wb_filename,
+  projection_name,
+  household_models = TRUE
+)
 }
 \arguments{
-\item{trend_dir}{String. The output directory where the projection RDS files are
-saved.}
+\item{output_dir}{string. The directory from which to read the data and save the Excel file}
 
-\item{excel_file_name}{String. File name for the population workbook output.
-With or without "xlsx" suffix.}
+\item{wb_filename}{String. The name of the output Excel file. With or without '.xlsx'}
+
+\item{projection_name}{String. The projection name.}
+
+\item{household_models}{Logical. Should the household model excel files also be created.}
 }
 \description{
 If a projection has been run with the \code{write_excel} variable set to
 \code{FALSE} and the Excel outputs are subsequently required this function
 will produce those workbooks. Creates a population workbook, an ONS household
 workbook and a DCLG household workbook.
-}
-\examples{
-\dontrun{
-create_trend_model_excels(
-  trend_dir = "outputs/trend/2018/2018_long_19-11-13_2144",
-  excel_file_name = "2018_long_trend.xlsx")
-}
 }

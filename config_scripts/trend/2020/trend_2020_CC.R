@@ -32,10 +32,11 @@ domestic_rates <- list(
 source("config_scripts/trend/2020/standard_trend_parameters.R")
 
 config_list <- standard_trend_parameters(list(projection_name = projection_name,
-                                             standard_covid_migration = standard_covid_migration,
-                                             int_out_flows_rates = int_out_flows_rates,
-                                             int_in = int_in,
-                                             domestic_rates = domestic_rates))
+                                              standard_covid_migration = standard_covid_migration,
+                                              int_out_flows_rates = int_out_flows_rates,
+                                              int_in = int_in,
+                                              domestic_rates = domestic_rates))
+
 rm(list = setdiff(ls(), "config_list"))
 
 # Run the model

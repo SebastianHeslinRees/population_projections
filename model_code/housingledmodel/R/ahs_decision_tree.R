@@ -6,10 +6,10 @@
 #' @param external_ahs A dataframe of AHS values from the ONS or DCLG household model
 #' @param trend_ahs A dataframe of AHS values from calculated from the
 #'   current projection year's trend population
-#' @param ahs_cap A ataframe or NULL. If the cap has been set then a dataframe of
+#' @param ahs_cap A dataframe or NULL. If the cap has been set then a dataframe of
 #'  cap values. If the cap hasn't been set then NULL.
 #' @param projection_year Numeric. The projection year
-#' @param ldd_final_year Numeric. The final year for which LDD is available
+#' @param ldd_final_yr Numeric. The final year of data available in the LDD
 #' @param gss_code_list Character. A vector of gss_codes which need to have an
 #'  AHS value returned
 #'
