@@ -74,7 +74,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       mutate(increment = (value_2-value_1)/curr_yr_info$transition_period,
              value = value_1+(increment*curr_yr_info$period_step)) %>%
       select(-increment) %>%
-      check_negative_values("value", set_to_zero = TRUE)
+      check_negative_values("value")
     
   } else {
     

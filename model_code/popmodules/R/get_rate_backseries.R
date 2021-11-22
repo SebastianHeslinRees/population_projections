@@ -119,7 +119,7 @@ get_rate_backseries <- function(component_mye_path,
   component[ix, col_component] <- 0
   
   # Set negative values to zero
-  component <- check_negative_values(component, col_component, set_to_zero = TRUE)
+  component <- check_negative_values(component, col_component)
   
   # TODO Figure out if this is necessary
   # levels <- col_aggregation[ !col_aggregation %in% col_partial_match]

@@ -181,7 +181,7 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
   
   #constrain borough populations to match constraint
   constrained_popn <- left_join(unconstrained_popn, small_area_to_district, by="gss_code_small_area") %>%
-    check_negative_values("popn", alt_value = 0.001) %>% 
+    check_negative_values("popn", change_value = 0.001) %>% 
     as.data.frame() %>%
     constrain_component(constraint = popn_constraint,
                         col_popn = "popn",
