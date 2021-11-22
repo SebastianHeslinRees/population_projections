@@ -78,7 +78,6 @@ output_small_area_projection <- function(projection, output_dir, projection_type
     tidyr::pivot_wider(names_from = year, values_from = popn) %>%
     select_at(col_aggregation)
 
-  
   persons <- mutate(popn, sex = "persons") %>%
     lazy_dt() %>%
     filter(year >= 2011) %>%

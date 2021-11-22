@@ -100,15 +100,8 @@ output_trend_projection <- function(projection, output_dir, write_excel, n_csv_e
   
   #Excel
   if(write_excel){
-    trend_datastore_outputs(population = projection$population,
-                            births = projection$births,
-                            deaths = projection$deaths,
-                            int_in = projection$int_in,
-                            int_out = projection$int_out,
-                            dom_in = projection$dom_in,
-                            dom_out = projection$dom_out,
-                            popn_adjustment = projection$popn_adjustment,
-                            output_dir = output_dir,
-                            excel_file_name = paste0(projection_name,".xlsx"))
+    excel_wb_name <- substr(projection_name,1,nchar(projection_name)-14)
+    variant_name <- paste("Variant trend projection:",str_replace_all(excel_wb_name, "_", " "))
+    create_trend_model_excels(output_dir, excel_wb_name, variant_name, FALSE)
   }
 }

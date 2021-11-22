@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_functions.R
 \name{.add_slash}
 \alias{.add_slash}
-\title{#A function to check if a file path ends with a slash and add one if not}
+\title{A function to check if a file path ends with a slash and add one if not}
 \usage{
 .add_slash(x)
 }
@@ -13,5 +13,5 @@
 The input string with a slash (`/`) on the end
 }
 \description{
-#A function to check if a file path ends with a slash and add one if not
+A function to check if a file path ends with a slash and add one if not
 }

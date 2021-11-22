@@ -10,6 +10,7 @@
 #' @import dplyr
 #' @import popmodules
 #' @importFrom tidyr pivot_wider
+#' @importFrom data.table fwrite
 
 household_model_outputs <- function(model_output, model, output_dir, write_excel, projection_name){
   
@@ -43,7 +44,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     summarise(ce_popn = sum(communal_establishment_population), .groups = 'drop_last') %>%
     tidyr::pivot_wider(names_from = year, values_from = ce_popn)
   
-
+  
   hh_pop <- model_output$stage_1$household_population %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
@@ -74,12 +75,17 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     nm <- setdiff(names(output_dataframes[[i]]),"gss_code")
     
     output_dataframes[[i]] <- left_join(output_dataframes[[i]], names_lookup, by="gss_code") %>%
-      select_at(c("gss_code", "gss_name", nm))
+      select_at(c("gss_code", "gss_name", nm)) %>% 
+      datastore_csv()
     
-    data.table::fwrite(output_dataframes[[i]],
-                       paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))
+    output_dataframes$household_summary <- output_dataframes$household_summary %>%
+      mutate(average_household_size = (household_population / households) %>%
+               round(digits = 3)) # since the summing in datastore_csv gets this wrong
+    
+    fwrite(output_dataframes[[i]],
+           paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))
   }
-
+  
   
   #RDS
   saveRDS(model_output[['stage_1']][['detailed_households']], paste0(hh_output_dir, model, "_", "stage_1_households.rds"))
@@ -91,48 +97,11 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
           paste0(hh_output_dir, model, "_", "ahs.rds"))
   
   if(write_excel){
-    
-    output_dataframes <- lapply(output_dataframes, datastore_csv)
-    
-    output_dataframes$household_summary <- output_dataframes$household_summary %>%
-      mutate(average_household_size = (household_population / households) %>%
-                                      round(digits = 3)) # since the summing in datastore_csv gets this wrong
-    
-    if(model == "dclg"){
-      #dclg excel file is too big to write out
-      for(i in seq(output_dataframes)){
-        data.table::fwrite(output_dataframes[[i]],
-                           paste0(output_dir,"/datastore/",model,"_",names(output_dataframes[i]), ".csv"))
-      }
-      
-    } else {
-      #ons excel file can be written
-      wb <- xlsx::loadWorkbook("input_data/excel_templates/household_template_2020.xlsx")
-      wb_sheets<- xlsx::getSheets(wb)
-      
-      xlsx::addDataFrame(output_dataframes[[1]], wb_sheets$`stage 1 households`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-      xlsx::addDataFrame(output_dataframes[[2]], wb_sheets$`stage 2 households`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-      xlsx::addDataFrame(output_dataframes[[4]], wb_sheets$`household popn`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-      xlsx::addDataFrame(output_dataframes[[3]], wb_sheets$`communal est popn`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-      xlsx::addDataFrame(output_dataframes[[5]], wb_sheets$`summary`, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-      
-      #metadata
-      title <- as.data.frame(paste0("London borough household projectons ",toupper(model)," model"))
-      model_desc <- as.data.frame(paste0("to households using the ", toupper(model), " household model"))
-      ce_desc <- as.data.frame(paste0("2. Communal establishment populations are taken from the ",toupper(model)," household model"))
-      proj_desc <- as.data.frame(paste0(projection_name, " projection"))
-      
-      xlsx::addDataFrame(title, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 2, startColumn = 1)
-      xlsx::addDataFrame(proj_desc, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 3, startColumn = 1)
-      xlsx::addDataFrame(model_desc, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 9, startColumn = 1)
-      xlsx::addDataFrame(ce_desc, wb_sheets$Metadata, col.names = FALSE, row.names = FALSE, startRow = 16, startColumn = 1)
-      
-      #Write xlsx file
-      wb_filename <- paste0(output_dir,"/datastore/",model,"_households.xlsx")
-      xlsx::saveWorkbook(wb, wb_filename)
-      
-    }
+    excel_wb_name <- substr(projection_name,1,nchar(projection_name)-14)
+    variant_name <- paste("Variant trend projection:",str_replace_all(excel_wb_name, "_", " "))
+    create_household_model_excels(output_dir, excel_wb_name, variant_name, model)
   }
+  
 }
 
 #---------------------------------------

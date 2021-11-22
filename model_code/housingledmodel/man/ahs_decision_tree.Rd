@@ -19,12 +19,12 @@ ahs_decision_tree(
 \item{trend_ahs}{A dataframe of AHS values from calculated from the
 current projection year's trend population}
 
-\item{ahs_cap}{A ataframe or NULL. If the cap has been set then a dataframe of
+\item{ahs_cap}{A dataframe or NULL. If the cap has been set then a dataframe of
 cap values. If the cap hasn't been set then NULL.}
 
 \item{projection_year}{Numeric. The projection year}
 
-\item{ldd_final_yr}{Numeric. The final year for which LDD is available}
+\item{ldd_final_yr}{Numeric. The final year of data available in the LDD}
 
 \item{gss_code_list}{Character. A vector of gss_codes which need to have an
 AHS value returned}
