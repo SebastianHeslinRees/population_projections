@@ -2,9 +2,9 @@
 % Please edit documentation in R/check_negative_values.R
 \name{check_negative_values}
 \alias{check_negative_values}
-\title{Test a column in a dataframe for negatives, optionally setting to zero}
+\title{Test a column in a dataframe for negatives and return a warning or amend the values}
 \usage{
-check_negative_values(x, data_col, set_to_zero = TRUE, alt_value = NULL)
+check_negative_values(x, data_col, warn_only = FALSE, change_value = 0)
 }
 \arguments{
 \item{x}{A data frame.}
@@ -12,17 +12,17 @@ check_negative_values(x, data_col, set_to_zero = TRUE, alt_value = NULL)
 \item{data_col}{String. The name of a column in the data frame containing
 numeric data.}
 
-\item{set_to_zero}{Logical. When TRUE, set negative values to zero. When
-FALSE return the data frame as is.}
+\item{warn_only}{Logical. When TRUE, only warn that the data_col contains
+negatives. When change negative values to the change_value.}
 
-\item{alt_value}{Numeric or NULL. If `set_to_zero = TRUE` this parameter can
-be used to set to a value other than zero}
+\item{change_value}{Numeric. If \code{warn_only = FALSE} this the value that
+negatives area changed to. Default 0}
 }
 \value{
-The input data frame. If \code{set_to_zero} is TRUE, negative values
-  of \code{data_col} are set to zero.
+The input data frame. If \code{warn_only} is FALSE, negative values
+  of \code{data_col} are set to the \code{change_value} value.
 }
 \description{
-If negatives exist print a warning. If the \code{set_to_zero} parameter is
-TRUE then change the negatives to 0.
+If negatives exist print a warning. If the \code{warn_only} parameter is
+FALSE then change the negatives to a user-defined value.
 }
