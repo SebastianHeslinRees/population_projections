@@ -1,41 +1,43 @@
-#' Test a column in a dataframe for negatives, optionally setting to zero
+#' Test a column in a dataframe for negatives and return a warning or amend the values
 #'
-#' If negatives exist print a warning. If the \code{set_to_zero} parameter is
-#' TRUE then change the negatives to 0.
+#' If negatives exist print a warning. If the \code{warn_only} parameter is
+#' FALSE then change the negatives to a user-defined value.
 #'
 #' @param x A data frame.
 #' @param data_col String. The name of a column in the data frame containing
 #'   numeric data.
-#' @param set_to_zero Logical. When TRUE, set negative values to zero. When
-#'   FALSE return the data frame as is.
-#' @param alt_value Numeric or NULL. If `set_to_zero = TRUE` this parameter can
-#'  be used to set to a value other than zero
+#' @param warn_only  Logical. When TRUE, only warn that the data_col contains
+#'   negatives. When change negative values to the change_value.
+#' @param change_value Numeric. If \code{warn_only = FALSE} this the value that
+#'   negatives area changed to. Default 0
 #'
-#' @return The input data frame. If \code{set_to_zero} is TRUE, negative values
-#'   of \code{data_col} are set to zero.
+#' @return The input data frame. If \code{warn_only} is FALSE, negative values
+#'   of \code{data_col} are set to the \code{change_value} value.
+#'   
+#' @importFrom assertthat assert_that
 #'
 #' @export
 
-check_negative_values <- function(x, data_col, set_to_zero = TRUE, alt_value = NULL){
+check_negative_values <- function(x, data_col, warn_only = FALSE, change_value = 0){
 
-  assertthat::assert_that(data_col %in% names(x))
-  assertthat::assert_that(any(c("numeric", "integer") %in% class(x[[data_col]])),
+  #Validate
+  assert_that(data_col %in% names(x),
+                          msg = paste("check_negative_values was passed a data_col column that isn't in the dataframe:", data_col))
+  assert_that(any(c("numeric", "integer") %in% class(x[[data_col]])),
                           msg = paste("check_negative_values was passed a non-numeric column:", data_col))
+  assert_that(is.data.frame(x),
+              msg = "check_negative_values expected a dataframe")
+  assert_that(is.logical(warn_only),
+              msg = paste("check_negative_values expected a non-logical value:", warn_only))
 
-  if(set_to_zero == TRUE & !is.null(alt_value)){
-    change_value <- alt_value
-  } else {
-    change_value <- 0
-  }
-  
+  #Function body
   ix <- x[[data_col]] < 0
-  
   
   if(any(ix)) {
 
-    zero_msg <- ifelse(set_to_zero == TRUE,
-                       paste("Setting negative values to", change_value),
-                       "Warning only, returning dataframe unchanged")
+    zero_msg <- ifelse(warn_only,
+                       "Warning only, returning dataframe unchanged",
+                       paste("Setting negative values to", change_value))
 
     n <- sum(ix)
     total_negative <- round(sum(x[[data_col]][ix]),2)
@@ -54,7 +56,7 @@ check_negative_values <- function(x, data_col, set_to_zero = TRUE, alt_value = N
       }
     }), collapse = "\n"))
 
-    if(set_to_zero){
+    if(!warn_only){
       x[[data_col]][ix] <- change_value
     }
   }

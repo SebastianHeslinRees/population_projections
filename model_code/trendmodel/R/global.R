@@ -80,5 +80,6 @@ globalVariables(c(
   "average_household_size",
   "borough",
   "upc",
-  "adjustment"
+  "adjustment",
+  "population"
 ))

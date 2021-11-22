@@ -5,7 +5,9 @@ library(smallareamodel)
 n_proj_yr <- 30
 projection_name <- "Housing_Targets"
 
-external_trend_path <- "outputs/trend/2020/2020_CH_21-09-08_1659"
+dirs <- list.dirs("outputs/trend/2020", recursive = FALSE)
+external_trend_path <- dplyr::last(stringr::str_sort(dirs[stringr::str_detect(dirs, "CH")]))
+
 dev_trajectory_path <- "input_data/housing_led_model/borough_2020-based_london_plan.rds"
 small_area_dev_trajectory_path <- "input_data/small_area_model/development_data/ward_2020-based_london_plan.rds"
 
@@ -33,8 +35,13 @@ projection <- run_housing_led_model(config_list[[1]])
 ward_projection <- run_small_area_model(config_list[[2]])
 msoa_projection <- run_small_area_model(config_list[[3]])
 
-# output_housing_led_excel_file(ward_projection[["csvs"]],
-#                               config_list$output_dir,
-#                               config_list$projection_name,
-#                               config_list$popn_adjustment_path,
-#                               file_suffix = "_2020.xlsx")
+#-------------------------------------------------------------------------------
+#Excel workbooks
+
+output_dir <- config_list[[1]]$output_dir
+wb_filename <- "housing_targets_scenario"
+projection_name <- "2020-based Scenario Projection: Housing Targets Scenario"
+
+create_housingled_excels(output_dir, wb_filename, projection_name)
+create_small_area_excels(output_dir, wb_filename, projection_name, smallarea = "ward")
+create_small_area_excels(output_dir, wb_filename, projection_name, smallarea = "msoa")

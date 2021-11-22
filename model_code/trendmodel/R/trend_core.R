@@ -253,7 +253,7 @@ trend_core <- function(start_population,
   # FIXME
   # TODO This setup creates negative populations
   # For now just setting -ve pops to zero
-  next_yr_popn <- check_negative_values(next_yr_popn, "popn", set_to_zero = TRUE)
+  next_yr_popn <- check_negative_values(next_yr_popn, "popn")
   
   next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn)
   
