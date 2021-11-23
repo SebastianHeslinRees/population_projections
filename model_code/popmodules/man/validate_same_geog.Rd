@@ -23,7 +23,7 @@ validate_same_geog(
 \item{col_2}{Character. The name of the column to be tested in df_2
 (default to same as col_1)}
 
-\item{warn_only}{Boolean. Should the function return a warning or an error.
+\item{warn_only}{Logical. Should the function return a warning or an error.
 If set to TRUE the function returns a warning, set to FALSE returns an error.
 Default FALSE.}
 }
@@ -31,7 +31,6 @@ Default FALSE.}
 Warnings or errors if there differences in the gss codes supplied
 }
 \description{
-Performs a check that the unique set of gss_codes in one
-dataframe is the same as the unique set of gss_codes in
-another
+Performs a check that the unique set of gss_codes in one  dataframe is the
+same as the unique set of gss_codes in another
 }
