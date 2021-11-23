@@ -4,24 +4,33 @@
 \alias{validate_same_geog}
 \title{Confirm two datasets have matching geography}
 \usage{
-validate_same_geog(df_1, df_2, col_1 = "gss_code", col_2 = "gss_code")
+validate_same_geog(
+  df_1,
+  df_2,
+  col_1 = "gss_code",
+  col_2 = col_1,
+  warn_only = FALSE
+)
 }
 \arguments{
-\item{df_1}{A dataframe containing a column of gss codes}
+\item{df_1}{A dataframe containing a column with geography codes or names}
 
-\item{df_2}{A dataframe containing a column of gss codes}
+\item{df_2}{A dataframe containing a column with geography codes or names}
 
-\item{col_1}{Character. The name of the column containing gss codes in df_1
+\item{col_1}{Character. The name of the column to be tested in df_1
 (default 'gss_code')}
 
-\item{col_2}{Character. The name of the column containing gss codes in df_2
-(default 'gss_code')}
+\item{col_2}{Character. The name of the column to be tested in df_2
+(default to same as col_1)}
+
+\item{warn_only}{Logical. Should the function return a warning or an error.
+If set to TRUE the function returns a warning, set to FALSE returns an error.
+Default FALSE.}
 }
 \value{
-Warnings if there differences in the gss codes supplied
+Warnings or errors if there differences in the gss codes supplied
 }
 \description{
-Performs a check that the unique set of gss_codes in one
-dataframe is the same as the unique set of gss_codes in
-another
+Performs a check that the unique set of gss_codes in one  dataframe is the
+same as the unique set of gss_codes in another
 }
