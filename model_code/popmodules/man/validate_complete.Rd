@@ -2,27 +2,30 @@
 % Please edit documentation in R/validate_complete.R
 \name{validate_complete}
 \alias{validate_complete}
-\title{Check that all expected aggreation levels are present}
+\title{Check that the number of rows in a dataframe is consistent with the expected
+number of rows}
 \usage{
 validate_complete(
   x,
-  col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
-  col_geog = c("gss_code", "gss_code_ward"),
-  additional_cols = NULL,
+  test_cols = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+  nested_cols = c("gss_code", "gss_code_ward"),
   warn_only = FALSE
 )
 }
 \arguments{
 \item{x}{A dataframe}
 
-\item{col_aggregation}{Character. The aggregation levels to be tested}
+\item{test_cols}{Character. The aggregation levels to be tested}
 
-\item{col_geog}{Charater. The column containing geography. These do not
-have to be included in the col_aggregation parameter.}
+\item{nested_cols}{Character. Any of the aggregation levels in \code{completed_cols} 
+which are nested. For example geography columns.}
 
-\item{additional_cols}{Character. Columns not included in col_aggregation
-but which need to be included in the test. Default NULL.}
+\item{warn_only}{Logical. If TRUE the function will return a warning, if FALSE
+an error is produced. Default FALSE.}
 }
 \description{
-Check that all expected aggreation levels are present
+Note that this is a crude test and only checks that \code{nrow(x)} is consistent
+with the expected number of rows. It says nothing about the content of those
+rows. Failure of the test indicated incompleteness. Passing the test does
+not indicate completeness but can be used as a crude proxy.
 }

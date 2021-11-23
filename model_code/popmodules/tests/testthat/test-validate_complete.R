@@ -12,33 +12,32 @@ x <- expand.grid(gss_code_ward = letters[15:23],
 
 test_that("returns invisible", {
   expect_silent(validate_complete(x,
-                                  col_aggregation = c("year","gss_code","gss_code_ward","sex","age"),
-                                  col_geog = c("gss_code", "gss_code_ward"),
+                                  test_cols = c("year","gss_code","gss_code_ward","sex","age"),
+                                  nested_cols = c("gss_code", "gss_code_ward"),
                                   warn_only = FALSE))
   
   expect_silent(validate_complete(x,
-                                  col_aggregation = c("year","gss_code_ward","sex","age"),
-                                  col_geog = c("gss_code", "gss_code_ward"),
+                                  test_cols = c("year","gss_code_ward","sex","age"),
+                                  nested_cols = c("gss_code", "gss_code_ward"),
                                   warn_only = FALSE))
   
   expect_silent(validate_complete(x,
-                                  col_aggregation = c("gss_code_ward","sex","age"),
-                                  col_geog = c("gss_code", "gss_code_ward"),
-                                  additional_cols = "year",
+                                  test_cols = c("year","sex","age"),
+                                  nested_cols = c("gss_code", "gss_code_ward"),
                                   warn_only = FALSE))
 })
 
 test_that("returns error", {
   expect_error(validate_complete(x,
-                                 col_aggregation = c("year","gss_code","gss_code_ward","sex","age"),
-                                 col_geog = c("gss_code"),
+                                 test_cols = c("year","gss_code","gss_code_ward","sex","age"),
+                                 nested_cols = c("gss_code"),
                                  warn_only = FALSE))
 })
 
 
 test_that("returns warning", {
   expect_warning(validate_complete(x,
-                                   col_aggregation = c("year","gss_code","gss_code_ward","sex","age"),
-                                   col_geog = c("gss_code"),
+                                   test_cols = c("year","gss_code","gss_code_ward","sex","age"),
+                                   nested_cols = c("gss_code"),
                                    warn_only = TRUE))
 })
