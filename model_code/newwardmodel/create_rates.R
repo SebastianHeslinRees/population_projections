@@ -3,7 +3,7 @@ library(data.table)
 library(assertthat)
 devtools::load_all('model_code/popmodules')
 
-data_dir <- "model_code/newwardmodel/data/"
+data_dir <- "input_data/new_ward_model/"
 
 ward_pop <- paste0(data_dir, "ward_population_WD20CD.rds") %>% readRDS()
 ward_births <- paste0(data_dir, "ward_births_WD20CD.rds") %>% readRDS()
@@ -54,18 +54,6 @@ fert_rates <- scaled_fertility_curve(popn = ward_pop,
                     npp_var = "2018_principal") %>% 
 complete_popn_dataframe()
 
-zero_fert <- expand.grid(gss_code_ward = unique(fert_rates$gss_code_ward),
-                         year = unique(fert_rates$year), 
-                         sex = c("female","male"),
-                         age = 0:90) %>%
-  filter(!(sex == "female" & age %in% 15:49)) %>% 
-  data.frame() %>% 
-  left_join(unique(select(fert_rates, gss_code, gss_code_ward)), by="gss_code_ward") %>% 
-  mutate(rate = 0) %>% 
-  select(names(fert_rates))
-
-fert_rates <- rbind(fert_rates, zero_fert)
-
 #-------------------------------------------------------------------------------
 
 out_mig_rates <- denominator_popn %>% 
@@ -77,7 +65,6 @@ out_mig_rates <- denominator_popn %>%
                                  col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
                                  project_rate_from = 2020) %>% 
   project_forward_flat(2050)
-
 
 #-------------------------------------------------------------------------------
 

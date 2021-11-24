@@ -7,22 +7,23 @@ projection_loop <- function(start_population,
                             mortality_rates,
                             out_rates,
                             in_flows,
-                            proj_yr){
+                            projection_year){
 
-  cat('\r',proj_yr)
+  cat('\r',projection_year)
   utils::flush.console()
 
   start_population <- start_population %>% 
     select(year, gss_code, gss_code_ward, sex, age, popn)
 
   col_agg <- c("year", "gss_code", "gss_code_ward", "sex", "age")
+  nested_geog <- c("gss_code", "gss_code_ward")
   
   #-----------------------------------------------------------------------------
 
   #age on
   aged_popn <- popn_age_on(start_population,
                       col_aggregation = col_agg,
-                      col_geog = "gss_code_ward")
+                      col_geog = nested_geog)
   
   assert_that(sum(is.na(aged_popn))==0, msg=paste("aged_popn", yr))
   
@@ -35,14 +36,11 @@ projection_loop <- function(start_population,
                                                filter(fertility_rates, age != 0),
                                                col_out = "births",
                                                col_aggregation = col_agg,
-                                               many2one = FALSE,
-                                               col_geog_popn = "gss_code_ward",
-                                               missing_levels_popn = TRUE,
-                                               missing_levels_rate = TRUE,
-                                               validate_geog = TRUE)
+                                               validate_geog = TRUE,
+                                               col_geog = nested_geog)
 
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f,
-                                              col_aggregation = c("gss_code","gss_code_ward"))
+                                              col_aggregation = nested_geog)
   
 
   assert_that(sum(is.na(births))==0, msg=paste("births", yr))
@@ -53,15 +51,13 @@ projection_loop <- function(start_population,
     
   #mortality
   deaths <- apply_rate_to_population(popn = aged_popn_w_births,
-                                     popn_rate = mortality_rates,
+                                     rates = mortality_rates,
                                      col_popn = "popn",
                                      col_rate = "rate",
                                      col_out = "deaths",
                                      col_aggregation = col_agg,
-                                     col_geog_popn = "gss_code_ward",
-                                     missing_levels_popn = TRUE,
-                                     missing_levels_rate = TRUE,
-                                     validate_geog = TRUE)
+                                     validate_geog = TRUE,
+                                     col_geog = nested_geog)
   
   assert_that(sum(is.na(deaths))==0, msg=paste("deaths", yr))
   
@@ -77,22 +73,20 @@ projection_loop <- function(start_population,
   
   #out migration
   outflow <- apply_rate_to_population(popn = aged_popn_w_births,
-                                      popn_rate = out_rates,
+                                      rates = out_rates,
                                       col_popn = "popn",
                                       col_rate = "out_rate",
                                       col_out = "outflow",
                                       col_aggregation = col_agg,
-                                      col_geog_popn = "gss_code_ward",
-                                      missing_levels_popn = TRUE,
-                                      missing_levels_rate = TRUE,
-                                      validate_geog = TRUE)
+                                      validate_geog = TRUE,
+                                      col_geog = nested_geog)
   
   assert_that(sum(is.na(outflow))==0, msg=paste("outflow", yr))
   
   #-----------------------------------------------------------------------------
   
   #in migration
-  inflow <- filter(in_flows, year == proj_yr) %>% 
+  inflow <- filter(in_flows, year == projection_year) %>% 
     rename(inflow = in_flow)
   
   assert_that(sum(is.na(inflow))==0, msg=paste("inflow", yr))
@@ -106,10 +100,10 @@ projection_loop <- function(start_population,
                                                  col_aggregation = col_agg) %>% 
     select(year, gss_code, gss_code_ward, sex, age, popn)
   
+  assert_that(sum(is.na(next_yr_popn))==0, msg=paste("next_yr_popn", yr))
+  
   negatives <- filter(next_yr_popn, popn < 0)
   next_yr_popn <- next_yr_popn %>% check_negative_values("popn")
-  
-  assert_that(sum(is.na(components))==0, msg=paste("next_yr_popn", yr))
   
   #-----------------------------------------------------------------------------
  
@@ -119,6 +113,11 @@ projection_loop <- function(start_population,
             by = col_agg) %>% 
     mutate(inflow = ifelse(is.na(popn), inflow, inflow-popn)) %>% 
     select(-popn)
+  
+  #-----------------------------------------------------------------------------
+  
+  total_net <- left_join(inflow, outflow, by = col_agg) %>% 
+    mutate(net_migration = inflow - outflow)
   
   #-----------------------------------------------------------------------------
   
@@ -138,7 +137,14 @@ projection_loop <- function(start_population,
 
   #-----------------------------------------------------------------------------
   
-  return(list(next_yr_popn = next_yr_popn,
-              components = components))
+  return(list(population = next_yr_popn,
+              births = births,
+              deaths = deaths,
+              in_migration = inflow,
+              out_migration = outflow,
+              net_migration = total_net,
+              natural_change = natural_change_popn,
+              births_by_mothers_age = births_by_mother,
+              components_df = components))
   
 }

@@ -130,9 +130,9 @@ validate_input_apply_rate_to_population <- function(popn, rates, col_aggregation
   if(validate_geog){
     assert_that(!is.null(col_geog),
                 msg = "apply_rate_to_population: col_geog parameter cannot be NULL if validate_geog = TRUE")
-    assert_that(col_geog %in% names(popn),
+    assert_that(all(col_geog %in% names(popn)),
                 msg = "apply_rate_to_population: col_geog not in popn dataframe")
-    assert_that(col_geog %in% names(rates),
+    assert_that(all(col_geog %in% names(rates)),
                 msg = "apply_rate_to_population: col_geog not in rates dataframe")
   }
   

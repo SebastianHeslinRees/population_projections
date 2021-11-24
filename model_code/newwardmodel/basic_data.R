@@ -1,7 +1,7 @@
 library(dplyr)
 library(data.table)
 
-data_dir <- "model_code/newwardmodel/data/"
+data_dir <- "input_data/new_ward_model/"
 dir.create(data_dir, showWarnings = FALSE)
 
 #location of the regrosser project
