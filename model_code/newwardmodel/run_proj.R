@@ -5,7 +5,7 @@ devtools::load_all('model_code/popmodules')
 source("model_code/newwardmodel/projection_loop.R")
 source("model_code/newwardmodel/arrange_core_outputs.R")
 source("model_code/newwardmodel/output.R")
-
+source("model_code/newwardmodel/get_constraints.R")
 
 #-------------------------------------------------------------------------------
 
@@ -23,17 +23,18 @@ run_new_ward_model <- function(config_list){
                        "mortality_rates",
                        "fertility_rates",
                        "in_mig_flows",
-                       "out_mig_rates")
+                       "out_mig_rates",
+                       "constraint_list")
   
   validate_config_list(config_list, expected_config)
   
   #-------------------------------------------------------------------------------
-  
+  #browser()
   message(config_list$projection_name)
   config_list$output_dir <- .add_slash(config_list$output_dir)
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
-  write_model_config(config_list)
+  #write_model_config(config_list)
   
   # validate_paths
   
@@ -99,8 +100,11 @@ run_new_ward_model <- function(config_list){
   out_mig_rates <- get_component_from_file(filepath = config_list$out_mig_rates, 
                                            max_yr = last_proj_yr)
   
-  
-  # constraints <- eval_or_read(config_list$constraint_fns)
+  #Constraints - 30 secs
+  if(!is.null(constraint_list)){
+    message("get constraints")
+    constraint_list <- get_constraints(constraint_list, last_proj_yr)
+  }
   
   # #Prep backseries
   population <- population %>% select(year, gss_code, gss_code_ward, age, sex, popn)
@@ -122,7 +126,7 @@ run_new_ward_model <- function(config_list){
   #                            config_list$int_out_method)
   
   projection <- list()
-  # 2 seconds per year
+  # 2 seconds per year, 5 when constraining
   for(projection_year in 2020:2030){
     
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
@@ -135,7 +139,8 @@ run_new_ward_model <- function(config_list){
                                                      mortality_rates = curr_yr_mortality,
                                                      out_rates = curr_yr_out_rates,
                                                      in_flows = curr_yr_in_flows,
-                                                     projection_year = projection_year)
+                                                     projection_year = projection_year,
+                                                     constraint_list = constraint_list)
     
     curr_yr_popn <- projection[[projection_year]]$population
   }
@@ -166,38 +171,4 @@ run_new_ward_model <- function(config_list){
   
 }
 
-#-------------------------------------------------------------------------------
 
-data_dir <- "input_data/new_ward_model/"
-projection_name <- "test"
-
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2020,
-                    n_proj_yr = 11,
-                    output_dir = paste0("outputs/newwardmodel/", projection_name),
-                    population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
-                    deaths_path = paste0(data_dir, "ward_deaths_WD20CD.rds"),
-                    births_path = paste0(data_dir, "ward_births_WD20CD.rds"),
-                    out_migration_path = paste0(data_dir, "ward_outflow_WD20CD.rds"),
-                    in_migration_path = paste0(data_dir, "ward_inflow_WD20CD.rds"),
-                    mortality_rates = paste0(data_dir, "mortality_rates_WD20CD.rds"),
-                    fertility_rates = paste0(data_dir, "fertility_rates_WD20CD.rds"),
-                    in_mig_flows = paste0(data_dir, "in_migration_flows_WD20CD.rds"),
-                    out_mig_rates = paste0(data_dir, "out_migration_rates_WD20CD.rds"))
-
-#-------------------------------------------------------------------------------
-
-projection <- run_new_ward_model(config_list)
-
-#-------------------------------------------------------------------------------
-
-components <- projection$components_df
-
-x_00F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 0)
-x_06F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 6)
-x_23F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 23)
-x_90F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 90)
-
-neg_pop <- filter(components, popn < 0)
-neg_pop_check <- filter(components, sqrt(change^2) > start_popn & change < 0)
-neg_pop_other <- setdiff(neg_pop, neg_pop_check)
