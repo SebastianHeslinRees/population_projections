@@ -1,7 +1,6 @@
 output_projection <- function(projection,
                               output_dir = config_list$output_dir,
-                              fertility_rates, mortality_rates,
-                              out_mig_rates, n_csv_elements = 8){
+                              n_csv_elements = 8){
   
   
   #RDS
@@ -74,7 +73,8 @@ output_projection <- function(projection,
   for(i in 1:n_csv_elements) { 
     make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
   }
-  fwrite(projection$components, paste0(output_dir,"/csv/components of change.csv"))
+  fwrite(projection$detailed_components, paste0(output_dir,"/csv/components of change.csv"))
+  fwrite(projection$summary, paste0(output_dir,"/csv/summary.csv"))
   
   #Excel
   # if(write_excel){

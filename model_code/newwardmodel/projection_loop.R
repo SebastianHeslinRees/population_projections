@@ -152,6 +152,17 @@ projection_loop <- function(start_population,
     mutate(inflow = ifelse(is.na(popn), inflow, inflow-popn)) %>% 
     select(-popn)
   
+  
+  #-----------------------------------------------------------------------------
+  
+  #TODO
+  #How does constraining the final population affect the relationship between the
+  #components and the population.
+  
+  #TODO
+  #The inflow, once its had the negatives added, no longer matches the constraint
+  #It is consistent with the pre-constrained population though
+  
   #-----------------------------------------------------------------------------
   
   total_net <- left_join(inflow, outflow, by = col_agg) %>% 
@@ -168,8 +179,14 @@ projection_loop <- function(start_population,
     left_join(outflow, by = col_agg) %>% 
     left_join(inflow, by = col_agg) %>% 
     rename(start_popn = popn) %>% 
+    left_join(next_yr_popn, by = col_agg) %>% 
     mutate(change = births - deaths + inflow - outflow,
-           popn = start_popn + change)
+           popn_from_components = start_popn + change,
+           diff = popn - popn_from_components) %>% 
+    select(year, gss_code, gss_code_ward, sex, age,
+           start_popn, births, deaths,
+           inflow, outflow, change,
+           popn_from_components, diff, popn)
   
   assert_that(sum(is.na(components))==0, msg=paste("components", yr))
   
@@ -183,6 +200,6 @@ projection_loop <- function(start_population,
               net_migration = total_net,
               natural_change = natural_change_popn,
               births_by_mothers_age = births_by_mother,
-              components_df = components))
+              detailed_components = components))
   
 }

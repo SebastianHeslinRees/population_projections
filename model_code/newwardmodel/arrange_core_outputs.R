@@ -29,13 +29,12 @@ arrange_core_outputs <- function(projection,
     proj_in_migration[[projection_year]] <- projection[[projection_year]][['in_migration']]
     proj_natural_change[[projection_year]] <- projection[[projection_year]][['natural_change']]
     proj_births_by_mother[[projection_year]] <- projection[[projection_year]][['births_by_mothers_age']]
-    proj_components[[projection_year]] <- projection[[projection_year]][['components_df']]
+    proj_components[[projection_year]] <- projection[[projection_year]][['detailed_components']]
     
   }
   
   bind_and_arrange <- function(x){
     data.table::rbindlist(x, use.names = TRUE) %>%
-      dtplyr::lazy_dt() %>% 
       arrange(gss_code, gss_code_ward, year, sex, age) %>% 
       data.frame()
   }
@@ -48,9 +47,18 @@ arrange_core_outputs <- function(projection,
                       net_migration = proj_net_migration,
                       natural_change = proj_natural_change,
                       births_by_mothers_age = proj_births_by_mother,
-                      components_df = proj_components) %>% 
+                      detailed_components = proj_components) %>% 
     lapply(bind_and_arrange)
-      
+  
+  output_list$summary <- output_list$detailed_components %>% 
+    select(-age, -sex) %>% 
+    group_by(year, gss_code, gss_code_ward) %>% 
+    summarise(across(.fns = sum), .groups = 'drop_last') %>% 
+    data.frame()
+  
+  output_list$detailed_components[6:14] <- round(output_list$detailed_components[6:14], 3)
+  output_list$summary[4:12] <- round(output_list$summary[4:12], 3)
+  
   return(output_list)
   
 }

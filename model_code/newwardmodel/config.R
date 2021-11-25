@@ -8,11 +8,11 @@ constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lo
                                           deaths = TRUE,
                                           in_migration = TRUE,
                                           out_migration = TRUE,
-                                          population = TRUE))
+                                          population = FALSE))
 
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2020,
-                    n_proj_yr = 11,
+                    n_proj_yr = 2,
                     output_dir = paste0("outputs/newwardmodel/", projection_name),
                     population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
                     deaths_path = paste0(data_dir, "ward_deaths_WD20CD.rds"),
@@ -21,24 +21,27 @@ config_list <- list(projection_name = projection_name,
                     in_migration_path = paste0(data_dir, "ward_inflow_WD20CD.rds"),
                     mortality_rates = paste0(data_dir, "mortality_rates_WD20CD.rds"),
                     fertility_rates = paste0(data_dir, "fertility_rates_WD20CD.rds"),
-                    in_mig_flows = paste0(data_dir, "in_migration_flows_WD20CD.rds"),
-                    out_mig_rates = paste0(data_dir, "out_migration_rates_WD20CD.rds"),
+                    in_migration = paste0(data_dir, "in_migration_flows_WD20CD.rds"),
+                    out_migration = paste0(data_dir, "out_migration_rates_WD20CD.rds"),
                     constraint_list = constraint_list)
 
 #-------------------------------------------------------------------------------
 
 #~3 mins with constraining
-system.time({
 projection <- run_new_ward_model(config_list)
-})
+
 #-------------------------------------------------------------------------------
 
-components <- projection$components_df
+components <- projection$detailed_components
+summary(components$diff)
+
+summary <- projection$summary
 
 x_00F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 0)
 x_06F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 6)
 x_23F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 23)
 x_90F <- filter(components, gss_code_ward == "E05000026", sex == 'female', age == 90)
+x_23M <- filter(components, gss_code_ward == "E05000026", sex == 'male', age == 23)
 
 neg_pop <- filter(components, popn < 0)
 neg_pop_check <- filter(components, sqrt(change^2) > start_popn & change < 0)
