@@ -1,18 +1,36 @@
 source("model_code/newwardmodel/run_proj.R")
 data_dir <- "input_data/new_ward_model/"
-projection_name <- "test"
+projection_name <- "test_2050"
 
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
                         mapping = c("gss_code","year","sex","age"),
                         components = list(births = TRUE,
                                           deaths = TRUE,
-                                          in_migration = TRUE,
-                                          out_migration = TRUE,
+                                          in_migration = FALSE,
+                                          out_migration = FALSE,
                                           population = FALSE))
+
+
+
+in_migration <- list(
+  '2020' = list(path =  paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
+                transition = T),
+  '2025' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_10yr_avg.rds"),
+                transition = F))
+
+out_migration <- list(
+  '2020' = list(path =  paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"),
+                transition = T),
+  '2025' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_10yr_avg.rds"),
+                transition = F))
 
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2020,
-                    n_proj_yr = 2,
+                    n_proj_yr = 31,
                     output_dir = paste0("outputs/newwardmodel/", projection_name),
                     population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
                     deaths_path = paste0(data_dir, "ward_deaths_WD20CD.rds"),
@@ -21,14 +39,17 @@ config_list <- list(projection_name = projection_name,
                     in_migration_path = paste0(data_dir, "ward_inflow_WD20CD.rds"),
                     mortality_rates = paste0(data_dir, "mortality_rates_WD20CD.rds"),
                     fertility_rates = paste0(data_dir, "fertility_rates_WD20CD.rds"),
-                    in_migration = paste0(data_dir, "in_migration_flows_WD20CD.rds"),
-                    out_migration = paste0(data_dir, "out_migration_rates_WD20CD.rds"),
+                    in_migration = in_migration,
+                    out_migration = out_migration,
                     constraint_list = constraint_list)
 
 #-------------------------------------------------------------------------------
 
-#~3 mins with constraining
-projection <- run_new_ward_model(config_list)
+#~3 mins with constraining (2 proj years)
+#~18 mins with constraining (30 proj years)
+#system.time({
+  projection <- run_new_ward_model(config_list)
+#})
 
 #-------------------------------------------------------------------------------
 

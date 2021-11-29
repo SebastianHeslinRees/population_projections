@@ -56,7 +56,7 @@ complete_popn_dataframe()
 
 #-------------------------------------------------------------------------------
 
-out_mig_rates <- denominator_popn %>% 
+out_mig_rates_5 <- denominator_popn %>% 
   left_join(ward_out_mig, by = c("gss_code_ward", "year", "sex", "age")) %>% 
   mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5,
@@ -66,10 +66,29 @@ out_mig_rates <- denominator_popn %>%
                                  project_rate_from = 2020) %>% 
   project_forward_flat(2050)
 
+out_mig_rates_10 <- denominator_popn %>% 
+  left_join(ward_out_mig, by = c("gss_code_ward", "year", "sex", "age")) %>% 
+  mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
+  calculate_mean_from_backseries(n_years_to_avg = 10,
+                                 last_data_year = 2019,
+                                 data_col = "out_rate",
+                                 col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+                                 project_rate_from = 2020) %>% 
+  project_forward_flat(2050)
+
 #-------------------------------------------------------------------------------
 
-in_mig_flows <- ward_in_mig %>% 
+in_mig_flows_5 <- ward_in_mig %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5,
+                                 last_data_year = 2019,
+                                 data_col = "inflow",
+                                 col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+                                 project_rate_from = 2020) %>% 
+  rename(in_flow = inflow) %>% 
+  project_forward_flat(2050)
+
+in_mig_flows_10 <- ward_in_mig %>% 
+  calculate_mean_from_backseries(n_years_to_avg = 10,
                                  last_data_year = 2019,
                                  data_col = "inflow",
                                  col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
@@ -81,7 +100,8 @@ in_mig_flows <- ward_in_mig %>%
 
 saveRDS(mort_rates, paste0(data_dir, "mortality_rates_WD20CD.rds"))
 saveRDS(fert_rates,  paste0(data_dir, "fertility_rates_WD20CD.rds"))
-saveRDS(in_mig_flows,  paste0(data_dir, "in_migration_flows_WD20CD.rds"))
-saveRDS(out_mig_rates,  paste0(data_dir, "out_migration_rates_WD20CD.rds"))
-
+saveRDS(in_mig_flows_5,  paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"))
+saveRDS(out_mig_rates_5,  paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"))
+saveRDS(in_mig_flows_10,  paste0(data_dir, "in_migration_flows_WD20CD_10yr_avg.rds"))
+saveRDS(out_mig_rates_10,  paste0(data_dir, "out_migration_rates_WD20CD_10yr_avg.rds"))
 rm(list=ls())

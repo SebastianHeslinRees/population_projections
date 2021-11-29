@@ -104,11 +104,18 @@ run_new_ward_model <- function(config_list){
   fertility_rates <- get_component_from_file(filepath = config_list$fertility_rates, 
                                              max_yr = last_proj_yr)
   
-  projected_in_migration <- get_component_from_file(filepath = config_list$in_migration, 
-                                          max_yr = last_proj_yr)
+  # projected_in_migration <- get_component_from_file(filepath = config_list$in_migration, 
+  #                                         max_yr = last_proj_yr)
+  # 
+  # projected_out_migration <- get_component_from_file(filepath = config_list$out_migration, 
+  #                                          max_yr = last_proj_yr)
   
-  projected_out_migration <- get_component_from_file(filepath = config_list$out_migration, 
-                                           max_yr = last_proj_yr)
+  in_flow_info <- get_rates_flows_info(config_list$in_migration, first_proj_yr, last_proj_yr)
+  projected_in_migration <- NULL
+  
+  out_rate_info <- get_rates_flows_info(config_list$out_migration, first_proj_yr, last_proj_yr)
+  projected_out_migration <- NULL
+  
   
   #Constraints - 30 secs
   if(!is.null(constraint_list)){
@@ -116,7 +123,7 @@ run_new_ward_model <- function(config_list){
     constraint_list <- get_constraints(constraint_list, last_proj_yr)
   }
   
- 
+  
   # # set up projection
   
   # validate_trend_core_inputs(population, births, deaths, int_out, int_in,
@@ -136,9 +143,26 @@ run_new_ward_model <- function(config_list){
     
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
-    curr_yr_out_rates <- filter(projected_out_migration, year == projection_year)
-    curr_yr_in_flows <- filter(projected_in_migration, year == projection_year)
     
+    projected_in_migration <- get_rates_or_flows(projected_in_migration, in_flow_info,
+                                           projection_year, first_proj_yr,
+                                           col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+                                           data_col = "in_flow")
+    
+    
+    curr_yr_in_flows <- filter(projected_in_migration, year == projection_year) %>% 
+      mutate(year = projection_year) %>% 
+      select(year, gss_code, gss_code_ward, sex, age, in_flow)
+    
+    projected_out_migration <- get_rates_or_flows(projected_out_migration, out_rate_info,
+                                                 projection_year, first_proj_yr,
+                                                 col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+                                                 data_col = "out_rate")
+    
+    curr_yr_out_rates <- filter(projected_out_migration, year == projection_year) %>% 
+      mutate(year = projection_year) %>% 
+      select(year, gss_code, gss_code_ward, sex, age, out_rate)
+
     projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
                                                      fertility_rates = curr_yr_fertility,
                                                      mortality_rates = curr_yr_mortality,
@@ -177,16 +201,14 @@ run_new_ward_model <- function(config_list){
 
 
 validate_input_paths <- function(config_list){
-
+  
   paths <- c("population_path",
              "deaths_path",
              "births_path",
              "out_migration_path",
              "in_migration_path",
              "mortality_rates",
-             "fertility_rates",
-             "in_migration",
-             "out_migration")
+             "fertility_rates")
   
   paths <- config_list[names(config_list) %in% paths]
   

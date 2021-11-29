@@ -96,7 +96,7 @@ validate_rates_or_flows <- function(df, col_aggregation, data_col) {
                         test_complete = FALSE, test_unique = TRUE, check_negative_values = TRUE)
   } else {
     validate_population(df, col_aggregation, data_col,,
-                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
+                        test_complete = FALSE, test_unique = TRUE, check_negative_values = TRUE)
   }
   if(data_col == "rate") {
     assert_that(max(df$rate) <= 1 & min(df$rate) >= 0, msg = "rate data contains rates outside the range 0-1")
