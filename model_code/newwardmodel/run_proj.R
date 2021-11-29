@@ -224,6 +224,26 @@ validate_input_paths <- function(config_list){
            }
          })
   
+  lapply(config_list$out_migration,
+         function(x) {
+           assert_that(file.exists(x$path),
+                       msg = paste0(x$path, "\nFile does not exist at specified path"))
+           
+           file_ext <- tolower(strsplit(x$path, split="\\.")[[1]][[2]])
+           assert_that(file_ext == "rds",
+                       msg = paste0(x$path, "\nFile is not .rds format"))
+         })
+  
+  lapply(config_list$in_migration,
+         function(x) {
+           assert_that(file.exists(x$path),
+                       msg = paste0(x$path, "\nFile does not exist at specified path"))
+           
+           file_ext <- tolower(strsplit(x$path, split="\\.")[[1]][[2]])
+           assert_that(file_ext == "rds",
+                       msg = paste0(x$path, "\nFile is not .rds format"))
+         })
+  
   if(!is.null(constraint_list$constraint_path)){
     assert_that(dir.exists(config_list$constraint_list$constraint_path),
                 msg = "constraint folder does not exist at specified path")
