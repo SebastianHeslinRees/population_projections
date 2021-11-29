@@ -46,10 +46,10 @@ config_list <- list(projection_name = projection_name,
 #-------------------------------------------------------------------------------
 
 #~3 mins with constraining (2 proj years)
-#~18 mins with constraining (30 proj years)
-#system.time({
+#~8 mins with constraining (31 proj years)
+system.time({
   projection <- run_new_ward_model(config_list)
-#})
+})
 
 #-------------------------------------------------------------------------------
 

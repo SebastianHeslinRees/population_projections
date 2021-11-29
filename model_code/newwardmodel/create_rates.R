@@ -33,7 +33,7 @@ mort_rates <- scaled_mortality_curve(popn = ward_pop,
   project_rates_npp(rate_col = "rate",
                     rates_trajectory = "input_data/mortality/npp_mortality_trend.rds",
                     first_proj_yr = 2020,
-                    n_proj_yr = 30,
+                    n_proj_yr = 31,
                     npp_var = "2018_principal")
 
 #-------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ fert_rates <- scaled_fertility_curve(popn = ward_pop,
   project_rates_npp(rate_col = "rate",
                     rates_trajectory = "input_data/fertility/npp_fertility_trend.rds",
                     first_proj_yr = 2020,
-                    n_proj_yr = 30,
+                    n_proj_yr = 31,
                     npp_var = "2018_principal") %>% 
 complete_popn_dataframe()
 
