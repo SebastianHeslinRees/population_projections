@@ -7,60 +7,11 @@ source("model_code/newwardmodel/projection_loop.R")
 source("model_code/newwardmodel/get_constraints.R")
 
 
-data_dir <- "input_data/new_ward_model/"
+source("model_code/newwardmodel/housing-led_config.R")
+source("model_code/newwardmodel/housing_led_core.R")
 
 #-------------------------------------------------------------------------------
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2020,
-                    n_proj_yr = 31,
-                    output_dir = paste0("outputs/newwardmodel/", projection_name),
-                    population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
-                    deaths_path = paste0(data_dir, "ward_deaths_WD20CD.rds"),
-                    births_path = paste0(data_dir, "ward_births_WD20CD.rds"),
-                    out_migration_path = paste0(data_dir, "ward_outflow_WD20CD.rds"),
-                    in_migration_path = paste0(data_dir, "ward_inflow_WD20CD.rds"),
-                    mortality_rates = paste0(data_dir, "mortality_rates_WD20CD.rds"),
-                    fertility_rates = paste0(data_dir, "fertility_rates_WD20CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    constraint_list = constraint_list)
-#-------------------------------------------------------------------------------
-
-in_migration <- list(
-  '2020' = list(path =  paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
-                transition = F),
-  '2022' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
-                transition = T),
-  '2025' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_10yr_avg.rds"),
-                transition = F))
-
-out_migration <- list(
-  '2020' = list(path =  paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"),
-                transition = F),
-  '2022' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"),
-                transition = T),
-  '2025' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_10yr_avg.rds"),
-                transition = F))
-
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        mapping = c("gss_code","year","sex","age"),
-                        components = list(births = TRUE,
-                                          deaths = TRUE,
-                                          in_migration = FALSE,
-                                          out_migration = FALSE,
-                                          population = FALSE))
-
-
-
-config_list <- list(first_proj_yr = 2020,
-                    n_proj_yr = 31,
-                    population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
-                    external_trend_path = "outputs/newwardmodel/test_2050/",
-                    mortality_rates = paste0(data_dir, "mortality_rates_WD20CD.rds"),
-                    fertility_rates = paste0(data_dir, "fertility_rates_WD20CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    constraint_list = constraint_list)
+#TREND MODEL PREP
 
 #projection years
 first_proj_yr <- config_list$first_proj_yr
@@ -77,7 +28,7 @@ component_constraints <- get_data_from_file(
   list(birth_constraint = paste0(config_list$external_trend_path,"births.rds"),
        death_constraint = paste0(config_list$external_trend_path,"deaths.rds"),
        out_migration_constraint = paste0(config_list$external_trend_path,"out_migration.rds"))) #%>%
-  #create_constraints()
+#create_constraints()
 
 mortality_rates <- get_component_from_file(filepath = config_list$mortality_rates, 
                                            max_yr = last_proj_yr)
@@ -100,10 +51,16 @@ if(!is.null(constraint_list)){
 #-------------------------------------------------------------------------------
 
 projection_year <- 2020
+ahs_cap <- NULL
+communal_establishment_population <- readRDS(config_list$communal_est_path)
+dwellings <- readRDS(config_list$dev_trajectory_path)
+#TODO Convert to dwellings to households
+households <- dwellings %>% rename(households = units)
 
 projection <- list()
+trend_projection <- list()
 curr_yr_popn <- filter(population, year == first_proj_yr-1)
-#for(projection_year in first_proj_yr:last_proj_yr){
+for(projection_year in first_proj_yr:last_proj_yr){
   
   curr_yr_fertility <- filter(fertility_rates, year == projection_year)
   curr_yr_mortality <- filter(mortality_rates, year == projection_year)
@@ -131,15 +88,13 @@ curr_yr_popn <- filter(population, year == first_proj_yr-1)
   # curr_yr_households_static <- filter(household_trajectory_static, year == projection_year)
   # curr_yr_households_adjusted <- filter(household_trajectory_adjusted, year == projection_year)
   
-  # communal_establishment_population
+  
   # hma_constraint
   # component_constraints
   # external ahs
-  # households 1
-  # households 2
+  curr_yr_households <- filter(households, year == projection_year)
   # hma_list
   # ahs_cap_year
-  # ahs_cap
   # ahs_method
   # ldd_final_yr
   # constraint_projection
@@ -149,24 +104,24 @@ curr_yr_popn <- filter(population, year == first_proj_yr-1)
   }
   curr_yr_constrain <- config_list$constrain_projection | projection_year <= config_list$last_data_yr
   
-
-  projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
-                                                   fertility_rates = curr_yr_fertility,
-                                                   mortality_rates = curr_yr_mortality,
-                                                   out_rates = curr_yr_out_rates,
-                                                   in_flows = curr_yr_in_flows,
-                                                   projection_year = projection_year,
-                                                   constraint_list = constraint_list)
+  
+  trend_projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
+                                                         fertility_rates = curr_yr_fertility,
+                                                         mortality_rates = curr_yr_mortality,
+                                                         out_rates = curr_yr_out_rates,
+                                                         in_flows = curr_yr_in_flows,
+                                                         projection_year = projection_year,
+                                                         constraint_list = constraint_list)
   
   projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                     trend_projection = trend_projection[[projection_year]],
-                                                    component_constraints = component_constraints,
-                                                    hma_constraint = curr_yr_hma_constraint,
+                                                    #component_constraints = component_constraints,
+                                                    #hma_constraint = curr_yr_hma_constraint,
                                                     communal_establishment_population = communal_establishment_population,
-                                                    external_ahs = curr_yr_ahs,
-                                                    households_1 = curr_yr_households_adjusted,
-                                                    households_2 = curr_yr_households_adjusted ,
-                                                    hma_list = hma_list,
+                                                    #external_ahs = curr_yr_ahs,
+                                                    households_1 = curr_yr_households,
+                                                    #households_2 = curr_yr_households_adjusted ,
+                                                    #hma_list = hma_list,
                                                     projection_year = projection_year,
                                                     ahs_cap_year = config_list$ahs_cap_year,
                                                     ahs_cap = ahs_cap,
@@ -176,6 +131,7 @@ curr_yr_popn <- filter(population, year == first_proj_yr-1)
   
   ahs_cap <- projection[[projection_year]]$ahs_cap
   curr_yr_popn <- projection[[projection_year]]$population
+  
 }
 
 

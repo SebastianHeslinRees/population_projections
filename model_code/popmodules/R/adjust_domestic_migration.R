@@ -26,6 +26,10 @@
 #'   counts in \code{popn}
 #' @param col_target A string with the name of the column containing population
 #'   counts in \code{target}
+#' @param col_dom_in A strings with the name of the column containing inflow
+#'   counts in \code{dom_in}. Default 'dom_in'
+#' @param col_dom_in A strings with the name of the column containing inflow
+#'   counts in \code{dom_out}. Default 'dom_out'
 #' @param rows_to_constrain A logical vector limiting the rows of \code{popn}
 #'   where this function is applied. Must be all TRUE or FALSE in each grouping
 #'   level specified by \code{col_aggregation}.
@@ -42,17 +46,19 @@
 adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
                                       col_aggregation = c("year","gss_code"),
                                       col_popn, col_target,
+                                      col_dom_in = "dom_in", col_dom_out = "dom_out",
                                       rows_to_constrain = TRUE){
 
   validate_join_population(popn[rows_to_constrain,], target, cols_common_aggregation = col_aggregation,
                            many2one = TRUE, one2many = FALSE, warn_unused_shared_cols = FALSE)
 
-  #find diff between popn and target
+  #Do some renaming
   col_popn_new <- paste0(col_popn, ".x")
   col_target_new  <- paste0(col_target,  ".y")
   popn <- rename(popn, !!col_popn_new := !!col_popn)
   target <- rename(target, !!col_target_new := !!col_target)
 
+  #find diff between popn and target
   domestic_adjustment <- popn %>%
     dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
@@ -72,9 +78,10 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
     mutate(net_dom_adjustment = ifelse(net_dom_adjustment < 0, -1 * net_dom_adjustment, 0))
 
   dom_in_target <- dom_in %>%
+    rename(inflow__ = !!col_dom_in) %>% 
     dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
-    summarise(dom_in_orig = sum(dom_in)) %>%
+    summarise(dom_in_orig = sum(inflow__)) %>%
     as.data.frame() %>%
     dtplyr::lazy_dt() %>%
     left_join(gross_in_adjustment, by = col_aggregation) %>%
@@ -83,9 +90,10 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
     as.data.frame()
 
   dom_out_target <- dom_out %>%
+    rename(outflow__ = !!col_dom_out) %>% 
     dtplyr::lazy_dt() %>%
     group_by_at(col_aggregation) %>%
-    summarise(dom_out_orig = sum(dom_out)) %>%
+    summarise(dom_out_orig = sum(outflow__)) %>%
     as.data.frame() %>%
     dtplyr::lazy_dt() %>%
     left_join(gross_out_adjustment, by = col_aggregation) %>%
@@ -96,18 +104,18 @@ adjust_domestic_migration <- function(popn, target, dom_in, dom_out,
   assert_that(all(complete.cases(dom_in_target)))
   assert_that(all(complete.cases(dom_out_target)))
 
-  #Adust the gross flows
+  #Adjust the gross flows
   adjusted_dom_in <- constrain_component(popn = dom_in,
                                          constraint = dom_in_target,
                                          col_aggregation = col_aggregation,
-                                         col_popn = "dom_in",
+                                         col_popn = col_dom_in,
                                          col_constraint = "dom_in_target",
                                          rows_to_constrain = rows_to_constrain)
 
   adjusted_dom_out <- constrain_component(popn = dom_out,
                                           constraint = dom_out_target,
                                           col_aggregation = col_aggregation,
-                                          col_popn = "dom_out",
+                                          col_popn = col_dom_out,
                                           col_constraint = "dom_out_target",
                                           rows_to_constrain = rows_to_constrain)
 
