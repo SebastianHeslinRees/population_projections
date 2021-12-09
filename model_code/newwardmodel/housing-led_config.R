@@ -29,7 +29,7 @@ out_migration <- list(
 
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2020,
-                    n_proj_yr = 31,
+                    n_proj_yr = 22,
                     output_dir = paste0("outputs/newwardmodel/", projection_name),
                     population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
                     deaths_path = paste0(data_dir, "ward_deaths_WD20CD.rds"),
