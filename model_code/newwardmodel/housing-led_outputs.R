@@ -75,15 +75,12 @@ output_housing_led <- function(projection,
   }
   
   
-  ahs <- projection$selection %>% 
-    select(-cap, -trend, -selection) %>% 
+  ahs <- projection$ahs %>% 
+    select(year, gss_code_ward, ahs) %>% 
     tidyr::pivot_wider(names_from = year, values_from = ahs)
   fwrite(ahs, paste0(output_dir,"/csv/ahs.csv"))
   
-  selection <- projection$selection %>% 
-    select(-cap, -trend, -ahs) %>% 
-    tidyr::pivot_wider(names_from = year, values_from = selection)
-  fwrite(selection, paste0(output_dir,"/csv/ahs_selection.csv"))
+  fwrite(projection$ahs, paste0(output_dir,"/csv/ahs_detailed.csv"))
   
   #Excel
   # if(write_excel){

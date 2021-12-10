@@ -48,13 +48,12 @@ config_list <- list(projection_name = projection_name,
                     communal_est_path = "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds",
                     dev_trajectory_path = "input_data/small_area_model/development_data/ward_2020-based_savills.rds", 
                     
-                    #TODO trend_households_file = "dclg_stage_1_households.rds",
+                    
                     
                     ldd_backseries_path = "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds",
                     
-                    #TODO external_ahs_trajectory_path = paste0(external_trend_path, "households/dclg_ahs.rds"),
-                    
-                    
+                    hhr_path = paste0(data_dir, "ward_HHR.rds"),
+                    ahs_method = 0.8,
                     #-------------------------------------------------------------------------------
                     #Variables
                     

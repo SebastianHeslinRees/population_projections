@@ -1,5 +1,6 @@
 library(tidyr)
 library(data.table)
+library(dplyr)
 
 data_dir <- "input_data/new_ward_model/"
 hh_pop_2011 <- fread(paste0(data_dir, "HH_pop_Age_Sex_LSOA_2011.csv"), header = TRUE) %>% data.frame()
@@ -165,6 +166,7 @@ lsoa_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "a
 lsoa_ward_lookup <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
 
 ward_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
+  filter(gss_code != "E01019077") %>%  #Isles of Scilly
   left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
   group_by(gss_code_ward, sex, age_group) %>%
   summarise(hrp = sum(hrp),
@@ -175,7 +177,8 @@ ward_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "a
          year = 2001) %>% 
   select(-hrp, -hh_pop)
 
-ward_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>% 
+ward_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
+  filter(gss_code != "E01019077") %>%  #Isles of Scilly
   left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
   group_by(gss_code_ward, sex, age_group) %>%
   summarise(hrp = sum(hrp),
@@ -259,5 +262,6 @@ for(i in 2022:2041){
 
 ward_rates <- data.table::rbindlist(ward_rates) %>%
   data.frame()
-#LOOK INTO MISSING VALUES IN GSS_CODE_WARD COLUMN
+
+saveRDS(ward_rates, paste0(data_dir, "ward_HHR.rds"))
 

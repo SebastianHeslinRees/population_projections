@@ -53,6 +53,17 @@ ward_outflow <- gross_flows %>% select(-inflow) %>% data.frame()
 rm(flows, gross_flows, i)
 
 #-------------------------------------------------------------------------------
+lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+
+dwellinngs_to_hh <- fread(paste0(data_dir,"dwelling_to_hh_LSOA.csv")) %>%
+  data.frame() %>% 
+  left_join(lsoa_to_ward, by="gss_code_lsoa") %>% 
+  group_by(gss_code_ward) %>% 
+  summarise(d2hh_ratio = sum(households)/sum(dwellings),
+            .groups = 'drop_last') %>% 
+  data.frame()
+
+#-------------------------------------------------------------------------------
 
 #Basic checks
 
@@ -74,5 +85,6 @@ saveRDS(ward_deaths, paste0(data_dir, "ward_deaths_WD20CD.rds"))
 saveRDS(ward_pop, paste0(data_dir, "ward_population_WD20CD.rds"))
 saveRDS(ward_inflow, paste0(data_dir, "ward_inflow_WD20CD.rds"))
 saveRDS(ward_outflow, paste0(data_dir, "ward_outflow_WD20CD.rds"))
+saveRDS(dwellinngs_to_hh, paste0(data_dir, "ward_dwelling_2_hh_ratio_WD13CD.rds"))
 
 rm(list=ls())

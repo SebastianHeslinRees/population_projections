@@ -7,7 +7,7 @@ source("model_code/newwardmodel/get_constraints.R")
 source("model_code/newwardmodel/housing-led_config.R")
 source("model_code/newwardmodel/housing-led_loop.R")
 source("model_code/newwardmodel/housing-led_arrange_outputs.R")
-source("/model_code/newwardmodel/housing-led_outputs.R")
+source("model_code/newwardmodel/housing-led_outputs.R")
 
 #-------------------------------------------------------------------------------
 
@@ -49,8 +49,8 @@ write_model_config(config_list)
 
 #-------------------------------------------------------------------------------
 
-# validate paths
-validate_input_paths(config_list)
+# TODO validate paths
+# validate_input_paths(config_list)
 
 #projection years
 first_proj_yr <- config_list$first_proj_yr
@@ -105,11 +105,11 @@ if(!is.null(constraint_list)){
 
 #Housing-led-specific stuff
 
-
+household_rep_rates = readRDS(config_list$hhr_path)
+communal_establishment_population <- readRDS(config_list$communal_est_path)
 ahs_cap <- NULL
 
-communal_establishment_population <- readRDS(config_list$communal_est_path)
-
+#Get the dwelling trajectory
 dwellings <- readRDS("input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds") %>% 
   filter(year == 2011) %>% 
   rbind(
@@ -119,16 +119,20 @@ dwellings <- readRDS("input_data/small_area_model/development_data/ldd_backserie
   mutate(units = cumsum(units)) %>% 
   data.frame()
 
-#TODO Convert to dwellings to households
-households <- dwellings %>% rename(households = units)
+#Convert to dwellings to households
+dwelling_2_hh <- readRDS(paste0(data_dir, "ward_dwelling_2_hh_ratio_WD13CD.rds"))
+households <- dwellings %>%
+  left_join(dwelling_2_hh, by="gss_code_ward") %>% 
+  mutate(households = units * d2hh_ratio) %>% 
+  select(-units, -d2hh_ratio)
 
+#Output lists
 hl_projection <- list()
 trend_projection <- list()
-curr_yr_popn <- filter(population, year == first_proj_yr-1)
 
 #-------------------------------------------------------------------------------
 
-projection_year <- 2020
+curr_yr_popn <- filter(population, year == first_proj_yr-1)
 
 for(projection_year in first_proj_yr:last_proj_yr){
   
@@ -156,6 +160,10 @@ for(projection_year in first_proj_yr:last_proj_yr){
   
   curr_yr_households <- filter(households, year == projection_year)
   
+  #curr_yr_hhr <- filter(household_rep_rates, year == projection_year)
+  curr_yr_hhr <- filter(household_rep_rates, year == 2011) %>% 
+    mutate(year = projection_year)
+  
   trend_projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
                                                          fertility_rates = curr_yr_fertility,
                                                          mortality_rates = curr_yr_mortality,
@@ -166,19 +174,14 @@ for(projection_year in first_proj_yr:last_proj_yr){
   
   hl_projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                        trend_projection = trend_projection[[projection_year]],
-                                                       #component_constraints = component_constraints,
-                                                       #hma_constraint = curr_yr_hma_constraint,
                                                        communal_establishment_population = communal_establishment_population,
-                                                       #external_ahs = curr_yr_ahs,
+                                                       household_rep_rates = curr_yr_hhr,
                                                        households = curr_yr_households,
-                                                       #households_2 = curr_yr_households_adjusted ,
-                                                       #hma_list = hma_list,
                                                        projection_year = projection_year,
                                                        ahs_cap_year = config_list$ahs_cap_year,
-                                                       ahs_cap = ahs_cap
-                                                       #ahs_method = config_list$ahs_method,
-                                                       #ldd_final_yr = config_list$ldd_final_yr,
-                                                       #constrain_projection = curr_yr_constrain
+                                                       ahs_cap = ahs_cap,
+                                                       ahs_method = config_list$ahs_method
+                                                       
   )
   
   ahs_cap <- hl_projection[[projection_year]]$ahs_cap
@@ -202,13 +205,12 @@ hl_projection <- arrange_housing_led_outputs(hl_projection,
 #-------------------------------------------------------------------------------
 
 output_housing_led(hl_projection, output_dir = config_list$output_dir)
-                               
+
 #-------------------------------------------------------------------------------                              
 
 
 hl_projection$populationn %>% View("popn")
 hl_projection$ahs %>% View("ahs")
-hl_projection$selection %>% View("selection")
 
 trend_output <- readRDS("outputs/newwardmodel/test_2050/population.rds") %>% mutate(proj = "trend")
 hl_output <- hl_projection$population %>% mutate(proj = "housing-led")

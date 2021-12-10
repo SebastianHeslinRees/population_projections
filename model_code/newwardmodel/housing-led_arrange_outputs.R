@@ -21,7 +21,7 @@ arrange_housing_led_outputs <- function(projection,
   
   proj_popn <- list()
   proj_ahs <- list()
-  proj_selection <- list()
+  
   
   for(projection_year in first_proj_yr:last_proj_yr){
     
@@ -33,7 +33,6 @@ arrange_housing_led_outputs <- function(projection,
     proj_in_migration[[projection_year]] <- projection[[projection_year]][['in_migration']]
     
     proj_ahs[[projection_year]] <- projection[[projection_year]][['ahs']]
-    proj_selection[[projection_year]] <- projection[[projection_year]][['selected_ahs']]
     
   }
   
@@ -54,7 +53,7 @@ arrange_housing_led_outputs <- function(projection,
                       in_migration = proj_in_migration,
                       net_migration = proj_net_migration,
                       ahs = proj_ahs,
-                      selection = proj_selection) %>% 
+                      ahs = proj_ahs) %>% 
     lapply(bind_and_arrange)
   
   return(output_list)
