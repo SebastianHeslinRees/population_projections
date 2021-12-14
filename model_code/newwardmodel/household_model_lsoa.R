@@ -12,14 +12,14 @@ hrp_2001 <- fread(paste0(data_dir,"HRP_Age_Sex_LSOA_2001.csv"), header = TRUE) %
 hh_pop_2011 <- pivot_longer(hh_pop_2011, cols = starts_with("X"),
                             names_to = "age", values_to = "hh_pop") %>% 
   data.frame() %>% 
-  mutate(age_group = case_when(age == "X0_4" ~ "0_24",
-                               age == "X5_7" ~ "0_24",
-                               age == "X8_9" ~ "0_24",
-                               age == "X10_14" ~ "0_24",
-                               age == "X15" ~ "0_24",
-                               age == "X16_17" ~ "0_24",
-                               age == "X18_19" ~ "0_24",
-                               age == "X20_24" ~ "0_24",
+  mutate(age_group = case_when(age == "X0_4" ~ "0_17",
+                               age == "X5_7" ~ "0_17",
+                               age == "X8_9" ~ "0_17",
+                               age == "X10_14" ~ "0_17",
+                               age == "X15" ~ "0_17",
+                               age == "X16_17" ~ "0_17",
+                               age == "X18_19" ~ "18_24",
+                               age == "X20_24" ~ "18_24",
                                age == "X25_29" ~ "25_34",
                                age == "X30_34" ~ "25_34",
                                age == "X35_39" ~ "35_49",  
@@ -38,14 +38,17 @@ hh_pop_2011 <- pivot_longer(hh_pop_2011, cols = starts_with("X"),
   summarise(hh_pop = sum(hh_pop), .groups = 'drop_last') %>% 
   data.frame()
 
+#Note the age groupings here mean that 18-19 are in 0-17
+#TODO could probably do something better using total pop sya but not
+# worth it atm as we're not actuall using this data
 hh_pop_2001 <- pivot_longer(hh_pop_2001, cols = starts_with("X"),
                             names_to = "age", values_to = "hh_pop") %>% 
   data.frame() %>% 
-  mutate(age_group = case_when(age == "X0_4" ~ "0_24",
-                               age == "X5_9" ~ "0_24",
-                               age == "X10_14" ~ "0_24",
-                               age == "X15_19" ~ "0_24",
-                               age == "X20_24" ~ "0_24",
+  mutate(age_group = case_when(age == "X0_4" ~ "0_17",
+                               age == "X5_9" ~ "0_17",
+                               age == "X10_14" ~ "0_17",
+                               age == "X15_19" ~ "0_17",
+                               age == "X20_24" ~ "18_24",
                                age == "X25_29" ~ "25_34",
                                age == "X30_34" ~ "25_34",
                                age == "X35_39" ~ "35_49",  
@@ -65,17 +68,20 @@ hh_pop_2001 <- pivot_longer(hh_pop_2001, cols = starts_with("X"),
   summarise(hh_pop = sum(hh_pop), .groups = 'drop_last') %>% 
   data.frame()
 
+#Assume all under 24s are actually 18-24 when applying denominators
 hrp_2011 <- pivot_longer(hrp_2011, cols = starts_with("X"),
                          names_to = "age", values_to = "hrp") %>% 
-  mutate(age_group = substr(age,2,8)) %>% 
+  mutate(age_group = substr(age,2,8), 
+         age_group = ifelse(age_group == "0_24", "18_24", age_group)) %>% 
   data.frame() %>% 
   select(-age, -gss_name)
 
+#Assume all under 24s are actually 18-24 when applying denominators
 hrp_2001 <- pivot_longer(hrp_2001, cols = starts_with("X"),
                          names_to = "age", values_to = "hrp")%>% 
   data.frame() %>% 
-  mutate(age_group = case_when(age == "X0_19" ~ "0_24",
-                               age == "X20_24" ~ "0_24",
+  mutate(age_group = case_when(age == "X0_19" ~ "18_24",
+                               age == "X20_24" ~ "18_24",
                                age == "X25_29" ~ "25_34",
                                age == "X30_34" ~ "25_34",
                                age == "X35_39" ~ "35_49",  
@@ -144,49 +150,22 @@ recode <- function(x, lookup){
 hrp_2001 <- recode(hrp_2001, lsoa_lookup)
 hh_pop_2001 <- recode(hh_pop_2001, lsoa_lookup)
 
-
-codes_not_in_lookup <- c("E01032522","E01032540","E01032608","E01033730")
+codes_not_in_lookup <- c("E01032522","E01032540","E01032608","E01033730") # TODO Look into but for now ignore - all outside London 
 hrp_2011 <- filter(hrp_2011, !gss_code %in% codes_not_in_lookup)
 hh_pop_2011 <- filter(hh_pop_2011, !gss_code %in% codes_not_in_lookup)
 
 #-------------------------------------------------------------------------------
 
 lsoa_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
-  mutate(HHR = ifelse(hh_pop == 0, 0, hrp/hh_pop),
+  mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
+         hh_rep_rate = ifelse(is.na(hh_rep_rate), 0, hh_rep_rate),
          year = 2001) %>% 
   select(-hrp, -hh_pop)
 
 lsoa_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>% 
-  mutate(HHR = ifelse(hh_pop == 0, 0, hrp/hh_pop),
+  mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
+         hh_rep_rate = ifelse(is.na(hh_rep_rate), 0, hh_rep_rate),
          year = 2011) %>% 
-  select(-hrp, -hh_pop)
-
-#-------------------------------------------------------------------------------
-
-lsoa_ward_lookup <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
-
-ward_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
-  filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
-  group_by(gss_code_ward, sex, age_group) %>%
-  summarise(hrp = sum(hrp),
-            hh_pop = sum(hh_pop),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  mutate(HHR = ifelse(hh_pop == 0, 0, hrp/hh_pop),
-         year = 2001) %>% 
-  select(-hrp, -hh_pop)
-
-ward_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
-  filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
-  group_by(gss_code_ward, sex, age_group) %>%
-  summarise(hrp = sum(hrp),
-            hh_pop = sum(hh_pop),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  mutate(HHR = ifelse(hh_pop == 0, 0, hrp/hh_pop),
-         year = 2001) %>% 
   select(-hrp, -hh_pop)
 
 #-------------------------------------------------------------------------------
@@ -213,7 +192,7 @@ for(i in 2001:2021){
            x = (i-d)/(c-d),
            y = k + (a*(b^x)),
            year = i) %>%
-    select(gss_code, year, sex, age_group, HRR = y)
+    select(gss_code, year, sex, age_group, hh_rep_rate = y)
 }
 rm(yc, yd, c, d, i)
 
@@ -228,9 +207,39 @@ lsoa_rates <- data.table::rbindlist(lsoa_rates) %>%
 
 #-------------------------------------------------------------------------------
 
+lsoa_ward_lookup <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+
+ward_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
+  filter(gss_code != "E01019077") %>%  #Isles of Scilly
+  left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  group_by(gss_code_ward, sex, age_group) %>%
+  summarise(hrp = sum(hrp),
+            hh_pop = sum(hh_pop),
+            .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
+         hh_rep_rate = ifelse(is.na(hh_rep_rate), 0, hh_rep_rate),
+         year = 2001) %>% 
+  select(-hrp, -hh_pop)
+
+ward_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
+  filter(gss_code != "E01019077") %>%  #Isles of Scilly
+  left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  mutate(hrp = ifelse(age_group == "0_17", 0, hrp)) %>% 
+  group_by(gss_code_ward, sex, age_group) %>%
+  summarise(hrp = sum(hrp),
+            hh_pop = sum(hh_pop),
+            .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
+         year = 2011) %>% 
+  select(-hrp, -hh_pop)
+
 ward_rates <- vector("list", 2041)
 ward_rates[[2001]] <- ward_rates_2001
 ward_rates[[2011]] <- ward_rates_2011
+
+#-------------------------------------------------------------------------------
 
 # Project rates to 2021
 # Modified 2-point exponential
@@ -250,7 +259,7 @@ for(i in 2001:2021){
            x = (i-d)/(c-d),
            y = k + (a*(b^x)),
            year = i) %>%
-    select(gss_code_ward, year, sex, age_group, HRR = y)
+    select(gss_code_ward, year, sex, age_group, hh_rep_rate = y)
 }
 rm(yc, yd, c, d, i)
 
@@ -263,5 +272,8 @@ for(i in 2022:2041){
 ward_rates <- data.table::rbindlist(ward_rates) %>%
   data.frame()
 
-saveRDS(ward_rates, paste0(data_dir, "ward_HHR.rds"))
+saveRDS(ward_rates, paste0(data_dir, "ward_hh_rep_rate.rds"))
 
+# a <- ward_rates_2011
+# b <- filter(ward_rates, year==2011) %>% select(names(a))
+# testthat::expect_equivalent(a,b)

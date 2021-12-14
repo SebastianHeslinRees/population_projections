@@ -1,18 +1,25 @@
 output_housing_led <- function(projection,
                                 output_dir = config_list$output_dir,
-                                n_csv_elements = 6){
+                                n_csv_elements = 7){
   
+  message("writing rds files")
   
   #RDS
   for(i in names(projection)) {
     saveRDS(projection[[i]], paste0(output_dir, i, ".rds"), compress = "gzip")
   }
   
+  message("writing csv files")
+  
   #CSV
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
   
   make_csvs <- function(data, name_stub){
+    
+    if(str_detect(name_stub, "household_population_sya")){
+      data <- select(data, -ce_popn, -popn)
+    }
     
     data_col <- names(data)[ncol(data)]
     cols <- setdiff(names(data), data_col)
@@ -21,6 +28,7 @@ output_housing_led <- function(projection,
     data <- left_join(data, get_gss_names(), by="gss_code") %>%
       filter(year >= 2011) %>%
       select_at(c(cols, data_col))
+    
     
     if(str_detect(name_stub, "births_by_mothers_age")){
       
@@ -32,7 +40,7 @@ output_housing_led <- function(projection,
       
       data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
       
-    } else {
+   } else {
       
       female <- filter(data, sex == "female") %>%
         rename(rounded = !!data_col) %>%
@@ -74,6 +82,7 @@ output_housing_led <- function(projection,
     make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
   }
   
+  fwrite(projection$households_detail, paste0(output_dir,"/csv/households_detail.csv"))
   
   ahs <- projection$ahs %>% 
     select(year, gss_code_ward, ahs) %>% 

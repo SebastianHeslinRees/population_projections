@@ -4,9 +4,7 @@ housing_led_core <- function(start_population,
                              household_rep_rates,
                              households,
                              projection_year,
-                             ahs_cap_year,
-                             ahs_cap,
-                             ahs_method,
+                             ahs_mix,
                              ldd_final_yr,
                              constrain_projection){
   
@@ -35,15 +33,23 @@ housing_led_core <- function(start_population,
                                         by = c("gss_code_ward", "sex", "age")) %>% 
     mutate(household_popn = popn - ce_popn) 
   
-  household_population <- household_population_sya %>% 
+  households_detail <- household_population_sya %>% 
     group_by(gss_code_ward, year) %>% 
-    summarise(household_popn = sum(household_popn), .groups = 'drop_last') %>% 
-    data.frame()
+    summarise(trend_population = sum(popn),
+              ce_population = sum(ce_popn),
+              household_popn = sum(household_popn), .groups = 'drop_last') %>% 
+    data.frame() %>% 
+    left_join(households, by=c("year","gss_code_ward")) %>% 
+    rename(input_households = households)
+  
+  household_population <- households_detail %>% 
+    select(gss_code_ward, year, household_popn) 
   
   #-----------------------------------------------------------------------------
   #browser()
-  curr_yr_hhr_ahs <- household_population_sya %>% 
-    mutate(age_group = case_when(age <= 24 ~ "0_24",
+  curr_yr_hhr_households <- household_population_sya %>% 
+    mutate(age_group = case_when(age <= 17 ~ "0_17",
+                                 age %in% 18:24 ~ "18_24",
                                  age %in% 25:34 ~ "25_34",
                                  age %in% 35:49 ~ "35_49",
                                  age %in% 50:64 ~ "50_64",
@@ -52,69 +58,40 @@ housing_led_core <- function(start_population,
     summarise(household_popn = sum(household_popn), .groups = 'drop_last') %>% 
     data.frame() %>% 
     left_join(household_rep_rates, by = c("gss_code_ward", "sex", "age_group")) %>% 
-    mutate(households = HRR * household_popn) %>% 
+    mutate(households = hh_rep_rate * household_popn) %>% 
     group_by(gss_code_ward, year) %>% 
     summarise(households = sum(households), .groups = 'drop_last') %>% 
-    data.frame() %>% 
+    data.frame() 
+  
+  curr_yr_hhr_ahs <- curr_yr_hhr_households %>% 
     left_join(household_population, by = c("gss_code_ward", "year")) %>% 
-    mutate(hhr = household_popn/households) %>% 
-    select(gss_code_ward, year, hhr)
+    mutate(hhr_ahs = household_popn/households) %>% 
+    select(gss_code_ward, year, hhr_ahs)
   
   #-----------------------------------------------------------------------------
   
   curr_yr_trend_ahs <- left_join(households, household_population, by=c("year","gss_code_ward")) %>%
-    mutate(trend = household_popn/households) %>%
-    select(-household_popn, -households)
-  
-  if(ahs_cap_year == projection_year){
-    ahs_cap <- curr_yr_trend_ahs %>% rename(cap = trend) %>% select(-year)
-  }
+    mutate(trend_ahs = household_popn/households)
   
   #-----------------------------------------------------------------------------
   
-  #TODO Temporary
+  # floating method
+  ahs_choice <- curr_yr_hhr_ahs %>%
+    filter(gss_code_ward %in% constrain_gss) %>%
+    left_join(curr_yr_trend_ahs, by = c("year", "gss_code_ward")) %>%
+    select(-household_popn, -households) %>% 
+    mutate(diff = trend_ahs - hhr_ahs,
+           ahs = hhr_ahs + (diff*ahs_mix)) %>%
+    select(year, gss_code_ward, hhr_ahs, trend_ahs, ahs)
   
-  # selected_ahs <- left_join(curr_yr_hhr_ahs, curr_yr_trend_ahs, by = "gss_code_ward") %>% 
-  #   left_join(ahs_cap, by = "gss_code_ward")
-  
-  #New floating method
-  if(is.numeric(ahs_method)){
-    set_ahs <- curr_yr_hhr_ahs %>%
-      filter(gss_code_ward %in% constrain_gss) %>%
-      left_join(curr_yr_trend_ahs, by = c("year", "gss_code_ward")) 
-    
-    if(is.null(ahs_cap)){
-      set_ahs <- set_ahs %>%
-        mutate(cap = trend)
-    } else {
-      set_ahs <- set_ahs %>%
-        left_join(ahs_cap, by="gss_code_ward")
-    }    
-    
-    set_ahs <- set_ahs %>%
-      mutate(diff = cap - hhr,
-             float = hhr + (diff*0)) %>%
-      select(-diff) %>%
-      mutate(diff = trend - float,
-             ahs = float + (diff*ahs_method))
-    
-    ahs_choice <- select(set_ahs, year, gss_code_ward, hhr, cap, trend, float, ahs)
-    ahs <- select(set_ahs, year, gss_code_ward, ahs)
-    
-  }
-  
+  ahs <- select(ahs_choice, year, gss_code_ward, ahs)
   
   #-----------------------------------------------------------------------------
   
-  
-  #browser()
-  # selected_ahs <- left_join(ahs_cap, curr_yr_trend_ahs,
-  #                           by = c("gss_code_ward")) %>% 
-  #   mutate(ahs = ifelse(cap > trend, trend, cap),
-  #          selection = ifelse(cap > trend, "trend", "cap")) 
-  # 
-  # ahs <- selected_ahs %>% 
-  #   select(-trend, -cap, -selection)
+  households_detail <- left_join(households_detail, curr_yr_hhr_households,
+                                 by = c("gss_code_ward", "year")) %>% 
+    rename(HHR_households = households) %>% 
+    left_join(ahs_choice, by=c("year","gss_code_ward"))
   
   #-----------------------------------------------------------------------------
   
@@ -161,6 +138,8 @@ housing_led_core <- function(start_population,
               out_migration = adjusted_migration$dom_out,
               in_migration = adjusted_migration$dom_in,
               net_migration = net_migration,
-              ahs_cap = ahs_cap,
-              ahs = ahs_choice))
+              household_population_sya = household_population_sya,
+              ahs = ahs_choice,
+              households_detail = households_detail
+              ))
 }

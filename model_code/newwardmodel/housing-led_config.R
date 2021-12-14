@@ -4,12 +4,11 @@ projection_name <- "housing-led_test"
 #TREND STUFF
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
                         mapping = c("gss_code","year","sex","age"),
-                        components = list(births = FALSE,
-                                          deaths = FALSE,
+                        components = list(births = TRUE,
+                                          deaths = TRUE,
                                           in_migration = FALSE,
                                           out_migration = FALSE,
                                           population = FALSE))
-
 
 in_migration <- list(
   '2020' = list(path =  paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
@@ -53,15 +52,13 @@ config_list <- list(projection_name = projection_name,
                     ldd_backseries_path = "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds",
                     
                     hhr_path = paste0(data_dir, "ward_HHR.rds"),
-                    ahs_method = 0.8,
+                    ahs_mix = 0.8,
+                    hhr_static_or_projected = "static",
                     #-------------------------------------------------------------------------------
                     #Variables
                     
                     constrain_projection = FALSE,
                     #TODO hma_list = list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33))),
-                    
-                    ahs_cap_year = 2020,
-                    #ahs_method = 0.8,
                     
                     ldd_final_yr = 2019,
                     last_data_yr = 2019

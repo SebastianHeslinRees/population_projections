@@ -6,7 +6,7 @@ arrange_housing_led_outputs <- function(projection,
                                         projected_out_migration,
                                         first_proj_yr, last_proj_yr){
   
-  
+  #browser()
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_out_migration <- list(out_migration %>% filter(year < first_proj_yr))
   proj_in_migration <- list(in_migration %>% filter(year < first_proj_yr))
@@ -22,6 +22,9 @@ arrange_housing_led_outputs <- function(projection,
   proj_popn <- list()
   proj_ahs <- list()
   
+  proj_households <- list()
+  proj_hh_pop_sya <- list()
+  
   
   for(projection_year in first_proj_yr:last_proj_yr){
     
@@ -33,6 +36,8 @@ arrange_housing_led_outputs <- function(projection,
     proj_in_migration[[projection_year]] <- projection[[projection_year]][['in_migration']]
     
     proj_ahs[[projection_year]] <- projection[[projection_year]][['ahs']]
+    proj_households[[projection_year]] <- projection[[projection_year]][['households_detail']]
+    proj_hh_pop_sya[[projection_year]] <- projection[[projection_year]][['household_population_sya']]
     
   }
   
@@ -52,8 +57,9 @@ arrange_housing_led_outputs <- function(projection,
                       out_migration = proj_out_migration,
                       in_migration = proj_in_migration,
                       net_migration = proj_net_migration,
+                      household_population_sya = proj_hh_pop_sya,
                       ahs = proj_ahs,
-                      ahs = proj_ahs) %>% 
+                      households_detail = proj_households) %>% 
     lapply(bind_and_arrange)
   
   return(output_list)

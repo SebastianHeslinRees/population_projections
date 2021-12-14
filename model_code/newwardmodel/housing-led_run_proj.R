@@ -96,20 +96,20 @@ out_rate_info <- get_rates_flows_info(config_list$out_migration, first_proj_yr, 
 projected_out_migration <- NULL
 
 
-#Constraints - 30 secs
+# Constraints - 30 secs
 if(!is.null(constraint_list)){
   message("get constraints")
   constraint_list <- get_constraints(constraint_list, last_proj_yr)
 }
 #-------------------------------------------------------------------------------
 
-#Housing-led-specific stuff
+# Housing-led-specific stuff
 
 household_rep_rates = readRDS(config_list$hhr_path)
 communal_establishment_population <- readRDS(config_list$communal_est_path)
 ahs_cap <- NULL
 
-#Get the dwelling trajectory
+# Get the dwelling trajectory
 dwellings <- readRDS("input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds") %>% 
   filter(year == 2011) %>% 
   rbind(
@@ -160,9 +160,12 @@ for(projection_year in first_proj_yr:last_proj_yr){
   
   curr_yr_households <- filter(households, year == projection_year)
   
-  #curr_yr_hhr <- filter(household_rep_rates, year == projection_year)
-  curr_yr_hhr <- filter(household_rep_rates, year == 2011) %>% 
-    mutate(year = projection_year)
+  if(config_list$hhr_static_or_projected == "projected"){
+    curr_yr_hhr <- filter(household_rep_rates, year == projection_year)
+  } else {
+    curr_yr_hhr <- filter(household_rep_rates, year == 2011) %>% 
+      mutate(year = projection_year)
+  }
   
   trend_projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
                                                          fertility_rates = curr_yr_fertility,
@@ -178,9 +181,7 @@ for(projection_year in first_proj_yr:last_proj_yr){
                                                        household_rep_rates = curr_yr_hhr,
                                                        households = curr_yr_households,
                                                        projection_year = projection_year,
-                                                       ahs_cap_year = config_list$ahs_cap_year,
-                                                       ahs_cap = ahs_cap,
-                                                       ahs_method = config_list$ahs_method
+                                                       ahs_mix = config_list$ahs_mix
                                                        
   )
   
@@ -208,8 +209,7 @@ output_housing_led(hl_projection, output_dir = config_list$output_dir)
 
 #-------------------------------------------------------------------------------                              
 
-
-hl_projection$populationn %>% View("popn")
+hl_projection$population %>% View("popn")
 hl_projection$ahs %>% View("ahs")
 
 trend_output <- readRDS("outputs/newwardmodel/test_2050/population.rds") %>% mutate(proj = "trend")

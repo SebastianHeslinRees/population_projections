@@ -50,7 +50,7 @@ projection_loop <- function(start_population,
   
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f,
                                               col_aggregation = nested_geog)
-  
+  #browser()
   if(constraint_list$components$births){
     births <- constrain_component(births, constraint_list$births_constraint,
                                   col_aggregation = constraint_list$mapping,
