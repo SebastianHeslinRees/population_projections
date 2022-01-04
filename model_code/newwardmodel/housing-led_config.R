@@ -51,7 +51,7 @@ config_list <- list(projection_name = projection_name,
                     
                     ldd_backseries_path = "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds",
                     
-                    hhr_path = paste0(data_dir, "ward_HHR.rds"),
+                    hhr_path = paste0(data_dir, "ward_hh_rep_rate.rds"),
                     ahs_mix = 0.8,
                     hhr_static_or_projected = "static",
                     #-------------------------------------------------------------------------------

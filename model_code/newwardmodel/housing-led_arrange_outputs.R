@@ -24,6 +24,7 @@ arrange_housing_led_outputs <- function(projection,
   
   proj_households <- list()
   proj_hh_pop_sya <- list()
+  proj_components <- list()
   
   
   for(projection_year in first_proj_yr:last_proj_yr){
@@ -39,6 +40,8 @@ arrange_housing_led_outputs <- function(projection,
     proj_households[[projection_year]] <- projection[[projection_year]][['households_detail']]
     proj_hh_pop_sya[[projection_year]] <- projection[[projection_year]][['household_population_sya']]
     
+    proj_components[[projection_year]] <- projection[[projection_year]][['components']]
+    
   }
   
   bind_and_arrange <- function(x){
@@ -50,7 +53,7 @@ arrange_housing_led_outputs <- function(projection,
       arrange_at(arrange_by) %>% 
       data.frame()
   }
-  
+  #browser()
   output_list <- list(population = proj_popn,
                       births = proj_births,
                       deaths = proj_deaths,
@@ -59,8 +62,10 @@ arrange_housing_led_outputs <- function(projection,
                       net_migration = proj_net_migration,
                       household_population_sya = proj_hh_pop_sya,
                       ahs = proj_ahs,
-                      households_detail = proj_households) %>% 
+                      households_detail = proj_households,
+                      components = proj_components) %>% 
     lapply(bind_and_arrange)
+  
   
   return(output_list)
 }

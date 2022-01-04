@@ -12,7 +12,7 @@ projection_loop <- function(start_population,
 
   cat('\r',projection_year)
   utils::flush.console()
-  
+
   start_population <- start_population %>% 
     select(year, gss_code, gss_code_ward, sex, age, popn)
   

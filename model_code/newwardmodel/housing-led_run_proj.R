@@ -167,6 +167,7 @@ for(projection_year in first_proj_yr:last_proj_yr){
       mutate(year = projection_year)
   }
   
+  #if(projection_year == 2039){browser()}
   trend_projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
                                                          fertility_rates = curr_yr_fertility,
                                                          mortality_rates = curr_yr_mortality,

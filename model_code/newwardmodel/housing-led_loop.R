@@ -11,6 +11,7 @@ housing_led_core <- function(start_population,
   col_agg <- c("year", "gss_code", "gss_code_ward", "sex", "age")
   nested_geog <- c("gss_code", "gss_code_ward")
   
+  #if(start_population$year >= 2038){browser()}
   #browser()
   #1. GSS codes present in housing trajectory
   #TODO
@@ -22,16 +23,22 @@ housing_led_core <- function(start_population,
   trend_projection <- lapply(trend_projection, function(x) filter(x, x$gss_code_ward %in% constrain_gss))
   
   aged_on_population <- filter(start_population, gss_code_ward %in% constrain_gss) %>%
-    popn_age_on(  col_aggregation = col_agg,
-                  col_geog = nested_geog)
+    popn_age_on(col_aggregation = col_agg,
+                col_geog = nested_geog)
   
-  initial_population <- trend_projection$population
+  #TODO The check_negative_values here should, I think, be part of the trend loop
+  initial_population <- trend_projection$population %>% 
+    check_negative_values("popn")
   
   #-----------------------------------------------------------------------------
-  
+  #TODO
+  #Need to make sure that the household population that is put into the internal hh model
+  #doesn't have negative population. I'm doing this here. But arguable it could be done when the
+  #sya is grouped into age groups. 
   household_population_sya <- left_join(initial_population, communal_establishment_population,
                                         by = c("gss_code_ward", "sex", "age")) %>% 
-    mutate(household_popn = popn - ce_popn) 
+    mutate(household_popn = popn - ce_popn) %>% 
+    check_negative_values("household_popn")
   
   households_detail <- household_population_sya %>% 
     group_by(gss_code_ward, year) %>% 
@@ -115,15 +122,9 @@ housing_led_core <- function(start_population,
                                                   col_dom_in = "inflow",
                                                   col_dom_out = "outflow")
   
-  net_migration <- adjusted_migration$dom_out %>% 
-    mutate(inflow = outflow *-1) %>% 
-    select(-outflow) %>% 
-    rbind(adjusted_migration$dom_in) %>% 
-    group_by_at(col_agg) %>% 
-    summarise(net_migration = sum(inflow), .groups = 'drop_last') %>% 
-    data.frame()
-  
+  #-----------------------------------------------------------------------------
   #browser()
+  
   unconstrained_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(trend_projection$births,
                                                         adjusted_migration$dom_in),
@@ -131,6 +132,47 @@ housing_led_core <- function(start_population,
                                                            adjusted_migration$dom_out),
                                    col_aggregation = col_agg) %>%
     rbind(areas_with_no_housing_data$population) 
+  
+  #-----------------------------------------------------------------------------
+  
+  #Guard against negative populations
+  negatives <- filter(unconstrained_population, popn < 0)
+  unconstrained_population <- unconstrained_population %>% check_negative_values("popn")
+  
+  #fix negatives by increasing inflow
+  if(nrow(negatives)!=0){
+    adjusted_migration$dom_in <- adjusted_migration$dom_in %>% 
+      left_join(negatives, by = col_agg) %>% 
+      mutate(inflow = ifelse(is.na(popn), inflow, inflow-popn)) %>% 
+      select(-popn)
+  }
+  
+  #-----------------------------------------------------------------------------
+  
+  net_migration <- adjusted_migration$dom_out %>% 
+    mutate(net_migration = outflow *-1) %>% 
+    select(-outflow) %>% 
+    rbind(adjusted_migration$dom_in %>% 
+            rename(net_migration = inflow)) %>% 
+    group_by_at(col_agg) %>% 
+    summarise(net_migration = sum(net_migration), .groups = 'drop_last') %>% 
+    data.frame()
+  
+  #-----------------------------------------------------------------------------
+  
+  components <- bind_rows(mutate(unconstrained_population, comp = 'popn'),
+                          rename(trend_projection$births, popn = births) %>%  mutate(comp = 'births'),
+                          rename(trend_projection$deaths, popn = deaths) %>%  mutate(comp = 'deaths'),
+                          rename(adjusted_migration$dom_in, popn = inflow) %>%  mutate(comp = 'inflow'),
+                          rename(adjusted_migration$dom_out, popn = outflow) %>%  mutate(comp = 'outflow'),
+                          rename(net_migration, popn = net_migration) %>%  mutate(comp = 'netflow')) %>%
+    select(-age, -sex) %>% 
+    group_by(gss_code, gss_code_ward, year, comp) %>% 
+    summarise(popn = sum(popn), .groups = 'drop_last') %>% 
+    data.frame() %>% 
+    tidyr::pivot_wider(names_from = 'comp', values_from = 'popn')
+  
+  #-----------------------------------------------------------------------------
   
   return(list(population = unconstrained_population,
               births = trend_projection$births,
@@ -140,6 +182,7 @@ housing_led_core <- function(start_population,
               net_migration = net_migration,
               household_population_sya = household_population_sya,
               ahs = ahs_choice,
-              households_detail = households_detail
-              ))
+              households_detail = households_detail,
+              components = components
+  ))
 }

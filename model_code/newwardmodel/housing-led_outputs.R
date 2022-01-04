@@ -91,6 +91,8 @@ output_housing_led <- function(projection,
   
   fwrite(projection$ahs, paste0(output_dir,"/csv/ahs_detailed.csv"))
   
+  fwrite(projection$components, paste0(output_dir,"/csv/components.csv"))
+  
   #Excel
   # if(write_excel){
   #   excel_wb_name <- substr(projection_name,1,nchar(projection_name)-14)
