@@ -1,4 +1,4 @@
-source("model_code/newwardmodel/run_proj.R")
+source("model_code/newwardmodel/trend_run_proj.R")
 data_dir <- "input_data/new_ward_model/"
 projection_name <- "test_2050"
 
@@ -13,17 +13,21 @@ constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lo
 
 
 in_migration <- list(
-  '2020' = list(path =  paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
+  '2020' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_Covid_2020.rds"),
                 transition = F),
-  '2022' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"),
+  '2021' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_Covid_2021.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_Covid_2022.rds"),
                 transition = T),
   '2025' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_10yr_avg.rds"),
                 transition = F))
 
 out_migration <- list(
-  '2020' = list(path =  paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"),
+  '2020' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_Covid_2020.rds"),
                 transition = F),
-  '2022' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"),
+  '2021' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_Covid_2021.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_Covid_2022.rds"),
                 transition = T),
   '2025' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_10yr_avg.rds"),
                 transition = F))

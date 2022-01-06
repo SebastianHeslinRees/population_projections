@@ -34,7 +34,7 @@ projection_loop <- function(start_population,
                            col_aggregation = col_agg,
                            col_geog = nested_geog)
   
-  assert_that(sum(is.na(aged_popn))==0, msg=paste("aged_popn", yr))
+  assert_that(sum(is.na(aged_popn))==0, msg=paste("aged_popn", projection_year))
   
   #-----------------------------------------------------------------------------
   
@@ -57,7 +57,7 @@ projection_loop <- function(start_population,
                                   "births")
   }
   
-  assert_that(sum(is.na(births))==0, msg=paste("births", yr))
+  assert_that(sum(is.na(births))==0, msg=paste("births", projection_year))
   
   aged_popn_w_births <- rbind(aged_popn, rename(births, popn = births))
   
@@ -79,7 +79,7 @@ projection_loop <- function(start_population,
                                   "deaths")
   }
   
-  assert_that(sum(is.na(deaths))==0, msg=paste("deaths", yr))
+  assert_that(sum(is.na(deaths))==0, msg=paste("deaths", projection_year))
   
   #-----------------------------------------------------------------------------
   
@@ -107,7 +107,7 @@ projection_loop <- function(start_population,
                                    "outflow")
   }
   
-  assert_that(sum(is.na(outflow))==0, msg=paste("outflow", yr))
+  assert_that(sum(is.na(outflow))==0, msg=paste("outflow", projection_year))
   
   #-----------------------------------------------------------------------------
   
@@ -121,7 +121,7 @@ projection_loop <- function(start_population,
                                   "inflow")
   }
   
-  assert_that(sum(is.na(inflow))==0, msg=paste("inflow", yr))
+  assert_that(sum(is.na(inflow))==0, msg=paste("inflow", projection_year))
   
   #-----------------------------------------------------------------------------
   
@@ -132,7 +132,7 @@ projection_loop <- function(start_population,
                                                  col_aggregation = col_agg) %>% 
     select(year, gss_code, gss_code_ward, sex, age, popn)
   
-  assert_that(sum(is.na(next_yr_popn))==0, msg=paste("next_yr_popn", yr))
+  assert_that(sum(is.na(next_yr_popn))==0, msg=paste("next_yr_popn", projection_year))
   
   negatives <- filter(next_yr_popn, popn < 0)
   next_yr_popn <- next_yr_popn %>% check_negative_values("popn")
@@ -188,7 +188,9 @@ projection_loop <- function(start_population,
            inflow, outflow, change,
            popn_from_components, diff, popn)
   
-  assert_that(sum(is.na(components))==0, msg=paste("components", yr))
+  if(sum(is.na(components))!=0){browser()}
+  
+  assert_that(sum(is.na(components))==0, msg=paste("components", projection_year))
   
   #-----------------------------------------------------------------------------
 

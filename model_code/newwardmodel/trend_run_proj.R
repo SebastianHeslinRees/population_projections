@@ -3,9 +3,9 @@ library(dplyr)
 library(assertthat)
 devtools::load_all('model_code/popmodules')
 
-source("model_code/newwardmodel/projection_loop.R")
-source("model_code/newwardmodel/arrange_core_outputs.R")
-source("model_code/newwardmodel/output.R")
+source("model_code/newwardmodel/trend_loop.R")
+source("model_code/newwardmodel/trend_arrange_outputs.R")
+source("model_code/newwardmodel/trend_outputs.R")
 source("model_code/newwardmodel/get_constraints.R")
 
 #-------------------------------------------------------------------------------

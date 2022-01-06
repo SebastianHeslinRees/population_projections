@@ -182,9 +182,7 @@ for(projection_year in first_proj_yr:last_proj_yr){
                                                        household_rep_rates = curr_yr_hhr,
                                                        households = curr_yr_households,
                                                        projection_year = projection_year,
-                                                       ahs_mix = config_list$ahs_mix
-                                                       
-  )
+                                                       ahs_mix = config_list$ahs_mix)
   
   ahs_cap <- hl_projection[[projection_year]]$ahs_cap
   curr_yr_popn <- hl_projection[[projection_year]]$population
