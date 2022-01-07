@@ -48,12 +48,12 @@ config_list <- list(projection_name = projection_name,
                     #HOUSING-LED STUFF
                     
                     external_trend_path = "outputs/newwardmodel/test_2050/",
-                    communal_est_path = "input_data/small_area_model/ward_data/ward_communal_establishment_population.rds",
-                    dev_trajectory_path = "input_data/small_area_model/development_data/ward_2020-based_savills.rds", 
+                    communal_est_path = "input_data/new_ward_model/communal_establishment_popn_WD20CD.rds",
+                    dev_trajectory_path = "input_data/new_ward_model/development_data/ward_shlaa_trajectory_2020.rds", 
                     
                     
                     
-                    ldd_backseries_path = "input_data/small_area_model/development_data/ldd_backseries_dwellings_ward.rds",
+                    ldd_backseries_path = "input_data/new_ward_model/development_data/ldd_backseries_dwellings_ward.rds",
                     
                     hhr_path = paste0(data_dir, "ward_hh_rep_rate.rds"),
                     ahs_mix = 0.8,

@@ -1,5 +1,6 @@
 library(dplyr)
 library(data.table)
+library(popmodules)
 
 data_dir <- "input_data/new_ward_model/"
 dir.create(data_dir, showWarnings = FALSE)
@@ -53,7 +54,7 @@ ward_outflow <- gross_flows %>% select(-inflow) %>% data.frame()
 rm(flows, gross_flows, i)
 
 #-------------------------------------------------------------------------------
-lsoa_to_ward <- readRDS("input_data/lookup/2011_lsoa_to_ward.rds")
+lsoa_to_ward <- readRDS("input_data/new_ward_model/lsoa_to_WD20_lookup.rds")
 
 dwellinngs_to_hh <- fread(paste0(data_dir,"dwelling_to_hh_LSOA.csv")) %>%
   data.frame() %>% 
@@ -61,6 +62,48 @@ dwellinngs_to_hh <- fread(paste0(data_dir,"dwelling_to_hh_LSOA.csv")) %>%
   group_by(gss_code_ward) %>% 
   summarise(d2hh_ratio = sum(households)/sum(dwellings),
             .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(gss_code_ward %in% ward_pop$gss_code_ward)
+
+#-------------------------------------------------------------------------------
+
+#Communal Establishments
+
+comm_est_lsoa <- rbind(
+  fread('input_data/new_ward_model/communal_est_males_lsoa.csv', header = TRUE),
+  fread('input_data/new_ward_model/communal_est_females_lsoa.csv', header = TRUE)) %>% 
+  tidyr::pivot_longer(values_to = "ce_popn", names_to = "age_group", cols = starts_with("Age")) %>% 
+  mutate(age_min = as.numeric(substr(age_group, 5,6))) %>% 
+  mutate(age_max = ifelse(age_min < 10, substr(age_group, 9,10),
+                          substr(age_group, 11,12))) %>% 
+  mutate(age_max = ifelse(age_min == 15, 15,
+                          ifelse(age_min == 85, 90,
+                                 as.numeric(age_max)))) %>% 
+  data.frame()
+
+communal_est_ward <- comm_est_lsoa  %>% 
+  left_join(lsoa_to_ward, by="gss_code_lsoa") %>% 
+  group_by(gss_code_ward, sex, age_group, age_min, age_max) %>% 
+  summarise(ce_popn = sum(ce_popn), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(gss_code_ward %in% ward_pop$gss_code_ward)
+
+comm_est_ward_sya <- list()
+
+for(group in unique(communal_est_ward$age_group)){
+  
+  pop_1 <- filter(communal_est_ward, age_group == group)
+  pop_2 <- filter(ward_pop, age %in%  unique(pop_1$age_min): unique(pop_1$age_max), year == 2011)
+  
+  comm_est_ward_sya[[group]] <- distribute_within_age_band(pop_1,pop_2,
+                                                           "ce_popn","popn",
+                                                           unique(pop_1$age_min),
+                                                           unique(pop_1$age_max),
+                                                           col_aggregation = c("gss_code_ward","sex"))
+}
+
+comm_est_ward_sya <- rbindlist(comm_est_ward_sya) %>% 
+  select(gss_code_ward, sex, age, ce_popn) %>% 
   data.frame()
 
 #-------------------------------------------------------------------------------
@@ -77,6 +120,8 @@ popmodules::validate_same_geog(ward_pop, ward_births, "gss_code_ward", "gss_code
 popmodules::validate_same_geog(ward_pop, ward_deaths, "gss_code_ward", "gss_code_ward")
 popmodules::validate_same_geog(ward_pop, ward_inflow, "gss_code_ward", "gss_code_ward")
 popmodules::validate_same_geog(ward_pop, ward_outflow, "gss_code_ward", "gss_code_ward")
+popmodules::validate_same_geog(ward_pop, comm_est_ward_sya, "gss_code_ward", "gss_code_ward")
+popmodules::validate_same_geog(ward_pop, dwellinngs_to_hh, "gss_code_ward", "gss_code_ward")
 
 #-------------------------------------------------------------------------------
 
@@ -85,6 +130,7 @@ saveRDS(ward_deaths, paste0(data_dir, "ward_deaths_WD20CD.rds"))
 saveRDS(ward_pop, paste0(data_dir, "ward_population_WD20CD.rds"))
 saveRDS(ward_inflow, paste0(data_dir, "ward_inflow_WD20CD.rds"))
 saveRDS(ward_outflow, paste0(data_dir, "ward_outflow_WD20CD.rds"))
-saveRDS(dwellinngs_to_hh, paste0(data_dir, "ward_dwelling_2_hh_ratio_WD13CD.rds"))
+saveRDS(dwellinngs_to_hh, paste0(data_dir, "ward_dwelling_2_hh_ratio_WD20CD.rds"))
+saveRDS(comm_est_ward_sya, paste0(data_dir, "communal_establishment_popn_WD20CD.rds"))
 
 rm(list=ls())

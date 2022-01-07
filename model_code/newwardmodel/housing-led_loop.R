@@ -35,6 +35,9 @@ housing_led_core <- function(start_population,
   #Need to make sure that the household population that is put into the internal hh model
   #doesn't have negative population. I'm doing this here. But arguable it could be done when the
   #sya is grouped into age groups. 
+  
+  #browser()
+  
   household_population_sya <- left_join(initial_population, communal_establishment_population,
                                         by = c("gss_code_ward", "sex", "age")) %>% 
     mutate(household_popn = popn - ce_popn) %>% 
