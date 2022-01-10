@@ -54,9 +54,9 @@ ward_outflow <- gross_flows %>% select(-inflow) %>% data.frame()
 rm(flows, gross_flows, i)
 
 #-------------------------------------------------------------------------------
-lsoa_to_ward <- readRDS("input_data/new_ward_model/lsoa_to_WD20_lookup.rds")
+lsoa_to_ward <- readRDS("input_data/new_ward_model/lookups/lsoa_to_WD20_lookup.rds")
 
-dwellinngs_to_hh <- fread(paste0(data_dir,"dwelling_to_hh_LSOA.csv")) %>%
+dwellinngs_to_hh <- fread(paste0(data_dir,"raw/dwelling_to_hh_LSOA.csv")) %>%
   data.frame() %>% 
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>% 
   group_by(gss_code_ward) %>% 
@@ -70,8 +70,8 @@ dwellinngs_to_hh <- fread(paste0(data_dir,"dwelling_to_hh_LSOA.csv")) %>%
 #Communal Establishments
 
 comm_est_lsoa <- rbind(
-  fread('input_data/new_ward_model/communal_est_males_lsoa.csv', header = TRUE),
-  fread('input_data/new_ward_model/communal_est_females_lsoa.csv', header = TRUE)) %>% 
+  fread('input_data/new_ward_model/raw/communal_est_males_lsoa.csv', header = TRUE),
+  fread('input_data/new_ward_model/raw/communal_est_females_lsoa.csv', header = TRUE)) %>% 
   tidyr::pivot_longer(values_to = "ce_popn", names_to = "age_group", cols = starts_with("Age")) %>% 
   mutate(age_min = as.numeric(substr(age_group, 5,6))) %>% 
   mutate(age_max = ifelse(age_min < 10, substr(age_group, 9,10),
@@ -125,12 +125,12 @@ popmodules::validate_same_geog(ward_pop, dwellinngs_to_hh, "gss_code_ward", "gss
 
 #-------------------------------------------------------------------------------
 
-saveRDS(ward_births, paste0(data_dir, "ward_births_WD20CD.rds"))
-saveRDS(ward_deaths, paste0(data_dir, "ward_deaths_WD20CD.rds"))
-saveRDS(ward_pop, paste0(data_dir, "ward_population_WD20CD.rds"))
-saveRDS(ward_inflow, paste0(data_dir, "ward_inflow_WD20CD.rds"))
-saveRDS(ward_outflow, paste0(data_dir, "ward_outflow_WD20CD.rds"))
-saveRDS(dwellinngs_to_hh, paste0(data_dir, "ward_dwelling_2_hh_ratio_WD20CD.rds"))
-saveRDS(comm_est_ward_sya, paste0(data_dir, "communal_establishment_popn_WD20CD.rds"))
+saveRDS(ward_births, paste0(data_dir, "backseries/ward_births_WD20CD.rds"))
+saveRDS(ward_deaths, paste0(data_dir, "backseries/ward_deaths_WD20CD.rds"))
+saveRDS(ward_pop, paste0(data_dir, "backseries/ward_population_WD20CD.rds"))
+saveRDS(ward_inflow, paste0(data_dir, "backseries/ward_inflow_WD20CD.rds"))
+saveRDS(ward_outflow, paste0(data_dir, "backseries/ward_outflow_WD20CD.rds"))
+saveRDS(dwellinngs_to_hh, paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD20CD.rds"))
+saveRDS(comm_est_ward_sya, paste0(data_dir, "processed/communal_establishment_popn_WD20CD.rds"))
 
 rm(list=ls())

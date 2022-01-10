@@ -1,15 +1,15 @@
 library(dplyr)
 library(data.table)
 library(assertthat)
-devtools::load_all('model_code/popmodules')
+library(popmodules)
 
 data_dir <- "input_data/new_ward_model/"
 
-ward_pop <- paste0(data_dir, "ward_population_WD20CD.rds") %>% readRDS()
-ward_births <- paste0(data_dir, "ward_births_WD20CD.rds") %>% readRDS()
-ward_deaths <- paste0(data_dir, "ward_deaths_WD20CD.rds") %>% readRDS()
-ward_in_mig <- paste0(data_dir, "ward_inflow_WD20CD.rds") %>% readRDS() %>% data.frame()
-ward_out_mig <- paste0(data_dir, "ward_outflow_WD20CD.rds") %>% readRDS() %>% data.frame()
+ward_pop <- paste0(data_dir, "backseries/ward_population_WD20CD.rds") %>% readRDS()
+ward_births <- paste0(data_dir, "backseries/ward_births_WD20CD.rds") %>% readRDS()
+ward_deaths <- paste0(data_dir, "backseries/ward_deaths_WD20CD.rds") %>% readRDS()
+ward_in_mig <- paste0(data_dir, "backseries/ward_inflow_WD20CD.rds") %>% readRDS() %>% data.frame()
+ward_out_mig <- paste0(data_dir, "backseries/ward_outflow_WD20CD.rds") %>% readRDS() %>% data.frame()
 
 #-------------------------------------------------------------------------------
 denominator_popn <- ward_pop %>%
@@ -18,7 +18,7 @@ denominator_popn <- ward_pop %>%
               col_geog = "gss_code_ward")
 
 #-------------------------------------------------------------------------------
-ward_pop_x <- filter(ward_pop, gss_code_ward != "E05000026")
+
 mort_rates <- scaled_mortality_curve(popn = ward_pop,
                                      births = ward_births,
                                      deaths = ward_deaths,
@@ -199,20 +199,20 @@ rm(scaling_out_2020, scaling_out_2021, scaling_out_2022, total_out_avg)
 
 #-------------------------------------------------------------------------------
 
-saveRDS(mort_rates, paste0(data_dir, "mortality_rates_WD20CD.rds"))
-saveRDS(fert_rates,  paste0(data_dir, "fertility_rates_WD20CD.rds"))
+saveRDS(mort_rates, paste0(data_dir, "processed/mortality_rates_WD20CD.rds"))
+saveRDS(fert_rates,  paste0(data_dir, "processed/fertility_rates_WD20CD.rds"))
 
-saveRDS(in_mig_flows_5,  paste0(data_dir, "in_migration_flows_WD20CD_5yr_avg.rds"))
-saveRDS(out_mig_rates_5,  paste0(data_dir, "out_migration_rates_WD20CD_5yr_avg.rds"))
-saveRDS(in_mig_flows_10,  paste0(data_dir, "in_migration_flows_WD20CD_10yr_avg.rds"))
-saveRDS(out_mig_rates_10,  paste0(data_dir, "out_migration_rates_WD20CD_10yr_avg.rds"))
+saveRDS(in_mig_flows_5,  paste0(data_dir, "processed/in_migration_flows_WD20CD_5yr_avg.rds"))
+saveRDS(out_mig_rates_5,  paste0(data_dir, "processed/out_migration_rates_WD20CD_5yr_avg.rds"))
+saveRDS(in_mig_flows_10,  paste0(data_dir, "processed/in_migration_flows_WD20CD_10yr_avg.rds"))
+saveRDS(out_mig_rates_10,  paste0(data_dir, "processed/out_migration_rates_WD20CD_10yr_avg.rds"))
 
-saveRDS(scaled_IN_2020,  paste0(data_dir, "in_migration_flows_WD20CD_Covid_2020.rds"))
-saveRDS(scaled_IN_2021,  paste0(data_dir, "in_migration_flows_WD20CD_Covid_2021.rds"))
-saveRDS(scaled_IN_2022,  paste0(data_dir, "in_migration_flows_WD20CD_Covid_2022.rds"))
+saveRDS(scaled_IN_2020,  paste0(data_dir, "processed/in_migration_flows_WD20CD_Covid_2020.rds"))
+saveRDS(scaled_IN_2021,  paste0(data_dir, "processed/in_migration_flows_WD20CD_Covid_2021.rds"))
+saveRDS(scaled_IN_2022,  paste0(data_dir, "processed/in_migration_flows_WD20CD_Covid_2022.rds"))
 
-saveRDS(scaled_OUT_2020,  paste0(data_dir, "out_migration_rates_WD20CD_Covid_2020.rds"))
-saveRDS(scaled_OUT_2021,  paste0(data_dir, "out_migration_rates_WD20CD_Covid_2021.rds"))
-saveRDS(scaled_OUT_2022,  paste0(data_dir, "out_migration_rates_WD20CD_Covid_2022.rds"))
+saveRDS(scaled_OUT_2020,  paste0(data_dir, "processed/out_migration_rates_WD20CD_Covid_2020.rds"))
+saveRDS(scaled_OUT_2021,  paste0(data_dir, "processed/out_migration_rates_WD20CD_Covid_2021.rds"))
+saveRDS(scaled_OUT_2022,  paste0(data_dir, "processed/out_migration_rates_WD20CD_Covid_2022.rds"))
 
 rm(list=ls())

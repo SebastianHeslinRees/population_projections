@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 devtools::load_all('model_code/popmodules')
 
-projection_loop <- function(start_population,
+trend_core <- function(start_population,
                             fertility_rates,
                             mortality_rates,
                             out_rates,

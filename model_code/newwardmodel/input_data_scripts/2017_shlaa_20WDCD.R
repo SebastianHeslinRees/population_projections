@@ -48,7 +48,7 @@ msoa_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/StatisticalBoundar
 msoa_polygons <- readOGR(dsn = msoa_polygon_loc, layer = "MSOA_2011_London",
                          verbose = FALSE)
 
-ward_polygon_loc <- "C:/Projects_c/population_projections/input_data/new_ward_model"
+ward_polygon_loc <- "C:/Projects_c/population_projections/input_data/new_ward_model/shape_files"
 ward_polygons <- readOGR(dsn = ward_polygon_loc, layer = "WD_DEC_2020_UK_BFC_V2",
                          verbose = FALSE)
 
@@ -122,7 +122,7 @@ large_sites <- large_input %>%
 
 
 #group data by ward, msoa and borough 
-london_wards <- readRDS("input_data/new_ward_model/lsoa_to_WD20_lookup.rds") %>%
+london_wards <- readRDS("input_data/new_ward_model/lookups/lsoa_to_WD20_lookup.rds") %>%
         filter(substr(gss_code,1,3) == "E09") %>% 
         #filter(gss_code != "E09000001") %>% 
         select(gss_code_ward) %>% 
@@ -199,7 +199,7 @@ oa_to_ward <- fread("C:/Projects_c/regrosser/data/lookups/Output_Area_to_Lower_L
         data.frame() %>% 
         select(gss_code_oa = OA11CD, gss_code_lsoa = LSOA11CD) %>% 
         left_join(
-                readRDS("input_data/new_ward_model/lsoa_to_WD20_lookup.rds"), by = "gss_code_lsoa") %>% 
+                readRDS("input_data/new_ward_model/lookups/lsoa_to_WD20_lookup.rds"), by = "gss_code_lsoa") %>% 
         select(gss_code_oa, gss_code_ward) %>%
         distinct()
 
@@ -332,23 +332,23 @@ borough_shlaa <- rbind(borough_large, borough_intense, borough_windfall) %>%
         data.frame()
 
 #Save
-saveRDS(ward_shlaa, "input_data/new_ward_model/development_data/ward_shlaa_trajectory_2020.rds")
-saveRDS(msoa_shlaa, "input_data/new_ward_model/development_data/msoa_shlaa_trajectory_2020.rds")
-saveRDS(borough_shlaa, "input_data/new_ward_model/borough_shlaa_trajectory_2020.rds")
+saveRDS(ward_shlaa, "input_data/new_ward_model/development_data/ward_shlaa_trajectory_WD20CD.rds")
+saveRDS(msoa_shlaa, "input_data/new_ward_model/development_data/msoa_shlaa_trajectory_MSOA.rds")
+#saveRDS(borough_shlaa, "input_data/new_ward_model/development_data/borough_shlaa_trajectory.rds")
 
-shlaa_breakdown <- left_join(borough_large, borough_intense, by = c('gss_code','year')) %>% 
-        left_join(borough_windfall, by = c('gss_code','year')) %>% 
-        group_by(year) %>% 
-        summarise(large_sites = sum(units.x),
-                  intensification = sum(units.y),
-                  windfall = sum(units),
-                  .groups = 'drop_last') %>% 
-        data.frame() %>% 
-        tidyr::replace_na(list(large_sites = 0,
-                               intensification = 0,
-                               windfall = 0)) %>% 
-        mutate(total = large_sites + intensification + windfall) %>% 
-        filter(year %in% 2017:2041)
+# shlaa_breakdown <- left_join(borough_large, borough_intense, by = c('gss_code','year')) %>% 
+#         left_join(borough_windfall, by = c('gss_code','year')) %>% 
+#         group_by(year) %>% 
+#         summarise(large_sites = sum(units.x),
+#                   intensification = sum(units.y),
+#                   windfall = sum(units),
+#                   .groups = 'drop_last') %>% 
+#         data.frame() %>% 
+#         tidyr::replace_na(list(large_sites = 0,
+#                                intensification = 0,
+#                                windfall = 0)) %>% 
+#         mutate(total = large_sites + intensification + windfall) %>% 
+#         filter(year %in% 2017:2041)
 
 #clipr::write_clip(shlaa_breakdown)
 

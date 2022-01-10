@@ -4,16 +4,18 @@ library(dplyr)
 
 message("LDD development data")
 
+data_dir <- "input_data/new_ward_model/"
+
 #Data up to this year is considered good quality
 last_data_year <- 2019
 
 #-------------------------------------------------------------------------------
 
 #lookups
-lsoa_to_ward <- readRDS("input_data/new_ward_model/lsoa_to_WD20_lookup.rds") %>% select(gss_code_lsoa, gss_code_ward)
+lsoa_to_ward <- readRDS(paste0(data_dir,"lookups/lsoa_to_WD20_lookup.rds")) %>% select(gss_code_lsoa, gss_code_ward)
 lsoa_to_msoa <- readRDS("input_data/lookup/lsoa_to_msoa.rds") %>%
   select(gss_code_lsoa, gss_code_msoa)
-ward_to_district <- readRDS("input_data/new_ward_model/lsoa_to_WD20_lookup.rds") %>% select(gss_code_ward, ward_name, gss_code) %>% distinct()
+ward_to_district <- readRDS(paste0(data_dir,"lookups/lsoa_to_WD20_lookup.rds")) %>% select(gss_code_ward, ward_name, gss_code) %>% distinct()
 msoa_to_district <- readRDS("input_data/lookup/msoa_to_district.rds")
 lsoa_to_borough <- left_join(lsoa_to_msoa, msoa_to_district, by = c("gss_code_msoa")) %>%
   select(gss_code_lsoa, gss_code)
@@ -187,8 +189,8 @@ clipr::write_clip(london)
 
 #save it all
 #dir.create("input_data/small_area_model/development_data/", showWarnings = FALSE)
-#saveRDS(borough_units, "input_data/new_ward_model/ldd_backseries_dwellings_borough.rds")
-saveRDS(ward_units, "input_data/new_ward_model/ldd_backseries_dwellings_ward.rds")
+#saveRDS(borough_units, paste0(data_dir,"ldd_backseries_dwellings_borough.rds")
+saveRDS(ward_units, paste0(data_dir,"development_data/ldd_backseries_dwellings_ward_WD20CD.rds"))
 #saveRDS(msoa_units, "input_data/small_area_model/development_data/ldd_backseries_dwellings_msoa.rds")
 
 rm(list=ls())

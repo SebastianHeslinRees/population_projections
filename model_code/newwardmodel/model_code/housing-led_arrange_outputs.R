@@ -5,7 +5,7 @@ arrange_housing_led_outputs <- function(projection,
                                         projected_in_migration,
                                         projected_out_migration,
                                         first_proj_yr, last_proj_yr){
-
+#browser()
   
   #Backseries
   proj_popn <- list(population %>% filter(year < first_proj_yr))
