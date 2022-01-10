@@ -1,6 +1,21 @@
-library(dplyr)
-library(tidyr)
-devtools::load_all('model_code/popmodules')
+#' Project from a starting population using a CCM methodology to
+#' produce an output population and components 
+#'
+#' @param start_population A dataframe. The starting population
+#' @param fertility_rates A dataframe. Fertility rates for the \code{projection_year}
+#' @param mortality_rates A dataframe. Mortality rates for the \code{projection_year}
+#' @param out_rates A dataframe. Out migration rates for the \code{projection_year}
+#' @param in_flows A dataframe. In migration flows for the \code{projection_year}
+#' @param projection_year Numeric. The year being projected
+#' @param constraint_list A list of constraints.
+#' 
+#' @return A list of projected components
+#' 
+#' @import popmodules
+#' @import dplyr
+#' @import tidyr
+#' 
+#' @export
 
 trend_core <- function(start_population,
                             fertility_rates,

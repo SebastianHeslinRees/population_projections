@@ -1,9 +1,33 @@
-arrange_core_outputs <- function(projection,
-                                 population, births, deaths,
-                                 in_migration, out_migration,
-                                 fertility_rates, mortality_rates,
-                                 in_mig_flows, out_mig_rates,
-                                 first_proj_yr, last_proj_yr){
+#' Arrange ward-level trend outputs
+#' 
+#' Take the projection output list which is organised by year and rearrange it
+#' so that its organised by component. Add on the backseries.
+#' 
+#' @param projection A list output from housing_led_core
+#' @param population A dataframe of the population backseries
+#' @param births A dataframe of the births backseries
+#' @param deaths A dataframe of the deaths backseries
+#' @param in_migration A dataframe of the in migration backseries
+#' @param out_migration A dataframe of the out migration backseries
+#' @param fertility_rates A dataframe of fertility rates
+#' @param mortality_rates A dataframe of mortality rates
+#' @param in_mig_flows A dataframe of input in migration flows
+#' @param out_mig_rates A dataframe of input out migration rates
+#' @param first_proj_yr Numeric. The first projection year
+#' @param last_proj_yr Numeric. The last projection
+#' 
+#' @import dplyr
+#' @importFrom data.table rbindlist
+#' 
+#' @return A list of projection outputs by component
+#' 
+
+arrange_trend_outputs <- function(projection,
+                                  population, births, deaths,
+                                  in_migration, out_migration,
+                                  fertility_rates, mortality_rates,
+                                  in_mig_flows, out_mig_rates,
+                                  first_proj_yr, last_proj_yr){
   
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_out_migration <- list(out_migration %>% filter(year < first_proj_yr))
@@ -34,7 +58,7 @@ arrange_core_outputs <- function(projection,
   }
   
   bind_and_arrange <- function(x){
-    data.table::rbindlist(x, use.names = TRUE) %>%
+    rbindlist(x, use.names = TRUE) %>%
       arrange(gss_code, gss_code_ward, year, sex, age) %>% 
       data.frame()
   }

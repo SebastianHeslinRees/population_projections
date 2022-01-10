@@ -1,3 +1,19 @@
+#' Write model outputs to RDS and CSV
+#' 
+#' Outputs from the small area trend model, passed through the \code{arrange}
+#' function are written out a RDS and CSV files
+#' 
+#' @param projection A list. The projection as processed through the arrange function
+#' @param output_dir String. The path to the output folder where files will be written
+#' @param n_csv_elements Numeric. The first n element of the projection list will be
+#'  written to csv. Default = 8.
+#' 
+#' @import dplyr
+#' @importFrom data.table fwrite
+#' @importFrom stringr str_detect
+#' 
+#' @export
+#' 
 output_projection <- function(projection,
                               output_dir = config_list$output_dir,
                               n_csv_elements = 8){

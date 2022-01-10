@@ -1,3 +1,19 @@
+#' Write model outputs to RDS and CSV
+#' 
+#' Outputs from the small area housing-led model, passed through the \code{arrange}
+#' function are written out a RDS and CSV files
+#' 
+#' @param projection A list. The projection as processed through the arrange function
+#' @param output_dir String. The path to the output folder where files will be written
+#' @param n_csv_elements Numeric. The first n element of the projection list will be
+#'  written to csv. Default = 7.
+#' 
+#' @import dplyr
+#' @importFrom data.table fwrite
+#' @importFrom stringr str_detect
+#' 
+#' @export
+
 output_housing_led <- function(projection,
                                 output_dir = config_list$output_dir,
                                 n_csv_elements = 7){
@@ -38,7 +54,7 @@ output_housing_led <- function(projection,
         pivot_wider(names_from = year, values_from = rounded) %>%
         reorder_for_output()
       
-      data.table::fwrite(b_m_a, paste0(name_stub,".csv"))
+      fwrite(b_m_a, paste0(name_stub,".csv"))
       
    } else {
       
@@ -70,9 +86,9 @@ output_housing_led <- function(projection,
         arrange(gss_code, sex, age) %>%
         reorder_for_output()
       
-      data.table::fwrite(female, paste0(name_stub,"_female.csv"))
-      data.table::fwrite(male, paste0(name_stub,"_male.csv"))
-      data.table::fwrite(persons, paste0(name_stub,"_persons.csv"))
+      fwrite(female, paste0(name_stub,"_female.csv"))
+      fwrite(male, paste0(name_stub,"_male.csv"))
+      fwrite(persons, paste0(name_stub,"_persons.csv"))
       
     }
   }

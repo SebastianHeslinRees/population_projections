@@ -1,6 +1,6 @@
-source("model_code/newwardmodel/trend_run_proj.R")
+devtools::load_all('model_code/newwardmodel')
 data_dir <- "input_data/new_ward_model/"
-projection_name <- "test_2050"
+projection_name <- "test_2"
 
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
                         mapping = c("gss_code","year","sex","age"),
@@ -13,36 +13,36 @@ constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lo
 
 
 in_migration <- list(
-  '2020' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_Covid_2020.rds"),
+  '2020' = list(path = paste0(data_dir, "processed/in_migration_flows_WD20CD_Covid_2020.rds"),
                 transition = F),
-  '2021' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_Covid_2021.rds"),
+  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD20CD_Covid_2021.rds"),
                 transition = F),
-  '2022' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_Covid_2022.rds"),
+  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD20CD_Covid_2022.rds"),
                 transition = T),
-  '2025' = list(path = paste0(data_dir, "in_migration_flows_WD20CD_10yr_avg.rds"),
+  '2025' = list(path = paste0(data_dir, "processed/in_migration_flows_WD20CD_10yr_avg.rds"),
                 transition = F))
 
 out_migration <- list(
-  '2020' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_Covid_2020.rds"),
+  '2020' = list(path = paste0(data_dir, "processed/out_migration_rates_WD20CD_Covid_2020.rds"),
                 transition = F),
-  '2021' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_Covid_2021.rds"),
+  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD20CD_Covid_2021.rds"),
                 transition = F),
-  '2022' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_Covid_2022.rds"),
+  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD20CD_Covid_2022.rds"),
                 transition = T),
-  '2025' = list(path = paste0(data_dir, "out_migration_rates_WD20CD_10yr_avg.rds"),
+  '2025' = list(path = paste0(data_dir, "processed/out_migration_rates_WD20CD_10yr_avg.rds"),
                 transition = F))
 
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2020,
                     n_proj_yr = 31,
                     output_dir = paste0("outputs/newwardmodel/", projection_name),
-                    population_path = paste0(data_dir, "ward_population_WD20CD.rds"),
-                    deaths_path = paste0(data_dir, "ward_deaths_WD20CD.rds"),
-                    births_path = paste0(data_dir, "ward_births_WD20CD.rds"),
-                    out_migration_path = paste0(data_dir, "ward_outflow_WD20CD.rds"),
-                    in_migration_path = paste0(data_dir, "ward_inflow_WD20CD.rds"),
-                    mortality_rates = paste0(data_dir, "mortality_rates_WD20CD.rds"),
-                    fertility_rates = paste0(data_dir, "fertility_rates_WD20CD.rds"),
+                    population_path = paste0(data_dir, "backseries/ward_population_WD20CD.rds"),
+                    deaths_path = paste0(data_dir, "backseries/ward_deaths_WD20CD.rds"),
+                    births_path = paste0(data_dir, "backseries/ward_births_WD20CD.rds"),
+                    out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD20CD.rds"),
+                    in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD20CD.rds"),
+                    mortality_rates = paste0(data_dir, "processed/mortality_rates_WD20CD.rds"),
+                    fertility_rates = paste0(data_dir, "processed/fertility_rates_WD20CD.rds"),
                     in_migration = in_migration,
                     out_migration = out_migration,
                     constraint_list = constraint_list)
@@ -51,9 +51,7 @@ config_list <- list(projection_name = projection_name,
 
 #~3 mins with constraining (2 proj years)
 #~8 mins with constraining (31 proj years)
-system.time({
-  projection <- run_new_ward_model(config_list)
-})
+projection <- run_small_area_trend_model(config_list)
 
 #-------------------------------------------------------------------------------
 

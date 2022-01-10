@@ -1,12 +1,31 @@
+#' Project from a starting population using a housing-led methodology to
+#' produce an output population and components 
+#'
+#' @param start_population A dataframe. The starting population
+#' @param trend_projection A list. The output from the small area trend model for
+#'  the year \code{projection_year}
+#' @param communal_establishment_population A dataframe. The communal establishment
+#'  population
+#' @param household_rep_rates A dataframe. Pre-calculated HHRs for model areas
+#' @param households A dataframe. An input total household figure for model areas
+#' @param projection_year Numeric. The year being projected
+#' @param ahs_mix Numeric. A number between 0 and 1 defining the mix of AHS
+#'  from the HHR household model and the implied trend AHS
+#' 
+#' @return A list of projected components
+#' 
+#' @import popmodules
+#' @import dplyr
+#' 
+#' @export
+
 housing_led_core <- function(start_population, 
                              trend_projection,
                              communal_establishment_population,
                              household_rep_rates,
                              households,
                              projection_year,
-                             ahs_mix,
-                             ldd_final_yr,
-                             constrain_projection){
+                             ahs_mix){
   
   col_agg <- c("year", "gss_code", "gss_code_ward", "sex", "age")
   nested_geog <- c("gss_code", "gss_code_ward")

@@ -1,16 +1,19 @@
-library(data.table)
-library(dplyr)
-library(assertthat)
-devtools::load_all('model_code/popmodules')
+#' Run the small area trend model
+#' 
+#' Given a set of input parameters run a cohort component model for small areas
+#' 
+#' @param config_list A List. A housing-led model configuration list.
+#' 
+#' @import dplyr
+#' @import data.table
+#' @import assertthat
+#' @import popmodules
+#' @importFrom utils flush.console
+#' @importFrom loggr log_file
+#'  
+#' @export
 
-source("model_code/newwardmodel/trend_loop.R")
-source("model_code/newwardmodel/trend_arrange_outputs.R")
-source("model_code/newwardmodel/trend_outputs.R")
-source("model_code/newwardmodel/get_constraints.R")
-
-#-------------------------------------------------------------------------------
-
-run_new_ward_model <- function(config_list){
+run_small_area_trend_model <- function(config_list){
   
   expected_config <- c("projection_name",
                        "first_proj_yr",
@@ -29,7 +32,7 @@ run_new_ward_model <- function(config_list){
   
   validate_config_list(config_list, expected_config)
   
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   #initalize the model outputs and log file
   message(config_list$projection_name)
   config_list$output_dir <- .add_slash(config_list$output_dir)
@@ -145,9 +148,9 @@ run_new_ward_model <- function(config_list){
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     
     projected_in_migration <- get_rates_or_flows(projected_in_migration, in_flow_info,
-                                           projection_year, first_proj_yr,
-                                           col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
-                                           data_col = "in_flow")
+                                                 projection_year, first_proj_yr,
+                                                 col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+                                                 data_col = "in_flow")
     
     
     curr_yr_in_flows <- filter(projected_in_migration, year == projection_year) %>% 
@@ -155,21 +158,21 @@ run_new_ward_model <- function(config_list){
       select(year, gss_code, gss_code_ward, sex, age, in_flow)
     
     projected_out_migration <- get_rates_or_flows(projected_out_migration, out_rate_info,
-                                                 projection_year, first_proj_yr,
-                                                 col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
-                                                 data_col = "out_rate")
+                                                  projection_year, first_proj_yr,
+                                                  col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+                                                  data_col = "out_rate")
     
     curr_yr_out_rates <- filter(projected_out_migration, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
       select(year, gss_code, gss_code_ward, sex, age, out_rate)
-
-    projection[[projection_year]] <- projection_loop(start_population = curr_yr_popn,
-                                                     fertility_rates = curr_yr_fertility,
-                                                     mortality_rates = curr_yr_mortality,
-                                                     out_rates = curr_yr_out_rates,
-                                                     in_flows = curr_yr_in_flows,
-                                                     projection_year = projection_year,
-                                                     constraint_list = constraint_list)
+    
+    projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
+                                                fertility_rates = curr_yr_fertility,
+                                                mortality_rates = curr_yr_mortality,
+                                                out_rates = curr_yr_out_rates,
+                                                in_flows = curr_yr_in_flows,
+                                                projection_year = projection_year,
+                                                constraint_list = constraint_list)
     
     curr_yr_popn <- projection[[projection_year]]$population
   }
@@ -178,13 +181,13 @@ run_new_ward_model <- function(config_list){
   #Arrange - 4 secs
   message('')
   message("arrange outputs")
-  projection <- arrange_core_outputs(projection,
-                                     population, births, deaths,
-                                     in_migration, out_migration,
-                                     fertility_rates, mortality_rates,
-                                     projected_in_migration,
-                                     projected_out_migration,
-                                     first_proj_yr, last_proj_yr)
+  projection <- arrange_trend_outputs(projection,
+                                      population, births, deaths,
+                                      in_migration, out_migration,
+                                      fertility_rates, mortality_rates,
+                                      projected_in_migration,
+                                      projected_out_migration,
+                                      first_proj_yr, last_proj_yr)
   
   #Output - 60 secs
   message("write outputs")

@@ -62,3 +62,5 @@ config_list <- list(projection_name = projection_name,
                     #TODO hma_list = list(london = c(paste0("E0900000",1:9), paste0("E090000",10:33))),
                     
 )
+ 
+hl_model <- run_small_area_hl_model(config_list)
