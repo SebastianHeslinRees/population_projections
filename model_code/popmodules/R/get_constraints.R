@@ -63,7 +63,7 @@ get_constraints <- function(constraint_list, last_proj_yr){
       data.frame()
   }
   
-  if(constraint_list$components$births){
+  if(constraint_list$components$out_migration){
     constraint_list$out_migration_constraint <- rbind(
       get_component_from_file(paste0(path,"int_out.rds"), last_proj_yr) %>%
         rename(outflow = int_out),
