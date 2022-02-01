@@ -2,7 +2,7 @@
 
 export("%>%")
 export(.add_slash)
-export(adjust_domestic_migration)
+export(adjust_gross_migration)
 export(aggregate_city_wards)
 export(aggregate_regional_flows)
 export(aggregate_regions)
