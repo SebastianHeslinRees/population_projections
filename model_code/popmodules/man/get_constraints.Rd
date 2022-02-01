@@ -7,13 +7,15 @@
 get_constraints(constraint_list, last_proj_yr)
 }
 \arguments{
-\item{constraint_list}{List with 3 elements.
+\item{constraint_list}{List with 4 elements.
 1: constraint_path: String. The path to the output folder of an LA-level
 projection run using the GLA trend model
-2: mapping: Character. A vector of column names common to both the constraint
+2: lookup_path: String  The path to a lookup from the constraint input
+dataframe geography to the constraining geography
+3: mapping: Character. A vector of column names common to both the constraint
 and the projection. This level at which the constraint is applied.
 E.g. c("gss_code","year","sex","age")
-3: components: A list of logical values indicating whether or not each
+4: components: A list of logical values indicating whether or not each
 component should be constrained. The list must include the following components:
 births, deaths, in_migration, out_migration, population}
 
@@ -24,14 +26,16 @@ A list where each element is a data frame containing constraint data.
 }
 \description{
 The constraint_list parameter has 3 elements: 1. the location of a LA-level trend
-projection; 2. a mapping parameter which maps between the constraint data and the
-projection data; 3. a list indicating components to constrain. The function returns
+projection; 2. the location of a lookup between the lower and higher geographies;
+3. a mapping parameter which maps between the constraint data and the
+projection data; 4. a list indicating components to constrain. The function returns
 a list of data frames each containing component constraint data.
 }
 \examples{
 \dontrun{
 get_constraints(list(
   constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259",
+  lookup_path = "something",
   mapping = c("gss_code","year","sex","age"),
   components = list(births = TRUE,
                     deaths = TRUE,
