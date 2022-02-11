@@ -17,7 +17,7 @@ arrange_small_area_outputs(
   out_mig_rates,
   first_proj_yr,
   last_proj_yr,
-  lookup_path,
+  config_list,
   model
 )
 }
@@ -46,8 +46,7 @@ arrange_small_area_outputs(
 
 \item{last_proj_yr}{Numeric. The last projection}
 
-\item{lookup_path}{String. The file path of a lookup containing small area codes
-and names and LA codes and names}
+\item{config_list}{List. The model config list}
 
 \item{model}{String. Either 'trend' or 'housing-led'}
 }

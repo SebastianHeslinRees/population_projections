@@ -15,13 +15,13 @@
 #' @param out_mig_rates A dataframe of input out migration rates
 #' @param first_proj_yr Numeric. The first projection year
 #' @param last_proj_yr Numeric. The last projection
-#' @param lookup_path String. The file path of a lookup containing small area codes
-#'  and names and LA codes and names
+#' @param config_list List. The model config list
 #' @param model String. Either 'trend' or 'housing-led'
 #' 
 #' @import dplyr
 #' @importFrom data.table rbindlist
 #' @importFrom dtplyr lazy_dt
+#' @importFrom tidyr pivot_wider
 #' 
 #' @return A list of projection outputs by component
 #' 
@@ -32,9 +32,11 @@ arrange_small_area_outputs <- function(projection,
                                        fertility_rates, mortality_rates,
                                        in_mig_flows, out_mig_rates,
                                        first_proj_yr, last_proj_yr,
-                                       lookup_path, model){
+                                       config_list, model){
   
-  lookup <- readRDS(lookup_path)
+  lookup <- readRDS(config_list$lookup_path)
+  
+  #Components backseries
   
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_popn_unc <- list(population %>% filter(year < first_proj_yr))
@@ -45,11 +47,13 @@ arrange_small_area_outputs <- function(projection,
   proj_births <- list(births %>% filter(year < first_proj_yr))
   proj_natural_change <- list()
   proj_births_by_mother <- list()
-  proj_components <- list()
   proj_ahs <- list()
   proj_households <- list()
   proj_hh_pop_sya <- list()
-  proj_components <- list()
+  
+  #-----------------------------------------------------------------------------
+  
+  #Net migration backseries
   
   join_by <- intersect(names(out_migration), names(in_migration))
   
@@ -58,6 +62,24 @@ arrange_small_area_outputs <- function(projection,
                                filter(year < first_proj_yr) %>% 
                                select(year, gss_code, gss_code_ward, sex, age, net_migration))
   
+  #-----------------------------------------------------------------------------
+  
+  #Components dataframe backeries
+  
+  proj_components <- list(rbind(
+    mutate(proj_popn[[1]], component = "popn") %>% rename(value = popn),
+    mutate(proj_births[[1]], component = "births") %>% rename(value = births),
+    mutate(proj_deaths[[1]], component = "deaths") %>% rename(value = deaths),
+    mutate(proj_in_migration[[1]], component = "inflow") %>% rename(value = inflow),
+    mutate(proj_out_migration[[1]], component = "outflow") %>% rename(value = outflow),
+    mutate(proj_net_migration[[1]], component = "netflow") %>% rename(value = net_migration)) %>% 
+      pivot_wider(values_from = value, names_from = component) %>% 
+      mutate(births = ifelse(is.na(births), 0, births)) %>% 
+      select(gss_code, gss_code_ward, year, sex, age, popn, births, deaths, inflow, outflow, netflow))
+  
+  #-----------------------------------------------------------------------------
+  
+  #Elements common to trend and housing-led projections
   
   for(projection_year in first_proj_yr:last_proj_yr){
     
@@ -67,48 +89,9 @@ arrange_small_area_outputs <- function(projection,
     proj_out_migration[[projection_year]] <- projection[[projection_year]][['out_migration']]
     proj_net_migration[[projection_year]] <- projection[[projection_year]][['net_migration']]
     proj_in_migration[[projection_year]] <- projection[[projection_year]][['in_migration']]
+    proj_components[[projection_year]] <- projection[[projection_year]][['detailed_components']] %>% 
+      select(names(proj_components[[1]]))
     
-    #possible problem
-    proj_components[[projection_year]] <- projection[[projection_year]][['detailed_components']]
-    
-  }
-  
-  if(model == "trend"){
-    
-    #trend
-    for(projection_year in first_proj_yr:last_proj_yr){
-      proj_births_by_mother[[projection_year]] <- projection[[projection_year]][['births_by_mothers_age']]
-      proj_natural_change[[projection_year]] <- projection[[projection_year]][['natural_change']]
-    }
-    
-  } else {
-    
-    #housing-led
-    for(projection_year in first_proj_yr:last_proj_yr){
-      proj_popn_unc[[projection_year]] <- projection[[projection_year]][['unconstrained_population']]
-      proj_popn_con[[projection_year]] <- projection[[projection_year]][['constarined_population']]
-      proj_ahs[[projection_year]] <- projection[[projection_year]][['ahs']]
-      proj_households[[projection_year]] <- projection[[projection_year]][['households_detail']]
-      proj_hh_pop_sya[[projection_year]] <- projection[[projection_year]][['household_population_sya']]
-    }
-  }
-  
-  bind_and_arrange <- function(x){
-    
-    z <- rbindlist(x, use.names = TRUE) %>% 
-      left_join(lookup, by = c("gss_code", "gss_code_ward")) %>% 
-      data.frame()
-    
-    arrange_by <- intersect(c("gss_code", "la_name", "gss_code_ward", "ward_name", "year", "sex", "age"),
-                            names(z))
-    
-    select_by <- c(arrange_by, setdiff(names(z), arrange_by))
-    
-    z %>% 
-      lazy_dt() %>% 
-      arrange_at(arrange_by) %>% 
-      select_at(select_by) %>% 
-      data.frame()
   }
   
   output_list <- list(population = proj_popn,
@@ -118,46 +101,91 @@ arrange_small_area_outputs <- function(projection,
                       in_migration = proj_in_migration,
                       net_migration = proj_net_migration,
                       detailed_components = proj_components) %>% 
-    lapply(bind_and_arrange)
+    lapply(.bind_and_arrange, lookup)
   
-  #Summary df
+  #-----------------------------------------------------------------------------
+  
+  #Components summary dataframe
+  
   output_list$summary <- output_list$detailed_components %>%
     select(-age, -sex) %>% 
     group_by(gss_code, la_name, gss_code_ward, ward_name, year) %>% 
-    summarise(across(.fns = sum), .groups = 'drop_last') %>% 
-    data.frame() %>%                  
-    mutate_if(is.numeric, round, digits = 3)
-  #TODO reorder so popn is first and add a total change
+    summarise(across(.fns = sum), .groups = 'drop_last') %>%                  
+    mutate(across(where(is.numeric) & !year, ~round(.x, digits=3))) %>% 
+    mutate(change = births - deaths + netflow) %>% 
+    select(gss_code, la_name, gss_code_ward, ward_name, year,
+           population = popn, births, deaths, inflow, outflow, netflow, change) %>% 
+    arrange(gss_code, gss_code_ward, year) %>% 
+    data.frame()
   
-  #round components tables
-  output_list$detailed_components <- output_list$detailed_components %>%                  
-    mutate_if(is.numeric, round, digits = 3)
-
+  #-----------------------------------------------------------------------------
   
+  #Model-specific outputs
   
   if(model == "trend"){
     
     #trend
+    for(projection_year in first_proj_yr:last_proj_yr){
+      proj_births_by_mother[[projection_year]] <- projection[[projection_year]][['births_by_mothers_age']]
+      proj_natural_change[[projection_year]] <- projection[[projection_year]][['natural_change']]
+    }
+    
     trend_list <- list(natural_change = proj_natural_change,
-                       births_by_mothers_age = proj_births_by_mother)%>% 
-      lapply(bind_and_arrange)
+                       births_by_mothers_age = proj_births_by_mother) %>% 
+      lapply(.bind_and_arrange, lookup)
     
     output_list <- c(output_list, trend_list)
     
   } else {
     
     #housing-led
+    for(projection_year in first_proj_yr:last_proj_yr){
+      proj_popn_unc[[projection_year]] <- projection[[projection_year]][['unconstrained_population']]
+      proj_popn_con[[projection_year]] <- projection[[projection_year]][['constrained_population']]
+      proj_ahs[[projection_year]] <- projection[[projection_year]][['ahs']]
+      proj_households[[projection_year]] <- projection[[projection_year]][['households_detail']]
+      proj_hh_pop_sya[[projection_year]] <- projection[[projection_year]][['household_population_sya']]
+    }
+    
+    #housing-led
     housing_list <- list(unconstrained_population = proj_popn_unc,
                          constrained_population = proj_popn_con,
                          household_population_sya = proj_hh_pop_sya,
-                         ahs = proj_ahs,
+                         ahs_detail = proj_ahs,
                          households_detail = proj_households) %>% 
-      lapply(bind_and_arrange)
+      lapply(.bind_and_arrange, lookup)
+    
+    housing_list$ahs <- housing_list$ahs_detail %>% 
+      select(year, gss_code_ward, actual_ahs) %>% 
+      pivot_wider(names_from = year, values_from = actual_ahs)
     
     output_list <- c(output_list, housing_list)
     
   }
   
-  return(output_list)
+  borough_data <- aggregate_borough_data(output_list, config_list$constraint_list$constraint_path)
   
+  return(c(output_list, borough_data = borough_data))
+  
+}
+
+.bind_and_arrange <- function(x, lookup){
+  
+  z <- rbindlist(x, use.names = TRUE) %>% 
+    left_join(lookup, by = c("gss_code", "gss_code_ward")) %>% 
+    data.frame()
+  
+  arrange_by <- intersect(c("gss_code", "la_name", "gss_code_ward", "ward_name", "year", "sex", "age"),
+                          names(z))
+  
+  select_by <- c(arrange_by, setdiff(names(z), arrange_by))
+  
+  z %>% 
+    lazy_dt() %>% 
+    arrange_at(arrange_by) %>% 
+    select_at(select_by) %>%
+    as_tibble() %>% 
+    mutate(across(where(is.numeric) & !intersect(names(z), c("year","age")),
+                  ~round(.x, digits=8))) %>% 
+    data.frame()
 }

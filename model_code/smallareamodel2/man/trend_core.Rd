@@ -12,7 +12,8 @@ trend_core(
   out_rates,
   in_flows,
   projection_year,
-  constraint_list
+  constraint_list,
+  excess_deaths
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ trend_core(
 \item{projection_year}{Numeric. The year being projected}
 
 \item{constraint_list}{A list of constraints.}
+
+\item{excess_deaths}{A dataframe of additional deaths for the projection year}
 }
 \value{
 A list of projected components

@@ -8,6 +8,7 @@
 #'   \code{bpo_dir} folder. With or without the "csv" suffix.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv.
 #' @param trajectory_range Numeric. The years covered by the input trajectory.
+#' @param wards String indicating the ward geography in the projection: either WD13 or WD22
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom tidyr pivot_longer replace_na
@@ -18,14 +19,23 @@
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
-                                trajectory_range){
+                                trajectory_range,
+                                wards){
   
-  ward_code_lookup <- readRDS("input_data/new_ward_model/lookups/dummy_WD22_codes.rds") %>% 
-    select(gss_code_ward, dummy_code, gss_code)
+  if(wards == "WD22"){
+    ward_code_lookup <- readRDS("input_data/smallarea_model/lookups/dummy_WD22_codes.rds") %>%select(gss_code_ward, dummy_code, gss_code)
+    ward_shlaa_trajectory <-  readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD22CD.rds")
+  }
+  
+  if(wards == "WD13"){
+    ward_code_lookup <- readRDS("input_data/smallarea_model/lookups/ward_2013_name_lookup.rds") %>% select(gss_code_ward, gss_code)
+    ward_shlaa_trajectory <-  readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD13CD.rds")
+  }
+  
   
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
-  csv_path <- paste0(bpo_dir, csv_name)
+  csv_path <- paste0(bpo_dir, "csvs/", csv_name)
   bpo_name <- substr(csv_name,1,nchar(csv_name)-4)
   
   #Read in data, do a check and find where the data starts and finishes
@@ -40,8 +50,8 @@ bpo_template_to_rds <- function(csv_name,
   
   #rm(tbl, unc_row, no_of_gss_codes)
   
-  conventional <- .process_input_csv(conventional_in)
-  non_conventional <- .process_input_csv(non_conventional_in)
+  conventional <- .process_input_csv(conventional_in, trajectory_range, wards, ward_code_lookup)
+  non_conventional <- .process_input_csv(non_conventional_in, trajectory_range, wards, ward_code_lookup)
   trajectory <- rbind(conventional, non_conventional) %>% 
     group_by(year, gss_code_ward) %>% 
     summarise(dev = sum(dev), .groups = 'drop_last') %>% 
@@ -57,10 +67,6 @@ bpo_template_to_rds <- function(csv_name,
   assert_that(length(borough_gss) == 1, msg = "more than one borough found in bpo csv")
   assert_that(borough_gss!="character(0)", msg = "no borough returned in bpo csv")
   
-  #read in standard shlaa trajectories
-  ward_shlaa_trajectory <-  readRDS("input_data/new_ward_model/development_data/ward_shlaa_trajectory_WD22CD.rds")
-  borough_shlaa_trajectory <- readRDS("input_data/new_ward_model/development_data/borough_shlaa_trajectory.rds")
-  
   #Ward trajectory
   bpo_ward_trajectory <- ward_shlaa_trajectory %>%
     left_join(conventional, by = c("gss_code_ward","year")) %>%
@@ -74,33 +80,37 @@ bpo_template_to_rds <- function(csv_name,
     summarise(units = sum(units), .groups = 'drop_last') %>% 
     data.frame()
   
-  assert_that(nrow(bpo_ward_trajectory)==680*39)
-  assert_that(nrow(bpo_borough_trajectory)==33*39)
-  
   saveRDS(bpo_ward_trajectory, paste0(bpo_dir,"rds/bpo_ward_trajectory_",bpo_name,".rds"))
-  saveRDS(bpo_borough_trajectory, paste0(bpo_dir,"rds/bpo_borough_trajectory_",bpo_name,".rds"))
+  #saveRDS(bpo_borough_trajectory, paste0(bpo_dir,"rds/bpo_borough_trajectory_",bpo_name,".rds"))
   
   return(borough_gss)
   
 }
 
 #function to reformat template data
-.process_input_csv <- function(x){
+.process_input_csv <- function(x, trajectory_range, wards, ward_code_lookup=NULL){
   
-  pivot_longer(x,
-                    cols = 3:32,
-                    names_to = "year_char",
-                    values_to = "dev") %>%
+  a <- pivot_longer(x,
+               cols = 3:32,
+               names_to = "year_char",
+               values_to = "dev") %>%
     data.frame() %>% 
     mutate(year = as.numeric(year_char),
-           dev = as.numeric(dev)) %>%
-    
+           dev = as.numeric(dev)) 
+  
+  if(wards == "WD22"){
+  a <- a %>% 
     rename(dummy_code = gss_code_ward) %>% 
-    left_join(ward_code_lookup, by = "dummy_code") %>% 
+    left_join(ward_code_lookup, by = "dummy_code")
+  }
+  
+  a <- a %>% 
     select(year, gss_code_ward, dev) %>%
     filter(year %in% trajectory_range) %>%
     as.data.frame() %>%
     tidyr::replace_na(list(dev = 0))%>% 
     data.frame() 
+  
+  return(a)
   
 }

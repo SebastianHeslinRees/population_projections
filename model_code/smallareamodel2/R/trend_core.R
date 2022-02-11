@@ -8,6 +8,7 @@
 #' @param in_flows A dataframe. In migration flows for the \code{projection_year}
 #' @param projection_year Numeric. The year being projected
 #' @param constraint_list A list of constraints.
+#' @param excess_deaths A dataframe of additional deaths for the projection year
 #' 
 #' @return A list of projected components
 #' 
@@ -23,7 +24,8 @@ trend_core <- function(start_population,
                        out_rates,
                        in_flows,
                        projection_year,
-                       constraint_list){
+                       constraint_list,
+                       excess_deaths){
   
   cat('\r',projection_year)
   utils::flush.console()
@@ -81,6 +83,14 @@ trend_core <- function(start_population,
                                      col_aggregation = col_agg,
                                      validate_geog = TRUE,
                                      col_geog = nested_geog)
+  
+  #Covid deaths
+  if(!is.null(excess_deaths)){
+    deaths <- left_join(deaths, excess_deaths, by = col_agg) %>% 
+      mutate(deaths = deaths + excess_deaths) %>% 
+      select(names(deaths)) %>% 
+      check_negative_values("deaths")
+  }
   
   if(constraint_list$components$deaths){
     

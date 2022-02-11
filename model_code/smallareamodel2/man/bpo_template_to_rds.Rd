@@ -4,7 +4,7 @@
 \alias{bpo_template_to_rds}
 \title{Process a standard bpo template csv file into 2 rds files}
 \usage{
-bpo_template_to_rds(csv_name, bpo_dir, trajectory_range)
+bpo_template_to_rds(csv_name, bpo_dir, trajectory_range, wards)
 }
 \arguments{
 \item{csv_name}{String. The name of the dwelling trajectory csv saved in the
@@ -13,6 +13,8 @@ bpo_template_to_rds(csv_name, bpo_dir, trajectory_range)
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv.}
 
 \item{trajectory_range}{Numeric. The years covered by the input trajectory.}
+
+\item{wards}{String indicating the ward geography in the projection: either WD13 or WD22}
 }
 \description{
 Take a standard ward-level csv bpo template and create 2
