@@ -122,3 +122,4 @@ test_that("calculate_scaling_factors should throw an error", {
                               col_popn = "popn",
                               col_constraint = "cindy"))
 })
+

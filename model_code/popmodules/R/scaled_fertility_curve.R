@@ -62,7 +62,7 @@ scaled_fertility_curve <- function(popn,
   col_aggregation <- unique(c("year", "gss_code", col_geog))
   
   births <- lazy_dt(births) %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(births = sum(births)) %>%
     data.frame()
   
@@ -81,11 +81,11 @@ scaled_fertility_curve <- function(popn,
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-   scaling_backseries <- aged_on_population %>% 
+  scaling_backseries <- aged_on_population %>% 
     lazy_dt() %>%
     right_join(target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(curve_count = sum(curve_count)) %>%
     filter(year %in% births$year) %>%
     ungroup() %>%
@@ -146,7 +146,7 @@ validate_scaled_fertility_curve_input <- function(population, births, target_cur
                                                   avg_or_trend, data_col, output_col){
   
   # test input parameters are of the correct type
- 
+  
   assert_that(is.numeric(last_data_year),
               msg="scaled_fertility_curve expects that last_data_year is an numeric")
   assert_that(is.numeric(n_years_to_avg),

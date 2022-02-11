@@ -93,7 +93,7 @@ get_constraints <- function(constraint_list, last_proj_yr){
     nm <- last(names(x))
     filter(x, gss_code %in% gss_codes) %>% 
       left_join(constraint_areas, by = "gss_code") %>% 
-      group_by_at(mapping) %>% 
+      group_by(across(mapping)) %>% 
       rename(value = !!nm) %>% 
       summarise(!!nm := sum(value), .groups = 'drop_last') %>% 
       data.frame()

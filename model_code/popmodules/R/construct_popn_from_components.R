@@ -19,6 +19,7 @@
 #' @import dplyr
 #' @import assertthat
 #' @importFrom dtplyr lazy_dt
+#' @importFrom data.table rbindlist
 #'
 #' @export
 #' 
@@ -52,10 +53,10 @@ construct_popn_from_components <- function(start_population,
   }
   
   constructed <- rbind(start_population,
-                       data.table::rbindlist(addition_data),
-                       data.table::rbindlist(subtraction_data)) %>%
+                       rbindlist(addition_data),
+                       rbindlist(subtraction_data)) %>%
     lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(popn = sum(popn)) %>%
     as.data.frame() %>%
     select(col_aggregation, "popn")

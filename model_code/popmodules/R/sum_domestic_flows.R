@@ -35,7 +35,7 @@ sum_domestic_flows <- function(domestic_flow, in_or_out, flow_col = "flow"){
   
   dom <- dtplyr::lazy_dt(domestic_flow) %>%
     rename(flow = !!flow_col) %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(flow = sum(flow)) %>%
     as.data.frame() %>%
     rename(gss_code = !!gss_col) %>%

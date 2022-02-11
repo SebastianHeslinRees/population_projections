@@ -29,6 +29,7 @@
 #' @import assertthat
 #' @importFrom utils capture.output
 #' @importFrom stats setNames
+#' @importFrom dtplyr lazy_dt
 #'
 #' @export
 
@@ -49,7 +50,7 @@ calculate_scaling_factors <- function(popn,
     #warning(paste("calculate_scaling_factors is aggregating the input constraints up to the requested levels.",
     #              "\nAlso, feel free to delete this warning in the source code if we're getting it too often, I'm just curious."))
     constraint <- lazy_dt(constraint) %>%
-      group_by_at(unname(col_aggregation)) %>%
+      group_by(across(unname(!!col_aggregation))) %>%
       summarise(!!sym(col_constraint) := sum(!!sym(col_constraint))) %>%
       ungroup() %>%
       data.frame()
@@ -73,7 +74,7 @@ calculate_scaling_factors <- function(popn,
   scaling <- popn %>%
     mutate(do_scale__ = !!enquo(rows_to_constrain)) %>%
     left_join(constraint, by = col_aggregation) %>%
-    group_by_at(names(col_aggregation)) %>%
+    group_by(across(names(col_aggregation))) %>%
     mutate(popn_total__ = sum(!!sym(col_popn_new)),
            scaling = ifelse(!do_scale__, 1,
                             ifelse(is.na(!!sym(col_constraint_new)), -999,
@@ -105,9 +106,9 @@ calculate_scaling_factors <- function(popn,
     scaling[[col_constraint_new]] != 0
 
   if(any(ix)) {
-    unable_to_scale <- dtplyr::lazy_dt(scaling) %>%
+    unable_to_scale <- lazy_dt(scaling) %>%
       filter(ix==TRUE) %>%
-      group_by_at(names(col_aggregation)) %>%
+      group_by(across(names(!!col_aggregation))) %>%
       summarise(!!col_constraint_new := first(!!sym(col_constraint_new))) %>%
       data.frame()
     
