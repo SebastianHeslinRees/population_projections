@@ -19,7 +19,6 @@ output_small_area_projection <- function(projection,
                                          model){
   
   
-  
   #RDS
   
   message("writing rds files")
@@ -33,44 +32,38 @@ output_small_area_projection <- function(projection,
   #CSV
   
   message("writing csv files")
-  
+  #browser()
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
-  
-  if(model == "trend"){
-    csv_elements <- c(1:6, 9)
-  } else {
-    csv_elements <- c(1:6, 9:11)
-  }
+  csv_elements <- c(1:6, 9:10)
+
+  if(model == "housing-led"){ csv_elements <- c(csv_elements, 11) }
   
   for(i in csv_elements) { 
     .make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
   }
   
-  fwrite(projection$detailed_components, paste0(output_dir,"/csv/components of change.csv"))
-  fwrite(projection$summary, paste0(output_dir,"/csv/summary.csv"))
+  #-----------------------------------------------------------------------------
   
+  projection$detailed_components <- projection$detailed_components %>%                  
+    mutate(across(where(is.numeric) & !c(year, age), ~round(.x, digits=3))) %>% 
+    data.frame()
+  
+  fwrite(projection$detailed_components, paste0(output_dir,"/csv/detailed_components_of_change.csv"))
+  fwrite(projection$summary, paste0(output_dir,"/csv/summary_components_of_change.csv"))
+  
+  #-----------------------------------------------------------------------------
   
   if(model == "housing-led"){
     
-    ahs <- projection$ahs %>% 
-      select(year, gss_code_ward, actual_ahs) %>% 
-      tidyr::pivot_wider(names_from = year, values_from = actual_ahs)
-    
-    fwrite(ahs, paste0(output_dir,"/csv/ahs.csv"))
-    fwrite(projection$ahs, paste0(output_dir,"/csv/ahs_detailed.csv"))
+    fwrite(projection$ahs, paste0(output_dir,"/csv/ahs.csv"))
+    fwrite(projection$ahs_detail, paste0(output_dir,"/csv/ahs_detailed.csv"))
     fwrite(projection$households_detail, paste0(output_dir,"/csv/households_detail.csv"))
     
   }
   
-  #-----------------------------------------------------------------------------
+  invisible()
   
-  #Excel
-  # if(write_excel){
-  #   excel_wb_name <- substr(projection_name,1,nchar(projection_name)-14)
-  #   variant_name <- paste("Variant trend projection:",str_replace_all(excel_wb_name, "_", " "))
-  #   create_trend_model_excels(output_dir, excel_wb_name, variant_name, FALSE)
-  # }
 }
 
 .make_csvs <- function(data, name_stub){
@@ -79,18 +72,10 @@ output_small_area_projection <- function(projection,
     data <- select(data, -ce_popn, -popn)
   }
   
-  data_col <- names(data)[ncol(data)]
+  data_col <- last(names(data))
   cols <- setdiff(names(data), data_col)
-  #cols <- c("gss_code", "la_name", "gss_code_ward","gss_code_ward", cols[!cols %in% c("gss_code","gss_code_ward")])
-  
-  #cols <- intersect(c("gss_code", "la_name", "gss_code_ward", "ward_name", "year", "sex", "age"),
-  #                        names(data))
-  
-  #cols <- c(cols, setdiff(names(data), cols))
-  
-  data <- data %>%
-    filter(year >= 2011) #%>%
-    #select_at(c(cols, data_col))
+
+  data <- data %>% filter(year >= 2011) %>% lazy_dt()
   
   
   if(str_detect(name_stub, "births_by_mothers_age")){
@@ -98,8 +83,8 @@ output_small_area_projection <- function(projection,
     b_m_a <- filter(data, sex == "female", age %in% 15:49) %>%
       rename(rounded = !!data_col) %>%
       mutate(rounded = round(rounded, 3)) %>%
-      pivot_wider(names_from = year, values_from = rounded) %>%
-      reorder_for_output()
+      pivot_wider(names_from = year, values_from = rounded) %>% 
+      data.frame()
     
     fwrite(b_m_a, paste0(name_stub,".csv"))
     
@@ -108,30 +93,31 @@ output_small_area_projection <- function(projection,
     female <- filter(data, sex == "female") %>%
       rename(rounded = !!data_col) %>%
       mutate(rounded = round(rounded, 3)) %>%
-      arrange(year) %>% # so that pivot_wider behaves
+      arrange(year)  %>% 
+      data.frame() %>%
       pivot_wider(names_from = year, values_from = rounded) %>%
-      arrange(gss_code, sex, age) %>%
-      reorder_for_output()
+      arrange(gss_code, gss_code_ward, age)
     
     male <- filter(data, sex == "male")  %>%
       rename(rounded = !!data_col) %>%
       mutate(rounded = round(rounded, 3))%>%
-      arrange(year) %>%
+      arrange(year) %>% 
+      data.frame() %>%
       pivot_wider(names_from = year, values_from = rounded) %>%
-      arrange(gss_code, sex, age) %>%
-      reorder_for_output()
-    
+      arrange(gss_code, gss_code_ward, age) 
+
     persons <- data %>%
       mutate(sex = "persons") %>%
       rename(value = !!data_col) %>%
-      group_by_at(cols) %>%
+      group_by(across(!!cols)) %>%
       summarise(value = sum(value), .groups = 'drop_last') %>%
-      ungroup() %>%
+      data.frame() %>%
       mutate(value = round(value, 3))%>%
       arrange(year) %>%
       pivot_wider(names_from = year, values_from = value) %>%
-      arrange(gss_code, sex, age) %>%
-      reorder_for_output()
+      arrange(gss_code, gss_code_ward, age) %>% 
+      data.frame() %>% 
+      rename_with(.cols = starts_with("X"), .fn = function(x){substr(x,2,5)})
     
     fwrite(female, paste0(name_stub,"_female.csv"))
     fwrite(male, paste0(name_stub,"_male.csv"))

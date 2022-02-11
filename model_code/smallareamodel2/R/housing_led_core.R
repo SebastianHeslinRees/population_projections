@@ -21,6 +21,7 @@
 #' @import popmodules
 #' @import dplyr
 #' @import tidyr
+#' @importFrom dtplyr lazy_dt
 #' 
 #' @export
 
@@ -61,6 +62,7 @@ housing_led_core <- function(start_population,
     check_negative_values("household_popn")
   
   households_detail <- household_population_sya %>% 
+    lazy_dt() %>% 
     group_by(gss_code, gss_code_ward, year) %>% 
     summarise(trend_population = sum(popn),
               ce_population = sum(ce_popn),
@@ -81,9 +83,11 @@ housing_led_core <- function(start_population,
                                  age %in% 35:49 ~ "35_49",
                                  age %in% 50:64 ~ "50_64",
                                  TRUE ~ "65_plus")) %>% 
+    lazy_dt() %>% 
     group_by(gss_code, gss_code_ward, sex, age_group) %>% 
     summarise(household_popn = sum(household_popn), .groups = 'drop_last') %>% 
     data.frame() %>% 
+    lazy_dt() %>% 
     left_join(household_rep_rates, by = c("gss_code_ward", "sex", "age_group")) %>% 
     mutate(households = hh_rep_rate * household_popn) %>% 
     group_by(gss_code, gss_code_ward, year) %>% 
@@ -217,9 +221,11 @@ housing_led_core <- function(start_population,
     check_negative_values("household_popn")
   
   actual_ahs <- final_household_popn %>% 
+    lazy_dt() %>% 
     group_by(gss_code_ward) %>% 
     summarise(hh_popn = sum(household_popn), .groups = 'drop_last') %>% 
     left_join(households, by ="gss_code_ward") %>% 
+    data.frame() %>% 
     mutate(actual_ahs = hh_popn/households) %>% 
     select(-year, -hh_popn, -households)
   
@@ -233,7 +239,8 @@ housing_led_core <- function(start_population,
     select(-outflow) %>% 
     rbind(final_migration$inflow %>% 
             rename(net_migration = inflow)) %>% 
-    group_by_at(col_agg) %>% 
+    lazy_dt() %>% 
+    group_by(across(!!col_agg)) %>% 
     summarise(net_migration = sum(net_migration), .groups = 'drop_last') %>% 
     data.frame()
   
@@ -246,6 +253,7 @@ housing_led_core <- function(start_population,
                           rename(final_migration$outflow, popn = outflow) %>%  mutate(component = 'outflow'),
                           rename(net_migration, popn = net_migration) %>%  mutate(component = 'netflow')) %>%
     
+    lazy_dt() %>% 
     group_by(gss_code, gss_code_ward, year, sex, age, component) %>% 
     summarise(popn = sum(popn), .groups = 'drop_last') %>% 
     data.frame() %>% 

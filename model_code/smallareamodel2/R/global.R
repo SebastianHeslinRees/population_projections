@@ -1,5 +1,7 @@
 #' @importFrom utils globalVariables
 globalVariables(c(
+  "where",
+  ".",
   "age",
   "age_group",
   "births",
@@ -42,5 +44,20 @@ globalVariables(c(
   "hh_popn",
   "component",
   "actual_ahs",
-  "V1"
+  "V1",
+  'flow',
+  'trend_inflow',
+  'trend_outflow',
+  'trend_ratio',
+  'trend_netflow',
+  'netdiff',
+  'ratio_in',
+  'ratio_out',
+  'final_in',
+  'final_out',
+  'final_net',
+  'netflow',
+  'python_to_excel_smallarea2'
 ))
+
+

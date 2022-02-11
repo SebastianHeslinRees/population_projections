@@ -50,7 +50,7 @@
            })
   }
   
-  if("constraint_list" %in% names(config_list) & !is.null(constraint_list$constraint_path)){
+  if("constraint_list" %in% names(config_list) & !is.null(config_list$constraint_list$constraint_path)){
     assert_that(dir.exists(config_list$constraint_list$constraint_path),
                 msg = "constraint folder does not exist at specified path")
   }

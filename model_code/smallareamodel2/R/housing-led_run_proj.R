@@ -45,7 +45,8 @@ run_small_area_hl_model <- function(config_list){
                        "hhr_path",
                        "ahs_mix",
                        "hhr_static_or_projected",
-                       "lookup_path")
+                       "lookup_path",
+                       "excess_deaths_path")
   
   validate_config_list(config_list, expected_config)
   
@@ -104,11 +105,17 @@ run_small_area_hl_model <- function(config_list){
   out_rate_info <- get_rates_flows_info(config_list$out_migration, first_proj_yr, last_proj_yr)
   out_migration_rates <- NULL
   
+  if(!is.null(config_list$excess_deaths_path)){
+    excess_deaths <- get_component_from_file(filepath = config_list$excess_deaths_path, 
+                                             max_yr = last_proj_yr)
+  } else {
+    excess_deaths <- NULL
+  }
   
   # Constraints - 30 secs
-  if(!is.null(constraint_list)){
+  if(!is.null(config_list$constraint_list)){
     message("get constraints")
-    constraint_list <- get_constraints(constraint_list, last_proj_yr)
+    constraint_list <- get_constraints(config_list$constraint_list, last_proj_yr)
   }
   #-------------------------------------------------------------------------------
   
@@ -147,6 +154,7 @@ run_small_area_hl_model <- function(config_list){
   
   curr_yr_popn <- filter(population, year == first_proj_yr-1)
   hhr_ahs_uplift <- NULL
+  curr_yr_hhr <- filter(household_rep_rates, year == 2011)
   
   message("projecting")
   for(projection_year in first_proj_yr:last_proj_yr){
@@ -182,8 +190,14 @@ run_small_area_hl_model <- function(config_list){
     if(config_list$hhr_static_or_projected == "projected"){
       curr_yr_hhr <- filter(household_rep_rates, year == projection_year)
     } else {
-      curr_yr_hhr <- filter(household_rep_rates, year == 2011) %>% 
-        mutate(year = projection_year)
+      curr_yr_hhr <- curr_yr_hhr %>% mutate(year = projection_year)
+    }
+    
+    
+    if(!is.null(excess_deaths) & projection_year %in% excess_deaths$year){
+      curr_yr_excess_deaths <- filter(excess_deaths, year == projection_year)
+    } else {
+      curr_yr_excess_deaths <- NULL
     }
     
     #project
@@ -193,7 +207,8 @@ run_small_area_hl_model <- function(config_list){
                                                       out_rates = curr_yr_out_rates,
                                                       in_flows = curr_yr_in_flows,
                                                       projection_year = projection_year,
-                                                      constraint_list = constraint_list)
+                                                      constraint_list = constraint_list,
+                                                      excess_deaths = curr_yr_excess_deaths)
     
     hl_projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                          trend_projection = trend_projection[[projection_year]],
@@ -205,11 +220,19 @@ run_small_area_hl_model <- function(config_list){
                                                          hhr_ahs_uplift = hhr_ahs_uplift,
                                                          constraint_list = constraint_list)
     
-    
     curr_yr_popn <- hl_projection[[projection_year]]$population
     hhr_ahs_uplift <- hl_projection[[projection_year]]$hhr_ahs_uplift
     
   }
+  
+  rm(list = setdiff(ls(), c("hl_projection",
+                            "population", "births", "deaths",
+                            "in_migration", "out_migration",
+                            "fertility_rates", "mortality_rates",
+                            "in_migration_flows",
+                            "out_migration_rates",
+                            "first_proj_yr", "last_proj_yr",
+                            "config_list")))
   
   #-------------------------------------------------------------------------------
   
@@ -223,9 +246,10 @@ run_small_area_hl_model <- function(config_list){
                                               in_migration_flows,
                                               out_migration_rates,
                                               first_proj_yr, last_proj_yr,
-                                              config_list$lookup_path,
+                                              config_list,
                                               "housing-led")
   
+  rm(list=setdiff(ls(), c("hl_projection","config_list")))
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins

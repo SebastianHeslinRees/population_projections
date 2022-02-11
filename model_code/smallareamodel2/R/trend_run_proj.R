@@ -29,7 +29,8 @@ run_small_area_trend_model <- function(config_list){
                        "in_migration",
                        "out_migration",
                        "constraint_list",
-                       "lookup_path")
+                       "lookup_path",
+                       "excess_deaths_path")
   
   validate_config_list(config_list, expected_config)
   
@@ -114,6 +115,12 @@ run_small_area_trend_model <- function(config_list){
   out_rate_info <- get_rates_flows_info(config_list$out_migration, first_proj_yr, last_proj_yr)
   projected_out_migration <- NULL
   
+  if(!is.null(config_list$excess_deaths_path)){
+    excess_deaths <- get_component_from_file(filepath = config_list$excess_deaths_path, 
+                                             max_yr = last_proj_yr)
+  } else {
+    excess_deaths <- NULL
+  }
   
   #Constraints - 30 secs
   if(!is.null(constraint_list)){
@@ -161,13 +168,20 @@ run_small_area_trend_model <- function(config_list){
       mutate(year = projection_year) %>% 
       select(year, gss_code, gss_code_ward, sex, age, out_rate)
     
+    if(!is.null(excess_deaths) & projection_year %in% excess_deaths$year){
+      curr_yr_excess_deaths <- filter(excess_deaths, year == projection_year)
+    } else {
+      curr_yr_excess_deaths <- NULL
+    }
+    
     projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                 fertility_rates = curr_yr_fertility,
                                                 mortality_rates = curr_yr_mortality,
                                                 out_rates = curr_yr_out_rates,
                                                 in_flows = curr_yr_in_flows,
                                                 projection_year = projection_year,
-                                                constraint_list = constraint_list)
+                                                constraint_list = constraint_list,
+                                                excess_deaths = curr_yr_excess_deaths)
     
     curr_yr_popn <- projection[[projection_year]]$population
   }
@@ -183,7 +197,7 @@ run_small_area_trend_model <- function(config_list){
                                            projected_in_migration,
                                            projected_out_migration,
                                            first_proj_yr, last_proj_yr,
-                                           config_list$lookup_path,
+                                           config_list,
                                            "trend")
   
   #Output - 60 secs
