@@ -27,7 +27,8 @@ sum_births_and_split_by_sex_ratio <- function(births,
   this_year <- births$year[1]
 
   #Slightly different way of doing the same thing
-   births <- group_by_at(births, col_aggregation) %>%
+   births <- births %>% 
+     group_by(across(!!col_aggregation)) %>%
      summarise(births = sum(births)) %>%
      ungroup() %>%
      mutate(age = 0, year = this_year, male = births * prop_male, female = births * prop_female) %>%

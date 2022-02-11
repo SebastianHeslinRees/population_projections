@@ -31,7 +31,7 @@ distribute_within_age_band <- function(popn_1, popn_2, popn_1_col, popn_2_col,
 
   distribution <- filter(popn_2, age >= min_age) %>%
     filter(age <= max_age) %>%
-    group_by_at(c(col_aggregation)) %>%
+    group_by(across(!!col_aggregation)) %>%
     mutate(popn_total = sum(!!sym(popn_2_col))) %>%
     mutate(age_distribution = ifelse(popn_total == 0, 1/n(), !!sym(popn_2_col) / popn_total)) %>%
     as.data.frame() %>%

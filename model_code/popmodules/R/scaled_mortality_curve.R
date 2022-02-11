@@ -22,6 +22,8 @@
 #'   containing the calculated rates
 #' @param project_rate_from Numeric. The year for which a rate is being calculated.
 #'   Default \code{last_data_year+1}.
+#' @param col_aggregation Character. Deafult c("gss_code","year","sex")
+#' @param col_geog Character. Defaultr "gss_code"
 #'
 #' @return A data frame of mortality probabilities rates by LA, year, sex and age
 #'   with the same age structure as the target curves and overall rates scaled so
@@ -70,7 +72,7 @@ scaled_mortality_curve <- function(popn, births, deaths,
     mutate(curve_count = rate * popn) %>%
     left_join(deaths, by = c(col_aggregation, "age")) %>%
     rename(value = !!data_col) %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(actual = sum(value),
               curve_count = sum(curve_count),
               .groups = 'drop_last') %>%

@@ -52,7 +52,7 @@ calculate_rate_by_regression <- function(data_backseries, n_years_regression, la
     rename(value = data_col) %>%
     filter(year %in% back_years) %>%
     mutate(year = n_years_regression - last_data_year + year)%>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     tidyr::nest() %>%
     mutate(
       Model = map(data, regression),

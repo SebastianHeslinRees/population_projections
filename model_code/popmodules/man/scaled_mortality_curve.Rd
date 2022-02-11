@@ -46,6 +46,10 @@ containing the calculated rates}
 
 \item{project_rate_from}{Numeric. The year for which a rate is being calculated.
 Default \code{last_data_year+1}.}
+
+\item{col_aggregation}{Character. Deafult c("gss_code","year","sex")}
+
+\item{col_geog}{Character. Defaultr "gss_code"}
 }
 \value{
 A data frame of mortality probabilities rates by LA, year, sex and age

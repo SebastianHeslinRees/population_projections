@@ -119,10 +119,10 @@ popn_age_on <- function(popn,
   
   aged <- aged %>%
     lazy_dt() %>% 
-    group_by_at(col_aggregation, add=FALSE) %>%
-    summarise_at(col_data, sum) %>%
+    group_by(across(!!col_aggregation)) %>%
+    summarise(across(!!col_data, sum)) %>% 
     data.frame()
-  
+
   #-----------------------------------------------------------------------------
   
   #Add births

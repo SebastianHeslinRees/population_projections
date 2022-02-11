@@ -47,13 +47,13 @@ check_negative_values <- function(x, data_col, warn_only = FALSE, change_value =
                    n, " aggregation levels summing to ",
                    total_negative))
       print(zero_msg)
-      if(sum(ix) < 30) {
-        print("Values:")
-        print(x[ix,])
-      } else {
-        print("First 30 values:")
-        print(x[ix,][1:30,])
-      }
+      # if(sum(ix) < 30) {
+      #   print("Values:")
+      #   print(x[ix,])
+      # } else {
+      #   print("First 30 values:")
+      #   print(x[ix,][1:30,])
+      # }
     }), collapse = "\n"))
 
     if(!warn_only){

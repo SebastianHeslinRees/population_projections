@@ -115,7 +115,7 @@ recode_gss_codes <- function(df_in,
     if(aggregate_data){
       df <- df %>% 
         dtplyr::lazy_dt() %>%
-        group_by_at(col_aggregation) %>%
+        group_by(across(!!col_aggregation)) %>%
         summarise_all(.funs = fun) %>%
         as.data.frame()
       
@@ -186,8 +186,8 @@ recode_gss_codes <- function(df_in,
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
       dtplyr::lazy_dt() %>% 
-      group_by_at(col_aggregation) %>%
-      summarise_all(.funs=fun) %>%
+      group_by(across(!!col_aggregation)) %>%
+      summarise(across(everything(), fun)) %>%
       data.frame() %>%
       rename(!!col_geog := "gss_code")
     

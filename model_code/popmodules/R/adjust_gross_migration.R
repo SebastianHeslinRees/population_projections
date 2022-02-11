@@ -56,7 +56,7 @@ adjust_gross_migration <- function(popn, target, inflow_df, outflow_df,
   #find diff between popn and target
   domestic_adjustment <- popn %>%
     dtplyr::lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(!!col_popn_new := sum(!!sym(col_popn_new))) %>%
     as.data.frame() %>%
     dtplyr::lazy_dt() %>%
@@ -75,7 +75,7 @@ adjust_gross_migration <- function(popn, target, inflow_df, outflow_df,
   inflow_target <- inflow_df %>%
     rename(inflow__ = !!col_inflow) %>% 
     dtplyr::lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(inflow_orig = sum(inflow__)) %>%
     as.data.frame() %>%
     dtplyr::lazy_dt() %>%
@@ -87,7 +87,7 @@ adjust_gross_migration <- function(popn, target, inflow_df, outflow_df,
   outflow_target <- outflow_df %>%
     rename(outflow__ = !!col_outflow) %>% 
     dtplyr::lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(outflow_orig = sum(outflow__)) %>%
     as.data.frame() %>%
     dtplyr::lazy_dt() %>%
