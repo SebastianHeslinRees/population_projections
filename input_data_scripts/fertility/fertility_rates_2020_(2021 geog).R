@@ -50,7 +50,27 @@ trend_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
 
 #------------------------------------------------------------------------------- 
 
+# 5 year trended rates
+
+trend_4yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
+                                     births = births_mye_path,
+                                     target_curves = fertility_curve_filepath,
+                                     last_data_year = 2019,
+                                     n_years_to_avg = 4,
+                                     avg_or_trend = "trend",
+                                     data_col = "births",
+                                     output_col = "rate") %>%
+  
+  project_rates_npp(rate_col = "rate",
+                    rate_trajectory_filepath = fertility_trajectory_filepath,
+                    first_proj_yr = 2020,
+                    n_proj_yr = 30,
+                    npp_var = "2018_principal")
+
+#------------------------------------------------------------------------------- 
+
 saveRDS(average_5yrs, "input_data/fertility/fert_rates_5yr_avg_2020.rds")
 saveRDS(trend_5yrs, "input_data/fertility/fert_rates_5yr_trend_2020.rds")
+saveRDS(trend_4yrs, "input_data/fertility/fert_rates_5yr_trend_2019.rds")
 
 rm(list=ls())

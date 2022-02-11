@@ -16,3 +16,6 @@ source('input_data_scripts/smallarea_model/migration_rates_WD13CD.R')
 source('input_data_scripts/smallarea_model/household_model_WD13CD.R')
 source('input_data_scripts/smallarea_model/ldd_WD13CD.R')
 source('input_data_scripts/smallarea_model/2017_shlaa_WD13CD.R')
+
+#other
+source("input_data_scripts/smallarea_model/excess_deaths.R")
