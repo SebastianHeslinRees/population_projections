@@ -322,16 +322,50 @@ ward_shlaa <- rbind(ward_large, ward_intense, ward_trend_windfall) %>%
                         gss_code_ward = unique(london_wards$gss_code_ward),
                         fill = list(units = 0))
 
-# borough_shlaa <- rbind(borough_large, borough_intense, borough_windfall) %>%
-#         group_by(year, gss_code) %>%
-#         summarise(units = sum(units), .groups = 'drop_last') %>%
-#         data.frame()
-
 sum(ward_shlaa$units)
-#sum(borough_shlaa$units)
-
 
 #Save
 saveRDS(ward_shlaa, "input_data/smallarea_model/development_data/ward_shlaa_trajectory_WD22CD.rds")
+
+#-------------------------------------------------------------------------------
+
+#Adjust initial years based on Svaills assumptions
+
+#Savills forecast 41.7k for 2020 & 43k per year for the period 2021-25
+#Then distribute the difference between the new trajectory and the SHLAA
+#to the later years (2026-41)
+savills <- filter(ward_shlaa, year %in% 2020:2025) %>% 
+        group_by(year) %>% 
+        summarise(shlaa_units = sum(units)) %>% 
+        cbind(data.frame(savills_units = c(41700,rep(43000,5)))) %>% 
+        mutate(reduction = shlaa_units - savills_units) %>% 
+        select(year, reduction)
+
+short_term_savills <- filter(ward_shlaa, year %in% 2020:2025) %>% 
+        group_by(year) %>% 
+        mutate(share = units/sum(units)) %>% 
+        left_join(savills, by = "year") %>% 
+        mutate(distributed_reduction = reduction * share,
+               units = units - distributed_reduction) %>% 
+        select(names(ward_shlaa))
+
+long_term_savills <- filter(ward_shlaa, year %in% 2026:2041) %>% 
+        mutate(share = units/sum(units),
+               distributed_increase = sum(savills$reduction) * share,
+               units = units + distributed_increase) %>% 
+        select(names(ward_shlaa))
+
+
+savills_trajectory <-  filter(ward_shlaa, !year %in% 2020:2041) %>% 
+        rbind(short_term_savills, long_term_savills) %>% 
+        arrange(gss_code_ward, year)
+
+sum(ward_shlaa$units)
+sum(savills_trajectory$units)
+
+#Save
+saveRDS(savills_trajectory, "input_data/smallarea_model/development_data/ward_savills_trajectory_WD22CD.rds")
+
+#-------------------------------------------------------------------------------
 
 rm(list=ls())

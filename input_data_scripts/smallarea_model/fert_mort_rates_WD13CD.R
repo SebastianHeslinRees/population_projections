@@ -95,7 +95,7 @@ fert_rates_4 <- scaled_fertility_curve(popn = ward_pop,
                     npp_var = "2018_principal") %>% 
   complete_popn_dataframe()
 
-#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------#
 
 saveRDS(mort_rates_5, paste0(input_data_dir, "processed/mortality_rates_5yr_trend_WD13CD.rds"))
 saveRDS(fert_rates_5,  paste0(input_data_dir, "processed/fertility_rates_5yr_trend_WD13CD.rds"))
