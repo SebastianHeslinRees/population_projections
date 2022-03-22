@@ -78,6 +78,7 @@ shlaa_rmd_2020 <- function(borough_name, wards){
 wards <- "WD13"
 
 projections <- list.dirs("outputs/flexible_area_model", recursive = FALSE)
+
 projections <- projections[grepl(wards, projections)]
 
 upper_path <- projections[grepl("upper", tolower(projections))]
@@ -92,7 +93,9 @@ for(x in c("population","births","deaths","in_migration","out_migration","net_mi
   lower_proj[[x]] <- readRDS(paste0(lower_path, "/", x, ".rds")) 
 }
 
+
 lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds") %>% 
+  
   filter(substr(gss_code,1,3)=="E09") %>% 
   select(gss_code, la_name) %>%
   distinct()
@@ -105,7 +108,9 @@ for(i in 1:nrow(lookup)){
 
 wards <- "WD22"
 
+
 projections <- list.dirs("outputs/flexible_area_model", recursive = FALSE)
+
 projections <- projections[grepl(wards, projections)]
 
 upper_path <- projections[grepl("upper", tolower(projections))]
@@ -121,6 +126,7 @@ for(x in c("population","births","deaths","in_migration","out_migration","net_mi
 }
 
 lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds") %>% 
+  
   filter(substr(gss_code,1,3)=="E09") %>% 
   select(gss_code, la_name) %>%
   distinct()
