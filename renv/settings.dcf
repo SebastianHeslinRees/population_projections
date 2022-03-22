@@ -1,5 +1,5 @@
 external.libraries:
-ignored.packages: housingledmodel, popmodules, smallareamodel, trendmodel
+ignored.packages: housingledmodel, popmodules, smallareamodel, trendmodel, smallareamodel2, validatepop
 package.dependency.fields: Imports, Depends, LinkingTo
 snapshot.type: implicit
 use.cache: TRUE
