@@ -48,7 +48,7 @@ in_mig_flows_5 <- ward_in_mig %>%
 
 # Approximate  Covid-affected migration rates so that
 
-trend_projection_migration <- "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/"
+trend_projection_migration <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/"
 
 #Borough covid flows IN
 total_in <- readRDS(paste0(trend_projection_migration, 'dom_in.rds')) %>% 

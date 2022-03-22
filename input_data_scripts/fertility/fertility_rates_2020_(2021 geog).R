@@ -24,7 +24,7 @@ average_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
                                        output_col = "rate") %>%
 
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = fertility_trajectory_filepath,
+                    rates_trajectory = fertility_trajectory_filepath,
                     first_proj_yr = 2021,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")
@@ -43,7 +43,7 @@ trend_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
                                      output_col = "rate") %>%
 
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = fertility_trajectory_filepath,
+                    rates_trajectory = fertility_trajectory_filepath,
                     first_proj_yr = 2021,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")
@@ -62,7 +62,7 @@ trend_4yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
                                      output_col = "rate") %>%
   
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = fertility_trajectory_filepath,
+                    rates_trajectory = fertility_trajectory_filepath,
                     first_proj_yr = 2020,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")

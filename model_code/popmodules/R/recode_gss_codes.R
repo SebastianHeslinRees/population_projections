@@ -12,8 +12,8 @@
 #'   \code{gss_code}).
 #' @param data_cols A string or character vector. The column(s) that contain the
 #'   data to be aggregated. Defaults to last column of input dataframe.
-#' @param fun List. Function to be applied in aggregating data. Passed to the
-#'   .funs argument of \code{dplyr::summarise_all}. Default \code{list(sum)}.
+#' @param fun Character Function to be applied in aggregating data. Either 'sum'
+#'   or 'mean'. Default \code{'sum'}.
 #' @param recode_to_year Numeric. Conform to geography in which year. Must be one of
 #'   \code{2009,2012,2013,2018,2019,2020,2021} (2013 is census geography).
 #' @param aggregate_data Logical. If set to true multiple instances of the same
@@ -36,12 +36,12 @@
 recode_gss_codes <- function(df_in,
                              col_geog="gss_code",
                              data_cols = last(names(df_in)),
-                             fun = list(sum),
+                             fun = "sum",
                              recode_to_year,
                              aggregate_data = TRUE,
                              recode_gla_codes = FALSE,
                              code_changes_path = "input_data/lookup/district_changes_clean.rds"){
-
+  
   #prepare input dataframe
   df <- df_in %>%
     as.data.frame() %>%
@@ -100,7 +100,7 @@ recode_gss_codes <- function(df_in,
   }
   
   recode_years <- recode_years[recode_years <= recode_to_year]
-
+  
   #in a loop so that codes that are changed and then changed again are picked-up
   for(yr in recode_years){
     
@@ -111,17 +111,28 @@ recode_gss_codes <- function(df_in,
     #merges
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recode_merges[[yr]])) 
-  
+    
     if(aggregate_data){
-      df <- df %>% 
-        dtplyr::lazy_dt() %>%
-        group_by(across(!!col_aggregation)) %>%
-        summarise_all(.funs = fun) %>%
-        as.data.frame()
+      
+      if(fun == "sum"){
+        df <- df %>% 
+          dtplyr::lazy_dt() %>%
+          group_by(across(!!col_aggregation)) %>%
+          summarise_all(.funs = sum) %>%
+          as.data.frame()
+      }
+      
+      if(fun == "mean"){
+        df <- df %>% 
+          dtplyr::lazy_dt() %>%
+          group_by(across(!!col_aggregation)) %>%
+          summarise_all(.funs = mean) %>%
+          as.data.frame()
+      }
       
     }
   }
-
+  
   df <- as.data.frame(df) %>%
     rename(!!col_geog := "gss_code")
   
@@ -182,14 +193,31 @@ recode_gss_codes <- function(df_in,
                 "E07000233" = "E06000054",
                 "E07000240" = "E07000100",
                 "E07000241" = "E07000104")
-
+  
+  if(fun == "sum"){
+    
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
       dtplyr::lazy_dt() %>% 
       group_by(across(!!col_aggregation)) %>%
-      summarise(across(everything(), fun)) %>%
+      summarise(across(everything(), sum)) %>%
       data.frame() %>%
       rename(!!col_geog := "gss_code")
+  }
+  
+  if(fun == "mean"){
+    
+    df <- df %>% 
+      mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
+      dtplyr::lazy_dt() %>% 
+      group_by(across(!!col_aggregation)) %>%
+      summarise(across(everything(), mean)) %>%
+      data.frame() %>%
+      rename(!!col_geog := "gss_code")
+  }
+  
+  
     
     return(df)
-}
+  }
+  

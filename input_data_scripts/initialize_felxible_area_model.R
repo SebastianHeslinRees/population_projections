@@ -2,7 +2,7 @@
 # Reads data from the Q drive
 
 #Packages
-devtools::install('model_code/popmodules')
+#devtools::install('model_code/popmodules')
 devtools::install('model_code/flexibleareamodel')
 
 #Folders
@@ -27,3 +27,4 @@ source('input_data_scripts/flexible_area_model/2017_shlaa_WD13CD.R')
 
 #other
 source("input_data_scripts/flexible_area_model/excess_deaths.R")
+source("input_data_scripts/flexible_area_model/nuts2_hma.R")

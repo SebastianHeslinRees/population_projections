@@ -5,8 +5,9 @@ message("Excess deaths")
 
 input_data_dir <- "input_data/flexible_area_model/"
 
-borough_popn <- readRDS("outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/population.rds")
-borough_deaths <-  readRDS("outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/deaths.rds")
+q_dir <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/"
+borough_popn <- readRDS(paste0(q_dir, "population.rds"))
+borough_deaths <-  readRDS(paste0(q_dir, "deaths.rds"))
 borough_mort_rates <- readRDS("input_data/mortality/mort_rates_5yr_trend_2020.rds")
 
 ward_2013_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds") %>% 
