@@ -9,7 +9,7 @@ library(dplyr)
 message("Ward 2013 Household model")
 
 input_data_dir <- "input_data/smallarea_model/"
-data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/new_ward_model_data/"
+data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/small_area_model_data/"
 
 # Read in data
 hh_pop_2011 <- fread(paste0(data_dir_Q_drive, "HH_pop_Age_Sex_LSOA_2011.csv"), header = TRUE) %>% data.frame()
