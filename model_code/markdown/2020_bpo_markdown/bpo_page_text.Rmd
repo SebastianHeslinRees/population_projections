@@ -1,0 +1,23 @@
+---
+title: !r paste0(borough_title, " - Borough Preferred Option Projections")
+output: html_document
+always_allow_html: true
+---
+
+The GLA Borough Preferred Option (BPO) 2020-based ward and borough population projections are produced for London Boroughs and are not published publicly by the GLA.
+
+### Development data
+These projections incorporate forecasts of future housing development into the projection process. All boroughs have a set of projections run using an adapted SHLAA development trajectory. In addition, boroughs which have submitted a BPO trajectory also have projections based on that data.
+
+### Wards
+The GLA projection model is able to produce projections for both 2013 wards and 2022 wards. In the case of the SHLAA projections a set for both ward boundaries has been produced. For BPO projections one set has been produced based on the submitted development trajectory.
+
+### Migration scenarios
+Each set of projections includes two migration scenarios. The scenarios are achieved by applying a constraint taken from one of two 2020-based GLA trend population projections. More information is available in the documentation attached below.
+
+To visit your borough SRP Hub click here: `r paste0("https://data.london.gov.uk/dataset/",borough,"-srp-service-hub")`
+
+
+
+
+
