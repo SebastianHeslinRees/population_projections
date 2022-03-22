@@ -41,11 +41,11 @@ run_bpo_projection <- function(bpo_name,
   
   ahs_mix <- 0.5
   n_proj_yr <- last_proj_yr - first_proj_yr + 1 #21
-  output_dir <- paste0("outputs/smallarea_model/bpo/", proj_name)
+  output_dir <- paste0("outputs/flexible_area_model/bpo/", proj_name)
   
   #-----------------------------------------------------------------------------
   
-  data_dir <- "input_data/smallarea_model/"
+  data_dir <- "input_data/flexible_area_model/"
   
   #Set the domestic migration data and paths for the variant projection that's been selected
   if(wards == "WD22"){
@@ -90,10 +90,10 @@ run_bpo_projection <- function(bpo_name,
   #-----------------------------------------------------------------------------
   
   if(wards == "WD22"){
-    excess_deaths <- "input_data/smallarea_model/processed/excess_covid_deaths_WD22CD.rds"
+    excess_deaths <- "input_data/flexible_area_model/processed/excess_covid_deaths_WD22CD.rds"
   }
   if(wards == "WD13"){
-    excess_deaths <- "input_data/smallarea_model/processed/excess_covid_deaths_WD13CD.rds"
+    excess_deaths <- "input_data/flexible_area_model/processed/excess_covid_deaths_WD13CD.rds"
   }
   
   #-----------------------------------------------------------------------------
@@ -109,7 +109,7 @@ run_bpo_projection <- function(bpo_name,
   #-----------------------------------------------------------------------------
   
   constraint_list <- list(constraint_path = constraint_path,
-                          lookup_path = "input_data/smallarea_model/lookups/NUTS2_hma.rds",
+                          lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
                           mapping = c("constraint_area","year","sex","age"),
                           components = list(births = T,
                                             deaths = T,
@@ -166,7 +166,7 @@ run_bpo_projection <- function(bpo_name,
                         hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
                         ahs_mix = ahs_mix,
                         hhr_static_or_projected = "static",
-                        lookup_path = "input_data/smallarea_model/lookups/ward_2022_name_lookup.rds",
+                        lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
                         excess_deaths_path = excess_deaths)
     
   }
@@ -206,7 +206,7 @@ run_bpo_projection <- function(bpo_name,
                         hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD13CD.rds"),
                         ahs_mix = ahs_mix,
                         hhr_static_or_projected = "static",
-                        lookup_path = "input_data/smallarea_model/lookups/ward_2013_name_lookup.rds",
+                        lookup_path = "input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds",
                         excess_deaths_path = excess_deaths)
     
   }

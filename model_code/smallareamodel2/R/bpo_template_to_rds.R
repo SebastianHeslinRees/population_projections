@@ -23,15 +23,15 @@ bpo_template_to_rds <- function(csv_name,
                                 wards){
   
   if(wards == "WD22"){
-    ward_code_lookup <- readRDS("input_data/smallarea_model/lookups/dummy_WD22_codes.rds") %>%select(gss_code_ward, dummy_code, gss_code)
-    ward_shlaa_trajectory <- readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD22CD.rds")
-    ldd_past_development <- readRDS("input_data/smallarea_model/development_data/ldd_backseries_dwellings_ward_WD22CD.rds")
+    ward_code_lookup <- readRDS("input_data/flexible_area_model/lookups/dummy_WD22_codes.rds") %>%select(gss_code_ward, dummy_code, gss_code)
+    ward_shlaa_trajectory <- readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
+    ldd_past_development <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD22CD.rds")
   }
   
   if(wards == "WD13"){
-    ward_code_lookup <- readRDS("input_data/smallarea_model/lookups/ward_2013_name_lookup.rds") %>% select(gss_code_ward, gss_code)
-    ward_shlaa_trajectory <-  readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD13CD.rds")
-    ldd_past_development <- readRDS("input_data/smallarea_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds")
+    ward_code_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds") %>% select(gss_code_ward, gss_code)
+    ward_shlaa_trajectory <-  readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD13CD.rds")
+    ldd_past_development <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds")
   }
   
   

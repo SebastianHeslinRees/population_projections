@@ -17,7 +17,7 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
   
   proj_name <- proj_name %>% tolower()
   
-  projections <- list.dirs("outputs/smallarea_model/bpo", recursive = FALSE)
+  projections <- list.dirs("outputs/flexible_area_model/bpo", recursive = FALSE)
   projections <- projections[grepl(proj_name, projections)]
 
   projections <- projections[grepl(wards, projections)]
