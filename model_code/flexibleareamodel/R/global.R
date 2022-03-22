@@ -71,7 +71,8 @@ globalVariables(c(
   'in_base',
   'out_base',
   'net_target',
-  'model_flows'
+  'model_flows',
+  'final'
 ))
 
 

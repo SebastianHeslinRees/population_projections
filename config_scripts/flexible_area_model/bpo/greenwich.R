@@ -1,4 +1,4 @@
-library(smallareamodel2); library(job)
+library(flexibleareamodel); library(job)
 
 bpo_name <- "greenwich_scenario_1_WD13"
 

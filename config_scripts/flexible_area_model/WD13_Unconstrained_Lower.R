@@ -1,4 +1,4 @@
-devtools::load_all('model_code/smallareamodel2')
+devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
 projection_name <- "housing-led_2013_TEST"
 

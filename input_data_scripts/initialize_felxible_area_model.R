@@ -3,7 +3,7 @@
 
 #Packages
 devtools::install('model_code/popmodules')
-devtools::install('model_code/smallareamodel2')
+devtools::install('model_code/flexibleareamodel')
 
 #Folders
 dir.create("input_data/flexible_area_model", showWarnings = FALSE, recursive = TRUE)

@@ -44,6 +44,8 @@ and the trend AHS in the first year of the projection.}
 in the model loop.}
 
 \item{n_cores}{Numeric. Number of cores}
+
+\item{lookup}{Dataframe. gss_code_ward to ward_name (cols must be named like this)}
 }
 \value{
 A list of projected components

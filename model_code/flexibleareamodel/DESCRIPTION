@@ -1,6 +1,6 @@
-Package: smallareamodel2
-Title: small area trend and housing-led models
-Version: 0.0.0.9000
+Package: flexibleareamodel
+Title: flexible area ccm and housing-led models
+Version: 0.0.1.0000
 Authors@R: 
     person(given = "Wil",
            family = "Tonkiss",

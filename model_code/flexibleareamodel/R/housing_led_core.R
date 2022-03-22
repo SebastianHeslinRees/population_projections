@@ -16,6 +16,7 @@
 #' @param constraint_list A list of constraints information and data for use
 #'  in the model loop.
 #' @param n_cores Numeric. Number of cores
+#' @param lookup Dataframe. gss_code_ward to ward_name (cols must be named like this)
 #' 
 #' @return A list of projected components
 #' 

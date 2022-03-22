@@ -1,5 +1,5 @@
 devtools::load_all('model_code/popmodules/')
-devtools::load_all('model_code/smallareamodel2')
+devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
 projection_name <- "WD13_NUTS2_Upper"
 
@@ -68,7 +68,7 @@ config_list <- list(projection_name = projection_name,
 
 model_output <- run_small_area_hl_model(config_list)
 
-devtools::load_all('model_code/smallareamodel2')
+devtools::load_all('model_code/flexibleareamodel')
 create_excel(config_list$output_dir, "NUTS2 Upper WD13.xlsx", "Test")
 
 

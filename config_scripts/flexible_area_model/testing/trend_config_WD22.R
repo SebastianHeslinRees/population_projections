@@ -1,5 +1,5 @@
 devtools::load_all('model_code/popmodules')
-devtools::load_all('model_code/smallareamodel2')
+devtools::load_all('model_code/flexibleareamodel')
 
 data_dir <- "input_data/flexible_area_model/"
 projection_name <- "test_2022_fully_constrained"
