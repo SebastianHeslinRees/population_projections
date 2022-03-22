@@ -2,7 +2,7 @@ import pandas as pd
 import openpyxl
 import datetime
 
-def python_to_excel_smallarea2(persons, females, males, components, output_dir, wb_filename, projection_name, small_area):
+def python_to_excel_smallarea2(persons, females, males, components, trajectory, stock, output_dir, wb_filename, projection_name, small_area):
 
   #read in the template
   if(small_area == "ward"):
@@ -17,6 +17,8 @@ def python_to_excel_smallarea2(persons, females, males, components, output_dir, 
   females.columns = females.columns.str.replace('_',' ')
   males.columns = males.columns.str.replace('_',' ')
   components.columns = components.columns.str.replace('_',' ')
+  trajectory.columns = trajectory.columns.str.replace('_',' ')
+  stock.columns = stock.columns.str.replace('_',' ')
 
   #Set the output name and prep the file for writing
   writer = pd.ExcelWriter(output_dir+wb_filename, engine='openpyxl') 
@@ -28,6 +30,8 @@ def python_to_excel_smallarea2(persons, females, males, components, output_dir, 
   females.to_excel(writer, "females", index=False)
   males.to_excel(writer, "males", index=False)
   components.to_excel(writer, "components of change", index=False)
+  trajectory.to_excel(writer, "dwelling trajectory", index=False)
+  stock.to_excel(writer, "dwelling stock", index=False)
   
   book.get_sheet_by_name('Metadata')['A3'] = projection_name
   book.get_sheet_by_name('Metadata')['A8'] = 'Projection produced on ' + datetime.date.today().strftime("%d %B, %Y")
