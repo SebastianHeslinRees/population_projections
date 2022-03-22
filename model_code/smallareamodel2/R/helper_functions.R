@@ -58,3 +58,71 @@
   
   invisible()
 }
+
+.apply_constraint <- function(x, constraint,
+                              areas = constraint_list$constraint_lookup,
+                              mapping = constraint_list$mapping,
+                              data_col = NULL){
+  
+  if(is.null(data_col)){data_col <- last(names(x))}
+  
+  x %>% 
+    left_join(areas, by = "gss_code") %>% 
+    constrain_component(constraint,
+                        col_aggregation = mapping,
+                        data_col) %>% 
+    select(names(x))
+}
+
+.bind_and_arrange <- function(x, lookup){
+  
+  z <- rbindlist(x, use.names = TRUE) %>% 
+    left_join(lookup, by = c("gss_code", "gss_code_ward")) %>% 
+    data.frame()
+  
+  arrange_by <- intersect(c("gss_code", "la_name", "gss_code_ward", "ward_name", "year", "sex", "age"),
+                          names(z))
+  
+  select_by <- c(arrange_by, setdiff(names(z), arrange_by))
+  
+  z %>% 
+    lazy_dt() %>% 
+    arrange_at(arrange_by) %>% 
+    select_at(select_by) %>%
+    as_tibble() %>% 
+    mutate(across(where(is.numeric) & !intersect(names(z), c("year","age")),
+                  ~round(.x, digits=8))) %>% 
+    data.frame()
+}
+
+.make_borough <- function(x){
+  nm <- last(names(x))
+  cols <- intersect(c("gss_code", "la_name", "year", "sex", "age"),
+                    names(x))
+  x <- x %>% 
+    rename(value = !!nm) %>% 
+    group_by(across(cols)) %>% 
+    summarise(!!nm := sum(value), .groups = 'drop_last') %>% 
+    data.frame()
+}
+
+.remove_ce_popn <- function(popn, ce_popn, popn_col = "popn",
+                            col_aggregation = c("gss_code_ward", "sex", "age")){
+  
+  ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
+    summarise(ce_popn = sum(ce_popn)) %>%  
+    left_join(popn, by = col_aggregation) %>% 
+    mutate(household_popn = !!sym(popn_col) - ce_popn) %>% 
+    check_negative_values("household_popn")
+}
+
+.add_ce_popn <- function(popn, ce_popn, popn_col = "popn",
+                         col_aggregation = c("gss_code_ward", "sex", "age")){
+  
+  ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
+    summarise(ce_popn = sum(ce_popn)) %>%  
+    left_join(popn, by = col_aggregation) %>% 
+    mutate(!!popn_col := !!sym(popn_col) + ce_popn) %>% 
+    check_negative_values(popn_col) %>% 
+    select(-ce_popn)
+}

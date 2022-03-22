@@ -20,7 +20,6 @@ output_small_area_projection <- function(projection,
   
   
   #RDS
-  
   message("writing rds files")
   
   for(i in names(projection)) {
@@ -32,12 +31,12 @@ output_small_area_projection <- function(projection,
   #CSV
   
   message("writing csv files")
-  #browser()
+ 
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
   csv_elements <- c(1:6, 9:10)
-
-  if(model == "housing-led"){ csv_elements <- c(csv_elements, 11) }
+  
+  if(model == "housing-led"){ csv_elements <- c(csv_elements, 11, 15:22, 24:25) }
   
   for(i in csv_elements) { 
     .make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
@@ -48,9 +47,10 @@ output_small_area_projection <- function(projection,
   projection$detailed_components <- projection$detailed_components %>%                  
     mutate(across(where(is.numeric) & !c(year, age), ~round(.x, digits=3))) %>% 
     data.frame()
-  
-  fwrite(projection$detailed_components, paste0(output_dir,"/csv/detailed_components_of_change.csv"))
-  fwrite(projection$summary, paste0(output_dir,"/csv/summary_components_of_change.csv"))
+
+  fwrite(projection$detailed_components, paste0(output_dir,"/csv/components_of_change_detailed.csv"))
+  fwrite(projection$summary, paste0(output_dir,"/csv/components_of_change_summary.csv"))
+  fwrite(projection$borough_data.summary, paste0(output_dir,"/csv/borough_components_of_change_summary.csv"))
   
   #-----------------------------------------------------------------------------
   
@@ -62,19 +62,20 @@ output_small_area_projection <- function(projection,
     
   }
   
+  #-----------------------------------------------------------------------------
+ 
   invisible()
   
 }
 
 .make_csvs <- function(data, name_stub){
   
-  if(str_detect(name_stub, "household_population_sya")){
-    data <- select(data, -ce_popn, -popn)
-  }
+  name_stub <- str_remove_all(name_stub, "data.")
   
   data_col <- last(names(data))
   cols <- setdiff(names(data), data_col)
-
+  arrange_by <- intersect(c("gss_code", "gss_code_ward", "age"), cols)
+  
   data <- data %>% filter(year >= 2011) %>% lazy_dt()
   
   
@@ -88,6 +89,18 @@ output_small_area_projection <- function(projection,
     
     fwrite(b_m_a, paste0(name_stub,".csv"))
     
+  } else if(!"sex" %in% cols){
+    
+    x <- data %>%
+      rename(rounded = !!data_col) %>%
+      mutate(rounded = round(rounded, 3)) %>%
+      arrange(year)  %>% 
+      data.frame() %>%
+      pivot_wider(names_from = year, values_from = rounded) %>%
+      arrange(across(arrange_by))
+    
+    fwrite(x, paste0(name_stub,".csv"))
+    
   } else {
     
     female <- filter(data, sex == "female") %>%
@@ -96,7 +109,7 @@ output_small_area_projection <- function(projection,
       arrange(year)  %>% 
       data.frame() %>%
       pivot_wider(names_from = year, values_from = rounded) %>%
-      arrange(gss_code, gss_code_ward, age)
+      arrange(across(arrange_by))
     
     male <- filter(data, sex == "male")  %>%
       rename(rounded = !!data_col) %>%
@@ -104,8 +117,8 @@ output_small_area_projection <- function(projection,
       arrange(year) %>% 
       data.frame() %>%
       pivot_wider(names_from = year, values_from = rounded) %>%
-      arrange(gss_code, gss_code_ward, age) 
-
+      arrange(across(arrange_by))
+    
     persons <- data %>%
       mutate(sex = "persons") %>%
       rename(value = !!data_col) %>%
@@ -115,7 +128,7 @@ output_small_area_projection <- function(projection,
       mutate(value = round(value, 3))%>%
       arrange(year) %>%
       pivot_wider(names_from = year, values_from = value) %>%
-      arrange(gss_code, gss_code_ward, age) %>% 
+      arrange(across(arrange_by)) %>% 
       data.frame() %>% 
       rename_with(.cols = starts_with("X"), .fn = function(x){substr(x,2,5)})
     

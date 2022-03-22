@@ -14,7 +14,9 @@ housing_led_core(
   projection_year,
   ahs_mix,
   hhr_ahs_uplift,
-  constraint_list
+  constraint_list,
+  n_cores,
+  lookup
 )
 }
 \arguments{
@@ -40,6 +42,8 @@ and the trend AHS in the first year of the projection.}
 
 \item{constraint_list}{A list of constraints information and data for use
 in the model loop.}
+
+\item{n_cores}{Numeric. Number of cores}
 }
 \value{
 A list of projected components

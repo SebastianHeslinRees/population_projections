@@ -26,22 +26,24 @@
 #' @export
 
 create_excel <- function(output_dir, wb_filename, projection_name, bpo = FALSE, smallarea = "ward"){
-  
+
   message(paste("Creating", smallarea, "Excel workbook"))
   output_dir <- .add_slash(output_dir)
 
   #Create workbook names
   if(str_sub(wb_filename,-5,-1)!=".xlsx"){ wb_filename <- paste0(wb_filename,".xlsx") }
   
-  #read in the data from csv
+  #read in borough & ward data from csv
   persons <- .read_and_filter("persons", output_dir, bpo)
   females <- .read_and_filter("female", output_dir, bpo)
   males <- .read_and_filter("male", output_dir, bpo)
   components <- .read_and_filter("components", output_dir, bpo)
+  trajectory <- .read_and_filter("trajectory", output_dir, bpo)
+  stock <- .read_and_filter("stock", output_dir, bpo)
   
   try( reticulate::source_python('model_code/other_scripts/python_to_excel_small_area2.py'), silent = TRUE)
   reticulate::source_python('model_code/other_scripts/python_to_excel_small_area2.py') 
-  python_to_excel_smallarea2(persons, females, males, components,
+  python_to_excel_smallarea2(persons, females, males, components, trajectory, stock,
                              output_dir,
                              wb_filename,
                              projection_name,
@@ -52,29 +54,90 @@ create_excel <- function(output_dir, wb_filename, projection_name, bpo = FALSE, 
 
 .read_and_filter <- function(x, output_dir, bpo){
   
-  if(x != "components"){
+  if(x %in% c("persons","female","male")){
     
-    a <- fread(paste0(output_dir, "csv/population_",x,".csv"), header = TRUE) %>%
+    ward_data <- fread(paste0(output_dir, "csv/population_",x,".csv"), header = TRUE) %>%
+      as.data.frame() 
+    
+    borough_data <- fread(paste0(output_dir, "csv/borough_population_",x,".csv"), header = TRUE) %>% 
       as.data.frame() %>% 
-      arrange(gss_code, gss_code_ward, age)
+      mutate(gss_code_ward = "",
+             ward_name = "Borough Total") %>% 
+      select(names(ward_data)) %>% 
+      filter(gss_code != "E09000001")
     
-    b <- as.numeric(last(names(a)))
+    all_data <- rbind(borough_data, ward_data) %>% 
+      mutate(sort_col = ifelse(ward_name == "Borough Total", 0, 1)) %>% 
+      arrange(gss_code, sort_col, gss_code_ward, age) %>% 
+      select(-sort_col)
     
-    if(b>2041){
-      a <- select(a, -c(as.character(2042:b)))
+    last_year <- as.numeric(last(names(all_data)))
+    
+    if(last_year>2041){
+      all_data <- select(all_data, -c(as.character(2042:last_year)))
     }
+  }
     
-  } else {
+  if(x == "components"){
     
-    a <- readRDS(paste0(output_dir, "summary.rds")) %>%
+    ward_data <- readRDS(paste0(output_dir, "summary.rds")) %>%
       as.data.frame() %>% 
-      filter(year %in% 2011:2041)
+      filter(year %in% 2012:2041)
+    
+    borough_data <- readRDS(paste0(output_dir, "borough_data.summary.rds")) %>%
+      as.data.frame() %>% 
+      mutate(gss_code_ward = "",
+             ward_name = "Borough Total") %>% 
+      select(names(ward_data)) %>% 
+      filter(gss_code != "E09000001",
+             year %in% 2012:2041)
+    
+    all_data <- rbind(borough_data, ward_data) %>% 
+      mutate(sort_col = ifelse(ward_name == "Borough Total", 0, 1)) %>% 
+      arrange(gss_code, sort_col, gss_code_ward, year) %>% 
+      select(-sort_col)
+  }
+  
+  if(x == "stock"){
+    
+    ward_data <- fread(paste0(output_dir, "csv/dwelling_stock.csv"), header = TRUE) %>%
+      as.data.frame() 
+    
+    borough_data <- fread(paste0(output_dir, "csv/borough_dwelling_stock.csv"), header = TRUE)%>% 
+      as.data.frame() %>% 
+      mutate(gss_code_ward = "",
+             ward_name = "Borough Total") %>% 
+      select(names(ward_data)) %>% 
+      filter(gss_code != "E09000001")
+    
+    all_data <- rbind(borough_data, ward_data) %>% 
+      mutate(sort_col = ifelse(ward_name == "Borough Total", 0, 1)) %>% 
+      arrange(gss_code, sort_col, gss_code_ward) %>% 
+      select(-sort_col)
+  }
+  
+  if(x == "trajectory"){
+    
+    ward_data <- fread(paste0(output_dir, "csv/dwelling_trajectory.csv"), header = TRUE) %>%
+      as.data.frame() 
+    
+    borough_data <- fread(paste0(output_dir, "csv/borough_dwelling_trajectory.csv"), header = TRUE)%>% 
+      as.data.frame() %>% 
+      mutate(gss_code_ward = "",
+             ward_name = "Borough Total") %>% 
+      select(names(ward_data)) %>% 
+      filter(gss_code != "E09000001")
+    
+    all_data <- rbind(borough_data, ward_data) %>% 
+      mutate(sort_col = ifelse(ward_name == "Borough Total", 0, 1)) %>% 
+      arrange(gss_code, sort_col, gss_code_ward) %>% 
+      select(-sort_col)
   }
   
   if(bpo!=FALSE){
-    a <- filter(a, gss_code == bpo)
+    all_data <- filter(all_data, gss_code == bpo)
   }
   
-  return(a)
+  return(all_data)
   
 }

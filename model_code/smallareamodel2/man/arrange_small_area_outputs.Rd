@@ -15,10 +15,13 @@ arrange_small_area_outputs(
   mortality_rates,
   in_mig_flows,
   out_mig_rates,
+  dwelling_trajectory,
+  dwelling_stock,
   first_proj_yr,
   last_proj_yr,
   config_list,
-  model
+  model,
+  n_cores
 )
 }
 \arguments{
@@ -42,6 +45,10 @@ arrange_small_area_outputs(
 
 \item{out_mig_rates}{A dataframe of input out migration rates}
 
+\item{dwelling_trajectory}{A dataframe}
+
+\item{dwelling_stock}{A dataframe}
+
 \item{first_proj_yr}{Numeric. The first projection year}
 
 \item{last_proj_yr}{Numeric. The last projection}
@@ -49,6 +56,8 @@ arrange_small_area_outputs(
 \item{config_list}{List. The model config list}
 
 \item{model}{String. Either 'trend' or 'housing-led'}
+
+\item{n_cores}{Numeric. Number of cores}
 }
 \value{
 A list of projection outputs by component

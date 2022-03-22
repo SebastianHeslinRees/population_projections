@@ -6,9 +6,10 @@
 \usage{
 run_bpo_projection(
   bpo_name,
-  trajectory_range,
   wards,
-  projection_range = 2020:2041,
+  variant,
+  trajectory_range = 2012:2041,
+  projection_range = 2021:2041,
   bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/",
   csv_name = bpo_name
 )
@@ -17,10 +18,12 @@ run_bpo_projection(
 \item{bpo_name}{String. The name of the dwelling trajectory csv saved in the
 folder \code{bpo_dir} folder. The output projection will also have this name.}
 
+\item{wards}{String. Either WD13 or WD22}
+
+\item{variant}{String. Either lower or upper}
+
 \item{trajectory_range}{Numeric or NULL. The years covered by the input trajectory.
 Default 2020:2041.}
-
-\item{wards}{String. Either WD13 or WD22}
 
 \item{projection_range}{Numeric. The years to project. \code{Default 2020:2050}.}
 

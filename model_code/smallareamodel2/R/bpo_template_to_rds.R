@@ -24,12 +24,14 @@ bpo_template_to_rds <- function(csv_name,
   
   if(wards == "WD22"){
     ward_code_lookup <- readRDS("input_data/smallarea_model/lookups/dummy_WD22_codes.rds") %>%select(gss_code_ward, dummy_code, gss_code)
-    ward_shlaa_trajectory <-  readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD22CD.rds")
+    ward_shlaa_trajectory <- readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD22CD.rds")
+    ldd_past_development <- readRDS("input_data/smallarea_model/development_data/ldd_backseries_dwellings_ward_WD22CD.rds")
   }
   
   if(wards == "WD13"){
     ward_code_lookup <- readRDS("input_data/smallarea_model/lookups/ward_2013_name_lookup.rds") %>% select(gss_code_ward, gss_code)
     ward_shlaa_trajectory <-  readRDS("input_data/smallarea_model/development_data/ward_savills_trajectory_WD13CD.rds")
+    ldd_past_development <- readRDS("input_data/smallarea_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds")
   }
   
   
@@ -42,16 +44,15 @@ bpo_template_to_rds <- function(csv_name,
   tbl <- fread(csv_path, header=FALSE) %>% as.data.frame()
   assert_that(ncol(tbl)==32, msg="number of columns in input housing trajectory is wrong")
   unc_row <- match("Non-self-contained", tbl[[1]])
-  no_of_gss_codes <- filter(tbl, substr(V1,1,3)=="E09")[,1] %>% unique() %>% length()
+  no_of_gss_codes <- filter(tbl, substr(V1,1,2)=="E0")[,1] %>% unique() %>% length()
   
   #read the data in again but this time as 2 dataframes
   conventional_in <- fread(csv_path, header=TRUE, skip = "gss_code_ward",  colClasses = rep("character",32))[1:no_of_gss_codes,]
   non_conventional_in <- fread(csv_path, header=TRUE, skip = unc_row+1, colClasses = rep("character",32))[1:no_of_gss_codes,]
   
-  #rm(tbl, unc_row, no_of_gss_codes)
-  
   conventional <- .process_input_csv(conventional_in, trajectory_range, wards, ward_code_lookup)
   non_conventional <- .process_input_csv(non_conventional_in, trajectory_range, wards, ward_code_lookup)
+  
   trajectory <- rbind(conventional, non_conventional) %>% 
     group_by(year, gss_code_ward) %>% 
     summarise(dev = sum(dev), .groups = 'drop_last') %>% 
@@ -67,22 +68,16 @@ bpo_template_to_rds <- function(csv_name,
   assert_that(length(borough_gss) == 1, msg = "more than one borough found in bpo csv")
   assert_that(borough_gss!="character(0)", msg = "no borough returned in bpo csv")
   
-  #Ward trajectory
+  #Fill in with LDD/SHLAA where necessary
   bpo_ward_trajectory <- ward_shlaa_trajectory %>%
-    left_join(conventional, by = c("gss_code_ward","year")) %>%
+    filter(year > 2019) %>% 
+    rbind(ldd_past_development) %>% 
+    left_join(trajectory, by = c("gss_code_ward","year")) %>%
     mutate(units = ifelse(is.na(dev), units, dev)) %>% 
     select(-dev)
   
-  #Borough trajectory
-  bpo_borough_trajectory <- bpo_ward_trajectory %>%
-    left_join(ward_code_lookup, by = "gss_code_ward") %>%
-    group_by(year, gss_code) %>% 
-    summarise(units = sum(units), .groups = 'drop_last') %>% 
-    data.frame()
-  
   saveRDS(bpo_ward_trajectory, paste0(bpo_dir,"rds/bpo_ward_trajectory_",bpo_name,".rds"))
-  #saveRDS(bpo_borough_trajectory, paste0(bpo_dir,"rds/bpo_borough_trajectory_",bpo_name,".rds"))
-  
+
   return(borough_gss)
   
 }

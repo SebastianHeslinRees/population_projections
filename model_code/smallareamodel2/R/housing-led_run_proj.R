@@ -3,10 +3,13 @@
 #' Given a set of input parameters run a housing-led for small areas
 #' 
 #' @param config_list A List. A housing-led model configuration list.
+#' @param n_cores An integer describing the number of CPU cores to use
 #' 
 #' @import dplyr
 #' @import popmodules
 #' @importFrom loggr log_file
+#' @import parallel
+#' @import doParallel
 #'  
 #' @export
 
@@ -22,7 +25,7 @@
 
 #-------------------------------------------------------------------------------
 
-run_small_area_hl_model <- function(config_list){
+run_small_area_hl_model <- function(config_list, n_cores = NULL){
   
   expected_config <- c("projection_name",
                        "first_proj_yr",
@@ -62,9 +65,20 @@ run_small_area_hl_model <- function(config_list){
   #Validate paths
   .validate_input_paths(config_list)
   
+  #------------------------------------------------------------------------------
+  # Parallel processing
+  detected_cores <- detectCores()
+  if(is.null(n_cores)){n_cores <- detected_cores}
+  if(n_cores > detected_cores){n_cores <- detected_cores}
+  cl <- makeCluster(n_cores)
+  registerDoParallel(cl)
+
+  #-----------------------------------------------------------------------------
+  
   #projection years
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
+  lookup <- readRDS(config_list$lookup_path)
   
   #Get backseries - 5 secs
   message("get backseries")
@@ -123,15 +137,10 @@ run_small_area_hl_model <- function(config_list){
   household_rep_rates = readRDS(config_list$hhr_path)
   communal_establishment_population <- readRDS(config_list$communal_est_path)
   
-  # Get the dwelling trajectory
-  dwellings_past <- readRDS(config_list$ldd_backseries_path) %>% 
-    select(year, gss_code_ward, units) 
+  trajectory <- readRDS(config_list$dev_trajectory_path)
   
-  dwellings_future <- readRDS(config_list$dev_trajectory_path) %>% 
-    filter(year > max(dwellings_past$year)) %>% 
-    select(year, gss_code_ward, units) 
-  
-  dwellings <- rbind(dwellings_past, dwellings_future) %>% 
+  dwellings <- trajectory %>% 
+    select(year, gss_code_ward, units) %>% 
     arrange(gss_code_ward, year) %>% 
     group_by(gss_code_ward) %>% 
     mutate(units = cumsum(units)) %>% 
@@ -218,7 +227,9 @@ run_small_area_hl_model <- function(config_list){
                                                          projection_year = projection_year,
                                                          ahs_mix = config_list$ahs_mix,
                                                          hhr_ahs_uplift = hhr_ahs_uplift,
-                                                         constraint_list = constraint_list)
+                                                         constraint_list = constraint_list,
+                                                         n_cores,
+                                                         lookup)
     
     curr_yr_popn <- hl_projection[[projection_year]]$population
     hhr_ahs_uplift <- hl_projection[[projection_year]]$hhr_ahs_uplift
@@ -229,10 +240,10 @@ run_small_area_hl_model <- function(config_list){
                             "population", "births", "deaths",
                             "in_migration", "out_migration",
                             "fertility_rates", "mortality_rates",
-                            "in_migration_flows",
-                            "out_migration_rates",
+                            "in_migration_flows", "out_migration_rates",
+                            "trajectory", "dwellings",
                             "first_proj_yr", "last_proj_yr",
-                            "config_list")))
+                            "config_list","n_cores","cl")))
   
   #-------------------------------------------------------------------------------
   
@@ -245,11 +256,13 @@ run_small_area_hl_model <- function(config_list){
                                               fertility_rates, mortality_rates,
                                               in_migration_flows,
                                               out_migration_rates,
+                                              trajectory, dwellings,
                                               first_proj_yr, last_proj_yr,
                                               config_list,
-                                              "housing-led")
+                                              "housing-led",
+                                              n_cores)
   
-  rm(list=setdiff(ls(), c("hl_projection","config_list")))
+  rm(list=setdiff(ls(), c("hl_projection","config_list","cl")))
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins
@@ -257,6 +270,7 @@ run_small_area_hl_model <- function(config_list){
   
   #Close log
   message("complete")
+  parallel::stopCluster(cl)
   deactivate_log(paste0(config_list$output_dir, "warnings.log"))
   
   return(hl_projection)

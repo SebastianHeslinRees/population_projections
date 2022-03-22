@@ -57,7 +57,21 @@ globalVariables(c(
   'final_out',
   'final_net',
   'netflow',
-  'python_to_excel_smallarea2'
+  'python_to_excel_smallarea2',
+  'out_tst',
+  'dpois',
+  'p_in',
+  'p_out',
+  'p_combo',
+  'sort_col',
+  'dist_in',
+  'dist_out',
+  'blended_ahs',
+  'aged',
+  'in_base',
+  'out_base',
+  'net_target',
+  'model_flows'
 ))
 
 
