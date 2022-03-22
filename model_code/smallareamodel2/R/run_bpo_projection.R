@@ -10,17 +10,20 @@
 #' @param trajectory_range Numeric or NULL. The years covered by the input trajectory.
 #'  Default 2020:2041.
 #' @param wards String. Either WD13 or WD22
+#' @param variant String. Either lower or upper
 #' @param projection_range Numeric. The years to project. \code{Default 2020:2050}.
 #' @param bpo_dir String. The folder containing the dwelling trajectory csv
 #' @param csv_name String. The name of the dwelling trajectory csv saved in the
 #'
 #' @import dplyr
+#' @import stringr
 #' @export
 
 run_bpo_projection <- function(bpo_name,
-                               trajectory_range,
                                wards,
-                               projection_range = 2020:2041,
+                               variant,
+                               trajectory_range = 2012:2041,
+                               projection_range = 2021:2041,
                                bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/",
                                csv_name = bpo_name){
   
@@ -28,6 +31,17 @@ run_bpo_projection <- function(bpo_name,
   last_proj_yr <- max(projection_range)
   
   assert_that(wards %in% c("WD13","WD22"))
+  assert_that(variant %in% c("lower","upper"))
+  
+  borough <- str_split(bpo_name, "_WD")[[1]][1]
+  scenario <- ifelse(variant == "lower", "scenario1", "scenario2")
+  proj_name <- paste(borough, scenario, wards, sep = "_")
+  
+  #-----------------------------------------------------------------------------
+  
+  ahs_mix <- 0.5
+  n_proj_yr <- last_proj_yr - first_proj_yr + 1 #21
+  output_dir <- paste0("outputs/smallarea_model/bpo/", proj_name)
   
   #-----------------------------------------------------------------------------
   
@@ -37,8 +51,6 @@ run_bpo_projection <- function(bpo_name,
   if(wards == "WD22"){
     
     in_migration <- list(
-      '2020' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2020.rds"),
-                    transition = F),
       '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2021.rds"),
                     transition = F),
       '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2022.rds"),
@@ -47,8 +59,6 @@ run_bpo_projection <- function(bpo_name,
                     transition = F))
     
     out_migration <- list(
-      '2020' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2020.rds"),
-                    transition = F),
       '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2021.rds"),
                     transition = F),
       '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2022.rds"),
@@ -60,8 +70,6 @@ run_bpo_projection <- function(bpo_name,
   if(wards == "WD13"){
     
     in_migration <- list(
-      '2020' = list(path = paste0(data_dir, "processed/in_migration_flows_WD13CD_Covid_2020.rds"),
-                    transition = F),
       '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD13CD_Covid_2021.rds"),
                     transition = F),
       '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD13CD_Covid_2022.rds"),
@@ -70,8 +78,6 @@ run_bpo_projection <- function(bpo_name,
                     transition = F))
     
     out_migration <- list(
-      '2020' = list(path = paste0(data_dir, "processed/out_migration_rates_WD13CD_Covid_2020.rds"),
-                    transition = F),
       '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD13CD_Covid_2021.rds"),
                     transition = F),
       '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD13CD_Covid_2022.rds"),
@@ -83,20 +89,39 @@ run_bpo_projection <- function(bpo_name,
   
   #-----------------------------------------------------------------------------
   
-  constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                          mapping = c("gss_code","year","sex","age"),
-                          components = list(births = F,
-                                            deaths = F,
+  if(wards == "WD22"){
+    excess_deaths <- "input_data/smallarea_model/processed/excess_covid_deaths_WD22CD.rds"
+  }
+  if(wards == "WD13"){
+    excess_deaths <- "input_data/smallarea_model/processed/excess_covid_deaths_WD13CD.rds"
+  }
+  
+  #-----------------------------------------------------------------------------
+  
+  if(variant == "lower"){
+    constraint_path <- "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/"
+  }
+  
+  if(variant == "upper"){
+    constraint_path <- "outputs/trend/2020/2020_CC_central_upper_21-09-21_1259/"
+  }
+  
+  #-----------------------------------------------------------------------------
+  
+  constraint_list <- list(constraint_path = constraint_path,
+                          lookup_path = "input_data/smallarea_model/lookups/NUTS2_hma.rds",
+                          mapping = c("constraint_area","year","sex","age"),
+                          components = list(births = T,
+                                            deaths = T,
                                             in_migration = F,
                                             out_migration = F,
-                                            population = F),
-                          lookup_path = "input_data/smallarea_model/lookups/London_hma.rds")
+                                            population = T))
   
   #-----------------------------------------------------------------------------
   
   #process the csv trajectory into an rds file
   #Also, figure out the gss code for the borough in question
-  #browser()
+  
   borough_gss <- bpo_template_to_rds(csv_name = csv_name,
                                      bpo_dir = bpo_dir,
                                      trajectory_range = trajectory_range,
@@ -104,14 +129,14 @@ run_bpo_projection <- function(bpo_name,
   
   small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
   
-  #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------  
   
   if(wards == "WD22"){
     
-    config_list <- list(projection_name = bpo_name,
+    config_list <- list(projection_name = proj_name,
                         first_proj_yr = first_proj_yr,
-                        n_proj_yr = last_proj_yr - first_proj_yr + 1, #22
-                        output_dir = paste0("outputs/smallarea_model/", bpo_name),
+                        n_proj_yr = n_proj_yr,
+                        output_dir = output_dir,
                         
                         #backseries
                         population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
@@ -139,19 +164,19 @@ run_bpo_projection <- function(bpo_name,
                         
                         #settings
                         hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                        ahs_mix = 0.8,
+                        ahs_mix = ahs_mix,
                         hhr_static_or_projected = "static",
                         lookup_path = "input_data/smallarea_model/lookups/ward_2022_name_lookup.rds",
-                        excess_deaths_path = NULL)
+                        excess_deaths_path = excess_deaths)
     
   }
   
   if(wards == "WD13"){
     
-    config_list <- list(projection_name = bpo_name,
+    config_list <- list(projection_name = proj_name,
                         first_proj_yr = first_proj_yr,
-                        n_proj_yr = 22,#last_proj_yr - first_proj_yr + 1 , #22
-                        output_dir = paste0("outputs/smallarea_model/", bpo_name),
+                        n_proj_yr = n_proj_yr,
+                        output_dir = output_dir,
                         
                         #backseries
                         population_path = paste0(data_dir, "backseries/ward_population_WD13CD.rds"),
@@ -161,8 +186,8 @@ run_bpo_projection <- function(bpo_name,
                         in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD13CD.rds"),
                         
                         #rates
-                        mortality_rates = paste0(data_dir, "processed/mortality_rates_5yr_trend_WD13CD.rds"),
-                        fertility_rates = paste0(data_dir, "processed/fertility_rates_5yr_trend_WD13CD.rds"),
+                        mortality_rates = paste0(data_dir, "processed/mortality_rates_WD13CD.rds"),
+                        fertility_rates = paste0(data_dir, "processed/fertility_rates_WD13CD.rds"),
                         in_migration = in_migration,
                         out_migration = out_migration,
                         
@@ -179,18 +204,29 @@ run_bpo_projection <- function(bpo_name,
                         
                         #settings
                         hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD13CD.rds"),
-                        ahs_mix = 0.8,
+                        ahs_mix = ahs_mix,
                         hhr_static_or_projected = "static",
                         lookup_path = "input_data/smallarea_model/lookups/ward_2013_name_lookup.rds",
-                        excess_deaths_path = "input_data/smallarea_model/processed/excess_covid_deaths_WD13CD.rds")
+                        excess_deaths_path = excess_deaths)
     
   }
   
-  run_small_area_hl_model(config_list)
-  proj_name <- str_replace_all(paste(bpo_name, "BPO"), "_", " ")
-  wb_name <- bpo_name
-  create_excel(config_list$output_dir, wb_name, proj_name, borough_gss)
+  x <- run_small_area_hl_model(config_list, n_cores = 20)
+  rm(x)
+  gc()
+  
+  borough <- .camel(str_replace_all(borough, "_", " "))
+  ward_year <- str_replace(wards, "WD", "20")
+  scenario <- substr(scenario, 9, 9)
+  proj_desc <- paste0(borough, " BPO - Migration scenario ", scenario, " - BPO development data - ", ward_year," ward boundaries")
+  
+  create_excel(config_list$output_dir, proj_name, proj_desc, borough_gss)
   
   message("complete")
   
+}
+
+.camel <- function(x){
+  capit <- function(x) paste0(toupper(substring(x, 1, 1)), substring(x, 2, nchar(x)))
+  sapply(strsplit(x, " "), function(x) paste(capit(x), collapse=" "))
 }

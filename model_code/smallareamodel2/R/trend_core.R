@@ -160,7 +160,8 @@ trend_core <- function(start_population,
   next_yr_popn <- next_yr_popn %>% check_negative_values("popn")
   
   if(constraint_list$components$population){
-  
+    # TODO
+    # This constraining step means the components do not sum to the population
     next_yr_popn <- .apply_constraint(next_yr_popn, constraint_list$population_constraint,
                                       areas = constraint_list$constraint_lookup,
                                       mapping = constraint_list$mapping)
@@ -175,26 +176,17 @@ trend_core <- function(start_population,
     mutate(inflow = ifelse(is.na(popn), inflow, inflow-popn)) %>% 
     select(-popn)
   
-  
-  #-----------------------------------------------------------------------------
-  
-  #TODO
-  #The constraining step at the end (line 155) means the components do not sum to
-  #the population
-  
-  #-----------------------------------------------------------------------------
-  
   total_net <- left_join(inflow, outflow, by = col_agg) %>% 
     mutate(net_migration = inflow - outflow) %>% 
     select(-inflow, -outflow)
   
   #-----------------------------------------------------------------------------
-  
+
   #make a nice output dataframe
   components <- aged_popn_w_births %>% 
-    mutate(popn = ifelse(age==0,0,popn)) %>% 
-    left_join(births, by = col_agg) %>% 
-    mutate(births = ifelse(is.na(births),0,births)) %>% 
+    arrange(across(col_agg)) %>% 
+    mutate(births = ifelse(age == 0, popn, 0)) %>% 
+    mutate(popn = ifelse(age == 0, 0, popn)) %>% 
     left_join(deaths, by = col_agg) %>% 
     left_join(outflow, by = col_agg) %>% 
     left_join(inflow, by = col_agg) %>% 
@@ -226,17 +218,3 @@ trend_core <- function(start_population,
   
 }
 
-.apply_constraint <- function(x, constraint,
-                              areas = constraint_list$constraint_lookup,
-                              mapping = constraint_list$mapping,
-                              data_col = NULL){
-  
-  if(is.null(data_col)){data_col <- last(names(x))}
-  
-  x %>% 
-    left_join(areas, by = "gss_code") %>% 
-    constrain_component(constraint,
-                        col_aggregation = mapping,
-                        data_col) %>% 
-    select(names(x))
-}

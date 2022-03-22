@@ -22,4 +22,6 @@ Imports:
   stringr,
   tidyr,
   dtplyr,
-  reticulate
+  reticulate,
+  doParallel,
+  foreach

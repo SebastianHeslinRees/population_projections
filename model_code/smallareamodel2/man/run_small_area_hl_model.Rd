@@ -4,10 +4,12 @@
 \alias{run_small_area_hl_model}
 \title{Run the small area housing-led model}
 \usage{
-run_small_area_hl_model(config_list)
+run_small_area_hl_model(config_list, n_cores = NULL)
 }
 \arguments{
 \item{config_list}{A List. A housing-led model configuration list.}
+
+\item{n_cores}{An integer describing the number of CPU cores to use}
 }
 \description{
 Given a set of input parameters run a housing-led for small areas

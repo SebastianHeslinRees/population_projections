@@ -13,10 +13,13 @@
 #' @param mortality_rates A dataframe of mortality rates
 #' @param in_mig_flows A dataframe of input in migration flows
 #' @param out_mig_rates A dataframe of input out migration rates
+#' @param dwelling_trajectory A dataframe
+#' @param dwelling_stock A dataframe
 #' @param first_proj_yr Numeric. The first projection year
 #' @param last_proj_yr Numeric. The last projection
 #' @param config_list List. The model config list
 #' @param model String. Either 'trend' or 'housing-led'
+#' @param n_cores Numeric. Number of cores
 #' 
 #' @import dplyr
 #' @importFrom data.table rbindlist
@@ -31,8 +34,9 @@ arrange_small_area_outputs <- function(projection,
                                        in_migration, out_migration,
                                        fertility_rates, mortality_rates,
                                        in_mig_flows, out_mig_rates,
+                                       dwelling_trajectory, dwelling_stock,
                                        first_proj_yr, last_proj_yr,
-                                       config_list, model){
+                                       config_list, model, n_cores){
   
   lookup <- readRDS(config_list$lookup_path)
   
@@ -58,9 +62,9 @@ arrange_small_area_outputs <- function(projection,
   join_by <- intersect(names(out_migration), names(in_migration))
   
   proj_net_migration <- list(left_join(in_migration, out_migration, by = join_by) %>% 
-                               mutate(net_migration = inflow - outflow) %>% 
+                               mutate(netflow = inflow - outflow) %>% 
                                filter(year < first_proj_yr) %>% 
-                               select(year, gss_code, gss_code_ward, sex, age, net_migration))
+                               select(year, gss_code, gss_code_ward, sex, age, netflow))
   
   #-----------------------------------------------------------------------------
   
@@ -72,7 +76,7 @@ arrange_small_area_outputs <- function(projection,
     mutate(proj_deaths[[1]], component = "deaths") %>% rename(value = deaths),
     mutate(proj_in_migration[[1]], component = "inflow") %>% rename(value = inflow),
     mutate(proj_out_migration[[1]], component = "outflow") %>% rename(value = outflow),
-    mutate(proj_net_migration[[1]], component = "netflow") %>% rename(value = net_migration)) %>% 
+    mutate(proj_net_migration[[1]], component = "netflow") %>% rename(value = netflow)) %>% 
       pivot_wider(values_from = value, names_from = component) %>% 
       mutate(births = ifelse(is.na(births), 0, births)) %>% 
       select(gss_code, gss_code_ward, year, sex, age, popn, births, deaths, inflow, outflow, netflow))
@@ -159,33 +163,30 @@ arrange_small_area_outputs <- function(projection,
       select(year, gss_code_ward, actual_ahs) %>% 
       pivot_wider(names_from = year, values_from = actual_ahs)
     
+    housing_list$dwelling_trajectory <- dwelling_trajectory %>% 
+      filter(year %in% 2012:last_proj_yr) %>% 
+      left_join(lookup, by = c("gss_code_ward")) %>% 
+      data.frame() %>% 
+      arrange(gss_code, gss_code_ward, year) %>% 
+      select(gss_code, la_name, gss_code_ward, ward_name, year, dwellings = units)
+    
+    housing_list$dwelling_stock <- dwelling_stock %>% 
+      filter(year %in% 2011:last_proj_yr) %>% 
+      left_join(lookup, by = c("gss_code_ward")) %>% 
+      data.frame() %>% 
+      arrange(gss_code, gss_code_ward, year) %>% 
+      select(gss_code, la_name, gss_code_ward, ward_name, year, dwellings = units)
+    
     output_list <- c(output_list, housing_list)
     
   }
   
-  borough_data <- aggregate_borough_data(output_list, config_list$constraint_list$constraint_path)
+  borough_data <- aggregate_borough_data2(output_list,
+                                          config_list$constraint_list$constraint_path,
+                                          config_list$first_proj_yr,
+                                          n_cores)
   
   return(c(output_list, borough_data = borough_data))
   
 }
 
-.bind_and_arrange <- function(x, lookup){
-  
-  z <- rbindlist(x, use.names = TRUE) %>% 
-    left_join(lookup, by = c("gss_code", "gss_code_ward")) %>% 
-    data.frame()
-  
-  arrange_by <- intersect(c("gss_code", "la_name", "gss_code_ward", "ward_name", "year", "sex", "age"),
-                          names(z))
-  
-  select_by <- c(arrange_by, setdiff(names(z), arrange_by))
-  
-  z %>% 
-    lazy_dt() %>% 
-    arrange_at(arrange_by) %>% 
-    select_at(select_by) %>%
-    as_tibble() %>% 
-    mutate(across(where(is.numeric) & !intersect(names(z), c("year","age")),
-                  ~round(.x, digits=8))) %>% 
-    data.frame()
-}
