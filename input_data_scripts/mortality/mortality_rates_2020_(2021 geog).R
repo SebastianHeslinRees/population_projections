@@ -28,7 +28,7 @@ average_5yrs <- scaled_mortality_curve(popn = gla_popn_mye_path,
                                        output_col = "rate") %>%
 
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = mortality_trajectory_filepath,
+                    rates_trajectory = mortality_trajectory_filepath,
                     first_proj_yr = 2021,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")
@@ -48,7 +48,7 @@ trend_5yrs <- scaled_mortality_curve(popn = gla_popn_mye_path,
                                      output_col = "rate") %>%
 
   project_rates_npp(rate_col = "rate",
-                    rate_trajectory_filepath = mortality_trajectory_filepath,
+                    rates_trajectory = mortality_trajectory_filepath,
                     first_proj_yr = 2021,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")
@@ -59,4 +59,4 @@ saveRDS(average_5yrs, "input_data/mortality/mort_rates_5yr_avg_2020.rds")
 saveRDS(trend_5yrs, "input_data/mortality/mort_rates_5yr_trend_2020.rds")
 
  
- rm(list = ls())
+rm(list = ls())
