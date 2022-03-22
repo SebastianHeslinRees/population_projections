@@ -7,41 +7,13 @@ message("Ward 2022 backseries")
 # Create file structure
 
 input_data_dir <- "input_data/smallarea_model/"
+data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/small_area_model_data/"
 dir.create(input_data_dir, showWarnings = FALSE)
-dir.create(paste0(input_data_dir, "lookups"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "backseries"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "processed"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "development_data"), showWarnings = FALSE)
 
-#-------------------------------------------------------------------------------
-
-# Create lookups
-
-source("input_data_scripts/smallarea_model/ward_2022_lookups.R")
-
-#-------------------------------------------------------------------------------
-
-# Location of raw data on the Q drive
-
-data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/new_ward_model_data/"
-
-#-------------------------------------------------------------------------------
-
-# Copy lookups
-
-lsoa_to_ward <- readRDS(paste0(data_dir_Q_drive, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
-lsoa_to_lsoa <- readRDS(paste0(data_dir_Q_drive, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
-dummy_codes <- readRDS(paste0(data_dir_Q_drive, "lookups/provisional_and_dummy_WD22_code_lookup.rds"))
-ward_names <- select(dummy_codes, gss_code_ward, ward_name, gss_code, la_name)
-oa_to_ward <- readRDS(paste0(data_dir_Q_drive, "lookups/oa_to_WD22_lookup_best_fit.rds"))
-oa_to_ward_proportions <- readRDS(paste0(data_dir_Q_drive,"lookups/oa_to_WD22_proportional.rds"))
-
-saveRDS(lsoa_to_ward, paste0(input_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
-saveRDS(dummy_codes, paste0(input_data_dir, "lookups/dummy_WD22_codes.rds"))
-saveRDS(ward_names, paste0(input_data_dir, "lookups/ward_2022_name_lookup.rds"))
-saveRDS(oa_to_ward, paste0(input_data_dir, "lookups/oa_to_WD22_lookup_best_fit.rds"))
-saveRDS(oa_to_ward_proportions, paste0(input_data_dir,"lookups/oa_to_WD22_proportional.rds"))
-saveRDS(lsoa_to_lsoa, paste0(input_data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
+lsoa_to_ward <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
 
 #-------------------------------------------------------------------------------
 
@@ -134,7 +106,7 @@ comm_est_ward_sya <- list()
 for(group in unique(communal_est_ward$age_group)){
   
   pop_1 <- filter(communal_est_ward, age_group == group)
-  pop_2 <- filter(ward_pop, age %in%  unique(pop_1$age_min): unique(pop_1$age_max), year == 2016) #change to 2011 when we have pop data
+  pop_2 <- filter(ward_pop, age %in% unique(pop_1$age_min):unique(pop_1$age_max), year == 2011)
   
   comm_est_ward_sya[[group]] <- distribute_within_age_band(pop_1,pop_2,
                                                            "ce_popn","popn",

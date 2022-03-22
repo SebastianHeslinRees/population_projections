@@ -29,6 +29,7 @@ check_negative_values <- function(x, data_col, warn_only = FALSE, change_value =
               msg = "check_negative_values expected a dataframe")
   assert_that(is.logical(warn_only),
               msg = paste("check_negative_values expected a non-logical value:", warn_only))
+  assert_that(!any(is.na(x[data_col])), msg = paste("check_negative_values: NAs in", data_col, " column"))
 
   #Function body
   ix <- x[[data_col]] < 0

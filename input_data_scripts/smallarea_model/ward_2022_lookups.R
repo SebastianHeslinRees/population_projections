@@ -2,10 +2,11 @@ library(data.table)
 library(dplyr)
 library(stringr)
 
-#This script makes lookups and saves them to the Q drive
-#A separate script saves them into the projections project
+#This script makes lookups and saves them to the Q drive & into the project
 
-data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/new_ward_model_data/"
+data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/small_area_model_data/"
+project_data_dir <- "input_data/smallarea_model/"
+dir.create(paste0(project_data_dir, "lookups"), showWarnings = FALSE)
 
 #-------------------------------------------------------------------------------
 
@@ -107,5 +108,18 @@ saveRDS(proportional_oa_ward, paste0(data_dir_Q_drive,"lookups/oa_to_WD22_propor
 
 #-------------------------------------------------------------------------------
 
-rm(data_dir_Q_drive, dummy_ward_codes, provisional_WD22, oa_to_wd22, lsoa_to_WD20,
-   lsoa_to_wd22, proportional_oa_ward)
+# Save to project folder
+
+lsoa_to_lsoa <- readRDS(paste0(data_dir_Q_drive, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
+ward_names <- select(provisional_WD22, gss_code_ward, ward_name, gss_code, la_name)
+
+saveRDS(lsoa_to_wd22, paste0(project_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
+saveRDS(provisional_WD22, paste0(project_data_dir, "lookups/dummy_WD22_codes.rds"))
+saveRDS(ward_names, paste0(project_data_dir, "lookups/ward_2022_name_lookup.rds"))
+saveRDS(oa_to_wd22, paste0(project_data_dir, "lookups/oa_to_WD22_lookup_best_fit.rds"))
+saveRDS(proportional_oa_ward, paste0(project_data_dir,"lookups/oa_to_WD22_proportional.rds"))
+saveRDS(lsoa_to_lsoa, paste0(project_data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
+
+#-------------------------------------------------------------------------------
+
+rm(list = ls())

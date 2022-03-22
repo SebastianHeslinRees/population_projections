@@ -17,7 +17,7 @@ dir.create(paste0(input_data_dir, "development_data"), showWarnings = FALSE)
 
 # Location of raw data on the Q drive
 
-data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/new_ward_model_data/"
+data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/small_area_model_data/"
 
 #-------------------------------------------------------------------------------
 # Lookups
