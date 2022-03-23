@@ -98,22 +98,22 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
   rm(ward_data)
 }
 
-
-bpo_rmd_2020("Greenwich", "WD13", "greenwich_scenario_1")
-bpo_rmd_2020("Greenwich", "WD13", "greenwich_scenario_3")
-
-bpo_rmd_2020("Barnet", "WD13")
-bpo_rmd_2020("Bromley", "WD13")
-bpo_rmd_2020("Haringey", "WD13")
-bpo_rmd_2020("Kingston", "WD13")
-bpo_rmd_2020("Lambeth", "WD13")
-bpo_rmd_2020("Merton", "WD13")
-bpo_rmd_2020("Wandsworth", "WD13")
-bpo_rmd_2020("Hounslow", "WD13")
-
-bpo_rmd_2020("Barking and Dagenham", "WD22", "barking_and_dagenham")
-bpo_rmd_2020("Brent", "WD22")
-bpo_rmd_2020("Harrow", "WD22")
-bpo_rmd_2020("Tower Hamlets", "WD22", "tower_hamlets")
-bpo_rmd_2020("Westminster", "WD22")
-
+# 
+# bpo_rmd_2020("Greenwich", "WD13", "greenwich_scenario_1")
+# bpo_rmd_2020("Greenwich", "WD13", "greenwich_scenario_3")
+# 
+# bpo_rmd_2020("Barnet", "WD13")
+# bpo_rmd_2020("Bromley", "WD13")
+# bpo_rmd_2020("Haringey", "WD13")
+# bpo_rmd_2020("Kingston", "WD13")
+# bpo_rmd_2020("Lambeth", "WD13")
+# bpo_rmd_2020("Merton", "WD13")
+# bpo_rmd_2020("Wandsworth", "WD13")
+# bpo_rmd_2020("Hounslow", "WD13")
+# 
+# bpo_rmd_2020("Barking and Dagenham", "WD22", "barking_and_dagenham")
+# bpo_rmd_2020("Brent", "WD22")
+# bpo_rmd_2020("Harrow", "WD22")
+# bpo_rmd_2020("Tower Hamlets", "WD22", "tower_hamlets")
+# bpo_rmd_2020("Westminster", "WD22")
+# bpo_rmd_2020("Redbridge", "WD22")
