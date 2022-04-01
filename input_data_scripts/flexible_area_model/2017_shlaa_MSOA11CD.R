@@ -25,7 +25,7 @@
 
 library(dplyr)
 
-message("shlaa development WD13")
+message("shlaa development MSOA")
 
 processed_dir <- "input_data/flexible_area_model/development_data/processed/"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -35,84 +35,86 @@ small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_i
 small_remainder_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
 small_trend_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
 
-lsoa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_WD13_lookup.rds")
+lsoa_to_msoa_lookup <- readRDS("input_data/lookup/lsoa_to_msoa.rds")
 
-london_wards <- lsoa_to_ward_lookup %>%
+london_msoas <- lsoa_to_msoa_lookup %>%
   filter(substr(gss_code,1,3) == "E09") %>% 
-  select(gss_code_ward) %>% 
+  select(gss_code_msoa) %>% 
   unique()
 
 #-------------------------------------------------------------------------------
 
 #Large sites
 
-ward_large <- large_sites %>%
-  group_by(gss_code_ward, year) %>%
+msoa_large <- large_sites %>%
+  group_by(gss_code_msoa, year) %>%
   summarise(units = sum(dev), .groups = 'drop_last') %>%
   as.data.frame() %>%
-  tidyr::complete(gss_code_ward = london_wards$gss_code_ward,
+  tidyr::complete(gss_code_msoa = london_msoas$gss_code_msoa,
                   year = 2012:2050,
                   fill = list(units = 0))
 
 #Test for NAs
-assertthat::assert_that(sum(is.na(ward_large))==0)
+assertthat::assert_that(sum(is.na(msoa_large))==0)
 
 #Test that amount of development in every dataframe is the same
-assertthat::assert_that(sum(ward_large$units)==total_units)
+assertthat::assert_that(sum(msoa_large$units)==total_units)
+
 
 #-------------------------------------------------------------------------------
 
 #Small Sites - Intensification
 
-ward_intense <- small_intensification %>%
-  group_by(gss_code_ward) %>%
+msoa_intense <- small_intensification %>%
+  left_join(oa_propotions_lookup, by="gss_code_oa") %>%
+  mutate(intense = intense*oa_ward_weight) %>% 
+  group_by(gss_code_ward, year) %>%
   summarise(units = sum(intense), .groups = 'drop_last') %>%
-  as.data.frame()
+  data.frame() %>% 
+  filter(year == 2020)
 
-ward_intense <- ward_intense %>% 
-  mutate(year = 2020) %>% 
+msoa_intense <- msoa_intense %>%
   popmodules::project_forward_flat(2029) %>% 
-  select(gss_code_ward, year, units)
+  select(gss_code_msoa, year, units)
+
 
 #-------------------------------------------------------------------------------
 
 #Small Sites - Windfall
+
 
 borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
   group_by(year, gss_code) %>%
   summarise(units = sum(units), .groups = 'drop_last') %>%
   data.frame()
 
-# The borough windfall is distributed evenly among the wards and MSOAs
-# i.e. not according to how the other development is distributed with the wards/MSOAs
+# The borough windfall is distributed evenly MSOAs
+# i.e. not according to how the other development is distributed with the MSOAs
 
-ward_trend_windfall <- lsoa_to_ward_lookup %>% 
+msoa_trend_windfall <- lsoa_to_msoa_lookup %>% 
   filter(gss_code %in% borough_windfall$gss_code) %>% 
-  select(gss_code_ward, gss_code) %>% 
+  select(gss_code_msoa, gss_code) %>% 
   distinct() %>% 
   group_by(gss_code) %>% 
   mutate(n = n()) %>%
   data.frame() %>% 
   left_join(borough_windfall, by = "gss_code") %>% 
   mutate(units = units/n) %>% 
-  select(gss_code_ward, year, units)
+  select(gss_code_msoa, year, units)
 
 #Join the small sites data to the large sites data
 #Add zeros for years 2012-2019 and 2042-2050
 #include 2011 in borough file
-ward_shlaa <- rbind(ward_large, ward_intense, ward_trend_windfall) %>%
-  filter(!gss_code_ward %in% london_wards$gss_code_ward) %>% 
-  rbind(ward_large, ward_intense) %>% 
-  filter(gss_code_ward %in% london_wards$gss_code_ward) %>%
-  group_by(year, gss_code_ward) %>%
+msoa_shlaa <- rbind(msoa_large, msoa_intense, msoa_trend_windfall) %>%
+  group_by(year, gss_code_msoa) %>%
   summarise(units = sum(units), .groups = 'drop_last') %>%
   data.frame() %>% 
   tidyr::complete(year = 2012:2050,
-                  gss_code_ward = unique(london_wards$gss_code_ward),
+                  gss_code_msoa = unique(london_msoas$gss_code_msoa),
                   fill = list(units = 0))
 
 #Save
-saveRDS(ward_shlaa, "input_data/flexible_area_model/development_data/ward_shlaa_trajectory_WD13CD.rds")
+saveRDS(msoa_shlaa, "input_data/flexible_area_model/development_data/msoa_shlaa_trajectory_MSOA11CD.rds")
 
 #-------------------------------------------------------------------------------
 
@@ -121,29 +123,28 @@ saveRDS(ward_shlaa, "input_data/flexible_area_model/development_data/ward_shlaa_
 #Savills forecast 41.7k for 2020 & 43k per year for the period 2021-25
 #Then distribute the difference between the new trajectory and the SHLAA
 #to the later years (2026-41)
-savills <- filter(ward_shlaa, year %in% 2020:2025) %>% 
+savills <- filter(msoa_shlaa, year %in% 2020:2025) %>% 
   group_by(year) %>% 
   summarise(shlaa_units = sum(units)) %>% 
   cbind(data.frame(savills_units = c(41700,rep(43000,5)))) %>% 
   mutate(reduction = shlaa_units - savills_units) %>% 
   select(year, reduction)
 
-short_term_savills <- filter(ward_shlaa, year %in% 2020:2025) %>% 
+short_term_savills <- filter(msoa_shlaa, year %in% 2020:2025) %>% 
   group_by(year) %>% 
   mutate(share = units/sum(units)) %>% 
   left_join(savills, by = "year") %>% 
   mutate(distributed_reduction = reduction * share,
          units = units - distributed_reduction) %>% 
-  select(names(ward_shlaa))
+  select(names(msoa_shlaa))
 
-long_term_savills <- filter(ward_shlaa, year %in% 2026:2041) %>% 
+long_term_savills <- filter(msoa_shlaa, year %in% 2026:2041) %>% 
   mutate(share = units/sum(units),
          distributed_increase = sum(savills$reduction) * share,
          units = units + distributed_increase) %>% 
-  select(names(ward_shlaa))
+  select(names(msoa_shlaa))
 
-
-ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds") %>% 
+ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_MSOA11CD.rds") %>% 
   filter(year < 2020)
 
 savills_trajectory <-  filter(ward_shlaa, !year %in% 2020:2041) %>% 
@@ -155,7 +156,6 @@ savills_trajectory <-  filter(ward_shlaa, !year %in% 2020:2041) %>%
 #-------------------------------------------------------------------------------
 
 #Save
-saveRDS(savills_trajectory, "input_data/flexible_area_model/development_data/ward_savills_trajectory_WD13CD.rds")
+saveRDS(savills_trajectory, "input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
 
 rm(list=ls())
-

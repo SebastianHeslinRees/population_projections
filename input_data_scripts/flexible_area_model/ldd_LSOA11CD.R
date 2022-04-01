@@ -1,5 +1,3 @@
-#Add the LDD development to the census stock
-#Group by ward, msoa and borough for use in models
 library(dplyr)
 library(data.table)
 

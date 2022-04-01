@@ -22,128 +22,29 @@
 # As SHLAA first year is 2018 and LDD only goes to 2016 so data are needed for 2017
 #       # Phase 1 developments spread over 3 years instead of 2
 
-library(rgeos)
-library(sp)
-library(rgdal)
-library(dplyr)
-library(data.table)
-library(tidyr)
-library(stringr)
 
-message("shlaa development data\nignore OGRSpatialRef warnings")
+library(dplyr)
+
+message("shlaa development WD22")
+
+processed_dir <- "input_data/flexible_area_model/development_data/processed/"
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+large_sites <- readRDS(paste0(processed_dir, "2017_shlaa_large_sites.rds"))
+small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_intensification.rds"))
+small_remainder_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
+small_trend_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
 
 lsoa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_WD22_lookup_best_fit.rds")
-oa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD22_lookup_best_fit.rds") %>% 
-  select(gss_code_oa, gss_code_ward)
 
-oa_propotions_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD22_proportional.rds")
-
-msoa_to_district_lookup <-  readRDS("input_data/lookup/msoa_to_district.rds")
-oa_to_msoa_lookup <- readRDS("input_data/lookup/oa_to_msoa.rds")
-
-ward_name_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds")
-
-#-------------------------------------------------------------------------------
-
-####LARGE SITES####
-
-#Join the large sites point data to ward and MSOA polygons
-start_dir <- getwd()
-
-#readOGR requires the directory to be changed
-shlaa_data_loc <- "Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/final_data/"
-setwd(paste0(shlaa_data_loc, "large_sites_v2/"))
-large_sites_points <- readOGR(dsn = ".", layer = "SHLAA_large_sites_3Oct2017_point",
-                              verbose = FALSE)
-
-setwd(start_dir)
-msoa_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/StatisticalBoundaries/Census_2011/SuperOutputAreas/London/Middle/ESRI"
-msoa_polygons <- readOGR(dsn = msoa_polygon_loc, layer = "MSOA_2011_London",
-                         verbose = FALSE)
-
-ward_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2022/ESRI/London"
-ward_polygons <- readOGR(dsn = ward_polygon_loc, layer = "London_Ward_2022_draft",
-                         verbose = FALSE)
-
-proj4string(large_sites_points) <- proj4string(msoa_polygons)
-proj4string(ward_polygons) <- proj4string(msoa_polygons)
-
-msoa_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, msoa_polygons))%>%
-  select(lhcss_ref, MSOA11CD, LAD11CD, LAD11NM,
-         Phase1, Phase2, Phase3, Phase4, Phase5)
-
-ward_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, ward_polygons)) %>%
-  data.frame() %>% 
-  mutate(ward_name = str_remove_all(ward_name, "\\.")) %>% 
-  mutate(ward_name = str_replace_all(ward_name, "Shirly", "Shirley")) %>% 
-  left_join(ward_name_lookup, by = c("la_gsscode"="gss_code", "ward_name"="ward_name")) %>% 
-  mutate(gss_code_ward = ifelse(la_gsscode == "E09000001", "E09000001", gss_code_ward)) %>% 
-  select(lhcss_ref, gss_code_ward)
-
-large_input <- left_join(msoa_join, ward_join, by="lhcss_ref") %>%
-  select(MSOA11CD, LAD11CD, LAD11NM, gss_code_ward,
-         Phase1, Phase2, Phase3, Phase4, Phase5)%>%
-  mutate(gss_code_msoa = as.character(MSOA11CD),
-         gss_code_borough = as.character(LAD11CD),
-         district = as.character(LAD11NM),
-         gss_code_ward = as.character(gss_code_ward)) %>%
-  select(gss_code_msoa, gss_code_borough, gss_code_ward, district,
-         Phase1, Phase2, Phase3, Phase4, Phase5)
-
-assertthat::assert_that(sum(is.na(large_input))==0)
-
-rm(list=setdiff(ls(), c("large_input","shlaa_data_loc", ls()[stringr::str_detect(ls(), "lookup")])))
-
-#-------------------------------------------------------------------------------
-
-####CREATE LARGE SITES TOTALS####
-total_units <- large_input %>%
-  select(Phase1, Phase2, Phase3, Phase4, Phase5) %>%
-  sum()
-
-large_sites <- large_input %>%
-  mutate(Y2017 = Phase1 /3,
-         Y2018 = Phase1 /3,
-         Y2019 = Phase1 /3,
-         
-         Y2020 = Phase2 /5,
-         Y2021 = Phase2 /5,
-         Y2022 = Phase2 /5,
-         Y2023 = Phase2 /5,
-         Y2024 = Phase2 /5,
-         
-         Y2025 = Phase3 /5,
-         Y2026 = Phase3 /5,
-         Y2027 = Phase3 /5,
-         Y2028 = Phase3 /5,
-         Y2029 = Phase3 /5,
-         
-         Y2030 = Phase4 /5,
-         Y2031 = Phase4 /5,
-         Y2032 = Phase4 /5,
-         Y2033 = Phase4 /5,
-         Y2034 = Phase4 /5,
-         
-         Y2035 = Phase5 /7,
-         Y2036 = Phase5 /7,
-         Y2037 = Phase5 /7,
-         Y2038 = Phase5 /7,
-         Y2039 = Phase5 /7,
-         Y2040 = Phase5 /7,
-         Y2041 = Phase5 /7) %>%
-  
-  select(-Phase1, -Phase2, -Phase3, -Phase4, -Phase5) %>%
-  pivot_longer(names_to = "year", values_to = "dev", cols = starts_with("Y")) %>%
-  mutate(year = as.numeric(substr(year,2,5))) %>%
-  rename(gss_code = gss_code_borough) %>% 
-  data.frame()
-
-
-#group data by ward, msoa and borough 
 london_wards <- lsoa_to_ward_lookup %>%
   filter(substr(gss_code,1,3) == "E09") %>% 
   select(gss_code_ward) %>% 
   unique()
+
+#-------------------------------------------------------------------------------
+
+#Large sites
 
 ward_large <- large_sites %>%
   group_by(gss_code_ward, year) %>%
@@ -153,56 +54,17 @@ ward_large <- large_sites %>%
                   year = 2012:2050,
                   fill = list(units = 0))
 
-borough_large <- large_sites %>%
-  group_by(gss_code, year) %>%
-  summarise(units = sum(dev), .groups = 'drop_last') %>%
-  as.data.frame() %>% 
-  tidyr::complete(gss_code,
-                  year = 2011:2050,
-                  fill = list(units = 0))
-
-
 #Test for NAs
 assertthat::assert_that(sum(is.na(ward_large))==0)
-assertthat::assert_that(sum(is.na(borough_large))==0)
 
 #Test that amount of development in every dataframe is the same
-assertthat::assert_that(sum(borough_large$units)==total_units)
 assertthat::assert_that(sum(ward_large$units)==total_units)
 
-rm(large_sites, large_input, total_units)
 
 #-------------------------------------------------------------------------------
 
-####Small Sites####
+#Small Sites - Intensification
 
-#As noted above the small sites are of 2 types:
-#       - OA level
-#       - Borough/Development Corporation level
-
-# The SHLAA assumed an intensification which is provided at OA level
-# Following EiP this has been reduced to 1/3 of the level in the input file
-
-# The other element to small sites is the non-specific windfall development
-# This is a borough-wide number and can't be distributed to ward or msoa
-# Its therefore only added into the borough trajectory
-# This data has provided by planning in 2 files: 1 for TH, Hackney, Islington and
-# one for everything else
-
-# All small sites data is one number which is the same in each year of the projection
-# Small sites data care applied from the SHLAA start year of 2020
-
-
-#OA level data
-
-small_intensification <- fread(paste0(shlaa_data_loc,"/Small_Sites_Intensification.csv")) %>%
-  as.data.frame() %>% 
-  setnames(c("gss_code_oa","intense")) %>%
-  #left_join(oa_to_msoa_lookup, by="gss_code_oa") %>%
-  #left_join(msoa_to_district_lookup, by="gss_code_msoa") %>%
-  mutate(intense = intense/3) # This is the post-EiP change
-
-#aggregate to ward
 ward_intense <- small_intensification %>%
   left_join(oa_propotions_lookup, by="gss_code_oa") %>%
   mutate(intense = intense*oa_ward_weight) %>% 
@@ -211,86 +73,15 @@ ward_intense <- small_intensification %>%
   data.frame() %>% 
   filter(year == 2020)
 
-#Check
-sum(small_intensification$intense)
-sum(ward_intense$units)
-
-#project
 ward_intense <- ward_intense %>%
   popmodules::project_forward_flat(2029) %>% 
   select(gss_code_ward, year, units)
 
-#aggregate to borough
-# borough_intense <- small_intensification %>%
-#         group_by(gss_code) %>%
-#         summarise(units = sum(intense), .groups = 'drop_last') %>%
-#         as.data.frame() 
-
-#project
-# borough_intense <- borough_intense %>% 
-#         mutate(year = 2020) %>% 
-#         popmodules::project_forward_flat(2029) %>% 
-#         select(gss_code, year, units)
-
-rm(small_intensification, oa_to_msoa_lookup, oa_to_ward_lookup)
-
-#Windfall sites
-#Borough Level Only
-#file 1 is windfalls for all boroughs except City of London and Islington
-#Standard windfall calc is for 2020-41
-
-#Remainder windfall
-small_windfall_1 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Windfall.csv")) %>%
-  data.frame() %>% 
-  filter(!Borough %in% c("City of London","Islington","LLDC","OPDC")) %>%
-  select(-Borough) %>%
-  rename(units = Windfall) %>% 
-  data.frame()
-
-small_windfall_opdc <- data.frame(gss_code=c("E09000012","E09000025","E09000030"),
-                                  units=c(0,68,2),
-                                  stringsAsFactors = F)
-
-small_windfall_lldc <- data.frame(gss_code="E09000009",
-                                  units=5,
-                                  stringsAsFactors = F)
-
-small_remainder_windfall <- rbind(small_windfall_1,
-                                  small_windfall_opdc,
-                                  small_windfall_lldc) %>%
-  group_by(gss_code) %>%
-  summarise(units = sum(units), .groups = 'drop_last') %>%
-  as.data.frame() %>% 
-  mutate(year = 2020) %>% 
-  popmodules::project_forward_flat(2029) %>% 
-  select(gss_code, year, units)
-
-#Trend windfall
-small_trend_windfall_1 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Other_Windfall.csv")) %>%
-  data.frame() %>% 
-  filter(Borough %in% c("City of London","Islington")) %>%
-  select(-Borough) %>%
-  rename(units = Windfall) %>% 
-  mutate(year = 2020) %>% 
-  popmodules::project_forward_flat(2029)
-
-small_trend_windfall_2 <- fread(paste0(shlaa_data_loc, "/Small_Sites_Other_Windfall.csv")) %>%
-  data.frame() %>% 
-  filter(!Borough %in% c("OPDC","LLDC")) %>%
-  select(-Borough) %>%
-  rename(units = Windfall) %>% 
-  mutate(year = 2017) %>% 
-  popmodules::project_forward_flat(2041) %>% 
-  filter(!year %in% 2020:2029)
-
-small_trend_windfall <- rbind(small_trend_windfall_1,
-                              small_trend_windfall_2) %>%
-  as.data.frame() %>% 
-  select(gss_code, year, units)
-
-rm(small_trend_windfall_1, small_trend_windfall_2, small_windfall_opdc, small_windfall_lldc)
 
 #-------------------------------------------------------------------------------
+
+#Small Sites - Windfall
+
 
 borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
   group_by(year, gss_code) %>%
@@ -321,8 +112,6 @@ ward_shlaa <- rbind(ward_large, ward_intense, ward_trend_windfall) %>%
   tidyr::complete(year = 2012:2050,
                   gss_code_ward = unique(london_wards$gss_code_ward),
                   fill = list(units = 0))
-
-sum(ward_shlaa$units)
 
 #Save
 saveRDS(ward_shlaa, "input_data/flexible_area_model/development_data/ward_shlaa_trajectory_WD22CD.rds")
@@ -368,7 +157,5 @@ savills_trajectory <-  filter(ward_shlaa, !year %in% 2020:2041) %>%
 
 #Save
 saveRDS(savills_trajectory, "input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
-
-
 
 rm(list=ls())
