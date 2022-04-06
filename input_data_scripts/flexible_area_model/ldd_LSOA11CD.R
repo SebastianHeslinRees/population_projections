@@ -155,8 +155,7 @@ lsoa_units <- lsoa_census_dwellings %>%
 
 #save
 dir.create(paste0(input_data_dir,"development_data/"), showWarnings = FALSE)
-saveRDS(ward_units, paste0(input_data_dir,"development_data/ldd_backseries_dwellings_LSOA11CD.rds"))
-
+saveRDS(lsoa_units, paste0(input_data_dir,"development_data/ldd_backseries_dwellings_LSOA11CD.rds"))
 
 rm(list=ls())
 

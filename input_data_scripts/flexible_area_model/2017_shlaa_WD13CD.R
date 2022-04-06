@@ -28,7 +28,6 @@ library(dplyr)
 message("shlaa development WD13")
 
 processed_dir <- "input_data/flexible_area_model/development_data/processed/"
-dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 large_sites <- readRDS(paste0(processed_dir, "2017_shlaa_large_sites.rds"))
 small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_intensification.rds"))
@@ -57,14 +56,12 @@ ward_large <- large_sites %>%
 #Test for NAs
 assertthat::assert_that(sum(is.na(ward_large))==0)
 
-#Test that amount of development in every dataframe is the same
-assertthat::assert_that(sum(ward_large$units)==total_units)
-
 #-------------------------------------------------------------------------------
 
 #Small Sites - Intensification
 
 ward_intense <- small_intensification %>%
+  mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>% 
   group_by(gss_code_ward) %>%
   summarise(units = sum(intense), .groups = 'drop_last') %>%
   as.data.frame()
