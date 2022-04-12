@@ -117,3 +117,5 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
 # bpo_rmd_2020("Tower Hamlets", "WD22", "tower_hamlets")
 # bpo_rmd_2020("Westminster", "WD22")
 # bpo_rmd_2020("Redbridge", "WD22")
+
+bpo_rmd_2020("Hillingdon", "WD13")
