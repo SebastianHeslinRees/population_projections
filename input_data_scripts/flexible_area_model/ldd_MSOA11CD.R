@@ -6,10 +6,10 @@ input_data_dir <- "input_data/flexible_area_model/"
 ldd_lsoa <- paste0(input_data_dir,"development_data/ldd_backseries_dwellings_LSOA11CD.rds")
 
 if(file.exists(ldd_lsoa)){
-  readRDS(ldd_lsoa)
+  lsoa_units <- readRDS(ldd_lsoa)
 } else {
   source("input_data_scripts/flexible_area_model/ldd_LSOA11CD.R")
-  readRDS(ldd_lsoa)
+  lsoa_units <- readRDS(ldd_lsoa)
 }
 
 # Lookups
@@ -32,7 +32,6 @@ msoa_units <- left_join(lsoa_units, lsoa_to_msoa, by="gss_code_lsoa") %>%
 
 #save
 dir.create(paste0(input_data_dir,"development_data/"), showWarnings = FALSE)
-saveRDS(ward_units, paste0(input_data_dir,"development_data/ldd_backseries_dwellings_MSOA11CD.rds"))
-
+saveRDS(msoa_units, paste0(input_data_dir,"development_data/ldd_backseries_dwellings_MSOA11CD.rds"))
 
 rm(list=ls())

@@ -28,16 +28,15 @@ library(dplyr)
 message("shlaa development MSOA")
 
 processed_dir <- "input_data/flexible_area_model/development_data/processed/"
-dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 large_sites <- readRDS(paste0(processed_dir, "2017_shlaa_large_sites.rds"))
 small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_intensification.rds"))
 small_remainder_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
 small_trend_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
 
-lsoa_to_msoa_lookup <- readRDS("input_data/lookup/lsoa_to_msoa.rds")
+msoa_to_district_lookup <- readRDS("input_data/lookup/msoa_to_district.rds")
 
-london_msoas <- lsoa_to_msoa_lookup %>%
+london_msoas <- msoa_to_district_lookup %>%
   filter(substr(gss_code,1,3) == "E09") %>% 
   select(gss_code_msoa) %>% 
   unique()
@@ -57,31 +56,21 @@ msoa_large <- large_sites %>%
 #Test for NAs
 assertthat::assert_that(sum(is.na(msoa_large))==0)
 
-#Test that amount of development in every dataframe is the same
-assertthat::assert_that(sum(msoa_large$units)==total_units)
-
-
 #-------------------------------------------------------------------------------
 
 #Small Sites - Intensification
 
 msoa_intense <- small_intensification %>%
-  left_join(oa_propotions_lookup, by="gss_code_oa") %>%
-  mutate(intense = intense*oa_ward_weight) %>% 
-  group_by(gss_code_ward, year) %>%
+  group_by(gss_code_msoa) %>%
   summarise(units = sum(intense), .groups = 'drop_last') %>%
   data.frame() %>% 
-  filter(year == 2020)
-
-msoa_intense <- msoa_intense %>%
+  mutate(year = 2020) %>%
   popmodules::project_forward_flat(2029) %>% 
   select(gss_code_msoa, year, units)
-
 
 #-------------------------------------------------------------------------------
 
 #Small Sites - Windfall
-
 
 borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
   group_by(year, gss_code) %>%
@@ -91,7 +80,7 @@ borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
 # The borough windfall is distributed evenly MSOAs
 # i.e. not according to how the other development is distributed with the MSOAs
 
-msoa_trend_windfall <- lsoa_to_msoa_lookup %>% 
+msoa_trend_windfall <- msoa_to_district_lookup %>% 
   filter(gss_code %in% borough_windfall$gss_code) %>% 
   select(gss_code_msoa, gss_code) %>% 
   distinct() %>% 
@@ -147,15 +136,15 @@ long_term_savills <- filter(msoa_shlaa, year %in% 2026:2041) %>%
 ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_MSOA11CD.rds") %>% 
   filter(year < 2020)
 
-savills_trajectory <-  filter(ward_shlaa, !year %in% 2020:2041) %>% 
+savills_trajectory <-  filter(msoa_shlaa, !year %in% 2020:2041) %>% 
   rbind(short_term_savills, long_term_savills) %>% 
   filter(year >= 2020) %>% 
   rbind(ldd) %>% 
-  arrange(gss_code_ward, year)
+  arrange(gss_code_msoa, year)
 
 #-------------------------------------------------------------------------------
 
 #Save
-saveRDS(savills_trajectory, "input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
+saveRDS(savills_trajectory, "input_data/flexible_area_model/development_data/ward_savills_trajectory_MSOA11CD.rds")
 
 rm(list=ls())

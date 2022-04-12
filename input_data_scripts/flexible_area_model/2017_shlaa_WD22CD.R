@@ -28,7 +28,6 @@ library(dplyr)
 message("shlaa development WD22")
 
 processed_dir <- "input_data/flexible_area_model/development_data/processed/"
-dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 large_sites <- readRDS(paste0(processed_dir, "2017_shlaa_large_sites.rds"))
 small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_intensification.rds"))
@@ -42,10 +41,11 @@ london_wards <- lsoa_to_ward_lookup %>%
   select(gss_code_ward) %>% 
   unique()
 
+oa_propotions_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD22_proportional.rds")
+
 #-------------------------------------------------------------------------------
 
 #Large sites
-
 ward_large <- large_sites %>%
   group_by(gss_code_ward, year) %>%
   summarise(units = sum(dev), .groups = 'drop_last') %>%
@@ -57,15 +57,12 @@ ward_large <- large_sites %>%
 #Test for NAs
 assertthat::assert_that(sum(is.na(ward_large))==0)
 
-#Test that amount of development in every dataframe is the same
-assertthat::assert_that(sum(ward_large$units)==total_units)
-
-
 #-------------------------------------------------------------------------------
 
 #Small Sites - Intensification
 
 ward_intense <- small_intensification %>%
+  select(-gss_code_ward) %>% 
   left_join(oa_propotions_lookup, by="gss_code_oa") %>%
   mutate(intense = intense*oa_ward_weight) %>% 
   group_by(gss_code_ward, year) %>%

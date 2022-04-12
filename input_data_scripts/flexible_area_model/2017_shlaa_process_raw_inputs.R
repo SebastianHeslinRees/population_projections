@@ -29,7 +29,7 @@ library(dplyr)
 library(data.table)
 library(tidyr)
 
-message("shlaa development WD13")
+message("raw shlaa development data")
 
 #-------------------------------------------------------------------------------
 
