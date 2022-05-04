@@ -28,6 +28,7 @@
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
 #' @import dplyr
+#' @import data.table
 #' @importFrom dtplyr lazy_dt
 #' @importFrom assertthat assert_that
 #' 
@@ -40,7 +41,7 @@ recode_gss_codes <- function(df_in,
                              recode_to_year,
                              aggregate_data = TRUE,
                              recode_gla_codes = FALSE,
-                             code_changes_path = "input_data/lookup/district_changes_clean.rds"){
+                             code_changes_path = NULL){
   
   #prepare input dataframe
   df <- df_in %>%
@@ -64,8 +65,12 @@ recode_gss_codes <- function(df_in,
   recode_merges <- list()
   recode_name_changes <- list()
   
-  code_changes <- readRDS(code_changes_path) %>%
-    select(changed_to_code, changed_from_code, year, split, merge)
+  if(is.null(code_change)){
+    code_changes <- .district_changes_clean()
+  } else {
+    code_changes <- readRDS(code_changes_path) %>%
+      select(changed_to_code, changed_from_code, year, split, merge)
+  }
   
   #### Splits
   #there have thus far been 2 splits, both in 2013
@@ -217,7 +222,100 @@ recode_gss_codes <- function(df_in,
   }
   
   
-    
-    return(df)
-  }
   
+  return(df)
+}
+
+.district_changes_clean <- function(){
+  
+  changes_list <- list(
+    data.frame("E06000049","Cheshire East","E07000017","Macclesfield","The Cheshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000050","Cheshire West and Chester","E07000013","Chester","The Cheshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000050","Cheshire West and Chester","E07000016","Ellesmere Port & Neston","The Cheshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000050","Cheshire West and Chester","E07000018","Vale Royal","The Cheshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000051","Shropshire","E07000182","Bridgnorth","The Shropshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000051","Shropshire","E07000183","North Shropshire","The Shropshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000051","Shropshire","E07000184","Oswestry","The Shropshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000051","Shropshire","E07000185","Shrewsbury and Atcham","The Shropshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000051","Shropshire","E07000186","South Shropshire","The Shropshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000052","Cornwall","E07000019","Caradon","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000052","Cornwall","E07000020","Carrick","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000052","Cornwall","E07000021","Kerrier","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000052","Cornwall","E07000022","North Cornwall","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000052","Cornwall","E07000023","Penwith","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000052","Cornwall","E07000024","Restormel","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000053","Isles of Scilly","E07000025","Isles of Scilly","The Cornwall (Structural Change) Order 2008","E06",2009,FALSE,FALSE),
+    data.frame("E06000054","Wiltshire","E07000230","Kennet","The Wiltshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000054","Wiltshire","E07000231","North Wiltshire","The Wiltshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000054","Wiltshire","E07000232","Salisbury","The Wiltshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000054","Wiltshire","E07000233","West Wiltshire","The Wiltshire (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000055","Bedford","E07000002","Bedford","The Bedfordshire (Structural Changes) Order 2008","E06",2009,FALSE,FALSE),
+    data.frame("E06000056","Central Bedfordshire","E07000001","Mid Bedfordshire","The Bedfordshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000054","Chester-le-Street","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000055","Derwentside","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000056","Durham","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000057","Easington","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000058","Sedgefield","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000059","Teesdale","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000047","County Durham","E07000060","Wear Valley","The County Durham (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000048","Northumberland","E07000157","Alnwick","The Northumberland (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000048","Northumberland","E07000158","Berwick-upon-Tweed","The Northumberland (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000048","Northumberland","E07000159","Blyth Valley","The Northumberland (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000048","Northumberland","E07000160","Castle Morpeth","The Northumberland (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000048","Northumberland","E07000161","Tynedale","The Northumberland (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000048","Northumberland","E07000162","Wansbeck","The Northumberland (Structural Change) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000049","Cheshire East","E07000014","Congleton","The Cheshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000049","Cheshire East","E07000015","Crewe and Nantwich","The Cheshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E06000056","Central Bedfordshire","E07000003","South Bedfordshire","The Bedfordshire (Structural Changes) Order 2008","E06",2009,FALSE,TRUE),
+    data.frame("E07000240","St Albans","E07000100","St Albans","The St Albans and Welwyn Hatfield (Boundary Change) Order 2012","E07",2012,FALSE,FALSE),
+    data.frame("E07000241","Welwyn Hatfield","E07000104","Welwyn Hatfield","The St Albans and Welwyn Hatfield (Boundary Change) Order 2012","E07",2012,FALSE,FALSE),
+    data.frame("E06000057","Northumberland","E06000048","Northumberland","The Gateshead and Northumberland (Boundary Change) Order 2013","E06",2013,FALSE,TRUE),
+    data.frame("E06000057","Northumberland","E08000020","Gateshead","The Gateshead and Northumberland (Boundary Change) Order 2013","E06",2013,TRUE,TRUE),
+    data.frame("E07000242","East Hertfordshire","E07000097","East Hertfordshire","The East Hertfordshire and Stevenage (Boundary Change) Order 2013","E07",2013,TRUE,FALSE),
+    data.frame("E07000243","Stevenage","E07000097","East Hertfordshire","The East Hertfordshire and Stevenage (Boundary Change) Order 2013","E07",2013,TRUE,TRUE),
+    data.frame("E07000243","Stevenage","E07000101","Stevenage","The East Hertfordshire and Stevenage (Boundary Change) Order 2013","E07",2013,FALSE,TRUE),
+    data.frame("E08000037","Gateshead","E08000020","Gateshead","The Gateshead and Northumberland (Boundary Change) Order 2013","E08",2013,TRUE,FALSE),
+    data.frame("E07000112","Folkestone and Hythe","E07000112","Shepway","Name Change","E07",2018,FALSE,FALSE),
+    data.frame("E06000058","Bournemouth, Christchurch and Poole","E07000048","Christchurch","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E06000059","Dorset","E07000049","East Dorset","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E06000059","Dorset","E07000050","North Dorset","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E06000059","Dorset","E07000053","Weymouth and Portland","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E07000244","East Suffolk","E07000205","Suffolk Coastal","The East Suffolk (Local Government Changes) Order 2018","E07",2019,FALSE,TRUE),
+    data.frame("E07000246","Somerset West and Taunton","E07000190","Taunton Deane","The Somerset West and Taunton (Local Government Changes) Order 2018","E07",2019,FALSE,TRUE),
+    data.frame("E07000246","Somerset West and Taunton","E07000191","West Somerset","The Somerset West and Taunton (Local Government Changes) Order 2018","E07",2019,FALSE,TRUE),
+    data.frame("E06000060","Buckinghamshire","E07000004","Aylesbury Vale","The Buckinghamshire (Structural Changes) Order 2019","E06",2020,FALSE,TRUE),
+    data.frame("E06000060","Buckinghamshire","E07000005","Chiltern","The Buckinghamshire (Structural Changes) Order 2019","E06",2020,FALSE,TRUE),
+    data.frame("E06000060","Buckinghamshire","E07000006","South Bucks","The Buckinghamshire (Structural Changes) Order 2019","E06",2020,FALSE,TRUE),
+    data.frame("E06000060","Buckinghamshire","E07000007","Wycombe","The Buckinghamshire (Structural Changes) Order 2019","E06",2020,FALSE,TRUE),
+    data.frame("E06000058","Bournemouth, Christchurch and Poole","E06000028","Bournemouth","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E06000058","Bournemouth, Christchurch and Poole","E06000029","Poole","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E06000059","Dorset","E07000051","Purbeck","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E06000059","Dorset","E07000052","West Dorset","The Bournemouth, Dorset and Poole (Structural Changes) Order 2018","E06",2019,FALSE,TRUE),
+    data.frame("E07000244","East Suffolk","E07000206","Waveney","The East Suffolk (Local Government Changes) Order 2018","E07",2019,FALSE,TRUE),
+    data.frame("E07000245","West Suffolk","E07000201","Forest Heath","The West Suffolk (Local Government Changes) Order 2018","E07",2019,FALSE,TRUE),
+    data.frame("E07000245","West Suffolk","E07000204","St Edmundsbury","The West Suffolk (Local Government Changes) Order 2018","E07",2019,FALSE,TRUE),
+    data.frame("E06000061","North Northamptonshire","E07000150","Corby","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE),
+    data.frame("E06000061","North Northamptonshire","E07000152","East Northamptonshire","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE),
+    data.frame("E06000061","North Northamptonshire","E07000153","Kettering","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE),
+    data.frame("E06000061","North Northamptonshire","E07000156","Wellingborough","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE),
+    data.frame("E06000062","West Northamptonshire","E07000151","Daventry","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE),
+    data.frame("E06000062","West Northamptonshire","E07000154","Northampton","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE),
+    data.frame("E06000062","West Northamptonshire","E07000155","South Northamptonshire","The Northamptonshire (Structural Changes) Order 2020","E06",2021,FALSE,TRUE)
+  )
+  
+  changes_df <- lapply(changes_list,
+                       FUN = function(x) setnames(x, c("changed_to_code",
+                                                       "changed_to_name",
+                                                       "changed_from_code",
+                                                       "changed_from_name",
+                                                       "desc",
+                                                       "entity_type",
+                                                       "year",
+                                                       "split",
+                                                       "merge"))) %>% 
+    rbindlist() %>% 
+    data.frame()
+  
+  return(changes_df)
+  
+}
