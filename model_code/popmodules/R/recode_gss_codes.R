@@ -23,7 +23,8 @@
 #'  used in the 2018-based (& earlier) projections. This is introduced for backward
 #'  compatibility and doesn't correspond to any single vintage year.
 #'  Default \code{FALSE}.
-#' @param code_changes_path string. file path to the code changes database.
+#' @param code_changes_path string. file path to the code changes database or NULL
+#'  to use the hard-coded code changes database. Degault NULL.
 #'
 #' @return The input dataframe with gss codes changed and data aggregated
 #'
@@ -43,6 +44,12 @@ recode_gss_codes <- function(df_in,
                              recode_gla_codes = FALSE,
                              code_changes_path = NULL){
   
+  #Possible recode years
+  recode_years <- c(2009,2012,2013,2018,2019,2020,2021)
+  
+  #validate
+  .validate_recode_gss_codes(df_in, col_geog, data_cols, recode_years, recode_to_year, fun)
+  
   #prepare input dataframe
   df <- df_in %>%
     as.data.frame() %>%
@@ -57,34 +64,17 @@ recode_gss_codes <- function(df_in,
   }
   
   #prepare recoding
-  recode_years <- c(2009,2012,2013,2018,2019,2020,2021)
-  assertthat::assert_that(recode_to_year %in% recode_years,
-                          msg=paste("recode_to_year variable must be one of",
-                                    2009,2012,2013,2018,2019,2020,2021))
-  
   recode_merges <- list()
   recode_name_changes <- list()
   
-  if(is.null(code_change)){
+  if(is.null(code_changes_path)){
     code_changes <- .district_changes_clean()
   } else {
     code_changes <- readRDS(code_changes_path) %>%
       select(changed_to_code, changed_from_code, year, split, merge)
   }
   
-  #### Splits
-  #there have thus far been 2 splits, both in 2013
-  #both were minor alterations to boundaries
-  #northumberland = 1 bungalow
-  #east hertfordshire = part of a row of houses
-  #both can effectively be treated as code changes with no tranfser of
-  #population.
-  #Therefore ignore E08000020 to E06000057
-  #and ignore E07000097 to E06000243
-  
-  code_changes <- code_changes %>% 
-    filter(!(changed_from_code == "E08000020" & changed_to_code == "E06000057")) %>%
-    filter(!(changed_from_code == "E07000097" & changed_to_code == "E07000243"))
+  code_changes <- .ignore_splits(code_changes)
   
   #for each year make the changes a named vector inside a list
   #the x=X is necessary because the vector must not be empty
@@ -121,7 +111,7 @@ recode_gss_codes <- function(df_in,
       
       if(fun == "sum"){
         df <- df %>% 
-          dtplyr::lazy_dt() %>%
+          lazy_dt() %>%
           group_by(across(!!col_aggregation)) %>%
           summarise_all(.funs = sum) %>%
           as.data.frame()
@@ -129,7 +119,7 @@ recode_gss_codes <- function(df_in,
       
       if(fun == "mean"){
         df <- df %>% 
-          dtplyr::lazy_dt() %>%
+          lazy_dt() %>%
           group_by(across(!!col_aggregation)) %>%
           summarise_all(.funs = mean) %>%
           as.data.frame()
@@ -203,7 +193,7 @@ recode_gss_codes <- function(df_in,
     
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
-      dtplyr::lazy_dt() %>% 
+      lazy_dt() %>% 
       group_by(across(!!col_aggregation)) %>%
       summarise(across(everything(), sum)) %>%
       data.frame() %>%
@@ -214,18 +204,18 @@ recode_gss_codes <- function(df_in,
     
     df <- df %>% 
       mutate(gss_code = recode(gss_code, !!!recoding)) %>% 
-      dtplyr::lazy_dt() %>% 
+      lazy_dt() %>% 
       group_by(across(!!col_aggregation)) %>%
       summarise(across(everything(), mean)) %>%
       data.frame() %>%
       rename(!!col_geog := "gss_code")
   }
   
-  
-  
   return(df)
 }
 
+
+# Code changes database cleaned version
 .district_changes_clean <- function(){
   
   changes_list <- list(
@@ -318,4 +308,44 @@ recode_gss_codes <- function(df_in,
   
   return(changes_df)
   
+}
+
+.ignore_splits <- function(x){
+  
+  #### Splits
+  #there have thus far been 2 splits, both in 2013
+  #both were minor alterations to boundaries
+  #northumberland = 1 bungalow
+  #east hertfordshire = part of a row of houses
+  #both can effectively be treated as code changes with no tranfser of
+  #population.
+  #Therefore ignore E08000020 to E06000057
+  #and ignore E07000097 to E06000243
+  
+  x %>% 
+    filter(!(changed_from_code == "E08000020" & changed_to_code == "E06000057")) %>%
+    filter(!(changed_from_code == "E07000097" & changed_to_code == "E07000243"))
+  
+}
+
+.validate_recode_gss_codes <- function(df_in, col_geog, data_cols, recode_years, recode_to_year, fun){
+  
+  assertthat::assert_that(fun %in% c("sum","mean"),
+                          msg = "in recode_gss_codes, fun must be sum or mean")
+  
+  assertthat::assert_that(recode_to_year %in% recode_years,
+                          msg=paste("in recode_gss_codes, recode_to_year must be one of",
+                                    recode_years))
+  
+  for(i in length(data_cols)){
+    assertthat::assert_that(data_cols[i] %in% names(df_in),
+                            msg = paste("in recode_gss_codes, specified data_col", data_cols[i],
+                                        "not in input dataframe"))
+  }
+  
+  assertthat::assert_that(col_geog %in% names(df_in),
+                          msg = paste("in recode_gss_codes, specified col_geog", col_geog,
+                                      "not in input dataframe"))
+  
+  invisible()
 }

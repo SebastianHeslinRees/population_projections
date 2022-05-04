@@ -12,7 +12,7 @@ recode_gss_codes(
   recode_to_year,
   aggregate_data = TRUE,
   recode_gla_codes = FALSE,
-  code_changes_path = "input_data/lookup/district_changes_clean.rds"
+  code_changes_path = NULL
 )
 }
 \arguments{
@@ -39,7 +39,8 @@ used in the 2018-based (& earlier) projections. This is introduced for backward
 compatibility and doesn't correspond to any single vintage year.
 Default \code{FALSE}.}
 
-\item{code_changes_path}{string. file path to the code changes database.}
+\item{code_changes_path}{string. file path to the code changes database or NULL
+to use the hard-coded code changes database. Degault NULL.}
 }
 \value{
 The input dataframe with gss codes changed and data aggregated

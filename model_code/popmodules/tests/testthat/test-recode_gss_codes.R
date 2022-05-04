@@ -11,7 +11,6 @@ df_1 <- code_changes %>%
   unique() %>%
   mutate(value = 5)
 
-
 #
 code_changes_2012 <- filter(code_changes, year == 2012) %>%
   select(changed_from_code, changed_to_code)
@@ -75,13 +74,15 @@ expect_2020 <- expect_2019 %>%
   group_by(gss_code) %>%
   summarise(value = sum(value), .groups = 'drop_last') %>%
   data.frame()
- 
+
 output_2009 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2009, code_changes_path = code_changes_path)
 output_2012 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2012, code_changes_path = code_changes_path)
 output_2013 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2013, code_changes_path = code_changes_path)
 output_2018 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2018, code_changes_path = code_changes_path)
 output_2019 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2019, code_changes_path = code_changes_path)
 output_2020 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2020, code_changes_path = code_changes_path)
+output_2020_hc1 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2020, code_changes_path = NULL)
+output_2020_hc2 <- recode_gss_codes(df_1, data_cols = "value", recode_to_year = 2020)
 
 expect_2_vars <- mutate(expect_2020, value_2=value)
 output_2_vars <- mutate(df_1, value_2 = value) %>% 
@@ -93,7 +94,7 @@ expect_mean <- expect_2020 %>%
 
 output_mean <- recode_gss_codes(df_1, data_cols = "value",
                                 recode_to_year = 2020,
-                                fun = list(mean),
+                                fun = "mean",
                                 code_changes_path = code_changes_path) %>% 
   arrange(gss_code)
 
@@ -117,3 +118,8 @@ test_that("recode_gss_codes produces the expected output", {
   expect_equivalent(expect_mean, output_mean)
 })
 
+#test hard-coded dataframe works
+test_that("recode_gss_codes produces the expected output", {
+  expect_equal(expect_2020, output_2020_hc1)
+  expect_equal(expect_2020, output_2020_hc2)
+})
