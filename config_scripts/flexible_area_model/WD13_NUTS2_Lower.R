@@ -1,7 +1,7 @@
 devtools::load_all('model_code/popmodules/')
 devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "WD13_NUTS2_Lower"
+projection_name <- "WD13_NUTS2_Lower_TEST"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
@@ -66,6 +66,7 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
+devtools::load_all("model_code/flexibleareamodel/")
 model_output <- run_small_area_hl_model(config_list)
 
 #create_excel(config_list$output_dir, "Croydon.xlsx", "Croydon BPO test", bpo = "E09000008")

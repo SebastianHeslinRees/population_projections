@@ -31,12 +31,12 @@ trend_core <- function(start_population,
   utils::flush.console()
   
   start_population <- start_population %>% 
-    select(year, gss_code, gss_code_ward, sex, age, popn)
+    select(year, gss_code, area_code, sex, age, popn)
   
-  col_agg <- c("year", "gss_code", "gss_code_ward", "sex", "age")
-  nested_geog <- c("gss_code", "gss_code_ward")
+  col_agg <- c("year", "gss_code", "area_code", "sex", "age")
+  nested_geog <- c("gss_code", "area_code")
   #constraint_list$constraint_lookup <- constraint_list$constraint_list$constraint_lookup #TODO This shouldn't be inside the loop
-  
+  #browser()
   #-----------------------------------------------------------------------------
   
   #age on
@@ -152,7 +152,7 @@ trend_core <- function(start_population,
                                                  addition_data = list(inflow),
                                                  subtraction_data = list(outflow),
                                                  col_aggregation = col_agg) %>% 
-    select(year, gss_code, gss_code_ward, sex, age, popn)
+    select(year, gss_code, area_code, sex, age, popn)
   
   assert_that(sum(is.na(next_yr_popn))==0, msg=paste("next_yr_popn", projection_year))
   
@@ -195,7 +195,7 @@ trend_core <- function(start_population,
     mutate(change = births - deaths + inflow - outflow,
            popn_from_components = start_popn + change,
            diff = popn - popn_from_components) %>% 
-    select(year, gss_code, gss_code_ward, sex, age,
+    select(year, gss_code, area_code, sex, age,
            start_popn, births, deaths,
            inflow, outflow, change,
            popn_from_components, diff, popn)

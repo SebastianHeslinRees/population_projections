@@ -36,7 +36,8 @@ arrange_small_area_outputs <- function(projection,
                                        in_mig_flows, out_mig_rates,
                                        dwelling_trajectory, dwelling_stock,
                                        first_proj_yr, last_proj_yr,
-                                       config_list, model, n_cores){
+                                       config_list, model, n_cores,
+                                       code_col, name_col){
   
   lookup <- readRDS(config_list$lookup_path)
   
@@ -64,7 +65,7 @@ arrange_small_area_outputs <- function(projection,
   proj_net_migration <- list(left_join(in_migration, out_migration, by = join_by) %>% 
                                mutate(netflow = inflow - outflow) %>% 
                                filter(year < first_proj_yr) %>% 
-                               select(year, gss_code, gss_code_ward, sex, age, netflow))
+                               select(year, gss_code, area_code, sex, age, netflow))
   
   #-----------------------------------------------------------------------------
   
@@ -79,7 +80,7 @@ arrange_small_area_outputs <- function(projection,
     mutate(proj_net_migration[[1]], component = "netflow") %>% rename(value = netflow)) %>% 
       pivot_wider(values_from = value, names_from = component) %>% 
       mutate(births = ifelse(is.na(births), 0, births)) %>% 
-      select(gss_code, gss_code_ward, year, sex, age, popn, births, deaths, inflow, outflow, netflow))
+      select(gss_code, area_code, year, sex, age, popn, births, deaths, inflow, outflow, netflow))
   
   #-----------------------------------------------------------------------------
   
@@ -113,13 +114,13 @@ arrange_small_area_outputs <- function(projection,
   
   output_list$summary <- output_list$detailed_components %>%
     select(-age, -sex) %>% 
-    group_by(gss_code, la_name, gss_code_ward, ward_name, year) %>% 
+    group_by(gss_code, la_name, area_code, area_name, year) %>% 
     summarise(across(.fns = sum), .groups = 'drop_last') %>%                  
     mutate(across(where(is.numeric) & !year, ~round(.x, digits=3))) %>% 
     mutate(change = births - deaths + netflow) %>% 
-    select(gss_code, la_name, gss_code_ward, ward_name, year,
+    select(gss_code, la_name, area_code, area_name, year,
            population = popn, births, deaths, inflow, outflow, netflow, change) %>% 
-    arrange(gss_code, gss_code_ward, year) %>% 
+    arrange(gss_code, area_code, year) %>% 
     data.frame()
   
   #-----------------------------------------------------------------------------
@@ -160,26 +161,28 @@ arrange_small_area_outputs <- function(projection,
       lapply(.bind_and_arrange, lookup)
     
     housing_list$ahs <- housing_list$ahs_detail %>% 
-      select(year, gss_code_ward, actual_ahs) %>% 
+      select(year, area_code, actual_ahs) %>% 
       pivot_wider(names_from = year, values_from = actual_ahs)
     
     housing_list$dwelling_trajectory <- dwelling_trajectory %>% 
       filter(year %in% 2012:last_proj_yr) %>% 
-      left_join(lookup, by = c("gss_code_ward")) %>% 
+      left_join(lookup, by = c("area_code")) %>% 
       data.frame() %>% 
-      arrange(gss_code, gss_code_ward, year) %>% 
-      select(gss_code, la_name, gss_code_ward, ward_name, year, dwellings = units)
+      arrange(gss_code, area_code, year) %>% 
+      select(gss_code, la_name, area_code, area_name, year, dwellings = units)
     
     housing_list$dwelling_stock <- dwelling_stock %>% 
       filter(year %in% 2011:last_proj_yr) %>% 
-      left_join(lookup, by = c("gss_code_ward")) %>% 
+      left_join(lookup, by = c("area_code")) %>% 
       data.frame() %>% 
-      arrange(gss_code, gss_code_ward, year) %>% 
-      select(gss_code, la_name, gss_code_ward, ward_name, year, dwellings = units)
+      arrange(gss_code, area_code, year) %>% 
+      select(gss_code, la_name, area_code, area_name, year, dwellings = units)
     
     output_list <- c(output_list, housing_list)
     
   }
+  
+  output_list <- output_list %>% lapply(.col_names, code_col, name_col)
   
   borough_data <- aggregate_borough_data2(output_list,
                                           config_list$constraint_list$constraint_path,

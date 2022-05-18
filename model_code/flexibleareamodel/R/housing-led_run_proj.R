@@ -60,6 +60,7 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
   
+  #browser()
   #-------------------------------------------------------------------------------
   
   #Validate paths
@@ -78,13 +79,12 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #projection years
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
-  lookup <- readRDS(config_list$lookup_path)
+  lookup <- readRDS(config_list$lookup_path) %>%  .prep_backseries("gss_code_ward")
   
   #Get backseries - 5 secs
   message("get backseries")
   population <- get_component_from_file(filepath = config_list$population_path, 
-                                        max_yr = config_list$first_proj_yr - 1) %>%
-    select(year, gss_code, gss_code_ward, age, sex, popn)
+                                        max_yr = config_list$first_proj_yr - 1)
   
   deaths <- get_component_from_file(filepath = config_list$deaths_path,
                                     max_yr = config_list$first_proj_yr - 1) 
@@ -100,18 +100,20 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   
   
   # #Prep backseries
-  population <- population %>% select(year, gss_code, gss_code_ward, age, sex, popn)
-  deaths <- deaths %>% select(year, gss_code, gss_code_ward, age, sex, deaths)
-  births <- births %>% select(year, gss_code, gss_code_ward, age, sex, births) %>% filter(age == 0)
-  out_migration <- out_migration %>% select(year, gss_code, gss_code_ward, age, sex, outflow)
-  in_migration <- in_migration %>% select(year, gss_code, gss_code_ward, age, sex, inflow)
+  population <- population %>% .prep_backseries("gss_code_ward", "popn")
+  deaths <- deaths %>% .prep_backseries("gss_code_ward", "deaths")
+  births <- births %>% .prep_backseries("gss_code_ward", "births") %>% filter(age == 0)
+  out_migration <- out_migration %>% .prep_backseries("gss_code_ward", "outflow")
+  in_migration <- in_migration %>% .prep_backseries("gss_code_ward", "inflow")
   
   # get the projected rates - 10 secs
   mortality_rates <- get_component_from_file(filepath = config_list$mortality_rates, 
-                                             max_yr = last_proj_yr)
+                                             max_yr = last_proj_yr) %>% 
+    .prep_backseries("gss_code_ward", "rate")
   
   fertility_rates <- get_component_from_file(filepath = config_list$fertility_rates, 
-                                             max_yr = last_proj_yr)
+                                             max_yr = last_proj_yr) %>% 
+    .prep_backseries("gss_code_ward", "rate")
   
   in_flow_info <- get_rates_flows_info(config_list$in_migration, first_proj_yr, last_proj_yr)
   in_migration_flows <- NULL
@@ -134,22 +136,21 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #-------------------------------------------------------------------------------
   
   # Housing-led-specific stuff
-  household_rep_rates = readRDS(config_list$hhr_path)
-  communal_establishment_population <- readRDS(config_list$communal_est_path)
+  household_rep_rates = readRDS(config_list$hhr_path) %>% .prep_backseries("gss_code_ward", "hh_rep_rate")
+  communal_establishment_population <- readRDS(config_list$communal_est_path) %>% .prep_backseries("gss_code_ward", "ce_popn")
   
-  trajectory <- readRDS(config_list$dev_trajectory_path)
+  trajectory <- readRDS(config_list$dev_trajectory_path) %>% .prep_backseries("gss_code_ward", "units")
   
   dwellings <- trajectory %>% 
-    select(year, gss_code_ward, units) %>% 
-    arrange(gss_code_ward, year) %>% 
-    group_by(gss_code_ward) %>% 
+    arrange(area_code, year) %>% 
+    group_by(area_code) %>% 
     mutate(units = cumsum(units)) %>% 
     data.frame()
   
   #Convert to dwellings to households
-  dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) 
+  dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) %>%  .prep_backseries("gss_code_ward", "d2hh_ratio")
   households <- dwellings %>%
-    left_join(dwellings_2_hh, by="gss_code_ward") %>% 
+    left_join(dwellings_2_hh, by="area_code") %>% 
     mutate(households = units * d2hh_ratio) %>% 
     select(-units, -d2hh_ratio)
   
@@ -176,22 +177,24 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
     in_migration_flows <- get_rates_or_flows(in_migration_flows, in_flow_info,
                                              projection_year, first_proj_yr,
                                              col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
-                                             data_col = "in_flow")
+                                             data_col = "in_flow") %>% 
+      .prep_backseries("gss_code_ward", data_col = c("value_2","value_1","in_flow"))
     
     
     curr_yr_in_flows <- filter(in_migration_flows, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
-      select(year, gss_code, gss_code_ward, sex, age, in_flow)
+      select(year, gss_code, area_code, sex, age, in_flow)
     
     #out migration
     out_migration_rates <- get_rates_or_flows(out_migration_rates, out_rate_info,
                                               projection_year, first_proj_yr,
                                               col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
-                                              data_col = "out_rate")
+                                              data_col = "out_rate") %>% 
+      .prep_backseries("gss_code_ward", data_col = c("value_2","value_1","out_rate"))
     
     curr_yr_out_rates <- filter(out_migration_rates, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
-      select(year, gss_code, gss_code_ward, sex, age, out_rate)
+      select(year, gss_code, area_code, sex, age, out_rate)
     
     #households
     curr_yr_households <- filter(households, year == projection_year)
@@ -276,4 +279,7 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   return(hl_projection)
   
 }
+
+
+
 

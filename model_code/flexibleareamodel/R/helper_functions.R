@@ -126,3 +126,16 @@
     check_negative_values(popn_col) %>% 
     select(-ce_popn)
 }
+
+.prep_backseries <- function(x, col_geog, data_col=NULL, col_agg = c("year", "gss_code", col_geog, "age", "sex")){
+  cols <- intersect(c(col_agg, data_col), names(x))
+  select(x, all_of(cols)) %>% 
+    rename(area_code = all_of(col_geog)) %>% 
+    return()
+}
+
+.col_names <- function(x, code_col, name_col){
+  x %>% 
+    rename(code_col = area_code,
+           name_name = area_name)
+}
