@@ -77,10 +77,10 @@
 .bind_and_arrange <- function(x, lookup){
   
   z <- rbindlist(x, use.names = TRUE) %>% 
-    left_join(lookup, by = c("gss_code", "gss_code_ward")) %>% 
+    left_join(lookup, by = c("gss_code", "area_code")) %>% 
     data.frame()
   
-  arrange_by <- intersect(c("gss_code", "la_name", "gss_code_ward", "ward_name", "year", "sex", "age"),
+  arrange_by <- intersect(c("gss_code", "la_name", "area_code", "area_name", "year", "sex", "age"),
                           names(z))
   
   select_by <- c(arrange_by, setdiff(names(z), arrange_by))
@@ -107,7 +107,7 @@
 }
 
 .remove_ce_popn <- function(popn, ce_popn, popn_col = "popn",
-                            col_aggregation = c("gss_code_ward", "sex", "age")){
+                            col_aggregation = c("area_code", "sex", "age")){
   
   ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
     summarise(ce_popn = sum(ce_popn)) %>%  
@@ -117,7 +117,7 @@
 }
 
 .add_ce_popn <- function(popn, ce_popn, popn_col = "popn",
-                         col_aggregation = c("gss_code_ward", "sex", "age")){
+                         col_aggregation = c("are_code", "sex", "age")){
   
   ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
     summarise(ce_popn = sum(ce_popn)) %>%  
@@ -127,15 +127,19 @@
     select(-ce_popn)
 }
 
-.prep_backseries <- function(x, col_geog, data_col=NULL, col_agg = c("year", "gss_code", col_geog, "age", "sex")){
+.standardise_df <- function(x, col_geog, data_col=NULL, col_agg = c("year", "gss_code", col_geog, "age", "sex")){
   cols <- intersect(c(col_agg, data_col), names(x))
   select(x, all_of(cols)) %>% 
     rename(area_code = all_of(col_geog)) %>% 
     return()
 }
 
-.col_names <- function(x, code_col, name_col){
-  x %>% 
-    rename(code_col = area_code,
-           name_name = area_name)
+.rename_geog_cols <- function(x, code_col, name_col){
+  if("area_code" %in% names(x)){
+    x <- rename(x, !!code_col := area_code)
+  }
+  if("area_name" %in% names(x)){
+    x <- rename(x, !!name_col := area_name)
+  }
+  return(x)
 }

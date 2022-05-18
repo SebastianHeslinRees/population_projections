@@ -36,10 +36,13 @@ arrange_small_area_outputs <- function(projection,
                                        in_mig_flows, out_mig_rates,
                                        dwelling_trajectory, dwelling_stock,
                                        first_proj_yr, last_proj_yr,
-                                       config_list, model, n_cores,
-                                       code_col, name_col){
+                                       config_list, model, n_cores){
   
-  lookup <- readRDS(config_list$lookup_path)
+  
+  
+  lookup <- readRDS(config_list$lookup_path) %>% 
+    rename(area_code = all_of(config_list$geog_code_col),
+           area_name = all_of(config_list$geog_name_col))
   
   #Components backseries
   
@@ -182,7 +185,7 @@ arrange_small_area_outputs <- function(projection,
     
   }
   
-  output_list <- output_list %>% lapply(.col_names, code_col, name_col)
+  output_list <- output_list %>% lapply(.rename_geog_cols, config_list$geog_code_col, config_list$geog_name_col)
   
   borough_data <- aggregate_borough_data2(output_list,
                                           config_list$constraint_list$constraint_path,

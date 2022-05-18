@@ -7,6 +7,7 @@
 #' @param output_dir String. The path to the output folder where files will be written
 #' @param model  A string. Either 'trend' or 'housing-led' indicating what data is
 #'  being passed to the function. Used to select which list elements to output as CSV.
+#' @param config_list. Model config list
 #' 
 #' @import dplyr
 #' @importFrom data.table fwrite
@@ -16,7 +17,8 @@
 
 output_small_area_projection <- function(projection,
                                          output_dir = config_list$output_dir,
-                                         model){
+                                         model, 
+                                         config_list){
   
   
   #RDS
@@ -31,7 +33,7 @@ output_small_area_projection <- function(projection,
   #CSV
   
   message("writing csv files")
- 
+  
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
   csv_elements <- c(1:6, 9:10)
@@ -39,7 +41,7 @@ output_small_area_projection <- function(projection,
   if(model == "housing-led"){ csv_elements <- c(csv_elements, 11, 15:22, 24:25) }
   
   for(i in csv_elements) { 
-    .make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]))
+    .make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]), config_list)
   }
   
   #-----------------------------------------------------------------------------
@@ -47,7 +49,7 @@ output_small_area_projection <- function(projection,
   projection$detailed_components <- projection$detailed_components %>%                  
     mutate(across(where(is.numeric) & !c(year, age), ~round(.x, digits=3))) %>% 
     data.frame()
-
+  
   fwrite(projection$detailed_components, paste0(output_dir,"/csv/components_of_change_detailed.csv"))
   fwrite(projection$summary, paste0(output_dir,"/csv/components_of_change_summary.csv"))
   fwrite(projection$borough_data.summary, paste0(output_dir,"/csv/borough_components_of_change_summary.csv"))
@@ -63,18 +65,18 @@ output_small_area_projection <- function(projection,
   }
   
   #-----------------------------------------------------------------------------
- 
+  
   invisible()
   
 }
 
-.make_csvs <- function(data, name_stub){
+.make_csvs <- function(data, name_stub, config_list){
   
   name_stub <- str_remove_all(name_stub, "data.")
   
   data_col <- last(names(data))
   cols <- setdiff(names(data), data_col)
-  arrange_by <- intersect(c("gss_code", "gss_code_ward", "age"), cols)
+  arrange_by <- intersect(c("gss_code", config_list$gss_code_col, "age"), cols)
   
   data <- data %>% filter(year >= 2011) %>% lazy_dt()
   

@@ -78,7 +78,7 @@ regross_parallel <- function(base_in, base_out, target_net,
   
   mig_target <- lazy_dt(base_in) %>%
     left_join(base_out, by = base_flows_cols) %>%
-    group_by(across(all_of(common_cols))) %>%
+    group_by(across(all_of(!!common_cols))) %>%
     summarise(in_base = sum(in_base),
               out_base = sum(out_base),
               .groups = 'drop_last') %>%
@@ -103,6 +103,15 @@ regross_parallel <- function(base_in, base_out, target_net,
   return(optimised_flows)
   
 }
+
+#' Optimise gross flows using Poisson distributions
+#' 
+#' @param base_in Dataframe
+#' @param base_out Dataframe
+#' @param target_net Dataframe
+#' 
+#' @import dtplyr
+#' @import dplyr
 
 .optimise_gross_flows <- function(base_in, base_out, target_net) {
   

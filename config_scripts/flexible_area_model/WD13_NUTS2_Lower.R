@@ -32,7 +32,7 @@ out_migration <- list(
 #Config
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2021,
-                    n_proj_yr = 21, #21
+                    n_proj_yr = 1, #21
                     output_dir = paste0("outputs/flexible_area_model/", projection_name),
                     
                     #backseries
@@ -62,8 +62,9 @@ config_list <- list(projection_name = projection_name,
                     ahs_mix = 0.5,
                     hhr_static_or_projected = "static",
                     lookup_path = "input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds",
-                    excess_deaths_path = NULL
-                    
+                    excess_deaths_path = NULL,
+                    geog_code_col = "gss_code_ward",
+                    geog_name_col = "ward_name"
 )
 
 devtools::load_all("model_code/flexibleareamodel/")

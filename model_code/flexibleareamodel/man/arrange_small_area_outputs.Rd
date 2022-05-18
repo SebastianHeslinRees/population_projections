@@ -21,7 +21,9 @@ arrange_small_area_outputs(
   last_proj_yr,
   config_list,
   model,
-  n_cores
+  n_cores,
+  code_col,
+  name_col
 )
 }
 \arguments{

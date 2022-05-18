@@ -40,12 +40,12 @@ housing_led_core <- function(start_population,
   
   col_agg <- c("year", "gss_code", "area_code", "sex", "age")
   nested_geog <- c("gss_code", "area_code")
-  browser()
+  
   # 1 --------------------------------------------------------------------------
   
   #Prep input data
   
-  constrain_gss <- unique(intersect(start_population$area_code, households$gss_code))
+  constrain_gss <- unique(intersect(start_population$area_code, households$area_code))
   
   households <- filter(households, area_code %in% constrain_gss)
   start_population <- filter(start_population, area_code %in% constrain_gss)
@@ -70,7 +70,6 @@ housing_led_core <- function(start_population,
     data.frame()
   
   # 3 --------------------------------------------------------------------------
-  
   # Run the ward implementation of the ONS HH model
   
   curr_yr_hhr_households <- trend_hh_population %>% 
@@ -179,7 +178,7 @@ housing_led_core <- function(start_population,
   
   optimised_flows <- regross_parallel(base_in = trend_projection$in_migration,
                                       base_out = trend_projection$out_migration,
-                                      target_net = target_net, 
+                                      target_net = target_net,
                                       col_inflow = "inflow",
                                       col_outflow = "outflow",
                                       col_target = "net_target",
@@ -283,11 +282,9 @@ housing_led_core <- function(start_population,
                                       col_outflow = "outflow",
                                       col_target = "net_target",
                                       n_cores)
-
-  lk <- select(lookup, gss_code, area_code)
   
-  final_migration <- optimised_flows %>%
-    left_join(lk, by = "area_code") %>% 
+  final_migration <- select(lookup, gss_code, area_code) %>% 
+    right_join(optimised_flows, by = "area_code") %>% 
     mutate(netflow = inflow - outflow) %>% 
     select(col_agg, inflow, outflow, netflow)
   
@@ -299,7 +296,7 @@ housing_led_core <- function(start_population,
   
   # Re-compile the population using the finalised components
   # Confirm that HH population is > 0 (this can introduce inconsistencies)
- 
+  
   final_population <- aged_on_population %>%
     construct_popn_from_components(addition_data = list(trend_projection$births,
                                                         final_migration$inflow),

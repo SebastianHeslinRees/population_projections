@@ -45,7 +45,7 @@ in the model loop.}
 
 \item{n_cores}{Numeric. Number of cores}
 
-\item{lookup}{Dataframe. gss_code_ward to ward_name (cols must be named like this)}
+\item{lookup}{Dataframe. area_code to area_name (cols must be named like this)}
 }
 \value{
 A list of projected components

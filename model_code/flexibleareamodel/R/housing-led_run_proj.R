@@ -49,7 +49,9 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
                        "ahs_mix",
                        "hhr_static_or_projected",
                        "lookup_path",
-                       "excess_deaths_path")
+                       "excess_deaths_path",
+                       "geog_code_col",
+                       "geog_name_col")
   
   validate_config_list(config_list, expected_config)
   
@@ -79,41 +81,33 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #projection years
   first_proj_yr <- config_list$first_proj_yr
   last_proj_yr <-  first_proj_yr + config_list$n_proj_yr -1
-  lookup <- readRDS(config_list$lookup_path) %>%  .prep_backseries("gss_code_ward")
+  lookup <- readRDS(config_list$lookup_path) %>% .standardise_df(config_list$geog_code_col)
   
   #Get backseries - 5 secs
   message("get backseries")
-  population <- get_component_from_file(filepath = config_list$population_path, 
-                                        max_yr = config_list$first_proj_yr - 1)
+  population <- get_component_from_file(config_list$population_path, config_list$first_proj_yr - 1) %>%
+    .standardise_df(config_list$geog_code_col, "popn")
   
-  deaths <- get_component_from_file(filepath = config_list$deaths_path,
-                                    max_yr = config_list$first_proj_yr - 1) 
+  deaths <- get_component_from_file(config_list$deaths_path, config_list$first_proj_yr - 1) %>% 
+    .standardise_df(config_list$geog_code_col, "deaths")
   
-  births <- get_component_from_file(filepath = config_list$births_path,
-                                    max_yr = config_list$first_proj_yr - 1)
+  births <- get_component_from_file(config_list$births_path, config_list$first_proj_yr - 1) %>% 
+    .standardise_df(config_list$geog_code_col, "births") %>%
+    filter(age == 0)
   
-  in_migration <- get_component_from_file(filepath = config_list$in_migration_path,
-                                          max_yr = config_list$first_proj_yr - 1) 
+  in_migration <- get_component_from_file(config_list$in_migration_path, config_list$first_proj_yr - 1) %>% 
+    .standardise_df(config_list$geog_code_col, "inflow")
   
-  out_migration <- get_component_from_file(filepath = config_list$out_migration_path,
-                                           max_yr = config_list$first_proj_yr - 1)
+  out_migration <- get_component_from_file(config_list$out_migration_path, config_list$first_proj_yr - 1) %>% 
+    .standardise_df(config_list$geog_code_col, "outflow")
   
+ 
+    # get the projected rates - 10 secs
+  mortality_rates <- get_component_from_file(config_list$mortality_rates, last_proj_yr) %>% 
+    .standardise_df(config_list$geog_code_col, "rate")
   
-  # #Prep backseries
-  population <- population %>% .prep_backseries("gss_code_ward", "popn")
-  deaths <- deaths %>% .prep_backseries("gss_code_ward", "deaths")
-  births <- births %>% .prep_backseries("gss_code_ward", "births") %>% filter(age == 0)
-  out_migration <- out_migration %>% .prep_backseries("gss_code_ward", "outflow")
-  in_migration <- in_migration %>% .prep_backseries("gss_code_ward", "inflow")
-  
-  # get the projected rates - 10 secs
-  mortality_rates <- get_component_from_file(filepath = config_list$mortality_rates, 
-                                             max_yr = last_proj_yr) %>% 
-    .prep_backseries("gss_code_ward", "rate")
-  
-  fertility_rates <- get_component_from_file(filepath = config_list$fertility_rates, 
-                                             max_yr = last_proj_yr) %>% 
-    .prep_backseries("gss_code_ward", "rate")
+  fertility_rates <- get_component_from_file(config_list$fertility_rates, last_proj_yr) %>% 
+    .standardise_df(config_list$geog_code_col, "rate")
   
   in_flow_info <- get_rates_flows_info(config_list$in_migration, first_proj_yr, last_proj_yr)
   in_migration_flows <- NULL
@@ -136,10 +130,13 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #-------------------------------------------------------------------------------
   
   # Housing-led-specific stuff
-  household_rep_rates = readRDS(config_list$hhr_path) %>% .prep_backseries("gss_code_ward", "hh_rep_rate")
-  communal_establishment_population <- readRDS(config_list$communal_est_path) %>% .prep_backseries("gss_code_ward", "ce_popn")
+  household_rep_rates <- readRDS(config_list$hhr_path) %>%
+    .standardise_df(config_list$geog_code_col, "hh_rep_rate" , col_agg = c("year", config_list$geog_code_col, "age_group", "sex"))
   
-  trajectory <- readRDS(config_list$dev_trajectory_path) %>% .prep_backseries("gss_code_ward", "units")
+  communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
+    .standardise_df(config_list$geog_code_col, "ce_popn")
+  
+  trajectory <- readRDS(config_list$dev_trajectory_path) %>% .standardise_df(config_list$geog_code_col, "units")
   
   dwellings <- trajectory %>% 
     arrange(area_code, year) %>% 
@@ -148,7 +145,7 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
     data.frame()
   
   #Convert to dwellings to households
-  dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) %>%  .prep_backseries("gss_code_ward", "d2hh_ratio")
+  dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) %>%  .standardise_df(config_list$geog_code_col, "d2hh_ratio")
   households <- dwellings %>%
     left_join(dwellings_2_hh, by="area_code") %>% 
     mutate(households = units * d2hh_ratio) %>% 
@@ -176,9 +173,9 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
     #in migration
     in_migration_flows <- get_rates_or_flows(in_migration_flows, in_flow_info,
                                              projection_year, first_proj_yr,
-                                             col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+                                             col_aggregation = c("year", "gss_code", config_list$geog_code_col, "sex", "age"),
                                              data_col = "in_flow") %>% 
-      .prep_backseries("gss_code_ward", data_col = c("value_2","value_1","in_flow"))
+      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","in_flow"))
     
     
     curr_yr_in_flows <- filter(in_migration_flows, year == projection_year) %>% 
@@ -188,9 +185,9 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
     #out migration
     out_migration_rates <- get_rates_or_flows(out_migration_rates, out_rate_info,
                                               projection_year, first_proj_yr,
-                                              col_aggregation = c("year", "gss_code", "gss_code_ward", "sex", "age"),
+                                              col_aggregation = c("year", "gss_code", config_list$geog_code_col, "sex", "age"),
                                               data_col = "out_rate") %>% 
-      .prep_backseries("gss_code_ward", data_col = c("value_2","value_1","out_rate"))
+      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","out_rate"))
     
     curr_yr_out_rates <- filter(out_migration_rates, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
@@ -269,7 +266,7 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins
-  output_small_area_projection(hl_projection, output_dir = config_list$output_dir, "housing-led")
+  output_small_area_projection(hl_projection, output_dir = config_list$output_dir, "housing-led", config_list)
   
   #Close log
   message("complete")
