@@ -56,4 +56,4 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
-model_output <- run_small_area_hl_model(config_list)
+model_output <- flexmodel_hl_projection(config_list)

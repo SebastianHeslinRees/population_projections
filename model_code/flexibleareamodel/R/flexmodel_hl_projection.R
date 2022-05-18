@@ -62,6 +62,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
   
+  #browser()
   #-------------------------------------------------------------------------------
   
   #Validate paths
@@ -101,7 +102,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     .standardise_df(config_list$geog_code_col, "outflow")
   
  
-  #Get the projected rates - 10 secs
+    # get the projected rates - 10 secs
   mortality_rates <- get_component_from_file(config_list$mortality_rates, last_proj_yr) %>% 
     .standardise_df(config_list$geog_code_col, "rate")
   
@@ -114,10 +115,11 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   out_rate_info <- get_rates_flows_info(config_list$out_migration, first_proj_yr, last_proj_yr)
   out_migration_rates <- NULL
   
-  excess_deaths <- NULL
   if(!is.null(config_list$excess_deaths_path)){
-    excess_deaths <- get_component_from_file(config_list$excess_deaths_path, last_proj_yr)%>% 
-      .standardise_df(config_list$geog_code_col, "excess_deaths")
+    excess_deaths <- get_component_from_file(filepath = config_list$excess_deaths_path, 
+                                             max_yr = last_proj_yr)
+  } else {
+    excess_deaths <- NULL
   }
   
   # Constraints - 30 secs
@@ -129,13 +131,12 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   
   # Housing-led-specific stuff
   household_rep_rates <- readRDS(config_list$hhr_path) %>%
-    .standardise_df(config_list$geog_code_col, "hh_rep_rate", col_agg = c("year", config_list$geog_code_col, "age_group", "sex"))
+    .standardise_df(config_list$geog_code_col, "hh_rep_rate" , col_agg = c("year", config_list$geog_code_col, "age_group", "sex"))
   
   communal_establishment_population <- readRDS(config_list$communal_est_path) %>%
     .standardise_df(config_list$geog_code_col, "ce_popn")
   
-  trajectory <- readRDS(config_list$dev_trajectory_path) %>%
-    .standardise_df(config_list$geog_code_col, "units")
+  trajectory <- readRDS(config_list$dev_trajectory_path) %>% .standardise_df(config_list$geog_code_col, "units")
   
   dwellings <- trajectory %>% 
     arrange(area_code, year) %>% 
@@ -144,9 +145,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     data.frame()
   
   #Convert to dwellings to households
-  dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) %>% 
-    .standardise_df(config_list$geog_code_col, "d2hh_ratio")
-  
+  dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) %>%  .standardise_df(config_list$geog_code_col, "d2hh_ratio")
   households <- dwellings %>%
     left_join(dwellings_2_hh, by="area_code") %>% 
     mutate(households = units * d2hh_ratio) %>% 

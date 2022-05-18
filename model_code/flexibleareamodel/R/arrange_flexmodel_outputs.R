@@ -29,7 +29,7 @@
 #' @return A list of projection outputs by component
 #' 
 
-arrange_small_area_outputs <- function(projection,
+arrange_flexmodel_outputs <- function(projection,
                                        population, births, deaths,
                                        in_migration, out_migration,
                                        fertility_rates, mortality_rates,

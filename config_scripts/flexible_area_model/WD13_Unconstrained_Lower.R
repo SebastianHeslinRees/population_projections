@@ -69,6 +69,6 @@ config_list <- list(projection_name = projection_name,
                     excess_deaths_path = NULL
 )
 
-profvis::profvis(hl_model <- run_small_area_hl_model(config_list))
+profvis::profvis(hl_model <- flexmodel_hl_projection(config_list))
 
 create_excel(config_list$output_dir, "Croydon.xlsx", "Croydon BPO test", bpo = "E09000008")

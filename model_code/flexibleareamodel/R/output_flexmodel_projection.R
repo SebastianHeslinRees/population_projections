@@ -7,7 +7,7 @@
 #' @param output_dir String. The path to the output folder where files will be written
 #' @param model  A string. Either 'trend' or 'housing-led' indicating what data is
 #'  being passed to the function. Used to select which list elements to output as CSV.
-#' @param config_list. Model config list
+#' @param config_list Model config list
 #' 
 #' @import dplyr
 #' @importFrom data.table fwrite
@@ -15,7 +15,7 @@
 #' 
 #' @export
 
-output_small_area_projection <- function(projection,
+output_flexmodel_projection <- function(projection,
                                          output_dir = config_list$output_dir,
                                          model, 
                                          config_list){

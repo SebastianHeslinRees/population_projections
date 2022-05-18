@@ -72,7 +72,10 @@ globalVariables(c(
   'out_base',
   'net_target',
   'model_flows',
-  'final'
+  'final',
+  'area_code',
+  'area_name',
+  'x'
 ))
 
 

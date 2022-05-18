@@ -211,7 +211,7 @@ run_bpo_projection <- function(bpo_name,
     
   }
   
-  x <- run_small_area_hl_model(config_list, n_cores = 20)
+  x <- flexmodel_hl_projection(config_list, n_cores = 20)
   rm(x)
   gc()
   

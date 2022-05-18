@@ -13,7 +13,7 @@
 #'  
 #' @export
 
-run_small_area_trend_model <- function(config_list){
+flexmodel_trend_projection <- function(config_list){
   
   expected_config <- c("projection_name",
                        "first_proj_yr",
@@ -190,7 +190,7 @@ run_small_area_trend_model <- function(config_list){
   #Arrange - 4 secs
   message('')
   message("arrange outputs")
-  projection <- arrange_small_area_outputs(projection,
+  projection <- arrange_flexmodel_outputs(projection,
                                            population, births, deaths,
                                            in_migration, out_migration,
                                            fertility_rates, mortality_rates,
@@ -201,7 +201,7 @@ run_small_area_trend_model <- function(config_list){
                                            "trend")
   
   #Output - 60 secs
-  output_small_area_projection(projection, config_list$output_dir, "trend")
+  output_flexmodel_projection(projection, config_list$output_dir, "trend", config_list)
   
   #Close log
   message("complete")

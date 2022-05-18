@@ -70,7 +70,7 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
-model_output <- run_small_area_hl_model(config_list)
+model_output <- flexmodel_hl_projection(config_list)
 
 create_excel(config_list$output_dir, "Croydon.xlsx", "Croydon BPO test", bpo = "E09000008")
 
