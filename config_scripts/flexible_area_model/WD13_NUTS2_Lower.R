@@ -32,7 +32,7 @@ out_migration <- list(
 #Config
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2021,
-                    n_proj_yr = 1, #21
+                    n_proj_yr = 21, #21
                     output_dir = paste0("outputs/flexible_area_model/", projection_name),
                     
                     #backseries

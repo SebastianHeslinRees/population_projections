@@ -167,7 +167,9 @@ run_bpo_projection <- function(bpo_name,
                         ahs_mix = ahs_mix,
                         hhr_static_or_projected = "static",
                         lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                        excess_deaths_path = excess_deaths)
+                        excess_deaths_path = excess_deaths,
+                        geog_code_col = "gss_code_ward",
+                        geog_name_col = "ward_name")
     
   }
   
