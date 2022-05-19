@@ -37,9 +37,11 @@ message("raw shlaa development data")
 
 msoa_to_district_lookup <-  readRDS("input_data/lookup/msoa_to_district.rds")
 oa_to_msoa_lookup <- readRDS("input_data/lookup/oa_to_msoa.rds")
-oa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD13_lookup.rds") %>%
-  select(gss_code_oa, gss_code_ward)
-
+oa_to_ward13_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD13_lookup.rds") %>%
+  select(gss_code_oa, WD13CD = gss_code_ward)
+oa_to_ward22_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD22_lookup_best_fit.rds") %>%
+  select(gss_code_oa, WD22CD = gss_code_ward)
+ward22_name_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds")
 #-------------------------------------------------------------------------------
 
 ####LARGE SITES####
@@ -59,28 +61,42 @@ msoa_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/StatisticalBoundar
 msoa_polygons <- readOGR(dsn = msoa_polygon_loc, layer = "MSOA_2011_London",
                          verbose = FALSE)
 
-ward_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2011/ESRI/London"
-ward_polygons <- readOGR(dsn = ward_polygon_loc, layer = "London_Ward_CityMerged",
+ward_13_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2011/ESRI/London"
+ward_13_polygons <- readOGR(dsn = ward_13_polygon_loc, layer = "London_Ward_CityMerged",
+                         verbose = FALSE)
+
+ward_22_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2022/ESRI/London"
+ward_22_polygons <- readOGR(dsn = ward_22_polygon_loc, layer = "London_Ward_2022_draft",
                          verbose = FALSE)
 
 proj4string(large_sites_points) <- proj4string(msoa_polygons)
-proj4string(ward_polygons) <- proj4string(msoa_polygons)
+proj4string(ward_13_polygons) <- proj4string(msoa_polygons)
+proj4string(ward_22_polygons) <- proj4string(msoa_polygons)
 
 msoa_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, msoa_polygons))%>%
   select(lhcss_ref, MSOA11CD, LAD11CD, LAD11NM,
          Phase1, Phase2, Phase3, Phase4, Phase5)
 
-ward_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, ward_polygons)) %>%
-  select(lhcss_ref, GSS_CODE)
+ward_13_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, ward_13_polygons)) %>%
+  select(lhcss_ref, WD13CD = GSS_CODE)
 
-large_input <- left_join(msoa_join, ward_join, by="lhcss_ref") %>%
-  select(MSOA11CD, LAD11CD, LAD11NM, GSS_CODE,
+ward_22_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, ward_22_polygons)) %>%
+  select(lhcss_ref, ward_name, gss_code = la_gsscode) %>% 
+  mutate(ward_name = stringr::str_replace_all(ward_name, "\\.", "")) %>% 
+  mutate(ward_name = stringr::str_replace_all(ward_name, "Shirly South", "Shirley South")) %>%
+  left_join(ward22_name_lookup, by = c("ward_name","gss_code")) %>% 
+  select(-la_name) %>% 
+  mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>% 
+  select(lhcss_ref, WD22CD = gss_code_ward)
+         
+large_input <- left_join(msoa_join, ward_13_join, by="lhcss_ref") %>%
+  left_join(ward_22_join, by="lhcss_ref") %>% 
+  select(MSOA11CD, LAD11CD, LAD11NM, WD13CD, WD22CD,
          Phase1, Phase2, Phase3, Phase4, Phase5)%>%
   mutate(gss_code_msoa = as.character(MSOA11CD),
          gss_code_borough = as.character(LAD11CD),
-         district = as.character(LAD11NM),
-         gss_code_ward = as.character(GSS_CODE)) %>%
-  select(gss_code_msoa, gss_code_borough, gss_code_ward, district,
+         district = as.character(LAD11NM)) %>%
+  select(gss_code_msoa, gss_code_borough, WD13CD, WD22CD, district,
          Phase1, Phase2, Phase3, Phase4, Phase5)
 
 
@@ -157,10 +173,11 @@ small_intensification <- fread(paste0(shlaa_data_loc,"/Small_Sites_Intensificati
   as.data.frame() %>% 
   setnames(c("gss_code_oa","intense")) %>%
   left_join(oa_to_msoa_lookup, by="gss_code_oa") %>%
-  left_join(oa_to_ward_lookup, by="gss_code_oa") %>%
+  left_join(oa_to_ward13_lookup, by="gss_code_oa") %>%
+  left_join(oa_to_ward22_lookup, by ="gss_code_oa") %>% 
   left_join(msoa_to_district_lookup, by="gss_code_msoa") %>%
+  mutate(WD13CD = ifelse(gss_code == "E09000001", "E09000001", WD13CD)) %>% 
   mutate(intense = intense/3) # This is the post-EiP change
-
 
 #Windfall sites
 #Borough Level Only
