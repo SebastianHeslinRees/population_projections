@@ -27,7 +27,7 @@ regross <- function(base_in, base_out, target_net,
   
   mig_target <- lazy_dt(base_in) %>%
     left_join(base_out, by = base_flows_cols) %>%
-    group_by(across(all_of(common_cols))) %>%
+    group_by(across(!!common_cols)) %>%
     summarise(in_base = sum(in_base),
               out_base = sum(out_base),
               .groups = 'drop_last') %>%
@@ -78,7 +78,7 @@ regross_parallel <- function(base_in, base_out, target_net,
   
   mig_target <- lazy_dt(base_in) %>%
     left_join(base_out, by = base_flows_cols) %>%
-    group_by(across(all_of(common_cols))) %>%
+    group_by(across(!!common_cols)) %>%
     summarise(in_base = sum(in_base),
               out_base = sum(out_base),
               .groups = 'drop_last') %>%
@@ -112,7 +112,7 @@ regross_parallel <- function(base_in, base_out, target_net,
   
   chk_max <- base_in + abs(target_net) + base_out
   
-  in_tst <- seq(target_net, chk_max, by = 1)
+  in_tst <- seq(0, chk_max, by = 1)
   
   tst_df <- lazy_dt(in_tst) %>% 
     mutate(out_tst = x - target_net,
