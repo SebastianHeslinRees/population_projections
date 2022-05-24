@@ -115,8 +115,9 @@ regross_parallel <- function(base_in, base_out, target_net,
   in_tst <- seq(0, chk_max, by = 1)
   
   tst_df <- lazy_dt(in_tst) %>% 
-    mutate(out_tst = x - target_net,
-           p_in = dpois(x, base_in),
+    mutate(out_tst = x - target_net) %>% 
+    filter(out_tst >= 0) %>% 
+    mutate(p_in = dpois(x, base_in),
            p_out = dpois(out_tst, base_out),
            p_combo = p_in * p_out) %>% 
     slice(which.max(p_combo))  %>%
