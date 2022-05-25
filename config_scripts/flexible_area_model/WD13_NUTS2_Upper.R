@@ -62,13 +62,12 @@ config_list <- list(projection_name = projection_name,
                     ahs_mix = 0.5,
                     hhr_static_or_projected = "static",
                     lookup_path = "input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds",
-                    excess_deaths_path = NULL
+                    excess_deaths_path = "input_data/flexible_area_model/processed/excess_covid_deaths_WD13CD.rds"
                     
 )
 
 model_output <- run_small_area_hl_model(config_list)
 
-devtools::load_all('model_code/flexibleareamodel')
 create_excel(config_list$output_dir, "SHLAA Scenario 2 WD13.xlsx", "SHLAA Scenario 2 WD13")
 
 
