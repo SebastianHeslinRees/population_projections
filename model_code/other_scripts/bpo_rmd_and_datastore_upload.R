@@ -1,8 +1,8 @@
 source("model_code/markdown/2020_bpo_markdown/process bpo into rmd inputs.R")
 source("model_code/other_scripts/upload_2020_bpo_excel_rmd.R")
 
-borough <- "camden"
-wards <- "WD22"
+borough <- "barking and dagenham"
+wards <- "WD13"
 
 #-------------------------------------------------------------------------------
 
