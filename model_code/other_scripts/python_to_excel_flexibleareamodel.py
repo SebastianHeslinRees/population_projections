@@ -2,7 +2,7 @@ import pandas as pd
 import openpyxl
 import datetime
 
-def python_to_excel_smallarea2(persons, females, males, components, trajectory, stock, output_dir, wb_filename, projection_name, small_area):
+def python_to_excel_flexibleareamodel(persons, females, males, components, trajectory, stock, output_dir, wb_filename, projection_name, small_area):
 
   #read in the template
   if(small_area == "ward"):
