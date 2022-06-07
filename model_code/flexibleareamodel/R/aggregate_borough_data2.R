@@ -21,6 +21,7 @@
 aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr, n_cores){
   
   col_agg <- c("gss_code", "la_name", "year", "sex", "age")
+  constraint_path <- .add_slash(constraint_path)
   
   # sum population, births, deaths
   

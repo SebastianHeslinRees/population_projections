@@ -57,7 +57,7 @@ population_into_age_groups <- function(population, age_groups, labels, data_cols
   cols <- names(pop)[!names(pop) %in% data_cols]
 
   pop <- lazy_dt(pop) %>%
-    group_by(across(cols)) %>%
+    group_by(across(!!cols)) %>%
     summarise(across(everything(), sum)) %>%
     ungroup() %>%
     as.data.frame()

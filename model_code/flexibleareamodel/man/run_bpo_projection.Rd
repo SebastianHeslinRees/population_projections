@@ -11,7 +11,8 @@ run_bpo_projection(
   trajectory_range = 2012:2041,
   projection_range = 2021:2041,
   bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/",
-  csv_name = bpo_name
+  csv_name = bpo_name,
+  fert_scenario = "principal"
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ Default 2020:2041.}
 \item{bpo_dir}{String. The folder containing the dwelling trajectory csv}
 
 \item{csv_name}{String. The name of the dwelling trajectory csv saved in the}
+
+\item{fert_scenario}{String. NPP fertility scenario (principal, high, low)}
 }
 \description{
 A wrapper for run_borough_and_ward_projection. Takes as input a csv in the

@@ -11,11 +11,11 @@ dclg_stage2 <- readRDS("input_data/household_model/dclg_headship_rates_2014.rds"
 
 ons_stage1 <- recode_gss_codes(ons_stage1,
                                data_cols = "HRR",
-                               fun = list(mean),
+                               fun = "mean",
                                recode_to_year = 2021)
 ons_stage2 <- recode_gss_codes(ons_stage2,
                                data_cols = "rate",
-                               fun = list(mean),
+                               fun = "mean",
                                recode_to_year = 2021)
 assert_that(!any(is.na(ons_stage1)))
 assert_that(!any(is.na(ons_stage2)))
@@ -32,7 +32,7 @@ dclg_stage1_rates <- dclg_stage1 %>%
   select(-households, -household_population, -institutional_population, -total_population) %>%
   recode_gss_codes(data_cols = "hh_rep_rates",
                    col_geog="gss_code",
-                   fun=list(mean),
+                   fun="mean",
                    recode_to_year = 2021)
 
 dclg_stage1 <- left_join(dclg_stage1_pops, dclg_stage1_rates,
@@ -41,7 +41,7 @@ dclg_stage1 <- left_join(dclg_stage1_pops, dclg_stage1_rates,
 dclg_stage2 <- dclg_stage2 %>%
   recode_gss_codes(data_cols = "rate",
                    col_geog="gss_code",
-                   fun=list(mean),
+                   fun="mean",
                    recode_to_year = 2021)
 
 source("input_data_scripts/households/communal_est_popn_(2021 geog).R")
