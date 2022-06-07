@@ -266,7 +266,7 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins
-  output_small_area_projection(hl_projection, output_dir = config_list$output_dir, "housing-led")
+  output_projection(hl_projection, output_dir = config_list$output_dir, "housing-led")
   
   #Close log
   message("complete")

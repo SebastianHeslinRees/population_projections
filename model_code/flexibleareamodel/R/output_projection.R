@@ -14,9 +14,9 @@
 #' 
 #' @export
 
-output_small_area_projection <- function(projection,
-                                         output_dir = config_list$output_dir,
-                                         model){
+output_projection <- function(projection,
+                              output_dir = config_list$output_dir,
+                              model){
   
   
   #RDS
@@ -31,7 +31,7 @@ output_small_area_projection <- function(projection,
   #CSV
   
   message("writing csv files")
- 
+  
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
   csv_elements <- c(1:6, 9:10)
@@ -47,7 +47,7 @@ output_small_area_projection <- function(projection,
   projection$detailed_components <- projection$detailed_components %>%                  
     mutate(across(where(is.numeric) & !c(year, age), ~round(.x, digits=3))) %>% 
     data.frame()
-
+  
   fwrite(projection$detailed_components, paste0(output_dir,"/csv/components_of_change_detailed.csv"))
   fwrite(projection$summary, paste0(output_dir,"/csv/components_of_change_summary.csv"))
   fwrite(projection$borough_data.summary, paste0(output_dir,"/csv/borough_components_of_change_summary.csv"))
@@ -63,7 +63,7 @@ output_small_area_projection <- function(projection,
   }
   
   #-----------------------------------------------------------------------------
- 
+  
   invisible()
   
 }

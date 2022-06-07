@@ -201,7 +201,7 @@ run_small_area_trend_model <- function(config_list){
                                 "trend")
   
   #Output - 60 secs
-  output_small_area_projection(projection, config_list$output_dir, "trend")
+  output_projection(projection, config_list$output_dir, "trend")
   
   #Close log
   message("complete")
