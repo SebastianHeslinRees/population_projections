@@ -72,7 +72,7 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   if(n_cores > detected_cores){n_cores <- detected_cores}
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
-
+  
   #-----------------------------------------------------------------------------
   
   #projection years
@@ -250,17 +250,17 @@ run_small_area_hl_model <- function(config_list, n_cores = NULL){
   #Arrange - 4 secs
   message('')
   message("arrange outputs")
-  hl_projection <- arrange_small_area_outputs(hl_projection,
-                                              population, births, deaths,
-                                              in_migration, out_migration,
-                                              fertility_rates, mortality_rates,
-                                              in_migration_flows,
-                                              out_migration_rates,
-                                              trajectory, dwellings,
-                                              first_proj_yr, last_proj_yr,
-                                              config_list,
-                                              "housing-led",
-                                              n_cores)
+  hl_projection <- arrange_outputs(hl_projection,
+                                   population, births, deaths,
+                                   in_migration, out_migration,
+                                   fertility_rates, mortality_rates,
+                                   in_migration_flows,
+                                   out_migration_rates,
+                                   trajectory, dwellings,
+                                   first_proj_yr, last_proj_yr,
+                                   config_list,
+                                   "housing-led",
+                                   n_cores)
   
   rm(list=setdiff(ls(), c("hl_projection","config_list","cl")))
   #-------------------------------------------------------------------------------

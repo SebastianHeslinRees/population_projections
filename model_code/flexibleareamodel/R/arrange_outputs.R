@@ -1,4 +1,4 @@
-#' Arrange ward-level outputs
+#' Arrange flexible area model outputs
 #' 
 #' Take the projection output list which is organised by year and rearrange it
 #' so that its organised by component. Add on the backseries.
@@ -29,14 +29,14 @@
 #' @return A list of projection outputs by component
 #' 
 
-arrange_small_area_outputs <- function(projection,
-                                       population, births, deaths,
-                                       in_migration, out_migration,
-                                       fertility_rates, mortality_rates,
-                                       in_mig_flows, out_mig_rates,
-                                       dwelling_trajectory, dwelling_stock,
-                                       first_proj_yr, last_proj_yr,
-                                       config_list, model, n_cores){
+arrange_outputs <- function(projection,
+                            population, births, deaths,
+                            in_migration, out_migration,
+                            fertility_rates, mortality_rates,
+                            in_mig_flows, out_mig_rates,
+                            dwelling_trajectory, dwelling_stock,
+                            first_proj_yr, last_proj_yr,
+                            config_list, model, n_cores){
   
   lookup <- readRDS(config_list$lookup_path)
   
