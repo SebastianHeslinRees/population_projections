@@ -66,7 +66,7 @@ job({
 )
 
 job({
-  run_bpo_projection(bpo_name = "Southwark_SHLAA_high_fert_WD13",
+  run_bpo_projection(bpo_name = "Southwark_SHLAA_high_fert_WD13_TEST",
                      wards = "WD13",
                      variant = "lower",
                      trajectory_range = 2012:2041,
