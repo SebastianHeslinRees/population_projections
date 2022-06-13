@@ -22,6 +22,8 @@
 #'   \code{age_groups} include the lowest age. If set to FALSE the function will
 #'   assume the first bin contains any value less than and including the stated
 #'   value. Default \code{TRUE}
+#' @param factors Logical. Should the \code{age_group} column be coerced to factor?
+#'  If TRUE levels will be taken from \code{labels}. Default FALSE 
 #'
 #' @return A data frame of population data grouped by age group
 #'
@@ -44,8 +46,13 @@
 #'                                    "70_74","75_79","80_84","85_89","90+"),
 #'                         data_cols = "popn")
 
-population_into_age_groups <- function(population, age_groups, labels, data_cols, include.lowest=T){
+population_into_age_groups <- function(population, age_groups, labels=NULL, data_cols, include.lowest=T,
+                                       factors = FALSE){
 
+  if(is.null(labels)){
+    labels <- .make_labels(age_groups)
+  }
+  
   pop <- population %>%
     mutate(age_group = cut(age,
                            breaks = age_groups,
@@ -62,6 +69,33 @@ population_into_age_groups <- function(population, age_groups, labels, data_cols
     ungroup() %>%
     as.data.frame()
 
+  if(factors){
+    pop <- mutate(pop, age_group = factor(age_group, levels = labels))
+  }
+  
   return(pop)
 
+}
+
+.make_labels <- function(vec){
+  
+  x <- c()
+  for(i in 2:length(vec)){
+    
+    if (i == 2){ 
+      a <- vec[i-1]
+    } else {
+      a <- vec[i-1]+1 
+    }
+    
+    if(i == length(vec)){
+      b <- paste(vec[i-1]+1, "and over")
+    } else {
+      b <- paste(a, "to", vec[i])  
+    }
+    
+    x <- c(x,b)
+  }
+  
+  return(x)
 }
