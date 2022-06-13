@@ -10,7 +10,7 @@ input_data_dir <- "input_data/flexible_area_model/"
 ward_pop <- paste0(input_data_dir, "backseries/ward_population_WD13CD.rds") %>% readRDS()
 ward_births <- paste0(input_data_dir, "backseries/ward_births_WD13CD.rds") %>% readRDS()
 ward_deaths <- paste0(input_data_dir, "backseries/ward_deaths_WD13CD.rds") %>% readRDS()
-☻
+
 #-------------------------------------------------------------------------------
 
 denominator_popn <- ward_pop %>%
