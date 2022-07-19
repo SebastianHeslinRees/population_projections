@@ -14,21 +14,14 @@ if(file.exists(ldd_lsoa)){
 
 #-------------------------------------------------------------------------------
 
-#lookups
-
+#lookup
 lsoa_to_lonLUTI <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_LonLUTI3_lookup.rds")) 
-
-# ward_to_district <- readRDS(paste0(input_data_dir,"lookups/lsoa_to_WD22_lookup_best_fit.rds")) %>%
-#   select(gss_code_ward, ward_name, gss_code) %>%
-#   distinct()
 
 #-------------------------------------------------------------------------------
 
 #group it into wards
 
-ward_units <- left_join(lsoa_units, lsoa_to_lonLUTI, by=c("gss_code_lsoa","year")) %>%
-  #left_join(ward_to_district, by = "gss_code_ward") %>%
-  #mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>%
+lonLUTI_units <- left_join(lsoa_units, lsoa_to_lonLUTI, by=c("gss_code_lsoa","year")) %>%
   group_by(year, LonLUTI3) %>%
   summarise(units = sum(units*lsoa_share), .groups = 'drop_last') %>%
   as.data.frame()
@@ -37,7 +30,7 @@ ward_units <- left_join(lsoa_units, lsoa_to_lonLUTI, by=c("gss_code_lsoa","year"
 
 #save
 dir.create(paste0(input_data_dir,"development_data/"), showWarnings = FALSE)
-saveRDS(ward_units, paste0(input_data_dir,"development_data/ldd_backseries_dwellings_ward_lonLUTI.rds"))
+saveRDS(lonLUTI_units, paste0(input_data_dir,"development_data/ldd_backseries_dwellings_lonLUTI.rds"))
 
 rm(list=ls())
 

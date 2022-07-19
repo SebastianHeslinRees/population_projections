@@ -3,7 +3,7 @@ library(data.table)
 library(assertthat)
 library(popmodules)
 
-message("Ward 2013 fertility & mortality")
+message("lonLUTI fertility & mortality")
 
 input_data_dir <- "input_data/flexible_area_model/"
 

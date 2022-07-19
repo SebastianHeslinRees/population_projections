@@ -18,7 +18,7 @@ data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_da
 # Lookups
 
 lsoa_to_lonLUTI <- readRDS(paste0(data_dir_Q_drive, "lookups/lsoa_to_LonLUTI3.rds")) %>% rename(gss_code_lsoa = LSOA11CD)
-oa_to_lonLUTI <- readRDS(paste0(data_dir_Q_drive, "lookups/oa_to_LonLUTI3_lookup.rds")) %>% rename(gss_code_oa = OA11CD)
+oa_to_lonLUTI <- readRDS(paste0(data_dir_Q_drive, "lookups/oa_to_LonLUTI3_lookup.rds")) 
 lonLUTI_name_lookup <- lsoa_to_lonLUTI %>% select(LonLUTI3) %>% mutate(name = LonLUTI3)
 
 saveRDS(lsoa_to_lonLUTI, paste0(input_data_dir, "lookups/lsoa_to_LonLUTI3_lookup.rds"))
@@ -141,6 +141,13 @@ popmodules::validate_same_geog(lonLUTI_pop, lonLUTI_outflow, "LonLUTI3", "LonLUT
 popmodules::validate_same_geog(lonLUTI_pop, comm_est_lonLUTI_sya, "LonLUTI3", "LonLUTI3")
 popmodules::validate_same_geog(lonLUTI_pop, dwellinngs_to_hh, "LonLUTI3", "LonLUTI3")
 
+sum(is.na(lonLUTI_pop))
+sum(is.na(lonLUTI_births))
+sum(is.na(lonLUTI_deaths))
+sum(is.na(lonLUTI_inflow))
+sum(is.na(lonLUTI_outflow))
+sum(is.na(comm_est_lonLUTI_sya))
+sum(is.na(dwellinngs_to_hh))
 #-------------------------------------------------------------------------------
 
 saveRDS(lonLUTI_births, paste0(input_data_dir, "backseries/lonLUTI_births.rds"))

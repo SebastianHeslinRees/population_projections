@@ -45,18 +45,18 @@ oa_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_LonLUTI3_look
 
 #-------------------------------------------------------------------------------
 
-#TODO 
 #Large sites
 lonLUTI_large <- large_sites %>%
-  group_by(gss_code_ward, year) %>%
+  mutate(LonLUTI3 = as.character(LonLUTI3)) %>% 
+  group_by(LonLUTI3, year) %>%
   summarise(units = sum(dev), .groups = 'drop_last') %>%
   as.data.frame() %>%
-  tidyr::complete(gss_code_ward = london_wards$gss_code_ward,
+  tidyr::complete(LonLUTI3 = lsoa_to_lonLUTI$LonLUTI3,
                   year = 2012:2050,
                   fill = list(units = 0))
 
 #Test for NAs
-assertthat::assert_that(sum(is.na(ward_large))==0)
+assertthat::assert_that(sum(is.na(lonLUTI_large))==0)
 
 #-------------------------------------------------------------------------------
 
@@ -137,7 +137,7 @@ long_term_savills <- filter(lonLUTI_shlaa, year %in% 2026:2041) %>%
          units = units + distributed_increase) %>% 
   select(names(lonLUTI_shlaa))
 
-ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_lonLUTI.rds") %>% 
+ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_lonLUTI.rds") %>% 
   filter(year < 2020)
 
 savills_trajectory <-  filter(lonLUTI_shlaa, !year %in% 2020:2041) %>% 

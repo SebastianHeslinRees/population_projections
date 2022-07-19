@@ -213,8 +213,8 @@ lonLUTI_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex",
   select(-hrp, -hh_pop)
 
 lonLUTI_rates <- vector("list", 2041)
-lonLUTI_rates[[2001]] <- lonLUTI_rates_2001
-lonLUTI_rates[[2011]] <- lonLUTI_rates_2011
+lonLUTI_rates[[2001]] <- lonLUTI_rates_2001 %>% filter(!is.na(LonLUTI3))
+lonLUTI_rates[[2011]] <- lonLUTI_rates_2011 %>% filter(!is.na(LonLUTI3))
 
 #-------------------------------------------------------------------------------
 
@@ -248,6 +248,8 @@ for(i in 2022:2041){
 
 lonLUTI_rates <- data.table::rbindlist(lonLUTI_rates) %>%
   data.frame()
+
+sum(is.na(lonLUTI_rates))
 
 #-------------------------------------------------------------------------------
 

@@ -45,15 +45,15 @@ oa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD13_
 ####LARGE SITES####
 
 #Join the large sites point data to ward and MSOA polygons
-start_dir <- getwd()
+#start_dir <- getwd()
 
 #readOGR requires the directory to be changed
-shlaa_data_loc <- "Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/final_data/"
-setwd(paste0(shlaa_data_loc, "large_sites_v2/"))
-large_sites_points <- readOGR(dsn = ".", layer = "SHLAA_large_sites_3Oct2017_point",
+shlaa_data_loc <- "Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/final_data/large_sites_v2"
+#setwd(paste0(shlaa_data_loc, "large_sites_v2/"))
+large_sites_points <- readOGR(dsn = shlaa_data_loc, layer = "SHLAA_large_sites_3Oct2017_point",
                               verbose = FALSE)
 
-setwd(start_dir)
+#setwd(start_dir)
 
 msoa_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/StatisticalBoundaries/Census_2011/SuperOutputAreas/London/Middle/ESRI"
 msoa_polygons <- readOGR(dsn = msoa_polygon_loc, layer = "MSOA_2011_London",
@@ -63,8 +63,14 @@ ward_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/20
 ward_polygons <- readOGR(dsn = ward_polygon_loc, layer = "London_Ward_CityMerged",
                          verbose = FALSE)
 
+lonLUTI_polygon_loc <- "Q:/Teams/D&PA/Data/TfL/LonLUTI13GIS"
+lonLUTI_polygons <- readOGR(dsn = lonLUTI_polygon_loc, layer = "LonLUTI3",
+                         verbose = FALSE)
+
 proj4string(large_sites_points) <- proj4string(msoa_polygons)
 proj4string(ward_polygons) <- proj4string(msoa_polygons)
+proj4string(lonLUTI_polygons) <- proj4string(msoa_polygons)
+
 
 msoa_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, msoa_polygons))%>%
   select(lhcss_ref, MSOA11CD, LAD11CD, LAD11NM,
@@ -73,16 +79,20 @@ msoa_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, m
 ward_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, ward_polygons)) %>%
   select(lhcss_ref, GSS_CODE)
 
+lonLUTI_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, lonLUTI_polygons)) %>%
+  select(lhcss_ref, LonLUTI3)
+
 large_input <- left_join(msoa_join, ward_join, by="lhcss_ref") %>%
-  select(MSOA11CD, LAD11CD, LAD11NM, GSS_CODE,
+  left_join(lonLUTI_join, by = "lhcss_ref") %>% 
+  select(MSOA11CD, LAD11CD, LAD11NM, GSS_CODE, LonLUTI3,
          Phase1, Phase2, Phase3, Phase4, Phase5)%>%
   mutate(gss_code_msoa = as.character(MSOA11CD),
          gss_code_borough = as.character(LAD11CD),
          district = as.character(LAD11NM),
          gss_code_ward = as.character(GSS_CODE)) %>%
-  select(gss_code_msoa, gss_code_borough, gss_code_ward, district,
-         Phase1, Phase2, Phase3, Phase4, Phase5)
-
+  select(gss_code_msoa, gss_code_borough, gss_code_ward, district, LonLUTI3,
+         Phase1, Phase2, Phase3, Phase4, Phase5) %>% 
+  filter((Phase1 + Phase2 + Phase3 + Phase4 + Phase5) > 0) 
 
 assertthat::assert_that(sum(is.na(large_input))==0)
 
