@@ -54,6 +54,7 @@ housing_led_core <- function(start_population,
   trend_projection <- lapply(trend_projection, function(x) filter(x, x$area_code %in% constrain_gss))
   
   aged_on_population <- start_population %>%
+    filter(area_code %in% constrain_gss) %>% 
     popn_age_on(col_aggregation = col_agg,
                 col_geog = nested_geog)
   
@@ -282,7 +283,7 @@ housing_led_core <- function(start_population,
                                       col_outflow = "outflow",
                                       col_target = "net_target",
                                       n_cores)
-
+  
   final_migration <- select(lookup, gss_code, area_code) %>% 
     right_join(optimised_flows, by = "area_code") %>% 
     mutate(netflow = inflow - outflow) %>% 
@@ -329,6 +330,8 @@ housing_led_core <- function(start_population,
   ahs_choice <- ahs_choice %>% 
     left_join(actual_ahs, by = "area_code")
   
+  #-----------------------------------------------------------------------------
+  
   # Reporting output - Components of Change dataframe
   
   components <- bind_rows(mutate(final_population, component = 'popn'),
@@ -359,21 +362,38 @@ housing_led_core <- function(start_population,
   
   # 15 -------------------------------------------------------------------------
   
+  #Add back in data for areas outside housing data area
+  #browser()
+  final_population <- bind_rows(final_population, areas_with_no_housing_data$population)
+  final_births <- bind_rows(trend_projection$births, areas_with_no_housing_data$births)
+  final_deaths <- bind_rows(trend_projection$deaths, areas_with_no_housing_data$deaths)
+  final_out_migration <- bind_rows(final_migration$outflow, areas_with_no_housing_data$out_migration)
+  final_in_migration <- bind_rows(final_migration$inflow, areas_with_no_housing_data$in_migration)
+  final_net_migration <- bind_rows(final_migration$netflow,
+                                   rename(areas_with_no_housing_data$net_migration,
+                                          netflow = net_migration))
+  final_components <- bind_rows(components,
+                                (areas_with_no_housing_data$detailed_components %>% 
+                                   mutate(netflow = inflow - outflow) %>% 
+                                   select(names(components))))
+  
+  # 16 ------------------------------------------------------------------------- 
+  
   output_list <- list(population = final_population,
                       unconstrained_population = unconstrained_population,
                       constrained_population = constrained_population,
-                      births = trend_projection$births,
+                      births = final_births,
                       deaths = trend_projection$deaths,
-                      out_migration = final_migration$outflow,
-                      in_migration = final_migration$inflow,
-                      net_migration = final_migration$netflow,
+                      out_migration = final_out_migration,
+                      in_migration = final_in_migration,
+                      net_migration = final_net_migration,
                       household_population_sya = final_household_popn,
                       ahs = ahs_choice,
                       households_detail = households_detail,
                       detailed_components = components,
                       hhr_ahs_uplift = hhr_ahs_uplift)
   
-  # 16 -------------------------------------------------------------------------
+  # 17 -------------------------------------------------------------------------
   
   #validate there are no NAs in any of the output dataframes
   lapply(output_list, FUN = function(x){

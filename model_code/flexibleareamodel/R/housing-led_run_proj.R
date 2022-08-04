@@ -213,7 +213,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     }
     
     #project
-   # browser()
+    #browser()
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility,
                                                       mortality_rates = curr_yr_mortality,

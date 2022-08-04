@@ -109,19 +109,19 @@
 .remove_ce_popn <- function(popn, ce_popn, popn_col = "popn",
                             col_aggregation = c("area_code", "sex", "age")){
   
-  ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
+  hh_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
     summarise(ce_popn = sum(ce_popn)) %>%  
-    left_join(popn, by = col_aggregation) %>% 
+    right_join(popn, by = col_aggregation) %>% 
     mutate(household_popn = !!sym(popn_col) - ce_popn) %>% 
     check_negative_values("household_popn")
 }
 
-.add_ce_popn <- function(popn, ce_popn, popn_col = "popn",
+.add_ce_popn <- function(hh_popn, ce_popn, popn_col = "popn",
                          col_aggregation = c("are_code", "sex", "age")){
   
   ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
     summarise(ce_popn = sum(ce_popn)) %>%  
-    left_join(popn, by = col_aggregation) %>% 
+    right_join(hh_popn, by = col_aggregation) %>% 
     mutate(!!popn_col := !!sym(popn_col) + ce_popn) %>% 
     check_negative_values(popn_col) %>% 
     select(-ce_popn)

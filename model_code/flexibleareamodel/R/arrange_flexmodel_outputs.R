@@ -30,19 +30,32 @@
 #' 
 
 arrange_flexmodel_outputs <- function(projection,
-                                       population, births, deaths,
-                                       in_migration, out_migration,
-                                       fertility_rates, mortality_rates,
-                                       in_mig_flows, out_mig_rates,
-                                       dwelling_trajectory, dwelling_stock,
-                                       first_proj_yr, last_proj_yr,
-                                       config_list, model, n_cores){
+                                      population, births, deaths,
+                                      in_migration, out_migration,
+                                      fertility_rates, mortality_rates,
+                                      in_mig_flows, out_mig_rates,
+                                      dwelling_trajectory, dwelling_stock,
+                                      first_proj_yr, last_proj_yr,
+                                      config_list, model, n_cores){
   
   
   
   lookup <- readRDS(config_list$lookup_path) %>% 
     rename(area_code = all_of(config_list$geog_code_col),
            area_name = all_of(config_list$geog_name_col))
+
+  
+  if(!"gss_code" %in% names(out_migration)){
+    out_migration <- left_join(out_migration,
+                               distinct(select(lookup, gss_code, area_code)),
+                               by = "area_code")
+  }
+  
+  if(!"gss_code" %in% names(in_migration)){
+    in_migration <- left_join(in_migration,
+                              distinct(select(lookup, gss_code, area_code)),
+                              by = "area_code")
+  }
   
   #Components backseries
   
@@ -58,9 +71,9 @@ arrange_flexmodel_outputs <- function(projection,
   proj_ahs <- list()
   proj_households <- list()
   proj_hh_pop_sya <- list()
-  
+
   #-----------------------------------------------------------------------------
-  
+  browser()
   #Net migration backseries
   
   join_by <- intersect(names(out_migration), names(in_migration))
@@ -69,7 +82,6 @@ arrange_flexmodel_outputs <- function(projection,
                                mutate(netflow = inflow - outflow) %>% 
                                filter(year < first_proj_yr) %>% 
                                select(year, gss_code, area_code, sex, age, netflow))
-  
   #-----------------------------------------------------------------------------
   
   #Components dataframe backeries
