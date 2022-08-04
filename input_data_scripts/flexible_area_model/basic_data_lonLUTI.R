@@ -19,7 +19,13 @@ data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_da
 
 lsoa_to_lonLUTI <- readRDS(paste0(data_dir_Q_drive, "lookups/lsoa_to_LonLUTI3.rds")) %>% rename(gss_code_lsoa = LSOA11CD)
 oa_to_lonLUTI <- readRDS(paste0(data_dir_Q_drive, "lookups/oa_to_LonLUTI3_lookup.rds")) 
-lonLUTI_name_lookup <- lsoa_to_lonLUTI %>% select(LonLUTI3) %>% mutate(name = LonLUTI3)
+lonLUTI_name_lookup <- oa_to_lonLUTI %>%
+  left_join(readRDS("input_data/lookup/gss_code_to_name.rds"), by = "gss_code") %>% 
+  select(LonLUTI3, gss_code, gss_name) %>%
+  mutate(name = LonLUTI3)  %>% 
+  data.frame() %>% 
+  distinct() %>% 
+  select(gss_code, la_name = gss_name, LonLUTI3, name)
 
 saveRDS(lsoa_to_lonLUTI, paste0(input_data_dir, "lookups/lsoa_to_LonLUTI3_lookup.rds"))
 saveRDS(oa_to_lonLUTI, paste0(input_data_dir, "lookups/oa_to_LonLUTI3_lookup.rds"))
@@ -48,22 +54,9 @@ lonLUTI_deaths <- readRDS(paste0(data_dir_Q_drive, "regrosser/created/deaths_lon
 
 #-------------------------------------------------------------------------------
 
-# Migration flows are saved as 1 file per borough
-# Loop through to read in then bind together
-
-flows <- list.files(paste0(data_dir_Q_drive, "regrosser/outputs/LonLUTI"), full.names = TRUE)
-gross_flows <- list()
-
-for(i in 1:33){
-  gross_flows[[i]] <- readRDS(flows[i]) %>% 
-    mutate(geography = "LonLUTI3") %>%
-    select(geography, year, gss_code, LonLUTI3, sex, age, inflow, outflow)
-}
-
-gross_flows <- rbindlist(gross_flows)
+gross_flows <- readRDS(paste0(data_dir_Q_drive, "regrosser/outputs/LonLUTI/gross_flows_lonLUTI.rds"))
 lonLUTI_inflow <- gross_flows %>% select(-outflow) %>% data.frame()
 lonLUTI_outflow <- gross_flows %>% select(-inflow) %>% data.frame()
-rm(flows, gross_flows, i)
 
 #-------------------------------------------------------------------------------
 
@@ -95,10 +88,12 @@ communal_est_lsoa <- rbind(
                                  as.numeric(age_max)))) %>%
   data.frame()
 
+lsoa_lookup_2020 <- filter(lsoa_to_lonLUTI, year == 2020)
+
 communal_est_lonLUTI <- communal_est_lsoa  %>%
-  left_join(lsoa_to_lonLUTI, by="gss_code_lsoa") %>%
+  left_join(lsoa_lookup_2020, by="gss_code_lsoa") %>%
   group_by(LonLUTI3, sex, age_group, age_min, age_max) %>%
-  summarise(ce_popn = sum(ce_popn), .groups = 'drop_last') %>%
+  summarise(ce_popn = sum(ce_popn*lsoa_share), .groups = 'drop_last') %>%
   data.frame() %>%
   filter(LonLUTI3 %in% lonLUTI_pop$LonLUTI3)
 
@@ -155,7 +150,7 @@ saveRDS(lonLUTI_deaths, paste0(input_data_dir, "backseries/lonLUTI_deaths.rds"))
 saveRDS(lonLUTI_pop, paste0(input_data_dir, "backseries/lonLUTI_population.rds"))
 saveRDS(lonLUTI_inflow, paste0(input_data_dir, "backseries/lonLUTI_inflow.rds"))
 saveRDS(lonLUTI_outflow, paste0(input_data_dir, "backseries/lonLUTI_outflow.rds"))
-saveRDS(dwellinngs_to_hh, paste0(input_data_dir, "processed/lonLUTI_dwelling_2_hh_ratio.rds"))
-saveRDS(comm_est_lonLUTI_sya, paste0(input_data_dir, "processed/lonLUTI_communal_establishment_popn.rds"))
+saveRDS(dwellinngs_to_hh, paste0(input_data_dir, "processed/dwelling_2_hh_ratio_lonLUTI.rds"))
+saveRDS(comm_est_lonLUTI_sya, paste0(input_data_dir, "processed/communal_establishment_popn_lonLUTI.rds"))
 
 rm(list=ls())

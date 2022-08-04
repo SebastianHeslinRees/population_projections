@@ -48,9 +48,9 @@ oa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD13_
 #start_dir <- getwd()
 
 #readOGR requires the directory to be changed
-shlaa_data_loc <- "Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/final_data/large_sites_v2"
+shlaa_data_loc <- "Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/final_data"
 #setwd(paste0(shlaa_data_loc, "large_sites_v2/"))
-large_sites_points <- readOGR(dsn = shlaa_data_loc, layer = "SHLAA_large_sites_3Oct2017_point",
+large_sites_points <- readOGR(dsn = paste0(shlaa_data_loc, "/large_sites_v2"), layer = "SHLAA_large_sites_3Oct2017_point",
                               verbose = FALSE)
 
 #setwd(start_dir)

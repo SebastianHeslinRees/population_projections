@@ -63,7 +63,7 @@ assertthat::assert_that(sum(is.na(lonLUTI_large))==0)
 #Small Sites - Intensification
 
 lonLUTI_intense <- small_intensification %>%
-  left_join(oa_lookup, by = c("gss_code_oa", "gss_code")) %>% 
+  left_join(oa_lookup, by = c("gss_code_oa"="OA11CD", "gss_code")) %>% 
   group_by(LonLUTI3) %>%
   summarise(units = sum(intense), .groups = 'drop_last') %>%
   data.frame() %>% 

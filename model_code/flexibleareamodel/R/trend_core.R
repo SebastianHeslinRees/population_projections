@@ -27,9 +27,6 @@ trend_core <- function(start_population,
                        constraint_list,
                        excess_deaths){
   
-  cat('\r',projection_year)
-  utils::flush.console()
-  
   start_population <- start_population %>% 
     select(year, gss_code, area_code, sex, age, popn)
   

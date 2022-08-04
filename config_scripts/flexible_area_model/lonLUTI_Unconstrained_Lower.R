@@ -1,17 +1,17 @@
 devtools::load_all('model_code/popmodules/')
 devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "lonLUTI_NUTS2_Lower_TEST"
+projection_name <- "lonLUTI_Unconstrained_Lower_TEST"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
                         lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
                         mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = T,
-                                          deaths = T,
+                        components = list(births = F,
+                                          deaths = F,
                                           in_migration = F,
                                           out_migration = F,
-                                          population = T))
+                                          population = F))
 #Migration
 in_migration <- list(
   '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_lonLUTI_Covid_2021.rds"),

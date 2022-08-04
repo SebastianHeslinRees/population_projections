@@ -74,7 +74,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   if(n_cores > detected_cores){n_cores <- detected_cores}
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
-
+  
   #-----------------------------------------------------------------------------
   
   #projection years
@@ -100,7 +100,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   out_migration <- get_component_from_file(config_list$out_migration_path, config_list$first_proj_yr - 1) %>% 
     .standardise_df(config_list$geog_code_col, "outflow")
   
- 
+  
   #Get the projected rates - 10 secs
   mortality_rates <- get_component_from_file(config_list$mortality_rates, last_proj_yr) %>% 
     .standardise_df(config_list$geog_code_col, "rate")
@@ -167,31 +167,33 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   message("projecting")
   for(projection_year in first_proj_yr:last_proj_yr){
     
+    cat('\r',projection_year)
+    utils::flush.console()
+    
     #fertility & mortality
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     
-    #in migration
     in_migration_flows <- get_rates_or_flows(in_migration_flows, in_flow_info,
                                              projection_year, first_proj_yr,
                                              col_aggregation = c("year", "gss_code", config_list$geog_code_col, "sex", "age"),
-                                             data_col = "in_flow") %>% 
-      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","in_flow"))
-    
+                                             data_col = "in_flow") 
+   
     
     curr_yr_in_flows <- filter(in_migration_flows, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
+      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","in_flow")) %>% 
       select(year, gss_code, area_code, sex, age, in_flow)
     
     #out migration
     out_migration_rates <- get_rates_or_flows(out_migration_rates, out_rate_info,
                                               projection_year, first_proj_yr,
                                               col_aggregation = c("year", "gss_code", config_list$geog_code_col, "sex", "age"),
-                                              data_col = "out_rate") %>% 
-      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","out_rate"))
+                                              data_col = "out_rate")
     
     curr_yr_out_rates <- filter(out_migration_rates, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
+      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","out_rate")) %>% 
       select(year, gss_code, area_code, sex, age, out_rate)
     
     #households
@@ -211,6 +213,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     }
     
     #project
+   # browser()
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility,
                                                       mortality_rates = curr_yr_mortality,
@@ -219,7 +222,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                                       projection_year = projection_year,
                                                       constraint_list = constraint_list,
                                                       excess_deaths = curr_yr_excess_deaths)
-    
+   
     hl_projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                          trend_projection = trend_projection[[projection_year]],
                                                          communal_establishment_population = communal_establishment_population,
@@ -252,16 +255,16 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   message('')
   message("arrange outputs")
   hl_projection <- arrange_flexmodel_outputs(hl_projection,
-                                              population, births, deaths,
-                                              in_migration, out_migration,
-                                              fertility_rates, mortality_rates,
-                                              in_migration_flows,
-                                              out_migration_rates,
-                                              trajectory, dwellings,
-                                              first_proj_yr, last_proj_yr,
-                                              config_list,
-                                              "housing-led",
-                                              n_cores)
+                                             population, births, deaths,
+                                             in_migration, out_migration,
+                                             fertility_rates, mortality_rates,
+                                             in_migration_flows,
+                                             out_migration_rates,
+                                             trajectory, dwellings,
+                                             first_proj_yr, last_proj_yr,
+                                             config_list,
+                                             "housing-led",
+                                             n_cores)
   
   rm(list=setdiff(ls(), c("hl_projection","config_list","cl")))
   #-------------------------------------------------------------------------------

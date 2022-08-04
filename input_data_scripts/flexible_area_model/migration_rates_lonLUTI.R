@@ -7,10 +7,14 @@ message("LonLUTI migration rates")
 
 input_data_dir <- "input_data/flexible_area_model/"
 
+
+
 LonLUTI_pop <- paste0(input_data_dir, "backseries/LonLUTI_population.rds") %>% readRDS()
 LonLUTI_births <- paste0(input_data_dir, "backseries/LonLUTI_births.rds") %>% readRDS()
 LonLUTI_in_mig <- paste0(input_data_dir, "backseries/LonLUTI_inflow.rds") %>% readRDS() %>% data.frame()
 LonLUTI_out_mig <- paste0(input_data_dir, "backseries/LonLUTI_outflow.rds") %>% readRDS() %>% data.frame()
+
+lonluti_to_la <- LonLUTI_pop %>% select(gss_code, LonLUTI3) %>% distinct()
 
 #-------------------------------------------------------------------------------
 
@@ -23,7 +27,7 @@ denominator_popn <- LonLUTI_pop %>%
 # Averaged migration flows and rates
 
 out_mig_rates_5 <- denominator_popn %>% 
-  left_join(LonLUTI_out_mig, by = c("gss_code", "LonLUTI3", "year", "sex", "age")) %>% 
+  left_join(LonLUTI_out_mig, by = c("LonLUTI3", "year", "sex", "age")) %>% 
   mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5, 
                                  last_data_year = 2020, 
@@ -36,17 +40,18 @@ out_mig_rates_5 <- denominator_popn %>%
 #-------------------------------------------------------------------------------
 
 in_mig_flows_5 <- LonLUTI_in_mig %>% 
+  left_join(lonluti_to_la, by = "LonLUTI3") %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5, 
                                  last_data_year = 2020,
                                  data_col = "inflow",
-                                 col_aggregation = c("gss_code", "gss_code", "LonLUTI3", "sex", "age"),
+                                 col_aggregation = c("gss_code", "LonLUTI3", "sex", "age"),
                                  project_rate_from = 2021) %>% 
   rename(in_flow = inflow) %>% 
   project_forward_flat(2050)
 
 #-------------------------------------------------------------------------------
 
-# Approximate  Covid-affected migration rates so that
+# Approximate Covid-affected migration rates so that
 
 trend_projection_migration <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/"
 
@@ -54,7 +59,7 @@ trend_projection_migration <- "Q:/Teams/D&PA/Demography/Projections/population_m
 total_in <- readRDS(paste0(trend_projection_migration, 'dom_in.rds')) %>% 
   left_join(readRDS(paste0(trend_projection_migration, 'int_in.rds')),
             by = c("year", "gss_code", "age", "sex")) %>% 
-  filter(substr(gss_code,1,3)=="E09") %>% 
+  filter(substr(gss_code,2,3) %in% c("06","07","08","09")) %>% 
   mutate(total_in = dom_in + int_in) %>% 
   select(-dom_in, -int_in)
 
@@ -94,7 +99,7 @@ rm(scaling_in_2021, scaling_in_2022, total_in_avg)
 total_out <- readRDS(paste0(trend_projection_migration, 'dom_out.rds')) %>% 
   left_join(readRDS(paste0(trend_projection_migration, 'int_out.rds')),
             by = c("year", "gss_code", "age", "sex")) %>% 
-  filter(substr(gss_code,1,3)=="E09") %>% 
+  filter(substr(gss_code,2,3) %in% c("06","07","08","09")) %>% 
   mutate(total_out = dom_out + int_out) %>% 
   select(-dom_out, -int_out)
 

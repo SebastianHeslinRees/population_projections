@@ -25,6 +25,14 @@ source('input_data_scripts/flexible_area_model/household_model_WD13CD.R')
 source('input_data_scripts/flexible_area_model/ldd_WD13CD.R')
 source('input_data_scripts/flexible_area_model/2017_shlaa_WD13CD.R')
 
+#### lonLUTI ####
+source('input_data_scripts/flexible_area_model/basic_data_lonLUTI.R')
+source('input_data_scripts/flexible_area_model/fert_mort_rates_lonLUTI.R')
+source('input_data_scripts/flexible_area_model/migration_rates_lonLUTI.R')
+source('input_data_scripts/flexible_area_model/household_model_lonLUTI.R')
+source('input_data_scripts/flexible_area_model/ldd_lonLUTI.R')
+source('input_data_scripts/flexible_area_model/2017_shlaa_lonLUTI.R')
+
 #other
 source("input_data_scripts/flexible_area_model/excess_deaths.R")
 source("input_data_scripts/flexible_area_model/nuts2_hma.R")

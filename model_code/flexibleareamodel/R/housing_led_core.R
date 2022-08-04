@@ -282,7 +282,7 @@ housing_led_core <- function(start_population,
                                       col_outflow = "outflow",
                                       col_target = "net_target",
                                       n_cores)
-  
+
   final_migration <- select(lookup, gss_code, area_code) %>% 
     right_join(optimised_flows, by = "area_code") %>% 
     mutate(netflow = inflow - outflow) %>% 
