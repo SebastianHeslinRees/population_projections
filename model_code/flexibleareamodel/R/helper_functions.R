@@ -66,12 +66,16 @@
   
   if(is.null(data_col)){data_col <- last(names(x))}
   
-  x %>% 
+  a <- filter(x, gss_code %in% areas$gss_code)
+  b <- filter(x, !gss_code %in% areas$gss_code)
+  
+  a %>% 
     left_join(areas, by = "gss_code") %>% 
     constrain_component(constraint,
                         col_aggregation = mapping,
                         data_col) %>% 
-    select(names(x))
+    select(names(x)) %>% 
+    bind_rows(b)
 }
 
 .bind_and_arrange <- function(x, lookup){
