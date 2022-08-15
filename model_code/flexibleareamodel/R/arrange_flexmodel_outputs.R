@@ -73,7 +73,7 @@ arrange_flexmodel_outputs <- function(projection,
   proj_hh_pop_sya <- list()
 
   #-----------------------------------------------------------------------------
-  browser()
+
   #Net migration backseries
   
   join_by <- intersect(names(out_migration), names(in_migration))
