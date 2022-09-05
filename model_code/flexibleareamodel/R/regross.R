@@ -68,7 +68,7 @@ regross_parallel <- function(base_in, base_out, target_net,
                              col_outflow = "outflow",
                              col_target = "net_target",
                              n_cores = 8,
-                             fun = 1){
+                             fun = 2){
   
   target_cols <- setdiff(names(target_net), col_target)
   base_flows_cols <- intersect(names(base_in), names(base_out))

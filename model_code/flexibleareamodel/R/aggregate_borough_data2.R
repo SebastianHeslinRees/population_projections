@@ -97,7 +97,8 @@ aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr
                                       col_inflow = "trend_inflow",
                                       col_outflow = "trend_outflow",
                                       col_target = "netflow",
-                                      n_cores)
+                                      n_cores = n_cores,
+                                      fun = 2)
   
   final_migration <- gross_flows %>%
     group_by(year, gss_code) %>%
