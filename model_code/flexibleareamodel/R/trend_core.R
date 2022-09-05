@@ -27,14 +27,19 @@ trend_core <- function(start_population,
                        constraint_list,
                        excess_deaths){
   
-  start_population <- start_population %>% 
-    select(year, gss_code, area_code, sex, age, popn)
+  if("gss_code" %in% names(start_population)){
+    col_agg <- c("year", "gss_code", "area_code", "sex", "age")
+    nested_geog <- c("gss_code", "area_code")
+  } else {
+    col_agg <- c("year", "area_code", "sex", "age")
+    nested_geog <- "area_code"
+  }
   
-  col_agg <- c("year", "gss_code", "area_code", "sex", "age")
-  nested_geog <- c("gss_code", "area_code")
-  #constraint_list$constraint_lookup <- constraint_list$constraint_list$constraint_lookup #TODO This shouldn't be inside the loop
   #browser()
   #-----------------------------------------------------------------------------
+  
+  start_population <- start_population %>% 
+    select(!!col_agg, "popn")
   
   #age on
   aged_popn <- popn_age_on(start_population,
@@ -131,6 +136,7 @@ trend_core <- function(start_population,
   
   #in migration
   inflow <- filter(in_flows, year == projection_year) %>% 
+    select(!!col_agg, "in_flow") %>% 
     rename(inflow = in_flow)
   
   if(constraint_list$components$in_migration){
@@ -149,7 +155,7 @@ trend_core <- function(start_population,
                                                  addition_data = list(inflow),
                                                  subtraction_data = list(outflow),
                                                  col_aggregation = col_agg) %>% 
-    select(year, gss_code, area_code, sex, age, popn)
+    select(!!col_agg, "popn")
   
   assert_that(sum(is.na(next_yr_popn))==0, msg=paste("next_yr_popn", projection_year))
   
@@ -178,7 +184,7 @@ trend_core <- function(start_population,
     select(-inflow, -outflow)
   
   #-----------------------------------------------------------------------------
-
+  
   #make a nice output dataframe
   components <- aged_popn_w_births %>% 
     arrange(across(col_agg)) %>% 
@@ -192,7 +198,7 @@ trend_core <- function(start_population,
     mutate(change = births - deaths + inflow - outflow,
            popn_from_components = start_popn + change,
            diff = popn - popn_from_components) %>% 
-    select(year, gss_code, area_code, sex, age,
+    select(!!col_agg,
            start_popn, births, deaths,
            inflow, outflow, change,
            popn_from_components, diff, popn)

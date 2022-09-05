@@ -51,7 +51,7 @@ lonLUTI_large <- large_sites %>%
   group_by(LonLUTI3, year) %>%
   summarise(units = sum(dev), .groups = 'drop_last') %>%
   as.data.frame() %>%
-  tidyr::complete(LonLUTI3 = lsoa_to_lonLUTI$LonLUTI3,
+  tidyr::complete(LonLUTI3 = unique(lsoa_to_lonLUTI$LonLUTI3),
                   year = 2012:2050,
                   fill = list(units = 0))
 
@@ -82,8 +82,8 @@ borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
   summarise(units = sum(units), .groups = 'drop_last') %>%
   data.frame()
 
-# The borough windfall is distributed evenly among the wards and MSOAs
-# i.e. not according to how the other development is distributed with the wards/MSOAs
+# The borough windfall is distributed evenly among the zones
+# i.e. not according to how the other development is distributed with the zones
 
 lonLUTI_trend_windfall <- lsoa_to_lonLUTI %>% 
   select(LonLUTI3, gss_code) %>% 

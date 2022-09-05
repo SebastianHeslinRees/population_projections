@@ -1,5 +1,3 @@
-devtools::load_all('model_code/popmodules/')
-devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
 projection_name <- "lonLUTI_Unconstrained_Lower_TEST"
 
@@ -32,7 +30,7 @@ out_migration <- list(
 #Config
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2021,
-                    n_proj_yr = 1, #21
+                    n_proj_yr = 21, #21
                     output_dir = paste0("outputs/flexible_area_model/", projection_name),
                     
                     #backseries
@@ -67,11 +65,7 @@ config_list <- list(projection_name = projection_name,
                     geog_name_col = "name"
 )
 
+devtools::load_all('model_code/popmodules/')
 devtools::load_all("model_code/flexibleareamodel/")
 model_output <- flexmodel_hl_projection(config_list)
-
-#create_excel(config_list$output_dir, "Croydon.xlsx", "Croydon BPO test", bpo = "E09000008")
-#create_excel(config_list$output_dir, "NUTS2 Lower lonLUTI.xlsx", "Test", smallarea = "lonLUTI")
-
-
 

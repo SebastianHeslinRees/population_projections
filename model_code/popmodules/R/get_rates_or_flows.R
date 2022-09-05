@@ -21,17 +21,17 @@
 #' @export
 
 get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
-                                col_aggregation, data_col){
- 
+                               col_aggregation, data_col, geog_code_col){
+  
   #value_1 = data_col for df_info$path
   #value_2 = data_col for df_info$next_path
   #data_col = actual rate used in projection_year-1
-
+  
   curr_yr_info <- filter(df_info, year == projection_year)
   assertthat::assert_that(nrow(curr_yr_info)==1,msg="too many rows in df_info dataframe")
   assertthat::assert_that(!is.null(df) | !is.na(curr_yr_info$path),
                           msg = "Must provide input df or a path to read from in the current year of df_info")
-
+  
   # return input if rates will be the same as last year
   if(is.na(curr_yr_info$path) && !curr_yr_info$transition) {
     return(df)
@@ -47,6 +47,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       
       #create the df in the first year
       df <- readRDS(curr_yr_info$path) %>%
+        .standardise_df(geog_code_col, data_col) %>% 
         validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col)
     }
@@ -59,6 +60,8 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       
       #add next set of data
       df <- readRDS(curr_yr_info$next_path) %>%
+        .standardise_df(geog_code_col, data_col) %>% 
+        select(!!col_aggregation, !!data_col) %>% 
         validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col) %>%
         full_join(df, by = col_aggregation) %>% 

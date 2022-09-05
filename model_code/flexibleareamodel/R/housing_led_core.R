@@ -38,8 +38,16 @@ housing_led_core <- function(start_population,
                              constraint_list,
                              n_cores, lookup){
   
-  col_agg <- c("year", "gss_code", "area_code", "sex", "age")
-  nested_geog <- c("gss_code", "area_code")
+  
+  if("gss_code" %in% names(start_population)){
+    col_agg <- c("year", "gss_code", "area_code", "sex", "age")
+    nested_geog <- c("gss_code", "area_code")
+    
+  } else {
+    col_agg <- c("year", "area_code", "sex", "age")
+    nested_geog <- "area_code"
+    
+  }
   
   # 1 --------------------------------------------------------------------------
   
@@ -66,7 +74,7 @@ housing_led_core <- function(start_population,
                                          communal_establishment_population)
   
   sum_trend_hh_population <- trend_hh_population %>% 
-    group_by(gss_code, area_code, year) %>% 
+    group_by(year, across(!!nested_geog)) %>% 
     summarise(household_popn = sum(household_popn)) %>% 
     data.frame()
   
@@ -80,21 +88,21 @@ housing_led_core <- function(start_population,
                                  age %in% 35:49 ~ "35_49",
                                  age %in% 50:64 ~ "50_64",
                                  TRUE ~ "65_plus")) %>% 
-    lazy_dt() %>% 
-    group_by(gss_code, area_code, sex, age_group) %>% 
+    
+    group_by(across(!!nested_geog), sex, age_group) %>% 
     summarise(household_popn = sum(household_popn), .groups = 'drop_last') %>% 
     data.frame() %>% 
     lazy_dt() %>% 
     left_join(household_rep_rates, by = c("area_code", "sex", "age_group")) %>% 
     mutate(households = hh_rep_rate * household_popn) %>% 
-    group_by(gss_code, area_code, year) %>% 
+    group_by(year, across(!!nested_geog)) %>% 
     summarise(households = sum(households), .groups = 'drop_last') %>% 
     data.frame() 
   
   curr_yr_hhr_ahs <- curr_yr_hhr_households %>% 
-    left_join(sum_trend_hh_population, by = c("gss_code", "area_code", "year")) %>% 
+    left_join(sum_trend_hh_population, by = c(nested_geog, "year")) %>% 
     mutate(hhr_ahs = household_popn/households) %>% 
-    select(gss_code, area_code, year, hhr_ahs)
+    select(year, !!nested_geog, hhr_ahs)
   
   # 4 --------------------------------------------------------------------------
   
@@ -109,7 +117,7 @@ housing_led_core <- function(start_population,
   
   if(is.null(hhr_ahs_uplift)){
     hhr_ahs_uplift <- left_join(curr_yr_hhr_ahs, curr_yr_trend_ahs,
-                                by = c("gss_code", "area_code", "year")) %>% 
+                                by = c(nested_geog, "year")) %>% 
       mutate(hhr_diff = trend_ahs - hhr_ahs) %>%
       select(area_code, hhr_diff)
   }
@@ -117,7 +125,7 @@ housing_led_core <- function(start_population,
   curr_yr_hhr_ahs <- curr_yr_hhr_ahs %>% 
     left_join(hhr_ahs_uplift, by = "area_code") %>% 
     mutate(hhr_ahs = hhr_ahs + hhr_diff) %>% 
-    select(gss_code, area_code, year, hhr_ahs)
+    select(year, !!nested_geog, hhr_ahs)
   
   # 6 --------------------------------------------------------------------------
   
@@ -125,13 +133,13 @@ housing_led_core <- function(start_population,
   
   ahs_choice <- curr_yr_hhr_ahs %>%
     filter(area_code %in% constrain_gss) %>%
-    left_join(curr_yr_trend_ahs, by = c("year", "gss_code", "area_code")) %>%
+    left_join(curr_yr_trend_ahs, by = c("year", nested_geog)) %>%
     select(-household_popn, -households) %>% 
     mutate(diff = trend_ahs - hhr_ahs,
            blended_ahs = hhr_ahs + (diff*ahs_mix)) %>%
-    select(year, gss_code, area_code, hhr_ahs, trend_ahs, blended_ahs)
+    select(year, !!nested_geog, hhr_ahs, trend_ahs, blended_ahs)
   
-  ahs <- select(ahs_choice, year, gss_code, area_code, ahs = blended_ahs)
+  ahs <- select(ahs_choice, year, !!nested_geog, ahs = blended_ahs)
   
   # 8 --------------------------------------------------------------------------
   
@@ -177,13 +185,15 @@ housing_led_core <- function(start_population,
     mutate(net_target = target_popn - start_popn - births + deaths) %>% 
     select(-births, -deaths, -target_popn, -start_popn)
   
+  if(projection_year==2026){browser()}
   optimised_flows <- regross_parallel(base_in = trend_projection$in_migration,
                                       base_out = trend_projection$out_migration,
                                       target_net = target_net,
                                       col_inflow = "inflow",
                                       col_outflow = "outflow",
                                       col_target = "net_target",
-                                      n_cores) %>% 
+                                      n_cores,
+                                      fun = 2) %>% 
     select(year, area_code, inflow, outflow)
   
   migration_distribution <- left_join(trend_projection$in_migration,
@@ -224,10 +234,10 @@ housing_led_core <- function(start_population,
     .remove_ce_popn(communal_establishment_population) %>% 
     check_negative_values("household_popn") %>% 
     mutate(popn = ce_popn + household_popn) %>% 
-    select(year, gss_code, area_code, sex, age, popn, ce_popn, household_popn)
+    select(year, !!nested_geog, sex, age, popn, ce_popn, household_popn)
   
   unconstrained_population <- unconstrained_household_popn %>% 
-    select(year, gss_code, area_code, sex, age, popn)
+    select(year, !!nested_geog, sex, age, popn)
   
   # 11 -------------------------------------------------------------------------
   
@@ -245,10 +255,10 @@ housing_led_core <- function(start_population,
       .remove_ce_popn(communal_establishment_population) %>% 
       check_negative_values("household_popn") %>% 
       mutate(popn = ce_popn + household_popn) %>% 
-      select(year, gss_code, area_code, sex, age, popn, ce_popn, household_popn)
+      select(year, !!nested_geog, sex, age, popn, ce_popn, household_popn)
     
     constrained_population <- constrained_household_popn %>% 
-      select(year, gss_code, area_code, sex, age, popn)
+      select(year, !!nested_geog, sex, age, popn)
     
     final_population <- constrained_population
     
@@ -282,9 +292,10 @@ housing_led_core <- function(start_population,
                                       col_inflow = "inflow",
                                       col_outflow = "outflow",
                                       col_target = "net_target",
-                                      n_cores)
+                                      n_cores,
+                                      fun = 2)
   
-  final_migration <- select(lookup, gss_code, area_code) %>% 
+  final_migration <- select(lookup, !!nested_geog) %>% 
     right_join(optimised_flows, by = "area_code") %>% 
     mutate(netflow = inflow - outflow) %>% 
     select(col_agg, inflow, outflow, netflow)
@@ -309,10 +320,10 @@ housing_led_core <- function(start_population,
     .remove_ce_popn(communal_establishment_population) %>% 
     check_negative_values("household_popn") %>% 
     mutate(popn = ce_popn + household_popn) %>% 
-    select(year, gss_code, area_code, sex, age, popn, ce_popn, household_popn)
+    select(year, !!nested_geog, sex, age, popn, ce_popn, household_popn)
   
   final_population <- final_household_popn %>% 
-    select(year, gss_code, area_code, sex, age, popn)
+    select(year, !!nested_geog, sex, age, popn)
   
   # 14 -------------------------------------------------------------------------
   
@@ -341,8 +352,8 @@ housing_led_core <- function(start_population,
                           rename(final_migration$outflow, popn = outflow) %>%  mutate(component = 'outflow'),
                           rename(final_migration$netflow, popn = netflow) %>%  mutate(component = 'netflow')) %>%
     
-    lazy_dt() %>% 
-    group_by(gss_code, area_code, year, sex, age, component) %>% 
+    #lazy_dt() %>% 
+    group_by(year, across(!!nested_geog), sex, age, component) %>% 
     summarise(popn = sum(popn), .groups = 'drop_last') %>% 
     data.frame() %>% 
     pivot_wider(names_from = 'component', values_from = 'popn') %>% 
@@ -351,8 +362,8 @@ housing_led_core <- function(start_population,
   # Reporting output - Households and population deatiled summary
   
   households_detail <- final_household_popn %>%
-    lazy_dt() %>%
-    group_by(gss_code, area_code, year) %>%
+    #lazy_dt() %>%
+    group_by(year, across(!!nested_geog)) %>%
     summarise(population = sum(popn),
               ce_population = sum(ce_popn),
               household_popn = sum(household_popn), .groups = 'drop_last') %>%

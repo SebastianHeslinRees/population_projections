@@ -169,32 +169,35 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     
     cat('\r',projection_year)
     utils::flush.console()
-    
+    #if(projection_year >= 2024){browser()}
+    #browser()
     #fertility & mortality
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
     
+    mig_col_agg <- intersect( c("year", "gss_code", "area_code", "sex", "age"), names(in_migration))
+    
     in_migration_flows <- get_rates_or_flows(in_migration_flows, in_flow_info,
                                              projection_year, first_proj_yr,
-                                             col_aggregation = c("year", "gss_code", config_list$geog_code_col, "sex", "age"),
-                                             data_col = "in_flow") 
-   
+                                             col_aggregation = mig_col_agg,
+                                             data_col = "in_flow",
+                                             geog_code_col = config_list$geog_code_col) 
     
+    #browser()
     curr_yr_in_flows <- filter(in_migration_flows, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
-      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","in_flow")) %>% 
-      select(year, gss_code, area_code, sex, age, in_flow)
+      select(!!mig_col_agg, in_flow)
     
     #out migration
     out_migration_rates <- get_rates_or_flows(out_migration_rates, out_rate_info,
                                               projection_year, first_proj_yr,
-                                              col_aggregation = c("year", "gss_code", config_list$geog_code_col, "sex", "age"),
-                                              data_col = "out_rate")
+                                              col_aggregation = mig_col_agg,
+                                              data_col = "out_rate",
+                                              geog_code_col = config_list$geog_code_col)
     
     curr_yr_out_rates <- filter(out_migration_rates, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
-      .standardise_df(config_list$geog_code_col, data_col = c("value_2","value_1","out_rate")) %>% 
-      select(year, gss_code, area_code, sex, age, out_rate)
+      select(!!mig_col_agg, out_rate)
     
     #households
     curr_yr_households <- filter(households, year == projection_year)
@@ -222,7 +225,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                                       projection_year = projection_year,
                                                       constraint_list = constraint_list,
                                                       excess_deaths = curr_yr_excess_deaths)
-   
+    
     hl_projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                          trend_projection = trend_projection[[projection_year]],
                                                          communal_establishment_population = communal_establishment_population,

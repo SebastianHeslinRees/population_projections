@@ -6,7 +6,7 @@ library(dplyr)
 # It uses census data from 2001 and 2011
 # The age groups for the 4 table it uses are different so there are some shenanigans
 
-message("lonLUTI Household model")
+message("motion_zone Household model")
 
 input_data_dir <- "input_data/flexible_area_model/"
 data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/"
@@ -22,7 +22,7 @@ hrp_2001 <- fread(paste0(data_dir_Q_drive,"HRP_Age_Sex_LSOA_2001.csv"), header =
 
 # Lookups
 lsoa_lookup <- readRDS(paste0(input_data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
-lsoa_lonLUTI_lookup <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_LonLUTI3_lookup.rds"))
+lsoa_motion_zone_lookup <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_motion_zone_lookup.rds"))
 
 #-------------------------------------------------------------------------------
 
@@ -186,12 +186,12 @@ hh_pop_2011 <- filter(hh_pop_2011, !gss_code %in% codes_not_in_lookup)
 
 # ONS model
 
-lonLUTI_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
+motion_zone_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
   filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_lonLUTI_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
-  group_by(LonLUTI3, sex, age_group) %>%
-  summarise(hrp = sum(hrp*lsoa_share),
-            hh_pop = sum(hh_pop*lsoa_share),
+  left_join(lsoa_motion_zone_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  group_by(motion_zone, sex, age_group) %>%
+  summarise(hrp = sum(hrp),
+            hh_pop = sum(hh_pop),
             .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
@@ -199,22 +199,22 @@ lonLUTI_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex",
          year = 2001) %>% 
   select(-hrp, -hh_pop)
 
-lonLUTI_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
+motion_zone_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
   filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_lonLUTI_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  left_join(lsoa_motion_zone_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
   mutate(hrp = ifelse(age_group == "0_17", 0, hrp)) %>% 
-  group_by(LonLUTI3, sex, age_group) %>%
-  summarise(hrp = sum(hrp*lsoa_share),
-            hh_pop = sum(hh_pop*lsoa_share),
+  group_by(motion_zone, sex, age_group) %>%
+  summarise(hrp = sum(hrp),
+            hh_pop = sum(hh_pop),
             .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
          year = 2011) %>% 
   select(-hrp, -hh_pop)
 
-lonLUTI_rates <- vector("list", 2041)
-lonLUTI_rates[[2001]] <- lonLUTI_rates_2001 %>% filter(!is.na(LonLUTI3))
-lonLUTI_rates[[2011]] <- lonLUTI_rates_2011 %>% filter(!is.na(LonLUTI3))
+motion_zone_rates <- vector("list", 2041)
+motion_zone_rates[[2001]] <- motion_zone_rates_2001 %>% filter(!is.na(motion_zone))
+motion_zone_rates[[2011]] <- motion_zone_rates_2011 %>% filter(!is.na(motion_zone))
 
 #-------------------------------------------------------------------------------
 
@@ -225,34 +225,34 @@ for(i in 2001:2021){
   c <- 2011#ifelse(i < 2011, 2001, 2011) #most recent census
   d <- 2001#ifelse(i < 2011, 2011, 2001) #furthest away census
   
-  yc <- lonLUTI_rates[[c]] %>% select(-year)
-  yd <- lonLUTI_rates[[d]] %>% select(-year)
+  yc <- motion_zone_rates[[c]] %>% select(-year)
+  yd <- motion_zone_rates[[d]] %>% select(-year)
   
-  lonLUTI_rates[[i]] <- left_join(yc, yd, by = c("LonLUTI3", "sex", "age_group")) %>%
-    setnames(c("LonLUTI3", "sex", "age_group", "yc", "yd")) %>%
+  motion_zone_rates[[i]] <- left_join(yc, yd, by = c("motion_zone", "sex", "age_group")) %>%
+    setnames(c("motion_zone", "sex", "age_group", "yc", "yd")) %>%
     mutate(k = ifelse(yc >= yd, 1, 0),
            a = yd -k,
            b = (yc-k)/(yd-k),
            x = (i-d)/(c-d),
            y = k + (a*(b^x)),
            year = i) %>%
-    select(LonLUTI3, year, sex, age_group, hh_rep_rate = y)
+    select(motion_zone, year, sex, age_group, hh_rep_rate = y)
 }
 rm(yc, yd, c, d, i)
 
 #Hold rates constant 2022-2041
 for(i in 2022:2041){
-  lonLUTI_rates[[i]] <- lonLUTI_rates[[2021]] %>%
+  motion_zone_rates[[i]] <- motion_zone_rates[[2021]] %>%
     mutate(year = i)
 }
 
-lonLUTI_rates <- data.table::rbindlist(lonLUTI_rates) %>%
+motion_zone_rates <- data.table::rbindlist(motion_zone_rates) %>%
   data.frame()
 
-sum(is.na(lonLUTI_rates))
+sum(is.na(motion_zone_rates))
 
 #-------------------------------------------------------------------------------
 
-saveRDS(lonLUTI_rates, paste0(input_data_dir, "processed/hh_rep_rate_lonLUTI.rds"))
+saveRDS(motion_zone_rates, paste0(input_data_dir, "processed/hh_rep_rate_motion_zone.rds"))
 
 

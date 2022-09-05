@@ -3,48 +3,55 @@ library(data.table)
 library(assertthat)
 library(popmodules)
 
-message("LonLUTI migration rates")
+message("motion_zone migration rates")
 
 input_data_dir <- "input_data/flexible_area_model/"
 
+motion_zone_to_la <- paste0(input_data_dir, "lookups/motion_zone_name_lookup.rds") %>%
+  readRDS() %>%
+  select(motion_zone, gss_code)
 
+motion_zone_pop <- paste0(input_data_dir, "backseries/motion_zone_population.rds") %>%
+  readRDS()%>%
+  left_join(motion_zone_to_la, by = "motion_zone")
 
-LonLUTI_pop <- paste0(input_data_dir, "backseries/LonLUTI_population.rds") %>% readRDS()
-LonLUTI_births <- paste0(input_data_dir, "backseries/LonLUTI_births.rds") %>% readRDS()
-LonLUTI_in_mig <- paste0(input_data_dir, "backseries/LonLUTI_inflow.rds") %>% readRDS() %>% data.frame()
-LonLUTI_out_mig <- paste0(input_data_dir, "backseries/LonLUTI_outflow.rds") %>% readRDS() %>% data.frame()
+motion_zone_births <- paste0(input_data_dir, "backseries/motion_zone_births.rds") %>%
+  readRDS() %>%
+  left_join(motion_zone_to_la, by = "motion_zone")
 
-lonluti_to_la <- LonLUTI_pop %>% select(gss_code, LonLUTI3) %>% distinct()
+motion_zone_in_mig <- paste0(input_data_dir, "backseries/motion_zone_inflow.rds") %>% readRDS()
+
+motion_zone_out_mig <- paste0(input_data_dir, "backseries/motion_zone_outflow.rds") %>% readRDS()
 
 #-------------------------------------------------------------------------------
 
-denominator_popn <- LonLUTI_pop %>%
-  popn_age_on(births = LonLUTI_births,
-              col_aggregation=c("gss_code","LonLUTI3", "year", "sex", "age"),
-              col_geog = c("gss_code", "LonLUTI3"))
+denominator_popn <- motion_zone_pop %>%
+  popn_age_on(births = motion_zone_births,
+              col_aggregation=c("gss_code","motion_zone", "year", "sex", "age"),
+              col_geog = c("gss_code", "motion_zone"))
 
 #-------------------------------------------------------------------------------
 # Averaged migration flows and rates
 
 out_mig_rates_5 <- denominator_popn %>% 
-  left_join(LonLUTI_out_mig, by = c("LonLUTI3", "year", "sex", "age")) %>% 
+  left_join(motion_zone_out_mig, by = c("motion_zone", "year", "sex", "age")) %>% 
   mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5, 
                                  last_data_year = 2020, 
                                  data_col = "out_rate",
-                                 col_aggregation = c("gss_code", "LonLUTI3", "sex", "age"),
+                                 col_aggregation = c("gss_code", "motion_zone", "sex", "age"),
                                  project_rate_from = 2021) %>% 
   mutate(out_rate = ifelse(out_rate > 0.8, 0.8, out_rate)) %>% 
   project_forward_flat(2050)
 
 #-------------------------------------------------------------------------------
 
-in_mig_flows_5 <- LonLUTI_in_mig %>% 
-  left_join(lonluti_to_la, by = "LonLUTI3") %>% 
+in_mig_flows_5 <- motion_zone_in_mig %>% 
+  left_join(motion_zone_to_la, by = "motion_zone") %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5, 
                                  last_data_year = 2020,
                                  data_col = "inflow",
-                                 col_aggregation = c("gss_code", "LonLUTI3", "sex", "age"),
+                                 col_aggregation = c("gss_code", "motion_zone", "sex", "age"),
                                  project_rate_from = 2021) %>% 
   rename(in_flow = inflow) %>% 
   project_forward_flat(2050)
@@ -80,7 +87,7 @@ scaling_in_2022 <- filter(total_in, year == 2022) %>%
   mutate(scaling_2022 = ifelse(avg == 0, 0, total_in/avg)) %>% 
   select(-total_in, -avg)
 
-#apply to LonLUTI 5-year avg
+#apply to motion_zone 5-year avg
 
 scaled_IN_2021 <- scaling_in_2021 %>% 
   left_join(in_mig_flows_5, by = c("gss_code", "year", "age", "sex")) %>% 
@@ -120,7 +127,7 @@ scaling_out_2022 <- filter(total_out, year == 2022) %>%
   mutate(scaling_2022 = ifelse(avg==0, 0, total_out/avg)) %>% 
   select(-total_out, -avg)
 
-#apply to LonLUTI 5-year avg
+#apply to motion_zone 5-year avg
 
 scaled_OUT_2021 <- scaling_out_2021 %>% 
   left_join(out_mig_rates_5, by = c("gss_code", "year", "age", "sex")) %>% 
@@ -136,13 +143,13 @@ rm(scaling_out_2021, scaling_out_2022, total_out_avg)
 
 #-------------------------------------------------------------------------------
 
-saveRDS(in_mig_flows_5,  paste0(input_data_dir, "processed/in_migration_flows_LonLUTI_5yr_avg.rds"))
-saveRDS(out_mig_rates_5,  paste0(input_data_dir, "processed/out_migration_rates_LonLUTI_5yr_avg.rds"))
+saveRDS(in_mig_flows_5,  paste0(input_data_dir, "processed/in_migration_flows_motion_zone_5yr_avg.rds"))
+saveRDS(out_mig_rates_5,  paste0(input_data_dir, "processed/out_migration_rates_motion_zone_5yr_avg.rds"))
 
-saveRDS(scaled_IN_2021,  paste0(input_data_dir, "processed/in_migration_flows_LonLUTI_Covid_2021.rds"))
-saveRDS(scaled_IN_2022,  paste0(input_data_dir, "processed/in_migration_flows_LonLUTI_Covid_2022.rds"))
+saveRDS(scaled_IN_2021,  paste0(input_data_dir, "processed/in_migration_flows_motion_zone_Covid_2021.rds"))
+saveRDS(scaled_IN_2022,  paste0(input_data_dir, "processed/in_migration_flows_motion_zone_Covid_2022.rds"))
 
-saveRDS(scaled_OUT_2021,  paste0(input_data_dir, "processed/out_migration_rates_LonLUTI_Covid_2021.rds"))
-saveRDS(scaled_OUT_2022,  paste0(input_data_dir, "processed/out_migration_rates_LonLUTI_Covid_2022.rds"))
+saveRDS(scaled_OUT_2021,  paste0(input_data_dir, "processed/out_migration_rates_motion_zone_Covid_2021.rds"))
+saveRDS(scaled_OUT_2022,  paste0(input_data_dir, "processed/out_migration_rates_motion_zone_Covid_2022.rds"))
 
 rm(list=ls())

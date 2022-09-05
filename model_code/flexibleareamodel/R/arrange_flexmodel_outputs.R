@@ -39,26 +39,22 @@ arrange_flexmodel_outputs <- function(projection,
                                       config_list, model, n_cores){
   
   
-  
   lookup <- readRDS(config_list$lookup_path) %>% 
     rename(area_code = all_of(config_list$geog_code_col),
            area_name = all_of(config_list$geog_name_col))
-
   
-  if(!"gss_code" %in% names(out_migration)){
-    out_migration <- left_join(out_migration,
-                               distinct(select(lookup, gss_code, area_code)),
-                               by = "area_code")
-  }
-  
-  if(!"gss_code" %in% names(in_migration)){
-    in_migration <- left_join(in_migration,
-                              distinct(select(lookup, gss_code, area_code)),
-                              by = "area_code")
+  if("gss_code" %in% names(projection[[first_proj_yr]][['population']])){
+    population <- .add_gss_code(population, lookup)
+    births <- .add_gss_code(births, lookup)
+    deaths <- .add_gss_code(deaths, lookup)
+    out_migration <- .add_gss_code(out_migration, lookup)
+    in_migration <- .add_gss_code(in_migration, lookup)
+    nested_geog <- c("gss_code", "area_code")
+  } else {
+    nested_geog <- "area_code"
   }
   
   #Components backseries
-  
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_popn_unc <- list(population %>% filter(year < first_proj_yr))
   proj_popn_con <- list(population %>% filter(year < first_proj_yr))
@@ -71,9 +67,9 @@ arrange_flexmodel_outputs <- function(projection,
   proj_ahs <- list()
   proj_households <- list()
   proj_hh_pop_sya <- list()
-
+  
   #-----------------------------------------------------------------------------
-
+  
   #Net migration backseries
   
   join_by <- intersect(names(out_migration), names(in_migration))
@@ -81,9 +77,8 @@ arrange_flexmodel_outputs <- function(projection,
   proj_net_migration <- list(left_join(in_migration, out_migration, by = join_by) %>% 
                                mutate(netflow = inflow - outflow) %>% 
                                filter(year < first_proj_yr) %>% 
-                               select(year, gss_code, area_code, sex, age, netflow))
+                               select(!!join_by, netflow))
   #-----------------------------------------------------------------------------
-  
   #Components dataframe backeries
   
   proj_components <- list(rbind(
@@ -95,7 +90,7 @@ arrange_flexmodel_outputs <- function(projection,
     mutate(proj_net_migration[[1]], component = "netflow") %>% rename(value = netflow)) %>% 
       pivot_wider(values_from = value, names_from = component) %>% 
       mutate(births = ifelse(is.na(births), 0, births)) %>% 
-      select(gss_code, area_code, year, sex, age, popn, births, deaths, inflow, outflow, netflow))
+      select(!!nested_geog, year, sex, age, popn, births, deaths, inflow, outflow, netflow))
   
   #-----------------------------------------------------------------------------
   

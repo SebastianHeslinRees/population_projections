@@ -1,5 +1,4 @@
 devtools::load_all('model_code/popmodules/')
-devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
 projection_name <- "lonLUTI_NUTS2_Lower_TEST"
 

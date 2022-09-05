@@ -80,9 +80,13 @@
 
 .bind_and_arrange <- function(x, lookup){
   
-  z <- rbindlist(x, use.names = TRUE) %>% 
-    left_join(lookup, by = c("gss_code", "area_code")) %>% 
-    data.frame()
+  join_by <- intersect(names(x), c("gss_code", "area_code"))
+  
+  suppressMessages(
+    z <- rbindlist(x, use.names = TRUE) %>% 
+      left_join(lookup, by = join_by) %>% 
+      data.frame()
+  )
   
   arrange_by <- intersect(c("gss_code", "la_name", "area_code", "area_name", "year", "sex", "age"),
                           names(z))
@@ -144,6 +148,15 @@
   }
   if("area_name" %in% names(x)){
     x <- rename(x, !!name_col := area_name)
+  }
+  return(x)
+}
+
+.add_gss_code <- function(x, lookup){
+  if(!"gss_code" %in% names(x)){
+    x <- left_join(x,
+                   distinct(select(lookup, gss_code, area_code)),
+                   by = "area_code")
   }
   return(x)
 }

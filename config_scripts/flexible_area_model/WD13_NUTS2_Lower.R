@@ -1,7 +1,7 @@
 devtools::load_all('model_code/popmodules/')
 devtools::load_all('model_code/flexibleareamodel')
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "WD13_NUTS2_Lower_TEST"
+projection_name <- "WD13_NUTS2_Lower_TEST_NEW"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
@@ -62,7 +62,7 @@ config_list <- list(projection_name = projection_name,
                     ahs_mix = 0.5,
                     hhr_static_or_projected = "static",
                     lookup_path = "input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds",
-                    excess_deaths_path = NULL,
+                    excess_deaths_path = "input_data/flexible_area_model/processed/excess_covid_deaths_WD13CD.rds",
                     geog_code_col = "gss_code_ward",
                     geog_name_col = "ward_name"
 )
