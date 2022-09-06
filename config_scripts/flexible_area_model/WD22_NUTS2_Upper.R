@@ -1,7 +1,7 @@
-devtools::load_all('model_code/popmodules/')
-devtools::load_all('model_code/flexibleareamodel')
+library(popmodules)
+library(flexibleareamodel)
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "WD22_NUTS2_Upper"
+projection_name <- "SHLAA_Scenario2_WD22"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CC_central_upper_21-09-21_1259/",
@@ -62,6 +62,7 @@ config_list <- list(projection_name = projection_name,
                     ahs_mix = 0.5,
                     hhr_static_or_projected = "static",
                     lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
+                    
                     excess_deaths_path = NULL,
                     geog_code_col = "gss_code_ward",
                     geog_name_col = "ward_name"
@@ -70,4 +71,4 @@ config_list <- list(projection_name = projection_name,
 
 model_output <- flexmodel_hl_projection(config_list)
 
-create_excel(config_list$output_dir, "NUTS2 Upper WD22.xlsx", "Test")
+create_excel(config_list$output_dir, "SHLAA Scenario 2 WD22.xlsx", "SHLAA Scenario 2 WD22")

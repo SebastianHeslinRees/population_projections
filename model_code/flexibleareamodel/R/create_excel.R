@@ -26,10 +26,10 @@
 #' @export
 
 create_excel <- function(output_dir, wb_filename, projection_name, bpo = FALSE, smallarea = "ward"){
-
+  
   message(paste("Creating", smallarea, "Excel workbook"))
   output_dir <- .add_slash(output_dir)
-
+  
   #Create workbook names
   if(str_sub(wb_filename,-5,-1)!=".xlsx"){ wb_filename <- paste0(wb_filename,".xlsx") }
   
@@ -41,13 +41,13 @@ create_excel <- function(output_dir, wb_filename, projection_name, bpo = FALSE, 
   trajectory <- .read_and_filter("trajectory", output_dir, bpo)
   stock <- .read_and_filter("stock", output_dir, bpo)
   
-  try( reticulate::source_python('model_code/other_scripts/python_to_excel_small_area2.py'), silent = TRUE)
-  reticulate::source_python('model_code/other_scripts/python_to_excel_small_area2.py') 
-  python_to_excel_smallarea2(persons, females, males, components, trajectory, stock,
-                             output_dir,
-                             wb_filename,
-                             projection_name,
-                             smallarea)
+  try( reticulate::source_python('model_code/other_scripts/python_to_excel_flexibleareamodel.py'), silent = TRUE)
+  reticulate::source_python('model_code/other_scripts/python_to_excel_flexibleareamodel.py') 
+  python_to_excel_flexibleareamodel(persons, females, males, components, trajectory, stock,
+                                    output_dir,
+                                    wb_filename,
+                                    projection_name,
+                                    smallarea)
   
 }
 
@@ -77,7 +77,7 @@ create_excel <- function(output_dir, wb_filename, projection_name, bpo = FALSE, 
       all_data <- select(all_data, -c(as.character(2042:last_year)))
     }
   }
-    
+  
   if(x == "components"){
     
     ward_data <- readRDS(paste0(output_dir, "summary.rds")) %>%

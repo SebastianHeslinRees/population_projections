@@ -2,7 +2,7 @@ import pandas as pd
 import openpyxl
 import datetime
 
-def python_to_excel_smallarea2(persons, females, males, components, trajectory, stock, output_dir, wb_filename, projection_name, small_area):
+def python_to_excel_flexibleareamodel(persons, females, males, components, trajectory, stock, output_dir, wb_filename, projection_name, small_area):
 
   #read in the template
   if(small_area == "ward"):
@@ -33,8 +33,12 @@ def python_to_excel_smallarea2(persons, females, males, components, trajectory, 
   trajectory.to_excel(writer, "dwelling trajectory", index=False)
   stock.to_excel(writer, "dwelling stock", index=False)
   
-  book.get_sheet_by_name('Metadata')['A3'] = projection_name
-  book.get_sheet_by_name('Metadata')['A8'] = 'Projection produced on ' + datetime.date.today().strftime("%d %B, %Y")
+  book['Metadata']['A3'] = projection_name
+  book['Metadata']['A8'] = 'Projection produced on ' + datetime.date.today().strftime("%d %B, %Y")
+   
+  #book.get_sheet_by_name('Metadata')['A3'] = projection_name
+  #book.get_sheet_by_name('Metadata')['A8'] = 'Projection produced on ' + datetime.date.today().strftime("%d %B, %Y")
+  
    
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)

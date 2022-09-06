@@ -41,12 +41,14 @@ london_wards <- lsoa_to_ward_lookup %>%
   select(gss_code_ward) %>% 
   unique()
 
+
+
 #-------------------------------------------------------------------------------
 
 #Large sites
 
 ward_large <- large_sites %>%
-  group_by(gss_code_ward, year) %>%
+  group_by(gss_code_ward = WD13CD, year) %>%
   summarise(units = sum(dev), .groups = 'drop_last') %>%
   as.data.frame() %>%
   tidyr::complete(gss_code_ward = london_wards$gss_code_ward,
@@ -61,6 +63,7 @@ assertthat::assert_that(sum(is.na(ward_large))==0)
 #Small Sites - Intensification
 
 ward_intense <- small_intensification %>%
+  rename(gss_code_ward = WD13CD) %>% 
   mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>% 
   group_by(gss_code_ward) %>%
   summarise(units = sum(intense), .groups = 'drop_last') %>%
@@ -98,8 +101,6 @@ ward_trend_windfall <- lsoa_to_ward_lookup %>%
 #Add zeros for years 2012-2019 and 2042-2050
 #include 2011 in borough file
 ward_shlaa <- rbind(ward_large, ward_intense, ward_trend_windfall) %>%
-  filter(!gss_code_ward %in% london_wards$gss_code_ward) %>% 
-  rbind(ward_large, ward_intense) %>% 
   filter(gss_code_ward %in% london_wards$gss_code_ward) %>%
   group_by(year, gss_code_ward) %>%
   summarise(units = sum(units), .groups = 'drop_last') %>%
@@ -107,6 +108,14 @@ ward_shlaa <- rbind(ward_large, ward_intense, ward_trend_windfall) %>%
   tidyr::complete(year = 2012:2050,
                   gss_code_ward = unique(london_wards$gss_code_ward),
                   fill = list(units = 0))
+
+ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds") %>% 
+  filter(year < 2020)
+
+ward_shlaa <- ward_shlaa %>% 
+  filter(year >= 2020) %>% 
+  rbind(ldd) %>% 
+  arrange(gss_code_ward, year)
 
 #Save
 saveRDS(ward_shlaa, "input_data/flexible_area_model/development_data/ward_shlaa_trajectory_WD13CD.rds")
@@ -118,24 +127,26 @@ saveRDS(ward_shlaa, "input_data/flexible_area_model/development_data/ward_shlaa_
 #Savills forecast 41.7k for 2020 & 43k per year for the period 2021-25
 #Then distribute the difference between the new trajectory and the SHLAA
 #to the later years (2026-41)
-savills <- filter(ward_shlaa, year %in% 2020:2025) %>% 
+savills_reduction <- filter(ward_shlaa, year %in% 2020:2025) %>% 
   group_by(year) %>% 
   summarise(shlaa_units = sum(units)) %>% 
   cbind(data.frame(savills_units = c(41700,rep(43000,5)))) %>% 
   mutate(reduction = shlaa_units - savills_units) %>% 
   select(year, reduction)
 
+total_reduction <- sum(savills_reduction$reduction)
+
 short_term_savills <- filter(ward_shlaa, year %in% 2020:2025) %>% 
   group_by(year) %>% 
   mutate(share = units/sum(units)) %>% 
-  left_join(savills, by = "year") %>% 
+  left_join(savills_reduction, by = "year") %>% 
   mutate(distributed_reduction = reduction * share,
          units = units - distributed_reduction) %>% 
   select(names(ward_shlaa))
 
 long_term_savills <- filter(ward_shlaa, year %in% 2026:2041) %>% 
   mutate(share = units/sum(units),
-         distributed_increase = sum(savills$reduction) * share,
+         distributed_increase = total_reduction * share,
          units = units + distributed_increase) %>% 
   select(names(ward_shlaa))
 
@@ -143,8 +154,7 @@ long_term_savills <- filter(ward_shlaa, year %in% 2026:2041) %>%
 ldd <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds") %>% 
   filter(year < 2020)
 
-savills_trajectory <-  filter(ward_shlaa, !year %in% 2020:2041) %>% 
-  rbind(short_term_savills, long_term_savills) %>% 
+savills_trajectory <- rbind(short_term_savills, long_term_savills) %>% 
   filter(year >= 2020) %>% 
   rbind(ldd) %>% 
   arrange(gss_code_ward, year)

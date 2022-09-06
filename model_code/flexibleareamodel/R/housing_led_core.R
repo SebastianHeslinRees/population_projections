@@ -42,11 +42,9 @@ housing_led_core <- function(start_population,
   if("gss_code" %in% names(start_population)){
     col_agg <- c("year", "gss_code", "area_code", "sex", "age")
     nested_geog <- c("gss_code", "area_code")
-    
   } else {
     col_agg <- c("year", "area_code", "sex", "age")
     nested_geog <- "area_code"
-    
   }
   
   # 1 --------------------------------------------------------------------------

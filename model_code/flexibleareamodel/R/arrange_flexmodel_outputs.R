@@ -1,4 +1,4 @@
-#' Arrange ward-level outputs
+#' Arrange flexible area model outputs
 #' 
 #' Take the projection output list which is organised by year and rearrange it
 #' so that its organised by component. Add on the backseries.
@@ -53,7 +53,7 @@ arrange_flexmodel_outputs <- function(projection,
   } else {
     nested_geog <- "area_code"
   }
-  
+
   #Components backseries
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_popn_unc <- list(population %>% filter(year < first_proj_yr))

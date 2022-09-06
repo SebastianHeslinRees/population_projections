@@ -204,7 +204,7 @@ upload_zip <- function(borough, proj_name = borough){
 }
 
 
-borough <- "hillingdon"
-upload_excels(borough)
-zip_rmds(borough)
-upload_zip(borough)
+# borough <- "newham"
+# upload_excels(borough)
+# zip_rmds(borough)
+# upload_zip(borough)

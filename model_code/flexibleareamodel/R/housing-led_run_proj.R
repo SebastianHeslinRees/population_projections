@@ -257,6 +257,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   #Arrange - 4 secs
   message('')
   message("arrange outputs")
+
   hl_projection <- arrange_flexmodel_outputs(hl_projection,
                                              population, births, deaths,
                                              in_migration, out_migration,
@@ -268,12 +269,14 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                              config_list,
                                              "housing-led",
                                              n_cores)
+
   
   rm(list=setdiff(ls(), c("hl_projection","config_list","cl")))
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins
   output_flexmodel_projection(hl_projection, output_dir = config_list$output_dir, "housing-led", config_list)
+
   
   #Close log
   message("complete")

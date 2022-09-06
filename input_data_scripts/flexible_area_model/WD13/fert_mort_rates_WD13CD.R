@@ -61,9 +61,45 @@ fert_rates_5 <- scaled_fertility_curve(popn = ward_pop,
                     npp_var = "2018_principal") %>% 
 complete_popn_dataframe()
 
+fert_rates_5_high <- scaled_fertility_curve(popn = ward_pop,
+                                       births = ward_births,
+                                       target_curves = "input_data/fertility/ons_asfr_curves_2018_(2021_geog).rds",
+                                       last_data_year = 2020,
+                                       n_years_to_avg = 5,
+                                       avg_or_trend = "trend",
+                                       data_col = "births",
+                                       output_col = "rate",
+                                       col_geog = c("gss_code","gss_code_ward"))  %>% 
+  project_rates_npp(rate_col = "rate",
+                    rates_trajectory = "input_data/fertility/npp_fertility_trend.rds",
+                    first_proj_yr = 2021,
+                    n_proj_yr = 30,
+                    npp_var = "2018_high") %>% 
+  complete_popn_dataframe()
+
+fert_rates_5_low <- scaled_fertility_curve(popn = ward_pop,
+                                       births = ward_births,
+                                       target_curves = "input_data/fertility/ons_asfr_curves_2018_(2021_geog).rds",
+                                       last_data_year = 2020,
+                                       n_years_to_avg = 5,
+                                       avg_or_trend = "trend",
+                                       data_col = "births",
+                                       output_col = "rate",
+                                       col_geog = c("gss_code","gss_code_ward"))  %>% 
+  project_rates_npp(rate_col = "rate",
+                    rates_trajectory = "input_data/fertility/npp_fertility_trend.rds",
+                    first_proj_yr = 2021,
+                    n_proj_yr = 30,
+                    npp_var = "2018_low") %>% 
+  complete_popn_dataframe()
+
+
 #-------------------------------------------------------------------------------
 
 saveRDS(mort_rates_5, paste0(input_data_dir, "processed/mortality_rates_WD13CD.rds"))
 saveRDS(fert_rates_5,  paste0(input_data_dir, "processed/fertility_rates_WD13CD.rds"))
+
+saveRDS(fert_rates_5_high,  paste0(input_data_dir, "processed/fertility_rates_WD13CD_HIGH.rds"))
+saveRDS(fert_rates_5_low,  paste0(input_data_dir, "processed/fertility_rates_WD13CD_LOW.rds"))
 
 rm(list=ls())

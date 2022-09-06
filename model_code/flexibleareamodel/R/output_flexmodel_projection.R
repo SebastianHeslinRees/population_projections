@@ -20,7 +20,6 @@ output_flexmodel_projection <- function(projection,
                                          model, 
                                          config_list){
   
-  
   #RDS
   message("writing rds files")
   

@@ -2,7 +2,7 @@
 % Please edit documentation in R/arrange_flexmodel_outputs.R
 \name{arrange_flexmodel_outputs}
 \alias{arrange_flexmodel_outputs}
-\title{Arrange ward-level outputs}
+\title{Arrange flexible area model outputs}
 \usage{
 arrange_flexmodel_outputs(
   projection,

@@ -11,7 +11,8 @@ regross_parallel(
   col_inflow = "inflow",
   col_outflow = "outflow",
   col_target = "net_target",
-  n_cores = 8
+  n_cores = 8,
+  fun = 2
 )
 }
 \arguments{

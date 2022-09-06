@@ -7,7 +7,7 @@
 aggregate_borough_data(model_output, constraint_path)
 }
 \arguments{
-\item{model_output}{List the output from the arrange_small_area_outputs function}
+\item{model_output}{List the output from the arrange_outputs function}
 
 \item{constraint_path}{String the location of inflow and outflow borough data}
 }

@@ -190,6 +190,7 @@ flexmodel_trend_projection <- function(config_list){
   #Arrange - 4 secs
   message('')
   message("arrange outputs")
+
   projection <- arrange_flexmodel_outputs(projection,
                                            population, births, deaths,
                                            in_migration, out_migration,
@@ -202,6 +203,7 @@ flexmodel_trend_projection <- function(config_list){
   
   #Output - 60 secs
   output_flexmodel_projection(projection, config_list$output_dir, "trend", config_list)
+
   
   #Close log
   message("complete")

@@ -40,13 +40,29 @@ trend_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
                                      n_years_to_avg = 5,
                                      avg_or_trend = "trend",
                                      data_col = "births",
-                                     output_col = "rate") %>%
+                                     output_col = "rate")
 
+trend_5yrs_principal <- trend_5yrs %>% 
   project_rates_npp(rate_col = "rate",
                     rates_trajectory = fertility_trajectory_filepath,
                     first_proj_yr = 2021,
                     n_proj_yr = 30,
                     npp_var = "2018_principal")
+
+trend_5yrs_low  <- trend_5yrs %>% 
+  project_rates_npp(rate_col = "rate",
+                    rates_trajectory = fertility_trajectory_filepath,
+                    first_proj_yr = 2021,
+                    n_proj_yr = 30,
+                    npp_var = "2018_low")
+
+
+trend_5yrs_high <- trend_5yrs %>% 
+  project_rates_npp(rate_col = "rate",
+                    rates_trajectory = fertility_trajectory_filepath,
+                    first_proj_yr = 2021,
+                    n_proj_yr = 30,
+                    npp_var = "2018_high")
 
 #------------------------------------------------------------------------------- 
 
@@ -70,7 +86,11 @@ trend_4yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
 #------------------------------------------------------------------------------- 
 
 saveRDS(average_5yrs, "input_data/fertility/fert_rates_5yr_avg_2020.rds")
-saveRDS(trend_5yrs, "input_data/fertility/fert_rates_5yr_trend_2020.rds")
+saveRDS(trend_5yrs_principal, "input_data/fertility/fert_rates_5yr_trend_2020.rds")
+
+saveRDS(trend_5yrs_low, "input_data/fertility/fert_rates_5yr_trend_2020_LOW.rds")
+saveRDS(trend_5yrs_high, "input_data/fertility/fert_rates_5yr_trend_2020_HIGH.rds")
+
 saveRDS(trend_4yrs, "input_data/fertility/fert_rates_5yr_trend_2019.rds")
 
 rm(list=ls())

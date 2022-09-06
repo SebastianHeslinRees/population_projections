@@ -1,6 +1,10 @@
 {
   "R": {
+<<<<<<< HEAD
     "Version": "4.2.1",
+=======
+    "Version": "4.2.0",
+>>>>>>> flex-model
     "Repositories": [
       {
         "Name": "CRAN",
@@ -43,10 +47,17 @@
     },
     "MASS": {
       "Package": "MASS",
+<<<<<<< HEAD
       "Version": "7.3-58",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "4bf2c61e656bbc238634c798c208d386",
+=======
+      "Version": "7.3-57",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "71476c1d88d1ebdf31580e5a257d5d31",
+>>>>>>> flex-model
       "Requirements": []
     },
     "Matrix": {
@@ -215,10 +226,17 @@
     },
     "broom": {
       "Package": "broom",
+<<<<<<< HEAD
       "Version": "1.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "c948329889c7b24a4201df3aef5058c2",
+=======
+      "Version": "0.8.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fe13cb670e14da57fd7a466578db8ce5",
+>>>>>>> flex-model
       "Requirements": [
         "backports",
         "dplyr",
@@ -434,10 +452,17 @@
     },
     "dbplyr": {
       "Package": "dbplyr",
+<<<<<<< HEAD
       "Version": "2.2.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f6c7eb9617e4d2a86bb7182fff99c805",
+=======
+      "Version": "2.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a6e4cc7b658d043806bc559ef42a1d2a",
+>>>>>>> flex-model
       "Requirements": [
         "DBI",
         "R6",
@@ -995,10 +1020,17 @@
     },
     "igraph": {
       "Package": "igraph",
+<<<<<<< HEAD
       "Version": "1.3.3",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "08d61bc0e4ab67c05d3f42b049b0aab0",
+=======
+      "Version": "1.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "820595efd173f9bac4ea76c1be007299",
+>>>>>>> flex-model
       "Requirements": [
         "Matrix",
         "magrittr",
@@ -1293,10 +1325,17 @@
     },
     "nlme": {
       "Package": "nlme",
+<<<<<<< HEAD
       "Version": "3.1-158",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "9469aeaeddf4f48a7ac70877d0b7ba36",
+=======
+      "Version": "3.1-157",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "dbca60742be0c9eddc5205e5c7ca1f44",
+>>>>>>> flex-model
       "Requirements": [
         "lattice"
       ]
@@ -1435,10 +1474,17 @@
     },
     "processx": {
       "Package": "processx",
+<<<<<<< HEAD
       "Version": "3.7.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f91df0f5f31ffdf88bc0b624f5ebab0f",
+=======
+      "Version": "3.6.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4acae60adac4791e8c8833d8494f270d",
+>>>>>>> flex-model
       "Requirements": [
         "R6",
         "ps"
@@ -1492,10 +1538,17 @@
     },
     "ps": {
       "Package": "ps",
+<<<<<<< HEAD
       "Version": "1.7.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "8b93531308c01ad0e56d9eadcc0c4fcd",
+=======
+      "Version": "1.7.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "eef74b13f32cae6bb0d495e53317c44c",
+>>>>>>> flex-model
       "Requirements": []
     },
     "purrr": {
@@ -1788,10 +1841,17 @@
     },
     "sass": {
       "Package": "sass",
+<<<<<<< HEAD
       "Version": "0.4.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "1b191143d7d3444d504277843f3a95fe",
+=======
+      "Version": "0.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f37c0028d720bab3c513fd65d28c7234",
+>>>>>>> flex-model
       "Requirements": [
         "R6",
         "fs",
@@ -2070,10 +2130,17 @@
     },
     "tinytex": {
       "Package": "tinytex",
+<<<<<<< HEAD
       "Version": "0.40",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "e7b654da5e77bc4e5435a966329cd25f",
+=======
+      "Version": "0.39",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "29f67ab15405b390b90e56ff22198ead",
+>>>>>>> flex-model
       "Requirements": [
         "xfun"
       ]

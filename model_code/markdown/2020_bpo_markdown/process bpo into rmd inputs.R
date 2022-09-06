@@ -12,10 +12,11 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
   
   gss_code_to_name <- readRDS("input_data/lookup/gss_code_to_name.rds") %>% filter(substr(gss_code,1,3)=="E09")
   #borough_gss <- filter(gss_code_to_name, gss_name == borough_name)$gss_code
-  borough_gss <- filter(gss_code_to_name, str_detect(gss_name, borough_name))$gss_code
+  borough_gss <- filter(gss_code_to_name, str_detect(tolower(gss_name), tolower(borough_name)))$gss_code
   assertthat::assert_that(length(borough_gss)==1, msg = "problem with borough name")
   
   proj_name <- proj_name %>% tolower()
+  proj_name <- str_replace_all(proj_name, " ", "_")
   
   projections <- list.dirs("outputs/flexible_area_model/bpo", recursive = FALSE)
 
@@ -117,5 +118,4 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
 # bpo_rmd_2020("Tower Hamlets", "WD22", "tower_hamlets")
 # bpo_rmd_2020("Westminster", "WD22")
 # bpo_rmd_2020("Redbridge", "WD22")
-
-bpo_rmd_2020("Hillingdon", "WD13")
+# bpo_rmd_2020("Newham", "WD22")
