@@ -29,6 +29,9 @@ regross_parallel(
 \item{col_target}{String}
 
 \item{n_cores}{Numeric. Number of cores}
+
+\item{fun}{Numeric. 1 or 2. Which version of the regrosser function
+to use. Default 2.}
 }
 \description{
 Regrosser in paralell

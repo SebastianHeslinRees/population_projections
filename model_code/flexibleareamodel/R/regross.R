@@ -54,6 +54,8 @@ regross <- function(base_in, base_out, target_net,
 #' @param col_outflow String
 #' @param col_target String
 #' @param n_cores Numeric. Number of cores
+#' @param fun Numeric. 1 or 2. Which version of the regrosser function
+#'  to use. Default 2.
 #' 
 #' @import dplyr
 #' @import tidyr

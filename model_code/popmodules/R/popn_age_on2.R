@@ -32,10 +32,6 @@
 #'   factor, the function will advance the age by one age band regardless of
 #'   this parameter. The \code{col_year} column, if present, will also be
 #'   increased by \code{timestep} years. Default 1.
-#' @param template_age_levels Numeric vector or a factor giving the expected
-#'   levels for the population's ages. This is an optional validation tool that
-#'   runs an extra check to make sure all expected levels are present. Default
-#'   NULL.
 #' @param births Data frame, 0 or \code{NULL}. Births data at the same
 #'   aggregation levels as \code{popn} but coded to the lowest age band that can
 #'   be joined to the output with \code{rbind}. If zero, then the output rows for

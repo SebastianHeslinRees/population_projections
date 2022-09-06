@@ -7,9 +7,10 @@
 population_into_age_groups(
   population,
   age_groups,
-  labels,
+  labels = NULL,
   data_cols,
-  include.lowest = T
+  include.lowest = T,
+  factors = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ data to be aggregated}
 \code{age_groups} include the lowest age. If set to FALSE the function will
 assume the first bin contains any value less than and including the stated
 value. Default \code{TRUE}}
+
+\item{factors}{Logical. Should the \code{age_group} column be coerced to factor?
+If TRUE levels will be taken from \code{labels}. Default FALSE}
 }
 \value{
 A data frame of population data grouped by age group

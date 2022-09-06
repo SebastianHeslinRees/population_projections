@@ -49,11 +49,6 @@ the \code{births} dataframe.}
 
 \item{col_geog}{Character vector denoting the geography column(s). Default "gss_code".
 Only used in validation. Only used when births dataframe is specified.}
-
-\item{template_age_levels}{Numeric vector or a factor giving the expected
-levels for the population's ages. This is an optional validation tool that
-runs an extra check to make sure all expected levels are present. Default
-NULL.}
 }
 \value{
 A data frame containing the population with age advanced by one time

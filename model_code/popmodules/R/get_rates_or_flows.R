@@ -13,11 +13,13 @@
 #' @param col_aggregation Character. The non-data columns in the dataframe \code{df}
 #' @param data_col String. The column containing the flow or rate information to be
 #'   in the model
+#' @param geog_code_col String. Which column in df contains the geography code
 #'
 #' @return A dataframe containing rates or flows to use in the model and also
 #'   rates or flows to be used in future calculations
 #'
 #' @import dplyr
+#' 
 #' @export
 
 get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
@@ -47,7 +49,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       
       #create the df in the first year
       df <- readRDS(curr_yr_info$path) %>%
-        .standardise_df(geog_code_col, data_col) %>% 
+        .standardise_df(col_geog=geog_code_col, data_col=data_col) %>% 
         validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col)
     }
@@ -60,7 +62,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       
       #add next set of data
       df <- readRDS(curr_yr_info$next_path) %>%
-        .standardise_df(geog_code_col, data_col) %>% 
+        .standardise_df(col_geog = geog_code_col, data_col=data_col) %>% 
         select(!!col_aggregation, !!data_col) %>% 
         validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col) %>%

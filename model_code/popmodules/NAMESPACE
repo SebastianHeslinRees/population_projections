@@ -3,6 +3,7 @@
 export("%>%")
 export(.add_slash)
 export(.path_or_dataframe)
+export(.standardise_df)
 export(adjust_gross_migration)
 export(aggregate_city_wards)
 export(aggregate_regional_flows)

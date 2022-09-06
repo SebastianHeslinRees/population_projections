@@ -57,7 +57,6 @@ globalVariables(c(
   'final_out',
   'final_net',
   'netflow',
-  'python_to_excel_smallarea2',
   'out_tst',
   'dpois',
   'p_in',
@@ -75,7 +74,13 @@ globalVariables(c(
   'final',
   'area_code',
   'area_name',
-  'x'
+  'x',
+  "python_to_excel_flexibleareamodel",
+  "hh_popn",
+  "a",
+  "final_components",
+  "final_deaths",
+  "fert_scenario_path"
 ))
 
 

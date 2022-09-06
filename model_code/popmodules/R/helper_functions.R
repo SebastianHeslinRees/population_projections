@@ -125,3 +125,26 @@
   if(is.string(x)){x <- readRDS(x)}
   return(data.frame(x))
 }
+
+
+#' Select columns in a dataframe and rename the geography column to the generic
+#' name 'area_code'
+#'
+#' @param x A dataframe
+#' @param col_geog String. The geography column
+#' @param data_col String. The data column. Default NULL
+#' @param col_agg String. The column aggregation to select
+#'
+#' @return dataframe
+#'
+#' @export
+
+.standardise_df <- function(x, col_geog, data_col=NULL,
+                            col_agg = c("year", "gss_code", col_geog, "age", "sex")){
+  
+  cols <- intersect(c(col_agg, data_col), names(x))
+  
+  select(x, all_of(cols)) %>% 
+    rename(area_code = all_of(col_geog)) %>% 
+    return()
+}

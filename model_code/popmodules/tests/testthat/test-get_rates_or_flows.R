@@ -20,7 +20,9 @@ projection_year <- 2020
 for(projection_year in 2020:2050){
   
   x <- get_rates_or_flows(x, df_info, projection_year, 2020,
-                           col_aggregation=c("gss_code","sex","age"), data_col="int_in")
+                          col_aggregation=c("gss_code","sex","age"), 
+                          data_col="int_in",
+                          geog_code_col = NULL)
   
   y[[projection_year]] <- x %>%
     mutate(year = projection_year) %>%
@@ -40,5 +42,4 @@ expect <- expand_grid(year = 2020:2050,
   data.frame()
 
 testthat::test_that("get_rates_or_flows unexpected output",
-  expect_equivalent(y,expect))
-         
+                    expect_equivalent(y,expect))
