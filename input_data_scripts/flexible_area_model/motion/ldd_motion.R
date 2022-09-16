@@ -15,13 +15,19 @@ if(file.exists(ldd_lsoa)){
 #-------------------------------------------------------------------------------
 
 #lookup
-lsoa_to_motion_zone <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_motion_zone_proportional.rds")) 
+oa_lsoa_msoa_lad11_lad21 <- readRDS("input_data/flexible_area_model/lookups/oa_lsoa_msoa_lad11_lad21.rds") %>% 
+  filter(substr(LAD11CD,1,3)=="E09")
+
+lsoa_to_motion_zone <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_motion_zone_proportional.rds")) %>% 
+  filter(gss_code_lsoa %in% oa_lsoa_msoa_lad11_lad21$LSOA11CD) 
+  
 
 #-------------------------------------------------------------------------------
 
-#group it into wards
-
-motion_zone_units <- left_join(lsoa_units, lsoa_to_motion_zone, by=c("gss_code_lsoa","year")) %>%
+#group it into zones
+motion_zone_units <- lsoa_to_motion_zone %>% 
+  filter(gss_code_lsoa %in% lsoa_units$gss_code_lsoa) %>% 
+  full_join(lsoa_units, by="gss_code_lsoa") %>%
   group_by(year, motion_zone) %>%
   summarise(units = sum(units*lsoa_share), .groups = 'drop_last') %>%
   as.data.frame()

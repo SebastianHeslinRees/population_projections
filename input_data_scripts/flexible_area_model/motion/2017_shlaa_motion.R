@@ -34,15 +34,19 @@ small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_i
 small_remainder_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
 small_trend_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
 
-lsoa_to_motion_zone <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_motion_zone_best_fit.rds")
 
-# london_wards <- lsoa_to_ward_lookup %>%
-#   filter(substr(gss_code,1,3) == "E09") %>% 
-#   select(gss_code_ward) %>% 
-#   unique()
+oa_lsoa_msoa_lad11_lad21 <- readRDS("input_data/flexible_area_model/lookups/oa_lsoa_msoa_lad11_lad21.rds") %>% 
+  filter(substr(LAD11CD,1,3)=="E09")
 
-oa_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_motion_zone_lookup.rds")
+lsoa_to_motion_zone <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_motion_zone_proportional.rds") %>% 
+  filter(gss_code_lsoa %in% oa_lsoa_msoa_lad11_lad21$LSOA11CD)
 
+oa_to_motion_zone <- readRDS("input_data/flexible_area_model/lookups/oa_to_motion_zones_lookup.rds") %>% 
+  filter(OA11CD %in% oa_lsoa_msoa_lad11_lad21$OA11CD) %>% 
+  filter(!motion_zone %in% c("15","719")) #these are outside london but because the
+# motion shape file has been poorly drawn there is a sliver of an OA from within London
+# that is assigned to these zone. Makes no difference to population data but for
+# dev data causes issues in the model
 #-------------------------------------------------------------------------------
 
 #Large sites
@@ -61,11 +65,10 @@ assertthat::assert_that(sum(is.na(motion_zone_large))==0)
 #-------------------------------------------------------------------------------
 
 #Small Sites - Intensification
-
 motion_zone_intense <- small_intensification %>%
-  left_join(oa_lookup, by = c("gss_code_oa"="OA11CD", "gss_code")) %>% 
+  right_join(oa_to_motion_zone, by = c("gss_code_oa"="OA11CD")) %>% 
   group_by(motion_zone) %>%
-  summarise(units = sum(intense), .groups = 'drop_last') %>%
+  summarise(units = sum(intense*scaling_factor), .groups = 'drop_last') %>%
   data.frame() %>% 
   mutate(year = 2020)
 
@@ -76,7 +79,6 @@ motion_zone_intense <- motion_zone_intense %>%
 #-------------------------------------------------------------------------------
 
 #Small Sites - Windfall
-
 borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
   group_by(year, gss_code) %>%
   summarise(units = sum(units), .groups = 'drop_last') %>%
@@ -84,16 +86,24 @@ borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
 
 # The borough windfall is distributed evenly among the wards and MSOAs
 # i.e. not according to how the other development is distributed with the wards/MSOAs
-
-motion_zone_trend_windfall <- lsoa_to_motion_zone %>% 
-  select(motion_zone, gss_code) %>% 
+lsoa_windfall <- select(oa_lsoa_msoa_lad11_lad21, gss_code_lsoa = LSOA11CD, gss_code = LAD21CD) %>% 
+  select(gss_code_lsoa, gss_code) %>% 
   distinct() %>% 
   group_by(gss_code) %>% 
   mutate(n = n()) %>%
   data.frame() %>% 
   left_join(borough_windfall, by = "gss_code") %>% 
-  mutate(units = units/n) %>% 
-  select(motion_zone, year, units)
+  mutate(lsoa_units = units/n) %>% 
+  select(gss_code_lsoa, year, units)
+
+motion_zone_trend_windfall <- lsoa_to_motion_zone %>% 
+  left_join(lsoa_windfall, by = "gss_code_lsoa")  %>%
+  group_by(motion_zone, year) %>% 
+  summarise(units = sum(units*lsoa_share), .groups = 'drop_last') %>% 
+  data.frame()
+  #left_join(borough_windfall, by = c("gss_code","year")) #%>% 
+  # mutate(units = units/n) %>% 
+  # select(motion_zone, year, units)
 
 #Join the small sites data to the large sites data
 #Add zeros for years 2012-2019 and 2042-2050

@@ -23,7 +23,6 @@
 
 validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
                                warn_only = FALSE){
-
   #validate function inputs
   assert_that(is.logical(warn_only),
               msg = paste0("in validte_same_geog, param warn_only is '",
@@ -69,7 +68,7 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
   }
   
   if(length(x)>0 && !warn_only){
-    stop(paste(length(x),"codes in",nm_1,"not in",nm_2, ": " , x))
+    stop(paste(length(x),"codes in",nm_1,"not in",nm_2, ": " , paste(x, collapse = ", ")))
   }
   
   #-----------------
@@ -81,7 +80,7 @@ validate_same_geog <- function(df_1, df_2, col_1="gss_code", col_2=col_1,
   }
   
   if(length(y)>0 && !warn_only){
-    stop(paste(length(y),"codes in",nm_2,"not in",nm_1, ": " , y))
+    stop(paste(length(y),"codes in",nm_2,"not in",nm_1, ": " , paste(y, collapse = ", ")))
   }
   
 }

@@ -22,7 +22,7 @@ hrp_2001 <- fread(paste0(data_dir_Q_drive,"HRP_Age_Sex_LSOA_2001.csv"), header =
 
 # Lookups
 lsoa_lookup <- readRDS(paste0(input_data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
-lsoa_motion_zone_lookup <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_motion_zone_lookup.rds"))
+lsoa_motion_zone_lookup <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_motion_zone_proportional.rds"))
 
 #-------------------------------------------------------------------------------
 
@@ -188,10 +188,10 @@ hh_pop_2011 <- filter(hh_pop_2011, !gss_code %in% codes_not_in_lookup)
 
 motion_zone_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
   filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_motion_zone_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  right_join(lsoa_motion_zone_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
   group_by(motion_zone, sex, age_group) %>%
-  summarise(hrp = sum(hrp),
-            hh_pop = sum(hh_pop),
+  summarise(hrp = sum(hrp*lsoa_share),
+            hh_pop = sum(hh_pop*lsoa_share),
             .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),
@@ -201,11 +201,11 @@ motion_zone_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "s
 
 motion_zone_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
   filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_motion_zone_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  right_join(lsoa_motion_zone_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
   mutate(hrp = ifelse(age_group == "0_17", 0, hrp)) %>% 
   group_by(motion_zone, sex, age_group) %>%
-  summarise(hrp = sum(hrp),
-            hh_pop = sum(hh_pop),
+  summarise(hrp = sum(hrp*lsoa_share),
+            hh_pop = sum(hh_pop*lsoa_share),
             .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(hh_rep_rate = ifelse(hh_pop == 0, 0, hrp/hh_pop),

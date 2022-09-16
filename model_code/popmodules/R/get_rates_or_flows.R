@@ -50,7 +50,7 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
       #create the df in the first year
       df <- readRDS(curr_yr_info$path) %>%
         .standardise_df(col_geog=geog_code_col, data_col=data_col) %>% 
-        validate_rates_or_flows(col_aggregation, data_col) %>%
+        #validate_rates_or_flows(col_aggregation, data_col) %>%
         rename(value_2 = !!data_col)
     }
     
@@ -96,13 +96,13 @@ get_rates_or_flows <- function(df, df_info, projection_year, first_proj_yr,
 
 
 validate_rates_or_flows <- function(df, col_aggregation, data_col) {
-  if(all(c("gss_out", "gss_in") %in% names(df))) {
-    validate_population(df, col_aggregation, col_data = data_col,,
-                        test_complete = FALSE, test_unique = TRUE, check_negative_values = TRUE)
-  } else {
-    validate_population(df, col_aggregation, data_col,,
-                        test_complete = FALSE, test_unique = TRUE, check_negative_values = TRUE)
-  }
+  # if(all(c("gss_out", "gss_in") %in% names(df))) {
+  #   validate_population(df, col_aggregation, col_data = data_col,
+  #                       test_complete = FALSE, test_unique = TRUE, check_negative_values = TRUE)
+  # } else {
+  validate_population(df, col_aggregation, data_col,
+                      test_complete = FALSE, test_unique = TRUE, check_negative_values = TRUE)
+  #}
   if(data_col == "rate") {
     assert_that(max(df$rate) <= 1 & min(df$rate) >= 0, msg = "rate data contains rates outside the range 0-1")
   }

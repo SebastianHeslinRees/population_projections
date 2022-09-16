@@ -153,8 +153,8 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     select(-units, -d2hh_ratio)
   
   #Output lists
-  hl_projection <- list()
-  trend_projection <- list()
+  hl_projection <- vector("list", last_proj_yr)
+  trend_projection <- vector("list", last_proj_yr)
   
   #-------------------------------------------------------------------------------
   
@@ -275,7 +275,8 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins
-  output_flexmodel_projection(hl_projection, output_dir = config_list$output_dir, "housing-led", config_list)
+  output_flexmodel_projection(hl_projection, output_dir = config_list$output_dir,
+                              "housing-led", config_list, n_cores)
 
   
   #Close log

@@ -56,7 +56,7 @@ validate_population <- function(population,
                                 check_negative_values = FALSE,
                                 comparison_pop = NA,
                                 col_comparison = col_aggregation) {
- 
+  
   #make sure col_aggregation is not a named vector
   col_aggregation <- unname(col_aggregation)
   
@@ -67,40 +67,54 @@ validate_population <- function(population,
   # drop requested column names that don't exist (the above checks threw the necessary warnings)
   col_aggregation <- col_aggregation[ col_aggregation %in% names(population) ]
   col_data <- col_data[ col_data %in% names(population) ]  # works with col_data = NA
-  
+  browser()
   # For some reason things took ages with tibbles, so convert to data frame
   # and cut down to the columns we care about
   test_population <- as.data.frame(population) %>% 
-    dplyr::select_at(c(col_aggregation, col_data))
+    select(all_of(c(col_aggregation, col_data)))
   
   # CHECK: warn if there are any missing factor levels,
-  for(col in col_aggregation) {
-    if(is.factor(population[[col]])) {
-      n_missing_levels <- sum( !levels(population[[col]]) %in% population[[col]])
-      if(n_missing_levels != 0) {
-        warning(paste("Column", col, "is a factor with", n_missing_levels,
-                      "level(s) not present in the input data"))
+  # for(col in col_aggregation) {
+  #   if(is.factor(population[[col]])) {
+  #     n_missing_levels <- sum( !levels(population[[col]]) %in% population[[col]])
+  #     if(n_missing_levels != 0) {
+  #       warning(paste("Column", col, "is a factor with", n_missing_levels,
+  #                     "level(s) not present in the input data"))
+  #     }
+  #   }
+  # }
+  # 
+  col_aggregation %>% 
+    lapply(function(col){
+      if(is.factor(population[[col]])) {
+        n_missing_levels <- sum( !levels(population[[col]]) %in% population[[col]])
+        if(n_missing_levels != 0) {
+          warning(paste("Column", col, "is a factor with", n_missing_levels,
+                        "level(s) not present in the input data"))
+        }
       }
-    }
-  }
+    })
+  
   # drop unused factor levels
   test_population <- droplevels(test_population)
   
   # CHECK: aggregation levels have no missing values
-  for(col in col_aggregation) {
-    # Error if missing aggregation vars
-    assert_that( !any(is.na(test_population[[col]])),
-                 msg=paste("Aggregation column", col, "contains missing values"))
-  }
+  col_aggregation %>% 
+    lapply(function(col){
+      assert_that( !any(is.na(test_population[[col]])),
+                   msg=paste("Aggregation column", col, "contains missing values"))
+    })
+  
   
   # CHECK: warn if data columns have missing values
   if(length(col_data)!=0) {
-    for(col in col_data) {
-      # Warning otherwise
-      if(any(is.na(test_population[[col]]))) {
-        warning(paste("validate_population found missing values in the",col,"column"))
-      }
-    }
+    
+    col_data %>% 
+      lapply(function(col){
+        if(any(is.na(test_population[[col]]))) {
+          warning(paste("validate_population found missing values in the",col,"column"))
+        }
+      })
   }
   
   # CHECK: no duplicates in input aggregation levels
@@ -161,7 +175,7 @@ validate_population <- function(population,
     }
     
     # after renaming the dataframes, the col_comparison values are redundant.
-   
+    
     # convert when necessary to match factored columns
     comparison_pop <- .match_factors(test_population, comparison_pop, col_mapping = col_aggregation)
     

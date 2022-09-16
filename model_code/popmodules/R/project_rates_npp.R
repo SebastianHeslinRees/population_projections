@@ -29,7 +29,8 @@ project_rates_npp <- function(jump_off_rates,
                               rates_trajectory,
                               first_proj_yr,
                               n_proj_yr,
-                              npp_var="2018_principal"){
+                              npp_var="2018_principal",
+                              col_geog = "gss_code"){
   
   rates_trajectory <- .path_or_dataframe(rates_trajectory)
 
@@ -62,7 +63,7 @@ project_rates_npp <- function(jump_off_rates,
     select(names(jump_off_rates)) %>% 
     data.frame() %>% 
     rbind(jump_off_rates, backseries) %>% 
-    arrange(year, gss_code, sex, age)
+    arrange(year, across(!!col_geog), sex, age)
   
   return(rates)
   

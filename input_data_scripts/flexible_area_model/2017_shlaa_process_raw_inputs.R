@@ -73,16 +73,23 @@ lonLUTI_polygon_loc <- "Q:/Teams/D&PA/Data/TfL/LonLUTI13GIS"
 lonLUTI_polygons <- readOGR(dsn = lonLUTI_polygon_loc, layer = "LonLUTI3",
                          verbose = FALSE)
 
+motion_polygon_loc <- "Q:/Teams/D&PA/Data/TfL/demand_zones/"
+motion_polygons <- readOGR(dsn = motion_polygon_loc, layer = "Demand_Zones_wv9.3_polygon",
+                            verbose = FALSE)
+
 proj4string(large_sites_points) <- proj4string(msoa_polygons)
 proj4string(lonLUTI_polygons) <- proj4string(msoa_polygons)
 proj4string(ward_13_polygons) <- proj4string(msoa_polygons)
 proj4string(ward_22_polygons) <- proj4string(msoa_polygons)
+proj4string(motion_polygons) <- proj4string(msoa_polygons)
 
 
 msoa_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, msoa_polygons))%>%
   select(lhcss_ref, MSOA11CD, LAD11CD, LAD11NM,
          Phase1, Phase2, Phase3, Phase4, Phase5)
 
+motion_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, motion_polygons)) %>%
+  select(lhcss_ref, motion_zone = Sequential)
 
 lonLUTI_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points, lonLUTI_polygons)) %>%
   select(lhcss_ref, LonLUTI3)
@@ -102,12 +109,11 @@ ward_22_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points
 large_input <- left_join(msoa_join, ward_13_join, by="lhcss_ref") %>%
   left_join(ward_22_join, by="lhcss_ref") %>% 
   left_join(lonLUTI_join, by = "lhcss_ref") %>% 
-  select(MSOA11CD, LAD11CD, LAD11NM, WD13CD, WD22CD, LonLUTI3,
-         Phase1, Phase2, Phase3, Phase4, Phase5)%>%
+  left_join(motion_join, by = "lhcss_ref") %>% 
   mutate(gss_code_msoa = as.character(MSOA11CD),
          gss_code_borough = as.character(LAD11CD),
          district = as.character(LAD11NM)) %>%
-  select(gss_code_msoa, gss_code_borough, WD13CD, WD22CD, LonLUTI3, district,
+  select(gss_code_msoa, gss_code_borough, WD13CD, WD22CD, LonLUTI3, motion_zone, district,
          Phase1, Phase2, Phase3, Phase4, Phase5) %>% 
   filter((Phase1 + Phase2 + Phase3 + Phase4 + Phase5) > 0) 
 

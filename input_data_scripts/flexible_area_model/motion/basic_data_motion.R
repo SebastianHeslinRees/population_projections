@@ -59,6 +59,19 @@ lsoa_to_motion_zone_proportional <- .polygon_to_polygon_lookup(target_polygon_di
   rename(gss_code_lsoa = LSOA11CD) %>%
   rename(lsoa_share = scaling_factor)
 
+# #LAD polygon overlap lookup
+# source("E:/project_folders/demography/wil/regrosser/functions/fn_polygon_to_polygon_lookup_sf.R")
+# lsoa_to_motion_zone_proportional <- .polygon_to_polygon_lookup(target_polygon_dir = "Q:/Teams/D&PA/Data/TfL/demand_zones",
+#                                                                target_polygon_shape_file = "Demand_Zones_wv9.3_polygon",
+#                                                                target_name = "Sequential",
+#                                                                
+#                                                                match_unmatched_base_polygons = TRUE,
+#                                                                base_polygon_dir = "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2019/ESRI/National",
+#                                                                base_polygon_shape_file = "GB_District_borough_unitary",
+#                                                                base_name = "GSS_CODE")#[[1]] %>% 
+#   rename(gss_code_lsoa = LSOA11CD) %>%
+#   rename(lsoa_share = scaling_factor)
+
 oa_to_motion_zone <- readRDS(paste0(f_paths$data_dir_Q_drive, f_paths$target_oa_lookup)) 
 
 motion_zone_name_lookup <- oa_to_motion_zone %>%
@@ -76,6 +89,11 @@ saveRDS(lsoa_to_motion_zone_proportional, paste0(f_paths$input_data_dir, out_pat
 saveRDS(oa_to_motion_zone, paste0(f_paths$input_data_dir, out_paths$target_oa_lookup))
 saveRDS(motion_zone_name_lookup, paste0(f_paths$input_data_dir, out_paths$target_name_lookup))
 
+
+lsoa_to_motion_zone_best_fit <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_bf))
+lsoa_to_motion_zone_proportional <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_prop))
+oa_to_motion_zone <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_oa_lookup))
+motion_zone_name_lookup <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_name_lookup))
 #-------------------------------------------------------------------------------
 
 # data contains non-London motion_zones from the regrosser process

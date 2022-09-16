@@ -119,6 +119,7 @@
   
   hh_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
     summarise(ce_popn = sum(ce_popn)) %>%  
+    data.frame() %>% 
     right_join(popn, by = col_aggregation) %>% 
     mutate(household_popn = !!sym(popn_col) - ce_popn) %>% 
     check_negative_values("household_popn")
@@ -129,6 +130,7 @@
   
   ce_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
     summarise(ce_popn = sum(ce_popn)) %>%  
+    data.frame() %>% 
     right_join(hh_popn, by = col_aggregation) %>% 
     mutate(!!popn_col := !!sym(popn_col) + ce_popn) %>% 
     check_negative_values(popn_col) %>% 

@@ -13,13 +13,6 @@ ward_deaths <- paste0(input_data_dir, "backseries/ward_deaths_WD13CD.rds") %>% r
 
 #-------------------------------------------------------------------------------
 
-denominator_popn <- ward_pop %>%
-  popn_age_on(births = ward_births,
-              col_aggregation=c("gss_code_ward", "year", "sex", "age"),
-              col_geog = "gss_code_ward")
-
-#-------------------------------------------------------------------------------
-
 # Mortality Rates
 # Uses ASMR curves and NPP trend
 

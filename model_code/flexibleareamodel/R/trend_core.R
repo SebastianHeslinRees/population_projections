@@ -35,16 +35,15 @@ trend_core <- function(start_population,
     nested_geog <- "area_code"
   }
   
-  #browser()
   #-----------------------------------------------------------------------------
   
   start_population <- start_population %>% 
     select(!!col_agg, "popn")
   
   #age on
-  aged_popn <- popn_age_on(start_population,
-                           col_aggregation = col_agg,
-                           col_geog = nested_geog)
+  aged_popn <- popn_age_on2(start_population,
+                            col_aggregation = col_agg,
+                            col_geog = nested_geog)
   
   assert_that(sum(is.na(aged_popn))==0, msg=paste("aged_popn", projection_year))
   

@@ -23,12 +23,6 @@ lonLUTI_deaths <- paste0(input_data_dir, "backseries/lonLUTI_deaths.rds") %>%
   readRDS() %>%
   left_join(lookup, by = "LonLUTI3")
 
-#-------------------------------------------------------------------------------
-
-denominator_popn <- lonLUTI_pop  %>% 
-  popn_age_on(births = lonLUTI_births,
-              col_aggregation=c("gss_code","LonLUTI3", "year", "sex", "age"),
-              col_geog = c("gss_code", "LonLUTI3"))
 
 #-------------------------------------------------------------------------------
 

@@ -66,16 +66,16 @@ popn_age_on2 <- function(popn,
   
   # Validate inputs
   
-  validate_popn_age_on_input(popn,
-                             col_aggregation,
-                             col_age,
-                             col_year,
-                             col_data,
-                             col_geog,
-                             timestep,
-                             template_age_levels=NULL,
-                             births,
-                             col_births)
+  # validate_popn_age_on_input(popn,
+  #                            col_aggregation,
+  #                            col_age,
+  #                            col_year,
+  #                            col_data,
+  #                            col_geog,
+  #                            timestep,
+  #                            template_age_levels=NULL,
+  #                            births,
+  #                            col_births)
   
   # Standardise data
   if(!col_age %in% col_aggregation) {
@@ -87,24 +87,28 @@ popn_age_on2 <- function(popn,
   
   # Increment the year
   aged <- popn %>% 
-    mutate(!!col_year := !!sym(col_year) + timestep)
-  
-  # If age is numeric, increment age
+    mutate(!!col_year := !!sym(col_year) + timestep) %>% 
+    mutate(!!col_age := !!sym(col_age) + timestep)
+ 
+  # Increment age
   max_age <- max(popn[[col_age]])
+  col_agg_no_age <- col_aggregation[(col_aggregation!= sym(col_age))]
   
-  last_age <- lazy_dt(aged) %>% 
-    filter(!!col_age >= (max_age-timestep)) %>%
+  last_age <- aged %>% 
+    #lazy_dt() %>%  #causes an error
+    filter(across(!!col_age) >= max_age) %>%
+    group_by(across(!!col_agg_no_age)) %>%
+    summarise(across(!!col_data, sum), .groups = 'drop_last') %>% 
     mutate(!!col_age := max_age) %>% 
-    group_by(across(!!col_aggregation)) %>%
-    summarise(across(!!col_data, sum)) %>% 
+    select(c(!!col_aggregation, !!col_data)) %>% 
     data.frame()
   
   aged <- aged %>% 
-    filter(!!col_age < (max_age-timestep)) %>%
-    mutate(!!col_age := !!sym(col_age) + timestep) %>%
-    bind_rows(last_age)
+    filter(across(!!col_age) < max_age) %>%
+    select(names(last_age)) %>% 
+    bind_rows(last_age) %>% 
+    data.frame()
   
- 
   #-----------------------------------------------------------------------------
   
   #Add births
@@ -114,24 +118,25 @@ popn_age_on2 <- function(popn,
     if(!is.data.frame(births) && births == 0) {
       
       births <- aged %>% 
-        select_at(col_aggregation) %>% 
+        select(!!col_aggregation) %>% 
         mutate(!!col_age := 0) %>% 
         mutate(!!col_births := 0) %>% 
         unique()
     }
     
     births <- births %>%
-      filter(!!sym(col_age) == 0) %>% 
+      filter(across(!!col_age) == 0) %>% 
       rename(!!col_data := col_births) %>%
-      select(names(aged))
+      select(names(aged)) %>% 
+      data.frame()
     
     aged <- bind_rows(births, aged) %>%
-      arrange_at(col_aggregation)
+      arrange(across(!!col_aggregation))
     
-    if(!is.null(col_year)){
-      common_years <- intersect(births[[col_year]], popn[[col_year]])
-      aged <- aged %>% filter(!!sym(col_year) %in% common_years)
-    }
+    # if(!is.null(col_year)){
+    #   common_years <- intersect(births[[col_year]], popn[[col_year]])
+    #   aged <- aged %>% filter(across(!!col_year) %in% common_years)
+    # }
   }
   
   #-----------------------------------------------------------------------------

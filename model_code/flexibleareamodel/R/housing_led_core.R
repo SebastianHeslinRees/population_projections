@@ -61,8 +61,8 @@ housing_led_core <- function(start_population,
   
   aged_on_population <- start_population %>%
     filter(area_code %in% constrain_gss) %>% 
-    popn_age_on(col_aggregation = col_agg,
-                col_geog = nested_geog)
+    popn_age_on2(col_aggregation = col_agg,
+                 col_geog = nested_geog)
   
   # 2 --------------------------------------------------------------------------
   
@@ -183,7 +183,6 @@ housing_led_core <- function(start_population,
     mutate(net_target = target_popn - start_popn - births + deaths) %>% 
     select(-births, -deaths, -target_popn, -start_popn)
   
-  if(projection_year==2026){browser()}
   optimised_flows <- regross_parallel(base_in = trend_projection$in_migration,
                                       base_out = trend_projection$out_migration,
                                       target_net = target_net,
@@ -372,7 +371,6 @@ housing_led_core <- function(start_population,
   # 15 -------------------------------------------------------------------------
   
   #Add back in data for areas outside housing data area
-  #browser()
   final_population <- bind_rows(final_population, areas_with_no_housing_data$population)
   final_births <- bind_rows(trend_projection$births, areas_with_no_housing_data$births)
   final_deaths <- bind_rows(trend_projection$deaths, areas_with_no_housing_data$deaths)
