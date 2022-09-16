@@ -117,12 +117,18 @@
 .remove_ce_popn <- function(popn, ce_popn, popn_col = "popn",
                             col_aggregation = c("area_code", "sex", "age")){
   
-  hh_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
-    summarise(ce_popn = sum(ce_popn)) %>%  
-    data.frame() %>% 
-    right_join(popn, by = col_aggregation) %>% 
+  # hh_popn <- group_by(ce_popn, across(col_aggregation)) %>% 
+  #   summarise(ce_popn = sum(ce_popn)) %>%  
+  #   data.frame() %>% 
+  #   right_join(popn, by = col_aggregation) %>% 
+  #   mutate(household_popn = !!sym(popn_col) - ce_popn) %>% 
+  #   check_negative_values("household_popn")
+
+  hh_popn <- popn %>%  
+    left_join(ce_popn, by = col_aggregation) %>% 
     mutate(household_popn = !!sym(popn_col) - ce_popn) %>% 
-    check_negative_values("household_popn")
+    check_negative_values("household_popn")	 
+  
 }
 
 .add_ce_popn <- function(hh_popn, ce_popn, popn_col = "popn",
@@ -168,3 +174,32 @@
   sapply(strsplit(x, " "), function(x) paste(capit(x), collapse=" "))
 }
 
+
+#' DT implementation of tidyr::unnest()
+#' https://www.r-bloggers.com/2019/10/much-faster-unnesting-with-data-table/
+#' 
+#' @param config_list A List. A model configuration list.
+#' 
+#' @import rlang
+#' @import data.table
+#'  
+#' @export
+
+.unnest_dt <- function(tbl, col) {
+  
+  tbl <- as.data.table(tbl)
+  
+  col <- ensyms(col)
+  
+  clnms <- syms(setdiff(colnames(tbl), as.character(col)))
+  
+  tbl <- as.data.table(tbl)
+  
+  tbl <- eval(
+    expr(tbl[, as.character(unlist(!!!col)), by = list(!!!clnms)])
+  )
+  
+  colnames(tbl) <- c(as.character(clnms), as.character(col))
+  
+  data.frame(tbl)
+}

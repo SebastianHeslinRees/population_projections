@@ -17,6 +17,7 @@
 #'  in the model loop.
 #' @param n_cores Numeric. Number of cores
 #' @param lookup Dataframe. area_code to area_name (cols must be named like this)
+#' @param parallel Logical. Should the regrosser process be run in parallel (TRUE) or serial (FALSE).
 #' 
 #' @return A list of projected components
 #' 
@@ -36,7 +37,8 @@ housing_led_core <- function(start_population,
                              ahs_mix,
                              hhr_ahs_uplift,
                              constraint_list,
-                             n_cores, lookup){
+                             n_cores, lookup,
+                             parallel){
   
   
   if("gss_code" %in% names(start_population)){
@@ -183,14 +185,15 @@ housing_led_core <- function(start_population,
     mutate(net_target = target_popn - start_popn - births + deaths) %>% 
     select(-births, -deaths, -target_popn, -start_popn)
   
-  optimised_flows <- regross_parallel(base_in = trend_projection$in_migration,
-                                      base_out = trend_projection$out_migration,
-                                      target_net = target_net,
-                                      col_inflow = "inflow",
-                                      col_outflow = "outflow",
-                                      col_target = "net_target",
-                                      n_cores,
-                                      fun = 2) %>% 
+  optimised_flows <- regross(base_in = trend_projection$in_migration,
+                             base_out = trend_projection$out_migration,
+                             target_net = target_net,
+                             col_inflow = "inflow",
+                             col_outflow = "outflow",
+                             col_target = "net_target",
+                             n_cores,
+                             fun = 2,
+                             parallel = parallel) %>% 
     select(year, area_code, inflow, outflow)
   
   migration_distribution <- left_join(trend_projection$in_migration,
@@ -283,16 +286,18 @@ housing_led_core <- function(start_population,
               .groups = 'drop_last') %>% 
     data.frame()
   
-  optimised_flows <- regross_parallel(base_in = trend_projection$in_migration,
-                                      base_out = trend_projection$out_migration,
-                                      target_net = final_net, 
-                                      col_inflow = "inflow",
-                                      col_outflow = "outflow",
-                                      col_target = "net_target",
-                                      n_cores,
-                                      fun = 2)
+  optimised_flows <- regross(base_in = trend_projection$in_migration,
+                             base_out = trend_projection$out_migration,
+                             target_net = final_net, 
+                             col_inflow = "inflow",
+                             col_outflow = "outflow",
+                             col_target = "net_target",
+                             n_cores,
+                             fun = 2,
+                             parallel = parallel)
   
-  final_migration <- select(lookup, !!nested_geog) %>% 
+  final_migration <- select(lookup, !!nested_geog) %>%
+    distinct() %>% 
     right_join(optimised_flows, by = "area_code") %>% 
     mutate(netflow = inflow - outflow) %>% 
     select(col_agg, inflow, outflow, netflow)
@@ -404,8 +409,10 @@ housing_led_core <- function(start_population,
   
   #validate there are no NAs in any of the output dataframes
   lapply(output_list, FUN = function(x){
-    a <- output_list
-    if(sum(is.na(x))!=0){browser()}
+    if(anyNA(x)){
+      a <- output_list
+      browser()
+    }
   })
   
   return(output_list)

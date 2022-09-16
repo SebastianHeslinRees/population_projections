@@ -1,76 +1,16 @@
-#' Regrosser
-#' 
-#' @param base_in Dataframe
-#' @param base_out Dataframe
-#' @param target_net Dataframe
-#' @param col_inflow String
-#' @param col_outflow String
-#' @param col_target String
-#' 
-#' @import dplyr
-#' @importFrom data.table rbindlist
-#' @import dtplyr
-#' 
+#' Regross
+#'
 #' @export
 
-regross <- function(base_in, base_out, target_net,
+regross <- function(base_in,
+                    base_out,
+                    target_net,
                     col_inflow = "inflow",
                     col_outflow = "outflow",
-                    col_target = "net_target"){
-  
-  target_cols <- setdiff(names(target_net), col_target)
-  base_flows_cols <- intersect(names(base_in), names(base_out))
-  common_cols <- intersect(target_cols, base_flows_cols)
-  base_in <- rename(base_in, in_base = !!col_inflow)
-  base_out <- rename(base_out, out_base = !!col_outflow)
-  target_net <- rename(target_net, net_target = !!col_target)
-  
-  mig_target <- lazy_dt(base_in) %>%
-    left_join(base_out, by = base_flows_cols) %>%
-    group_by(across(!!common_cols)) %>%
-    summarise(in_base = sum(in_base),
-              out_base = sum(out_base),
-              .groups = 'drop_last') %>%
-    left_join(target_net, by = common_cols) %>%
-    select(c(target_cols, in_base, out_base, net_target)) 
-  
-  optimise_gross_flows_vec <- Vectorize(.optimise_gross_flows, SIMPLIFY = TRUE)
-  
-  optimised_flows <- mig_target %>%
-    mutate(model_flows = optimise_gross_flows_vec(in_base, out_base, net_target)) %>%
-    data.frame() %>%
-    unnest_wider(col = model_flows)
-  
-  return(optimised_flows)
-  
-}
-
-#' Regrosser in paralell
-#' 
-#' @param base_in Dataframe
-#' @param base_out Dataframe
-#' @param target_net Dataframe
-#' @param col_inflow String
-#' @param col_outflow String
-#' @param col_target String
-#' @param n_cores Numeric. Number of cores
-#' @param fun Numeric. 1 or 2. Which version of the regrosser function
-#'  to use. Default 2.
-#' 
-#' @import dplyr
-#' @import tidyr
-#' @importFrom data.table rbindlist
-#' @import foreach
-#' @import dtplyr
-#' 
-#' @export
-
-regross_parallel <- function(base_in, base_out, target_net,
-                             col_inflow = "inflow",
-                             col_outflow = "outflow",
-                             col_target = "net_target",
-                             n_cores = 8,
-                             fun = 2){
+                    col_target = "net_target",
+                    n_cores = 1,
+                    fun = 2,
+                    parallel = parallel){
   
   target_cols <- setdiff(names(target_net), col_target)
   base_flows_cols <- intersect(names(base_in), names(base_out))
@@ -89,8 +29,61 @@ regross_parallel <- function(base_in, base_out, target_net,
     select(c(target_cols, in_base, out_base, net_target)) %>% 
     data.frame()
   
+  if(parallel){
+    optimised_flows <- .regross_parallel(mig_target, fun, n_cores)
+  } else {
+    optimised_flows <- .regross_serial(mig_target, fun)
+  }
+  
+  optimised_flows <- unnest_wider(optimised_flows, col = model_flows)
+  
+  return(optimised_flows)
+}
+
+#' Regrosser in serial
+#' 
+#' @param mig_target Dataframe
+#' @param fun Numeric. 1 or 2. Version of the regrosser function to use. Default 2.
+#' 
+#' @import dplyr
+#' @importFrom data.table rbindlist
+#' 
+#' @export
+
+.regross_serial <- function(mig_target, fun = 2){
+  
   if(fun==1){
-    optimise_gross_flows_vec <- Vectorize(.optimise_gross_flows, SIMPLIFY = TRUE)
+    optimise_gross_flows_vec <- Vectorize(.optimise_gross_flows_1, SIMPLIFY = TRUE)
+  } else {
+    optimise_gross_flows_vec <- Vectorize(.optimise_gross_flows_2, SIMPLIFY = TRUE)
+  }
+  
+  optimised_flows <- mig_target %>%
+    mutate(model_flows = optimise_gross_flows_vec(in_base, out_base, net_target)) %>%
+    data.frame() 
+  
+  return(optimised_flows)
+  
+}
+
+#' Regrosser in paralell
+#' 
+#' @param mig_target Dataframe
+#' @param fun Numeric. 1 or 2. Version of the regrosser function to use. Default 2.
+#' @param n_cores Numeric. Number of cores. Default 8
+#' 
+#' @import dplyr
+#' @import tidyr
+#' @importFrom data.table rbindlist
+#' @import foreach
+#' @import dtplyr
+#' 
+#' @export
+
+.regross_parallel <- function(mig_target, fun = 2, n_cores = 8){
+  
+  if(fun==1){
+    optimise_gross_flows_vec <- Vectorize(.optimise_gross_flows_1, SIMPLIFY = TRUE)
   } else {
     optimise_gross_flows_vec <- Vectorize(.optimise_gross_flows_2, SIMPLIFY = TRUE)
   }
@@ -105,8 +98,6 @@ regross_parallel <- function(base_in, base_out, target_net,
       mutate(model_flows = optimise_gross_flows_vec(in_base, out_base, net_target))
   } 
   
-  optimised_flows <- unnest_wider(optimised_flows, col = model_flows)
-  
   return(optimised_flows)
   
 }
@@ -120,7 +111,7 @@ regross_parallel <- function(base_in, base_out, target_net,
 #' @import dtplyr
 #' @import dplyr
 
-.optimise_gross_flows <- function(base_in, base_out, target_net) {
+.optimise_gross_flows_1 <- function(base_in, base_out, target_net) {
   
   base_out <- abs(round(base_out, 0))
   base_in <- round(base_in, 0)

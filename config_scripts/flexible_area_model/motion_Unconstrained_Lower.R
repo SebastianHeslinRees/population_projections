@@ -22,7 +22,7 @@ out_migration <- list(
 #Config
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2021,
-                    n_proj_yr = 2, #21
+                    n_proj_yr = 21, #21
                     output_dir = paste0("outputs/flexible_area_model/", projection_name),
                     
                     #backseries
@@ -54,7 +54,8 @@ config_list <- list(projection_name = projection_name,
                     lookup_path = "input_data/flexible_area_model/lookups/motion_zone_name_lookup.rds",
                     excess_deaths_path = NULL,
                     geog_code_col = "motion_zone",
-                    geog_name_col = "name"
+                    geog_name_col = "name",
+                    parallel = FALSE
 )
 
 devtools::load_all('model_code/popmodules/')

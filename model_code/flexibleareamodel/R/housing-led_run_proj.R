@@ -51,7 +51,8 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                        "lookup_path",
                        "excess_deaths_path",
                        "geog_code_col",
-                       "geog_name_col")
+                       "geog_name_col",
+                       "parallel")
   
   validate_config_list(config_list, expected_config)
   
@@ -69,11 +70,13 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   
   #------------------------------------------------------------------------------
   # Parallel processing
-  detected_cores <- detectCores()
-  if(is.null(n_cores)){n_cores <- detected_cores}
-  if(n_cores > detected_cores){n_cores <- detected_cores}
-  cl <- makeCluster(n_cores)
-  registerDoParallel(cl)
+  if(config_list$parallel){
+    detected_cores <- detectCores()
+    if(is.null(n_cores)){n_cores <- detected_cores}
+    if(n_cores > detected_cores){n_cores <- detected_cores}
+    cl <- makeCluster(n_cores)
+    registerDoParallel(cl)
+  }
   
   #-----------------------------------------------------------------------------
   
@@ -170,7 +173,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     cat('\r',projection_year)
     utils::flush.console()
     #if(projection_year >= 2024){browser()}
-    #browser()
+    
     #fertility & mortality
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
@@ -183,7 +186,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                              data_col = "in_flow",
                                              geog_code_col = config_list$geog_code_col) 
     
-    #browser()
+    
     curr_yr_in_flows <- filter(in_migration_flows, year == projection_year) %>% 
       mutate(year = projection_year) %>% 
       select(!!mig_col_agg, in_flow)
@@ -216,7 +219,6 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     }
     
     #project
-    #browser()
     trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                       fertility_rates = curr_yr_fertility,
                                                       mortality_rates = curr_yr_mortality,
@@ -236,7 +238,8 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                                          hhr_ahs_uplift = hhr_ahs_uplift,
                                                          constraint_list = constraint_list,
                                                          n_cores,
-                                                         lookup)
+                                                         lookup,
+                                                         config_list$parallel)
     
     curr_yr_popn <- hl_projection[[projection_year]]$population
     hhr_ahs_uplift <- hl_projection[[projection_year]]$hhr_ahs_uplift
@@ -257,7 +260,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   #Arrange - 4 secs
   message('')
   message("arrange outputs")
-
+  
   hl_projection <- arrange_flexmodel_outputs(hl_projection,
                                              population, births, deaths,
                                              in_migration, out_migration,
@@ -268,20 +271,20 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                              first_proj_yr, last_proj_yr,
                                              config_list,
                                              "housing-led",
-                                             n_cores)
-
+                                             n_cores, config_list$parallel)
+  
   
   rm(list=setdiff(ls(), c("hl_projection","config_list","cl")))
   #-------------------------------------------------------------------------------
   
   #Output - 2 mins
   output_flexmodel_projection(hl_projection, output_dir = config_list$output_dir,
-                              "housing-led", config_list, n_cores)
-
+                              "housing-led", config_list)
+  
   
   #Close log
   message("complete")
-  parallel::stopCluster(cl)
+  if(config_list$parallel){parallel::stopCluster(cl)}
   deactivate_log(paste0(config_list$output_dir, "warnings.log"))
   
   return(hl_projection)

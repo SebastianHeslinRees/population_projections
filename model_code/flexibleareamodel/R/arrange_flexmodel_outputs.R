@@ -36,7 +36,7 @@ arrange_flexmodel_outputs <- function(projection,
                                       in_mig_flows, out_mig_rates,
                                       dwelling_trajectory, dwelling_stock,
                                       first_proj_yr, last_proj_yr,
-                                      config_list, model, n_cores){
+                                      config_list, model, n_cores, parallel){
   
   
   lookup <- readRDS(config_list$lookup_path) %>% 
@@ -197,7 +197,8 @@ arrange_flexmodel_outputs <- function(projection,
   borough_data <- aggregate_borough_data2(output_list,
                                           config_list$constraint_list$constraint_path,
                                           config_list$first_proj_yr,
-                                          n_cores)
+                                          n_cores,
+                                          parallel)
   
   return(c(output_list, borough_data = borough_data))
   

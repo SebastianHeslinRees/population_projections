@@ -10,6 +10,7 @@
 #' @param constraint_path String the location of inflow and outflow borough data
 #' @param first_proj_yr Numeric
 #' @param n_cores Numeric. Number of cores
+#' @param parallel Logical. Should the regrosser process be run in parallel (TRUE) or serial (FALSE).
 #' 
 #' @import dplyr
 #' @importFrom tidyr pivot_wider
@@ -18,7 +19,7 @@
 #' 
 #' @return A list of projection outputs by component for boroughs
 
-aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr, n_cores){
+aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr, n_cores, parallel){
   
   col_agg <- c("gss_code", "la_name", "year", "sex", "age")
   constraint_path <- .add_slash(constraint_path)
@@ -92,14 +93,15 @@ aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr
   
   #Regrosser process
   
-  optimised_flows <- regross_parallel(base_in = select(gross_flows, -trend_outflow),
-                                      base_out = select(gross_flows, -trend_inflow),
-                                      target_net = projected_net,
-                                      col_inflow = "trend_inflow",
-                                      col_outflow = "trend_outflow",
-                                      col_target = "netflow",
-                                      n_cores = n_cores,
-                                      fun = 2)
+  optimised_flows <- regross(base_in = select(gross_flows, -trend_outflow),
+                             base_out = select(gross_flows, -trend_inflow),
+                             target_net = projected_net,
+                             col_inflow = "trend_inflow",
+                             col_outflow = "trend_outflow",
+                             col_target = "netflow",
+                             n_cores = n_cores,
+                             fun = 2,
+                             parallel = parallel)
   
   final_migration <- gross_flows %>%
     group_by(year, gss_code) %>%
