@@ -67,7 +67,7 @@ validate_population <- function(population,
   # drop requested column names that don't exist (the above checks threw the necessary warnings)
   col_aggregation <- col_aggregation[ col_aggregation %in% names(population) ]
   col_data <- col_data[ col_data %in% names(population) ]  # works with col_data = NA
-  browser()
+  
   # For some reason things took ages with tibbles, so convert to data frame
   # and cut down to the columns we care about
   test_population <- as.data.frame(population) %>% 

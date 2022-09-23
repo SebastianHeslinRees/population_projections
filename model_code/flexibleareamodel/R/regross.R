@@ -1,5 +1,16 @@
 #' Regross
 #'
+#' @param base_in Dataframe base in flows
+#' @param base_out Dataframe Base outflows
+#' @param target_net Dataframe Target net migration value
+#' @param col_inflow String. Column in base_in containing data. Default "inflow"
+#' @param col_outflow = String.Column in base_out containing data. Default "outflow",
+#' @param col_target = String.Column in target_net containing data. Default "net_target",
+#' @param n_cores Numeric. Number of cores to use if paralell is TRUE
+#' @param fun Numeric. Which version of the regrosser function to use. Verion 1 is
+#'  depricated and shouldn't be used. Deafult 2.
+#' @param parallel = Logical. Parallelise the process
+#'
 #' @export
 
 regross <- function(base_in,
@@ -10,7 +21,7 @@ regross <- function(base_in,
                     col_target = "net_target",
                     n_cores = 1,
                     fun = 2,
-                    parallel = parallel){
+                    parallel = FALSE){
   
   target_cols <- setdiff(names(target_net), col_target)
   base_flows_cols <- intersect(names(base_in), names(base_out))

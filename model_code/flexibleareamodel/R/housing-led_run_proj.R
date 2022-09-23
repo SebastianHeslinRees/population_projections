@@ -52,7 +52,8 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                        "excess_deaths_path",
                        "geog_code_col",
                        "geog_name_col",
-                       "parallel")
+                       "parallel",
+                       "borough_outputs")
   
   validate_config_list(config_list, expected_config)
   
@@ -126,7 +127,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   # Constraints - 30 secs
   if(!is.null(config_list$constraint_list)){
     message("get constraints")
-    constraint_list <- get_constraints(config_list$constraint_list, last_proj_yr)
+    constraint_list <- get_constraints(config_list$constraint_list, last_proj_yr, config_list$geog_code_col)
   }
   #-------------------------------------------------------------------------------
   
@@ -227,7 +228,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
                                                       projection_year = projection_year,
                                                       constraint_list = constraint_list,
                                                       excess_deaths = curr_yr_excess_deaths)
-    
+   
     hl_projection[[projection_year]] <- housing_led_core(start_population = curr_yr_popn, 
                                                          trend_projection = trend_projection[[projection_year]],
                                                          communal_establishment_population = communal_establishment_population,

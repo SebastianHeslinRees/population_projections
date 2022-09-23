@@ -10,7 +10,8 @@ project_rates_npp(
   rates_trajectory,
   first_proj_yr,
   n_proj_yr,
-  npp_var = "2018_principal"
+  npp_var = "2018_principal",
+  col_geog = "gss_code"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ ASMR/ASFR trajectory or a dataframe containing the data.}
 \item{npp_var}{Character. NPP trend variant. Either \code{2018_principal},
 \code{2018_high}, \code{2018_low},  \code{2016_principal}, \code{2016_high}, or
 \code{2016_low}. Defaults to \code{2018_principal}.}
+
+\item{col_geog}{String. The geography column in the dataframe}
 }
 \value{
 A data frame of fertility probabilities for all projection years.

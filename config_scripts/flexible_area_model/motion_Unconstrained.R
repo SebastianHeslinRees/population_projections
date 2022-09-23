@@ -1,5 +1,5 @@
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "motion_Unconstrained_Lower_TEST"
+projection_name <- "motion_Unconstrained"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
@@ -55,13 +55,14 @@ config_list <- list(projection_name = projection_name,
                     excess_deaths_path = NULL,
                     geog_code_col = "motion_zone",
                     geog_name_col = "name",
-                    parallel = FALSE
+                    parallel = FALSE,
+                    borough_outputs = FALSE
 )
 
 devtools::load_all('model_code/popmodules/')
 devtools::load_all("model_code/flexibleareamodel/")
 
-library(profvis)
+#library(profvis)
 #profvis(
 model_output <- flexmodel_hl_projection(config_list)
 #)

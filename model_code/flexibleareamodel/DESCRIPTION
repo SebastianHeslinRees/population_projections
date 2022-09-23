@@ -24,4 +24,5 @@ Imports:
   dtplyr,
   reticulate,
   doParallel,
-  foreach
+  foreach,
+  rlang

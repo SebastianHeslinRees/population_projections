@@ -64,9 +64,9 @@ trend_core <- function(start_population,
   
   if(constraint_list$components$births){
     
-    births <- .apply_constraint(births, constraint_list$births_constraint,
-                                areas = constraint_list$constraint_lookup,
-                                mapping = constraint_list$mapping)
+    births <- apply_constraint(births, constraint_list$births_constraint,
+                               constraint_lookup = constraint_list$apply_constraint_lookup,
+                               mapping = constraint_list$mapping)
   }
   
   assert_that(sum(is.na(births))==0, msg=paste("births", projection_year))
@@ -95,9 +95,9 @@ trend_core <- function(start_population,
   
   if(constraint_list$components$deaths){
     
-    deaths <- .apply_constraint(deaths, constraint_list$deaths_constraint,
-                                areas = constraint_list$constraint_lookup,
-                                mapping = constraint_list$mapping)
+    deaths <- apply_constraint(deaths, constraint_list$deaths_constraint,
+                               constraint_lookup = constraint_list$apply_constraint_lookup,
+                               mapping = constraint_list$mapping)
   }
   
   assert_that(sum(is.na(deaths))==0, msg=paste("deaths", projection_year))
@@ -124,9 +124,9 @@ trend_core <- function(start_population,
   
   if(constraint_list$components$out_migration){
     
-    outflow <- .apply_constraint(outflow, constraint_list$out_migration_constraint,
-                                 areas = constraint_list$constraint_lookup,
-                                 mapping = constraint_list$mapping)
+    outflow <- apply_constraint(outflow, constraint_list$out_migration_constraint,
+                                constraint_lookup = constraint_list$apply_constraint_lookup,
+                                mapping = constraint_list$mapping)
   }
   
   assert_that(sum(is.na(outflow))==0, msg=paste("outflow", projection_year))
@@ -140,9 +140,9 @@ trend_core <- function(start_population,
   
   if(constraint_list$components$in_migration){
     
-    inflow <- .apply_constraint(inflow, constraint_list$in_migration_constraint,
-                                areas = constraint_list$constraint_lookup,
-                                mapping = constraint_list$mapping)
+    inflow <- apply_constraint(inflow, constraint_list$in_migration_constraint,
+                               constraint_lookup = constraint_list$constraint_lookup,
+                               mapping = constraint_list$mapping)
   }
   
   assert_that(sum(is.na(inflow))==0, msg=paste("inflow", projection_year))
@@ -164,9 +164,9 @@ trend_core <- function(start_population,
   if(constraint_list$components$population){
     # TODO
     # This constraining step means the components do not sum to the population
-    next_yr_popn <- .apply_constraint(next_yr_popn, constraint_list$population_constraint,
-                                      areas = constraint_list$constraint_lookup,
-                                      mapping = constraint_list$mapping)
+    next_yr_popn <- apply_constraint(next_yr_popn, constraint_list$population_constraint,
+                                     constraint_lookup = constraint_list$apply_constraint_lookup,
+                                     mapping = constraint_list$mapping)
   }
   
   #-----------------------------------------------------------------------------

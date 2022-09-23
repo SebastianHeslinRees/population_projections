@@ -247,9 +247,9 @@ housing_led_core <- function(start_population,
   if(constraint_list$components$population){
     
     constrained_population <- unconstrained_population %>%
-      .apply_constraint(constraint_list$population_constraint,
-                        areas = constraint_list$constraint_lookup,
-                        mapping = constraint_list$mapping)
+      apply_constraint(constraint_list$population_constraint,
+                       constraint_lookup = constraint_list$apply_constraint_lookup,
+                       mapping = constraint_list$mapping)
     
     constrained_household_popn <- constrained_population %>% 
       .remove_ce_popn(communal_establishment_population) %>% 

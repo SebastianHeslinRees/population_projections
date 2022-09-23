@@ -74,15 +74,20 @@ lsoa_to_motion_zone_proportional <- .polygon_to_polygon_lookup(target_polygon_di
 
 oa_to_motion_zone <- readRDS(paste0(f_paths$data_dir_Q_drive, f_paths$target_oa_lookup)) 
 
-motion_zone_name_lookup <- oa_to_motion_zone %>%
-  left_join(readRDS("input_data/lookup/oa_to_msoa.rds"), by = c("OA11CD" = "gss_code_oa")) %>% 
-  left_join(readRDS("input_data/lookup/msoa_to_district.rds"), by = "gss_code_msoa") %>% 
-  left_join(readRDS(f_paths$gss_code_lookup), by = "gss_code") %>% 
-  select(motion_zone, gss_code, gss_name) %>%
-  mutate(name = motion_zone)  %>% 
-  data.frame() %>% 
-  distinct() %>% 
-  select(gss_code, la_name = gss_name, motion_zone, name)
+# motion_zone_name_lookup <- oa_to_motion_zone %>%
+#   left_join(readRDS("input_data/lookup/oa_to_msoa.rds"), by = c("OA11CD" = "gss_code_oa")) %>% 
+#   left_join(readRDS("input_data/lookup/msoa_to_district.rds"), by = "gss_code_msoa") %>% 
+#   left_join(readRDS(f_paths$gss_code_lookup), by = "gss_code") %>% 
+#   select(motion_zone, gss_code, gss_name) %>%
+#   mutate(name = motion_zone)  %>% 
+#   data.frame() %>% 
+#   distinct() %>% 
+#   select(gss_code, la_name = gss_name, motion_zone, name)
+
+motion_zone_name_lookup <- oa_to_motion_zone %>% 
+  mutate(name = motion_zone)  %>%
+  select(motion_zone, name) %>% 
+  distinct()
 
 saveRDS(lsoa_to_motion_zone_best_fit, paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_bf))
 saveRDS(lsoa_to_motion_zone_proportional, paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_prop))

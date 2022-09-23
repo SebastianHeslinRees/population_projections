@@ -16,7 +16,8 @@ housing_led_core(
   hhr_ahs_uplift,
   constraint_list,
   n_cores,
-  lookup
+  lookup,
+  parallel
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ in the model loop.}
 \item{n_cores}{Numeric. Number of cores}
 
 \item{lookup}{Dataframe. area_code to area_name (cols must be named like this)}
+
+\item{parallel}{Logical. Should the regrosser process be run in parallel (TRUE) or serial (FALSE).}
 }
 \value{
 A list of projected components

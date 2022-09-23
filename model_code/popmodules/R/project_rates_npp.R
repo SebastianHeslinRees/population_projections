@@ -17,6 +17,7 @@
 #' @param npp_var Character. NPP trend variant. Either \code{2018_principal},
 #'   \code{2018_high}, \code{2018_low},  \code{2016_principal}, \code{2016_high}, or
 #'   \code{2016_low}. Defaults to \code{2018_principal}.
+#' @param col_geog String. The geography column in the dataframe
 #'
 #' @return A data frame of fertility probabilities for all projection years.
 #' @import dplyr

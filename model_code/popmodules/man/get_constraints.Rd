@@ -4,22 +4,26 @@
 \alias{get_constraints}
 \title{Read in constraint data and place in a list for use in the small area model}
 \usage{
-get_constraints(constraint_list, last_proj_yr)
+get_constraints(constraint_list, last_proj_yr, geog_code_col)
 }
 \arguments{
 \item{constraint_list}{List with 4 elements.
 1: constraint_path: String. The path to the output folder of an LA-level
-projection run using the GLA trend model
-2: lookup_path: String  The path to a lookup from the constraint input
-dataframe geography to the constraining geography
-3: mapping: Character. A vector of column names common to both the constraint
-and the projection. This level at which the constraint is applied.
-E.g. c("gss_code","year","sex","age")
-4: components: A list of logical values indicating whether or not each
-component should be constrained. The list must include the following components:
-births, deaths, in_migration, out_migration, population}
+  projection run using the GLA trend model
+2: apply_lookup_path: String  The path to a lookup from the operational
+  geography input to the constraining geography
+3: make_llokup_path: String. The path to a lookup from the constraint input
+  dataframe geography to the constraining geography
+4 mapping: Character. A vector of column names common to both the constraint
+  and the projection. This level at which the constraint is applied.
+  E.g. c("gss_code","year","sex","age")
+5: components: A list of logical values indicating whether or not each
+   component should be constrained. The list must include the following components:
+   births, deaths, in_migration, out_migration, population}
 
 \item{last_proj_yr}{Numeric. The final projection year.}
+
+\item{geog_code_col}{String. The column name of the geographic (gss) codes}
 }
 \value{
 A list where each element is a data frame containing constraint data.
@@ -33,14 +37,15 @@ a list of data frames each containing component constraint data.
 }
 \examples{
 \dontrun{
-get_constraints(list(
-  constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259",
-  lookup_path = "something",
-  mapping = c("gss_code","year","sex","age"),
-  components = list(births = TRUE,
-                    deaths = TRUE,
-                    in_migration = FALSE,
-                    out_migration = FALSE,
-                    population = FALSE)))
+get_constraints(list(constraint_path =  "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
+                     apply_constraint_lookup_path =  "input_data/flexible_area_model/lookups/NUTS2_motion_zone.rds",
+                     make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
+                     mapping = c("constraint_area","year","sex","age"),
+                     components = list(births = T,
+                                       deaths = T,
+                                       in_migration = F,
+                                       out_migration = F,
+                                       population = T)))
+                    
 }
 }

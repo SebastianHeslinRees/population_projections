@@ -8,15 +8,6 @@
 #
 # ===========================================
 
-# A useful package for visualising function dependencies
-# is `pkgnet` https://cran.r-project.org/web/packages/pkgnet/vignettes/pkgnet-intro.html
-
-
-
-
-
-
-
 
 # Function: convert character vector (unnamed or partially named) to one where
 # every element is named
@@ -40,9 +31,6 @@
   
   return(vec)
 }
-
-
-
 
 
 # ------------------------------------------------------------------------------------

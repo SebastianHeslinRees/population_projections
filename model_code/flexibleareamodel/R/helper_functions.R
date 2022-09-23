@@ -59,25 +59,6 @@
   invisible()
 }
 
-.apply_constraint <- function(x, constraint,
-                              areas = constraint_list$constraint_lookup,
-                              mapping = constraint_list$mapping,
-                              data_col = NULL){
-  
-  if(is.null(data_col)){data_col <- last(names(x))}
-  
-  a <- filter(x, gss_code %in% areas$gss_code)
-  b <- filter(x, !gss_code %in% areas$gss_code)
-  
-  a %>% 
-    left_join(areas, by = "gss_code") %>% 
-    constrain_component(constraint,
-                        col_aggregation = mapping,
-                        data_col) %>% 
-    select(names(x)) %>% 
-    bind_rows(b)
-}
-
 .bind_and_arrange <- function(x, lookup){
   
   join_by <- intersect(names(x), c("gss_code", "area_code"))
@@ -178,7 +159,8 @@
 #' DT implementation of tidyr::unnest()
 #' https://www.r-bloggers.com/2019/10/much-faster-unnesting-with-data-table/
 #' 
-#' @param config_list A List. A model configuration list.
+#' @param tbl Dataframe
+#' @param col String
 #' 
 #' @import rlang
 #' @import data.table

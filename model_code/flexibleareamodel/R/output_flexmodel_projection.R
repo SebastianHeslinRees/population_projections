@@ -16,9 +16,9 @@
 #' @export
 
 output_flexmodel_projection <- function(projection,
-                                         output_dir = config_list$output_dir,
-                                         model, 
-                                         config_list){
+                                        output_dir = config_list$output_dir,
+                                        model, 
+                                        config_list){
   
   #RDS
   message("writing rds files")
@@ -30,14 +30,18 @@ output_flexmodel_projection <- function(projection,
   #-----------------------------------------------------------------------------
   
   #CSV
-  
   message("writing csv files")
   
   csv_dir <- paste0(output_dir,"csv/")
   dir.create(csv_dir, showWarnings = FALSE)
   csv_elements <- c(1:6, 9:10)
   
-  if(model == "housing-led"){ csv_elements <- c(csv_elements, 11, 15:22, 24:25) }
+  if(model == "housing-led"){
+    csv_elements <- c(csv_elements, 11, 15:16)
+    if(config_list$borough_outputs){
+      csv_elements <- c(csv_elements, 17, 22, 24:25)
+    }
+  }
   
   for(i in csv_elements) { 
     .make_csvs(projection[[i]], paste0(csv_dir, names(projection)[[i]]), config_list)
@@ -51,7 +55,10 @@ output_flexmodel_projection <- function(projection,
   
   fwrite(projection$detailed_components, paste0(output_dir,"/csv/components_of_change_detailed.csv"))
   fwrite(projection$summary, paste0(output_dir,"/csv/components_of_change_summary.csv"))
-  fwrite(projection$borough_data.summary, paste0(output_dir,"/csv/borough_components_of_change_summary.csv"))
+  
+  if(config_list$borough_outputs){
+    fwrite(projection$borough_data.summary, paste0(output_dir,"/csv/borough_components_of_change_summary.csv"))
+  }
   
   #-----------------------------------------------------------------------------
   

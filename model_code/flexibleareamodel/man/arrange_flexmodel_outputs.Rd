@@ -21,7 +21,8 @@ arrange_flexmodel_outputs(
   last_proj_yr,
   config_list,
   model,
-  n_cores
+  n_cores = 1,
+  parallel = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ arrange_flexmodel_outputs(
 \item{model}{String. Either 'trend' or 'housing-led'}
 
 \item{n_cores}{Numeric. Number of cores}
+
+\item{parallel}{Logical. Should the borough data creation be run in parallel}
 }
 \value{
 A list of projection outputs by component

@@ -20,6 +20,7 @@
 #' @param config_list List. The model config list
 #' @param model String. Either 'trend' or 'housing-led'
 #' @param n_cores Numeric. Number of cores
+#' @param parallel Logical. Should the borough data creation be run in parallel
 #' 
 #' @import dplyr
 #' @importFrom data.table rbindlist
@@ -27,7 +28,6 @@
 #' @importFrom tidyr pivot_wider
 #' 
 #' @return A list of projection outputs by component
-#' 
 
 arrange_flexmodel_outputs <- function(projection,
                                       population, births, deaths,
@@ -36,7 +36,8 @@ arrange_flexmodel_outputs <- function(projection,
                                       in_mig_flows, out_mig_rates,
                                       dwelling_trajectory, dwelling_stock,
                                       first_proj_yr, last_proj_yr,
-                                      config_list, model, n_cores, parallel){
+                                      config_list, model,
+                                      n_cores = 1, parallel = FALSE){
   
   
   lookup <- readRDS(config_list$lookup_path) %>% 
@@ -50,10 +51,12 @@ arrange_flexmodel_outputs <- function(projection,
     out_migration <- .add_gss_code(out_migration, lookup)
     in_migration <- .add_gss_code(in_migration, lookup)
     nested_geog <- c("gss_code", "area_code")
+    output_geog_cols <- c("gss_code","la_name","area_code","area_name")
   } else {
     nested_geog <- "area_code"
+    output_geog_cols <- c("area_code","area_name")
   }
-
+  
   #Components backseries
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_popn_unc <- list(population %>% filter(year < first_proj_yr))
@@ -119,18 +122,17 @@ arrange_flexmodel_outputs <- function(projection,
     lapply(.bind_and_arrange, lookup)
   
   #-----------------------------------------------------------------------------
-  
   #Components summary dataframe
   
   output_list$summary <- output_list$detailed_components %>%
     select(-age, -sex) %>% 
-    group_by(gss_code, la_name, area_code, area_name, year) %>% 
+    group_by(across(!!output_geog_cols), year) %>% 
     summarise(across(.fns = sum), .groups = 'drop_last') %>%                  
     mutate(across(where(is.numeric) & !year, ~round(.x, digits=3))) %>% 
     mutate(change = births - deaths + netflow) %>% 
-    select(gss_code, la_name, area_code, area_name, year,
+    select(!!output_geog_cols, year,
            population = popn, births, deaths, inflow, outflow, netflow, change) %>% 
-    arrange(gss_code, area_code, year) %>% 
+    arrange(across(!!nested_geog), year) %>% 
     data.frame()
   
   #-----------------------------------------------------------------------------
@@ -178,15 +180,15 @@ arrange_flexmodel_outputs <- function(projection,
       filter(year %in% 2012:last_proj_yr) %>% 
       left_join(lookup, by = c("area_code")) %>% 
       data.frame() %>% 
-      arrange(gss_code, area_code, year) %>% 
-      select(gss_code, la_name, area_code, area_name, year, dwellings = units)
+      arrange(across(!!nested_geog), year) %>% 
+      select(!!output_geog_cols, year, dwellings = units)
     
     housing_list$dwelling_stock <- dwelling_stock %>% 
       filter(year %in% 2011:last_proj_yr) %>% 
       left_join(lookup, by = c("area_code")) %>% 
       data.frame() %>% 
-      arrange(gss_code, area_code, year) %>% 
-      select(gss_code, la_name, area_code, area_name, year, dwellings = units)
+      arrange(across(!!nested_geog), year) %>% 
+      select(!!output_geog_cols, year, dwellings = units)
     
     output_list <- c(output_list, housing_list)
     
@@ -194,13 +196,20 @@ arrange_flexmodel_outputs <- function(projection,
   
   output_list <- output_list %>% lapply(.rename_geog_cols, config_list$geog_code_col, config_list$geog_name_col)
   
-  borough_data <- aggregate_borough_data2(output_list,
-                                          config_list$constraint_list$constraint_path,
-                                          config_list$first_proj_yr,
-                                          n_cores,
-                                          parallel)
-  
-  return(c(output_list, borough_data = borough_data))
+  if(config_list$borough_outputs){
+    borough_data <- aggregate_borough_data2(output_list,
+                                            config_list$constraint_list$constraint_path,
+                                            first_proj_yr,
+                                            n_cores,
+                                            parallel)
+    
+    return(c(output_list, borough_data = borough_data))
+    
+  } else {
+    
+    return(output_list)
+    
+  }
   
 }
 
