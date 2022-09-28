@@ -62,8 +62,5 @@ config_list <- list(projection_name = projection_name,
 devtools::load_all('model_code/popmodules/')
 devtools::load_all("model_code/flexibleareamodel/")
 
-#library(profvis)
-#profvis(
 model_output <- flexmodel_hl_projection(config_list)
-#)
 
