@@ -52,6 +52,7 @@ globalVariables(c(
   'scenario',
   'resource_title',
   'adjustment',
+  'applied_ahs',
   'actual_ahs',
-  'applied_ahs'
+  'scenario'
   ))

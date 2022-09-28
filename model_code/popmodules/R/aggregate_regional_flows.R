@@ -9,6 +9,8 @@
 #'  gss_codes. Columns \code{gss_code, gss_code_region}
 #' @param flow_col A string giving the data column name in the input data frame.
 #'  Default \code{flow}
+#' @param inner_outer_lookup A file path to the location of a lookup between London
+#'  Boroughs and the Inner London/Outer London subregions
 #'
 #' @return A list containing 3 data frames of origin destination flow data.
 #'  List names are: \code{[[1]]regional_flow, [[2]]national_flow, [[3]]sub_regional_flow}
@@ -18,7 +20,8 @@
 #' 
 #' @export
 
-aggregate_regional_flows <- function(domestic_flow, region_lookup, flow_col = "flow"){
+aggregate_regional_flows <- function(domestic_flow, region_lookup, flow_col = "flow",
+                                     inner_outer_lookup =  "input_data/lookup/inner_and_outer_london.rds"){
   
   domestic_flow <- domestic_flow %>% rename(flow = !!flow_col)
   
@@ -57,7 +60,7 @@ aggregate_regional_flows <- function(domestic_flow, region_lookup, flow_col = "f
     summarise(!!flow_col := sum(flow)) %>%
     as.data.frame()
   
-  inner_outer_lookup <- readRDS("input_data/lookup/inner_and_outer_london.rds")
+  inner_outer_lookup <- readRDS(inner_outer_lookup)
   
   outer_codes <- filter(inner_outer_lookup, outer == TRUE)$gss_code
   inner_codes <- filter(inner_outer_lookup, inner == TRUE)$gss_code

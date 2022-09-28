@@ -18,6 +18,7 @@
 #'
 #' @import dplyr
 #'
+#' @export
 
 ahs_decision_tree <- function(external_ahs, trend_ahs, ahs_cap,
                               projection_year, ldd_final_yr, gss_code_list){

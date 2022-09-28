@@ -101,6 +101,7 @@ globalVariables(c(
   "rate__",
   "component__",
   "gss_factor",
+  "gss___",
   "dom_in",
   "dom_out",
   "inflow",

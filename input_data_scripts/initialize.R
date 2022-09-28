@@ -29,7 +29,16 @@ assertthat::assert_that(all(
   
   file.copy("input_data/lookup/district_changes_clean.rds",
             "model_code/popmodules/tests/testthat/test_data/district_changes_clean.rds",
+            overwrite = TRUE),
+  
+  file.copy("input_data/lookup/district_to_region.rds",
+            "model_code/popmodules/tests/testthat/test_data/district_to_region.rds",
+            overwrite = TRUE),
+  
+  file.copy("input_data/lookup/inner_and_outer_london.rds",
+            "model_code/popmodules/tests/testthat/test_data/inner_and_outer_london.rds",
             overwrite = TRUE)),
+  
   msg="failed to copy lookups files from Q:")
 
 #-------------------------------------------------------------------------------
