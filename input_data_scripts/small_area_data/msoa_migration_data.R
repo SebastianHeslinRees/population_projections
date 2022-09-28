@@ -269,7 +269,8 @@ msoa_popn_2010 <- readRDS(msoa_popn_path) %>%
 denominators <- msoa_popn_2010 %>%
         as.data.frame() %>%
         popn_age_on(col_aggregation = c("year", "gss_code_msoa", "sex", "age"),
-                    births = msoa_births_2011) %>%
+                    births = msoa_births_2011,
+                    col_geog = 'gss_code_msoa') %>%
         left_join(msoa_deaths_2011, by = c("year","gss_code_msoa","sex","age")) %>%
         mutate(popn = popn - deaths) %>%
         select(-deaths) %>%

@@ -31,7 +31,8 @@ calculate_geomean_scaling_factors <- function(popn, future_rates, data_years, co
   validate_geomean_scaling_factors_inputs(popn, future_rates, data_years, constraint, constraint_data_col)
 
   component_from_rate <- popn_age_on(as.data.frame(popn),
-                                     col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>%
+                                     col_aggregation = c("year", "gss_code_small_area", "age", "sex"),
+                                     col_geog = "gss_code_small_area") %>%
     filter(year %in% data_years) %>%
     dtplyr::lazy_dt() %>%
     left_join(unique(select(popn, gss_code, gss_code_small_area)), by="gss_code_small_area") %>% 

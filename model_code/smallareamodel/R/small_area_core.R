@@ -53,7 +53,8 @@ small_area_core <- function(start_population, births, deaths, communal_est_popn,
 
   ####Age on####
   aged_on_popn <- popn_age_on(start_population,
-                              col_aggregation = c("year", "gss_code_small_area", "age", "sex")) %>% 
+                              col_aggregation = c("year", "gss_code_small_area", "age", "sex"),
+                              col_geog = "gss_code_small_area") %>% 
     left_join(unique(select(small_area_to_district, gss_code, gss_code_small_area)), by="gss_code_small_area")
   
   ####Fertility####

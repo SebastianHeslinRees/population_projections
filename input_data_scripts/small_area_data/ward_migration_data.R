@@ -175,7 +175,8 @@ ward_popn_2010 <- readRDS(ward_popn_path) %>%
 denominators <- ward_popn_2010 %>%
         as.data.frame() %>%
         popn_age_on(col_aggregation = c("year", "gss_code_ward", "sex", "age"),
-                    births = ward_births_2011) %>%
+                    births = ward_births_2011,
+                    col_geog = "gss_code_ward") %>%
         left_join(ward_deaths_2011, by = c("year","gss_code_ward","sex","age")) %>%
         rename(start_popn = popn) %>%
         mutate(popn = start_popn - deaths) %>%
