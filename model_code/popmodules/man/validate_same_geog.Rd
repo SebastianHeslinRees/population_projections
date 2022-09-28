@@ -9,7 +9,8 @@ validate_same_geog(
   df_2,
   col_1 = "gss_code",
   col_2 = col_1,
-  warn_only = FALSE
+  warn_only = FALSE,
+  nested_geog = FALSE
 )
 }
 \arguments{
