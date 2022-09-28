@@ -15,7 +15,7 @@
 #' @importFrom dtplyr lazy_dt
 #' @importFrom data.table fwrite rbindlist
 
-output_small_area_projection <- function(projection, output_dir, projection_type, lookup){
+output_projection <- function(projection, output_dir, projection_type, lookup){
   
   borough_names <- get_gss_names()
 

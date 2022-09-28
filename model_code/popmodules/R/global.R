@@ -59,8 +59,10 @@ globalVariables(c(
   "value_from_rate",
   "int_net",
   "dom_net",
-  "dom_in_orig",
-  "dom_out_orig",
+  "inflow_orig",
+  "outflow_orig",
+  "inflow__",
+  "outflow__",
   "net_dom_adjustment",
   "gss_in",
   "gss_out",
@@ -99,5 +101,11 @@ globalVariables(c(
   "rate__",
   "component__",
   "gss_factor",
-  "gss___"
+  "gss___",
+  "dom_in",
+  "dom_out",
+  "inflow",
+  "int_in",
+  "int_out",
+  "outflow"
 ))

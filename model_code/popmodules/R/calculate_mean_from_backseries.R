@@ -43,7 +43,7 @@ calculate_mean_from_backseries <- function(data_backseries, n_years_to_avg, last
   averaged <- data_backseries %>%
     rename(value = data_col) %>%
     filter(year %in% back_years) %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(value = sum(value)/n_years_to_avg) %>%
     ungroup() %>%
     mutate(year = project_rate_from) %>% 

@@ -12,7 +12,8 @@
 
 notes:
 - The Sys.setenv(JAVA_HOME="") in the .Rprofile file is a fix to something to do with Java so that devtools::install works properly. 
-- renv has been set to ignore housingledmodel, popmodules, smallareamodel, trendmodel when creating the snapshot.  This is because having them in the lockfile will cause renv::restore() to fail as it doesn't know where to look for them
+- renv has been set to ignore housingledmodel, popmodules, smallareamodel, flexibleareamodel, trendmodel when creating the snapshot.
+This is because having them in the lockfile will cause renv::restore() to fail as it doesn't know where to look for them.
 
 
 

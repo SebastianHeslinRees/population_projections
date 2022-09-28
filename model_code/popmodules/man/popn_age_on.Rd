@@ -13,7 +13,8 @@ popn_age_on(
   timestep = 1,
   template_age_levels = NULL,
   births = NULL,
-  col_births = "births"
+  col_births = "births",
+  col_geog = "gss_code"
 )
 }
 \arguments{
@@ -51,11 +52,14 @@ zero-year-olds are included in the output. Default \code{NULL}.}
 
 \item{col_births}{String denoting the name of the column containing data in 
 the \code{births} dataframe.}
+
+\item{col_geog}{Character vector denoting the geography column(s). Default "gss_code".
+Only used in validation. Only used when births dataframe is specified.}
 }
 \value{
 A data frame containing the population with age advanced by one time
   step (or age band). The lowest age will not be present in this output. Rows
-  are arranged iby \code{col_aggregation}, in that order.
+  are arranged by \code{col_aggregation}, in that order.
 }
 \description{
 Given a cohort population, advance the cohort's age by one timestep/age band
@@ -68,7 +72,7 @@ equally spaced by the interval given in \code{timestep}, usually 1.
 
 Ageing of the population is done by either adding the timestep to the age
 (for a numeric age) or by incrementing to the next level of the factor (for
-age as an ordered factor)./ If \code{col_year} is given, the year will also
+age as an ordered factor). If \code{col_year} is given, the year will also
 be increased by \code{timestep}.
 
 The highest age/age band is considered to be unbounded. This means that when

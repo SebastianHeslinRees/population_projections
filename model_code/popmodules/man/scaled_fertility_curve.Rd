@@ -6,31 +6,32 @@
 projection year}
 \usage{
 scaled_fertility_curve(
-  popn_mye_path,
-  births_mye_path,
-  target_curves_filepath,
+  popn,
+  births,
+  target_curves,
   last_data_year,
   n_years_to_avg,
   avg_or_trend,
   data_col = "births",
   output_col,
-  project_rate_from = last_data_year + 1
+  project_rate_from = last_data_year + 1,
+  col_geog = "gss_code"
 )
 }
 \arguments{
-\item{popn_mye_path}{Character or data frame. Path to the MYE population
-data, or a data frame with the data.}
+\item{popn}{String or data frame. Path to population data, or a
+data frame containing the data.}
 
-\item{births_mye_path}{Character or data frame. Path to the MYE births
-component data, or a data frame with the data.}
+\item{births}{String or data frame. Path to births data, or a 
+data frame with the data.}
 
-\item{target_curves_filepath}{Character or data frame. Path to the SNPP
+\item{target_curves}{String or data frame. Path to the SNPP
 target fertility curves, or a data frame with the data.}
 
-\item{last_data_year}{numeric. The last year of births data on which to
+\item{last_data_year}{Numeric. The last year of births data on which to
 calculate averages.}
 
-\item{n_years_to_avg}{numeric. The number of years to use in calculating
+\item{n_years_to_avg}{Numeric. The number of years to use in calculating
 averages/trend forward.}
 
 \item{avg_or_trend}{Character. Should the averaged be calculated as the mean
@@ -44,11 +45,13 @@ containing the calculated rates}
 
 \item{project_rate_from}{Numeric. The year for which a rate is being
 calculated. Default \code{last_data_year+1}}
+
+\item{col_geog}{Character. The column containing geographic codes or names}
 }
 \value{
-A data frame of mortality probabilities or fertility rates by LA,
-  year, sex and age with the same age structure as the target curves and
-  overall rates scaled so that they are consistent with past births.
+A data frame of fertility fertility rates by LA, year, sex and age
+ with the same age structure as the target curves and overall rates scaled
+ so that they are consistent with past births.
 }
 \description{
 Compares past rates by LA, age and sex to an input

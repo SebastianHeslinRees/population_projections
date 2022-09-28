@@ -16,15 +16,14 @@ aged_popn <- readRDS(popn_path) %>%
 
 fertility_rates <- readRDS(fert_rates_path) %>%
   filter(year == 2021) %>%
-  complete_fertility(aged_popn)
+  complete_popn_dataframe(ages = 1:90)
 
 mortality_rates <- readRDS(mort_rates_path) %>%
   filter(year == 2021)
 
 births <- apply_rate_to_population(aged_popn,
                                    fertility_rates,
-                                   col_out = "births",
-                                   many2one = FALSE) %>%
+                                   col_out = "births") %>%
   sum_births_and_split_by_sex_ratio() %>% 
   rename(popn = births)
 
@@ -32,7 +31,7 @@ births <- apply_rate_to_population(aged_popn,
 #births <- sum_births_and_split_by_sex_ratio(additional_births)
 
 deaths <- rbind(aged_popn, births) %>% 
-  apply_rate_to_population(popn_rate = mortality_rates,
+  apply_rate_to_population(rates = mortality_rates,
                            col_popn = "popn",
                            col_rate = "rate",
                            col_out = "deaths")

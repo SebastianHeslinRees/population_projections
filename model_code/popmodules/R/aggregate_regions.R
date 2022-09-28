@@ -42,7 +42,7 @@ aggregate_regions <- function(x,
       dtplyr::lazy_dt() %>%
       filter(substr(gss_code,1,1) %in% c("E","W")) %>% 
       left_join(lookup, by = setNames("gss_code", gss_col)) %>%
-      group_by_at(col_aggregation) %>% 
+      group_by(across(!!col_aggregation)) %>% 
       summarise(value = sum(value)) %>%
       as.data.frame() %>%
       rename(gss_code = region_gss_code,
@@ -63,7 +63,7 @@ aggregate_regions <- function(x,
         dtplyr::lazy_dt() %>%
         filter(substr(gss_code,1,3) %in% c("E06","E07","E08","E09")) %>% 
         mutate(region_gss_code = "E92000001") %>%
-        group_by_at(col_aggregation) %>% 
+        group_by(across(!!col_aggregation)) %>% 
         summarise(value = sum(value)) %>%
         as.data.frame() %>%
         rename(gss_code = region_gss_code,

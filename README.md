@@ -42,9 +42,7 @@ Open the RStudio project within the repository root (`population_projections.Rpr
 Run the script `input_data_scripts/initialize.R`. This will install all necessary packages from CRAN as well as the 4 packages which comprise the GLA models suite. It will also create the data needed to run the trend and housing-led models. Raw model inputs are taken from the Q: drive and therefore the models
 can only be installed on machines with access to that drive.
 
-Run `input_data_scripts/intitalize_small_area.R` will create the data needed to run the small area model.
-
 
 ## Running the models
 
-Each model package has a `run_model()` function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `config_scripts` folder.
+Each model package has a `run_model()` function which takes a config list of model parameters as it's single input. Config lists for basic model runs can be found in the `config_scripts` folder. 

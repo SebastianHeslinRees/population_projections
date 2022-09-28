@@ -7,9 +7,10 @@
 population_into_age_groups(
   population,
   age_groups,
-  labels,
+  labels = NULL,
   data_cols,
-  include.lowest = T
+  include.lowest = T,
+  factors = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ data to be aggregated}
 \code{age_groups} include the lowest age. If set to FALSE the function will
 assume the first bin contains any value less than and including the stated
 value. Default \code{TRUE}}
+
+\item{factors}{Logical. Should the \code{age_group} column be coerced to factor?
+If TRUE levels will be taken from \code{labels}. Default FALSE}
 }
 \value{
 A data frame of population data grouped by age group
@@ -44,19 +48,4 @@ data using \code{dplyr} functions, summing each column specified in
 \details{
 Note: all columns not specified in \code{data_cols} are assumed to be
 aggregation levels.
-}
-\examples{
-sya_popn <- expand.grid(gss_code = "C-3P0",
-                        year = 2001:2005,
-                        sex = c("female","male"),
-                        age = 0:90,
-                        popn = 10)
-
-age_group_popn <- population_into_age_groups(
-                        population = sya_popn,
-                        age_groups = c(0, 15, seq(19,89,5), Inf),
-                        labels = c("0_15","16_19","20_24","25_29","30_34","35_39","40_44",
-                                   "45_49","50_54","55_59","60_64","65_69",
-                                   "70_74","75_79","80_84","85_89","90+"),
-                        data_cols = "popn")
 }

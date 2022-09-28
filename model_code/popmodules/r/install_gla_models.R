@@ -6,22 +6,22 @@
 #' 
 #' @param trend Logical Document and install the trendmodel package Default \code{TRUE}
 #' @param housing_led Logical Document and install the housingledmodel package Default \code{TRUE}
-#' @param small_area Logical Document and install the smallareamodel package Default \code{TRUE}
+#' @param flex_area Logical Document and install the flexibleareamodel package Default \code{TRUE}
 #' 
 #' @importFrom devtools document install
 #' 
 #' @export
 
-install_gla_models <- function(trend = TRUE, housing_led = TRUE, small_area = TRUE){
+install_gla_models <- function(trend = TRUE, housing_led = TRUE, flex_area = TRUE){
   
   if(trend){
     devtools::document("model_code/trendmodel")
     devtools::install("model_code/trendmodel", upgrade = FALSE)
   }
   
-  if(small_area){
-    devtools::document("model_code/smallareamodel")
-    devtools::install("model_code/smallareamodel", upgrade = FALSE)
+  if(flex_area){
+    devtools::document("model_code/flexibleareamodel")
+    devtools::install("model_code/flexibleareamodel", upgrade = FALSE)
   }
   
   if(housing_led){
@@ -31,7 +31,7 @@ install_gla_models <- function(trend = TRUE, housing_led = TRUE, small_area = TR
   
   t <- ifelse(trend, "trendmodel, ", "")
   h <- ifelse(housing_led, "housingledmodel, ", "")
-  s <- ifelse(small_area, "smallareamodels, ", "")
+  s <- ifelse(flex_area, "flexibleareamodel, ", "")
   
   message(paste0(t, h, s, "documented and installed"))
   

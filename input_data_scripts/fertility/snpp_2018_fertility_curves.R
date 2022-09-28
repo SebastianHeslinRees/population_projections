@@ -38,10 +38,10 @@ national_fert <- filter(national_fert, gss_code != "W92000004")
 ons_fert <- rbind(ons_fert, national_fert, wales) %>%
   as.data.frame() %>%
   select(gss_code, sex, age, fert_rate) %>%
-  popmodules::recode_gss_codes(col_geog = "gss_code",
-                               data_cols = "fert_rate",
-                               fun = list(mean),
-                               recode_gla_codes = TRUE) %>%
+  recode_gss_codes(col_geog = "gss_code",
+                   data_cols = "fert_rate",
+                   fun = "mean",
+                   recode_gla_codes = TRUE) %>%
   as.data.frame()
 
 #smooth curves

@@ -8,11 +8,11 @@ recode_gss_codes(
   df_in,
   col_geog = "gss_code",
   data_cols = last(names(df_in)),
-  fun = list(sum),
+  fun = "sum",
   recode_to_year,
   aggregate_data = TRUE,
   recode_gla_codes = FALSE,
-  code_changes_path = "input_data/lookup/district_changes_clean.rds"
+  code_changes_path = NULL
 )
 }
 \arguments{
@@ -24,8 +24,8 @@ recode_gss_codes(
 \item{data_cols}{A string or character vector. The column(s) that contain the
 data to be aggregated. Defaults to last column of input dataframe.}
 
-\item{fun}{List. Function to be applied in aggregating data. Passed to the
-.funs argument of \code{dplyr::summarise_all}. Default \code{list(sum)}.}
+\item{fun}{Character Function to be applied in aggregating data. Either 'sum'
+or 'mean'. Default \code{'sum'}.}
 
 \item{recode_to_year}{Numeric. Conform to geography in which year. Must be one of
 \code{2009,2012,2013,2018,2019,2020,2021} (2013 is census geography).}
@@ -39,7 +39,8 @@ used in the 2018-based (& earlier) projections. This is introduced for backward
 compatibility and doesn't correspond to any single vintage year.
 Default \code{FALSE}.}
 
-\item{code_changes_path}{string. file path to the code changes database.}
+\item{code_changes_path}{string. file path to the code changes database or NULL
+to use the hard-coded code changes database. Degault NULL.}
 }
 \value{
 The input dataframe with gss codes changed and data aggregated

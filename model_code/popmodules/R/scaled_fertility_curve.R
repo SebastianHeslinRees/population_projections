@@ -6,15 +6,15 @@
 #' averaged or trended forward using regression. The resulting scaling
 #' factor is applied to the input curve to produce a set of rates.
 #'
-#' @param popn_mye_path Character or data frame. Path to the MYE population
-#'   data, or a data frame with the data.
-#' @param births_mye_path Character or data frame. Path to the MYE births
-#'   component data, or a data frame with the data.
-#' @param target_curves_filepath Character or data frame. Path to the SNPP
+#' @param popn String or data frame. Path to population data, or a
+#'   data frame containing the data.
+#' @param births String or data frame. Path to births data, or a 
+#'   data frame with the data.
+#' @param target_curves String or data frame. Path to the SNPP
 #'   target fertility curves, or a data frame with the data.
-#' @param last_data_year numeric. The last year of births data on which to
+#' @param last_data_year Numeric. The last year of births data on which to
 #'   calculate averages.
-#' @param n_years_to_avg numeric. The number of years to use in calculating
+#' @param n_years_to_avg Numeric. The number of years to use in calculating
 #'   averages/trend forward.
 #' @param avg_or_trend Character. Should the averaged be calculated as the mean
 #'   \code{Average}, or by linear regression \code{Trend}.
@@ -24,148 +24,129 @@
 #'   containing the calculated rates
 #' @param project_rate_from Numeric. The year for which a rate is being
 #'   calculated. Default \code{last_data_year+1}
+#' @param col_geog Character. The column containing geographic codes or names
 #'
-#' @return A data frame of mortality probabilities or fertility rates by LA,
-#'   year, sex and age with the same age structure as the target curves and
-#'   overall rates scaled so that they are consistent with past births.
+#' @return A data frame of fertility fertility rates by LA, year, sex and age
+#'  with the same age structure as the target curves and overall rates scaled
+#'  so that they are consistent with past births.
 #'
 #' @import dplyr
 #' @import assertthat
-#' @importFrom data.table setnames
 #' @importFrom dtplyr lazy_dt
 #'
 #' @export
 
-
-scaled_fertility_curve <- function(popn_mye_path, births_mye_path,
-                                   target_curves_filepath, last_data_year,
-                                   n_years_to_avg, avg_or_trend,
-                                   data_col="births", output_col,
-                                   project_rate_from = last_data_year+1){
-
-  if(class(popn_mye_path)=="character"){
-    population <- data.frame(readRDS(popn_mye_path))
-  } else {
-    population <- popn_mye_path
-  }
-  if(class(births_mye_path)=="character"){
-    births <- data.frame(readRDS(births_mye_path))
-  } else {
-    births <- births_mye_path
-  }
-  if(class(target_curves_filepath)=="character"){
-    target_curves <- readRDS(target_curves_filepath) %>% select(-year)
-  } else {
-    target_curves <- target_curves_filepath
-  }
-
-  validate_scaled_fertility_curve_input(population, births, target_curves, last_data_year, n_years_to_avg,
+scaled_fertility_curve <- function(popn,
+                                   births,
+                                   target_curves,
+                                   last_data_year,
+                                   n_years_to_avg,
+                                   avg_or_trend,
+                                   data_col="births",
+                                   output_col,
+                                   project_rate_from = last_data_year+1,
+                                   col_geog = "gss_code"){
+  
+  
+  population <- .path_or_dataframe(popn)
+  births <- .path_or_dataframe(births)
+  target_curves <- .path_or_dataframe(target_curves)
+  
+  validate_scaled_fertility_curve_input(population, births, target_curves,
+                                        last_data_year, n_years_to_avg,
                                         avg_or_trend, data_col, output_col)
-
+  
+  #remove year column if it exists
+  target_curves <- target_curves[!names(target_curves)=="year"]
+  
+  col_aggregation <- unique(c("year", "gss_code", col_geog))
+  
   births <- lazy_dt(births) %>%
-    group_by(year, gss_code) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(births = sum(births)) %>%
-    as.data.frame()
-
-  population <-  lazy_dt(population) %>%
+    data.frame()
+  
+  assert_that(n_years_to_avg <= length(unique(births$year)),
+              msg = paste("scaled_fertility_curve couldn't construct", n_years_to_avg, "years of fertility data from the inputs"))
+  
+  aged_on_population <-  population %>%
     filter(sex == "female", age %in% unique(target_curves$age)) %>%
-    as.data.frame()
-
+    popn_age_on(births = NULL,
+                col_aggregation = c(col_aggregation, "age", "sex"),
+                col_geog = col_geog)
+  
   target_curves <- filter(target_curves, gss_code %in% unique(births$gss_code))
-
+  
   # Calculate the total births per year for each geography and sex that the target fertility curve would would create from population
   # Compare to the total births per year for each geography and sex in the actual births
   # *scaling* tells you what you would need to scale each geog and sex of the target curve by to get the same total births as the actuals
   # This is done because we prefer the ONS age structure for the first projection year to the previous actuals age structures
-  scaling_backseries <- popn_age_on(population, births = 0) %>%
+  scaling_backseries <- aged_on_population %>% 
     lazy_dt() %>%
     right_join(target_curves, by = c("gss_code", "age", "sex")) %>%
     mutate(curve_count = rate * popn) %>%
-    group_by(year, gss_code) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(curve_count = sum(curve_count)) %>%
     filter(year %in% births$year) %>%
     ungroup() %>%
-    as.data.frame() %>%   # dtplyr needs to take a break part way through
+    data.frame() %>%   # dtplyr needs to take a break part way through
     lazy_dt() %>%
-    left_join(births, by = c("gss_code", "year"))  %>%
-    as.data.frame() %>%
+    left_join(births, by = col_aggregation)  %>%
+    data.frame() %>%
     rename(actual = data_col) %>%
     mutate(scaling = ifelse(curve_count == 0,
                             0,
                             actual / curve_count)) %>%
-    select(gss_code, year, scaling)
-
-  assert_that(n_years_to_avg <= length(unique(scaling_backseries$year)),
-              msg = paste("scaled_fertility_curve couldn't construct", n_years_to_avg,"years of fertility data from the inputs"))
-
+    select_at(c(col_aggregation, "scaling"))
+  
   if(avg_or_trend == "trend"){
-    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries, n_years_regression = n_years_to_avg, last_data_year, data_col="scaling",
-                                                             col_aggregation = "gss_code",
-                                                             project_rate_from)
+    
+    averaged_scaling_factors <- calculate_rate_by_regression(scaling_backseries,
+                                                             n_years_regression = n_years_to_avg,
+                                                             last_data_year = last_data_year,
+                                                             data_col = "scaling",
+                                                             col_aggregation =  col_aggregation[col_aggregation != "year"],
+                                                             project_rate_from = project_rate_from)
   }
-
+  
   if(avg_or_trend == "average"){
-    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries, n_years_to_avg, last_data_year, data_col="scaling",
-                                                               col_aggregation = "gss_code",
-                                                               project_rate_from)
+    
+    averaged_scaling_factors <- calculate_mean_from_backseries(scaling_backseries,
+                                                               n_years_to_avg = n_years_to_avg,
+                                                               last_data_year = last_data_year,
+                                                               data_col = "scaling",
+                                                               col_aggregation = col_aggregation[col_aggregation != "year"],
+                                                               project_rate_from = project_rate_from)
   }
-
-  validate_population(averaged_scaling_factors, col_aggregation = c("year", "gss_code"), col_data = "scaling",
-                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
-
-  jump_off_rates <- target_curves %>%
-    left_join(averaged_scaling_factors, by = "gss_code") %>%
-    mutate(jump_off_rate = scaling * rate) %>%
-    select(gss_code, year, sex, age, jump_off_rate) %>%
-    rename(!!output_col := jump_off_rate)
-
-  rates_backseries <- left_join(scaling_backseries, target_curves, by="gss_code") %>%
+  
+  jump_off_rates <- averaged_scaling_factors %>%
+    left_join(target_curves, by = c("gss_code")) %>%
+    mutate(jump_off_rate = scaling * rate,
+           sex = "female") %>%
+    select_at(c(col_aggregation, "sex", "age", "jump_off_rate")) %>%
+    rename(!!output_col := jump_off_rate) %>% 
+    data.frame()
+  
+  fertility_rates <- left_join(scaling_backseries, target_curves, by=c("gss_code")) %>%
     filter(!is.na(scaling)) %>%
     mutate(rate = rate*scaling) %>%
-    select(gss_code, year, sex, age, rate) %>%
+    select_at(c(col_aggregation, "sex", "age", "rate")) %>%
     rename(!!output_col := rate) %>%
-    filter(year < project_rate_from)
-
-  return(rbind(rates_backseries, jump_off_rates) %>%
-           arrange(gss_code, year, sex, age))
-
+    filter(year < project_rate_from) %>%
+    rbind(jump_off_rates)  %>%
+    arrange_at(c("year", col_aggregation, "age"))
+  
+  return(fertility_rates)
+  
 }
 
 #--------------------------------------------------------------------
 
-#Function for creating birth denominator population
-
-births_denominator <- function(population) {
-
-  #Not used at them moment
-  assert_that(is.data.frame(population),
-              msg="births_denominator expects population to be a dataframe")
-
-  population <- mutate(population, year=year+1) %>%
-    filter(year != max(year)) %>%
-    left_join(population, by=c("gss_code","year","sex","age")) %>%
-    mutate(popn = (popn.x + popn.y)/2)       %>%
-    mutate(popn = ifelse(is.na(popn),0,popn)) %>%
-    select(gss_code, year, sex, age, popn) %>%
-    arrange(gss_code, year, sex, age)
-
-  return(population)
-}
-
-#-----------------------------------------------
-
-# Function to check that the input to initial_year_mortality_rates is all legal
-
 validate_scaled_fertility_curve_input <- function(population, births, target_curves, last_data_year, n_years_to_avg,
                                                   avg_or_trend, data_col, output_col){
-
+  
   # test input parameters are of the correct type
-  assert_that(is.data.frame(population),
-              msg="scaled_fertility_curve expects that population is a data frame")
-  assert_that(is.data.frame(births),
-              msg="scaled_fertility_curve expects that births is a data frame")
-  assert_that(is.data.frame(target_curves),
-              msg="scaled_fertility_curve expects that target_curves is a data frame")
+  
   assert_that(is.numeric(last_data_year),
               msg="scaled_fertility_curve expects that last_data_year is an numeric")
   assert_that(is.numeric(n_years_to_avg),
@@ -178,14 +159,12 @@ validate_scaled_fertility_curve_input <- function(population, births, target_cur
               msg="scaled_fertility_curve expects that output_col is a character")
   assert_that(data_col %in% names(births),
               msg="scaled_fertility_curve expects that data_col is a column in births dataframe")
-
-  validate_population(population, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "popn",
-                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
-  validate_population(births, col_aggregation = c("gss_code", "year", "sex", "age"), col_data = "births",
-                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
-  validate_population(target_curves, col_aggregation = c("gss_code", "age", "sex"), col_data = "rate",
-                      test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
-
+  
+  if("year" %in% names(target_curves)){
+    assert_that(length(unique(target_curves$year))==1,
+                msg = "scaled_mortality_curve: target_curves dataframe has data for more than 1 year. This is unacceptable.")
+  }
+  
   invisible(TRUE)
 }
 

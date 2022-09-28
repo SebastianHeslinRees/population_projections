@@ -32,7 +32,7 @@ aggregate_city_wards <- function(df, data_col,
     as.data.frame() %>%
     mutate(gss_code_ward = "E09000001") %>%
     dtplyr::lazy_dt() %>%
-    group_by_at(col_aggregation) %>%
+    group_by(across(!!col_aggregation)) %>%
     summarise(value = sum(!!sym(data_col))) %>%
     as.data.frame() %>%
     rename(!!data_col := value)

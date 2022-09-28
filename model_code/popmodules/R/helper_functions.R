@@ -8,15 +8,6 @@
 #
 # ===========================================
 
-# A useful package for visualising function dependencies
-# is `pkgnet` https://cran.r-project.org/web/packages/pkgnet/vignettes/pkgnet-intro.html
-
-
-
-
-
-
-
 
 # Function: convert character vector (unnamed or partially named) to one where
 # every element is named
@@ -40,9 +31,6 @@
   
   return(vec)
 }
-
-
-
 
 
 # ------------------------------------------------------------------------------------
@@ -106,4 +94,45 @@
     x <- paste0(x,"/")
   }
   return(x)
+}
+
+#' So that functions can either be passed the path to some data
+#' or a dataframe
+#'
+#' @param x A string or a dataframe
+#' 
+#' @import assertthat
+#'
+#' @return dataframe
+#'
+#' @export
+
+.path_or_dataframe <- function(x){
+  assert_that(is.string(x) | is.data.frame(x),
+             msg = paste('.path_or_dataframe: x must be string or dataframe, function was passed', class(x)))
+  if(is.string(x)){x <- readRDS(x)}
+  return(data.frame(x))
+}
+
+
+#' Select columns in a dataframe and rename the geography column to the generic
+#' name 'area_code'
+#'
+#' @param x A dataframe
+#' @param col_geog String. The geography column
+#' @param data_col String. The data column. Default NULL
+#' @param col_agg String. The column aggregation to select
+#'
+#' @return dataframe
+#'
+#' @export
+
+.standardise_df <- function(x, col_geog, data_col=NULL,
+                            col_agg = c("year", "gss_code", col_geog, "age", "sex")){
+  
+  cols <- intersect(c(col_agg, data_col), names(x))
+  
+  select(x, all_of(cols)) %>% 
+    rename(area_code = all_of(col_geog)) %>% 
+    return()
 }

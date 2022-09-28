@@ -7,6 +7,7 @@
 #' @import dplyr
 #' @importFrom loggr deactivate_log
 #' @importFrom data.table fread fwrite
+#' @importFrom stringr str_replace_all
 #' 
 #' @export
 
@@ -14,10 +15,13 @@ deactivate_log <- function(log_file_path){
   
   loggr::deactivate_log()
   
-  data.table::fread(log_file_path, header = FALSE,
-                    sep = "*") %>%
+  fread(log_file_path, header = FALSE, sep = "*") %>%
     data.frame() %>% 
     filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
-    data.table::fwrite(log_file_path, col.names = FALSE, quote=FALSE)
+    mutate(V1 = str_replace_all(V1, " - SIMPLEWARNING - ", " ")) %>% 
+    mutate(V1 = str_replace_all(V1, " - SIMPLEMESSAGE - ", " ")) %>% 
+    fwrite(log_file_path, col.names = FALSE, quote=FALSE)
   
 }
+
+

@@ -209,7 +209,7 @@ housing_led_core <- function(start_population,
   }
   
   if(ahs_method == "tree"){
-
+    
     ahs <- ahs_decision_tree(external_ahs, curr_yr_trend_ahs, ahs_cap,
                              projection_year, ldd_final_yr, constrain_gss)
     ahs_choice <- ahs[[1]]
@@ -220,12 +220,12 @@ housing_led_core <- function(start_population,
   
   #6. Target population
   #dw2hh 2018
-  target_population <- apply_rate_to_population(households_2, ahs,
+  target_population <- apply_rate_to_population(popn = households_2,
+                                                rates = ahs,
                                                 col_popn = "households",
                                                 col_rate = "ahs",
                                                 col_out = "target_popn",
-                                                col_aggregation = c("year","gss_code"),
-                                                one2many = TRUE)
+                                                col_aggregation = c("year","gss_code"))
   
   #7. This point is intentionally left blank
   
@@ -235,12 +235,12 @@ housing_led_core <- function(start_population,
   #   Adjust domestic
   adjusted_domestic_migration <- household_population %>% 
     select(-popn, -communal_est_popn) %>%
-    adjust_domestic_migration(target = target_population,
-                              dom_in = trend_projection[['dom_in']],
-                              dom_out = trend_projection[['dom_out']],
-                              col_aggregation = c("year","gss_code"),
-                              col_popn = "household_popn",
-                              col_target = "target_popn")
+    adjust_gross_migration(target = target_population,
+                           inflow_df = trend_projection[['dom_in']],
+                           outflow_df = trend_projection[['dom_out']],
+                           col_aggregation = c("year","gss_code"),
+                           col_popn = "household_popn",
+                           col_target = "target_popn")
   
   #This is a QA output only
   out_adjusted_dom <- left_join(adjusted_domestic_migration[["dom_in"]],
@@ -285,14 +285,14 @@ housing_led_core <- function(start_population,
     #11. Compare population from step 10 to population from step 9.
     #    Difference = domestic adjustment
     #    Adjust domestic
-    final_domestic_migration <- adjust_domestic_migration(popn =  unconstrained_population,
-                                                          target = constrained_population,
-                                                          dom_in = dom_in,
-                                                          dom_out = dom_out,
-                                                          col_aggregation = c("year","gss_code","sex","age"),
-                                                          col_popn = "popn",
-                                                          col_target = "popn",
-                                                          rows_to_constrain =  unconstrained_population$gss_code %in% hma_list$gss_code)
+    final_domestic_migration <- adjust_gross_migration(popn =  unconstrained_population,
+                                                       target = constrained_population,
+                                                       inflow_df = dom_in,
+                                                       outflow_df = dom_out,
+                                                       col_aggregation = c("year","gss_code","sex","age"),
+                                                       col_popn = "popn",
+                                                       col_target = "popn",
+                                                       rows_to_constrain =  unconstrained_population$gss_code %in% hma_list$gss_code)
     dom_in <- final_domestic_migration[['dom_in']]
     dom_out <- final_domestic_migration[['dom_out']]
     

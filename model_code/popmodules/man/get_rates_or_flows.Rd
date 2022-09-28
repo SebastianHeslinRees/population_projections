@@ -10,7 +10,8 @@ get_rates_or_flows(
   projection_year,
   first_proj_yr,
   col_aggregation,
-  data_col
+  data_col,
+  geog_code_col
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ the previous year iteration}
 
 \item{data_col}{String. The column containing the flow or rate information to be
 in the model}
+
+\item{geog_code_col}{String. Which column in df contains the geography code}
 }
 \value{
 A dataframe containing rates or flows to use in the model and also

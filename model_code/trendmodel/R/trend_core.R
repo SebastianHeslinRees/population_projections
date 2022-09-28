@@ -75,10 +75,9 @@ trend_core <- function(start_population,
   
   if(is.null(external_births)){
     
-    births_by_mother <- apply_rate_to_population(aged_popn,
-                                                 filter(fertility_rates, age != 0),
-                                                 col_out = "births",
-                                                 many2one = FALSE)
+    births_by_mother <- apply_rate_to_population(popn = aged_popn,
+                                                 rates = filter(fertility_rates, age != 0),
+                                                 col_out = "births")
     
     
     
@@ -110,7 +109,7 @@ trend_core <- function(start_population,
   } else {
     
     deaths <- apply_rate_to_population(popn = aged_popn_w_births,
-                                       popn_rate = mortality_rates,
+                                       rates = mortality_rates,
                                        col_popn = "popn",
                                        col_rate = "rate",
                                        col_out = "deaths")
@@ -143,7 +142,7 @@ trend_core <- function(start_population,
     int_out <- int_out_flows_rates
   } else {
     int_out <- apply_rate_to_population(popn = natural_change_popn,
-                                        popn_rate = int_out_flows_rates,
+                                        rates = int_out_flows_rates,
                                         col_popn = "popn",
                                         col_rate = "int_out",
                                         col_out = "int_out")
@@ -254,7 +253,7 @@ trend_core <- function(start_population,
   # FIXME
   # TODO This setup creates negative populations
   # For now just setting -ve pops to zero
-  next_yr_popn <- check_negative_values(next_yr_popn, "popn", set_to_zero = TRUE)
+  next_yr_popn <- check_negative_values(next_yr_popn, "popn")
   
   next_yr_popn <- select(next_yr_popn, year, gss_code, age, sex, popn)
   

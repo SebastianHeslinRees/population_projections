@@ -7,10 +7,11 @@
 project_rates_npp(
   jump_off_rates,
   rate_col,
-  rate_trajectory_filepath,
+  rates_trajectory,
   first_proj_yr,
   n_proj_yr,
-  npp_var = "2018_principal"
+  npp_var = "2018_principal",
+  col_geog = "gss_code"
 )
 }
 \arguments{
@@ -21,8 +22,8 @@ Likely calculated from \code{scaled_mortality_curve()} or \code{scaled_fertility
 \item{rate_col}{Character. The column in the jump_off_rates dataframe
 containing the rates.}
 
-\item{rate_trajectory_filepath}{Character. The file path for the national-level
-ASMR/ASFR trajectory.}
+\item{rates_trajectory}{String or dataframe. The file path for the national-level
+ASMR/ASFR trajectory or a dataframe containing the data.}
 
 \item{first_proj_yr}{Integer. The first projection year.}
 
@@ -31,6 +32,8 @@ ASMR/ASFR trajectory.}
 \item{npp_var}{Character. NPP trend variant. Either \code{2018_principal},
 \code{2018_high}, \code{2018_low},  \code{2016_principal}, \code{2016_high}, or
 \code{2016_low}. Defaults to \code{2018_principal}.}
+
+\item{col_geog}{String. The geography column in the dataframe}
 }
 \value{
 A data frame of fertility probabilities for all projection years.
