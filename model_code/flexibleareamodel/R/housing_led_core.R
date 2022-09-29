@@ -395,14 +395,14 @@ housing_led_core <- function(start_population,
                       unconstrained_population = unconstrained_population,
                       constrained_population = constrained_population,
                       births = final_births,
-                      deaths = trend_projection$deaths,
+                      deaths = final_deaths,
                       out_migration = final_out_migration,
                       in_migration = final_in_migration,
                       net_migration = final_net_migration,
                       household_population_sya = final_household_popn,
                       ahs = ahs_choice,
                       households_detail = households_detail,
-                      detailed_components = components,
+                      detailed_components = final_components,
                       hhr_ahs_uplift = hhr_ahs_uplift)
   
   # 17 -------------------------------------------------------------------------

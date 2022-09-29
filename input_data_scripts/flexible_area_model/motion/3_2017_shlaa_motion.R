@@ -84,7 +84,7 @@ borough_windfall <- rbind(small_trend_windfall, small_remainder_windfall) %>%
   summarise(units = sum(units), .groups = 'drop_last') %>%
   data.frame()
 
-# The borough windfall is distributed evenly among the wards and MSOAs
+# The borough windfall is distributed evenly among the zones
 # i.e. not according to how the other development is distributed with the wards/MSOAs
 lsoa_windfall <- select(oa_lsoa_msoa_lad11_lad21, gss_code_lsoa = LSOA11CD, gss_code = LAD21CD) %>% 
   select(gss_code_lsoa, gss_code) %>% 
@@ -94,7 +94,7 @@ lsoa_windfall <- select(oa_lsoa_msoa_lad11_lad21, gss_code_lsoa = LSOA11CD, gss_
   data.frame() %>% 
   left_join(borough_windfall, by = "gss_code") %>% 
   mutate(lsoa_units = units/n) %>% 
-  select(gss_code_lsoa, year, units)
+  select(gss_code_lsoa, year, units = lsoa_units)
 
 motion_zone_trend_windfall <- lsoa_to_motion_zone %>% 
   left_join(lsoa_windfall, by = "gss_code_lsoa")  %>%
@@ -113,8 +113,9 @@ motion_zone_shlaa <- rbind(motion_zone_large, motion_zone_intense, motion_zone_t
   summarise(units = sum(units), .groups = 'drop_last') %>%
   data.frame() %>% 
   tidyr::complete(year = 2012:2050,
-                  motion_zone = unique(lsoa_to_motion_zone$motion_zone),
-                  fill = list(units = 0))
+                  motion_zone = unique(.$motion_zone),
+                  fill = list(units = 0)) %>% 
+  filter(motion_zone %in% unique(lsoa_to_motion_zone$motion_zone))
 
 #Save
 saveRDS(motion_zone_shlaa, "input_data/flexible_area_model/development_data/shlaa_trajectory_motion_zone.rds")
@@ -154,7 +155,9 @@ savills_trajectory <-  filter(motion_zone_shlaa, !year %in% 2020:2041) %>%
   rbind(short_term_savills, long_term_savills) %>% 
   filter(year >= 2020) %>% 
   rbind(ldd) %>% 
-  arrange(motion_zone, year)
+  arrange(motion_zone, year) %>% 
+  filter(motion_zone %in% unique(lsoa_to_motion_zone$motion_zone))
+
 
 #-------------------------------------------------------------------------------
 

@@ -27,6 +27,9 @@ validate_same_geog(
 \item{warn_only}{Logical. Should the function return a warning or an error.
 If set to TRUE the function returns a warning, set to FALSE returns an error.
 Default FALSE.}
+
+\item{nested_geog}{Logical. Should the nested geography be tested to ensure there
+is a many-to-one relationship between lower and higher geographies.}
 }
 \value{
 Warnings or errors if there differences in the gss codes supplied

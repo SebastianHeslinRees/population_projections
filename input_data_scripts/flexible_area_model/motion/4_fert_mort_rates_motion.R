@@ -7,10 +7,6 @@ message("motion_zone fertility & mortality")
 
 input_data_dir <- "input_data/flexible_area_model/"
 
-# lookup <- paste0(input_data_dir, "lookups/motion_zone_name_lookup.rds") %>%
-#   readRDS() %>%
-#   select(motion_zone, gss_code)
-
 lsoa_lookup <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_motion_zone_proportional.rds")
 
 lookup <- readRDS("input_data/flexible_area_model/lookups/oa_lsoa_msoa_lad11_lad21.rds") %>% 
@@ -19,6 +15,8 @@ lookup <- readRDS("input_data/flexible_area_model/lookups/oa_lsoa_msoa_lad11_lad
   right_join(lsoa_lookup, by = "gss_code_lsoa") %>% 
   select(motion_zone, gss_code) %>% 
   distinct()
+
+#-------------------------------------------------------------------------------
 
 motion_zone_pop <- paste0(input_data_dir, "backseries/motion_zone_population.rds") %>%
   readRDS()%>%
