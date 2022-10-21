@@ -28,7 +28,8 @@ out_paths <- list(target_lsoa_lookup_bf = "lookups/lsoa_to_motion_zone_best_fit_
                   target_inflow = paste0(f_paths$input_data_dir, "backseries/motion_zone_inflow.rds"),
                   target_outflow = paste0(f_paths$input_data_dir, "backseries/motion_zone_outflow.rds"),
                   dwellings_to_hh = paste0(f_paths$input_data_dir, "processed/dwelling_2_hh_ratio_motion_zone.rds"),
-                  comm_est_sya = paste0(f_paths$input_data_dir, "processed/communal_establishment_popn_motion_zone.rds"))
+                  comm_est_sya = paste0(f_paths$input_data_dir, "processed/communal_establishment_popn_motion_zone.rds"),
+                  constraint_lookup = "lookups/motion_zone_to_london_constraint.rds")
 
 #-------------------------------------------------------------------------------
 
@@ -46,6 +47,8 @@ lsoa_to_motion_zone_best_fit <- .point_in_polygon_lookup(polygon_dir = "Q:/Teams
   rename(gss_code_lsoa = LSOA11CD) %>% 
   rename(motion_zone = Sequential)
 
+#---
+
 #LSOA polygon overlap lookup
 source("E:/project_folders/demography/wil/regrosser/functions/fn_polygon_to_polygon_lookup_sf.R")
 lsoa_to_motion_zone_proportional <- .polygon_to_polygon_lookup(target_polygon_dir = "Q:/Teams/D&PA/Data/TfL/demand_zones",
@@ -59,29 +62,35 @@ lsoa_to_motion_zone_proportional <- .polygon_to_polygon_lookup(target_polygon_di
   rename(gss_code_lsoa = LSOA11CD) %>%
   rename(lsoa_share = scaling_factor)
 
-# #LAD polygon overlap lookup
-# source("E:/project_folders/demography/wil/regrosser/functions/fn_polygon_to_polygon_lookup_sf.R")
-# lsoa_to_motion_zone_proportional <- .polygon_to_polygon_lookup(target_polygon_dir = "Q:/Teams/D&PA/Data/TfL/demand_zones",
-#                                                                target_polygon_shape_file = "Demand_Zones_wv9.3_polygon",
-#                                                                target_name = "Sequential",
-#                                                                
-#                                                                match_unmatched_base_polygons = TRUE,
-#                                                                base_polygon_dir = "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2019/ESRI/National",
-#                                                                base_polygon_shape_file = "GB_District_borough_unitary",
-#                                                                base_name = "GSS_CODE")#[[1]] %>% 
-#   rename(gss_code_lsoa = LSOA11CD) %>%
-#   rename(lsoa_share = scaling_factor)
+#---
 
+#Name lookup needed for output functions
 motion_zone_name_lookup <- readRDS(paste0(f_paths$data_dir_Q_drive, f_paths$target_oa_lookup))  %>% 
   mutate(name = motion_zone)  %>%
   select(motion_zone, name) %>% 
   distinct()
 
+#---
+
+#London lookup for constraining
+constraint_lookup <- readRDS(paste0(f_paths$data_dir_Q_drive, f_paths$target_oa_lookup)) %>% 
+  left_join(readRDS("input_data/flexible_area_model/lookups/oa_lsoa_msoa_lad11_lad21.rds"),
+            by = "OA11CD") %>% 
+  filter(substr(LAD11CD,1,3)=="E09") %>% 
+  mutate(constraint_area = "London") %>% 
+  select(motion_zone, constraint_area) %>% 
+  unique()
+
+#---
+
+#save out
 saveRDS(lsoa_to_motion_zone_best_fit, paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_bf))
 saveRDS(lsoa_to_motion_zone_proportional, paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_prop))
 saveRDS(oa_to_motion_zone, paste0(f_paths$input_data_dir, out_paths$target_oa_lookup))
 saveRDS(motion_zone_name_lookup, paste0(f_paths$input_data_dir, out_paths$target_name_lookup))
+saveRDS(constraint_lookup, paste0(f_paths$input_data_dir, out_paths$constraint_lookup))
 
+#read back in - so that it can be run from here if needs be
 lsoa_to_motion_zone_best_fit <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_bf))
 lsoa_to_motion_zone_proportional <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_lsoa_lookup_prop))
 oa_to_motion_zone <- readRDS(paste0(f_paths$input_data_dir, out_paths$target_oa_lookup))
