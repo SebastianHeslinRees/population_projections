@@ -22,7 +22,7 @@ def python_to_excel_households(output_dir, wb_filename, projection_name, model):
   household_summary.columns = household_summary.columns.str.replace('_',' ')
 
   #Set the output name and prep the file for writing
-  writer = pd.ExcelWriter(output_dir+"datastore/"+wb_filename, engine='openpyxl') 
+  writer = pd.ExcelWriter(output_dir+"excel/"+wb_filename, engine='openpyxl') 
   writer.book = book
   writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
 
@@ -33,7 +33,7 @@ def python_to_excel_households(output_dir, wb_filename, projection_name, model):
   detailed_hh_pop.to_excel(writer, "communal est popn", index=False)
   household_summary.to_excel(writer, "summary", index=False)
   
-  book.get_sheet_by_name('Metadata')['A3'] = projection_name+" - "+model.upper()+" houshold model"
+  book['Metadata']['A3'] = projection_name+" - "+model.upper()+" houshold model"
   
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)

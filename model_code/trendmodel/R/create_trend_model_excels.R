@@ -22,10 +22,10 @@
 create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
                                       household_models = TRUE){
   
-  #datastore directory
+  #excel directory
   output_dir <- .add_slash(output_dir)
-  datastore_dir <- paste0(output_dir,"datastore")
-  dir.create(datastore_dir, recursive = T, showWarnings = F)
+  excel_dir <- paste0(output_dir,"excel")
+  dir.create(excel_dir, recursive = T, showWarnings = F)
   
   #excel file name
   if(str_sub(wb_filename,-5,-1)!=".xlsx"){
@@ -108,7 +108,7 @@ create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
   
   try( reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py'), silent = TRUE)
   reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py') 
-  python_to_excel_trendmodel(persons, female, male, components, datastore_dir, wb_filename, projection_name)
+  python_to_excel_trendmodel(persons, female, male, components, excel_dir, wb_filename, projection_name)
   
   if(household_models){
     wb_filename <- substr(wb_filename, 1, nchar(wb_filename)-5)

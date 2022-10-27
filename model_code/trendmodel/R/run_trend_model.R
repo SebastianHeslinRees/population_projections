@@ -49,7 +49,8 @@ run_trend_model <- function(config_list) {
                        "dclg_stage2_file_path",
                        "qa_areas_of_interest",
                        "write_QA",
-                       "write_excel")
+                       "write_excel",
+                       "geog_code_col")
   
   validate_config_list(config_list, expected_config)
   
@@ -208,14 +209,18 @@ run_trend_model <- function(config_list) {
     domestic_rates <- get_rates_or_flows(domestic_rates, domestic_rates_info,
                                          projection_year, first_proj_yr,
                                          col_aggregation = c("gss_in","gss_out","sex","age"),
-                                         data_col = "rate")
+                                         data_col = "rate",
+                                         geog_code_col = config_list$geog_code_col,
+                                         standardise_geog = FALSE)
     
     curr_yr_domestic_rates <- select(domestic_rates, gss_in, gss_out, sex, age, rate)
     
     int_in_flows <- get_rates_or_flows(int_in_flows, international_in_flow_info,
                                        projection_year, first_proj_yr,
                                        col_aggregation = c("gss_code","sex","age"),
-                                       data_col = "int_in")
+                                       data_col = "int_in",
+                                       geog_code_col = config_list$geog_code_col,
+                                       standardise_geog = FALSE)
     
     curr_yr_int_in <- int_in_flows %>% 
       mutate(year = projection_year) %>% 
@@ -224,7 +229,9 @@ run_trend_model <- function(config_list) {
     int_out_flows_rates <- get_rates_or_flows(int_out_flows_rates, international_out_flow_info,
                                               projection_year, first_proj_yr,
                                               col_aggregation = c("gss_code","sex","age"),
-                                              data_col = "int_out")
+                                              data_col = "int_out",
+                                              geog_code_col = config_list$geog_code_col,
+                                              standardise_geog = FALSE)
     
     curr_yr_int_out <- int_out_flows_rates %>% 
       mutate(year = projection_year) %>% 

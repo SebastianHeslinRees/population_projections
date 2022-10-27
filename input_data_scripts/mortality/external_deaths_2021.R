@@ -41,12 +41,12 @@ covid_deaths <- readRDS(covid_deaths_path) %>%
   mutate(deaths = upc*-1) %>% 
   select(-upc)
 
-additional_deaths <- rbind(deaths, covid_deaths) %>% 
+total_deaths <- rbind(deaths, covid_deaths) %>% 
   group_by(year, gss_code, sex, age) %>% 
   summarise(deaths = sum(deaths),
             .groups = "drop_last") %>% 
   data.frame()
 
-saveRDS(additional_deaths, "input_data/mortality/external_deaths_2021.rds")
+saveRDS(total_deaths, "input_data/mortality/external_deaths_2021.rds")
 
 rm(list = ls())
