@@ -3,8 +3,8 @@ projection_name <- "motion_Upper"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CC_central_upper_21-09-21_1259/",
-                        apply_constraint_lookup_path =  "input_data/flexible_area_model/lookups/NUTS2_motion_zone.rds",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
+                        apply_constraint_lookup_path =  "input_data/flexible_area_model/lookups/motion_zone_to_london_constraint.rds",
+                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/boroughs_to_london.rds",
                         mapping = c("constraint_area","year","sex","age"),
                         components = list(births = T,
                                           deaths = T,
