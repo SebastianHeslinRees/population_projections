@@ -46,6 +46,32 @@ in_mig_flows_5 <- ward_in_mig %>%
 
 #-------------------------------------------------------------------------------
 
+# Averaged migration flows and rates - 10 YEAR
+
+out_mig_rates_9 <- denominator_popn %>% 
+  left_join(ward_out_mig, by = c("gss_code_ward", "year", "sex", "age")) %>% 
+  mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
+  calculate_mean_from_backseries(n_years_to_avg = 9, 
+                                 last_data_year = 2020, 
+                                 data_col = "out_rate",
+                                 col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+                                 project_rate_from = 2021) %>% 
+  mutate(out_rate = ifelse(out_rate > 0.8, 0.8, out_rate)) %>% 
+  project_forward_flat(2050)
+
+#-------------------------------------------------------------------------------
+
+in_mig_flows_9 <- ward_in_mig %>% 
+  calculate_mean_from_backseries(n_years_to_avg = 9, 
+                                 last_data_year = 2020,
+                                 data_col = "inflow",
+                                 col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+                                 project_rate_from = 2021) %>% 
+  rename(in_flow = inflow) %>% 
+  project_forward_flat(2050)
+
+#-------------------------------------------------------------------------------
+
 # Approximate  Covid-affected migration rates so that
 
 trend_projection_migration <- "Q:/Teams/D&PA/Demography/Projections/population_models/outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/"
@@ -133,6 +159,9 @@ rm(scaling_out_2021, scaling_out_2022, total_out_avg)
 
 saveRDS(in_mig_flows_5,  paste0(input_data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"))
 saveRDS(out_mig_rates_5,  paste0(input_data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"))
+
+saveRDS(in_mig_flows_9,  paste0(input_data_dir, "processed/in_migration_flows_WD22CD_9yr_avg.rds"))
+saveRDS(out_mig_rates_9,  paste0(input_data_dir, "processed/out_migration_rates_WD22CD_9yr_avg.rds"))
 
 saveRDS(scaled_IN_2021,  paste0(input_data_dir, "processed/in_migration_flows_WD22CD_Covid_2021.rds"))
 saveRDS(scaled_IN_2022,  paste0(input_data_dir, "processed/in_migration_flows_WD22CD_Covid_2022.rds"))

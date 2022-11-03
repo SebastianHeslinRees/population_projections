@@ -7,128 +7,13 @@ base_trajectory <- readRDS("Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/
 
 #-----------
 
-for(x in c(0,100,200,300,400,500,1000)){
-  
-  projection_name <- paste0("TH_sensitivity_", x, "_unit_uplift")
-  dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-  projection_name <- paste0(projection_name, "_UNC")
-  
-  # back_dev <- filter(base_trajectory, year < 2020)
-  # foward_dev <- filter(base_trajectory, year >= 2020)
-  # 
-  # th_trajectory <- filter(foward_dev, gss_code_ward %in% th_wards) %>% 
-  #   mutate(units = units + x)
-  # 
-  # new_dev <- filter(foward_dev, !gss_code_ward %in% th_wards) %>% 
-  #   bind_rows(th_trajectory, back_dev)
-  # 
-  # saveRDS(new_dev, paste0(data_dir, dev_trajectory))
-  # 
-  
-  #Constraints
-  constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                          make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                          apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                          mapping = c("constraint_area","year","sex","age"),
-                          components = list(births = F,
-                                            deaths = F,
-                                            in_migration = F,
-                                            out_migration = F,
-                                            population = F))
-  #Migration
-  in_migration <- list(
-    '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2021.rds"),
-                  transition = F),
-    '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2022.rds"),
-                  transition = T),
-    '2025' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                  transition = F))
-  
-  out_migration <- list(
-    '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2021.rds"),
-                  transition = F),
-    '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2022.rds"),
-                  transition = T),
-    '2025' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                  transition = F))
-  
-  #Config
-  config_list <- list(projection_name = projection_name,
-                      first_proj_yr = 2021,
-                      n_proj_yr = 21,
-                      output_dir = paste0("outputs/flexible_area_model/", projection_name),
-                      
-                      #backseries
-                      population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                      deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                      births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                      out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                      in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                      
-                      #rates
-                      mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                      fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                      in_migration = in_migration,
-                      out_migration = out_migration,
-                      
-                      #constraints
-                      constraint_list = constraint_list,
-                      
-                      #HOUSING-LED STUFF
-                      dev_trajectory_path = paste0(data_dir, dev_trajectory), 
-                      ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                      communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                      dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                      
-                      #settings
-                      hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                      ahs_mix = 0.8,
-                      hhr_static_or_projected = "static",
-                      lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                      excess_deaths_path = NULL,
-                      geog_code_col = "gss_code_ward",
-                      geog_name_col = "ward_name",
-                      parallel = FALSE,
-                      borough_outputs = TRUE
-                      
-  )
-  
-  model_output <- flexmodel_hl_projection(config_list)
-  
-  create_excel(config_list$output_dir, paste0("th_",x,"_unc.xlsx"), projection_name, bpo = "E09000030")
-  
-}
+# BASE SCENARIO
 
-
-#-------------------------------------------------------------------------------
-
-#No COVID
-
-projection_name <- paste0("TH_sensitivity_1000_unit_uplift")
-dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-projection_name <- paste0(projection_name, "_UNC_No_COVID")
-
-#Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                        apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                        mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
-                                          in_migration = F,
-                                          out_migration = F,
-                                          population = F))
-#Migration
-in_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-out_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                transition = F))
+dev_trajectory <- "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/rds/bpo_ward_trajectory_tower_hamlets_WD22.rds"
+projection_name <- "TH sensitivity Base Scenario"
 
 #Config
-config_list <- list(projection_name = projection_name,
+base_config <- list(projection_name = projection_name,
                     first_proj_yr = 2021,
                     n_proj_yr = 21,
                     output_dir = paste0("outputs/flexible_area_model/", projection_name),
@@ -143,14 +28,34 @@ config_list <- list(projection_name = projection_name,
                     #rates
                     mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
                     fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
+                    in_migration = list(
+                      '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2021.rds"),
+                                    transition = F),
+                      '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2022.rds"),
+                                    transition = T),
+                      '2025' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
+                                    transition = F)),
+                    out_migration = list(
+                      '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2021.rds"),
+                                    transition = F),
+                      '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2022.rds"),
+                                    transition = T),
+                      '2025' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
+                                    transition = F)),
                     
                     #constraints
-                    constraint_list = constraint_list,
+                    constraint_list = list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
+                                           make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
+                                           apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
+                                           mapping = c("constraint_area","year","sex","age"),
+                                           components = list(births = F,
+                                                             deaths = F,
+                                                             in_migration = F,
+                                                             out_migration = F,
+                                                             population = F)),
                     
                     #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, dev_trajectory), 
+                    dev_trajectory_path = "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/rds/bpo_ward_trajectory_tower_hamlets_WD22.rds", 
                     ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
                     communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
                     dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
@@ -168,372 +73,90 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
-model_output <- flexmodel_hl_projection(config_list)
-
-create_excel(config_list$output_dir, paste0("th_1000_unc_no_COVID.xlsx"), projection_name, bpo = "E09000030")
-
-#-------------------------------------------------------------------------------
-
-#No COVID & AHS Mix = 1
-
-projection_name <- paste0("TH_sensitivity_1000_unit_uplift")
-dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-projection_name <- paste0(projection_name, "_UNC_AHS_1")
-
-#Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                        apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                        mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
-                                          in_migration = F,
-                                          out_migration = F,
-                                          population = F))
-#Migration
-in_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-out_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-#Config
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2021,
-                    n_proj_yr = 21,
-                    output_dir = paste0("outputs/flexible_area_model/", projection_name),
-                    
-                    #backseries
-                    population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                    deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                    births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                    out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                    in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                    
-                    #rates
-                    mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                    fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    
-                    #constraints
-                    constraint_list = constraint_list,
-                    
-                    #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, dev_trajectory), 
-                    ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                    communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                    dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                    
-                    #settings
-                    hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                    ahs_mix = 1,
-                    hhr_static_or_projected = "static",
-                    lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                    excess_deaths_path = NULL,
-                    geog_code_col = "gss_code_ward",
-                    geog_name_col = "ward_name",
-                    parallel = FALSE,
-                    borough_outputs = TRUE
-                    
-)
-
-model_output <- flexmodel_hl_projection(config_list)
-
-create_excel(config_list$output_dir, paste0("th_1000_unc_AHS_1.xlsx"), projection_name, bpo = "E09000030")
-
-#-------------------------------------------------------------------------------
-
-#No COVID & AHS Mix = 1
-
-projection_name <- paste0("TH_sensitivity_1000_unit_uplift")
-dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-projection_name <- paste0(projection_name, "_UNC_AHS_0")
-
-#Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                        apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                        mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
-                                          in_migration = F,
-                                          out_migration = F,
-                                          population = F))
-#Migration
-in_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-out_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-#Config
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2021,
-                    n_proj_yr = 21,
-                    output_dir = paste0("outputs/flexible_area_model/", projection_name),
-                    
-                    #backseries
-                    population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                    deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                    births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                    out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                    in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                    
-                    #rates
-                    mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                    fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    
-                    #constraints
-                    constraint_list = constraint_list,
-                    
-                    #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, dev_trajectory), 
-                    ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                    communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                    dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                    
-                    #settings
-                    hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                    ahs_mix = 0,
-                    hhr_static_or_projected = "static",
-                    lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                    excess_deaths_path = NULL,
-                    geog_code_col = "gss_code_ward",
-                    geog_name_col = "ward_name",
-                    parallel = FALSE,
-                    borough_outputs = TRUE
-                    
-)
-
-model_output <- flexmodel_hl_projection(config_list)
-
-create_excel(config_list$output_dir, paste0("th_1000_unc_AHS_0.xlsx"), projection_name, bpo = "E09000030")
+model_output <- flexmodel_hl_projection(base_config)
 
 
 #-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-
-#ZERO UPLIFT
-
 #-------------------------------------------------------------------------------
 
 #No COVID
 
-projection_name <- paste0("TH_sensitivity_0_unit_uplift")
-dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-projection_name <- paste0(projection_name, "_UNC_No_COVID")
+no_covid_config <- base_config
+projection_name <- "TH_sensitivity_No_COVID"
+no_covid_config$projection_name <- projection_name
+no_covid_config$output_dir <- paste0("outputs/flexible_area_model/", projection_name)
 
-#Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                        apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                        mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
-                                          in_migration = F,
-                                          out_migration = F,
-                                          population = F))
-#Migration
-in_migration <- list(
+no_covid_config$in_migration <- list(
   '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
                 transition = F))
 
-out_migration <- list(
+no_covid_config$out_migration <- list(
   '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
                 transition = F))
 
-#Config
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2021,
-                    n_proj_yr = 21,
-                    output_dir = paste0("outputs/flexible_area_model/", projection_name),
-                    
-                    #backseries
-                    population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                    deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                    births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                    out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                    in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                    
-                    #rates
-                    mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                    fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    
-                    #constraints
-                    constraint_list = constraint_list,
-                    
-                    #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, dev_trajectory), 
-                    ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                    communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                    dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                    
-                    #settings
-                    hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                    ahs_mix = 0.8,
-                    hhr_static_or_projected = "static",
-                    lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                    excess_deaths_path = NULL,
-                    geog_code_col = "gss_code_ward",
-                    geog_name_col = "ward_name",
-                    parallel = FALSE,
-                    borough_outputs = TRUE
-                    
-)
 
-model_output <- flexmodel_hl_projection(config_list)
-
-create_excel(config_list$output_dir, paste0("th_0_unc_no_COVID.xlsx"), projection_name, bpo = "E09000030")
+model_output <- flexmodel_hl_projection(no_covid_config)
 
 #-------------------------------------------------------------------------------
 
-#No COVID & AHS Mix = 1
+#AHS Mix = 1
+AHS_1_config <- base_config
+projection_name <- "TH_sensitivity_AHS_1"
+AHS_1_config$projection_name <- projection_name
+AHS_1_config$output_dir <- paste0("outputs/flexible_area_model/", projection_name)
+AHS_1_config$ahs_mix <- 1
 
-projection_name <- paste0("TH_sensitivity_0_unit_uplift")
-dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-projection_name <- paste0(projection_name, "_UNC_AHS_1")
-
-#Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                        apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                        mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
-                                          in_migration = F,
-                                          out_migration = F,
-                                          population = F))
-#Migration
-in_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-out_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                transition = F))
-
-#Config
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2021,
-                    n_proj_yr = 21,
-                    output_dir = paste0("outputs/flexible_area_model/", projection_name),
-                    
-                    #backseries
-                    population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                    deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                    births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                    out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                    in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                    
-                    #rates
-                    mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                    fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    
-                    #constraints
-                    constraint_list = constraint_list,
-                    
-                    #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, dev_trajectory), 
-                    ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                    communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                    dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                    
-                    #settings
-                    hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                    ahs_mix = 1,
-                    hhr_static_or_projected = "static",
-                    lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                    excess_deaths_path = NULL,
-                    geog_code_col = "gss_code_ward",
-                    geog_name_col = "ward_name",
-                    parallel = FALSE,
-                    borough_outputs = TRUE
-                    
-)
-
-model_output <- flexmodel_hl_projection(config_list)
-
-create_excel(config_list$output_dir, paste0("th_0_unc_AHS_1.xlsx"), projection_name, bpo = "E09000030")
+model_output <- flexmodel_hl_projection(AHS_1_config)
 
 #-------------------------------------------------------------------------------
 
-#No COVID & AHS Mix = 1
+#AHS Mix = 0
+AHS_0_config <- base_config
+projection_name <- "TH_sensitivity_AHS_0"
+AHS_0_config$projection_name <- projection_name
+AHS_0_config$output_dir <- paste0("outputs/flexible_area_model/", projection_name)
+AHS_0_config$ahs_mix <- 0
 
-projection_name <- paste0("TH_sensitivity_0_unit_uplift")
-dev_trajectory <- paste0("TH_dev_scenarios/",projection_name, "_DEV.rds")
-projection_name <- paste0(projection_name, "_UNC_AHS_0")
+model_output <- flexmodel_hl_projection(AHS_0_config)
 
-#Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
-                        apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/NUTS2_WD22.rds",
-                        mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
-                                          in_migration = F,
-                                          out_migration = F,
-                                          population = F))
-#Migration
-in_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
+
+#-------------------------------------------------------------------------------
+
+# 9-year migration
+
+long_mig_config <-base_config
+projection_name <- "9_yr_migration"
+long_mig_config$projection_name <- projection_name
+long_mig_config$output_dir <- paste0("outputs/flexible_area_model/", projection_name)
+
+long_mig_config$in_migration <- list(
+  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2021.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2022.rds"),
+                transition = T),
+  '2025' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_9yr_avg.rds"),
                 transition = F))
 
-out_migration <- list(
-  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
+long_mig_config$out_migration <- list(
+  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2021.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2022.rds"),
+                transition = T),
+  '2025' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_9yr_avg.rds"),
                 transition = F))
 
-#Config
-config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2021,
-                    n_proj_yr = 21,
-                    output_dir = paste0("outputs/flexible_area_model/", projection_name),
-                    
-                    #backseries
-                    population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                    deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                    births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                    out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                    in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                    
-                    #rates
-                    mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                    fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                    in_migration = in_migration,
-                    out_migration = out_migration,
-                    
-                    #constraints
-                    constraint_list = constraint_list,
-                    
-                    #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, dev_trajectory), 
-                    ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                    communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                    dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                    
-                    #settings
-                    hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                    ahs_mix = 0,
-                    hhr_static_or_projected = "static",
-                    lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                    excess_deaths_path = NULL,
-                    geog_code_col = "gss_code_ward",
-                    geog_name_col = "ward_name",
-                    parallel = FALSE,
-                    borough_outputs = TRUE
-                    
-)
+model_output <- flexmodel_hl_projection(long_mig_config)
 
-model_output <- flexmodel_hl_projection(config_list)
+#-------------------------------------------------------------------------------
 
-create_excel(config_list$output_dir, paste0("th_0_unc_AHS_0.xlsx"), projection_name, bpo = "E09000030")
+#1000 unit uplift
+uplift <- base_config
+projection_name <- "TH_sensitivity_1000_uplift"
+uplift$projection_name <- projection_name
+uplift$output_dir <- paste0("outputs/flexible_area_model/", projection_name)
+uplift$dev_trajectory_path <-  "input_data/flexible_area_model/TH_dev_scenarios/TH_sensitivity_1000_unit_uplift_DEV.rds"
+
+model_output <- flexmodel_hl_projection(uplift)
+
+
+#-------------------------------------------------------------------------------

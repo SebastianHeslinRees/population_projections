@@ -1,15 +1,18 @@
+#Central Upper, Identified Capacity
+
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "motion_Unconstrained"
+projection_name <- "motion_Upper"
 
 #Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
+constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CC_central_upper_21-09-21_1259/",
+                        apply_constraint_lookup_path =  "input_data/flexible_area_model/lookups/motion_zone_to_london_constraint.rds",
+                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/boroughs_to_london.rds",
                         mapping = c("constraint_area","year","sex","age"),
-                        components = list(births = F,
-                                          deaths = F,
+                        components = list(births = T,
+                                          deaths = T,
                                           in_migration = F,
                                           out_migration = F,
-                                          population = F))
+                                          population = T))
 #Migration
 in_migration <- list(
   '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_motion_zone_5yr_avg.rds"),
@@ -61,6 +64,6 @@ config_list <- list(projection_name = projection_name,
 
 devtools::load_all('model_code/popmodules/')
 devtools::load_all("model_code/flexibleareamodel/")
-
 model_output <- flexmodel_hl_projection(config_list)
+
 
