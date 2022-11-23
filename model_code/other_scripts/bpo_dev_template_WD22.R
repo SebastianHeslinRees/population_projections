@@ -1,17 +1,17 @@
 library(dplyr)
 library(data.table)
 
-dummy <- readRDS("input_data/new_ward_model/lookups/dummy_ward_2022_name_lookup.rds")
+ward_2022_name_lookup <- readRDS("C:/Projects_c/population_projections/input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds") 
 
-ldd_2022 <- readRDS("input_data/new_ward_model/development_data/ldd_backseries_dwellings_ward_WD22CD.rds") %>% 
-  left_join(dummy, by = "gss_code_ward") %>% 
-  filter(substr(gss_code_ward, 1, 3)=="E09")%>% 
+ldd_2022 <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD22CD.rds") %>% 
+  left_join(select(ward_2022_name_lookup, gss_code_ward, ward_name), by = "gss_code_ward") %>% 
+  #filter(substr(gss_code, 1, 3)=="E09")%>% 
   group_by(gss_code_ward, ward_name, year) %>% 
   summarise(units = sum(units), .groups = 'drop_last') %>% 
   filter(year %in% 2012:2019)
 
-template <- expand.grid(year = 2020:2041, gss_code_ward = unique(dummy$gss_code_ward), units = NA) %>%
-  left_join(select(dummy, -gss_code, -la_name), by = "gss_code_ward") %>% 
+template <- expand.grid(year = 2020:2041, gss_code_ward = unique(ward_2022_name_lookup$gss_code_ward), units = NA) %>%
+  left_join(select(ward_2022_name_lookup, gss_code_ward, ward_name), by = "gss_code_ward") %>% 
   rbind(ldd_2022) %>% 
   arrange(year, gss_code_ward) %>% 
   mutate(units = round(units,1)) %>% 
@@ -53,9 +53,12 @@ notes[5,1] <- "See the 2020-based BPO Developmenty Template Guide for more infor
 
 #i <- "Harrow"
 
-for(i in unique(dummy$la_name)){
+folder <- "Q:/Teams/D&PA/Demography/Projections/bpo_2021_based/blank_templates/2022_wards/"
+dir.create(folder, recursive = T, showWarnings = F)
+
+for(i in unique(ward_2022_name_lookup$la_name)){
   
-  borough <- filter(dummy, la_name == i) %>% 
+  borough <- filter(ward_2022_name_lookup, la_name == i) %>% 
     distinct() %>% 
     select(-gss_code, -la_name)
   
@@ -66,8 +69,6 @@ for(i in unique(dummy$la_name)){
                   non_self, empty, header, borough_template_non_self, empty,
                   notes)
   
-  
-  folder <- "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/blank_templates/2022_wards/"
   fwrite(output, paste0(folder, i, " (2022 wards).csv"), col.names = FALSE)
   
 }
