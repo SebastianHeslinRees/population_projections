@@ -1,19 +1,22 @@
 library(dplyr)
 library(data.table)
 library(popmodules)
+library(stringr)
 
 message("Ward 2022 backseries")
 
 # Create file structure
 
 input_data_dir <- "input_data/flexible_area_model/"
-data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/"
+regrosser_data <- "E:/project_folders/demography/wil/regrosser/data/"
+
 dir.create(input_data_dir, showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "backseries"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "processed"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "development_data"), showWarnings = FALSE)
 
 lsoa_to_ward <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
+ward_LAD <- readRDS(paste0(input_data_dir, "lookups/ward_2022_name_lookup.rds"))
 
 #-------------------------------------------------------------------------------
 
@@ -21,52 +24,56 @@ lsoa_to_ward <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_WD22_lookup_best
 # these present as NA in the WD22CD column
 # filter these out
 
-ward_pop <- readRDS(paste0(data_dir_Q_drive, "regrosser/created/ward_population_estimates_WD22.rds")) %>% 
-  filter(!is.na(WD22CD)) %>% 
-  rename(popn = value,
-         gss_code_ward = WD22CD) %>% 
+ward_pop <- readRDS(paste0(regrosser_data, "estimates_series/WD22CD/WD22CD_population_London_2021_series.rds")) %>% 
+  rename(gss_code_ward = WD22CD) %>% 
+  left_join(ward_LAD, by = "gss_code_ward") %>% 
   mutate(geography = "WD22CD") %>% 
   select(geography, year, gss_code, gss_code_ward, sex, age, popn)
 
-ward_births <- readRDS(paste0(data_dir_Q_drive, "regrosser/created/births_ward_WD22.rds")) %>% 
-  filter(!is.na(WD22CD)) %>% 
-  rename(gss_code_ward = WD22CD) %>% 
-  mutate(births = value,
-         geography = "WD22CD") %>% 
+ward_births <- readRDS(paste0(regrosser_data, "estimates_series/WD22CD/WD22CD_births_London_2021_series.rds")) %>% 
+  rename(gss_code_ward = WD22CD) %>%
+  left_join(ward_LAD, by = "gss_code_ward") %>% 
+  mutate(geography = "WD22CD") %>% 
   select(geography, year, gss_code, gss_code_ward, sex, age, births)
 
-ward_deaths <- readRDS(paste0(data_dir_Q_drive, "regrosser/created/deaths_ward_WD22_sya.rds")) %>% 
-  filter(!is.na(WD22CD)) %>% 
-  rename(deaths = value,
-         gss_code_ward = WD22CD) %>% 
+ward_deaths <- readRDS(paste0(regrosser_data, "estimates_series/WD22CD/WD22CD_deaths_London_2021_series.rds")) %>% 
+  rename(gss_code_ward = WD22CD) %>% 
+  left_join(ward_LAD, by = "gss_code_ward") %>% 
   mutate(geography = "WD22CD") %>% 
   select(geography, year, gss_code, gss_code_ward, sex, age, deaths)
 
 #-------------------------------------------------------------------------------
 
-# Migration flows are saved as 1 file per borough
+# Gross flows are saved by year
 # Loop through to read in then bind together
-
-flows <- list.files(paste0(data_dir_Q_drive, "regrosser/outputs/ward_2022"), full.names = TRUE)
 gross_flows <- list()
 
-for(i in 1:33){
-  gross_flows[[i]] <- readRDS(flows[i]) %>% 
+for(i in 2011:2021){
+
+  gross_flows[[i]] <- readRDS(paste0(regrosser_data, "gross_migration/WD22CD/WD22_gross_flows_London_2021_series_",i,".rds")) %>% 
     mutate(geography = "WD22CD") %>%
     rename(gss_code_ward = WD22CD) %>% 
-    select(geography, year, gss_code, gss_code_ward, sex, age, inflow, outflow)
+    select(geography, year, gss_code_ward, sex, age, inflow, outflow)
 }
 
-gross_flows <- rbindlist(gross_flows)
-ward_inflow <- gross_flows %>% select(-outflow) %>% data.frame()
-ward_outflow <- gross_flows %>% select(-inflow) %>% data.frame()
-rm(flows, gross_flows, i)
+gross_flows <- rbindlist(gross_flows) %>% 
+  left_join(ward_LAD, by = "gss_code_ward")
+
+ward_inflow <- gross_flows %>%
+  select(geography, year, gss_code, gss_code_ward, sex, age, inflow) %>%
+  data.frame()
+
+ward_outflow <- gross_flows %>% select(-inflow)  %>%
+  select(geography, year, gss_code, gss_code_ward, sex, age, outflow) %>%
+  data.frame()
+
+rm(gross_flows, i)
 
 #-------------------------------------------------------------------------------
 
 # Dwelling to household ratio
 
-dwellinngs_to_hh <- fread(paste0(data_dir_Q_drive, "dwelling_to_hh_LSOA.csv")) %>%
+dwellinngs_to_hh <- fread(paste0(regrosser_data, "dwelling_to_hh_LSOA.csv")) %>%
   data.frame() %>% 
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>% 
   group_by(gss_code_ward) %>% 
@@ -81,8 +88,8 @@ dwellinngs_to_hh <- fread(paste0(data_dir_Q_drive, "dwelling_to_hh_LSOA.csv")) %
 # Create single year of age from grouped data
 
 communal_est_lsoa <- rbind(
-  fread(paste0(data_dir_Q_drive, 'communal_est_males_lsoa.csv'), header = TRUE),
-  fread(paste0(data_dir_Q_drive, 'communal_est_females_lsoa.csv'), header = TRUE)) %>% 
+  fread(paste0(regrosser_data, 'communal_est_males_lsoa.csv'), header = TRUE),
+  fread(paste0(regrosser_data, 'communal_est_females_lsoa.csv'), header = TRUE)) %>% 
   tidyr::pivot_longer(values_to = "ce_popn", names_to = "age_group", cols = starts_with("Age")) %>% 
   mutate(age_min = as.numeric(substr(age_group, 5,6))) %>% 
   mutate(age_max = ifelse(age_min < 10, substr(age_group, 9,10),

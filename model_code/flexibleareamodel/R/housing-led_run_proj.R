@@ -63,7 +63,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   dir.create(config_list$output_dir, recursive = T, showWarnings = F)
   loggr::log_file(paste0(config_list$output_dir,"warnings.log"))
   write_model_config(config_list)
-  
+ 
   #-------------------------------------------------------------------------------
   
   #Validate paths
@@ -174,7 +174,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
     cat('\r',projection_year)
     utils::flush.console()
     #if(projection_year >= 2024){browser()}
-    
+    #browser()
     #fertility & mortality
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)

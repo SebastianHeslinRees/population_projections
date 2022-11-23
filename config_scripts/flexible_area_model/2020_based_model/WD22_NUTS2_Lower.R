@@ -1,12 +1,11 @@
 library(popmodules)
-#library(flexibleareamodel)
+library(flexibleareamodel)
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "TEST_2021_based"
+projection_name <- "SHLAA_Scenario1_WD22"
 
 #Constraints
 constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lower_21-09-21_1259/",
-                        apply_constraint_lookup_path =  "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
-                        make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
+                        lookup_path = "input_data/flexible_area_model/lookups/NUTS2_hma.rds",
                         mapping = c("constraint_area","year","sex","age"),
                         components = list(births = T,
                                           deaths = T,
@@ -15,18 +14,26 @@ constraint_list <- list(constraint_path = "outputs/trend/2020/2020_CH_central_lo
                                           population = T))
 #Migration
 in_migration <- list(
-  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
+  '2021' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2021.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_Covid_2022.rds"),
+                transition = T),
+  '2025' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
                 transition = F))
 
 out_migration <- list(
-  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
+  '2021' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2021.rds"),
+                transition = F),
+  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_Covid_2022.rds"),
+                transition = T),
+  '2025' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
                 transition = F))
 
 #Config
 config_list <- list(projection_name = projection_name,
-                    first_proj_yr = 2022,
-                    n_proj_yr = 2, #20
-                    output_dir = paste0("outputs/flexible_area_model/2021_based/", projection_name),
+                    first_proj_yr = 2021,
+                    n_proj_yr = 21, #21
+                    output_dir = paste0("outputs/flexible_area_model/", projection_name),
                     
                     #backseries
                     population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
@@ -58,12 +65,10 @@ config_list <- list(projection_name = projection_name,
 
                     excess_deaths_path = NULL,
                     geog_code_col = "gss_code_ward",
-                    geog_name_col = "ward_name",
-                    parallel = FALSE,
-                    borough_outputs = TRUE
+                    geog_name_col = "ward_name"
+                    
 )
 
-devtools::load_all("model_code/flexibleareamodel")
 model_output <- flexmodel_hl_projection(config_list)
 
-create_excel(config_list$output_dir, "TEST.xlsx", "2021-based Test Projection WD22")
+create_excel(config_list$output_dir, "SHLAA Scenario 1 WD22.xlsx", "SHLAA Scenario 1 WD22")

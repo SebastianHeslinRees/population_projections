@@ -39,7 +39,6 @@ arrange_flexmodel_outputs <- function(projection,
                                       config_list, model,
                                       n_cores = 1, parallel = FALSE){
   
-  
   lookup <- readRDS(config_list$lookup_path) %>% 
     rename(area_code = all_of(config_list$geog_code_col),
            area_name = all_of(config_list$geog_name_col))

@@ -13,8 +13,6 @@ reticulate::py_install(c("pandas","openpyxl"))
 
 #Create directories
 dir.create("input_data/lookup", showWarnings = FALSE, recursive = TRUE)
-#dir.create("input_data/small_area_model", showWarnings = FALSE)
-dir.create("input_data/housing_led_model", showWarnings = FALSE)
 dir.create("model_code/popmodules/tests/testthat/test_data/", showWarnings = FALSE, recursive = TRUE)
 
 #-------------------------------------------------------------------------------
@@ -103,25 +101,4 @@ assertthat::assert_that(
 
 #-------------------------------------------------------------------------------
 
-#### Small area data
-
-#Needs to be done in this order as subsequent steps use data created in precedent steps
-#Some scripts read data from Q:/
-# message("small area model data")
-# 
-# source('input_data_scripts/small_area_data/ons_small_area_estimates.R')
-# source('input_data_scripts/small_area_data/births_and_deaths.R')
-# 
-# source('input_data_scripts/small_area_data/ward_communal_establishment_population.R')
-# source('input_data_scripts/small_area_data/ward_adults_per_dwelling.R')
-# source('input_data_scripts/small_area_data/ward_migration_data.R')
-# 
-# source('input_data_scripts/small_area_data/msoa_communal_establishment_population.R')
-# source('input_data_scripts/small_area_data/msoa_adults_per_dwelling.R')
-# source('input_data_scripts/small_area_data/msoa_migration_data.R')
-# 
-# #-------------------------------------------------------------------------------
-# 
-# source('input_data_scripts/small_area_data/test_small_area_inputs.R')
-# message("small area data complete")
 message("initialize complete")

@@ -5,43 +5,7 @@ library(stringr)
 #This script makes lookups and saves them to the Q drive & into the project
 
 data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/"
-project_data_dir <- "input_data/flexible_area_model/"
-dir.create(paste0(project_data_dir, "lookups"), showWarnings = FALSE)
-
-#-------------------------------------------------------------------------------
-
-#Dummy codes
-
-dummy_ward_codes <- fread(paste0(data_dir_Q_drive, "lookups/London_wards_2022.csv")) %>% 
-  select(gss_code = la_gsscode, ward_name, la_name = la_distric) %>% 
-  distinct %>% 
-  arrange(gss_code, ward_name) %>% 
-  group_by(gss_code) %>% 
-  mutate(count = 1:n()) %>% 
-  data.frame() %>% 
-  mutate(count = ifelse(count<10, paste0("0",count), as.character(count))) %>% 
-  mutate(gss_code_ward = paste0(gss_code,"_",count)) %>% 
-  mutate(ward_name = str_replace_all(ward_name, "\\.", "")) %>% 
-  select(-count) %>% 
-  filter(gss_code != "E09000001") %>% 
-  rbind(data.frame(gss_code = "E09000001",
-                   ward_name = "City of London",
-                   gss_code_ward = "E09000001",
-                   la_name = "City of London"))
-
-#saveRDS(dummy_ward_codes, paste0(data_dir_Q_drive, "lookups/dummy_WD22_code_lookup.rds"))
-
-#-------------------------------------------------------------------------------
-
-provisional_WD22 <- fread(paste0(data_dir_Q_drive, "lookups/WD22_LAD22_UK_LU_provisional.csv")) %>% 
-  right_join(dummy_ward_codes, by=c("WD22NM"="ward_name", "LAD22CD"="gss_code")) %>% 
-  mutate(WD22CD = ifelse(LAD22CD == "E09000001", "E09000001", WD22CD)) %>% 
-  data.frame() %>% 
-  rename(dummy_code = gss_code_ward) %>% 
-  rename(gss_code_ward = WD22CD, ward_name = WD22NM, gss_code = LAD22CD) %>% 
-  select(-LAD22NM)
-
-saveRDS(provisional_WD22, paste0(data_dir_Q_drive, "lookups/provisional_and_dummy_WD22_code_lookup.rds"))
+data_dir <- "input_data/flexible_area_model/"
 
 #-------------------------------------------------------------------------------
 
@@ -108,17 +72,26 @@ saveRDS(proportional_oa_ward, paste0(data_dir_Q_drive,"lookups/oa_to_WD22_propor
 
 #-------------------------------------------------------------------------------
 
+#Ward to NUTS2 (HMA) lookup
+LAD_to_NUTS2 <- readRDS("input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds")
+ward_to_LAD <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds")
+wD22_to_NUTS2 <- left_join(ward_to_LAD, LAD_to_NUTS2, by = "gss_code") %>% 
+  select(gss_code_ward, constraint_area)
+saveRDS(wD22_to_NUTS2, "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds")
+
+#-------------------------------------------------------------------------------
+
 # Save to project folder
 
 lsoa_to_lsoa <- readRDS(paste0(data_dir_Q_drive, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
 ward_names <- select(provisional_WD22, gss_code_ward, ward_name, gss_code, la_name)
 
-saveRDS(lsoa_to_wd22, paste0(project_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
-saveRDS(provisional_WD22, paste0(project_data_dir, "lookups/dummy_WD22_codes.rds"))
-saveRDS(ward_names, paste0(project_data_dir, "lookups/ward_2022_name_lookup.rds"))
-saveRDS(oa_to_wd22, paste0(project_data_dir, "lookups/oa_to_WD22_lookup_best_fit.rds"))
-saveRDS(proportional_oa_ward, paste0(project_data_dir,"lookups/oa_to_WD22_proportional.rds"))
-saveRDS(lsoa_to_lsoa, paste0(project_data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
+saveRDS(lsoa_to_wd22, paste0(data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
+saveRDS(provisional_WD22, paste0(data_dir, "lookups/dummy_WD22_codes.rds"))
+saveRDS(ward_names, paste0(data_dir, "lookups/ward_2022_name_lookup.rds"))
+saveRDS(oa_to_wd22, paste0(data_dir, "lookups/oa_to_WD22_lookup_best_fit.rds"))
+saveRDS(proportional_oa_ward, paste0(data_dir,"lookups/oa_to_WD22_proportional.rds"))
+saveRDS(lsoa_to_lsoa, paste0(data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
 
 #-------------------------------------------------------------------------------
 
