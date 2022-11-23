@@ -60,6 +60,7 @@ standard_trend_parameters <- function(params){
   standard$write_excel <- TRUE
   standard$constraint_fns <- list(list(fn = function() NULL, args = list()))
   standard$int_out_flow_or_rate <- "flow"
+  standard$geog_code_col <- "gss_code"
   
   #-------------------------------------------------------------------------------
   
@@ -128,7 +129,8 @@ standard_trend_parameters <- function(params){
     
     qa_areas_of_interest = FALSE,
     write_QA = FALSE,
-    write_excel = write_excel
+    write_excel = write_excel,
+    geog_code_col = geog_code_col
   )
   
   return(config_list)

@@ -17,7 +17,7 @@ def python_to_excel_trendmodel(persons, females, males, components, output_dir, 
   males.to_excel(writer, "males", index=False)
   components.to_excel(writer, "components of change", index=False)
   
-  book.get_sheet_by_name('Metadata')['A3'] = projection_name
+  book['Metadata']['A3']  = projection_name
 
   #Remove border formatting that openpyxl adds
   side = openpyxl.styles.Side(border_style=None)

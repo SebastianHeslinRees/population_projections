@@ -18,8 +18,12 @@ deactivate_log <- function(log_file_path){
   fread(log_file_path, header = FALSE, sep = "*") %>%
     data.frame() %>% 
     filter(substr(V1,43,80)!="Unable to convert event to a log event") %>% 
+    filter(substr(V1,25,49)!= "replacing previous import") %>% 
     mutate(V1 = str_replace_all(V1, " - SIMPLEWARNING - ", " ")) %>% 
     mutate(V1 = str_replace_all(V1, " - SIMPLEMESSAGE - ", " ")) %>% 
+    mutate(V1 = str_replace_all(V1, " - SIMPLEERROR - ", " ")) %>% 
+    mutate(V1 = str_replace_all(V1, "If this is a large number, check that the col_aggregation parameter only includes one geographic variable, as the test checks for all permutations of all varaibles.  Call with test_complete = FALSE if this is permitted",
+                                " ")) %>% 
     fwrite(log_file_path, col.names = FALSE, quote=FALSE)
   
 }

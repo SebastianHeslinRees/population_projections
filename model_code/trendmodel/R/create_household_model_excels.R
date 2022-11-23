@@ -17,10 +17,10 @@
 
 create_household_model_excels <- function(output_dir, wb_filename, projection_name, model="both"){
   
-  #datastore directory
+  #excel directory
   output_dir <- .add_slash(output_dir)
-  datastore_dir <- paste0(output_dir,"datastore")
-  dir.create(datastore_dir, recursive = T, showWarnings = F)
+  excel_dir <- paste0(output_dir,"excel")
+  dir.create(excel_dir, recursive = T, showWarnings = F)
   
   #excel file name
   if(str_sub(wb_filename,-5,-1)==".xlsx"){
