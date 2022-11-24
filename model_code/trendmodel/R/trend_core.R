@@ -69,7 +69,7 @@ trend_core <- function(start_population,
   # change rates are for changes that occurred in the 12 months up to 30th June
   # age is the age the cohort is at 30th June
   aged_popn <- start_population %>%
-    popn_age_on() 
+    popn_age_on2() 
   
   birthratio_m2f <- 1.05
   
@@ -236,7 +236,6 @@ trend_core <- function(start_population,
     nat_dom_in)
   
   if(is.null(popn_adjustment)){
-    
     next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
                                                    addition_data = list(int_in, dom_in),
                                                    subtraction_data = list(int_out, dom_out),

@@ -9,13 +9,15 @@ message("Ward 2022 backseries")
 
 input_data_dir <- "input_data/flexible_area_model/"
 regrosser_data <- "E:/project_folders/demography/wil/regrosser/data/"
+Q_data <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/"
 
 dir.create(input_data_dir, showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "backseries"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "processed"), showWarnings = FALSE)
 dir.create(paste0(input_data_dir, "development_data"), showWarnings = FALSE)
 
-lsoa_to_ward <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
+lsoa_to_ward <- readRDS(paste0(input_data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds")) %>% 
+  select(gss_code_lsoa = LSOA11CD, gss_code_ward = WD22CD)
 ward_LAD <- readRDS(paste0(input_data_dir, "lookups/ward_2022_name_lookup.rds"))
 
 #-------------------------------------------------------------------------------
@@ -73,7 +75,7 @@ rm(gross_flows, i)
 
 # Dwelling to household ratio
 
-dwellinngs_to_hh <- fread(paste0(regrosser_data, "dwelling_to_hh_LSOA.csv")) %>%
+dwellinngs_to_hh <- fread(paste0(Q_data, "dwelling_to_hh_LSOA.csv")) %>%
   data.frame() %>% 
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>% 
   group_by(gss_code_ward) %>% 
@@ -88,8 +90,8 @@ dwellinngs_to_hh <- fread(paste0(regrosser_data, "dwelling_to_hh_LSOA.csv")) %>%
 # Create single year of age from grouped data
 
 communal_est_lsoa <- rbind(
-  fread(paste0(regrosser_data, 'communal_est_males_lsoa.csv'), header = TRUE),
-  fread(paste0(regrosser_data, 'communal_est_females_lsoa.csv'), header = TRUE)) %>% 
+  fread(paste0(Q_data, 'communal_est_males_lsoa.csv'), header = TRUE),
+  fread(paste0(Q_data, 'communal_est_females_lsoa.csv'), header = TRUE)) %>% 
   tidyr::pivot_longer(values_to = "ce_popn", names_to = "age_group", cols = starts_with("Age")) %>% 
   mutate(age_min = as.numeric(substr(age_group, 5,6))) %>% 
   mutate(age_max = ifelse(age_min < 10, substr(age_group, 9,10),
@@ -144,6 +146,14 @@ popmodules::validate_same_geog(ward_pop, ward_inflow, "gss_code_ward", "gss_code
 popmodules::validate_same_geog(ward_pop, ward_outflow, "gss_code_ward", "gss_code_ward")
 popmodules::validate_same_geog(ward_pop, comm_est_ward_sya, "gss_code_ward", "gss_code_ward")
 popmodules::validate_same_geog(ward_pop, dwellinngs_to_hh, "gss_code_ward", "gss_code_ward")
+
+sum(is.na(ward_births))
+sum(is.na(ward_deaths))
+sum(is.na(ward_pop))
+sum(is.na(ward_inflow))
+sum(is.na(ward_outflow))
+sum(is.na(comm_est_ward_sya))
+sum(is.na(dwellinngs_to_hh))
 
 #-------------------------------------------------------------------------------
 

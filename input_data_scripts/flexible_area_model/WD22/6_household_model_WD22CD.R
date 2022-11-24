@@ -206,8 +206,8 @@ lsoa_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "a
 
 ward_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "age_group")) %>% 
   filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
-  group_by(gss_code_ward, sex, age_group) %>%
+  left_join(lsoa_ward_lookup, by=c("gss_code"="LSOA11CD")) %>% 
+  group_by(gss_code_ward=WD22CD, sex, age_group) %>%
   summarise(hrp = sum(hrp),
             hh_pop = sum(hh_pop),
             .groups = 'drop_last') %>% 
@@ -219,9 +219,9 @@ ward_rates_2001 <- left_join(hh_pop_2001, hrp_2001, by = c("gss_code", "sex", "a
 
 ward_rates_2011 <- left_join(hh_pop_2011, hrp_2011, by = c("gss_code", "sex", "age_group")) %>%
   filter(gss_code != "E01019077") %>%  #Isles of Scilly
-  left_join(lsoa_ward_lookup, by=c("gss_code"="gss_code_lsoa")) %>% 
+  left_join(lsoa_ward_lookup, by=c("gss_code"="LSOA11CD")) %>% 
   mutate(hrp = ifelse(age_group == "0_17", 0, hrp)) %>% 
-  group_by(gss_code_ward, sex, age_group) %>%
+  group_by(gss_code_ward=WD22CD, sex, age_group) %>%
   summarise(hrp = sum(hrp),
             hh_pop = sum(hh_pop),
             .groups = 'drop_last') %>% 

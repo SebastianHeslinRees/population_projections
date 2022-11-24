@@ -56,10 +56,10 @@ scaled_mortality_curve <- function(popn, births, deaths,
   target_curves <- target_curves[!names(target_curves)=="year"]
   
   #Deaths denominator
-  aged_on_population <- population %>%
-    popn_age_on(births=births,
-                col_aggregation=c(col_aggregation, "age"),
-                col_geog = col_geog) %>%
+  aged_on_population <- popn_age_on2(popn = population,
+                 births=births,
+                 col_aggregation=c(col_aggregation, "age"),
+                 col_geog = col_geog) %>%
     select_at(c(col_aggregation, "age", "popn")) %>%
     arrange_at(c(col_aggregation, "age"))
   
@@ -128,7 +128,7 @@ validate_scaled_mortality_curve_inputs <- function(popn, births, deaths, target_
                                                    avg_or_trend, data_col, output_col){
   
   # test input parameters are of the correct type
-
+  
   assert_that(is.numeric(last_data_year),
               msg="scaled_mortality_curve expects that last_data_year is an numeric")
   assert_that(is.numeric(n_years_to_avg),

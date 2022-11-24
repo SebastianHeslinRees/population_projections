@@ -5,9 +5,9 @@ def python_to_excel_smallarea(persons, females, males, components, output_dir, w
 
   #read in the template
   if(small_area == "ward"):
-    book = openpyxl.load_workbook('input_data/excel_templates/ward_housing_led_2020_based_template.xlsx')
+    book = openpyxl.load_workbook('input_data/excel_templates/ward_housing_led_2021_based_template.xlsx')
   elif(small_area == "msoa"):
-    book = openpyxl.load_workbook('input_data/excel_templates/msoa_housing_led_2020_based_template.xlsx')
+    book = openpyxl.load_workbook('input_data/excel_templates/msoa_housing_led_2021_based_template.xlsx')
   else:
     return("Error in python_excel_output: small_area must be either ward or msoa")
   

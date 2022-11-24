@@ -4,7 +4,7 @@ import openpyxl
 def python_to_excel_trendmodel(persons, females, males, components, output_dir, wb_filename, projection_name):
 
   #read in the template
-  book = openpyxl.load_workbook('input_data/excel_templates/trend_template_2020.xlsx')
+  book = openpyxl.load_workbook('input_data/excel_templates/trend_template_2021.xlsx')
   
   #Set the output name and prep the file for writing
   writer = pd.ExcelWriter(output_dir+"/"+wb_filename, engine='openpyxl') 

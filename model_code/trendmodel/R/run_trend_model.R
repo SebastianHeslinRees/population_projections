@@ -182,8 +182,12 @@ run_trend_model <- function(config_list) {
                              config_list$int_out_method)
   
   ## run year loop
+  message("projecting")
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
+    
+    cat('\r',projection_year)
+    utils::flush.console()
     
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
@@ -258,6 +262,8 @@ run_trend_model <- function(config_list) {
     curr_yr_popn <- projection[[projection_year]][['population']]
   }
   
+  message(" ")
+  message("arrange outputs")
   projection <- arrange_trend_core_outputs(projection,
                                            population, births, deaths, int_out,
                                            int_in, dom_in, dom_out,
@@ -457,7 +463,7 @@ validate_trend_core_outputs <- function(projection, first_proj_yr) {
   assert_that(identical(components, expected_components))
   
   validate_dataframes <- c("population", "deaths", "births", "int_out", "int_in",
-                           "int_net", "dom_net", "total_net", "births_by_mothers_age",
+                           "int_net", "total_net", "births_by_mothers_age",
                            "natural_change", "fertility_rates", "mortality_rates",
                            "int_out_rates_flows")
   

@@ -17,22 +17,23 @@ standard_trend_parameters <- function(params){
   
   #-------------------------------------------------------------------------------
   #Basics
-  standard$first_proj_yr <- 2021
-  standard$n_proj_yr <- 30
+  standard$first_proj_yr <- 2022
+  standard$n_proj_yr <- 2 #29
+  standard$geog_code_col <- "gss_code"
   
   #-------------------------------------------------------------------------------
   #Backseries
   
-  standard$popn_mye_path <- paste0("input_data/mye/2021/population_gla.rds")
-  standard$deaths_mye_path <-  paste0("input_data/mye/2021/deaths_ons.rds")
-  standard$births_mye_path <-  paste0("input_data/mye/2021/births_ons.rds")
-  standard$int_out_mye_path <-  paste0("input_data/mye/2021/int_out_gla.rds")
-  standard$int_in_mye_path <-  paste0("input_data/mye/2021/int_in_gla.rds")
-  standard$dom_out_mye_path <- paste0("input_data/domestic_migration/2021/domestic_migration_out_gla.rds")
-  standard$dom_in_mye_path <- paste0("input_data/domestic_migration/2020/domestic_migration_in_gla.rds")
+  standard$popn_mye_path <- "input_data/mye/2021/population_gla.rds"
+  standard$deaths_mye_path <-  "input_data/mye/2021/deaths_gla.rds"
+  standard$births_mye_path <-  "input_data/mye/2021/births_gla.rds"
+  standard$int_out_mye_path <- "input_data/mye/2021/int_out_gla.rds"
+  standard$int_in_mye_path <-  "input_data/mye/2021/int_in_gla.rds"
+  standard$dom_out_mye_path <- "input_data/mye/2021/dom_out_gla.rds"
+  standard$dom_in_mye_path <- "input_data/mye/2021/dom_in_gla.rds"
   standard$upc_mye_path <- NULL
   standard$popn_adjustment_path <- NULL
-  standard$external_births_path <- NULL
+  standard$external_births_path <- NULL #TODO
   standard$external_deaths_path <- NULL
   
   #-------------------------------------------------------------------------------
@@ -91,7 +92,9 @@ standard_trend_parameters <- function(params){
   if(!"popn_adjustment_path" %in% ls()){
     popn_adjustment_path <- NULL
   }
-  
+  if(!"upc_mye_path" %in% ls()){
+    upc_mye_path <- NULL
+  }
   #-------------------------------------------------------------------------------
   
   config_list <- list(
@@ -128,7 +131,8 @@ standard_trend_parameters <- function(params){
     
     qa_areas_of_interest = FALSE,
     write_QA = FALSE,
-    write_excel = write_excel
+    write_excel = write_excel,
+    geog_code_col = geog_code_col
   )
   
   return(config_list)

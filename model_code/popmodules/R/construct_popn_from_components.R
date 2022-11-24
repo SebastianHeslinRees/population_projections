@@ -29,11 +29,17 @@ construct_popn_from_components <- function(start_population,
                                            col_aggregation = c("year","gss_code","sex","age"),
                                            data_are_subsets = FALSE){
   
+  #remove any areas in addition and subtraction that aren't in start_population
+  addition_data <- lapply(addition_data, function(x){filter(x, gss_code %in% unique(start_population$gss_code))})
+  subtraction_data <- lapply(subtraction_data, function(x){filter(x, gss_code %in% unique(start_population$gss_code))})
+  
   validate_construct_popn_from_component_input(start_population, addition_data, subtraction_data, col_aggregation, data_are_subsets)
   
   start_population <- mutate(start_population, var = "start") %>%
     rename(popn = last(names(start_population))) %>%
     select_at(c(col_aggregation, "var", "popn"))
+  
+  
   
   for(i in seq(addition_data)){
     addition_data[[i]] <- tidyr::pivot_longer(addition_data[[i]],
