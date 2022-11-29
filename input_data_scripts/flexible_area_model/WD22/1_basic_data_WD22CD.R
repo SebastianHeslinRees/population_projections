@@ -128,6 +128,36 @@ comm_est_ward_sya <- rbindlist(comm_est_ward_sya) %>%
   select(gss_code_ward, sex, age, ce_popn) %>% 
   data.frame()
 
+#2021 Census Data - OA total CE popn
+oa21_wd22 <- readRDS("input_data/flexible_area_model//lookups/OA21CD_to_WD22CD_proportional.rds") %>% 
+  data.frame() %>% 
+  mutate(WD22CD = ifelse(LAD22CD == "E09000001", "E09000001", WD22CD)) %>% 
+  group_by(OA21CD, WD22CD) %>% 
+  summarise(area = sum(area_of_OA_inside_ward), .groups = 'drop_last') %>% 
+  group_by(OA21CD) %>% 
+  mutate(total_area = sum(area)) %>% 
+  data.frame() %>% 
+  mutate(proportion = area/total_area) %>% 
+  select(OA21CD, WD22CD, proportion)
+
+ce_2021_census <- fread("Q:/Teams/D&PA/Census/2021 Census/central_data_folder/raw_data/2021/1. Demography and migration/oa/residence_type.csv") %>% 
+  data.frame() %>% 
+  filter(name == "Lives in a communal establishment") %>% 
+  select(OA21CD = geography,
+         ce_2021 = value) %>% 
+  full_join(oa21_wd22, by= "OA21CD") %>% 
+  filter(!is.na(proportion)) %>% 
+  group_by(gss_code_ward = WD22CD) %>% 
+  summarise(ce_2021 = sum(ce_2021*proportion), .groups = 'drop_last') %>% 
+  data.frame()
+  
+ce_popn_scaled <- comm_est_ward_sya %>% 
+  group_by(gss_code_ward) %>% 
+  mutate(summed = sum(ce_popn)) %>% 
+  left_join(ce_2021_census, by = "gss_code_ward") %>% 
+  mutate(scaling = ifelse(summed == 0, 0, ce_2021 / summed),
+         ce_popn2 = ce_popn * scaling)
+
 rm(pop_1, pop_2, communal_est_lsoa, communal_est_ward)
 
 #-------------------------------------------------------------------------------

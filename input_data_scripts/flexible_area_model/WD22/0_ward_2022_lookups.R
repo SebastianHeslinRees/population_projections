@@ -70,19 +70,19 @@ saveRDS(lsoa_to_wd22, paste0(data_dir_Q_drive, "lookups/lsoa_to_WD22_lookup_best
 
 #-------------------------------------------------------------------------------
 
-proportional_oa_ward <- list.files(paste0(data_dir_Q_drive, "oa_WD22_lookups"), full.names = T) %>%
-  lapply(fread) %>%
-  rbindlist() %>% 
-  data.frame() %>% 
-  rename(OA11CD = oa, WD22CD = ward_gss, gss_code = gss) %>% 
-  mutate(WD22CD = ifelse(gss_code == "E09000001", "E09000001", WD22CD)) %>% 
-  group_by(OA11CD, WD22CD, year) %>% 
-  summarise(oa_ward_weight = sum(oa_ward_weight), .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  left_join(WD22_to_LAD22, by = "WD22CD") %>% 
-  select(OA11CD, WD22CD, year, oa_ward_weight)
-
-saveRDS(proportional_oa_ward, paste0(data_dir_Q_drive,"lookups/oa_to_WD22_proportional.rds"))
+# proportional_oa_ward <- list.files(paste0(data_dir_Q_drive, "oa_WD22_lookups"), full.names = T) %>%
+#   lapply(fread) %>%
+#   rbindlist() %>% 
+#   data.frame() %>% 
+#   rename(OA11CD = oa, WD22CD = ward_gss, gss_code = gss) %>% 
+#   mutate(WD22CD = ifelse(gss_code == "E09000001", "E09000001", WD22CD)) %>% 
+#   group_by(OA11CD, WD22CD, year) %>% 
+#   summarise(oa_ward_weight = sum(oa_ward_weight), .groups = 'drop_last') %>% 
+#   data.frame() %>% 
+#   left_join(WD22_to_LAD22, by = "WD22CD") %>% 
+#   select(OA11CD, WD22CD, year, oa_ward_weight)
+# 
+# saveRDS(proportional_oa_ward, paste0(data_dir_Q_drive,"lookups/oa11_to_WD22_proportional.rds"))
 
 #-------------------------------------------------------------------------------
 
@@ -90,6 +90,10 @@ saveRDS(proportional_oa_ward, paste0(data_dir_Q_drive,"lookups/oa_to_WD22_propor
 LAD_to_NUTS2 <- readRDS("input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds")
 wD22_to_NUTS2 <- left_join(WD22_to_LAD22, LAD_to_NUTS2, by = c("LAD22CD"="gss_code")) %>% 
   select(gss_code_ward = WD22CD, constraint_area)
+
+#OA21 to WD22
+oa21_ward22 <- fread("Q:/Teams/D&PA/Census/2021 Census/central_data_folder/geog_lookups/2021_oa_2022_ward.csv")
+saveRDS(oa21_ward22, paste0(data_dir, "lookups/OA21CD_to_WD22CD_proportional.rds"))
 
 #-------------------------------------------------------------------------------
 
@@ -105,8 +109,7 @@ ward_names <- select(WD22_to_LAD22,
 saveRDS(lsoa_to_wd22, paste0(data_dir, "lookups/lsoa_to_WD22_lookup_best_fit.rds"))
 saveRDS(WD22_to_LAD22, paste0(data_dir, "lookups/dummy_WD22_codes.rds"))
 saveRDS(ward_names, paste0(data_dir, "lookups/ward_2022_name_lookup.rds"))
-saveRDS(oa_to_wd22, paste0(data_dir, "lookups/oa_to_WD22_lookup_best_fit.rds"))
-saveRDS(proportional_oa_ward, paste0(data_dir,"lookups/oa_to_WD22_proportional.rds"))
+saveRDS(oa_to_wd22, paste0(data_dir, "lookups/oa11_to_WD22_lookup_best_fit.rds"))
 saveRDS(lsoa_to_lsoa, paste0(data_dir, "lookups/lsoa_2001_to_lsoa_2011_lookup.rds"))
 saveRDS(wD22_to_NUTS2, "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds")
 

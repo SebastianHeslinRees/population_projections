@@ -60,7 +60,7 @@ standard_trend_parameters <- function(params){
   standard$output_dir <- paste0("outputs/trend/2021/",projection_name,"/")
   standard$write_excel <- TRUE
   standard$constraint_fns <- list(list(fn = function() NULL, args = list()))
-  standard$int_out_flow_or_rate <- "flow"
+  standard$int_out_method <- "flow"
   
   #-------------------------------------------------------------------------------
   
@@ -118,7 +118,7 @@ standard_trend_parameters <- function(params){
     mortality_rates = mortality_rates,
     fertility_rates = fertility_rates,
     int_out_flows_rates = int_out_flows_rates,
-    int_out_method = int_out_flow_or_rate,
+    int_out_method = int_out_method,
     int_in_flows = int_in,
     domestic_rates = domestic_rates,
     constraint_fns = constraint_fns,

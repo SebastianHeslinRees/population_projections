@@ -25,7 +25,8 @@ trend_core <- function(start_population,
                        in_flows,
                        projection_year,
                        constraint_list,
-                       excess_deaths){
+                       excess_deaths,
+                       external_births){
   
   if("gss_code" %in% names(start_population)){
     col_agg <- c("year", "gss_code", "area_code", "sex", "age")
@@ -62,9 +63,23 @@ trend_core <- function(start_population,
   births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f,
                                               col_aggregation = nested_geog)
   
-  if(constraint_list$components$births){
+  # 2 possible constraints
+  # Either at the borough-level when an additional year of borough births is available
+  # Or at a higher constraining level (eg NUTS2)
+  # This allows for different constraints in different years
+  if(!is.null(external_births) && projection_year %in% external_births$births_constraint$year){
     
-    births <- apply_constraint(births, constraint_list$births_constraint,
+    births <- apply_constraint(births,
+                               constraint = external_births$births_constraint,
+                               constraint_lookup = external_births$lookup,
+                               mapping = external_births$mapping) 
+      
+  }
+  
+  else if(constraint_list$components$births){
+    
+    births <- apply_constraint(births,
+                               constraint = constraint_list$births_constraint,
                                constraint_lookup = constraint_list$apply_constraint_lookup,
                                mapping = constraint_list$mapping)
   }

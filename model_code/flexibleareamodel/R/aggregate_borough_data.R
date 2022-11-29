@@ -31,11 +31,11 @@ aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr
   
   #-----------------------------------------------------------------------------
   
-  # migration backeries from MYE components
+  # migration backseries from MYE components
   
-  backseries_in <-list(dom_in = "dom_in_ons",
+  backseries_in <-list(dom_in = "dom_in_gla",
                        int_in = "int_in_gla") %>% 
-    lapply(function(x){readRDS(paste0("input_data/mye/2020/", x,".rds")) %>% 
+    lapply(function(x){readRDS(paste0("input_data/mye/2021/", x,".rds")) %>% 
         rename(value = !!last(names(.)))}) %>% 
     rbindlist() %>% 
     mutate(flow = "trend_inflow") %>% 
@@ -43,9 +43,9 @@ aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr
     summarise(value = sum(value), .groups = 'drop_last') %>% 
     data.frame()
   
-  backseries_out <-list(dom_out = "dom_out_ons",
+  backseries_out <-list(dom_out = "dom_out_gla",
                         int_out = "int_out_gla") %>% 
-    lapply(function(x){readRDS(paste0("input_data/mye/2020/", x,".rds")) %>% 
+    lapply(function(x){readRDS(paste0("input_data/mye/2021/", x,".rds")) %>% 
         rename(value = !!last(names(.)))}) %>%
     rbindlist() %>% 
     mutate(flow = "trend_outflow") %>% 

@@ -392,8 +392,7 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
 
   if(!is.null(external_births)){
     validate_population(external_births, col_data = "births",
-                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE,
-                        col_aggregation = c("year", "gss_code"))
+                        test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   }
   
 

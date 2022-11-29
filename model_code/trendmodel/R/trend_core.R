@@ -60,9 +60,6 @@ trend_core <- function(start_population,
                        projection_year,
                        region_lookup) {
   
-  # run projection
-  cat('\r',paste("  Projecting year",projection_year))
-  utils::flush.console()
   
   # aged on population is used due to definitions of MYE to ensure the correct denominator
   # population in population at 30th June
@@ -73,23 +70,40 @@ trend_core <- function(start_population,
   
   birthratio_m2f <- 1.05
   
+  
+  births_by_mother <- apply_rate_to_population(popn = aged_popn,
+                                               rates = filter(fertility_rates, age != 0),
+                                               col_out = "births")
+  
+  if(!is.null(external_births)){
+    
+    external_constraint <- external_births %>% 
+      group_by(gss_code) %>%
+      summarise(constraint = sum(births), .groups = 'drop_last')
+    
+    births_by_mother <- births_by_mother %>% 
+      group_by(gss_code) %>% 
+      mutate(births_total = sum(births)) %>% 
+      data.frame() %>% 
+      left_join(external_constraint, by = "gss_code") %>% 
+      mutate(births = births * (constraint/births_total)) %>% 
+      select(names(births_by_mother))
+    
+  }
+  
+  if(!is.null(constraints)){
+    
+    births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
+    
+  }
+  
   if(is.null(external_births)){
-    
-    births_by_mother <- apply_rate_to_population(popn = aged_popn,
-                                                 rates = filter(fertility_rates, age != 0),
-                                                 col_out = "births")
-    
-    
-    
-    if(!is.null(constraints)){
-      births_by_mother <- constrain_births(births=births_by_mother, constraint=constraints$births_constraint)
-    }
     
     births <- sum_births_and_split_by_sex_ratio(births_by_mother, birthratio_m2f)
     
   } else {
     
-    births <- sum_births_and_split_by_sex_ratio(external_births, birthratio_m2f)
+    births <- external_births
     
   }
   
@@ -101,11 +115,11 @@ trend_core <- function(start_population,
                       check_negative_values = TRUE,
                       comparison_pop = mutate(as.data.frame(start_population), year=year+1))
   
-
+  
   if(!is.null(external_deaths)){
     
     deaths <- external_deaths
-
+    
   } else {
     
     deaths <- apply_rate_to_population(popn = aged_popn_w_births,
@@ -185,7 +199,7 @@ trend_core <- function(start_population,
     
     int_in$country <- NULL
   }
-
+  
   domestic_flow <- natural_change_popn %>%
     apply_domestic_migration_rates(mign_rate = domestic_rates,
                                    col_aggregation = c("gss_code"="gss_out", "sex", "age"),

@@ -29,11 +29,16 @@ apply_constraint <- function(x,
   to_constrain <- filter(x, !!sym(col_geog) %in% constraint_lookup[[col_geog]])
   no_constraint <- filter(x, !(!!sym(col_geog) %in% constraint_lookup[[col_geog]]))
   
-  x_out <- to_constrain %>% 
-    left_join(constraint_lookup, by = col_geog) %>% 
-    constrain_component(constraint,
-                        col_aggregation = mapping,
-                        data_col) %>% 
+  if(!all(names(constraint_lookup) %in% names(to_constrain))){
+    
+    to_constrain <- to_constrain %>% 
+      left_join(constraint_lookup, by = col_geog)
+  }
+  
+  x_out <- constrain_component(to_constrain,
+                               constraint,
+                               col_aggregation = mapping,
+                               data_col) %>% 
     select(names(x)) %>% 
     bind_rows(no_constraint)
   

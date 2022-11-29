@@ -4,7 +4,7 @@ import openpyxl
 def python_to_excel_households(output_dir, wb_filename, projection_name, model):
 
   #read in the template
-  book = openpyxl.load_workbook('input_data/excel_templates/household_template_2020.xlsx')
+  book = openpyxl.load_workbook('input_data/excel_templates/household_template_2021.xlsx')
   hh_output_dir = output_dir+"households/"+model+"_"
   
   #read in the data from csv
