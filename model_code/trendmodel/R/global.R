@@ -81,5 +81,6 @@ globalVariables(c(
   "borough",
   "upc",
   "adjustment",
-  "population"
+  "population",
+  "births_total","constraint"
 ))

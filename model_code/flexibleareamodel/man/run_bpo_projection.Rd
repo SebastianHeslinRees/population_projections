@@ -9,10 +9,9 @@ run_bpo_projection(
   wards,
   variant,
   trajectory_range = 2012:2041,
-  projection_range = 2021:2041,
-  bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2020_based/",
-  csv_name = bpo_name,
-  fert_scenario = "principal"
+  projection_range = 2022:2041,
+  bpo_dir = "Q:/Teams/D&PA/Demography/Projections/bpo_2021_based/",
+  csv_name = bpo_name
 )
 }
 \arguments{

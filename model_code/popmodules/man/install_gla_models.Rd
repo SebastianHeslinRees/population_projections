@@ -4,12 +4,10 @@
 \alias{install_gla_models}
 \title{Install the GLA model packages}
 \usage{
-install_gla_models(trend = TRUE, housing_led = TRUE, flex_area = TRUE)
+install_gla_models(trend = TRUE, flex_area = TRUE)
 }
 \arguments{
 \item{trend}{Logical Document and install the trendmodel package Default \code{TRUE}}
-
-\item{housing_led}{Logical Document and install the housingledmodel package Default \code{TRUE}}
 
 \item{flex_area}{Logical Document and install the flexibleareamodel package Default \code{TRUE}}
 }

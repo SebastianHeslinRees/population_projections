@@ -4,7 +4,7 @@
 \alias{bpo_template_to_rds}
 \title{Process a standard bpo template csv file into 2 rds files}
 \usage{
-bpo_template_to_rds(csv_name, bpo_dir, trajectory_range, wards)
+bpo_template_to_rds(csv_name, bpo_dir, trajectory_range)
 }
 \arguments{
 \item{csv_name}{String. The name of the dwelling trajectory csv saved in the

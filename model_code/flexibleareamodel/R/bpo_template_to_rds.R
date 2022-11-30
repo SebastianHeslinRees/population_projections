@@ -19,25 +19,17 @@
 
 bpo_template_to_rds <- function(csv_name,
                                 bpo_dir,
-                                trajectory_range,
-                                wards){
+                                trajectory_range){
   
-  if(wards == "WD22"){
-    ward_code_lookup <- readRDS("input_data/flexible_area_model/lookups/dummy_WD22_codes.rds") %>%select(gss_code_ward, dummy_code, gss_code)
+
+    ward_code_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds") %>% select(gss_code_ward, gss_code)
     ward_shlaa_trajectory <- readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
     ldd_past_development <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD22CD.rds")
-  }
-  
-  if(wards == "WD13"){
-    ward_code_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2013_name_lookup.rds") %>% select(gss_code_ward, gss_code)
-    ward_shlaa_trajectory <-  readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD13CD.rds")
-    ldd_past_development <- readRDS("input_data/flexible_area_model/development_data/ldd_backseries_dwellings_ward_WD13CD.rds")
-  }
   
   
   #file names and paths
   if(!grepl(".csv$", csv_name)){csv_name <- paste0(csv_name,".csv")}
-  csv_path <- paste0(bpo_dir, "csvs/", csv_name)
+  csv_path <- paste0(bpo_dir, "csv/", csv_name)
   bpo_name <- substr(csv_name,1,nchar(csv_name)-4)
   
   #Read in data, do a check and find where the data starts and finishes
@@ -92,12 +84,6 @@ bpo_template_to_rds <- function(csv_name,
     data.frame() %>% 
     mutate(year = as.numeric(year_char),
            dev = as.numeric(dev)) 
-  
-  if(wards == "WD22"){
-  a <- a %>% 
-    rename(dummy_code = gss_code_ward) %>% 
-    left_join(ward_code_lookup, by = "dummy_code")
-  }
   
   a <- a %>% 
     select(year, gss_code_ward, dev) %>%

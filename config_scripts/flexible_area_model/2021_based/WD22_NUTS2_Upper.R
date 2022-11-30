@@ -77,4 +77,4 @@ devtools::load_all('model_code/popmodules/')
 devtools::load_all('model_code/flexibleareamodel/')
 model_output <- flexmodel_hl_projection(config_list)
 
-#create_excel(config_list$output_dir, "TEST.xlsx", "Test Projection 2021-base")
+create_excel(config_list$output_dir, "TEST.xlsx", "Test Projection 2021-base")

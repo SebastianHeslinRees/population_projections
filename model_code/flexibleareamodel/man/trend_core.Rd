@@ -13,7 +13,8 @@ trend_core(
   in_flows,
   projection_year,
   constraint_list,
-  excess_deaths
+  excess_deaths,
+  external_births
 )
 }
 \arguments{

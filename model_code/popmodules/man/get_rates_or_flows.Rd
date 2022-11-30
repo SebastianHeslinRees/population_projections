@@ -11,7 +11,8 @@ get_rates_or_flows(
   first_proj_yr,
   col_aggregation,
   data_col,
-  geog_code_col
+  geog_code_col,
+  standardise_geog = TRUE
 )
 }
 \arguments{
@@ -30,6 +31,10 @@ the previous year iteration}
 in the model}
 
 \item{geog_code_col}{String. Which column in df contains the geography code}
+
+\item{standardise_geog}{Logical. Should the geography column be renamed to the 
+generic 'area_code' or left alone. flex model needs TRUE, trend model needs FALSE.
+Default TRUE}
 }
 \value{
 A dataframe containing rates or flows to use in the model and also

@@ -17,5 +17,5 @@ source("input_data_scripts/flexible_area_model/WD22/5_migration_rates_WD22CD.R")
 source("input_data_scripts/flexible_area_model/WD22/6_household_model_WD22CD.R")
 
 #Example Flexible area model Projection
-source("config_scripts/flexible_area_model/WD22_NUTS2_Upper.R")
+source("config_scripts/flexible_area_model/2021_based/WD22_NUTS2_Upper.R")
 

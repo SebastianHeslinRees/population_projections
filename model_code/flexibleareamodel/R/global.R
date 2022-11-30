@@ -81,7 +81,10 @@ globalVariables(c(
   "final_components",
   "final_deaths",
   "fert_scenario_path",
-  "area_code"
+  "area_code",
+  "wards",
+  "fert_scenario",
+  "external_births"
 ))
 
 
