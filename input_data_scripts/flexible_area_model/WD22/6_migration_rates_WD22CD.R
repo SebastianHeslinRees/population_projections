@@ -17,14 +17,16 @@ ward_out_mig <- paste0(input_data_dir, "backseries/ward_outflow_WD22CD.rds") %>%
 denominator_popn <- ward_pop %>%
   popn_age_on(births = ward_births,
               col_aggregation=c("gss_code", "gss_code_ward", "year", "sex", "age"),
-              col_geog = c("gss_code", "gss_code_ward"))
+              col_geog = c("gss_code", "gss_code_ward")) %>% 
+  left_join(ward_in_mig, by = c("gss_code", "gss_code_ward", "year", "sex", "age")) %>% 
+  mutate(denom_pop = popn + inflow)
 
 #-------------------------------------------------------------------------------
 # Averaged migration flows and rates
 
 out_mig_rates_5 <- denominator_popn %>% 
   left_join(ward_out_mig, by = c("gss_code", "gss_code_ward", "year", "sex", "age")) %>% 
-  mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
+  mutate(out_rate = ifelse(denom_pop==0, 0, outflow/denom_pop)) %>% 
   calculate_mean_from_backseries(n_years_to_avg = 5, 
                                  last_data_year = 2021, 
                                  data_col = "out_rate",
@@ -50,7 +52,7 @@ in_mig_flows_5 <- ward_in_mig %>%
 
 out_mig_rates_10 <- denominator_popn %>% 
   left_join(ward_out_mig, by = c("gss_code", "gss_code_ward", "year", "sex", "age")) %>% 
-  mutate(out_rate = ifelse(popn==0, 0, outflow/popn)) %>% 
+  mutate(out_rate = ifelse(denom_pop==0, 0, outflow/denom_pop)) %>%
   calculate_mean_from_backseries(n_years_to_avg = 10, 
                                  last_data_year = 2021, 
                                  data_col = "out_rate",

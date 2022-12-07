@@ -1,32 +1,26 @@
 # library(popmodules)
 # library(trendmodel)
 
-#CC
-#Central International
-#Central Domestic
-
-#Central Upper
- 
-projection_name <- "2021_TEST"
+projection_name <- "2021_TEST_SHORT"
 standard_covid_migration <- FALSE
 n_proj_yr <- 29
 
 #-------------------------------------------------------------------------------
 
 int_out <- list(
-  '2022' = list(path = "input_data/scenario_data/2021_int_out_10yr_avg.rds",
+  '2022' = list(path = "input_data/scenario_data/2021_int_out_5yr_avg.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
 
 int_in  <- list(
-  '2022' = list(path = "input_data/scenario_data/2021_int_in_10yr_avg.rds",
+  '2022' = list(path = "input_data/scenario_data/2021_int_in_5yr_avg.rds",
                 transition = F))
 #-------------------------------------------------------------------------------
 
 domestic_rates <- list(
-  '2022' = list(path = "input_data/scenario_data/2020_dom_10yr_avg.rds",
-                transition = F)) # TODO
+  '2022' = list(path = "input_data/scenario_data/2020_dom_5yr_avg.rds",
+                transition = F))
 
 #-------------------------------------------------------------------------------
 

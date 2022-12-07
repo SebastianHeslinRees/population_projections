@@ -31,12 +31,13 @@ run_bpo_projection <- function(bpo_name,
   first_proj_yr <- min(projection_range)
   last_proj_yr <- max(projection_range)
   
-  assert_that(variant %in% c("lower","upper","TEST"))
+  assert_that(variant %in% c("lower","upper","TEST 1","TEST 2"))
   
   borough <- bpo_name
   scenario <- case_when(variant == "lower" ~ "scenario1",
                         variant == "upper" ~ "scenario2",
-                        TRUE ~ "TEST")
+                        TRUE ~ variant)
+  
   proj_name <- paste(borough, scenario, sep = "_")
   
   #-----------------------------------------------------------------------------
@@ -63,14 +64,18 @@ run_bpo_projection <- function(bpo_name,
   #-----------------------------------------------------------------------------
   
   #Constraint Path (trend model)
-  if(variant == "TEST"){
-    constraint_path <- "outputs/trend/2021/2021_TEST_22-11-28_1522/"
+  if(variant == "TEST 1"){
+    constraint_path <- "outputs/trend/2021/2021_TEST_SHORT_22-12-07_1312/"
   }
+  if(variant == "TEST 2"){
+    constraint_path <- "outputs/trend/2021/2021_TEST_LONG_22-12-07_1313/"
+  }
+  
   
   if(variant == "lower"){
     constraint_path <- ""
   }
-  if(variant == "upp"){
+  if(variant == "upper"){
     constraint_path <- ""
   }
   
@@ -155,7 +160,7 @@ run_bpo_projection <- function(bpo_name,
   borough <- .camel(str_replace_all(borough, "_", " "))
   scenario <- case_when(variant == "lower" ~ " Sceanrio 1",
                         variant == "upper" ~ "Scenario 2",
-                        TRUE ~ "TEST")
+                        TRUE ~ variant)
   proj_desc <- paste0(borough, " BPO - Migration ", scenario, " - BPO development data - 2022 ward boundaries")
   
   create_excel(config_list$output_dir, proj_name, proj_desc, borough_gss)

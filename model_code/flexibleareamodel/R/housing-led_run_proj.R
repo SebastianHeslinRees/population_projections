@@ -230,6 +230,7 @@ for(projection_year in first_proj_yr:last_proj_yr){
   }
   
   #project
+  
   trend_projection[[projection_year]] <- trend_core(start_population = curr_yr_popn,
                                                     fertility_rates = curr_yr_fertility,
                                                     mortality_rates = curr_yr_mortality,

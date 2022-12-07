@@ -126,9 +126,29 @@ trend_core <- function(start_population,
     check_negative_values(data_col = "popn")
   
   #-----------------------------------------------------------------------------
+
+  #in migration
+  inflow <- filter(in_flows, year == projection_year) %>% 
+    select(!!col_agg, "in_flow") %>% 
+    rename(inflow = in_flow)
+  
+  if(constraint_list$components$in_migration){
+    
+    inflow <- apply_constraint(inflow, constraint_list$in_migration_constraint,
+                               constraint_lookup = constraint_list$constraint_lookup,
+                               mapping = constraint_list$mapping)
+  }
+  
+  assert_that(sum(is.na(inflow))==0, msg=paste("inflow", projection_year))
+  
+  outflow_denominator_popn <- natural_change_popn %>% 
+    left_join(inflow, by = col_agg) %>% 
+    mutate(outflow_denom = inflow + popn)
+  
+  #-----------------------------------------------------------------------------
   
   #out migration
-  outflow <- apply_rate_to_population(popn = aged_popn_w_births,
+  outflow <- apply_rate_to_population(popn = outflow_denominator_popn,
                                       rates = out_rates,
                                       col_popn = "popn",
                                       col_rate = "out_rate",
@@ -147,22 +167,7 @@ trend_core <- function(start_population,
   assert_that(sum(is.na(outflow))==0, msg=paste("outflow", projection_year))
   
   #-----------------------------------------------------------------------------
-  
-  #in migration
-  inflow <- filter(in_flows, year == projection_year) %>% 
-    select(!!col_agg, "in_flow") %>% 
-    rename(inflow = in_flow)
-  
-  if(constraint_list$components$in_migration){
-    
-    inflow <- apply_constraint(inflow, constraint_list$in_migration_constraint,
-                               constraint_lookup = constraint_list$constraint_lookup,
-                               mapping = constraint_list$mapping)
-  }
-  
-  assert_that(sum(is.na(inflow))==0, msg=paste("inflow", projection_year))
-  
-  #-----------------------------------------------------------------------------
+
   
   #final population
   next_yr_popn <- construct_popn_from_components(start_population = natural_change_popn,
