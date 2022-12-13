@@ -1,25 +1,25 @@
 library(trendmodel)
 
-projection_name <- "2021_5yr"
+projection_name <- "2021_15yr"
 standard_covid_migration <- TRUE
 n_proj_yr <- 29
 
 #-------------------------------------------------------------------------------
 
 int_out <- list(
-  '2025' = list(path = "input_data/scenario_data/2021_int_out_5yr_avg_flow.rds",
+  '2025' = list(path = "input_data/scenario_data/2021_int_out_15yr_avg_flow.rds",
                 transition = F))
 
 #-------------------------------------------------------------------------------
 
 int_in  <- list(
-  '2025' = list(path = "input_data/scenario_data/2021_int_in_5yr_avg.rds",
+  '2025' = list(path = "input_data/scenario_data/2021_int_in_15yr_avg.rds",
                 transition = F))
 #-------------------------------------------------------------------------------
 
 domestic_rates <- list(
-  '2022' = list(path = "input_data/scenario_data/2021_dom_5yr_avg.rds",
-                transition = F))
+  '2022' = list(path = "input_data/scenario_data/2021_dom_15yr_avg.rds",
+                transition = F)) # TODO
 
 #-------------------------------------------------------------------------------
 

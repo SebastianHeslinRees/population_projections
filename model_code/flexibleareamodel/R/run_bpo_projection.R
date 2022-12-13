@@ -31,12 +31,10 @@ run_bpo_projection <- function(bpo_name,
   first_proj_yr <- min(projection_range)
   last_proj_yr <- max(projection_range)
   
-  assert_that(variant %in% c("lower","upper","TEST 1","TEST 2"))
+  assert_that(variant %in% c("5 year constrained","10 year constrained","10 year unconstrained"))
   
   borough <- bpo_name
-  scenario <- case_when(variant == "lower" ~ "scenario1",
-                        variant == "upper" ~ "scenario2",
-                        TRUE ~ variant)
+  scenario <- variant
   
   proj_name <- paste(borough, scenario, sep = "_")
   
@@ -51,32 +49,54 @@ run_bpo_projection <- function(bpo_name,
   
   #Set the domestic migration data and paths for the variant projection that's been selected
   
-  in_migration <- list(
-    '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                  transition = F))
+  if(variant == "5 year constrained" | variant == "5 year unconstrained"){
+    
+    in_migration <- list(
+      '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
+                    transition = F))
+    
+    out_migration <- list(
+      '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
+                    transition = F))
+    
+  }
   
-  out_migration <- list(
-    '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                  transition = F))
-  
-  
+  if(variant == "10 year constrained" | variant == "10 year unconstrained"){
+    
+    in_migration <- list(
+      '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_10yr_avg.rds"),
+                    transition = F))
+    
+    out_migration <- list(
+      '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_10yr_avg.rds"),
+                    transition = F))
+    
+  }
   
   #-----------------------------------------------------------------------------
   
   #Constraint Path (trend model)
-  if(variant == "TEST 1"){
-    constraint_path <- "outputs/trend/2021/2021_TEST_SHORT_22-12-07_1312/"
+  if(variant == "5 year constrained" | variant == "5 year unconstrained"){
+    constraint_path <- "outputs/trend/2021/2021_TEST_SHORT_INT_MIG_FERT_22-12-12_1539/"
   }
-  if(variant == "TEST 2"){
-    constraint_path <- "outputs/trend/2021/2021_TEST_LONG_22-12-07_1313/"
+  if(variant == "10 year constrained" | variant == "10 year unconstrained"){
+    constraint_path <- "outputs/trend/2021/2021_TEST_LONG_INT_MIG_FERT_22-12-12_1442"
   }
+
   
-  
-  if(variant == "lower"){
-    constraint_path <- ""
-  }
-  if(variant == "upper"){
-    constraint_path <- ""
+  if(variant == "5 year constrained" | variant == "10 year constrained"){
+    components_to_constrain <- list(births = T,
+                                    deaths = T,
+                                    in_migration = F,
+                                    out_migration = F,
+                                    population = T)
+  } else {
+    
+    components_to_constrain <-  list(births = F,
+                                     deaths = F,
+                                     in_migration = F,
+                                     out_migration = F,
+                                     population = F)
   }
   
   #-----------------------------------------------------------------------------
@@ -85,13 +105,10 @@ run_bpo_projection <- function(bpo_name,
                           apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
                           make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
                           mapping = c("constraint_area","year","sex","age"),
-                          components = list(births = T,
-                                            deaths = T,
-                                            in_migration = F,
-                                            out_migration = F,
-                                            population = T))
+                          components = components_to_constrain)
   
-  external_births <- list(births_path = "input_data/scenario_data/2022_births_dummy_file.rds",
+
+  external_births <- list(births_path = "input_data/scenario_data/births_mid_22.rds",
                           apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
                           mapping = c("gss_code","year","sex","age"))
   
@@ -151,16 +168,12 @@ run_bpo_projection <- function(bpo_name,
                       borough_outputs = TRUE)
   
   
-  
-  
   x <- flexmodel_hl_projection(config_list, n_cores = 20)
   rm(x)
   gc()
   
   borough <- .camel(str_replace_all(borough, "_", " "))
-  scenario <- case_when(variant == "lower" ~ " Sceanrio 1",
-                        variant == "upper" ~ "Scenario 2",
-                        TRUE ~ variant)
+  scenario <- variant
   proj_desc <- paste0(borough, " BPO - Migration ", scenario, " - BPO development data - 2022 ward boundaries")
   
   create_excel(config_list$output_dir, proj_name, proj_desc, borough_gss)

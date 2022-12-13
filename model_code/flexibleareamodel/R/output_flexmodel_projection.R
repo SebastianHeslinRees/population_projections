@@ -40,7 +40,10 @@ output_flexmodel_projection <- function(projection,
     csv_elements <- c(csv_elements, 11, 15:16)
     if(config_list$borough_outputs){
       csv_elements <- c(csv_elements, 17, 22, 24:25)
+      fwrite(projection[[26]], paste0(csv_dir, "borough_household_detail.csv"))
     }
+    projection$household_population_sya <- projection$household_population_sya %>% 
+      select(-popn, -ce_popn)
   }
   
   for(i in csv_elements) { 

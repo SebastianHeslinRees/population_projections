@@ -47,8 +47,6 @@ run_trend_model <- function(config_list) {
                        "communal_est_pop_path",
                        "dclg_stage1_file_path",
                        "dclg_stage2_file_path",
-                       "qa_areas_of_interest",
-                       "write_QA",
                        "write_excel",
                        "geog_code_col")
   
@@ -183,6 +181,7 @@ run_trend_model <- function(config_list) {
   
   ## run year loop
   message("projecting")
+  message(" ")
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
     
@@ -298,23 +297,8 @@ run_trend_model <- function(config_list) {
   household_model_outputs(projection$dclg_households, model = "dclg", config_list$output_dir,
                           write_excel = config_list$write_excel, projection_name = config_list$projection_name)
   
-  ## output the QA
-  if(config_list$write_QA){
-    rmarkdown::render("model_code/qa/population_qa.Rmd",
-                      output_file = paste0("population_qa.html"),
-                      output_dir = config_list$output_dir,
-                      params = list(qa_areas_of_interest = config_list$qa_areas_of_interest,
-                                    popn_proj_fp = paste0(config_list$output_dir,"/population.rds"),
-                                    deaths_proj_fp = paste0(config_list$output_dir,"/deaths.rds"),
-                                    int_in_proj_fp = paste0(config_list$output_dir,"/int_in.rds"),
-                                    int_out_proj_fp = paste0(config_list$output_dir,"/int_out.rds"),
-                                    dom_in_proj_fp = paste0(config_list$output_dir,"/dom_in.rds"),
-                                    dom_out_proj_fp = paste0(config_list$output_dir,"/dom_out.rds"),
-                                    births_proj_fp = paste0(config_list$output_dir,"/births.rds"),
-                                    output_files_dir = paste0(config_list$output_dir,"population_qa_files/"),
-                                    first_proj_yr = config_list$first_proj_yr))
-  }
   
+  message("complete")
   deactivate_log(paste0(config_list$output_dir,"warnings.log"))
   
   return(projection)

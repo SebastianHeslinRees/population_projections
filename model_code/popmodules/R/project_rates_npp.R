@@ -39,6 +39,10 @@ project_rates_npp <- function(jump_off_rates,
   validate_proj_rates_npp_input(jump_off_rates, rate_col, rates_trajectory, first_proj_yr, n_proj_yr, npp_var)
   
   final_projection_year <- first_proj_yr + n_proj_yr -1
+  
+  if(first_proj_yr-1 > max(jump_off_rates$year)){
+    jump_off_rates <- project_forward_flat(jump_off_rates, first_proj_yr-1)
+  }
   jump_off_year <- max(jump_off_rates$year)
   assert_that(all((jump_off_year + 1):final_projection_year %in% rates_trajectory$year))
   backseries <- filter(jump_off_rates, year < jump_off_year) %>% data.frame() 

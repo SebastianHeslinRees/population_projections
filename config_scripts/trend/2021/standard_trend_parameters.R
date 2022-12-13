@@ -18,7 +18,7 @@ standard_trend_parameters <- function(params){
   #-------------------------------------------------------------------------------
   #Basics
   standard$first_proj_yr <- 2022
-  standard$n_proj_yr <- 2 #29
+  standard$n_proj_yr <- 29
   standard$geog_code_col <- "gss_code"
   
   #-------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ standard_trend_parameters <- function(params){
   #Mort/fert
   
   standard$mortality_rates <- "input_data/mortality/mort_rates_5yr_trend_2021.rds"
-  standard$fertility_rates <- "input_data/fertility/fert_rates_5yr_trend_2021.rds"
+  standard$fertility_rates <- "input_data/fertility/fert_rates_2yr_trend_2019.rds"
   
   #-------------------------------------------------------------------------------
   
@@ -74,8 +74,8 @@ standard_trend_parameters <- function(params){
   #This runs a separate script to add the standard covid migration assumptions
   #to the 3 migration parameters
   if(standard_covid_migration){
-    source('config_scripts/trend/2020/standard_2020_covid_migration.R')
-    mig <- covid_migration(int_out_flows_rates, int_in, domestic_rates)
+    source('config_scripts/trend/2021/standard_2022_covid_migration.R')
+    mig <- covid_migration(int_out_flows_rates, int_in, domestic_rates, TRUE)
     int_out_flows_rates <- mig[[1]]
     int_in <- mig[[2]]
     domestic_rates <- mig[[3]]
@@ -129,8 +129,6 @@ standard_trend_parameters <- function(params){
     dclg_stage1_file_path = dclg_stage1_file_path,
     dclg_stage2_file_path = dclg_stage2_file_path,
     
-    qa_areas_of_interest = FALSE,
-    write_QA = FALSE,
     write_excel = write_excel,
     geog_code_col = geog_code_col
   )

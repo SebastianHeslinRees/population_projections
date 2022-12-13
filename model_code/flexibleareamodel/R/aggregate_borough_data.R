@@ -184,6 +184,18 @@ aggregate_borough_data2 <- function(model_output, constraint_path, first_proj_yr
   
   #-----------------------------------------------------------------------------
   
+  #housing 
+  borough_data$households_detail <- model_output$households_detail %>% 
+    group_by(gss_code, la_name, year) %>% 
+    summarise(population = sum(population),
+              ce_population = sum(ce_population),
+              household_population = sum(household_popn),
+              input_households = sum(input_households),
+              .groups = 'drop_last') %>% 
+    data.frame() %>% 
+    mutate(implied_ahs = household_population/input_households)
+  
+  
   return(borough_data)
   
 }

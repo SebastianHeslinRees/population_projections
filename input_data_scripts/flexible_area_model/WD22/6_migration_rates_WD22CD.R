@@ -22,7 +22,7 @@ denominator_popn <- ward_pop %>%
   mutate(denom_pop = popn + inflow)
 
 #-------------------------------------------------------------------------------
-# Averaged migration flows and rates
+# Averaged migration flows and rates - 5yrs
 
 out_mig_rates_5 <- denominator_popn %>% 
   left_join(ward_out_mig, by = c("gss_code", "gss_code_ward", "year", "sex", "age")) %>% 
@@ -71,6 +71,32 @@ in_mig_flows_10 <- ward_in_mig %>%
                                  project_rate_from = 2022) %>% 
   rename(in_flow = inflow) %>% 
   project_forward_flat(2050)
+
+#-------------------------------------------------------------------------------
+
+# Averaged migration flows and rates - 15 years
+
+# out_mig_rates_15 <- denominator_popn %>% 
+#   left_join(ward_out_mig, by = c("gss_code", "gss_code_ward", "year", "sex", "age")) %>% 
+#   mutate(out_rate = ifelse(denom_pop==0, 0, outflow/denom_pop)) %>% 
+#   calculate_mean_from_backseries(n_years_to_avg = 15, 
+#                                  last_data_year = 2021, 
+#                                  data_col = "out_rate",
+#                                  col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+#                                  project_rate_from = 2022) %>% 
+#   mutate(out_rate = ifelse(out_rate > 0.8, 0.8, out_rate)) %>% 
+#   project_forward_flat(2050)
+# 
+# #-------------------------------------------------------------------------------
+# 
+# in_mig_flows_15 <- ward_in_mig %>% 
+#   calculate_mean_from_backseries(n_years_to_avg = 15, 
+#                                  last_data_year = 2021,
+#                                  data_col = "inflow",
+#                                  col_aggregation = c("gss_code", "gss_code_ward", "sex", "age"),
+#                                  project_rate_from = 2022) %>% 
+#   rename(in_flow = inflow) %>% 
+#   project_forward_flat(2050)
 
 #-------------------------------------------------------------------------------
 

@@ -1,10 +1,10 @@
-# library(popmodules)
-# library(flexibleareamodel)
+library(flexibleareamodel)
+
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "2021_TEST"
+projection_name <- "2021_SHLAA_dev_10yr"
 
 #Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2021/2021_TEST_22-11-28_1522/",
+constraint_list <- list(constraint_path = "outputs/trend/2021/2021_10yr_22-12-13_1417/",
                         apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
                         make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
                         mapping = c("constraint_area","year","sex","age"),
@@ -14,7 +14,7 @@ constraint_list <- list(constraint_path = "outputs/trend/2021/2021_TEST_22-11-28
                                           out_migration = F,
                                           population = T))
 
-external_births <- list(births_path = "input_data/scenario_data/2022_births_dummy_file.rds",
+external_births <- list(births_path = "input_data/scenario_data/births_mid_22.rds",
                         apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
                         mapping = c("gss_code","year","sex","age"))
 
@@ -22,11 +22,11 @@ external_births <- list(births_path = "input_data/scenario_data/2022_births_dumm
 
 #Migration
 in_migration <- list(
-  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
+  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_10yr_avg.rds"),
                 transition = F))
 
 out_migration <- list(
-  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
+  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_10yr_avg.rds"),
                 transition = F))
 
 #Config
@@ -73,8 +73,8 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
-devtools::load_all('model_code/popmodules/')
-devtools::load_all('model_code/flexibleareamodel/')
+# devtools::load_all('model_code/popmodules/')
+# devtools::load_all('model_code/flexibleareamodel/')
 model_output <- flexmodel_hl_projection(config_list)
 
-create_excel(config_list$output_dir, "TEST.xlsx", "Test Projection 2021-base")
+create_excel(config_list$output_dir, "SHLAA 10-year migration.xlsx", "Test Projection 2021-base")

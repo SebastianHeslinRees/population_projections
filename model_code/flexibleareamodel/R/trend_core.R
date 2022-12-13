@@ -141,16 +141,16 @@ trend_core <- function(start_population,
   
   assert_that(sum(is.na(inflow))==0, msg=paste("inflow", projection_year))
   
+  #-----------------------------------------------------------------------------
+  
+  #out migration
   outflow_denominator_popn <- natural_change_popn %>% 
     left_join(inflow, by = col_agg) %>% 
     mutate(outflow_denom = inflow + popn)
   
-  #-----------------------------------------------------------------------------
-  
-  #out migration
   outflow <- apply_rate_to_population(popn = outflow_denominator_popn,
                                       rates = out_rates,
-                                      col_popn = "popn",
+                                      col_popn = "outflow_denom",
                                       col_rate = "out_rate",
                                       col_out = "outflow",
                                       col_aggregation = col_agg,

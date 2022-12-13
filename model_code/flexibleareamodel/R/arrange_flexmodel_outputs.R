@@ -35,6 +35,7 @@ arrange_flexmodel_outputs <- function(projection,
                                       fertility_rates, mortality_rates,
                                       in_mig_flows, out_mig_rates,
                                       dwelling_trajectory, dwelling_stock,
+                                      households, communal_establishment_population,
                                       first_proj_yr, last_proj_yr,
                                       config_list, model,
                                       n_cores = 1, parallel = FALSE){
@@ -81,7 +82,7 @@ arrange_flexmodel_outputs <- function(projection,
                                filter(year < first_proj_yr) %>% 
                                select(!!join_by, netflow))
   #-----------------------------------------------------------------------------
-  #Components dataframe backeries
+  #Components dataframe backseries
   
   proj_components <- list(rbind(
     mutate(proj_popn[[1]], component = "popn") %>% rename(value = popn),
@@ -161,6 +162,32 @@ arrange_flexmodel_outputs <- function(projection,
       proj_ahs[[projection_year]] <- projection[[projection_year]][['ahs']]
       proj_households[[projection_year]] <- projection[[projection_year]][['households_detail']]
       proj_hh_pop_sya[[projection_year]] <- projection[[projection_year]][['household_population_sya']]
+    }
+   
+    #housing-led backseries
+    for(backseries_year in min(population$year):(first_proj_yr-1)){
+      
+      proj_hh_pop_sya[[backseries_year]] <- filter(population, year == backseries_year) %>% 
+        .remove_ce_popn(communal_establishment_population) %>% 
+        select(names(proj_hh_pop_sya[[first_proj_yr]]))
+      
+      #browser()
+      
+      proj_households[[backseries_year]] <- proj_hh_pop_sya[[backseries_year]] %>% 
+        group_by(year, across(!!nested_geog)) %>% 
+        summarise(population = sum(popn),
+                  ce_population = sum(ce_popn),
+                  household_popn = sum(household_popn),
+                  .groups = 'drop_last') %>% 
+        data.frame() %>% 
+        left_join(households, by = c("year", "area_code")) %>% 
+        rename(input_households = households)
+        
+      proj_ahs[[backseries_year]] <- proj_households[[backseries_year]] %>% 
+        mutate(hhr_ahs = NA, trend_ahs = NA, blended_ahs = NA,
+               actual_ahs = household_popn / input_households) %>% 
+        select(names(proj_ahs[[first_proj_yr]])) %>% 
+        data.frame()
     }
     
     #housing-led

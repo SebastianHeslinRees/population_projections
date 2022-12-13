@@ -82,12 +82,14 @@ trend_core <- function(start_population,
       summarise(constraint = sum(births), .groups = 'drop_last')
     
     births_by_mother <- births_by_mother %>% 
+      filter(gss_code %in% external_constraint$gss_code) %>% 
       group_by(gss_code) %>% 
       mutate(births_total = sum(births)) %>% 
       data.frame() %>% 
       left_join(external_constraint, by = "gss_code") %>% 
       mutate(births = births * (constraint/births_total)) %>% 
-      select(names(births_by_mother))
+      select(names(births_by_mother)) %>% 
+      bind_rows(filter(births_by_mother, !gss_code %in% external_constraint$gss_code))
     
   }
   
@@ -104,6 +106,9 @@ trend_core <- function(start_population,
   } else {
     
     births <- external_births
+    other_births <- filter(births_by_mother, !gss_code %in% external_births$gss_code) %>% 
+      sum_births_and_split_by_sex_ratio(birthratio_m2f)
+    births <- bind_rows(births, other_births)
     
   }
   

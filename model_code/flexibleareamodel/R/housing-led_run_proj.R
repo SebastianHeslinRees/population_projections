@@ -159,6 +159,7 @@ dwellings <- trajectory %>%
   data.frame()
 
 #Convert to dwellings to households
+
 dwellings_2_hh <- readRDS(config_list$dwellings_to_households_path) %>% 
   .standardise_df(config_list$geog_code_col, "d2hh_ratio")
 
@@ -180,6 +181,7 @@ hhr_ahs_uplift <- NULL
 curr_yr_hhr <- filter(household_rep_rates, year == 2011)
 
 message("projecting")
+message(" ")
 for(projection_year in first_proj_yr:last_proj_yr){
   
   cat('\r',projection_year)
@@ -266,7 +268,9 @@ rm(list = setdiff(ls(), c("hl_projection",
                           "in_migration_flows", "out_migration_rates",
                           "trajectory", "dwellings",
                           "first_proj_yr", "last_proj_yr",
-                          "config_list","n_cores","cl")))
+                          "config_list","n_cores","cl",
+                          "communal_establishment_population",
+                          "households")))
 
 #-------------------------------------------------------------------------------
 
@@ -280,7 +284,8 @@ hl_projection <- arrange_flexmodel_outputs(hl_projection,
                                            fertility_rates, mortality_rates,
                                            in_migration_flows,
                                            out_migration_rates,
-                                           trajectory, dwellings,
+                                           trajectory, dwellings, households,
+                                           communal_establishment_population,
                                            first_proj_yr, last_proj_yr,
                                            config_list,
                                            "housing-led",

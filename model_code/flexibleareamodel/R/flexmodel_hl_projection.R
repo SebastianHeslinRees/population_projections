@@ -165,7 +165,7 @@ flexmodel_hl_projection <- function(config_list, n_cores = NULL){
   
   message("projecting")
   for(projection_year in first_proj_yr:last_proj_yr){
-    browser()
+    
     #fertility & mortality
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)
