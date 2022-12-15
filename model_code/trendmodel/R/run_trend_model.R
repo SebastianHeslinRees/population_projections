@@ -185,8 +185,8 @@ run_trend_model <- function(config_list) {
   projection <- list()
   for(projection_year in first_proj_yr:last_proj_yr){
     
-    cat('\r',projection_year)
     utils::flush.console()
+    cat('\r',projection_year)
     
     curr_yr_fertility <- filter(fertility_rates, year == projection_year)
     curr_yr_mortality <- filter(mortality_rates, year == projection_year)

@@ -28,13 +28,17 @@ past_dom_out <- readRDS(paste0(previous_data, "dom_out_ons.rds")) %>% filter(yea
 #past_dom_net <- readRDS(paste0(previous_data, "dom_net_ons.rds")) %>% filter(year < 2012)
 
 # N Ireland, Scotland, Wales
-other_popn <- readRDS(paste0(previous_data, "population_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
-other_births <- readRDS(paste0(previous_data, "births_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
-other_deaths <- readRDS(paste0(previous_data, "deaths_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
-other_int_in <- readRDS(paste0(previous_data, "int_in_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
-other_int_out <- readRDS(paste0(previous_data, "int_out_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
-other_dom_in <- readRDS(paste0(previous_data, "dom_in_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
-other_dom_out <- readRDS(paste0(previous_data, "dom_out_ons.rds")) %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
+n_s_w <- function(x){
+  x %>% filter(substr(gss_code,1,1) %in% c("N","S","W"))
+}
+
+other_popn <- readRDS(paste0(previous_data, "population_ons.rds")) %>% n_s_w()
+other_births <- readRDS(paste0(previous_data, "births_ons.rds")) %>% n_s_w()
+other_deaths <- readRDS(paste0(previous_data, "deaths_ons.rds")) %>% n_s_w()
+other_int_in <- readRDS(paste0(previous_data, "int_in_ons.rds")) %>% n_s_w()
+other_int_out <- readRDS(paste0(previous_data, "int_out_ons.rds")) %>% n_s_w()
+other_dom_in <- readRDS(paste0(previous_data, "dom_in_ons.rds")) %>% n_s_w()
+other_dom_out <- readRDS(paste0(previous_data, "dom_out_ons.rds")) %>% n_s_w()
 
 #-------------------------------------------------------------------------------
 # Scotland
@@ -60,11 +64,11 @@ scotland_dom_out_total_2021 <- 47300
 scotland_int_out_total_2021 <- 22100
 
 scotland_births_2021 <- data.frame(gss_code = "S92000003",
-                                         age = 0,
-                                         sex = c("female","male"),
-                                         year = 2021,
-                                         births = c(scotland_births_total_2021 * (100/205),
-                                                    scotland_births_total_2021 * (105/205))) %>% 
+                                   age = 0,
+                                   sex = c("female","male"),
+                                   year = 2021,
+                                   births = c(scotland_births_total_2021 * (100/205),
+                                              scotland_births_total_2021 * (105/205))) %>% 
   complete_popn_dataframe(col_data = "births") %>% 
   select(names(past_births))
 
@@ -191,23 +195,80 @@ gla_int_net <- gla_int_out %>%
 # Domestic
 # TODO This needs to be rebuilt from the O/D matrix
 
+dom_matrix <- readRDS("input_data/domestic_migration/2020/domestic_migration_flows_ons_(2021_geog).rds")
+region_lookup <- readRDS("input_data/lookup/district_to_region_(2021 geog).rds")
+
+regional_dom <- aggregate_regional_flows(dom_matrix,
+                                         region_lookup = region_lookup,
+                                         flow_col = "value",
+                                         inner_outer_lookup =  "input_data/lookup/inner_and_outer_london.rds")
+
+region_dom_in <- regional_dom[[1]] %>% 
+  group_by(gss_code = gss_in, year, sex, age) %>% 
+  summarise(dom_in = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(substr(gss_code,1,1) == "E")
+
+region_dom_out <- regional_dom[[1]] %>% 
+  group_by(gss_code = gss_out, year, sex, age) %>% 
+  summarise(dom_out = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(substr(gss_code,1,1) == "E")
+
+national_dom_in <- regional_dom[[2]] %>% 
+  group_by(gss_code = gss_in, year, sex, age) %>% 
+  summarise(dom_in = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(substr(gss_code,1,1) %in% c("E","W"))
+
+national_dom_out <- regional_dom[[2]] %>% 
+  group_by(gss_code = gss_out, year, sex, age) %>% 
+  summarise(dom_out = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(substr(gss_code,1,1) %in% c("E","W"))
+
+sub_reg_dom_in <- regional_dom[[3]] %>% 
+  group_by(gss_code = gss_in, year, sex, age) %>% 
+  summarise(dom_in = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(substr(gss_code,1,3)=="E13") 
+
+sub_reg_dom_out <- regional_dom[[3]] %>% 
+  group_by(gss_code = gss_out, year, sex, age) %>% 
+  summarise(dom_out = sum(value), .groups = 'drop_last') %>% 
+  data.frame() %>% 
+  filter(substr(gss_code,1,3)=="E13")
+
 gla_dom_in <- filter(gla_series, component == "internal_in") %>% 
   select(gss_code, year, sex, age, dom_in = value) %>% 
   data.frame()%>% 
   bind_rows(past_dom_in)%>% 
   filter(substr(gss_code,1,3) %in% england_codes) %>% 
-  bind_rows(other_dom_in, scotland_dom_in_2021) %>% 
-  check_negative_values("dom_in") 
+  bind_rows(other_dom_in, scotland_dom_in_2021,
+            region_dom_in, national_dom_in, sub_reg_dom_in) %>% 
+  check_negative_values("dom_in") %>% 
+  data.frame()
 
 gla_dom_out <- filter(gla_series, component == "internal_out") %>% 
   select(gss_code, year, sex, age, dom_out = value) %>% 
   data.frame() %>% 
   bind_rows(past_dom_out) %>% 
   filter(substr(gss_code,1,3) %in% england_codes) %>% 
-  bind_rows(other_dom_out, scotland_dom_out_2021) %>% 
-  check_negative_values("dom_out")
+  bind_rows(other_dom_out, scotland_dom_out_2021,
+            region_dom_out, national_dom_out, sub_reg_dom_out) %>% 
+  check_negative_values("dom_out") %>% 
+  data.frame()
 
 #-------------------------------------------------------------------------------
+
+sum(is.na(gla_popn))
+sum(is.na(gla_births))
+sum(is.na(gla_deaths))
+sum(is.na(gla_int_in))
+sum(is.na(gla_int_out))
+sum(is.na(gla_int_net))
+sum(is.na(gla_dom_in))
+sum(is.na(gla_dom_out))
 
 #save
 saveRDS(gla_popn, "input_data/mye/2021/population_gla.rds")
