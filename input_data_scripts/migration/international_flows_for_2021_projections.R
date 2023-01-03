@@ -11,16 +11,21 @@ int_in_mye_path <-  "input_data/mye/2021/int_in_gla.rds"
 int_out_mye_path <-  "input_data/mye/2021/int_out_gla.rds"
 dir.create("input_data/scenario_data", showWarnings = FALSE)
 
+
+popn <- readRDS(popn_mye_path) %>% filter(!substr(gss_code,1,3) %in% c("E12","E92","W92"))
+births <- readRDS(births_mye_path) %>% filter(!substr(gss_code,1,3) %in% c("E12","E92","W92"))
+int_in <- readRDS(int_in_mye_path) %>% filter(!substr(gss_code,1,3) %in% c("E12","E92","W92"))
+int_out <- readRDS(int_out_mye_path) %>% filter(!substr(gss_code,1,3) %in% c("E12","E92","W92"))
+
 #---
 
 # 10 year
 
-
 int_in_avg_2012_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "flow",
-  component_path = int_in_mye_path,
+  component_path = int_in,
   last_data_year = 2021,
   n_years_to_avg = 10,
   data_col = "int_in",
@@ -30,10 +35,10 @@ int_in_avg_2012_2021 <- calculate_mean_international_rates_or_flows(
   select(-year)
 
 int_out_rate_2012_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "rate",
-  component_path = int_out_mye_path,
+  component_path = int_out,
   last_data_year = 2021,
   n_years_to_avg = 10,
   data_col = "int_out",
@@ -43,10 +48,10 @@ int_out_rate_2012_2021 <- calculate_mean_international_rates_or_flows(
   select(-year)
 
 int_out_flow_2012_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "flow",
-  component_path = int_out_mye_path,
+  component_path = int_out,
   last_data_year = 2021,
   n_years_to_avg = 10,
   data_col = "int_out",
@@ -60,10 +65,10 @@ int_out_flow_2012_2021 <- calculate_mean_international_rates_or_flows(
 # 5 year
 
 int_in_avg_2017_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "flow",
-  component_path = int_in_mye_path,
+  component_path = int_in,
   last_data_year = 2021,
   n_years_to_avg = 5,
   data_col = "int_in",
@@ -73,10 +78,10 @@ int_in_avg_2017_2021 <- calculate_mean_international_rates_or_flows(
   select(-year)
 
 int_out_rate_2017_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "rate",
-  component_path = int_out_mye_path,
+  component_path = int_out,
   last_data_year = 2021,
   n_years_to_avg = 5,
   data_col = "int_out",
@@ -86,10 +91,10 @@ int_out_rate_2017_2021 <- calculate_mean_international_rates_or_flows(
   select(-year)
 
 int_out_flow_2017_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "flow",
-  component_path = int_out_mye_path,
+  component_path = int_out,
   last_data_year = 2021,
   n_years_to_avg = 5,
   data_col = "int_out",
@@ -103,10 +108,10 @@ int_out_flow_2017_2021 <- calculate_mean_international_rates_or_flows(
 # 15 year
 
 int_in_avg_2007_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "flow",
-  component_path = int_in_mye_path,
+  component_path = int_in,
   last_data_year = 2021,
   n_years_to_avg = 15,
   data_col = "int_in",
@@ -116,10 +121,10 @@ int_in_avg_2007_2021 <- calculate_mean_international_rates_or_flows(
   select(-year)
 
 int_out_rate_2007_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "rate",
-  component_path = int_out_mye_path,
+  component_path = int_out,
   last_data_year = 2021,
   n_years_to_avg = 15,
   data_col = "int_out",
@@ -129,10 +134,10 @@ int_out_rate_2007_2021 <- calculate_mean_international_rates_or_flows(
   select(-year)
 
 int_out_flow_2007_2021 <- calculate_mean_international_rates_or_flows(
-  popn_mye_path = popn_mye_path,
-  births_mye_path = births_mye_path,
+  popn_mye_path = popn,
+  births_mye_path = births,
   flow_or_rate = "flow",
-  component_path = int_out_mye_path,
+  component_path = int_out,
   last_data_year = 2021,
   n_years_to_avg = 15,
   data_col = "int_out",

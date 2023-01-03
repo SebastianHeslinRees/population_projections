@@ -10,12 +10,15 @@ births_mye_path <-  paste0("input_data/mye/2021/births_gla.rds")
 fertility_curve_filepath <- "input_data/fertility/ons_asfr_curves_2018_(2021_geog).rds"
 fertility_trajectory_filepath <- "input_data/fertility/npp_fertility_trend.rds"
 
+popn <- readRDS(gla_popn_mye_path) %>% filter(!substr(gss_code,1,3) %in% c("E12","E92","W92"))
+births <- readRDS(births_mye_path) %>% filter(!substr(gss_code,1,3) %in% c("E12","E92","W92"))
+
 #------------------------------------------------------------------------------- 
 
 # 5 year average rates
 
-average_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
-                                       births = births_mye_path,
+average_5yrs <- scaled_fertility_curve(popn = popn,
+                                       births = births,
                                        target_curves = fertility_curve_filepath,
                                        last_data_year = 2021,
                                        n_years_to_avg = 5,
@@ -33,8 +36,8 @@ average_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
 
 # 5 year trended rates
 
-trend_5yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
-                                     births = births_mye_path,
+trend_5yrs <- scaled_fertility_curve(popn = popn,
+                                     births = births,
                                      target_curves = fertility_curve_filepath,
                                      last_data_year = 2021,
                                      n_years_to_avg = 5,
@@ -68,8 +71,8 @@ trend_5yrs_high <- trend_5yrs %>%
 
 # Trend 2 years (2018 & 2019)
 
-trend_2yrs <- scaled_fertility_curve(popn = gla_popn_mye_path,
-                                     births = births_mye_path,
+trend_2yrs <- scaled_fertility_curve(popn = popn,
+                                     births = births,
                                      target_curves = fertility_curve_filepath,
                                      last_data_year = 2019,
                                      n_years_to_avg = 2,

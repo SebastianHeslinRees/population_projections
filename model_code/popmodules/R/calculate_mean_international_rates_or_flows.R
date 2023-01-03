@@ -39,12 +39,14 @@ calculate_mean_international_rates_or_flows <- function(popn_mye_path, births_my
                                                         first_proj_yr, n_proj_yr, rate_cap, modify_rates_and_flows=1,
                                                         project_rate_from = last_data_year+1) {
 
-  component <- readRDS(component_path)
+  population <- .path_or_dataframe(popn_mye_path)
+  births <- .path_or_dataframe(births_mye_path)
+  component <- .path_or_dataframe(component_path)
 
   if(flow_or_rate == "rate"){
 
-    population <- readRDS(popn_mye_path) %>%
-      popn_age_on(births = readRDS(births_mye_path)) %>%
+    population <- population %>%
+      popn_age_on(births = births) %>%
       data.frame()
 
     rate_backseries <- population %>%

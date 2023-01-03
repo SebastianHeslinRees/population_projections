@@ -78,9 +78,9 @@ get_rate_backseries <- function(component_mye_path,
   # changes are changes that occurred in the 12 months up to 30th June
   # age is the age the cohort is at 30th June
   # TODO add link to ONS documentation for the above
-  popn <- readRDS(popn_mye_path)
-  births <- readRDS(births_mye_path)
-  component <- readRDS(component_mye_path)
+  popn <- .path_or_dataframe(popn_mye_path)
+  births <- .path_or_dataframe(births_mye_path)
+  component <- .path_or_dataframe(component_mye_path)
   
   validate_get_rate_backseries_inputs(popn, births, component, years_backseries,
                                       col_partial_match, col_aggregation, col_component, rate_cap)
