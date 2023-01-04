@@ -154,13 +154,13 @@ run_trend_model <- function(config_list) {
   constraints <- eval_or_read(config_list$constraint_fns)
   
   #Prep backseries
-  population <- population %>% select(year, gss_code, age, sex, popn)
-  deaths <- deaths %>% select(year, gss_code, age, sex, deaths)
-  births <- births %>% select(year, gss_code, age, sex, births)
-  int_out <- int_out %>% select(year, gss_code, age, sex, int_out)
-  int_in <- int_in %>% select(year, gss_code, age, sex, int_in)
-  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out)
-  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in)
+  population <- population %>% select(year, gss_code, age, sex, popn) %>% filter_to_LAs()
+  deaths <- deaths %>% select(year, gss_code, age, sex, deaths) %>% filter_to_LAs()
+  births <- births %>% select(year, gss_code, age, sex, births) %>% filter_to_LAs()
+  int_out <- int_out %>% select(year, gss_code, age, sex, int_out) %>% filter_to_LAs()
+  int_in <- int_in %>% select(year, gss_code, age, sex, int_in) %>% filter_to_LAs()
+  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out) %>% filter_to_LAs()
+  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in) %>% filter_to_LAs()
   
   fertility_rates <- fertility_rates %>% select(year, gss_code, age, sex, rate)
   mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
@@ -170,6 +170,7 @@ run_trend_model <- function(config_list) {
   curr_yr_popn <- filter(population, year == first_proj_yr-1)
   
   # set up projection
+  
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              dom_out, dom_in, popn_adjustment, upc_mye,
                              fertility_rates, mortality_rates,
