@@ -33,7 +33,7 @@ curves_no_year <- curves %>% select(-year)
 
 aged_popn <- pop_data %>% 
   filter(sex == "female", age %in% unique(curves$age)) %>% 
-  popn_age_on(births = NULL)
+  popn_age_on2(births = NULL)
 
 total_births <- group_by(births, year, gss_code) %>%
   summarise(births = sum(births), .groups = 'drop_last')

@@ -66,7 +66,7 @@ popn_age_on2 <- function(popn,
   
   # Validate inputs
   
-  # validate_popn_age_on_input(popn,
+  # validate_popn_age_on2_input(popn,
   #                            col_aggregation,
   #                            col_age,
   #                            col_year,
@@ -107,7 +107,8 @@ popn_age_on2 <- function(popn,
     filter(across(!!col_age) < max_age) %>%
     select(names(last_age)) %>% 
     bind_rows(last_age) %>% 
-    data.frame()
+    data.frame() %>%
+    arrange(across(!!col_aggregation))
   
   #-----------------------------------------------------------------------------
   
@@ -152,7 +153,7 @@ popn_age_on2 <- function(popn,
 
 # -------------------------------------------------------------------------
 
-validate_popn_age_on_input <- function(popn,
+validate_popn_age_on2_input <- function(popn,
                                        col_aggregation,
                                        col_age,
                                        col_year,

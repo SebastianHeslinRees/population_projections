@@ -52,7 +52,7 @@ curves$rate <- sample(seq(0.001:0.01, by=0.01),nrow(curves),replace=T)
 #-------------------------------------------------------------------------------
 
 aged <- pop_data %>%
-  popn_age_on(births = births)
+  popn_age_on2(births = births)
 
 curves_no_year <- select(curves, -year)
 
@@ -114,7 +114,8 @@ x <- scaled_mortality_curve(pop_data, births, deaths,
                             curves, last_data_year,
                             years_to_avg, avg_or_trend="trend",
                             data_col = "deaths", output_col = "rate") %>% 
-  arrange(gss_code, year, sex, age)
+  arrange(gss_code, year, sex, age) %>% 
+  filter(year > 2001)
 
 #-----------------------------------------------------------
 #devtools::load_all('model_code/popmodules')

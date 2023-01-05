@@ -46,9 +46,9 @@ GITHUB_PAT="xxx"
 ## Model development
 
 When adding new features or editing existing code the following commands should be used to test and check code before it is pushed for review:\
-`devtools::check("pkg")`\
-`devtools::test("pkg")`\
-`codetools::checkUsagePackage("pkg", suppressUndefined=TRUE)`
+`devtools::check("model_code/popmodules")`\
+`devtools::test("model_code/popmodules")`\
+`codetools::checkUsagePackage("popmodules", suppressUndefined=TRUE)`
 
 
 ## Model Installation

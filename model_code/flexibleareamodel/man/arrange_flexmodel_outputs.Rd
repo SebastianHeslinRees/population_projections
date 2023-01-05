@@ -17,6 +17,8 @@ arrange_flexmodel_outputs(
   out_mig_rates,
   dwelling_trajectory,
   dwelling_stock,
+  households,
+  communal_establishment_population,
   first_proj_yr,
   last_proj_yr,
   config_list,

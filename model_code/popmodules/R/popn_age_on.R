@@ -120,7 +120,7 @@ popn_age_on <- function(popn,
   aged <- aged %>%
     lazy_dt() %>% 
     group_by(across(!!col_aggregation)) %>%
-    summarise(across(!!col_data, sum)) %>% 
+    summarise(across(!!col_data, sum), .groups='drop_last') %>% 
     data.frame()
 
   #-----------------------------------------------------------------------------
@@ -141,7 +141,7 @@ popn_age_on <- function(popn,
     births <- births %>%
       filter(!!sym(col_age) == 0) %>% 
       rename(!!col_data := col_births) %>%
-      select(names(aged))
+      select(all_of(names(aged)))
     
     aged <- rbind(births, aged) %>%
       arrange_at(col_aggregation)
@@ -279,7 +279,9 @@ validate_popn_age_on_input <- function(popn,
               msg = "popn_age_on: duplicated aggregation levels in input dataframe. Is the col_aggregation parameter set correctly?")
   
   #Check for missing data
-  validate_complete(popn, col_aggregation, col_geog)
+  nested <- names(popn)[stringr::str_detect(names(popn), "gss_code")]
+  col_agg <- unique(nested, col_aggregation)
+  validate_complete(popn, col_aggregation, col_geog, nested_cols = nested)
   
   #Test for NAs
   assert_that(sum(is.na(popn[col_aggregation]))==0,

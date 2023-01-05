@@ -277,19 +277,15 @@ test_that("popn_age_on can handle small area data - errors)", {
   expect_error(popn_age_on(small_area_popn,
                            col_aggregation = c("year","gss_code","sex","age")))
   
-  expect_error(popn_age_on(small_area_popn,
-                           col_aggregation = c("year","gss_code","gss_code_ward","sex","age")))
-  
 })
 
 
-#Note: This one will change to an error when the validate_same_geog function is updated
 test_that("popn_age_on can handle small area data - errors)", {
   
-expect_warning(popn_age_on(small_area_wrong,
-                           col_aggregation = c("year","gss_code_ward","sex","age"),
-                           births = small_area_births,
-                           col_geog = "gss_code_ward"))
+  expect_error(popn_age_on(small_area_wrong,
+                             col_aggregation = c("year","gss_code_ward","sex","age"),
+                             births = small_area_births,
+                             col_geog = "gss_code_ward"))
 })
 
 
