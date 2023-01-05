@@ -17,10 +17,10 @@ if(file.exists(ldd_lsoa)){
 #lookups
 
 lsoa_to_ward <- readRDS(paste0(input_data_dir,"lookups/lsoa_to_WD22_lookup_best_fit.rds")) %>%
-  select(gss_code_lsoa, gss_code_ward)
+  select(gss_code_lsoa=LSOA11CD, gss_code_ward=WD22CD)
 
 ward_to_district <- readRDS(paste0(input_data_dir,"lookups/lsoa_to_WD22_lookup_best_fit.rds")) %>%
-  select(gss_code_ward, ward_name, gss_code) %>%
+  select(gss_code_ward=WD22CD, ward_name, gss_code=LAD22CD) %>%
   distinct()
 
 #-------------------------------------------------------------------------------

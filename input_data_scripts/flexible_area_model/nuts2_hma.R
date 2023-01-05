@@ -17,6 +17,6 @@ nuts2_hma <- data.frame(gss_code = c('E09000023', 'E09000028', 'E09000022', 'E09
                                       'Inner London - West', 'Inner London - East', 'Inner London - East',
                                       'Inner London - East', 'Inner London - East', 'Inner London - East'))
 
-saveRDS(nuts2_hma, "input_data/flexible_area_model/lookups/NUTS2_hma.rds")
+saveRDS(nuts2_hma, "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds")
 
 rm(list=ls())

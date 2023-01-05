@@ -28,20 +28,28 @@ library(dplyr)
 message("shlaa development WD22")
 
 processed_dir <- "input_data/flexible_area_model/development_data/processed/"
+dir.create(processed_dir, showWarnings = FALSE)
+
+if(exists(paste0(processed_dir, "2017_shlaa_large_sites.rds"))){
+  source("input_data_scripts/flexible_area_model/2017_shlaa_process_raw_inputs.R")
+}
+
 
 large_sites <- readRDS(paste0(processed_dir, "2017_shlaa_large_sites.rds"))
 small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_intensification.rds"))
 small_remainder_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
 small_trend_windfall <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
 
-lsoa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_WD22_lookup_best_fit.rds")
+lsoa_to_ward_lookup <- readRDS("input_data/flexible_area_model/lookups/lsoa_to_WD22_lookup_best_fit.rds") %>% 
+  rename(gss_code_ward = WD22CD, gss_code = LAD22CD)
 
 london_wards <- lsoa_to_ward_lookup %>%
   filter(substr(gss_code,1,3) == "E09") %>% 
   select(gss_code_ward) %>% 
   unique()
 
-oa_propotions_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD22_proportional.rds")
+oa_propotions_lookup <- readRDS("input_data/flexible_area_model/lookups/OA11CD_to_WD22CD_proportional.rds") %>% 
+  rename(gss_code_oa = OA11CD, gss_code_ward = WD22CD)
 
 #-------------------------------------------------------------------------------
 

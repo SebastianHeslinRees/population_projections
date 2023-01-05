@@ -41,7 +41,7 @@ assertthat::assert_that(all(
 
 #-------------------------------------------------------------------------------
 
-#### Trend model data
+#### Trend model data - LAD21CD
 
 #NPP & SNPP data
 source("input_data_scripts/fertility/npp_fertility_trend.R")
@@ -55,20 +55,29 @@ source("input_data_scripts/mye/ons_mye_2020.R")
 source("input_data_scripts/mye/gla_mye_2020.R")
 source("input_data_scripts/domestic_migration/domestic_migration_2020.R")
 
-#Other 2020 data (2021 geography)
+#2021 MYE & components
+source("input_data_scripts/mye/gla_mye_2021.R")
+
+#Other data
 source("input_data_scripts/households/household_model_inputs.R")
 source("input_data_scripts/households/household_model_inputs_(2021 geog).R")
 source("input_data_scripts/fertility/asfr_2021_geography.R")
 source("input_data_scripts/mortality/asmr_2021_geography.R")
-source("input_data_scripts/fertility/fertility_rates_2020_(2021 geog).R")
-source("input_data_scripts/mortality/mortality_rates_2020_(2021 geog).R")
-#source("input_data_scripts/fertility/additional_births_2019-based.R")
-source("input_data_scripts/scenario_data/covid_scenario_deaths.R")
-source("input_data_scripts/mortality/external_deaths_2021.R")
+source("input_data_scripts/fertility/2022_births.R")
 
-#2020-based migration rates and flows
-source("input_data_scripts/scenario_data/domestic_rates_for_2020_projections.R")
-source("input_data_scripts/scenario_data/international_flows_for_2020_projections.R")
+#Rates 2020 projections
+# source("input_data_scripts/fertility/fertility_rates_2020_(2021 geog).R")
+# source("input_data_scripts/mortality/mortality_rates_2020_(2021 geog).R")
+# source("input_data_scripts/scenario_data/covid_scenario_deaths.R")
+# source("input_data_scripts/mortality/external_deaths_2021.R")
+# source("input_data_scripts/scenario_data/domestic_rates_for_2020_projections.R")
+# source("input_data_scripts/scenario_data/international_flows_for_2020_projections.R")
+
+#Rates 2021 projections
+source("input_data_scripts/fertility/fertility_rates_2021.R")
+source("input_data_scripts/mortality/mortality_rates_2021.R")
+source("input_data_scripts/migration/international_flows_for_2021_projections.R")
+source("input_data_scripts/migration/domestic_rates_for_2021_projections.R")
 
 #-------------------------------------------------------------------------------
 
@@ -86,6 +95,7 @@ R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/e
 # message("development data")
 # 
 # #LDD Polygon splits file
+dir.create("input_data/housing_led_model/")
 assertthat::assert_that(
   file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
             "input_data/housing_led_model/lsoa_polygon_splits.rds", overwrite = TRUE),

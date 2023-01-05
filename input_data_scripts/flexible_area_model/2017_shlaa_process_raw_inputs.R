@@ -37,10 +37,10 @@ message("raw shlaa development data")
 
 msoa_to_district_lookup <-  readRDS("input_data/lookup/msoa_to_district.rds")
 oa_to_msoa_lookup <- readRDS("input_data/lookup/oa_to_msoa.rds")
-oa_to_ward13_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD13_lookup.rds") %>%
+oa_to_ward13_lookup <- readRDS("input_data/flexible_area_model/lookups/OA11CD_to_WD13CD_best_fit.rds") %>%
   select(gss_code_oa, WD13CD = gss_code_ward)
-oa_to_ward22_lookup <- readRDS("input_data/flexible_area_model/lookups/oa_to_WD22_lookup_best_fit.rds") %>%
-  select(gss_code_oa, WD22CD = gss_code_ward)
+oa_to_ward22_lookup <- readRDS("input_data/flexible_area_model/lookups/oa11_to_WD22_lookup_best_fit.rds") %>%
+  select(gss_code_oa = OA11CD, WD22CD)
 ward22_name_lookup <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds")
 #-------------------------------------------------------------------------------
 

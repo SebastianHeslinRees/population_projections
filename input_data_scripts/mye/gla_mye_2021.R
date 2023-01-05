@@ -331,23 +331,24 @@ dom_matrix <- bind_rows(dom_matrix_past, dom_matrix_2021)
 
 #---
 
-test_dom <- function(x, i){
-  
-  y <- filter(x, year == i)
-  a <- length(unique(y$gss_in))
-  b <- length(unique(y$gss_out))
-  c <- length(unique(y$age))
-  d <- length(unique(y$sex))
-  e <- nrow(y)
-  
-  print(paste0(i, ": ", a, " gss_in / ", b, " gss_out / ", c, " ages / ", d, " sexes / ", e, " (nrow)"))
-  
-}
-
-for(i in unique(dom_matrix$year)){test_dom(dom_matrix, i)}
+# test_dom <- function(x, i){
+#   
+#   y <- filter(x, year == i)
+#   a <- length(unique(y$gss_in))
+#   b <- length(unique(y$gss_out))
+#   c <- length(unique(y$age))
+#   d <- length(unique(y$sex))
+#   e <- nrow(y)
+#   
+#   print(paste0(i, ": ", a, " gss_in / ", b, " gss_out / ", c, " ages / ", d, " sexes / ", e, " (nrow)"))
+#   
+# }
+# 
+# for(i in unique(dom_matrix$year)){test_dom(dom_matrix, i)}
 
 #---
 
+dir.create("input_data/domestic_migration/2021")
 saveRDS(dom_matrix, f_paths$dom_matrix_out)
 
 #---

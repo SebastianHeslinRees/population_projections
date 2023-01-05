@@ -119,13 +119,13 @@ run_trend_model <- function(config_list) {
     external_births <- NULL
   }
   
-
+  
   if(!is.null(config_list$external_deaths_path)){
     external_deaths <- readRDS(config_list$external_deaths_path)
   } else {
     external_deaths <- NULL
   }
-
+  
   # get the projected rates
   message("get projected rates")
   
@@ -159,18 +159,17 @@ run_trend_model <- function(config_list) {
   births <- births %>% select(year, gss_code, age, sex, births) %>% filter_to_LAs()
   int_out <- int_out %>% select(year, gss_code, age, sex, int_out) %>% filter_to_LAs()
   int_in <- int_in %>% select(year, gss_code, age, sex, int_in) %>% filter_to_LAs()
-  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out) %>% filter_to_LAs()
-  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in) %>% filter_to_LAs()
+  dom_out <- dom_out %>% select(year, gss_code, age, sex, dom_out) 
+  dom_in <- dom_in %>% select(year, gss_code, age, sex, dom_in) 
   
   fertility_rates <- fertility_rates %>% select(year, gss_code, age, sex, rate)
   mortality_rates <- mortality_rates %>% select(year, gss_code, age, sex, rate)
   international_in <- data.frame()
   international_out <- data.frame()
   
-  curr_yr_popn <- filter(population, year == first_proj_yr-1)
+  curr_yr_popn <- filter(population, year == first_proj_yr-1) %>% filter_to_LAs()
   
   # set up projection
-  
   validate_trend_core_inputs(population, births, deaths, int_out, int_in,
                              dom_out, dom_in, popn_adjustment, upc_mye,
                              fertility_rates, mortality_rates,
@@ -303,9 +302,9 @@ run_trend_model <- function(config_list) {
   deactivate_log(paste0(config_list$output_dir,"warnings.log"))
   
   return(projection)
-
-}
   
+}
+
 
 
 
@@ -315,8 +314,8 @@ run_trend_model <- function(config_list) {
 validate_trend_core_inputs <- function(population, births, deaths, int_out, int_in, dom_out, dom_in, popn_adjustment,
                                        upc_mye, fertility_rates, mortality_rates, external_births, external_deaths,
                                        int_out_flows_rates, first_proj_yr, n_proj_yr, int_out_method) {
-
-
+  
+  
   validate_population(population, col_data = "popn",
                       test_complete = TRUE,
                       test_unique = TRUE,
@@ -374,13 +373,13 @@ validate_trend_core_inputs <- function(population, births, deaths, int_out, int_
                         test_complete = FALSE, test_unique = TRUE, check_negative_values = FALSE)
   }
   
-
+  
   if(!is.null(external_births)){
     validate_population(external_births, col_data = "births",
                         test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)
   }
   
-
+  
   if(!is.null(external_deaths)){
     validate_population(external_deaths, col_data = "deaths",
                         test_complete = TRUE, test_unique = TRUE, check_negative_values = TRUE)

@@ -4,7 +4,7 @@ data_dir <- "input_data/flexible_area_model/"
 projection_name <- "2021_SHLAA_dev_5yr"
 
 #Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2021/2021_5yr_22-12-13_1417/",
+constraint_list <- list(constraint_path = "outputs/trend/2021/2021_5yr_23-01-05_1140/",
                         apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
                         make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
                         mapping = c("constraint_area","year","sex","age"),

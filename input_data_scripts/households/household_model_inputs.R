@@ -2,6 +2,7 @@
 library(dplyr)
 library(data.table)
 library(popmodules)
+library(dtplyr)
 
 message('household model inputs')
 
@@ -18,12 +19,14 @@ file_location <- "Q:/Teams/D&PA/Data/household_projections/ONS_data/2016_based/m
 rates_2001 <- read_hh_rates_files("/hh_rep_rates.rds", file_location, 2001) %>%
   recode_gss_codes(data_cols = "HRR",
                    fun = "mean",
-                   recode_gla_codes = TRUE)
+                   recode_gla_codes = TRUE,
+                   recode_to_year = 2012)
 
 rates_2011 <- read_hh_rates_files("/hh_rep_rates.rds", file_location, 2011) %>%
   recode_gss_codes(data_cols = "HRR",
                    fun = "mean",
-                   recode_gla_codes = TRUE)
+                   recode_gla_codes = TRUE,
+                   recode_to_year = 2012)
 
 rates <- vector("list", 2041)
 rates[[2001]] <- rates_2001
@@ -83,7 +86,8 @@ rounded_rates <- rbind(data.table::fread(paste0(ons_data_location, "rounded_hh_r
   select(-merged_gss_code) %>%
   popmodules::recode_gss_codes(data_cols = "HRR",
                                fun="mean",
-                               recode_gla_codes = TRUE) %>%
+                               recode_gla_codes = TRUE,
+                               recode_to_year = 2012) %>%
   filter(year %in% unique(rates$year) & gss_code %in% unique(rates$gss_code))
 
 rates <- filter(rates, age_group != "85_over") %>%
@@ -111,7 +115,8 @@ ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.cs
                          sex == "Male" ~ "male")) %>%
   select(-district) %>%
   popmodules::recode_gss_codes(data_cols = "ce_pop",
-                               recode_gla_codes = TRUE)
+                               recode_gla_codes = TRUE,
+                               recode_to_year = 2012)
 
 hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
                 data.table::fread(paste0(ons_data_location, "hh_population_male.csv"), header = T)) %>%
@@ -122,7 +127,8 @@ hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_femal
                          sex == "Male" ~ "male")) %>%
   select(-district) %>%
   popmodules::recode_gss_codes(data_cols = "hh_pop",
-                               recode_gla_codes = TRUE)
+                               recode_gla_codes = TRUE,
+                               recode_to_year = 2012)
 
 ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
   mutate(ce_rate = ifelse(age_group %in% c("75_79","80_84","85_89","90+"), ce_pop/(ce_pop+hh_pop), NA)) %>%
@@ -140,7 +146,8 @@ stage_2_inputs <- data.table::fread(paste0(ons_data_location,"s2_household_repre
   select(-merged_gss_code) %>%
   popmodules::recode_gss_codes(data_cols = "rate",
                                fun = "mean",
-                               recode_gla_codes = TRUE) %>%
+                               recode_gla_codes = TRUE,
+                               recode_to_year = 2012) %>%
   mutate(year = as.numeric(year))
 
 pop_under_16 <-  expand.grid(gss_code = unique(stage_2_inputs$gss_code),
@@ -171,20 +178,23 @@ stage1_data <- readRDS(paste0(data_location,"2014 DCLG stage 1 data.rds")) %>%
 stage_1_totals <- select(stage1_data, -hh_rep_rates) %>%
   recode_gss_codes(data_cols = c("households","household_population",
                                  "institutional_population","total_population"),
-                   recode_gla_codes = TRUE)
+                   recode_gla_codes = TRUE,
+                   recode_to_year = 2012)
 
 stage_1_rates <- select(stage1_data, -households, -household_population,
                         -institutional_population, -total_population) %>%
   recode_gss_codes(data_cols = "hh_rep_rates",
                    fun = "mean",
-                   recode_gla_codes = TRUE)
+                   recode_gla_codes = TRUE,
+                   recode_to_year = 2012)
 
 stage1_data <- left_join(stage_1_totals, stage_1_rates, by = c("gss_code","year","sex","household_type","age_group"))
 
 stage2_data <- readRDS(paste0(data_location,"2014 DCLG Stage 2 headship rates.rds")) %>%
   rename(rate = DCLG.rate) %>%
   select(-district) %>%
-  popmodules::recode_gss_codes(data_cols = "rate", fun = "mean", recode_gla_codes = TRUE)
+  popmodules::recode_gss_codes(data_cols = "rate", fun = "mean",
+                               recode_gla_codes = TRUE, recode_to_year = 2012)
 
 saveRDS(stage1_data, "input_data/household_model/dclg_stage1_data_2014.rds")
 saveRDS(stage2_data, "input_data/household_model/dclg_headship_rates_2014.rds")

@@ -23,7 +23,7 @@ def python_to_excel_flexibleareamodel(persons, females, males, components, traje
   #Set the output name and prep the file for writing
   writer = pd.ExcelWriter(output_dir+wb_filename, engine='openpyxl') 
   writer.book = book
-  writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+  writer.worksheets = dict((ws.title, ws) for ws in book.worksheets)
 
   #Write the dataframes to the workbook
   persons.to_excel(writer, "persons", index=False)
@@ -60,4 +60,4 @@ def python_to_excel_flexibleareamodel(persons, females, males, components, traje
           cell.number_format = '0'
   
   # Save the workbook
-  writer.save()
+  writer.close()

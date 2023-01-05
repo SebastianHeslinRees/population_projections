@@ -47,7 +47,7 @@ communal_est_lsoa <- rbind(
                                  as.numeric(age_max)))) %>% 
   data.frame()
 
-message("ingore warnings about NAs - its lying")
+message("ignore warnings about NAs - its lying")
 
 communal_est_ward <- communal_est_lsoa  %>% 
   left_join(lsoa_to_ward, by="gss_code_lsoa") %>% 

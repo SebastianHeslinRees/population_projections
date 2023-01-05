@@ -6,12 +6,14 @@ library(stringr)
 
 data_dir_Q_drive <- "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/"
 data_dir <- "input_data/flexible_area_model/"
+dir.create(data_dir, showWarnings = FALSE)
+dir.create(paste0(data_dir, "lookups"), showWarnings = FALSE)
 
 #-------------------------------------------------------------------------------
 
 # Ward 2022 to LAD 22
 # Directly from ONS Geo-portal
-WD22_to_LAD22 <- fread("input_data/flexible_area_model/lookups/WD22_LAD22_UK_LU_provisional.csv") %>% 
+WD22_to_LAD22 <- fread("Q:/Teams/D&PA/Demography/Projections/model_lookups/WD22_LAD22_UK_LU_provisional.csv") %>% 
   mutate(WD22NM = str_remove_all(WD22NM, "\\.")) %>% 
   data.frame() %>% 
   mutate(WD22CD = ifelse(LAD22CD=="E09000001", LAD22CD, WD22CD),
@@ -31,7 +33,7 @@ oa_to_wd22 <- fread(paste0(data_dir_Q_drive, 'lookups/oa_to_WD22.csv')) %>%
   mutate(ward_name = ifelse(LAD22CD == "E09000001", "City of London", ward_name),
          WD22CD = ifelse(LAD22CD == "E09000001", "E09000001", WD22CD))
 
-sum(is.na(oa_to_wd22))
+#sum(is.na(oa_to_wd22))
 
 #There is no OA linked to Stratford Olympic Park because of population weighting from 2011
 #Manually adjust so that that the OA that covers the ward is associated with it
@@ -40,6 +42,8 @@ oa_to_wd22 <- oa_to_wd22 %>%
          ward_name = ifelse(OA11CD == "E00175033", "Stratford Olympic Park", ward_name))
 
 saveRDS(oa_to_wd22, paste0(data_dir_Q_drive, "lookups/oa_to_WD22_lookup_best_fit.rds"))
+
+
 
 #-------------------------------------------------------------------------------
 
@@ -87,13 +91,22 @@ saveRDS(lsoa_to_wd22, paste0(data_dir_Q_drive, "lookups/lsoa_to_WD22_lookup_best
 #-------------------------------------------------------------------------------
 
 #Ward to NUTS2 (HMA) lookup
-LAD_to_NUTS2 <- readRDS("input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds")
+LAD_to_NUTS2 <- readRDS(paste0(data_dir_Q_drive, "lookups/LAD_to_NUTS2.rds"))
 wD22_to_NUTS2 <- left_join(WD22_to_LAD22, LAD_to_NUTS2, by = c("LAD22CD"="gss_code")) %>% 
   select(gss_code_ward = WD22CD, constraint_area)
 
 #OA21 to WD22
 oa21_ward22 <- fread("Q:/Teams/D&PA/Census/2021 Census/central_data_folder/geog_lookups/2021_oa_2022_ward.csv")
 saveRDS(oa21_ward22, paste0(data_dir, "lookups/OA21CD_to_WD22CD_proportional.rds"))
+
+#OA11 to WD22
+oa11_ward22 <- readRDS("Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/lookups/oa_to_ward_2022_proportional_london_only.rds") %>% 
+  rename(oa_ward_weight = scaling_factor)
+saveRDS(oa11_ward22, paste0(data_dir, "lookups/OA11CD_to_WD22CD_proportional.rds"))
+
+#OA11 to WD13
+oa11_ward13 <- readRDS("Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/lookups/oa_to_WD13_lookup.rds")
+saveRDS(oa11_ward13, paste0(data_dir, "lookups/OA11CD_to_WD13CD_best_fit.rds"))
 
 #-------------------------------------------------------------------------------
 
