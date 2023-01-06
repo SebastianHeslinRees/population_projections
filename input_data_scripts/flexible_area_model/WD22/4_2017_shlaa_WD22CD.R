@@ -30,10 +30,9 @@ message("shlaa development WD22")
 processed_dir <- "input_data/flexible_area_model/development_data/processed/"
 dir.create(processed_dir, showWarnings = FALSE)
 
-if(exists(paste0(processed_dir, "2017_shlaa_large_sites.rds"))){
+if(!file.exists(paste0(processed_dir, "2017_shlaa_large_sites.rds"))){
   source("input_data_scripts/flexible_area_model/2017_shlaa_process_raw_inputs.R")
 }
-
 
 large_sites <- readRDS(paste0(processed_dir, "2017_shlaa_large_sites.rds"))
 small_intensification <- readRDS(paste0(processed_dir, "2017_shlaa_small_sites_intensification.rds"))

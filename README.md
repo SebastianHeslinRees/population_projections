@@ -4,7 +4,7 @@ The GLA's demographic models are modular, and each model combines different meth
 
 The `popmodules` package contains functions for all of these, plus code that's shared between them, functions to validate population data frames, and miscellaneous functions for data wrangling.
 
-The `trendmodel`, `housingledmodel` and `smallareamodel` packages contain functions which leverage `popmodules` functions to produce population projections.
+The `trendmodel` and `flexibleareamodel` packages contain functions which leverage `popmodules` functions to produce population projections.
 
 
 ## Requirements

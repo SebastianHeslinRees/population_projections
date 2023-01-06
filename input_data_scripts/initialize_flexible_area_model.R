@@ -1,12 +1,9 @@
-# Data for the smallarea model
+# Data for the flexiblearea model
 # Reads data from the Q drive
-
-#Packages
-#devtools::install('model_code/popmodules')
-devtools::install('model_code/flexibleareamodel')
 
 #Folders
 dir.create("input_data/flexible_area_model", showWarnings = FALSE, recursive = TRUE)
+dir.create("input_data/flexible_area_model/lookups", showWarnings = FALSE)
 
 #HMA
 source("input_data_scripts/flexible_area_model/nuts2_hma.R")

@@ -1,4 +1,10 @@
+#This script installs all package and preps the input data ready for model runs
+#Run it line by line rather than sourcing it to ensure each element completes properly
+
 #Make sure all the correct CRAN/github packages of the correct versions are installed
+renv::restore()
+
+#run renv again as a check
 renv::restore()
 
 #install the gla models packages
@@ -6,7 +12,7 @@ devtools::document('model_code/popmodules')
 devtools::install('model_code/popmodules', dependencies = FALSE)
 popmodules::install_gla_models()
 
-#python
+#python packages
 reticulate::py_install(c("pandas","openpyxl"))
 
 #-------------------------------------------------------------------------------
@@ -90,24 +96,12 @@ R.utils::copyDirectory("Q:/Teams/D&PA/Demography/Projections/population_models/e
 
 #### Dev Data
 
-#Initialize script for LDD, SHLAA and dev scenario data
-#Some scripts read data from Q:/
-# message("development data")
-# 
-# #LDD Polygon splits file
+#LDD Polygon splits file
 dir.create("input_data/housing_led_model/")
 assertthat::assert_that(
   file.copy("Q:/Teams/D&PA/Data/LDD/lsoa_polygon_splits.rds",
             "input_data/housing_led_model/lsoa_polygon_splits.rds", overwrite = TRUE),
   msg="failed to copy ldd files from Q:")
-
-# #source("input_data_scripts/development_data/calc_polygon_splits.R") #20min runtime
-# 
-# #Dev data
-# source('input_data_scripts/development_data/ldd.R')
-# source('input_data_scripts/development_data/2017_shlaa.R')
-# source('input_data_scripts/development_data/shlaa_dev_pandemic_adjustments.R')
-# source('input_data_scripts/development_data/2020_housing_led_dev_scenarios.R')
 
 #-------------------------------------------------------------------------------
 

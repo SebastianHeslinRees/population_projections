@@ -120,7 +120,7 @@ large_input <- left_join(msoa_join, ward_13_join, by="lhcss_ref") %>%
 
 assertthat::assert_that(sum(is.na(large_input))==0)
 
-rm(list=setdiff(ls(), c("large_input","shlaa_data_loc", ls()[stringr::str_detect(ls(), "lookup")])))
+rm(list=setdiff(ls(), c("large_input","shlaa_data_loc", ls()[stringr::str_detect(ls(), "lookup","processed_dir")])))
 
 ####CREATE LARGE SITES TOTALS####
 total_units <- large_input %>%
@@ -262,5 +262,3 @@ saveRDS(large_sites, paste0(output_dir, "2017_shlaa_large_sites.rds"))
 saveRDS(small_intensification, paste0(output_dir, "2017_shlaa_small_sites_intensification.rds"))
 saveRDS(small_remainder_windfall, paste0(output_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
 saveRDS(small_trend_windfall, paste0(output_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
-
-rm(list = ls())
