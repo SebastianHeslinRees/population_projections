@@ -67,6 +67,7 @@ source("input_data_scripts/mye/gla_mye_2021.R")
 #Other data
 source("input_data_scripts/households/household_model_inputs.R")
 source("input_data_scripts/households/household_model_inputs_(2021 geog).R")
+source("input_data_scripts/households/communal_est_popn_2021_census.R")
 source("input_data_scripts/fertility/asfr_2021_geography.R")
 source("input_data_scripts/mortality/asmr_2021_geography.R")
 source("input_data_scripts/fertility/2022_births.R")

@@ -15,7 +15,11 @@ dir.create(paste0(data_dir, "lookups"), showWarnings = FALSE)
 # Directly from ONS Geo-portal
 WD22_to_LAD22 <- fread("Q:/Teams/D&PA/Demography/Projections/model_lookups/WD22_LAD22_UK_LU_provisional.csv") %>% 
   mutate(WD22NM = str_remove_all(WD22NM, "\\.")) %>% 
-  data.frame() %>% 
+  data.frame()
+
+city_wards <- filter(WD22_to_LAD22, LAD22CD == "E09000001") %>% pull(WD22CD)
+
+WD22_to_LAD22 <- WD22_to_LAD22 %>% 
   mutate(WD22CD = ifelse(LAD22CD=="E09000001", LAD22CD, WD22CD),
          WD22NM = ifelse(LAD22CD=="E09000001", LAD22NM, WD22NM)) %>% 
   select(-WD22NMW) %>% 
@@ -96,7 +100,11 @@ wD22_to_NUTS2 <- left_join(WD22_to_LAD22, LAD_to_NUTS2, by = c("LAD22CD"="gss_co
   select(gss_code_ward = WD22CD, constraint_area)
 
 #OA21 to WD22
-oa21_ward22 <- fread("Q:/Teams/D&PA/Census/2021 Census/central_data_folder/geog_lookups/2021_oa_2022_ward.csv")
+oa21_ward22 <- fread("Q:/Teams/D&PA/Census/2021 Census/central_data_folder/geog_lookups/2021_oa_2022_ward.csv") %>% 
+  mutate(WD22NM = ifelse(WD22CD %in% city_wards, "City of London", WD22NM),
+         WD22CD = ifelse(WD22CD %in% city_wards, "E09000001", WD22CD)) %>% 
+  data.frame()
+
 saveRDS(oa21_ward22, paste0(data_dir, "lookups/OA21CD_to_WD22CD_proportional.rds"))
 
 #OA11 to WD22
