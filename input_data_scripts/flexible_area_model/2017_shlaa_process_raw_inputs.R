@@ -63,19 +63,19 @@ msoa_polygons <- readOGR(dsn = msoa_polygon_loc, layer = "MSOA_2011_London",
 
 ward_13_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2011/ESRI/London"
 ward_13_polygons <- readOGR(dsn = ward_13_polygon_loc, layer = "London_Ward_CityMerged",
-                         verbose = FALSE)
+                            verbose = FALSE)
 
 ward_22_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/AdminBoundaries/2022/ESRI/London"
 ward_22_polygons <- readOGR(dsn = ward_22_polygon_loc, layer = "London_Ward_2022_draft",
-                         verbose = FALSE)
+                            verbose = FALSE)
 
 lonLUTI_polygon_loc <- "Q:/Teams/D&PA/Data/TfL/LonLUTI13GIS"
 lonLUTI_polygons <- readOGR(dsn = lonLUTI_polygon_loc, layer = "LonLUTI3",
-                         verbose = FALSE)
+                            verbose = FALSE)
 
 motion_polygon_loc <- "Q:/Teams/D&PA/Data/TfL/demand_zones/"
 motion_polygons <- readOGR(dsn = motion_polygon_loc, layer = "Demand_Zones_wv9.3_polygon",
-                            verbose = FALSE)
+                           verbose = FALSE)
 
 proj4string(large_sites_points) <- proj4string(msoa_polygons)
 proj4string(lonLUTI_polygons) <- proj4string(msoa_polygons)
@@ -105,7 +105,7 @@ ward_22_join <- cbind(as.data.frame(large_sites_points), over(large_sites_points
   select(-la_name) %>% 
   mutate(gss_code_ward = ifelse(gss_code == "E09000001", "E09000001", gss_code_ward)) %>% 
   select(lhcss_ref, WD22CD = gss_code_ward)
-         
+
 large_input <- left_join(msoa_join, ward_13_join, by="lhcss_ref") %>%
   left_join(ward_22_join, by="lhcss_ref") %>% 
   left_join(lonLUTI_join, by = "lhcss_ref") %>% 
@@ -120,7 +120,9 @@ large_input <- left_join(msoa_join, ward_13_join, by="lhcss_ref") %>%
 
 assertthat::assert_that(sum(is.na(large_input))==0)
 
-rm(list=setdiff(ls(), c("large_input","shlaa_data_loc", ls()[stringr::str_detect(ls(), "lookup","processed_dir")])))
+rm(list=setdiff(ls(), 
+                c("large_input","shlaa_data_loc", "processed_dir",
+                  ls()[stringr::str_detect(ls(), "lookup")])))
 
 ####CREATE LARGE SITES TOTALS####
 total_units <- large_input %>%
@@ -262,3 +264,5 @@ saveRDS(large_sites, paste0(output_dir, "2017_shlaa_large_sites.rds"))
 saveRDS(small_intensification, paste0(output_dir, "2017_shlaa_small_sites_intensification.rds"))
 saveRDS(small_remainder_windfall, paste0(output_dir, "2017_shlaa_small_sites_remainder_windfall.rds"))
 saveRDS(small_trend_windfall, paste0(output_dir, "2017_shlaa_small_sites_trend_windfall.rds"))
+
+rm(list = setdiff(ls(), "processed_dir"))

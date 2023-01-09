@@ -11,13 +11,14 @@ source("input_data_scripts/flexible_area_model/nuts2_hma.R")
 #### 2022 Wards ####
 source("input_data_scripts/flexible_area_model/WD22/0_ward_2022_lookups.R")
 source("input_data_scripts/flexible_area_model/WD22/1_basic_data_WD22CD.R")
-source("input_data_scripts/flexible_area_model/WD22/2_census_inputs_WD22CD.R")
+source("input_data_scripts/flexible_area_model/WD22/2a_hh_to_dwellings_WD22CD.R")
+source("input_data_scripts/flexible_area_model/WD22/2b_communal_establishment_pop_WD22CD.R")
 source("input_data_scripts/flexible_area_model/WD22/3_ldd_WD22CD.R")
 source("input_data_scripts/flexible_area_model/WD22/4_2017_shlaa_WD22CD.R")
 source("input_data_scripts/flexible_area_model/WD22/5_fert_mort_rates_WD22CD.R")
 source("input_data_scripts/flexible_area_model/WD22/6_migration_rates_WD22CD.R")
 source("input_data_scripts/flexible_area_model/WD22/7_household_model_WD22CD.R")
-source("input_data_scripts/flexible_area_model/WD22/8_communal_establishment_pop.R")
+
 
 #### lonLUTI ####
 source('input_data_scripts/flexible_area_model/lonLUTI/1_basic_data_lonLUTI.R')

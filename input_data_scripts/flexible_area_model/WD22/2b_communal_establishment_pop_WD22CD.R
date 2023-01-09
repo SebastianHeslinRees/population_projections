@@ -1,4 +1,5 @@
 # Output Area and Ward Communal Establishment Populations
+message("Ward 2022 - Communal Establishment Populations")
 
 library(dplyr)
 library(data.table)
