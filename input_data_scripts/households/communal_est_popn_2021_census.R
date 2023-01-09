@@ -3,8 +3,8 @@ library(data.table)
 library(popmodules)
 library(stringr)
 
-fpaths <- list(lad_ce_pop_2021 = "C:/Users/wtonkiss/Downloads/2021_census_TS047_CE_pop_LAD.csv",
-               msoa_ce_pop_2021 = "C:/Users/wtonkiss/Downloads/2021_census_TS047_CE_pop_MSOA.csv",
+fpaths <- list(lad_ce_pop_2021 = "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/2021_census_TS047_CE_pop_LAD.csv",
+               msoa_ce_pop_2021 = "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/2021_census_TS047_CE_pop_MSOA.csv",
                mye_pop = "input_data/mye/2021/population_gla.rds",
                msoa_to_lad_lookup = "Q:/Teams/D&PA/Demography/Projections/model_lookups/MSOA_(2021)_to_Local_Authority_District_(2022).csv",
                ons_2016_hh_pop = "input_data/household_model/ons_communal_establishment_population_(2021_geog).rds")

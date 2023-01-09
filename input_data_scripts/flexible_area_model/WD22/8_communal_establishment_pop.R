@@ -8,7 +8,7 @@ library(stringr)
 fpaths <- list(msoa_ce_pop = "input_data/household_model/2021_census_ce_pop_msoa_sya21CD.rds",
                oa_ce_pop_2021 = "Q:/Teams/D&PA/Census/2021 Census/central_data_folder/raw_data/2021/1. Demography and migration/oa/residence_type.csv",
                oa21_wd22 = "input_data/flexible_area_model/lookups/OA21CD_to_WD22CD_proportional.rds",
-               oa21_msoa21 = "C:/Users/wtonkiss/Downloads/OAs_to_LSOAs_to_MSOAs_to_LEP_to_LAD_(May_2022)_Lookup_in_England.csv")
+               oa21_msoa21 = "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/lookups/OAs_to_LSOAs_to_MSOAs_to_LEP_to_LAD_(May_2022)_Lookup_in_England.csv")
 
 #----
 
