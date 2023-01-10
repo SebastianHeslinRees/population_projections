@@ -41,7 +41,7 @@ standard_trend_parameters <- function(params){
   
   standard$ons_stage1_file_path <- "input_data/household_model/ons_household_representative_rates_(2021_geog).rds"
   standard$ons_stage2_file_path <- "input_data/household_model/ons_headship_rates_2016_(2021_geog).rds"
-  standard$communal_est_pop_path <- "input_data/household_model/ons_communal_establishment_population_(2021_geog).rds"
+  standard$communal_est_pop_path <- "input_data/household_model/2021_census_ce_pop_LAD21CD_grouped.rds"
   standard$dclg_stage1_file_path <- "input_data/household_model/dclg_stage1_data_2014_(2021_geog).rds"
   standard$dclg_stage2_file_path <- "input_data/household_model/dclg_headship_rates_2014_(2021_geog).rds"
   

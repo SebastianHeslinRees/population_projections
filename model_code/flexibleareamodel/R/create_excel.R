@@ -29,7 +29,7 @@ create_excel <- function(output_dir, wb_filename, projection_name, bpo = FALSE, 
   
   message(paste("Creating", smallarea, "Excel workbook"))
   output_dir <- .add_slash(output_dir)
-  browser()
+  
   #Create workbook names
   if(str_sub(wb_filename,-5,-1)!=".xlsx"){ wb_filename <- paste0(wb_filename,".xlsx") }
   

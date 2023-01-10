@@ -106,33 +106,33 @@ rates <- filter(rates, gss_code=="E06000053") %>%
 rm(list=setdiff(ls(),c("rates","merged_lookup","ons_data_location")))
 
 
-ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.csv"), header = T),
-            data.table::fread(paste0(ons_data_location, "ce_population_male.csv"), header = T)) %>%
-  tibble() %>%
-  tidyr::pivot_longer(5:45, names_to = "year", values_to = "ce_pop") %>%
-  mutate(year = as.numeric(year),
-         sex = case_when(sex == "Female" ~ "female",
-                         sex == "Male" ~ "male")) %>%
-  select(-district) %>%
-  popmodules::recode_gss_codes(data_cols = "ce_pop",
-                               recode_gla_codes = TRUE,
-                               recode_to_year = 2012)
+# ce <- rbind(data.table::fread(paste0(ons_data_location, "ce_population_female.csv"), header = T),
+#             data.table::fread(paste0(ons_data_location, "ce_population_male.csv"), header = T)) %>%
+#   tibble() %>%
+#   tidyr::pivot_longer(5:45, names_to = "year", values_to = "ce_pop") %>%
+#   mutate(year = as.numeric(year),
+#          sex = case_when(sex == "Female" ~ "female",
+#                          sex == "Male" ~ "male")) %>%
+#   select(-district) %>%
+#   popmodules::recode_gss_codes(data_cols = "ce_pop",
+#                                recode_gla_codes = TRUE,
+#                                recode_to_year = 2012)
 
-hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
-                data.table::fread(paste0(ons_data_location, "hh_population_male.csv"), header = T)) %>%
-  tibble() %>%
-  tidyr::pivot_longer(5:45, names_to = "year", values_to = "hh_pop") %>%
-  mutate(year = as.numeric(year),
-         sex = case_when(sex == "Female" ~ "female",
-                         sex == "Male" ~ "male")) %>%
-  select(-district) %>%
-  popmodules::recode_gss_codes(data_cols = "hh_pop",
-                               recode_gla_codes = TRUE,
-                               recode_to_year = 2012)
+# hh_pop <- rbind(data.table::fread(paste0(ons_data_location, "hh_population_female.csv"), header = T),
+#                 data.table::fread(paste0(ons_data_location, "hh_population_male.csv"), header = T)) %>%
+#   tibble() %>%
+#   tidyr::pivot_longer(5:45, names_to = "year", values_to = "hh_pop") %>%
+#   mutate(year = as.numeric(year),
+#          sex = case_when(sex == "Female" ~ "female",
+#                          sex == "Male" ~ "male")) %>%
+#   select(-district) %>%
+#   popmodules::recode_gss_codes(data_cols = "hh_pop",
+#                                recode_gla_codes = TRUE,
+#                                recode_to_year = 2012)
 
-ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
-  mutate(ce_rate = ifelse(age_group %in% c("75_79","80_84","85_89","90+"), ce_pop/(ce_pop+hh_pop), NA)) %>%
-  select(-hh_pop)
+# ce <- left_join(ce, hh_pop, by = c("gss_code", "age_group", "sex", "year")) %>%
+#   mutate(ce_rate = ifelse(age_group %in% c("75_79","80_84","85_89","90+"), ce_pop/(ce_pop+hh_pop), NA)) %>%
+#   select(-hh_pop)
 
 
 #Stage 2
@@ -161,7 +161,7 @@ stage_2_inputs <- rbind(stage_2_inputs, pop_under_16)
 
 dir.create("input_data/household_model", showWarnings = FALSE)
 saveRDS(rates, "input_data/household_model/ons_household_representative_rates.rds")
-saveRDS(ce, "input_data/household_model/ons_communal_establishment_population.rds")
+#saveRDS(ce, "input_data/household_model/ons_communal_establishment_population.rds")
 saveRDS(stage_2_inputs, "input_data/household_model/ons_headship_rates_2016.rds")
 rm(list=ls())
 #--------------------------------------------------------

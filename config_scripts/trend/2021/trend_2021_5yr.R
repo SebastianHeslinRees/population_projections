@@ -41,7 +41,7 @@ config_list <- standard_trend_parameters(list(projection_name = projection_name,
 rm(list = setdiff(ls(), "config_list"))
 
 # devtools::load_all('model_code/popmodules')
-# devtools::load_all('model_code/trendmodel')
+devtools::load_all('model_code/trendmodel')
 
 # Run the model
 projection <- run_trend_model(config_list)

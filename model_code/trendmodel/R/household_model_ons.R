@@ -67,7 +67,7 @@ ons_stage_1 <- function(popn, hh_rep_rates_path, communal_est_pop_path, first_pr
                                                                  "45_49","50_54","55_59","60_64","65_69",
                                                                  "70_74","75_79","80_84","85_89","90+"),
                                                       data_cols = "popn")
-  
+
   communal_establishment <- get_communal_establishment_popn(communal_est_pop_path,
                                                             population_age_groups,
                                                             rates_ages = c("75_79","80_84","85_89","90+"),

@@ -6,7 +6,7 @@ library(data.table)
 library(popmodules)
 library(stringr)
 
-fpaths <- list(msoa_ce_pop = "input_data/household_model/2021_census_ce_pop_msoa_sya21CD.rds",
+fpaths <- list(msoa_ce_pop = "input_data/household_model/2021_census_ce_pop_MSOA21CD_sya.rds",
                oa_ce_pop_2021 = "Q:/Teams/D&PA/Census/2021 Census/central_data_folder/raw_data/2021/1. Demography and migration/oa/residence_type.csv",
                oa21_wd22 = "input_data/flexible_area_model/lookups/OA21CD_to_WD22CD_proportional.rds",
                oa21_msoa21 = "Q:/Teams/D&PA/Demography/Projections/flexible_area_model_data/lookups/OAs_to_LSOAs_to_MSOAs_to_LEP_to_LAD_(May_2022)_Lookup_in_England.csv")
@@ -80,7 +80,7 @@ ce_ward_sya <- ce_pop_OA_sya %>%
 
 #---
 
-saveRDS(ce_ward_sya, "input_data/flexible_area_model/processed/communal_establishment_popn_WD22C.rds")
+saveRDS(ce_ward_sya, "input_data/flexible_area_model/processed/communal_establishment_popn_WD22CD.rds")
 
 #---
 

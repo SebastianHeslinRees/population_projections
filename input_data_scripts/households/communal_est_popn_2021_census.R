@@ -57,6 +57,8 @@ ce_pop_LAD_sya <- bind_rows(ce_pop_LAD_list) %>%
   select(gss_code, year, sex, age, ce_pop) %>% 
   aggregate_regions(england = TRUE)
 
+all_pop <- aggregate_regions(all_pop, england = TRUE)
+
 #---
 
 # HOUSEHOLD MODEL AGE GROUPS
@@ -93,14 +95,16 @@ ce_groups_LAD <- bind_rows(ce_groups_LAD_list) %>%
             .groups = 'drop_last') %>% 
   data.frame() %>% 
   mutate(ce_rate = ifelse(age_group %in% c("75_79","80_84","85_89", "90+"), ce_pop / popn, NA)) %>% 
+  select("gss_code","age_group","sex","year","ce_pop","ce_rate") %>% 
   project_forward_flat(last_proj_yr = 2050) %>% 
+  filter(gss_code %in% ons_2016_ce_pop$gss_code) %>% 
   bind_rows(filter(ons_2016_ce_pop, year < 2021))
 
 
 #---
 
-saveRDS(ce_pop_LAD_sya, "input_data/household_model/2021_census_ce_pop_SYA.rds")
-saveRDS(ce_groups_LAD, "input_data/household_model/2021_census_ce_pop_GROUPS.rds")
+saveRDS(ce_pop_LAD_sya, "input_data/household_model/2021_census_ce_pop_LAD21CD_SYA.rds")
+saveRDS(ce_groups_LAD, "input_data/household_model/2021_census_ce_pop_LAD21CD_grouped.rds")
 
 #---
 
@@ -162,6 +166,6 @@ ce_pop_msoa_sya <- bind_rows(ce_pop_list_msoa) %>%
 
 #---
 
-saveRDS(ce_pop_msoa_sya, "input_data/household_model/2021_census_ce_pop_msoa_sya21CD.rds")
+saveRDS(ce_pop_msoa_sya, "input_data/household_model/2021_census_ce_pop_MSOA21CD_sya.rds")
 
 rm(list=ls())

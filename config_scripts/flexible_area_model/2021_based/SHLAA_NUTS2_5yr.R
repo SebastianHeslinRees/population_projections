@@ -4,7 +4,7 @@ data_dir <- "input_data/flexible_area_model/"
 projection_name <- "2021_SHLAA_dev_5yr"
 
 #Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2021/2021_5yr_23-01-05_1140/",
+constraint_list <- list(constraint_path = "outputs/trend/2021/2021_5yr_23-01-10_1223/",
                         apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
                         make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
                         mapping = c("constraint_area","year","sex","age"),
@@ -32,7 +32,7 @@ out_migration <- list(
 #Config
 config_list <- list(projection_name = projection_name,
                     first_proj_yr = 2022,
-                    n_proj_yr = 20, #20
+                    n_proj_yr = 2, #20
                     output_dir = paste0("outputs/flexible_area_model/2021_based/", projection_name),
                     
                     #backseries
