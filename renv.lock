@@ -114,10 +114,10 @@
     },
     "RcppTOML": {
       "Package": "RcppTOML",
-      "Version": "0.1.7",
+      "Version": "0.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f8a578aa91321ecec1292f1e2ffadeda",
+      "Hash": "d9cb2bbc7216c6b502011129c0c8554c",
       "Requirements": [
         "Rcpp"
       ]
@@ -344,10 +344,10 @@
     },
     "cli": {
       "Package": "cli",
-      "Version": "3.5.0",
+      "Version": "3.6.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "eb9fc121ad9a1075c471107ef185be46",
+      "Hash": "3177a5a16c243adc199ba33117bd9657",
       "Requirements": []
     },
     "clipr": {
@@ -1013,10 +1013,10 @@
     },
     "htmlwidgets": {
       "Package": "htmlwidgets",
-      "Version": "1.6.0",
+      "Version": "1.6.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f894e7b76e36258a483c602a786d7270",
+      "Hash": "b677ee5954471eaa974c0d099a343a1a",
       "Requirements": [
         "htmltools",
         "jsonlite",
@@ -1690,10 +1690,10 @@
     },
     "raster": {
       "Package": "raster",
-      "Version": "3.6-11",
+      "Version": "3.6-13",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "48f95b0f7e708aa96c8913cadf12eb79",
+      "Hash": "2398b7f3d73637adfe6adc286e6844f4",
       "Requirements": [
         "Rcpp",
         "sp",
@@ -1822,10 +1822,10 @@
     },
     "reticulate": {
       "Package": "reticulate",
-      "Version": "1.26",
+      "Version": "1.27",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "91c176c84a2e3558572d2cbaddc08bd4",
+      "Hash": "06b70ad2da1a1bd19424d9e60fecce44",
       "Requirements": [
         "Matrix",
         "Rcpp",
@@ -2062,14 +2062,13 @@
     },
     "smoothr": {
       "Package": "smoothr",
-      "Version": "0.2.2",
+      "Version": "1.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "38f98fc9f7ae8072a2aed0a45545a7ba",
+      "Hash": "e25d5ac5e013478b6364a531ec6b0fac",
       "Requirements": [
-        "raster",
-        "rgeos",
         "sf",
+        "terra",
         "units"
       ]
     },

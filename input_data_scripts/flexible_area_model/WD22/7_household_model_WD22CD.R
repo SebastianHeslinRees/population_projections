@@ -271,4 +271,4 @@ ward_rates <- data.table::rbindlist(ward_rates) %>%
 
 saveRDS(ward_rates, paste0(input_data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"))
 
-
+rm(list=ls())

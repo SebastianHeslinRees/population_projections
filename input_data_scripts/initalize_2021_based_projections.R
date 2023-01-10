@@ -2,7 +2,7 @@ library(job)
 
 #Example Trend Projection
 job({source("config_scripts/trend/2021/trend_2021_5yr.R")}, title = "trend 5yr")
-☺job({source("config_scripts/trend/2021/trend_2021_10yr.R")}, title = "trend 10yr")
+job({source("config_scripts/trend/2021/trend_2021_10yr.R")}, title = "trend 10yr")
 job({source("config_scripts/trend/2021/trend_2021_15yr.R")}, title = "trend 15yr")
 
 
