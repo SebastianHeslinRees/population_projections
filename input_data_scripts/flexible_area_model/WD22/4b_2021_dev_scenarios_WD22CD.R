@@ -9,59 +9,10 @@ message('Development trajectories - 2020-based housing-led projections')
 
 #-------------------------------------------------------------------------------
 
-shlaa <- readRDS("input_data/housing_led_model/borough_shlaa_trajectory_2020.rds")
 ldd_backseries <- readRDS("input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
 gss_lookup <- readRDS("input_data/lookup/gss_code_to_name.rds") %>% 
   filter(substr(gss_code,1,3)=="E09") %>% 
   mutate(x = substr(gss_name, 1, 4))
-
-#-------------------------------------------------------------------------------
-
-#Savills forecast 41.7k for 2020 & 43k per year for the period 2021-25
-#Then distribute the difference between the new trajectory and the SHLAA
-#to the later years (2026-41)
-
-adjust_2020 <- filter(shlaa, year == 2020) %>% 
-  mutate(distribution = units / sum(units)) %>% 
-  mutate(new_units = distribution*41700) %>% 
-  select(year, gss_code, new_units) %>% 
-  rename(units = new_units)
-
-adjust_2021_2025 <- filter(shlaa, year %in% 2021:2025) %>%
-  group_by(year) %>% 
-  mutate(distribution = units / sum(units)) %>%
-  data.frame() %>% 
-  mutate(new_units = distribution*43000) %>% 
-  select(year, gss_code, new_units) %>% 
-  rename(units = new_units)
-
-excess <- rbind(adjust_2020, adjust_2021_2025) %>% 
-  rename(savils = units) %>% 
-  left_join(shlaa, by=c("gss_code","year")) %>% 
-  rename(shlaa = units) %>% 
-  group_by(gss_code) %>% 
-  summarise(excess = sum(shlaa)-sum(savils)) %>% 
-  data.frame()
-
-adjust_2026_2050 <- filter(shlaa, year >= 2026) %>% 
-  group_by(gss_code) %>% 
-  mutate(dist = units/sum(units)) %>% 
-  data.frame() %>% 
-  left_join(excess, by="gss_code") %>% 
-  mutate(excess_dist = dist*excess,
-         new_units = units+excess_dist) %>% 
-  select(year, gss_code, units = new_units)
-
-savills <- rbind(ldd_backseries,
-                 adjust_2020,
-                 adjust_2021_2025,
-                 adjust_2026_2050) %>% 
-  arrange(year, gss_code) %>% 
-  data.frame()
-
-initial_years <- filter(savills, year <= 2021)
-
-rm(adjust_2020, adjust_2021_2025, adjust_2026_2050, excess)
 
 #-------------------------------------------------------------------------------
 
@@ -133,7 +84,6 @@ london_plan_trajectory <- london_plan %>%
   popmodules::project_forward_flat(2050) %>% 
   mutate(units = ifelse(year > 2041, 0, units))  %>% 
   filter(year > 2021) %>% 
-  rbind(initial_years) %>% 
   arrange(year, gss_code) %>% 
   data.frame()
 
@@ -143,7 +93,6 @@ rm(start_dir, large_sites_points, msoa_polygon_loc, msoa_polygons,
 
 #-------------------------------------------------------------------------------
 
-#Low scenario just uses the 8-year LDD average (2012-2019)
 mean_ldd <- ldd_backseries %>%
   filter(year %in% 2012:2019) %>% 
   group_by(gss_code) %>% 
@@ -153,14 +102,46 @@ mean_ldd <- ldd_backseries %>%
   popmodules::project_forward_flat(2042) %>% 
   mutate(units = ifelse(year == 2042, 0, units)) %>% 
   popmodules::project_forward_flat(2050) %>% 
-  rbind(initial_years) %>% 
   arrange(year, gss_code) %>% 
   data.frame()
 
 #-------------------------------------------------------------------------------
 
-#Save
-saveRDS(mean_ldd, "input_data/housing_led_model/borough_2020-based_ldd_mean.rds")
-saveRDS(london_plan_trajectory, "input_data/housing_led_model/borough_2020-based_london_plan.rds")
+rm(list=setdiff(ls(), c("mean_ldd", "london_plan_trajectory")))
 
-rm(list=ls())
+#-------------------------------------------------------------------------------
+
+WD22_to_LAD21 <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds")
+
+shlaa_WD22 <- readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
+
+initial_years <- filter(shlaa_WD22, year <= 2021)
+
+WD22_london_plan <- shlaa_WD22 %>% 
+  filter(year > 2021) %>% 
+  left_join(WD22_to_LAD21, by = "gss_code_ward") %>% 
+  group_by(gss_code) %>% 
+  mutate(borough_total = sum(units)) %>% 
+  data.frame() %>% 
+  left_join(london_plan_trajectory, by = c("gss_code", "year")) %>% 
+  rename(lp_units = units.y) %>% 
+  mutate(sf = lp_units/borough_total,
+         units = units.x * sf) %>% 
+  select(names(shlaa_WD22)) %>% 
+  bind_rows(initial_years)
+
+WD22_ldd_mean <- shlaa_WD22 %>% 
+  filter(year > 2021) %>% 
+  left_join(WD22_to_LAD21, by = "gss_code_ward") %>% 
+  group_by(gss_code) %>% 
+  mutate(borough_total = sum(units)) %>% 
+  data.frame() %>% 
+  left_join(mean_ldd, by = c("gss_code", "year")) %>% 
+  rename(ldd_units = units.y) %>% 
+  mutate(sf = ldd_units/borough_total,
+         units = units.x * sf) %>% 
+  select(names(shlaa_WD22)) %>% 
+  bind_rows(initial_years)
+
+saveRDS(WD22_london_plan, "input_data/flexible_area_model/development_data/housing_targets_WD22CD.rds")
+saveRDS(WD22_ldd_mean, "input_data/flexible_area_model/development_data/past_delivery_WD22CD.rds")

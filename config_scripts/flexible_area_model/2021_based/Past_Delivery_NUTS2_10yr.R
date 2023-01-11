@@ -1,10 +1,15 @@
 library(flexibleareamodel)
 
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "2021_SHLAA_dev_10yr"
+projection_name <- "2021_Past_Delivery_10yr"
+dev_path <- paste0(data_dir, "development_data/past_delivery_WD22CD.rds")
+
+x <- list.files("outputs/trend/2021/")
+x <- x[stringr::str_detect(x,"10yr")]
+x <- paste0("outputs/trend/2021/",x[length(x)],"/")
 
 #Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2021/2021_10yr_22-12-13_1417/",
+constraint_list <- list(constraint_path = x,
                         apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
                         make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
                         mapping = c("constraint_area","year","sex","age"),
@@ -52,7 +57,7 @@ config_list <- list(projection_name = projection_name,
                     constraint_list = constraint_list,
                     
                     #HOUSING-LED STUFF
-                    dev_trajectory_path = paste0(data_dir, "development_data/ward_savills_trajectory_WD22CD.rds"), 
+                    dev_trajectory_path = dev_path, 
                     ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
                     communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
                     dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
