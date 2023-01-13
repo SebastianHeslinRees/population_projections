@@ -28,8 +28,8 @@ source("model_code/markdown/2021_projections/demog_plotly.R")
 
 number_in_text <- function(x){
   
-  type <- case_when(x < 1000 ~ "small",
-                    x < 999999 ~ "thousand",
+  type <- case_when(abs(x) < 1000 ~ "small",
+                    abs(x) < 999999 ~ "thousand",
                     TRUE ~ "million")
   
   if(type == "small"){
@@ -41,8 +41,20 @@ number_in_text <- function(x){
   }
   
   if(type == "million"){
-    return(paste(round(x/1000000,2),type))
+    x <- as.character(round(x/1000000,2))
+    
+    if(nchar(x)==1){
+      a <- ".000"
+      x <- paste0(x, a)
+    }
+    
+    if(nchar(x)<5){
+      a <- paste(rep("0", 5-nchar(x)), collapse="")
+      x <- paste0(x, a)
+    }
+    
   }
+  return(paste(x,type))
   
 } 
 
@@ -53,20 +65,10 @@ get_percent <- function(a,b,places=1){
 ```
 
 ```{r charts, out.width = "100%"}
-charts <- readRDS("outputs/markdown/results_doc_charts.rds")
+charts <- readRDS("outputs/markdown/2021_results_doc_charts.rds")
 ```
 
 <div class="h1-title">Executive Summary</div>
-
-The 2021-based population projections comprise both *variant trend projections* and *housing-led scenario projections*. Trend projections are based on the continuation of past trends in population change while the housing-led projections incorporate considerations of future housing delivery into the projection process. Trend projections are most appropriate for strategic planning at the regional level while for most other uses the GLA recommends the housing-led projections. Trend projections are available for all local authority districts in England and Wales and at the national level for Northern Ireland and Scotland. Housing-led projections are available for London Boroughs and London wards.
-
-The 2021-based based projection take as their starting point the 2021 mid-year estimate (MYE). This is a rolled-forward estimate from the 2021 census population estimate as is the most recent official estimate of London's population. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
-
-This report provides a summary of the range of projected population for London and the London Boroughs.
-
-
-
-<div class="h2-title">Trend projections</div>
 
 ```{r include = FALSE, echo = FALSE}
 
@@ -83,26 +85,42 @@ g <- round(data$`Housing Targets`/1000000,3)
 
 ```
 
-The 2021-based trend projections include three variants which vary in their assumptions about future migration behaviour, both internationally and domestically. These variants are based on averaging past periods of observed migration behviours. The variants are: *5-year (short)*, *10-year (central)* and *15-year (long)*.
+The 2021-based population projections comprise both *variant trend projections* and *housing-led scenario projections*. Trend projections are based on the continuation of past trends in population change while the housing-led projections incorporate considerations of future housing delivery into the projection process. Trend projections are most appropriate for strategic planning at the regional level while for most other uses the GLA recommends the housing-led projections. Trend projections are available for all local authority districts in England and Wales and at the national level for Northern Ireland and Scotland. Housing-led projections are available for London Boroughs and London wards.
+
+The 2021-based based projection take as their starting point the 2021 mid-year estimate (MYE). This is a rolled-forward estimate from the 2021 census population estimate and is the most recent official estimate of London's population. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
+
+This report provides a summary of the range of projected population for London and the London Boroughs.
 
 - London's mid-2021 population was 8.797 million (<a target="_blank" href='https://data.london.gov.uk/dataset/londons-population/'>2021 mid-year estimate</a>).
 - The Central projection has a population of `r a` in million in 2050.
 - The range between the Short and the Long projections spans a population of between `r b` million and `r c` million in 2050.
 
-<div class="h2-title">Housing-led projections</div>
 
-The 2021-based housing-led projections include three scenario projections based on different levels of future housing availability. They are the *Identified Capacity scenario* which uses a development trajectory adapted from the Strategic Housing Land Availability Assessment (SHLAA), the *Past Delivery scenario* which assumes average of delivery over the last eight years will continue, and the *Housing Targets scenario* in which the London Plan target of 52,287 units is delivered in each year of the projection. In producing the projections no assumption has been made about the likelihood of these delivery scenarios coming forward - the projections are designed to illustrate how the population might change under the conditions described in the scenarios.
-
-Due to limited information about potential development sites in the very long term, the housing-led projections have a projection horizon of 2041.
-
-- The Identified Capacity scenario projection has a population of `r e` million in 2041.
-- The Past Delivery scenario has a population of `r f` million in 2041.
-- The Housing Targets scenario has a population of `r g` million in 2041.
+<div class="h2-title">Trend projections</div>
 
 ```{r exec_chart, out.width = "100%"}
-charts[['exec summary']]
-rm(data, a, b, c, d, e, f, g)
+charts[['exec summary']] 
+rm(data, a, b, c, e, f, g)
 ```
+
+The 2021-based trend projections include three variants which differ in their assumptions about future migration behaviour (both international and domestica). These variants are based on averaging past periods of observed migration behviours. The variants are: 
+
+- The Central projection (10-year migration averages)
+- The Short variant (5-year migration averages)
+- The Long variant (15-year migration averages)
+
+
+<div class="h2-title">Housing-led projections</div>
+
+The 2021-based housing-led projections include three scenario projections based on different levels of future housing availability. They are:  
+
+- *Identified Capacity scenario* which uses a development trajectory adapted from the Strategic Housing Land Availability Assessment (SHLAA).  
+- *Past Delivery scenario* which assumes average of delivery over the period 2012-2019 will continue.  
+- *Housing Targets scenario* in which the London Plan target of 52,287 units is delivered in each year of the projection.
+
+In producing the projections no assumption has been made about the likelihood of these delivery scenarios coming forward - the projections are designed to illustrate how the population might change under the conditions described in the scenarios. At the London level all housing-led projections are constrained to the central trend projection.
+
+Due to limited information about potential development sites in the very long term, the housing-led projections have a projection horizon of 2041.
 
 
 # Introduction
@@ -115,7 +133,7 @@ The two main types of population projection produced are *trend-based* projectio
 
 This summary document outlines the results of the GLA’s 2021-based population and household projections which were released in January 2023.
 
-The 2021-based projections take as their starting point the most recent ONS Mid-Year Estimate (mid-2021). This is a rolled-forward estimate from the 2021 census estimate. This is a rolled-forward estimate from the 2021 census population estimate as is the most recent official estimate of London's population. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
+The 2021-based projections take as their starting point the most recent ONS Mid-Year Estimate (mid-2021). This is a rolled-forward estimate from the 2021 census estimate. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
 
 The trend projections comprise a set of variants based on different assumptions about future migration levels. The housing-led projections include a set of scenarios across which the migration assumptions are consistent but the levels of housing delivery in London differ. The production of these variants and scenarios has been driven by the desire to meet the needs of a wide range of users.
 
@@ -128,98 +146,96 @@ Detailed methodology documents are provided alongside each set of population pro
 
 <a href="#top">Back to top</a>
 
-Three variant projections have been produced: a central projection, and two projections which bound a wider range. The projections differ in their assumptions about future levels of domestic and international migration, they are:
+Three variant projections have been produced: a central projection, and two projections which bound a wider plausible range. These variants have been produced in order to assist users in understanding current uncertainty about future population growth. The projections differ in their assumptions about future levels of domestic and international migration, they are:
 
-- The Central projection (10-year migration average)
-- The Short variant (5-year migration average)
-- The Long variant (15-year migration average)
+- The Central projection (10-year migration averages)
+- The Short variant (5-year migration averages)
+- The Long variant (15-year migration averages)
 
-The projections move forward from a starting point of mid-2021. In the first year of the projection to (2022) international migration levels are constrained to be consistent with data on international flows at the UK level published by ONS.
-
-Variant projections have been produced in order to assist users in understanding current uncertainty about future population growth.
-
-No additional adjustment has been made for the impacts of Covid-19 in these projections.
+The projections move forward from a starting point of mid-2021. In the first year of the projection (2022) international migration levels are constrained to be consistent with UK-level data on international flows published by ONS.
 
 Corresponding household projections have been run for each population output. Two sets of household projections are available for each trend variant: one set using the ONS 2018-based household model and one set using the 2014-based DCLG household model.
 
-# Expert Panel
+## Expert Panel
 
 <a href="#top">Back to top</a>
 
-In recent rounds of population projections the GLA sought the guidance of an expert panel of academics and professional demographers. The panel were consulted on the economic and social drivers of population change in both the short-term and long-term, as well as the specifics of component trajectories. Their input was key in shaping the assumptions which formed the 2019-based and 2020-based variant projections. A summary of the consultation responses and recommendations is available on the <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation/">London Datastore</a>.
+For recent rounds of population projections the GLA sought the guidance of an expert panel of academics and professional demographers insetting the projection input parameters. The panel were consulted on the economic and social drivers of population change in both the short-term and long-term, as well as the specifics of component trajectories. Their input was key in shaping the assumptions which formed the 2019-based and 2020-based variant projections. A summary of the consultation responses and recommendations is available on the <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation/">London Datastore</a>.
 
-For the 2021-based projections we have returned to a statistical approach to assumption-setting. We believe that the three trajectories based on varying years' migration data provide a plausible range of future population change. As such, the expert panel's input was not required for this round of projections.
-
-*WIL YOU WERE HERE*
+For the 2021-based projections the GLA has returned to a statistical approach to assumption-setting. We believe that the three trajectories, based on varying years of migration data, provide a reasonable range of likely future population change. As such, the expert panel's input was not sought for this round of projections.
 
 # Interpreting variant projections
 
-<a href="#top">Back to top</a>
-
-The 2021-based variant projections provide users with several population growth trajectories. The Central projection provides change trajectory consistent with population change over the last decade (2012-2021). The short projection incorporates the last five year's migration data (2017-2021) and the long projection uses 15 year's of data (2007-2021). Together these projections provide both an indication of the effect of rates of migration on population change and a plausible range for future growth.
-
-## Central Projection
-
 ```{r include = FALSE, echo = FALSE}
-data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "Central Upper")
+data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "Central")
 a <- filter(data, x_axis_col == 2021)$y_axis_col
 b <- filter(data, x_axis_col == 2050)$y_axis_col
-c <- format(round((b-a)/30,-2), big.mark = ",")
+central_future <- format(round((b-a)/30,-2), big.mark = ",")
 
-data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "Central Lower")
-d <- filter(data, x_axis_col == 2021)$y_axis_col
-e <- filter(data, x_axis_col == 2050)$y_axis_col
-f <- format(round((e-d)/30,-2), big.mark = ",")
+#--
+d <- filter(data, x_axis_col == 2011)$y_axis_col
+e <- filter(data, x_axis_col == 2021)$y_axis_col
+actual_past <- format(round((e-d)/10,-2), big.mark = ",")
+
+#--
+
+data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "Short")
+g <- filter(data, x_axis_col == 2021)$y_axis_col
+h <- filter(data, x_axis_col == 2050)$y_axis_col
+short_future <- format(round((h-g)/30,-2), big.mark = ",")
+
+#--
+
+data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "Long")
+j <- filter(data, x_axis_col == 2021)$y_axis_col
+k <- filter(data, x_axis_col == 2050)$y_axis_col
+long_future <- format(round((k-j)/30,-2), big.mark = ",")
+
+#---
+
+data <- plotly_data(charts[['dom net']]) %>%  filter(colour_col == "10-year average")
+g <- round(filter(data, x_axis_col == 2017)$y_axis_col,-2)*-1
+dom_max <- format(g, big.mark = ",")
+rm(a,b,d,e,g,h,j,k)
 ```
 
-The two projections bounding the Central Range each use the same assumptions about international migration (based on an average of ten years' observed data). Net international migration to London over the past 20 years has remained relatively stable within a range of 69,200 and 126,400. The ten-year average (2010-2019) used in the modelling is 95,500 persons. More recent data are excluded from the averaging due to concerns about how ONS have distributed recent estimates of international migration. More details on this can be found in the trend model methodology documentation (see below).
+<a href="#top">Back to top</a>
+
+The 2021-based variant projections provides users with three population trajectories. These variants give an indication of the effect of different levels of migration on population size and structure. 
 
 The last two decades have seen a number of shocks which might be expected to have significantly impacted international flows: EU expansion in 2004, 2007 and 2013; the credit crunch, housing crisis and great recession beginning in 2008; the EU referendum in 2016; and major changes to UK migration policy throughout the period. However, absolute levels of international migration have been relatively stable, lending weight to the idea of the resilience of long-term trends. 
 
-The difference in the Upper and Lower bound projections of the Central Range is in the assumptions about future rates of domestic migration. The Upper bound uses a ten-year average (2011-2020) of past migration patterns, while the Lower bound uses a five-year average (2016-2020).
+The three  2021-based projection variants use differing levels of migration - both domestic and international - and assumes that that level remains consistent throughout the projection period. Projected domestic flows are calculated by applying averaged rates of migration while international in and out migration are input as static flows.
 
-The ten-year average captures a wide range of behaviours across the economic cycle, including the lower levels of mobility observed following the financial crisis. The five-year average provides a higher migration scenario - the last five years have been a period of relatively high migration with a peak in 2017 when net out migration from London reached 101,600 people. Use of the five-year average represents an assumption that recent levels become the norm even after accounting for potential variation over the economic cycle.
+- *Central* - uses an average of the last 10 years of migration flows (2012-2021) 
+- *Short* - uses an average of the last five years of migration flows (2017-2021).
+- *Long* - uses an average of the last 15 years of migration flows (2007-2021).  
 
-The inclusion of the year to mid-2020 in the averaging was carefully considered. Although the data for the year to mid-2020 does include some impacts of COVID-19 on population movement, they appear to be modest. As noted by ONS in their <a target="_blank"  href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualmidyearpopulationestimates/mid2020#movement-of-people-within-the-uk">2020 mid-year estimate release</a>, the significant student migration which occurs largely in September and October would have been completed well before the pandemic struck.
+The ten-year 'central' average captures a wide range of behaviours across the economic cycle, including the lower levels of mobility observed following the financial crisis. The five-year average provides a higher migration scenario - the last five years have been a period of relatively high migration with a peak in 2017 when net out migration from London reached `r dom_max` people. Use of the five-year average represents an assumption that recent levels become the norm even after accounting for potential variation over the economic cycle.
 
-The Central Upper projection projects annualised growth of `r c` per year over the period to 2050 while the Central Lower projects `r f`. This is in the context of average growth of 94,100 per year in London over the last decade.
+The inclusion of data covering the period from mid-2019 to mid-2021 in the averaging was carefully considered. Although the data for these years does include the impacts of COVID-19 on population movement, the range of variants provides users with a clear indication of the range of plausible future growth when migration inputs are varied. 
 
-## Short projection variant
+The Central projection projects annualised growth of `r central_future` per year over the period to 2050. This is in the context of average growth of `r actual_past` per year in London over the last decade.
 
-```{r include = FALSE, echo = FALSE}
-rm(data,a,b,c)
-data <- plotly_data(charts[['total net']]) %>%  filter(colour_col == "Low Population", x_axis_col > 2020)
-a <- round(min(data$y_axis_col)/1000,0)
-b <- round(max(data$y_axis_col)/1000,0)
+<div class="table-title">Table 1: Annualised population change, London</div>
+```{r}
 
-data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "Low Population")
-c <- filter(data, x_axis_col == 2021)$y_axis_col
-d <- filter(data, x_axis_col == 2050)$y_axis_col
-e <- format(round((d-c)/30,-2), big.mark = ",")
-```
-
-
-
-
-## Long Projection variant
-
-```{r include = FALSE, echo = FALSE}
-rm(data, a, b, c, d, e)
-
-data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "High Population")
-d <- filter(data, x_axis_col == 2021)$y_axis_col
-e <- filter(data, x_axis_col == 2050)$y_axis_col
-f <- format(round((e-d)/30,-2), big.mark = ",")
-
-data <- plotly_data(charts[['total net']]) %>%  filter(colour_col == "High Population", x_axis_col > 2021)
-g <- round(max(data$y_axis_col)/1000,0)
-h <- round(min(data$y_axis_col)/1000,0)
-
-```
+tibble(variant = c("Observed",
+"Central",
+"Short",
+"Long"),
+period = c("2011-2021",
+"2021-2050",
+"2021-2050",
+"2021-2050"),
+`annual change` = c(actual_past,
+central_future,
+short_future,
+long_future)) %>% 
+DT::datatable(rownames = FALSE, filter = "none",  caption = "persons",
+options = list(paging=FALSE, searching=FALSE, info=FALSE)) 
 
 
-```{r include = FALSE, echo = FALSE}
-rm(data, a, b, c, d, e, f, g, h)
 ```
 
 
@@ -243,16 +259,16 @@ A paper on the models, methodologies and configuration options used in producing
 ```{r, include = FALSE, echo = FALSE}
 # The diff between 2020 and 2021 in London
 a <- plotly_data(charts[['covid']]) %>% 
-  filter(variant == "Central Lower")
+filter(variant == "Central Lower")
 b <- filter(a, year == 2020)$popn
 c <- filter(a, year == 2021)$popn
 a <- round((b-c)/1000,0) 
 rm(b,c)
 ```
 
-The initial short-term period of the projections (up to 2025) accounts for the on-going impacts of the COVID-19 pandemic and Brexit on London's population. Assumptions about migration patterns during the first two years are consistent across all variants. Over the following two years (2023-2024) migration assumptions diverge as levels of both international and domestic migration transition incrementally towards the long-term values set for each variant. These long-term levels come into effect in 2025.
+The initial short-term period of the projections incorporates additional intelligence about population change not included in the mid-year estimate series. In the first projection year (2022) international migration at the UK level is adjusted to be consistent with data from the ONS on flows for that year. This year saw extremely high in-migration flows as a result of significant flows from Ukraine and Hong Kong and a 'bounce back' following the lifting of covid restrictions.
 
-The impacts on population of these short-term migration assumptions, along with the increase in mortality from COVID-19 can be seen in the chart below. The population in the 2020 base year for London is 9.002 million. This falls by `r a` thousand over the year to 2021. Then, from a low of 8.895 million the population grows again as migration patterns move towards their long-term levels. 
+Over the following two years (2023-2024) migration assumptions diverge as levels of migration transition incrementally towards the long-term values set for each variant. These long-term levels come into effect in 2025.
 
 
 ```{r chart_covid, out.width = "100%"}
@@ -262,38 +278,33 @@ charts[['covid']]
 ## Long-term projections
 
 ```{r, include = FALSE, echo = FALSE}
+data <- plotly_data(charts[['int net']])
+int_net_10 <- filter(data, x_axis_col == 2025, colour_col == "10-year average")$y_axis_col %>% number_in_text()
+int_net_5 <- filter(data, x_axis_col == 2025, colour_col == "5-year average")$y_axis_col %>% number_in_text()
+int_net_15 <- filter(data, x_axis_col == 2025, colour_col == "15-year average")$y_axis_col %>% number_in_text()
+
 data <- plotly_data(charts[['popn']])
-popn_2021 <- filter(data, x_axis_col == 2021, colour_col == "Central Lower")$y_axis_col
 
-a <- round((filter(data, x_axis_col == 2030, colour_col == "High Population")$y_axis_col - popn_2021)/1000,0)
-b <- round((filter(data, x_axis_col == 2030, colour_col == "Low Population")$y_axis_col - popn_2021)/1000,0)
+central_decade <- filter(data, x_axis_col %in% c(2021,2031), colour_col == "Central") %>% mutate(y_axis_col = ifelse(x_axis_col == 2021, y_axis_col*-1, y_axis_col)) %>% pull(y_axis_col) %>% sum() %>% number_in_text()
 
-c <- round((filter(data, x_axis_col == 2050, colour_col == "Central Lower")$y_axis_col - popn_2021)/1000000,3)
-d <- round((filter(data, x_axis_col == 2050, colour_col == "Central Upper")$y_axis_col - popn_2021)/1000000,3)
+short_decade <- filter(data, x_axis_col %in% c(2021,2031), colour_col == "Short") %>% mutate(y_axis_col = ifelse(x_axis_col == 2021, y_axis_col*-1, y_axis_col)) %>% pull(y_axis_col) %>% sum() %>% number_in_text()
 
-e <- round((filter(data, x_axis_col == 2050, colour_col == "Low Population")$y_axis_col - popn_2021)/1000,0)
-f <- round((filter(data, x_axis_col == 2050, colour_col == "High Population")$y_axis_col - popn_2021)/1000000,3)
+long_decade <- filter(data, x_axis_col %in% c(2021,2031), colour_col == "Long") %>% mutate(y_axis_col = ifelse(x_axis_col == 2021, y_axis_col*-1, y_axis_col)) %>% pull(y_axis_col) %>% sum() %>% number_in_text()
 
 rm(data, popn_2021)
 ```
 
 Beyond 2025, long-term levels of migration are reached and maintained.
 
-In the Central Range, international migration returns to the 10-year average (net 96 thousand) while in the Low Population variant international migration is 50 thousand per year and in the High Population variant 125 thousand per year.
+In the Central projection, international migration returns to the 10-year average (net `r int_net_10`) while in the Short variant international migration is `r int_net_5` per year and in the Long variant `r int_net_15` per year.
 
-A 10-year average of domestic migration rates is used in all but the Central Low variant where a high net out migration scenario is used.
+All three variants project population growth over the period, albeit to varying levels. London grew by 1 million people in in the decade to 2011 and then around 800 thousand people in the the decade to 2021. Over the decade to 2031, the Central Population variant sees growth of `r central_decade` while the in Short Population variant London is projected to grow by `r short_decade` and in the Long variant projected growth to 2030 is `r long_decade`.
 
-All four variants project population growth over the period, albeit to varying levels. London grew by 1 million people in both of the last two decades. Over the decade to 2030, the High Population variant sees growth of `r a` thousand while the in Low Population variant London is projected to grow by `r b` thousand. Growth over the entire projection period to 2050 ranges between `r c` million and `r d` million in the Central Range, and `r e` thousand and `r f` million in the wider range. 
-
-```{r, include = FALSE, echo = FALSE}
-rm(a,b,c,d,e,f)
-```
-
-<div class="table-title">Table 1: Variant population projections, London</div>
+<div class="table-title">Table 2: Variant population projections, London</div>
 ```{r growth_table}
-charts[['table 1']] %>% 
-  DT::datatable(rownames = FALSE, filter = "none", caption = "population (millions)",
-                options = list(paging=FALSE, searching=FALSE, info=FALSE))
+charts[['table growth']] %>% 
+DT::datatable(rownames = FALSE, filter = "none", caption = "population (millions)",
+options = list(paging=FALSE, searching=FALSE, info=FALSE))
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
 
@@ -302,23 +313,25 @@ charts[['table 1']] %>%
 charts[['popn']]
 ```
 
-## Comparison to 2019-based
+## Comparison to 2020-based
 
 ```{r}
 data <- plotly_data(charts[['popn']])
-a <- round((filter(data, x_axis_col == 2050, colour_col == "Central Lower")$y_axis_col)/1000000,3)
-b <- round((filter(data, x_axis_col == 2050, colour_col == "Central Upper")$y_axis_col)/1000000,3)
+a <- filter(data, x_axis_col == 2050, colour_col == "Short")$y_axis_col
+b <- filter(data, x_axis_col == 2050, colour_col == "Long")$y_axis_col
+c <- filter(data, x_axis_col == 2050, colour_col == "Central")$y_axis_col
 rm(data)
 ```
 
-The 2019-based GLA trend projections were released in November 2020. The differences between the last round and the 2021-based projections are primarily that: 
+The 2020-based GLA trend projections were released in September 2021. The differences between the last round and the 2021-based projections are significant, the primary reason bring that the population backseries used in the two rounds of projection is different.
 
--   the 2021-based projections include an extra year of data, and;
--   migration assumptions in the short-term have been adjusted to incorporate recent understanding and data on the impact of COVID-19 on migration flows.
+The 2020-based projections used the 2020 mid-year estimate (MYE) as their jumping-off point. This MYE was the last estimate in a series which began in 2011. Each subsequent year from 2012 forward was calculated by adding estimated components of change to the previous year's population estimate. As such, over the decade, the MYE series had drifted away from the true population count.
 
-The 2021-based projections provide a lower growth trajectory outlook than the 2019-based projections. In the 2019-based projections the Central Range of population in 2050 was 10.516 million to 10.915 million, while in 2020 that growth has been revised to between `r a` million and `r b` million.
+The 2021 census has provided an opportunity to reset the mid-year estimate series using the new data census as a starting point. The 2021 estimate therefore represents a break in the previous series. In order to create a consistent back series between the 2021 and 2011 estimates the GLA has modelled population and components of change for that period.
 
-This is the result of the inclusion of a more severe shock to the population in the short-term as well as a lower mid-year starting point in 2020. In the 2021-based projection the recovery to long-term trends happens faster - by 2025 rather than 2028. This revision is based on th advice of the Expert Panel and analysis of Home Office visa issuances data which indicate a 'bounce back' of international flows may have already begun.
+The existing ONS 2020 MYE for London was 9.002 million. The GLA's revised estimate for that year is 8.878 million, around 125 thousand persons lower. This difference represents the inflation in the existing ONS MYE series over the last decade.
+
+The 2021-based projections use the 2021 MYE as their starting point and the modelled GLA backseries for the calculation of trends. As the ONS series had overestimated the level of population growth in London the previous set of projections projected stronger growth into the future when compared to the 2021-based projections. In the 2020-based projections the Central Range of population in 2050 was 10.319 million to 10.707 million, while for 2021-based projections growth is projected to range between `r number_in_text(a)` and `r number_in_text(b)`. The Central projection has a population of `r number_in_text(c)` in 2050.
 
 ```{r chart_comp, out.width = "100%"}
 charts[['comp']]
@@ -327,9 +340,7 @@ charts[['comp']]
 
 # Age structure
 
-The age structure in 2036, after 15 years of projected change, is shown in the chart below. Age structure has implications for household growth trajectories (see the section on households below) where household formation rates differ by age.
-
-The Low Population variant is based on assumptions of a high net migration outflow. Because the young adult population is most at most at risk of migration a high net migration variant has a much lower population among the young adults (20-40 years old). The converse is the High Population variant which assumes low net out migration meaning the young adult population swells. In older ages there is much less propensity for migration and so the difference between the variants is less.
+The age structure in 2037, after 15 years of projected change, is shown in the chart below. Age structure has implications for household growth trajectories (see the section on households below) where household formation rates differ by age.
 
 ```{r chart_sya, out.width = "100%"}
 charts[['age structure']]
@@ -337,12 +348,19 @@ charts[['age structure']]
 
 # Working age population
 
-The size of the working age population (16-64) in London is heavily dependent on the level of migration. High net out migration as seen in the Low Population variant leads to a decline in the working age population over time. In the High Population variant, which has a low net out migration, the population grows over the period to 2050.
+The size of the working age population (16-64) in London is heavily dependent on the level of migration. High net out migration as seen in the Short Population variant leads to a decline in the working age population over time. In the Long Population variant, which has a low net out migration, the population grows over the period to 2050.
 
-The Central Range projects growth up to 2040 and then a levelling-off/slight decline in the last decade of the projections.
+The Central variant sees growth up to 2040 and then a leveling-off in the last decade of the projection.
 
 ```{r chart_working, out.width = "100%"}
 charts[['working age']]
+```
+
+<div class="table-title">Table 3: Working age population, London</div>
+```{r table_working}
+charts[['table working']] %>% 
+DT::datatable(rownames = FALSE, filter = "none",  caption = "population (millions)",
+options = list(paging=FALSE, searching=FALSE, info=FALSE))
 ```
 
 # Components of Change {.tabset}
@@ -356,7 +374,20 @@ As noted above, London’s relatively youthful population is a result of establi
 
 ## Total migration
 
-Total net migration is the sum of all flows in to and out of an area. This includes both international and domestic flows. Historically, London has seen large gross flows both in and out of the capital which have largely cancelled each other out. Over the last decade total net migration has ranged between -34 thousand and 63 thousand.
+```{r}
+data <- plotly_data(charts[['total net']])
+a <- filter(data, x_axis_col == 2021, colour_col == "Central")$y_axis_col
+d <- filter(data, x_axis_col %in% 2002:2019, colour_col == "Central")$y_axis_col
+
+data <- plotly_data(charts[['int net']])
+c <- round((filter(data, x_axis_col == 2022, colour_col == "10-year average")$y_axis_col)/1000,0)
+
+```
+
+
+Total net migration is the sum of all flows in to and out of an area. This includes both international and domestic flows. Historically, London has seen large gross flows both in and out of the capital which have largely cancelled each other out. Over the period 2002-2019 total net migration ranged between `r number_in_text(min(d))` thousand and `r number_in_text(max(d))`.
+
+COVID-19 saw significant disruption to migration flows both domestically and internationally. In particular, 2021 saw significantly higher than normal net outflows from London (`r number_in_text(a)`). Flows in the initial year of the projection (2022) include data from ONS on international migration at the UK level. The year to mid-2022 saw the highest net inflow of international migrants to the UK on record (504 thousand). This was in part a response to the easing of covid restrictions but was also influenced by significant migrations from Ukraine and Hong Kong. This UK-level data has been used to model a net international inflow to London of `r number_in_text(c)` in 2022.
 
 ```{r chart_total, out.width = "100%"}
 charts[['total net']]
@@ -364,9 +395,9 @@ charts[['total net']]
 
 ## International migration
 
-International migration assumptions provide the basis for much of the variation between the four projection variants. There are three international migration scenarios: a high, a central, and a low. In each case the level of net migration was agreed in consultation with the Expert Panel before gross in and out flows consistent with those net assumptions were derived. 
+International migration assumptions provide the basis for much of the variation between the four projection variants. There are three international migration scenarios: a high (15-year average), a central (10-year average), and a low (5-year average).
 
-Net international migration in the high scenario is 125 thousand persons per year, in the central scenario is 96 thousand persons per year and in the low scenario is 50 thousand persons per year. These levels are achieved in 2025 in the modelling. The period 2020-2022 has its own international migration profile which is consistent across all three scenarios. The period 2023-2024 is a transition period over which levels of migration move from the 2022 level to the 2025 level. 
+Net international migration in the high scenario is `r int_net_15` persons per year, in the central scenario is 96 `r int_net_10` persons per year and in the low scenario is `r int_net_5` persons per year. These levels are achieved in 2025 in the modelling. The period 2020-2022 has its own international migration profile which is consistent across all three scenarios. The period 2023-2024 is a transition period over which levels of migration move from the 2022 level to the 2025 level. 
 
 
 ```{r chart_int_a, out.width = "100%"}
@@ -381,15 +412,41 @@ charts[['int in']]
 charts[['int out']]
 ```
 
-## Domestic migration
+```{r}
 
-The variant projections use a high migration scenario for the Central Lower projection and a central migration scenario for the other three variants As domestic migration is projected using a rates-based approach, the number of people moving in any given projection is a function of the size and structure of the resident population as well as the rates.
+dom_net_past <- readRDS("input_data/mye/2021/dom_net_gla.rds")
+
+ldn_dom_net_10 <- filter(dom_net_past, gss_code == "E12000007", year %in% 2012:2021) %>% 
+group_by(year) %>% 
+summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
+data.frame() %>%
+pull(dom_net) %>% 
+mean() %>%
+number_in_text()
+
+ldn_dom_net_5 <- filter(dom_net_past, gss_code == "E12000007", year %in% 2017:2021) %>% 
+group_by(year) %>% 
+summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
+data.frame() %>%
+pull(dom_net) %>% 
+mean() %>%
+number_in_text()
+
+ldn_dom_net_15 <- filter(dom_net_past, gss_code == "E12000007", year %in% 2007:2021) %>% 
+group_by(year) %>% 
+summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
+data.frame() %>%
+pull(dom_net) %>% 
+mean() %>%
+number_in_text()
+
+```
+
+## Domestic migration
 
 The balance of domestic migration in London has been consistently negative for the last two decades. This means that more people leave the capital each year for other areas of the UK than move to London. Higher rates of domestic migration overall lead to a higher net outflow from London and correspondingly slower population growth.
 
-The Central Lower variant uses a high domestic migration average and as a result has the highest outflow of the four variants. The other three variants use the same central scenario migration rates – the differences in levels here are a result of the size of the resident population to which the rates are applied.
-
-The low domestic migration scenario shown here is based on an average of the period 2008-2012 when domestic flows were suppressed during the recession. The low scenario is not used in the four main variants but is used in the supplementary variants.
+Over the last decade average outflow from London was `r ldn_dom_net_10`. The average of the last 15 years is lower at `r ldn_dom_net_15` as this period includes the Great Recession when domestic flows were lower across the UK in response to economic uncertainty and impacts on the housing market. In more recent years the combined impacts of COVID-19 and Brexit have meant significantly higher levels of domestic out migration from London. The 5-year average outflow for the period 2017-2021 was `r ldn_dom_net_5`.
 
 
 ```{r chart_dom_a, out.width = "100%"}
@@ -406,7 +463,16 @@ charts[['dom out']]
 
 ## Births
 
-Annual births in London rose by approximately 30 per cent over the decade from 2002 to 2012. Since then the number of births has fallen and in 2020 was 115,700, similar to the level seen in 2005.
+```{r}
+
+births_2021 <- readRDS("input_data/mye/2021/births_gla.rds") %>% 
+filter(gss_code == "E12000007", year == 2021) %>% 
+pull(births) %>% 
+sum()
+
+```
+
+Annual births in London rose by approximately 30 per cent over the decade from 2002 to 2012. Since then the number of births has fallen and in 2020 was `r number_in_text(births_2021)`, similar to the level last seen in 2003.
 
 The same fertility rates are applied in each of the variants. The difference in births is a function of the differing size and composition of the population in each variant. In all cases an initial period of falling births is followed by steady increase. The number of births peaks and stabilises at the end of the projection as the number of women of child-bearing age in the population reaches an equilibrium.
 
@@ -417,9 +483,18 @@ charts[['births']]
 
 ## Deaths
 
+```{r}
+
+deaths_2021 <- readRDS("input_data/mye/2021/deaths_gla.rds") %>% 
+filter(gss_code == "E12000007", year == 2021) %>% 
+pull(deaths) %>% 
+sum()
+
+```
+
 The same mortality rates are applied in each of the variants. The difference in deaths is a function of the differing size and composition of the population in each variant.
 
-The impact of COVID-19 can be seen in the deaths occurring in 2020 and 2021. From 2022 on wards deaths from COVID-19 are assumed to be accounted for through the normal application of mortality rates.
+The impact of COVID-19 can be seen in the deaths occurring over the period 2019-2021. From 2022 on deaths from COVID-19 are assumed to be accounted for through the normal application of mortality rates.
 
 ```{r chart_deaths, out.width = "100%"}
 charts[['deaths']]
@@ -427,7 +502,7 @@ charts[['deaths']]
 
 ## Natural change
 
-Natural change is the balance of births and deaths over the year. It is the largest direct contributor to London's growth.
+Natural change is the balance of births and deaths over the year. It is the largest direct contributor to London's growth. In 2021 natural change added `r number_in_text(births_2021 - deaths_2021)` persons to the London population.
 
 ```{r chart_nc, out.width = "100%"}
 charts[['natural change']]
@@ -443,7 +518,7 @@ For each population projection variant, household projections have been run usin
 
 The ONS model is the official household model for England and was used by ONS in the preparation of the 2018-based household projections. 
 
-<div class="table-title">Table 2: Variant household projections (ONS household model), London</div>
+<div class="table-title">Table 4: Variant household projections (ONS household model), London</div>
 ```{r ons_table}
 charts[['ons table']] %>% 
   DT::datatable(rownames = FALSE, filter = "none",  caption = "households (millions)",
@@ -455,7 +530,7 @@ charts[['ons table']] %>%
 charts[['ons hh']]
 ```
 
-<div class="table-title">Table 3: Annualised household change (ONS household model) </div>
+<div class="table-title">Table 5: Annualised household change (ONS household model) </div>
 ```{r ons_table_2}
 charts[['ons annualised']] %>% 
   setnames(c("variant","households 2043", "change 2018-2043", "annualised change")) %>% 
@@ -468,9 +543,9 @@ charts[['ons annualised']] %>%
 
 ## DCLG Household projections
 
-The DCLG model was the official household model for England for the preparation of the 2014-based household projections. Outputs from this model remain relevant due to its continued use by MHCLG in the preparation of housing targets.
+The DCLG model was the official household model for England for the preparation of the 2014-based household projections. Outputs from this model remain relevant due to its continued use by DLUHC in the preparation of housing targets.
 
-<div class="table-title">Table 4: Variant household projections (DCLG household model), London</div>
+<div class="table-title">Table 6: Variant household projections (DCLG household model), London</div>
 ```{r dclg_table}
 charts[['dclg table']] %>% 
   DT::datatable(rownames = FALSE, filter = "none", caption = "households (millions)",
@@ -482,7 +557,7 @@ charts[['dclg table']] %>%
 charts[['dclg hh']]
 ```
 
-<div class="table-title">Table 5: Annualised household change (DCLG household model) </div>
+<div class="table-title">Table 7: Annualised household change (DCLG household model) </div>
 ```{r dclg_table_2}
 charts[['dclg annualised']] %>% 
   setnames(c("variant","households 2043", "change 2018-2043", "annualised change")) %>% 
@@ -498,7 +573,7 @@ charts[['dclg annualised']] %>%
 
 <a href="#top">Back to top</a>
 
-The housing-led projections are produced for London boroughs, wards and MSOAs. The GLA suggests that these projections provide the best estimate of future populations at these geographic resolutions. This is because the additional intelligence on the capacity of smaller areas to accommodate population, in the form of available housing stock, provides a more realistic view of future population. The GLA recommends the housing-led projections for most purposes.
+The housing-led projections are produced for London boroughs and wards. The GLA suggests that these projections provide the best estimate of future populations at these geographic resolutions. This is because the additional intelligence on the capacity of smaller areas to accommodate population, in the form of available housing stock, provides a more realistic view of future population. The GLA recommends the housing-led projections for most purposes.
 
 Unlike the trend projections which have a projection horizon of 2050, the housing-led projections work to a projection horizon of 2041. This is because the availability, reliability and utility of housing delivery data diminishes over time.
 
@@ -582,20 +657,14 @@ charts[['stock']]
 
 ## Comparison to the Trend
 
-The chart shows the 2021-based trend projections Central Range in grey alongside the three housing-led scenarios population trajectories. Note that the migration assumptions in the housing-led scenarios are consistent with the lower bound of the Central Range.
+The houseing-led projections are constrained to be consistent with the Central Trend projection at the <a target="_blank"  href=https://www.ons.gov.uk/methodology/geography/ukgeographies/eurostat#london>International Territorial Level 2</a> (ITL2, previously NUTS2) aggregation level. The ITL2 sub-regions are:  
+- Inner London - West  
+- Inner London - East  
+- Outer London - East and North East  
+- Outer London - South  
+- Outer London - West and North West  
 
-```{r hlm_trend, out.width = "100%"}
-charts[['trend-vs-hlm']]
-```
-
-
-<div class="table-title">Table 6: Housing-led population projections, London</div>
-```{r hlm_table}
-charts[['housing-led table']] %>% 
-  DT::datatable(rownames = FALSE, filter = "none", caption = "population (millions)",
-                options = list(paging=FALSE, searching=FALSE, info=FALSE))
-```
-<div class="source">Source: GLA 2021-based population projections</div>
+As a result of this constraining, the population of each group of boroughs, and of London as a whole, is the same in all of the housing-led projections. Individual borough and ward populations do vary.
 
 
 ## Population change {.tabset}
@@ -628,15 +697,6 @@ charts[['lp map']]
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
 
-## Age structure
-
-<a href="#top">Back to top</a>
-
-As with the trend projections, differences in the age structure between the scenarios in the housing-led projections are the result of different levels of migration. The Housing Targets scenario has the highest level of housing delivery meaning that there is comparatively higher net in-migration in this scenario. This not only raises the total population but impacts the age structure so that there is more population in young adults of working age. In older ages there is less differentiation between the scenarios.
-
-```{r hlm_sya, out.width = "100%"}
-charts[['housing-led age structure']]
-```
 
 ## Average Household Size
 
@@ -649,6 +709,8 @@ charts[['ahs']]
 ```
 
 ## Ward profiles
+
+**TODO: NOT PRODUCED YET**
 
 <a href="#top">Back to top</a>
 

@@ -7,24 +7,21 @@ library(rgdal)
 library(tidyr)
 
 f <- 1
-root <- "outputs/trend/2020/"
-root_2019 <- "outputs/trend/2019/published_27_nov_2020/"
-trend_factor_levels <- c("Central Lower", "Central Upper",
-                         "Low Population", "High Population")
+root <- "outputs/trend/2021/"
+root_2020 <- "outputs/trend/2020/"
+flex_root <- "outputs/flexible_area_model/2021_based/"
+trend_factor_levels <- c("Central", "Short","Long")
 
 #
-projections <- list('High Population' = "2020_HC_high_21-09-21_1259",
-                    'Central Upper' = "2020_CC_central_upper_21-09-21_1259",
-                    'Central Lower' = "2020_CH_central_lower_21-09-21_1259",
-                    'Low Population' = "2020_LC_low_21-09-21_1259") %>% 
+projections_2020 <- list('Central Upper' = "2020_CC_central_upper_21-09-21_1259",
+                         'Central Lower' = "2020_CH_central_lower_21-09-21_1259") %>% 
+  lapply(function(x) paste0(root_2020,x,"/"))
+
+#
+projections_2021<- list('Central' = "2021_10yr_23-01-11_1329",
+                        'Short' = "2021_5yr_23-01-11_1537",
+                        'Long' = "2021_15yr_23-01-11_1329") %>% 
   lapply(function(x) paste0(root,x,"/"))
-
-#
-projections_2019 <- list('High Population' = "2019_variant_HC_20-11-27_1205",
-                         'Central Upper' = "2019_variant_CC_20-11-27_1153",
-                         'Central Lower' = "2019_variant_CH_20-11-27_1154",
-                         'Low Population' = "2019_variant_LC_20-11-27_1208") %>% 
-  lapply(function(x) paste0(root_2019,x,"/"))
 
 #
 components <- c("population","births","deaths","dom_in","dom_out","dom_net",
@@ -34,10 +31,10 @@ components <- c("population","births","deaths","dom_in","dom_out","dom_net",
 households <- c("ons_stage_2_households","dclg_stage_2_households")
 
 #
-housing_led <- list('Identified Capacity' = "Identified_Capacity_21-09-22_1121",
-                    'Past Delivery' = "Past_Delivery_21-09-22_1121",
-                    'Housing Targets' = "Housing_Targets_21-09-22_1121") %>%
-  lapply(function(x) paste0("outputs/housing_led/2020/",x,"/"))
+housing_led <- list('Identified Capacity' = "2021_Identified_Capacity_10yr",
+                    'Past Delivery' = "2021_Past_Delivery_10yr",
+                    'Housing Targets' = "2021_Housing_Targets_10yr") %>%
+  lapply(function(x) paste0(flex_root,x,"/"))
 
 #-------------------------------------------------------------------------------
 
@@ -46,12 +43,12 @@ charts <- list()
 
 for(i in components){
   print(i)
-  data_list[[i]] <- read_multiple_projections(projections, i) %>% 
+  data_list[[i]] <- read_multiple_projections(projections_2021, i) %>% 
     mutate(variant = factor(variant, levels = trend_factor_levels))
 }
 
 print('age structure')
-data_list[['sya']] <- read_multiple_projections(projections,
+data_list[['sya']] <- read_multiple_projections(projections_2021,
                                                 "population",
                                                 col_aggregation = c("year","gss_code","age")) %>% 
   mutate(variant = factor(variant, levels = trend_factor_levels))
@@ -59,7 +56,7 @@ data_list[['sya']] <- read_multiple_projections(projections,
 
 
 print('households')
-projections <- lapply(projections, function(x) paste0(x,"households/"))
+projections <- lapply(projections_2021, function(x) paste0(x,"households/"))
 
 for(i in households){
   print(i)
@@ -68,19 +65,19 @@ for(i in households){
   
 }
 
-data_list[['popn_2019']] <- read_multiple_projections(projections_2019, "population") %>% 
-  mutate(projection = "2019-based")
+data_list[['popn_2020']] <- read_multiple_projections(projections_2020, "population") %>% 
+  mutate(projection = "2020-based")
 
 #-------------------------------------------------------------------------------
 
-#Covid Chart
-chart_title <- "Short-term Projected Population, London"
+#5-year horizon Chart
+chart_title <- "Projected Population (2021-2026), London"
 axis_title <- "population"
 f <- f+1
 
 charts[['covid']] <- data_list[['population']] %>% 
   filter_london(data_col = "popn") %>% 
-  filter(year %in% 2020:2025) %>% 
+  filter(year %in% 2021:2026) %>% 
   plot_ly(x=~year, y=~popn, color=~variant,
           colors = c("#6da7de",
                      "#9e0059",
@@ -103,7 +100,7 @@ charts[['covid']] <- data_list[['population']] %>%
          autosize = TRUE,
          annotations = list(x = 1,
                             y = -0.10, #position of text adjust as needed 
-                            text = "Source: GLA 2020-based population projections", 
+                            text = "Source: GLA 2021-based population projections", 
                             showarrow = F,
                             xref='paper',
                             yref='paper', 
@@ -124,17 +121,29 @@ charts[['popn']] <- data_list[['population']] %>%
                     "year", "popn", "variant",
                     axis_title, figure = f, zero_y = FALSE)
 
+
+charts[['exec summary']] <- data_list[['population']] %>% 
+  filter_london(data_col = "popn") %>% 
+  line_chart_plotly(chart_title,
+                    "year", "popn", "variant",
+                    axis_title, figure = 1, zero_y = FALSE) 
+
 #comparison chart
 chart_title <- "Projected Population, London"
 axis_title <- "population"
 f <- f+1
 
 charts[['comp']] <- data_list[['population']] %>% 
-  mutate(projection = "2020-based") %>% 
-  rbind(data_list[['popn_2019']]) %>% 
-  filter_london(data_col = "popn") %>% #View()
-  filter(variant %in% c("Central Upper", "Central Lower")) %>% 
+  mutate(projection = "2021-based") %>% 
+  rbind(data_list[['popn_2020']]) %>% 
   mutate(x = paste(projection, variant)) %>% 
+  filter_london(data_col = "popn", validate = FALSE) %>% #View()
+  select(gss_code, year, x, popn) %>% 
+  mutate(x = factor(x, levels = c('2021-based Central',
+                                  '2021-based Short',
+                                  '2021-based Long',
+                                  '2020-based Central Lower',
+                                  '2020-based Central Upper'))) %>% 
   line_chart_plotly(chart_title,
                     "year", "popn", "x",
                     axis_title, figure = f, zero_y = FALSE) 
@@ -146,9 +155,9 @@ f <- f+1
 
 charts[['age structure']] <- data_list[['sya']] %>% 
   filter_london(data_col = "popn") %>% 
-  filter(year %in% c(2020,2036)) %>% 
+  filter(year %in% c(2021,2037)) %>% 
   mutate(variant = as.character(variant)) %>% 
-  mutate(variant = ifelse(year == 2020, "2020 structure", variant)) %>% 
+  mutate(variant = ifelse(year == 2021, "2021 structure", variant)) %>% 
   unique() %>% 
   mutate(value = popn) %>% 
   mutate(variant = factor(variant, levels = c("2020 structure", trend_factor_levels))) %>% 
@@ -186,11 +195,11 @@ charts[['total net']] <- data_list[['total_net']] %>%
 re_factor_migration <- function(x){
   x %>% 
     filter(variant != "Central Lower") %>% 
-    mutate(variant = case_when(variant == "Central Upper" ~ "central",
-                               variant == "High Population" ~ "high migration",
-                               variant == "Low Population" ~ "low migration",
+    mutate(variant = case_when(variant == "Central" ~ "10-year average",
+                               variant == "Short" ~ "5-year average",
+                               variant == "Long" ~ "15-year average",
                                TRUE ~ "TRUE")) %>% 
-    mutate(variant = factor(variant, levels = c("central", "high migration", "low migration")))
+    mutate(variant = factor(variant, levels = c("10-year average", "5-year average", "15-year average")))
 }
 
 chart_title <- "Net international migration, London"
@@ -232,7 +241,7 @@ chart_title <- "Net domestic migration, London"
 f <- f+1
 
 charts[['dom net']] <- data_list[['dom_net']] %>% 
-  filter_london(data_col = "dom_net") %>% 
+  filter(gss_code == "E12000007") %>% 
   re_factor_migration() %>% 
   line_chart_plotly(chart_title,
                     "year", "dom_net", "variant",
@@ -244,7 +253,7 @@ chart_title <- "Domestic in migration, London"
 f <- f+1
 
 charts[['dom in']] <- data_list[['dom_in']] %>% 
-  filter_london(data_col = "dom_in") %>% 
+  filter(gss_code == "E12000007") %>% 
   re_factor_migration() %>% 
   line_chart_plotly(chart_title,
                     "year", "dom_in", "variant",
@@ -256,7 +265,7 @@ chart_title <- "Domestic out migration, London"
 f <- f+1
 
 charts[['dom out']] <- data_list[['dom_out']] %>% 
-  filter_london(data_col = "dom_out") %>% 
+  filter(gss_code == "E12000007") %>%  
   re_factor_migration() %>% 
   line_chart_plotly(chart_title,
                     "year", "dom_out", "variant",
@@ -332,12 +341,12 @@ hlm_factor_levels <- c("Identified Capacity","Past Delivery","Housing Targets")
 
 housing_led_popn <- read_multiple_projections(housing_led, "population")
 
-housing_led_sya <- read_multiple_projections(housing_led, "population",
+housing_led_sya <- read_multiple_projections(housing_led, "borough_data.population",
                                              col_aggregation = c("gss_code","year","age"))
 
 housing_led_change <- housing_led_popn %>% 
-  filter(year %in% c(2020,2041)) %>% 
-  mutate(popn = ifelse(year == 2020, popn*-1, popn)) %>% 
+  filter(year %in% c(2021,2041)) %>% 
+  mutate(popn = ifelse(year == 2021, popn*-1, popn)) %>% 
   group_by(gss_code, variant) %>% 
   summarise(change = sum(popn), .groups = "drop_last") %>% 
   data.frame() %>% 
@@ -350,36 +359,29 @@ hlm_vs_trend <- data_list[['population']] %>%
   filter(year %in% 2011:2041) %>%
   pivot_wider(names_from = variant, values_from = popn)
 
-LP_dev <- readRDS("input_data/housing_led_model/borough_2020-based_london_plan.rds") %>% 
+housing_targets_dev <- readRDS("input_data/flexible_area_model/development_data/housing_targets_WD22CD.rds") %>% 
   mutate(variant = "Housing Targets")
-shlaa_dev <- readRDS("input_data/housing_led_model/borough_2020-based_savills.rds") %>% 
+shlaa_dev <- readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds") %>% 
   mutate(variant = "Identified Capacity")
-LDD_dev <- readRDS("input_data/housing_led_model/borough_2020-based_ldd_mean.rds") %>% 
+past_delivery_dev <- readRDS("input_data/flexible_area_model/development_data/past_delivery_WD22CD.rds") %>% 
   mutate(variant = "Past Delivery")
 
-dev_data <- rbind(LP_dev, shlaa_dev, LDD_dev) %>% 
-  filter_london(data_col = "units") %>% 
+WD22CD_to_LAD21CD <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds") %>% 
+  select(gss_code, gss_code_ward)
+
+dev_data <- rbind(housing_targets_dev, shlaa_dev, past_delivery_dev) %>% 
+  left_join(WD22CD_to_LAD21CD, by = "gss_code_ward") %>% 
+  select(-gss_code_ward) %>% 
+  filter_london(data_col = "units", validate = FALSE) %>% 
   mutate(variant = factor(variant, levels = hlm_factor_levels))
 
-ahs <- read_multiple_projections(housing_led, "summary", age = NULL,
-                                 col_aggregation = c("gss_code","year","household_popn","households")) %>% 
+ahs <- read_multiple_projections(housing_led, "borough_data.households_detail", age = NULL,
+                                 col_aggregation = c("gss_code","year","household_population","input_households")) %>% 
+  filter(year > 2010) %>% 
   group_by(year, variant) %>% 
-  summarise(ahs = sum(household_popn)/sum(households),
+  summarise(ahs = sum(household_population)/sum(input_households),
             .groups = 'drop_last') %>% 
   data.frame()
-
-ahs <- readRDS(paste0(projections$`Central Lower`,"dclg_stage_1_households.rds")) %>%
-  filter(substr(gss_code,1,3)=="E09",
-         year <= 2020) %>% 
-  group_by(year) %>% 
-  summarise(ahs = sum(household_population)/sum(households)) %>% 
-  data.frame() %>% 
-  mutate(variant = "Past AHS") %>% 
-  select(year, variant, ahs) %>% 
-  rbind(filter(ahs, year == 2021,
-               variant == "Identified Capacity") %>% 
-          mutate(variant = "Past AHS"),
-        ahs) 
 
 #-------------------------------------------------------------------------------
 
@@ -391,19 +393,19 @@ ahs <- readRDS(paste0(projections$`Central Lower`,"dclg_stage_1_households.rds")
 
 chart_title <- "Forecast dwellings, London"
 f <- f+1
-axis_title <- "dwellings"
+axis_title <- "net additonal dwellings"
 
 charts[['dev chart']] <- dev_data %>% 
   filter(year %in% 2012:2041) %>%
   line_chart_plotly(chart_title,
                     "year", "units", "variant",
-                    axis_title, figure = f, zero_y = FALSE,
-                    source = "Source: London development database, GLA 2020-based population projections")
+                    axis_title, figure = f, zero_y = TRUE,
+                    source = "Source: London development database, GLA 2021-based population projections")
 
 
 chart_title <- "Forecast housing stock, London"
 f <- f+1
-axis_title <- "dwellings"
+axis_title <- "total dwellings"
 
 charts[['stock']] <- dev_data %>% 
   filter(year %in% 2011:2041) %>%
@@ -414,7 +416,7 @@ charts[['stock']] <- dev_data %>%
   line_chart_plotly(chart_title,
                     "year", "stock", "variant",
                     axis_title, figure = f, zero_y = FALSE,
-                    source = "Source: London development database, GLA 2020-based population projections")
+                    source = "Source: London development database, GLA 2021-based population projections")
 
 
 #-------------------------------------------------------------------------------
@@ -458,17 +460,27 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
             showlegend = TRUE,
             name = 'Housing Targets',
             text = "Housing Targets") %>% 
+  #Central
+  add_trace(x = ~year, y = ~`Central`,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = "#dee000",
+                        shape = "spline"),
+            marker = list(color =  "#dee000"),
+            showlegend = TRUE,
+            name = 'Central',
+            text = "Central") %>% 
   
-  #Central Lower line
-  add_trace(x = ~year, y = ~`Central Lower`, type = 'scatter', mode = 'lines',
+  #Short
+  add_trace(x = ~year, y = ~`Short`, type = 'scatter', mode = 'lines',
             line = list(color = 'rgba(0,100,80,0.2)'),
-            showlegend = TRUE, name = 'Trend Central Range', text = 'Central Lower') %>% 
+            showlegend = TRUE, name = 'Short', text = 'Short') %>% 
   
   #Central Upper line and shading between the 2
-  add_trace(y = ~`Central Upper`, type = 'scatter', mode = 'lines',
+  add_trace(y = ~`Long`, type = 'scatter', mode = 'lines',
             fill = 'tonexty', fillcolor='rgba(0,100,80,0.2)',
             line = list(color = 'rgba(0,100,80,0.2)'),
-            showlegend = FALSE, name = 'Central Upper', text = 'Central Upper') %>% 
+            showlegend = FALSE, name = 'Long', text = 'Long') %>% 
   
   #layout and presentation options
   layout(title = list(text = paste0("<b>Figure ",f,": ",chart_title,"</b>"),
@@ -493,7 +505,7 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
                 x0 = 2020, x1 = 2025,
                 y0 = 8000000, y1 =11000000,
                 layer = "below"),
-          
+           
            list(type = "rect",
                 fillcolor = "#44aad5",
                 line = list(width = 0),
@@ -514,7 +526,7 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
                 showarrow = FALSE,
                 font=list(size=11)),
            
-            list(x = mean(c(2025,2041)),
+           list(x = mean(c(2025,2041)),
                 y = 0.93,
                 text = "Long-term\nperiod",
                 xref = "x",
@@ -527,7 +539,7 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based population projections", 
+                text = "Source: GLA 2021-based population projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -536,24 +548,6 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
                 xshift=0,
                 yshift=0,
                 font=list(size=11, color="grey"))))
-
-charts[['exec summary']] <- charts[['trend-vs-hlm']] %>% 
-  
-  #low popn line
-  add_trace(x = ~year, y = ~`Low Population`, type = 'scatter', mode = 'lines',
-            line = list(color = 'rgba(0,100,80,0.2)'),
-            showlegend = TRUE, name = 'Trend Wide Range', text = 'Low Population') %>% 
-  
-  #high popn line and shading between the 2
-  add_trace(y = ~`High Population`, type = 'scatter', mode = 'lines',
-            fill = 'tonexty', fillcolor='rgba(0,100,80,0.2)',
-            line = list(color = 'rgba(0,100,80,0.2)'),
-            showlegend = FALSE, name = 'High Population', text = 'High Population') %>%
-  
-  layout(title = list(text = paste0("<b>Figure 1: ",chart_title,"</b>"),
-                      xanchor = "left",
-                      x = 0,
-                      font = list(size = 12)))
 
 #-------------------------------------------------------------------------------
 
@@ -564,7 +558,7 @@ f <- f+1
 
 charts[['housing-led age structure']] <- housing_led_sya %>% 
   filter_london(data_col = "popn") %>% 
-  filter(year %in% c(2020,2036)) %>% 
+  filter(year %in% c(2020,2037)) %>% 
   mutate(variant = ifelse(year == 2020, "2020 structure", variant)) %>% 
   unique() %>% 
   mutate(value = popn) %>% 
@@ -586,7 +580,7 @@ charts[['ahs']] <- ahs %>%
   line_chart_plotly(chart_title,
                     "year", "ahs", "variant",
                     axis_title, figure = f, zero_y = FALSE, round_y = 2,
-                    source = "Source: London development database, GLA 2020-based population projections")
+                    source = "Source: London development database, GLA 2021-based population projections")
 
 #-------------------------------------------------------------------------------
 
@@ -653,12 +647,22 @@ charts[['lp map']] <- housing_led_change %>%
 
 #Tables
 
-charts[['table 1']] <-  data_list[['population']] %>% 
+charts[['table growth']] <-  data_list[['population']] %>% 
   filter_london(data_col = "popn") %>% 
-  filter(year %in% c(2020,2030,2040,2050)) %>% 
+  filter(year %in% c(2021,2031,2041,2050)) %>% 
   mutate(popn = round(popn/1000000,3)) %>% 
   pivot_wider(names_from = year, values_from = popn) %>% 
   select(-gss_code) 
+
+charts[['table working']] <-  data_list$sya %>% 
+  filter(age %in% 16:64) %>% 
+  group_by(variant, gss_code, year) %>% 
+  summarise(popn = sum(popn), .groups = 'drop_last') %>% 
+  filter_london(data_col = "popn") %>% 
+  filter(year %in% c(2021,2031,2041,2050)) %>% 
+  mutate(popn = round(popn/1000000,3)) %>% 
+  pivot_wider(names_from = year, values_from = popn) %>% 
+  select(-gss_code)
 
 charts[['ons table']] <- data_list[['ons_stage_2_households']] %>% 
   filter_london(data_col = "households") %>% 
@@ -711,6 +715,6 @@ charts[['housing-led table']] <- housing_led_popn  %>%
 #-------------------------------------------------------------------------------
 
 dir.create("outputs/markdown", showWarnings = FALSE)
-saveRDS(charts, "outputs/markdown/results_doc_charts.rds")
-#saveRDS(data_list, "outputs/markdown/results_doc_data.rds")
-#rm(list = ls())
+saveRDS(charts, "outputs/markdown/2021_results_doc_charts.rds")
+saveRDS(data_list, "outputs/markdown/2021_results_doc_data.rds")
+rm(list = ls())

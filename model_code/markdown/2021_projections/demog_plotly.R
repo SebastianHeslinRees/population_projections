@@ -8,27 +8,33 @@ line_chart_plotly <- function(data, title, x, y, colour,
   data <- data %>% rename(x_axis_col = all_of(x))
   data <- data %>% rename(y_axis_col = all_of(y))
   data <- data %>% rename(colour_col = all_of(colour))
+  # browser()
+  if(is.factor(data$colour_col)){
+    n <- length(levels(data$colour_col))
+  } else {
+    n <- length(unique(data$colour_col))
+  }
+  pal <- gglaplot::gla_pal(gla_theme = "default", n = n)
+  pal <- unique(c("#6da7de","#9e0059","#dee000", pal))
   
   hvr_tmp <- paste0("<b>%{x}</b><br>","%{text}: %{y:,.",round_y,"f}","<extra></extra>")
   
   if(is.null(source)){
-    source_text <- "Source: GLA 2020-based population projections"
+    source_text <- "Source: GLA 2021-based population projections"
   } else {
     source_text <- source
   }
   
   #Basic Plot
   p <- plot_ly(data, x=~x_axis_col, y=~y_axis_col, color=~colour_col,
-               colors = c("#6da7de",
-                          "#9e0059",
-                          "#dee000"),
+               colors = pal,
                type = "scatter",
                mode = "lines+markers", 
                line = list(shape = "spline"),
                text = ~colour_col,
                hovertemplate = hvr_tmp)#,
-               # width = 900,
-               # height = 600) 
+  # width = 900,
+  # height = 600) 
   
   #x-axis to zero
   if(zero_y){
@@ -64,7 +70,7 @@ line_chart_plotly <- function(data, title, x, y, colour,
                   fillcolor = "#44aad5",
                   line = list(width = 0),
                   opacity = 0.15,
-                  x0 = 2020, x1 = 2025,
+                  x0 = 2021, x1 = 2025,
                   y0 = y_min_y_axis_col, y1 = max(data$y_axis_col),
                   layer = "below"),
              # list(type = "rect",
@@ -142,14 +148,14 @@ age_chart_plotly <- function(data, title, colour, figure=NULL, percent=FALSE){
   
   if(percent){
     hvr <- paste("<b>Age %{x}</b><br>",
-          "%{text}: %{y:,.2f}",
-          "<extra></extra>")
+                 "%{text}: %{y:,.2f}",
+                 "<extra></extra>")
   } else {
     hvr <- paste("<b>Age %{x}</b><br>",
                  "%{text}: %{y:,.0f}",
                  "<extra></extra>")
   }
-
+  
   #Basic plot
   plot_ly(data, x=~age, y=~value, color=~colour_col,
           colors = c("#6da7de",
@@ -180,7 +186,7 @@ age_chart_plotly <- function(data, title, colour, figure=NULL, percent=FALSE){
            annotations = list(
              list(x = 1,
                   y = -0.10, #position of text adjust as needed 
-                  text = "Source: GLA 2020-based population projections", 
+                  text = "Source: GLA 2021-based population projections", 
                   showarrow = F,
                   xref='paper',
                   yref='paper', 

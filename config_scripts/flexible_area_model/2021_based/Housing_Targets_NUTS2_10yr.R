@@ -2,7 +2,7 @@ library(flexibleareamodel)
 
 data_dir <- "input_data/flexible_area_model/"
 projection_name <- "2021_Housing_Targets_10yr"
-dev_path <- paste0(data_dir, "development_data/housing_target_WD22CD.rds")
+dev_path <- paste0(data_dir, "development_data/housing_targets_WD22CD.rds")
 
 x <- list.files("outputs/trend/2021/")
 x <- x[stringr::str_detect(x,"10yr")]

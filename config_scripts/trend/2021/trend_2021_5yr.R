@@ -2,7 +2,7 @@ library(trendmodel)
 
 projection_name <- "2021_5yr"
 standard_covid_migration <- TRUE
-n_proj_yr <- 2
+n_proj_yr <- 29
 
 #-------------------------------------------------------------------------------
 

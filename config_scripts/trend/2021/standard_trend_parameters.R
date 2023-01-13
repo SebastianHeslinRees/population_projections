@@ -49,7 +49,7 @@ standard_trend_parameters <- function(params){
   #Mort/fert
   
   standard$mortality_rates <- "input_data/mortality/mort_rates_5yr_trend_2021.rds"
-  standard$fertility_rates <- "input_data/fertility/fert_rates_2yr_trend_2019.rds"
+  standard$fertility_rates <- "input_data/fertility/fert_rates_5yr_trend_2021.rds"
   
   #-------------------------------------------------------------------------------
   

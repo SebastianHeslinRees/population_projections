@@ -5,11 +5,10 @@ library(rgdal)
 library(data.table)
 library(tidyr)
 
-message('Development trajectories - 2020-based housing-led projections')
+message('Development trajectories - 2021-based WD22CD')
 
 #-------------------------------------------------------------------------------
 
-ldd_backseries <- readRDS("input_data/housing_led_model/ldd_backseries_dwellings_borough.rds")
 gss_lookup <- readRDS("input_data/lookup/gss_code_to_name.rds") %>% 
   filter(substr(gss_code,1,3)=="E09") %>% 
   mutate(x = substr(gss_name, 1, 4))
@@ -25,15 +24,12 @@ gss_lookup <- readRDS("input_data/lookup/gss_code_to_name.rds") %>%
 #Then calculating how many units of the totals are in each borough
 #Then applying that distribution to the London Plan totals
 message("ignore OGRSpatialRef warnings")
-
-start_dir <- getwd()
-
+proj_wd <- getwd()
 #readOGR requires the directory to be changed
 shlaa_data_loc <- "Q:/Teams/D&PA/Data/housing_development/shlaa/shlaa_2017/October 2017 (v2)/final_data/"
 setwd(paste0(shlaa_data_loc, "large_sites_v2/"))
 large_sites_points <- readOGR(dsn = ".", layer = "SHLAA_large_sites_3Oct2017_point", verbose = FALSE)
 
-setwd(start_dir)
 msoa_polygon_loc <- "W:/GISDataMapInfo/BaseMapping/Boundaries/StatisticalBoundaries/Census_2011/SuperOutputAreas/London/Middle/ESRI"
 msoa_polygons <- readOGR(dsn = msoa_polygon_loc, layer = "MSOA_2011_London",
                          verbose = FALSE)
@@ -52,6 +48,8 @@ dev_corp_distributions <- cbind(as.data.frame(large_sites_points), over(large_si
   mutate(dist = units/sum(units)) %>% 
   data.frame() %>% 
   select(gss_code = LAD11CD, DC, dist)
+
+setwd(proj_wd)
 
 london_plan <- fread("Q:/Teams/D&PA/Data/housing_development/2021 London Plan Target (2020-2029).csv",
                      header = TRUE) %>% 
@@ -93,34 +91,34 @@ rm(start_dir, large_sites_points, msoa_polygon_loc, msoa_polygons,
 
 #-------------------------------------------------------------------------------
 
-mean_ldd <- ldd_backseries %>%
-  filter(year %in% 2012:2019) %>% 
-  group_by(gss_code) %>% 
-  summarise(units = mean(units)) %>% 
-  data.frame() %>% 
-  mutate(year = 2022) %>% 
-  popmodules::project_forward_flat(2042) %>% 
-  mutate(units = ifelse(year == 2042, 0, units)) %>% 
-  popmodules::project_forward_flat(2050) %>% 
-  arrange(year, gss_code) %>% 
-  data.frame()
-
-#-------------------------------------------------------------------------------
-
-rm(list=setdiff(ls(), c("mean_ldd", "london_plan_trajectory")))
-
-#-------------------------------------------------------------------------------
-
 WD22_to_LAD21 <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds")
 
 shlaa_WD22 <- readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds")
 
 initial_years <- filter(shlaa_WD22, year <= 2021)
 
+#---
+
+mean_ldd <- shlaa_WD22 %>%
+  filter(year %in% 2012:2019) %>% 
+  group_by(gss_code_ward) %>% 
+  summarise(units = mean(units)) %>% 
+  data.frame() %>% 
+  mutate(year = 2022) %>% 
+  popmodules::project_forward_flat(2042) %>% 
+  mutate(units = ifelse(year == 2042, 0, units)) %>% 
+  popmodules::project_forward_flat(2050) %>% 
+  arrange(year, gss_code_ward) %>% 
+  data.frame() %>% 
+  bind_rows(initial_years)
+
+
+#-------------------------------------------------------------------------------
+
 WD22_london_plan <- shlaa_WD22 %>% 
   filter(year > 2021) %>% 
   left_join(WD22_to_LAD21, by = "gss_code_ward") %>% 
-  group_by(gss_code) %>% 
+  group_by(gss_code, year) %>% 
   mutate(borough_total = sum(units)) %>% 
   data.frame() %>% 
   left_join(london_plan_trajectory, by = c("gss_code", "year")) %>% 
@@ -130,18 +128,8 @@ WD22_london_plan <- shlaa_WD22 %>%
   select(names(shlaa_WD22)) %>% 
   bind_rows(initial_years)
 
-WD22_ldd_mean <- shlaa_WD22 %>% 
-  filter(year > 2021) %>% 
-  left_join(WD22_to_LAD21, by = "gss_code_ward") %>% 
-  group_by(gss_code) %>% 
-  mutate(borough_total = sum(units)) %>% 
-  data.frame() %>% 
-  left_join(mean_ldd, by = c("gss_code", "year")) %>% 
-  rename(ldd_units = units.y) %>% 
-  mutate(sf = ldd_units/borough_total,
-         units = units.x * sf) %>% 
-  select(names(shlaa_WD22)) %>% 
-  bind_rows(initial_years)
 
 saveRDS(WD22_london_plan, "input_data/flexible_area_model/development_data/housing_targets_WD22CD.rds")
-saveRDS(WD22_ldd_mean, "input_data/flexible_area_model/development_data/past_delivery_WD22CD.rds")
+saveRDS(mean_ldd, "input_data/flexible_area_model/development_data/past_delivery_WD22CD.rds")
+
+rm(list=ls())
