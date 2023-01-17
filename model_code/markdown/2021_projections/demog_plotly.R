@@ -1,4 +1,5 @@
 library(plotly)
+library(gglaplot)
 
 line_chart_plotly <- function(data, title, x, y, colour,
                               y_axis_title, zero_y=FALSE,
@@ -90,7 +91,7 @@ line_chart_plotly <- function(data, title, x, y, colour,
            
            #Annotoation at the top of the rectangles
            annotations = list(
-             list(x = 2022.5,
+             list(x = 2023,
                   y = 0.93,
                   text = "Short-term\nperiod",
                   xref = "x",

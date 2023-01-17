@@ -28,8 +28,7 @@ library(stringr)
 ```{r data, echo = FALSE}
 
 stem <- "https://londondatastore-upload.s3.eu-west-1.amazonaws.com/Demography/ward_profiles/"
-wards <- readRDS("input_data/lookup/2011_ward_to_district.rds") %>% 
-  left_join(readRDS("input_data/lookup/gss_code_to_name.rds"),by = "gss_code") %>% 
+wards <- readRDS("input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds") 
   filter(substr(gss_code,1,3)=="E09") %>% 
   filter(gss_code != "E09000001") %>% 
   arrange(gss_code, ward_name) %>% 

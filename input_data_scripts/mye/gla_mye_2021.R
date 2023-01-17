@@ -18,7 +18,8 @@ f_paths <- list(gla_series = "E:/project_folders/demography/ben/R_projects/creat
                 nireland_pop = "Q:/Teams/D&PA/Data/population_estimates/nrs_nisra_estimates/northern_ireland/mye_2021/N_IRELAND_MYE21_SYA.csv",
                 output_dir = "input_data/mye/2021/",
                 previous_dir = "input_data/mye/2020/",
-                dom_matrix = "input_data/domestic_migration/2020/domestic_migration_flows_ons_(2021_geog).rds",
+                dom_matrix_past = "input_data/domestic_migration/2020/domestic_migration_flows_ons_(2021_geog).rds",
+                dom_matrix_2021 = "E:/project_folders/demography/ben/R_projects/create_modelled_backseries/outputs/modelled_od_flows.rds",
                 dom_matrix_out = "input_data/domestic_migration/2021/domestic_migration_flows_ons_(2021_geog).rds")
 
 
@@ -259,71 +260,18 @@ final_int_net <- final_int_out %>%
   data.frame()
 
 #-------------------------------------------------------------------------------
-# Domestic
-# Create the 2021 OD matrix
-source("input_data_scripts/domestic_migration/domestic_migration_2021.R")
-dom_matrix_past <- readRDS(f_paths$dom_matrix)
+# Domestic 2021 OD matrix
 
-temp_dom_in <- filter(gla_series, component == "internal_in") %>% 
-  mutate(value = ifelse(value < 0, 0, value)) %>% 
-  select(gss_code, year, sex, age, dom_in = value) %>% 
-  data.frame() %>% 
-  bind_rows(eng_wales_dom_in_past) %>% 
-  filter(substr(gss_code,1,3) %in% england_wales_codes) %>% 
-  bind_rows(other_dom_in_past, scotland_dom_in_2021, n_ireland_dom_in_2021) %>% 
-  check_negative_values("dom_in") %>% 
-  rename(value = dom_in)
 
-temp_dom_out <- filter(gla_series, component == "internal_out") %>% 
-  mutate(value = ifelse(value < 0, 0, value)) %>% 
-  select(gss_code, year, sex, age, dom_out = value) %>% 
-  data.frame() %>% 
-  bind_rows(eng_wales_dom_out_past) %>% 
-  filter(substr(gss_code,1,3) %in% england_wales_codes) %>% 
-  bind_rows(other_dom_out_past, scotland_dom_out_2021, n_ireland_dom_out_2021) %>% 
-  check_negative_values("dom_out") %>% 
-  rename(value = dom_out)
+matrix_existing <- readRDS(f_paths$dom_matrix_past)
+matrix_2021 <- readRDS(f_paths$dom_matrix_2021) %>% 
+  select(names(matrix_existing))
+
+dom_matrix <- bind_rows(matrix_existing, matrix_2021)
 
 #---
 
-tgt_in <- temp_dom_in %>% 
-  filter(substr(gss_code,1,3) %in% c(england_wales_codes, "W06", "N92", "S92")) %>% 
-  filter(year == 2021)
-
-tgt_out <- temp_dom_out %>% 
-  filter(substr(gss_code,1,3) %in% c(england_wales_codes, "W06", "N92", "S92")) %>% 
-  filter(year == 2021) 
-
-#---
-
-dom_matrix_2021 <- dom_matrix_past %>% 
-  filter(year == 2020) %>% 
-  create_od_data(tgt_in, tgt_out, parallel = TRUE) %>% 
-  mutate(year = 2021) %>% 
-  select(names(dom_matrix_past))
-
-dom_matrix <- bind_rows(dom_matrix_past, dom_matrix_2021)
-
-#---
-
-# test_dom <- function(x, i){
-#   
-#   y <- filter(x, year == i)
-#   a <- length(unique(y$gss_in))
-#   b <- length(unique(y$gss_out))
-#   c <- length(unique(y$age))
-#   d <- length(unique(y$sex))
-#   e <- nrow(y)
-#   
-#   print(paste0(i, ": ", a, " gss_in / ", b, " gss_out / ", c, " ages / ", d, " sexes / ", e, " (nrow)"))
-#   
-# }
-# 
-# for(i in unique(dom_matrix$year)){test_dom(dom_matrix, i)}
-
-#---
-
-dir.create("input_data/domestic_migration/2021")
+dir.create("input_data/domestic_migration/2021", showWarnings = FALSE)
 saveRDS(dom_matrix, f_paths$dom_matrix_out)
 
 #---

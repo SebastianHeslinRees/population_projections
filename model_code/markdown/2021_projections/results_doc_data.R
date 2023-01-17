@@ -1,5 +1,5 @@
 devtools::load_all("Q:/Teams/D&PA/Demography/demogtools")
-source("model_code/markdown/2020_projections/demog_plotly.R")
+source("model_code/markdown/2021_projections/demog_plotly.R")
 library(dplyr)
 library(data.table)
 library(leaflet)
@@ -10,7 +10,7 @@ f <- 1
 root <- "outputs/trend/2021/"
 root_2020 <- "outputs/trend/2020/"
 flex_root <- "outputs/flexible_area_model/2021_based/"
-trend_factor_levels <- c("Central", "Short","Long")
+trend_factor_levels <- c("5-year trend", "10-year trend","15-year trend")
 
 #
 projections_2020 <- list('Central Upper' = "2020_CC_central_upper_21-09-21_1259",
@@ -18,9 +18,9 @@ projections_2020 <- list('Central Upper' = "2020_CC_central_upper_21-09-21_1259"
   lapply(function(x) paste0(root_2020,x,"/"))
 
 #
-projections_2021<- list('Central' = "2021_10yr_23-01-11_1329",
-                        'Short' = "2021_5yr_23-01-11_1537",
-                        'Long' = "2021_15yr_23-01-11_1329") %>% 
+projections_2021<- list('Central' = "2021_10yr_23-01-17_1210",
+                        'Short' = "2021_5yr_23-01-17_1210",
+                        'Long' = "2021_15yr_23-01-17_1210") %>% 
   lapply(function(x) paste0(root,x,"/"))
 
 #
@@ -38,20 +38,33 @@ housing_led <- list('Identified Capacity' = "2021_Identified_Capacity_10yr",
 
 #-------------------------------------------------------------------------------
 
+re_factor_variant <- function(x){
+  x %>% 
+    filter(!variant %in% c("Central Lower",
+                           "Central Upper")) %>% 
+    mutate(variant = case_when(variant == "Central" ~ "10-year trend",
+                               variant == "Short" ~ "5-year trend",
+                               variant == "Long" ~ "15-year trend",
+                               TRUE ~ "TRUE")) %>% 
+    mutate(variant = factor(variant, levels = c("5-year trend", "10-year trend", "15-year trend")))
+}
+
+#-------------------------------------------------------------------------------
+
 data_list <- list()
 charts <- list()
 
 for(i in components){
   print(i)
   data_list[[i]] <- read_multiple_projections(projections_2021, i) %>% 
-    mutate(variant = factor(variant, levels = trend_factor_levels))
+    re_factor_variant()
 }
 
 print('age structure')
 data_list[['sya']] <- read_multiple_projections(projections_2021,
                                                 "population",
                                                 col_aggregation = c("year","gss_code","age")) %>% 
-  mutate(variant = factor(variant, levels = trend_factor_levels))
+  re_factor_variant()
 
 
 
@@ -61,7 +74,7 @@ projections <- lapply(projections_2021, function(x) paste0(x,"households/"))
 for(i in households){
   print(i)
   data_list[[i]] <- read_multiple_projections(projections,i,age_filter = NULL) %>% 
-    mutate(variant = factor(variant, levels = trend_factor_levels))
+    re_factor_variant()
   
 }
 
@@ -75,7 +88,7 @@ chart_title <- "Projected Population (2021-2026), London"
 axis_title <- "population"
 f <- f+1
 
-charts[['covid']] <- data_list[['population']] %>% 
+charts[['short']] <- data_list[['population']] %>% 
   filter_london(data_col = "popn") %>% 
   filter(year %in% 2021:2026) %>% 
   plot_ly(x=~year, y=~popn, color=~variant,
@@ -137,11 +150,11 @@ charts[['comp']] <- data_list[['population']] %>%
   mutate(projection = "2021-based") %>% 
   rbind(data_list[['popn_2020']]) %>% 
   mutate(x = paste(projection, variant)) %>% 
-  filter_london(data_col = "popn", validate = FALSE) %>% #View()
+  filter_london(data_col = "popn", validate = FALSE) %>% 
   select(gss_code, year, x, popn) %>% 
-  mutate(x = factor(x, levels = c('2021-based Central',
-                                  '2021-based Short',
-                                  '2021-based Long',
+  mutate(x = factor(x, levels = c('2021-based 5-year trend',
+                                  '2021-based 10-year trend',
+                                  '2021-based 15-year trend',
                                   '2020-based Central Lower',
                                   '2020-based Central Upper'))) %>% 
   line_chart_plotly(chart_title,
@@ -186,28 +199,19 @@ f <- f+1
 
 charts[['total net']] <- data_list[['total_net']] %>% 
   filter_london(data_col = "total_net") %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "total_net", "variant",
                     axis_title, figure = f, zero_y = FALSE)
 
 
 #International migration
-re_factor_migration <- function(x){
-  x %>% 
-    filter(variant != "Central Lower") %>% 
-    mutate(variant = case_when(variant == "Central" ~ "10-year average",
-                               variant == "Short" ~ "5-year average",
-                               variant == "Long" ~ "15-year average",
-                               TRUE ~ "TRUE")) %>% 
-    mutate(variant = factor(variant, levels = c("10-year average", "5-year average", "15-year average")))
-}
-
 chart_title <- "Net international migration, London"
 f <- f+1
 
 charts[['int net']] <- data_list[['int_net']] %>% 
   filter_london(data_col = "int_net") %>% 
-  re_factor_migration() %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "int_net", "variant",
                     axis_title, figure = f, zero_y = FALSE)
@@ -219,7 +223,7 @@ f <- f+1
 
 charts[['int in']] <- data_list[['int_in']] %>% 
   filter_london(data_col = "int_in") %>% 
-  re_factor_migration() %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "int_in", "variant",
                     axis_title, figure = f, zero_y = FALSE)
@@ -231,7 +235,7 @@ f <- f+1
 
 charts[['int out']] <- data_list[['int_out']] %>% 
   filter_london(data_col = "int_out") %>% 
-  re_factor_migration() %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "int_out", "variant",
                     axis_title, figure = f, zero_y = FALSE)
@@ -242,7 +246,7 @@ f <- f+1
 
 charts[['dom net']] <- data_list[['dom_net']] %>% 
   filter(gss_code == "E12000007") %>% 
-  re_factor_migration() %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "dom_net", "variant",
                     axis_title, figure = f, zero_y = FALSE)
@@ -254,7 +258,7 @@ f <- f+1
 
 charts[['dom in']] <- data_list[['dom_in']] %>% 
   filter(gss_code == "E12000007") %>% 
-  re_factor_migration() %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "dom_in", "variant",
                     axis_title, figure = f, zero_y = FALSE)
@@ -266,7 +270,7 @@ f <- f+1
 
 charts[['dom out']] <- data_list[['dom_out']] %>% 
   filter(gss_code == "E12000007") %>%  
-  re_factor_migration() %>% 
+  #re_factor_variant() %>% 
   line_chart_plotly(chart_title,
                     "year", "dom_out", "variant",
                     axis_title, figure = f, zero_y = FALSE)
@@ -461,26 +465,26 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
             name = 'Housing Targets',
             text = "Housing Targets") %>% 
   #Central
-  add_trace(x = ~year, y = ~`Central`,
+  add_trace(x = ~year, y = ~`10-year trend`,
             type = 'scatter',
             mode = 'lines+markers',
             line = list(color = "#dee000",
                         shape = "spline"),
             marker = list(color =  "#dee000"),
             showlegend = TRUE,
-            name = 'Central',
-            text = "Central") %>% 
+            name = '10-year trend',
+            text = "10-year trend") %>% 
   
   #Short
-  add_trace(x = ~year, y = ~`Short`, type = 'scatter', mode = 'lines',
+  add_trace(x = ~year, y = ~`5-year trend`, type = 'scatter', mode = 'lines',
             line = list(color = 'rgba(0,100,80,0.2)'),
-            showlegend = TRUE, name = 'Short', text = 'Short') %>% 
+            showlegend = TRUE, name = '5-year trend', text = '5-year trend') %>% 
   
   #Central Upper line and shading between the 2
-  add_trace(y = ~`Long`, type = 'scatter', mode = 'lines',
+  add_trace(y = ~`15-year trend`, type = 'scatter', mode = 'lines',
             fill = 'tonexty', fillcolor='rgba(0,100,80,0.2)',
             line = list(color = 'rgba(0,100,80,0.2)'),
-            showlegend = FALSE, name = 'Long', text = 'Long') %>% 
+            showlegend = FALSE, name = '15-year trend', text = '15-year trend') %>% 
   
   #layout and presentation options
   layout(title = list(text = paste0("<b>Figure ",f,": ",chart_title,"</b>"),
@@ -502,7 +506,7 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
                 fillcolor = "#44aad5",
                 line = list(width = 0),
                 opacity = 0.15,
-                x0 = 2020, x1 = 2025,
+                x0 = 2021, x1 = 2025,
                 y0 = 8000000, y1 =11000000,
                 layer = "below"),
            
@@ -516,7 +520,7 @@ charts[['trend-vs-hlm']] <- hlm_vs_trend %>%
          
          # labels at the top of the rectangles
          annotations = list(
-           list(x = 2022.5,
+           list(x = 2023,
                 y = 0.93,
                 text = "Short-term\nperiod",
                 xref = "x",
@@ -600,7 +604,7 @@ map_function <- function(data, polygons, bins, palette){
     polygons$NAME, polygons$change
   ) %>% lapply(htmltools::HTML)
   
-  map_title <- "Population growth 2020-2041"
+  map_title <- "Population growth 2021-2041"
   
   map_output <- leaflet() %>%
     addPolygons(data = polygons,
