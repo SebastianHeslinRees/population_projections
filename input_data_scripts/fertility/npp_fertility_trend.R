@@ -2,18 +2,20 @@
 library(dplyr)
 library(tidyr)
 library(data.table)
+library(tidyr)
 
 message('NPP fertility trend')
 
 max_year <- 2050
-npp_data_2016 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs"
-npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs"
+npp_data_2016 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/"
+npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/"
+npp_data_2020 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2020-based NPP/model_inputs/"
 
 #function to read and wrangle raw data
 fertility_trend <- function(file, var, max_year, npp_data_location){
   fert <- fread(paste0(npp_data_location, file)) %>%
     tibble() %>%
-    gather(year, rate, 3:102) %>%
+    pivot_longer(names_to = "year", values_to = "rate", cols = 3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
     mutate(age = as.numeric(Age))%>%
     select(-Sex, -Age) %>%
@@ -44,24 +46,27 @@ fertility_trend <- function(file, var, max_year, npp_data_location){
 }
 
 #read in data
-principal_2016 <- fertility_trend("/Principal Fertility Assumptions.csv", "2016_principal", max_year, npp_data_2016)
-high_2016 <- fertility_trend("/High Fertility Assumptions.csv", "2016_high", max_year, npp_data_2016)
-low_2016 <- fertility_trend("/Low Fertility Assumptions.csv", "2016_low", max_year, npp_data_2016)
+principal_2016 <- fertility_trend("Principal Fertility Assumptions.csv", "2016_principal", max_year, npp_data_2016)
+high_2016 <- fertility_trend("High Fertility Assumptions.csv", "2016_high", max_year, npp_data_2016)
+low_2016 <- fertility_trend("Low Fertility Assumptions.csv", "2016_low", max_year, npp_data_2016)
 
-principal_2018 <- fertility_trend("/fertility_principal.csv", "2018_principal", max_year, npp_data_2018)
-high_2018 <- fertility_trend("/fertility_high.csv", "2018_high", max_year, npp_data_2018)
-low_2018 <- fertility_trend("/fertility_low.csv", "2018_low", max_year, npp_data_2018)
+principal_2018 <- fertility_trend("fertility_principal.csv", "2018_principal", max_year, npp_data_2018)
+high_2018 <- fertility_trend("fertility_high.csv", "2018_high", max_year, npp_data_2018)
+low_2018 <- fertility_trend("fertility_low.csv", "2018_low", max_year, npp_data_2018)
+
+principal_2020 <- fertility_trend("principal_fertility.csv", "2020_principal", max_year, npp_data_2020)
 
 #bind the variants together
 fert_trend <- rbind(principal_2016, high_2016, low_2016,
-                    principal_2018, high_2018, low_2018) 
+                    principal_2018, high_2018, low_2018,
+                    principal_2020) 
 
 #2012 data
 load("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
 rm(list=setdiff(ls(),c("fert_trend", "npp_fertility_trend")))
 
 trend_2012 <- select(npp_fertility_trend, year, age, High.2012, Low.2012, Principal.2012) %>%
-  gather(variant, rate, c(High.2012, Low.2012, Principal.2012)) %>%
+  pivot_longer(names_to = "variant", values_to = "rate", cols = c("High.2012", "Low.2012", "Principal.2012")) %>%
   mutate(sex = "female") %>%
   select(names(fert_trend)) %>%
   filter(year <= max(fert_trend$year)) %>%

@@ -81,7 +81,7 @@ source("input_data_scripts/fertility/2022_births.R")
 # source("input_data_scripts/scenario_data/international_flows_for_2020_projections.R")
 
 #Rates 2021 projections
-source("input_data_scripts/fertility/fertility_rates_2021.R")
+source("input_data_scripts/fertility/fertility_rates_2021_B.R")
 source("input_data_scripts/mortality/mortality_rates_2021.R")
 source("input_data_scripts/migration/international_flows_for_2021_projections.R")
 source("input_data_scripts/migration/domestic_rates_for_2021_projections.R")

@@ -39,7 +39,7 @@ trend_5yrs_eng <- scaled_fertility_curve(popn = popn,
                     rates_trajectory = fertility_trajectory_filepath,
                     first_proj_yr = 2023,
                     n_proj_yr = 28,
-                    npp_var = "2018_principal") %>% 
+                    npp_var = "2020_principal") %>% 
   filter(year >= 2023)
 
 #------------------------------------------------------------------------------- 
@@ -56,7 +56,7 @@ trend_5yrs_other <- scaled_fertility_curve(popn = popn,
                     rates_trajectory = fertility_trajectory_filepath,
                     first_proj_yr = 2022,
                     n_proj_yr = 29,
-                    npp_var = "2018_principal")
+                    npp_var = "2020_principal")
 
 trend_5yrs_eng_2022 <- filter(trend_5yrs_other, substr(gss_code,1,1)=="E", year <= 2022)
 trend_5yrs_other <- filter(trend_5yrs_other, substr(gss_code,1,3) %in% c("N92","S92","W06"))

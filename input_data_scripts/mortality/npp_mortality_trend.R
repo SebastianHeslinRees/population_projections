@@ -2,18 +2,20 @@
 library(dplyr)
 library(tidyr)
 library(data.table)
+library(tidyr)
 
 message('NPP mortality trend')
 
 max_year <- 2050
 npp_data_2016 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2016-based NPP/model_inputs/"
 npp_data_2018 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2018-based NPP/model_inputs/"
+npp_data_2020 <- "Q:/Teams/D&PA/Data/population_projections/ons_npp/2020-based NPP/model_inputs/"
 
 #function to read and wrangle raw data
 mortality_trend <- function(file, var, max_year, npp_data_location){
   mort <- fread(paste0(npp_data_location, file)) %>%
     tibble() %>%
-    gather(year, rate, 3:102) %>%
+    pivot_longer(names_to="year", values_to="rate", cols=3:102) %>%
     mutate(sex = ifelse(Sex == 1, "male", "female")) %>%
     mutate(age = ifelse(Age == "Birth", -1, Age),
            age = as.numeric(age))%>%
@@ -46,21 +48,20 @@ principal_2018 <- mortality_trend("mortality_principal.csv", "2018_principal", m
 high_2018 <- mortality_trend("mortality_high.csv", "2018_high", max_year, npp_data_2018)
 low_2018 <- mortality_trend("mortality_low.csv", "2018_low", max_year, npp_data_2018)
 
+principal_2020 <- mortality_trend("principal_mortality.csv", "2020_principal", max_year, npp_data_2020)
 
 #bind the variants together
 mort_trend <- rbind(principal_2016, high_2016, low_2016,
-                    principal_2018, high_2018, low_2018)
+                    principal_2018, high_2018, low_2018,
+                    principal_2020)
 
-#bind the variants together
-mort_trend <- rbind(principal_2016, high_2016, low_2016,
-                    principal_2018, high_2018, low_2018) 
 
 #2012 data
 load("Q:/Teams/D&PA/Demography/Projections/Legacy Models/Trend Model - original/Inputs/2016 base/CCM Data Inputs - UPC.RData")
 rm(list=setdiff(ls(),c("mort_trend", "npp_mortality_trend")))
 
 trend_2012 <- npp_mortality_trend %>%
-  gather(variant, rate, c(High, Low, Principal)) %>%
+  pivot_longer(names_to="variant", values_to="rate", cols = c("High", "Low", "Principal")) %>%
   mutate(sex = case_when(sex == "F" ~ "female",
                          sex == "M" ~ "male")) %>%
   select(names(mort_trend)) %>%
@@ -79,7 +80,6 @@ mort_trend <- mort_trend %>%
   mutate(change = (rate - last_year)/last_year)%>%
   mutate(change = ifelse(year == min(year),0,change)) %>%
   select(-rate, -last_year)
-
 
 
 #write output

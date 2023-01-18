@@ -35,7 +35,7 @@ average_5yrs <- scaled_mortality_curve(popn = popn,
                     rates_trajectory = mortality_trajectory_filepath,
                     first_proj_yr = 2022,
                     n_proj_yr = 29,
-                    npp_var = "2018_principal")
+                    npp_var = "2020_principal")
 
 #-------------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ trend_5yrs <- scaled_mortality_curve(popn = popn,
                     rates_trajectory = mortality_trajectory_filepath,
                     first_proj_yr = 2022,
                     n_proj_yr = 29,
-                    npp_var = "2018_principal")
+                    npp_var = "2020_principal")
 
 #-------------------------------------------------------------------------------
 

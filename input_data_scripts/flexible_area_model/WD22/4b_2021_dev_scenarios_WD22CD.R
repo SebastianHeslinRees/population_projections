@@ -110,7 +110,8 @@ mean_ldd <- shlaa_WD22 %>%
   popmodules::project_forward_flat(2050) %>% 
   arrange(year, gss_code_ward) %>% 
   data.frame() %>% 
-  bind_rows(initial_years)
+  bind_rows(initial_years) %>% 
+  select(names(shlaa_WD22)) 
 
 
 #-------------------------------------------------------------------------------
