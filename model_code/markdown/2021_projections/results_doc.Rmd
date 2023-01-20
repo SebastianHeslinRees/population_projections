@@ -176,6 +176,23 @@ These 2021-based projections, released in January 2023, are interim projections 
 - **Household to dwellings ratio** - The flexible area model used in the production of the housing-led projections uses ratios taken from the census to convert households to dwellings and vice versa. At the time of publication no dwellings data was available from the 2021 census and so modelled ratios based in 2011 census data were being used.
 - **Housing stock** - The London Development Database (LDD) recorded all residential development completed in London up to 2019 when it was superseded by the London Planning DataHub. The dwelling stock estimates in the housing-led model use 2011 census estimates as their base and then add on LDD recorded development each year between 2012 and 2019. Dwelling data beyond 2019 is based on capacity data adapted from the SHLAA. The lack of dwellings data from the 2021 census means that the intended re-basing of the stock level was not possible for the interim projections.
 
+# Population backseries
+
+```{r include = FALSE, echo = FALSE}
+mye_2020 <- plotly_data(charts[['popn']]) %>% 
+  filter(colour_col == "10-year trend", x_axis_col == 2020) %>% 
+  pull(y_axis_col)
+```
+
+The production of population projections requires a backseries of population and component of change. The most recent mid-year estimate (MYE) is used as the 'jump-off' point for the projections and data from past years' estimates is used in the calculation of average flows and rates.
+
+The 2020-based projections used the 2020 MYE as their jumping-off point. This was the last estimate in a series which began in 2011. Each subsequent year from 2012 forward was calculated by adding estimated components of change to the previous year's population estimate. As such, over the decade, the MYE series had drifted away from the true population count.
+
+The 2021 census has provided an opportunity to reset the mid-year estimate series using the new data census as a starting point. The 2021 estimate therefore represents a break in the previous series. In order to create a consistent back series between the 2021 and 2011 estimates the GLA has modelled population and components of change for the period 2012-2020.
+
+The existing ONS 2020 MYE for London was 9.002 million. The GLA's revised estimate for 2020 is `r number_in_text(mye_2020)`, around `r number_in_text(90002488-mye_2020)` persons lower. This difference represents the inflation in the existing ONS MYE series over the last decade.
+
+The impact on the projections is notable. The 2021-based projection, starting from a lower population and based on lower growth trends over the last decade, have lower future growth trajectories than the 2020-based projections.
 
 # Interpreting variant projections
 
@@ -183,32 +200,34 @@ These 2021-based projections, released in January 2023, are interim projections 
 data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "10-year trend")
 a <- filter(data, x_axis_col == 2021)$y_axis_col
 b <- filter(data, x_axis_col == 2050)$y_axis_col
-central_future <- format(round((b-a)/30,-2), big.mark = ",")
+central_future <- (b-a)/30
 
 #--
 d <- filter(data, x_axis_col == 2011)$y_axis_col
 e <- filter(data, x_axis_col == 2021)$y_axis_col
-actual_past <- format(round((e-d)/10,-2), big.mark = ",")
+actual_past <- (e-d)/10
 
 #--
 
 data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "5-year trend")
 g <- filter(data, x_axis_col == 2021)$y_axis_col
 h <- filter(data, x_axis_col == 2050)$y_axis_col
-short_future <- format(round((h-g)/30,-2), big.mark = ",")
+short_future <- (h-g)/30
 
 #--
 
 data <- plotly_data(charts[['popn']]) %>%  filter(colour_col == "15-year trend")
 j <- filter(data, x_axis_col == 2021)$y_axis_col
 k <- filter(data, x_axis_col == 2050)$y_axis_col
-long_future <- format(round((k-j)/30,-2), big.mark = ",")
+long_future <- (k-j)/30
 
 #---
 
-data <- plotly_data(charts[['dom net']]) %>%  filter(colour_col == "10-year average")
-g <- round(filter(data, x_axis_col == 2017)$y_axis_col,-2)*-1
-dom_max <- format(g, big.mark = ",")
+data <- plotly_data(charts[['dom net']]) %>% filter(colour_col == "10-year trend")
+dom_max <- (filter(data, x_axis_col == 2017)$y_axis_col)*-1
+
+#---
+
 rm(a,b,d,e,g,h,j,k)
 
 ```
@@ -225,31 +244,31 @@ The three  2021-based projection variants use differing levels of migration - bo
 - **10-year trend** - uses an average of the last 10 years of migration flows (2012-2021) 
 - **15-year trend** - uses an average of the last 15 years of migration flows (2007-2021).  
 
-The *10-year trend* average captures a wide range of behaviours across the economic cycle, including the lower levels of mobility observed following the financial crisis. The five-year average provides a higher migration scenario - the last five years have been a period of relatively high migration with a peak in 2017 when net out migration from London reached `r dom_max` people. Use of the five-year average represents an assumption that recent levels become the norm even after accounting for potential variation over the economic cycle.
+The *10-year trend* average captures a wide range of behaviours across the economic cycle, including the lower levels of mobility observed following the financial crisis. The five-year average provides a higher migration scenario - the last five years have been a period of relatively high migration with a peak in 2017 when net out migration from London reached `r number_in_text(dom_max)` people. Use of the five-year average represents an assumption that recent levels become the norm even after accounting for potential variation over the economic cycle.
 
 The inclusion of data covering the period from mid-2019 to mid-2021 in the averaging was carefully considered. Although the data for these years does include the impacts of COVID-19 on population movement, the range of variants provides users with a clear indication of the range of plausible future growth when migration inputs are varied. 
 
-The *10-year trend* projection projects annualised growth of `r central_future` per year over the period to 2050. This is in the context of average growth of `r actual_past` per year in London over the last decade.  
-  
-  
+The *10-year trend* projection projects annualised growth of `r number_in_text(central_future)` per year over the period to 2050. This is in the context of average growth of `r number_in_text(actual_past)` per year in London over the last decade.  
+
+
 
 <div class="table-title">Table 1: Annualised population change, London</div>
 ```{r}
 
 tibble(variant = c("Observed",
-"5-year trend",
-"10-year trend",
-"15-year trend"),
-period = c("2011-2021",
-"2021-2050",
-"2021-2050",
-"2021-2050"),
-`annual change` = c(actual_past,
-short_future,
-central_future,
-long_future)) %>% 
-DT::datatable(rownames = FALSE, filter = "none",  caption = "persons",
-options = list(paging=FALSE, searching=FALSE, info=FALSE)) 
+                   "5-year trend",
+                   "10-year trend",
+                   "15-year trend"),
+       period = c("2011-2021",
+                  "2021-2050",
+                  "2021-2050",
+                  "2021-2050"),
+       `annual change` = c(actual_past,
+                           short_future,
+                           central_future,
+                           long_future)) %>% 
+  DT::datatable(rownames = FALSE, filter = "none",  caption = "persons",
+                options = list(paging=FALSE, searching=FALSE, info=FALSE)) 
 
 
 ```
@@ -266,7 +285,6 @@ The detailed variant projections outputs include data for all local authorities 
 A paper on the models, methodologies and configuration options used in producing these projections is available to download from the <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation/">London Datastore</a>. 
 
 
-
 # Trend projections results {.tabset}
 
 <a href="#top">Back to top</a>
@@ -276,7 +294,7 @@ A paper on the models, methodologies and configuration options used in producing
 ```{r, include = FALSE, echo = FALSE}
 # The diff between 2020 and 2021 in London
 a <- plotly_data(charts[['short']]) %>% 
-filter(variant == "Central Lower")
+  filter(variant == "Central Lower")
 b <- filter(a, year == 2020)$popn
 c <- filter(a, year == 2021)$popn
 a <- round((b-c)/1000,0) 
@@ -288,7 +306,7 @@ The initial short-term period of the projections incorporates additional intelli
 Over the following two years (2023-2024) migration assumptions diverge as levels of migration transition incrementally towards the long-term values set for each variant. These long-term levels come into effect in 2025.
 
 
-```{r chart_covid, out.width = "100%"}
+```{r chart_short, out.width = "100%"}
 charts[['short']]
 ```
 
@@ -320,8 +338,8 @@ All three variants project population growth over the period, albeit to varying 
 <div class="table-title">Table 2: Variant population projections, London</div>
 ```{r growth_table}
 charts[['table growth']] %>% 
-DT::datatable(rownames = FALSE, filter = "none", caption = "population (millions)",
-options = list(paging=FALSE, searching=FALSE, info=FALSE))
+  DT::datatable(rownames = FALSE, filter = "none", caption = "population (millions)",
+                options = list(paging=FALSE, searching=FALSE, info=FALSE))
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
 
@@ -341,12 +359,6 @@ rm(data)
 ```
 
 The 2020-based GLA trend projections were released in September 2021. The differences between the last round and the 2021-based projections are significant, the primary reason bring that the population backseries used in the two rounds of projection is different.
-
-The 2020-based projections used the 2020 mid-year estimate (MYE) as their jumping-off point. This MYE was the last estimate in a series which began in 2011. Each subsequent year from 2012 forward was calculated by adding estimated components of change to the previous year's population estimate. As such, over the decade, the MYE series had drifted away from the true population count.
-
-The 2021 census has provided an opportunity to reset the mid-year estimate series using the new data census as a starting point. The 2021 estimate therefore represents a break in the previous series. In order to create a consistent back series between the 2021 and 2011 estimates the GLA has modelled population and components of change for that period.
-
-The existing ONS 2020 MYE for London was 9.002 million. The GLA's revised estimate for 2020 is 8.878 million, around 125 thousand persons lower. This difference represents the inflation in the existing ONS MYE series over the last decade.
 
 The 2021-based projections use the 2021 MYE as their starting point and the modelled GLA backseries for the calculation of trends. The 2020-based projections used trends based on the ONS series which had overestimated the level of population growth in London. As a result, the previous set of projections started from a higher population and projected stronger growth into the future when compared to the 2021-based projections. In the 2020-based projections the Central Range of population in 2050 was 10.319 million to 10.707 million, while for 2021-based projections growth is projected to range between `r number_in_text(a)` (*5-year trend*) and `r number_in_text(b)` (*15-year trend*). The *10-year trend* variant projects a population of `r number_in_text(c)` in 2050.
 
@@ -376,8 +388,8 @@ charts[['working age']]
 <div class="table-title">Table 3: Working age population, London</div>
 ```{r table_working}
 charts[['table working']] %>% 
-DT::datatable(rownames = FALSE, filter = "none",  caption = "population (millions)",
-options = list(paging=FALSE, searching=FALSE, info=FALSE))
+  DT::datatable(rownames = FALSE, filter = "none",  caption = "population (millions)",
+                options = list(paging=FALSE, searching=FALSE, info=FALSE))
 ```
 
 # Components of Change {.tabset}
@@ -397,7 +409,7 @@ a <- filter(data, x_axis_col == 2021, colour_col == "10-year trend")$y_axis_col
 d <- filter(data, x_axis_col %in% 2002:2019, colour_col == "10-year trend")$y_axis_col
 
 data <- plotly_data(charts[['int net']])
-c <- round((filter(data, x_axis_col == 2022, colour_col == "10-year trend")$y_axis_col)/1000,0)
+c <- filter(data, x_axis_col == 2022, colour_col == "10-year trend")$y_axis_col
 
 ```
 
@@ -432,28 +444,28 @@ charts[['int out']]
 dom_net_past <- readRDS("input_data/mye/2021/dom_net_gla.rds")
 
 ldn_dom_net_10 <- filter(dom_net_past, gss_code == "E12000007", year %in% 2012:2021) %>% 
-group_by(year) %>% 
-summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
-data.frame() %>%
-pull(dom_net) %>% 
-mean() %>%
-number_in_text()
+  group_by(year) %>% 
+  summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
+  data.frame() %>%
+  pull(dom_net) %>% 
+  mean() %>%
+  number_in_text()
 
 ldn_dom_net_5 <- filter(dom_net_past, gss_code == "E12000007", year %in% 2017:2021) %>% 
-group_by(year) %>% 
-summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
-data.frame() %>%
-pull(dom_net) %>% 
-mean() %>%
-number_in_text()
+  group_by(year) %>% 
+  summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
+  data.frame() %>%
+  pull(dom_net) %>% 
+  mean() %>%
+  number_in_text()
 
 ldn_dom_net_15 <- filter(dom_net_past, gss_code == "E12000007", year %in% 2007:2021) %>% 
-group_by(year) %>% 
-summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
-data.frame() %>%
-pull(dom_net) %>% 
-mean() %>%
-number_in_text()
+  group_by(year) %>% 
+  summarise(dom_net = sum(dom_net*-1), .groups = 'drop_last') %>% 
+  data.frame() %>%
+  pull(dom_net) %>% 
+  mean() %>%
+  number_in_text()
 
 ```
 
@@ -481,20 +493,20 @@ charts[['dom out']]
 ```{r}
 
 births_2021 <- readRDS("input_data/mye/2021/births_gla.rds") %>% 
-filter(gss_code == "E12000007", year == 2021) %>% 
-pull(births) %>% 
-sum()
+  filter(gss_code == "E12000007", year == 2021) %>% 
+  pull(births) %>% 
+  sum()
 
 births_2022 <- readRDS("input_data/mye/2021/births_gla.rds") %>% 
-filter(gss_code == "E12000007", year == 2022) %>% 
-pull(births) %>% 
-sum()
+  filter(gss_code == "E12000007", year == 2022) %>% 
+  pull(births) %>% 
+  sum()
 
 ```
 
 Annual births in London rose by approximately 30 per cent over the decade from 2002 to 2012. Since then the number of births has fallen and in 2021 was `r number_in_text(births_2021)`, similar to the level last seen in 2003.
 
-Total births in 2022 are modelled from GP register counts of 0-year-olds and are estimated to be slightly higher than the number recorded in 2021 at `r births_2022`. Births in subsequent years are projected by applying projected fertility rates to projected populations. Fertility rates in 2023 are calculated by trending forward rates over the 5-year period 2018-2022. In subsequent that initial rate is adjusted by the rate of change taken from the ONS 2020-based NPP principal projection assumptions.
+Total births in 2022 are modelled from GP register counts of 0-year-olds and are estimated to be slightly higher than the number recorded in 2021 at `r number_in_text(births_2022)`. Births in subsequent years are projected by applying projected fertility rates to projected populations. Fertility rates in 2023 are calculated by trending forward rates over the 5-year period 2018-2022. In subsequent that initial rate is adjusted by the rate of change taken from the ONS 2020-based NPP principal projection assumptions.
 
 The same fertility rates are applied in each of the variants. The difference in births is a function of the differing size and composition of the population in each variant. In all cases an initial period of falling births is followed by steady increase.
 
@@ -508,9 +520,9 @@ charts[['births']]
 ```{r}
 
 deaths_2021 <- readRDS("input_data/mye/2021/deaths_gla.rds") %>% 
-filter(gss_code == "E12000007", year == 2021) %>% 
-pull(deaths) %>% 
-sum()
+  filter(gss_code == "E12000007", year == 2021) %>% 
+  pull(deaths) %>% 
+  sum()
 
 ```
 
@@ -625,7 +637,7 @@ k <- get_percent(b,i)
 
 This scenario adapts the 2017 <a target="_blank" href="https://www.london.gov.uk/what-we-do/planning/london-plan/new-london-plan/strategic-housing-land-availability-assessment">Strategic Housing Land Availability Assessment (SHLAA)</a> housing capacity study for use as a future delivery scenario. A SHLAA is a technical exercise to determine the quantity and suitability of land potentially available for housing development. It is a required part of the evidence base needed for the preparation of a Local Plan.
 
-In the initial years of the projection the delivery assumptions have been amended to reflect housing market analysis undertaken by Savills Estate Agents. In 2020 assumed delivery is 41,700 while for 2021-2025 it is 43,000 per annum. The total delivery over this period is 256,700 while the SHLAA capacity identifies 333,100 units over the same period. The difference (76,400) is assumed to come forward over the period 2026-2041 and is distributed to the trajectory for those years.
+In the initial years of the projection the delivery assumptions have been amended to reflect housing market analysis undertaken by Savills Estate Agents. In 2020 assumed delivery is 41,700 units while for 2021-2025 it is 43,000 per annum. The total delivery over this period is 256,700 while the SHLAA capacity identifies 333,100 units over the same period. The difference (76,400) is assumed to come forward over the period 2026-2041 and is distributed to the trajectory for those years.
 
 In later years the trajectory assumes lower levels of delivery. Whilst this is unlikely to be a reality for London’s future growth, it is a reflection that the SHLAA, on which this delivery scenario is based, is a capacity study that - due to information available on site availability and deliverability at the time - is better able to identify sites in the short-to-medium term. In the longer-term SHLAA capacity is based on less reliable assumptions about sites that may come forward for housing delivery. This is due to an inability to predict market changes or development patterns that could result in brownfield land not currently suitable for housing becoming available. As a result, annual delivery in later years is much lower than the initial years of the trajectory, however in reality this is unlikely to occur.
 
