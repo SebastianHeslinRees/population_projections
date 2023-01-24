@@ -742,8 +742,10 @@ Average Household Size (AHS) is calculated by dividing the household population 
 charts[['ahs']]
 ```
 
-## Ward profiles
+## Ward projections
 
 <a href="#top">Back to top</a>
 
-Housing-led projections are produced for London wards as well as boroughs. Summaries for each ward are available through the <a target="_blank"  href=https://data.london.gov.uk/dataset/housing-led-population-projections/">London Datastore</a>.
+Housing-led projections are also available for London wards. These projections use a modelled backseries based on ONS small area population estimates (SAPE) and consistent with the GLA revised MYE backseries. Data for 2021 may not be consistent with census estimates for wards. Future updates to projections will incorporate ward-level information from the census.
+
+Summaries for each ward as well as detailed projections estimates are available on the <a target="_blank"  href=https://data.london.gov.uk/dataset/housing-led-population-projections/">London Datastore</a>.

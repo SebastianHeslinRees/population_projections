@@ -25,7 +25,7 @@ ward_name <- ward_data$ward_name
 ```
 
 
-# `r paste0(ward_data$dev_trajectory, " development trajectory (", ward_type, " ward boundaries)")`
+# `r paste0(ward_data$dev_trajectory, " development trajectory")`
 
 `r space`
 
@@ -73,6 +73,71 @@ Domestic migration levels in the constraining trend projections are calculated b
 
 `r space`
 
+```{r chart_layout, echo = FALSE}
+
+
+chart_layout <- function(p, y_min_value, y_max_value){
+  
+  
+  p %>%          #2 rectangles for different periods
+    layout(
+      shapes = list(
+        list(type = "rect",
+             fillcolor = "#44aad5",
+             line = list(width = 0),
+             opacity = 0.15,
+             x0 = 2021, x1 = 2025,
+             y0 = y_min_value, y1 = y_max_value,
+             layer = "below"),
+        
+        list(type = "rect",
+             fillcolor = "#44aad5",
+             line = list(width = 0),
+             opacity = 0.05,
+             x0 = 2025, x1 = 2042,
+             y0 = y_min_value, y1 = y_max_value,
+             layer = "below")),
+      
+      #Annotation at the top of the rectangles
+      annotations = list(
+        list(x = 2023,
+             y = 0.93,
+             text = "Short-term\nperiod",
+             xref = "x",
+             yref = "paper",
+             xanchor = 'center',
+             yanchor = 'top',
+             showarrow = FALSE,
+             font=list(size=11)),
+        
+        list(x = 2032,
+             y = 0.93,
+             text = "Long-term period",
+             xref = "x",
+             yref = "paper",
+             xanchor = 'center',
+             yanchor = 'top',
+             showarrow = FALSE,
+             font=list(size=11)),
+        
+        #Source text in the bottom left
+        list(x = 1,
+             y = -0.10, #position of text adjust as needed 
+             text = "Source: GLA 2021-based BPO projections", 
+             showarrow = F,
+             xref='paper',
+             yref='paper', 
+             xanchor='right',
+             yanchor='auto',
+             xshift=0,
+             yshift=0,
+             font=list(size=11, color="grey"))
+      )
+    )
+}
+
+```
+
 ## Population {.tabset}
 
 ### Total population
@@ -92,11 +157,7 @@ p <- population %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(population$value)
-
-p %>% 
+          height = 600) %>% 
   layout(title = paste0("Total population - ",ward_name ,"\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -104,64 +165,13 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2021, x1 = 2025,
-                y0 = y_min_value, y1 = max(population$value),
-                layer = "below"),
-         
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(population$year+1),
-                y0 = y_min_value, y1 = max(population$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
- 
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+y_min_value <- min(population$value)
+y_max_value <- max(population$value)
+
+chart_layout(p, y_min_value, y_max_value)
+
 ```
 
 ### Primary age
@@ -181,11 +191,7 @@ p <- primary %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(primary$value)
-
-p %>% 
+          height = 600) %>% 
   layout(title = paste0("Primary population (4-10) - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -193,64 +199,14 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(primary$value),
-                layer = "below"),
-           
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(primary$year+1),
-                y0 = y_min_value, y1 = max(primary$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
+         hovermode = "x unified")
 
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+y_min_value <- min(primary$value)
+y_max_value <- max(primary$value)
+
+chart_layout(p, y_min_value, y_max_value) 
+
+
 ```
 
 ### Secondary age
@@ -270,11 +226,7 @@ p <- secondary %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(secondary$value)
-
-p %>% 
+          height = 600) %>% 
   layout(title = paste0("Secondary population (11-15) - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -282,66 +234,13 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(secondary$value),
-                layer = "below"),
-         
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(secondary$year+1),
-                y0 = y_min_value, y1 = max(secondary$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-       
-           
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+y_min_value <- min(secondary$value)
+y_max_value <- max(secondary$value)
+
+chart_layout(p, y_min_value, y_max_value) 
+
 ```
 
 ### Age Structure
@@ -377,7 +276,7 @@ p %>%
          margin = list(b=50),
          hovermode = "x unified",
          
-          annotations = list(
+         annotations = list(
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
@@ -420,11 +319,7 @@ p <- inflow_data %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(inflow_data$value)
-
-p %>% 
+          height = 600)  %>% 
   layout(title = paste0("In Migration - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -432,64 +327,14 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(inflow_data$value),
-                layer = "below"),
-      
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(inflow_data$year+1),
-                y0 = y_min_value, y1 = max(inflow_data$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+
+y_min_value <- min(inflow_data$value)
+y_max_value <- max(inflow_data$value)
+
+chart_layout(p, y_min_value, y_max_value) 
+
 ```
 
 ### Out Migration
@@ -509,11 +354,7 @@ p <- outflow_data %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(outflow_data$value)
-
-p %>% 
+          height = 600)  %>% 
   layout(title = paste0("Out Migration - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -521,64 +362,13 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(outflow_data$value),
-                layer = "below"),
-       
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(outflow_data$year+1),
-                y0 = y_min_value, y1 = max(outflow_data$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-         
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+y_min_value <- min(outflow_data$value)
+y_max_value <- max(outflow_data$value)
+
+chart_layout(p, y_min_value, y_max_value)         
+
 ```
 
 ### Net Migration
@@ -598,11 +388,7 @@ p <- netflow_data %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(netflow_data$value)
-
-p %>% 
+          height = 600) %>% 
   layout(title = paste0("Net Migration - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -610,64 +396,12 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(netflow_data$value),
-                layer = "below"),
-        
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(netflow_data$year+1),
-                y0 = y_min_value, y1 = max(netflow_data$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-        
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+y_min_value <- min(netflow_data$value)
+y_max_value <- max(netflow_data$value)
+
+chart_layout(p, y_min_value, y_max_value)  
 ```
 
 ## Fertility
@@ -692,11 +426,7 @@ p <- births_data %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(births_data$value)
-
-p %>% 
+          height = 600)  %>% 
   layout(title = paste0("Births - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -704,64 +434,13 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(births_data$value),
-                layer = "below"),
-          
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(births_data$year+1),
-                y0 = y_min_value, y1 = max(births_data$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-          list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+y_min_value <- min(births_data$value)
+y_max_value <- max(births_data$value)
+
+chart_layout(p, y_min_value, y_max_value)
+
 ```
 
 ## Mortality
@@ -787,11 +466,7 @@ p <- deaths_data %>%
           hovertemplate = paste("%{text}: %{y:,.0f}",
                                 "<extra></extra>"),
           width = 1000,
-          height = 600) 
-
-y_min_value <- min(deaths_data$value)
-
-p %>% 
+          height = 600) %>% 
   layout(title = paste0("Deaths - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
@@ -799,64 +474,14 @@ p %>%
                       showgrid = TRUE),
          legend = list(orientation = "h"),
          margin = list(b=50),
-         hovermode = "x unified",
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019, x1 = 2023,
-                y0 = y_min_value, y1 = max(deaths_data$value),
-                layer = "below"),
-         
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023, x1 = max(deaths_data$year+1),
-                y0 = y_min_value, y1 = max(deaths_data$value),
-                layer = "below")),
-         
-         #Annotation at the top of the rectangles
-         annotations = list(
-           list(x = 2021,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           list(x = 2032,
-                y = 0.93,
-                text = "Long-term period",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         hovermode = "x unified")
+
+y_min_value <- min(deaths_data$value)
+y_max_value <- max(deaths_data$value)
+
+chart_layout(p, y_min_value, y_max_value)
+
+
 ```
 
 
@@ -879,7 +504,7 @@ For the years 2020-2024 the SHLAA data is adjusted to account for the impact of 
 ```{r dev_chart, echo = FALSE}
 dev_data <- ward_data$dev 
 
-dev_data %>% 
+p <- dev_data %>% 
   mutate(source = ifelse(year <= 2019, "past", "projected")) %>% 
   plot_ly(x=~year, y=~dwellings, color = ~source,
           colors = c("#6da7de",
@@ -900,64 +525,10 @@ dev_data %>%
          yaxis = list(title = "net additional dwellings",
                       showgrid = TRUE),
          legend = list(orientation = "h"),
-         margin = list(b=50),
-         
-         #3 rectangles for different periods
-         shapes = list(
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.15,
-                x0 = 2019.5, x1 = 2023.5,
-                y0 =0, y1 = max(dev_data$dwellings),
-                layer = "below"),
-          
-           list(type = "rect",
-                fillcolor = "#44aad5",
-                line = list(width = 0),
-                opacity = 0.05,
-                x0 = 2023.5, x1 = 2042,
-                y0 = 0, y1 = max(dev_data$dwellings),
-                layer = "below")),
-         
-         #Annotoation at the top of the rectangles
-         annotations = list(
-           list(x = 2021.5,
-                y = 0.93,
-                text = "Covid\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-         list(x = 2032,
-                y = 0.93,
-                text = "Long-term\nperiod",
-                xref = "x",
-                yref = "paper",
-                xanchor = 'center',
-                yanchor = 'top',
-                showarrow = FALSE,
-                font=list(size=11)),
-           
-           #Source text in the bottom left
-           list(x = 1,
-                y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2021-based BPO projections", 
-                showarrow = F,
-                xref='paper',
-                yref='paper', 
-                xanchor='right',
-                yanchor='auto',
-                xshift=0,
-                yshift=0,
-                font=list(size=11, color="grey"))
-         )
-         
-         
-  )
+         margin = list(b=50))
+
+chart_layout(p, 0, max(dev_data$dwellings))
+       
 ```
 
 

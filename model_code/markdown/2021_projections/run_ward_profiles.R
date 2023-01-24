@@ -5,6 +5,8 @@ dir.create("outputs/markdown/2021_ward_profiles", showWarnings = FALSE, recursiv
 ward_profile_data <- readRDS("outputs/markdown/2021_ward_profile_data.rds")
 all_wards <- setdiff(names(ward_profile_data), "london")[-1] # not City
 
+ward_code <- all_wards[sample(1:680,1)] #for testing
+
 #Loop from here
 tm <- Sys.time()
 for(ward_code in all_wards){

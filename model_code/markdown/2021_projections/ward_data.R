@@ -104,16 +104,8 @@ borough_ahs <- borough_hh_data %>%
          hh_pop = household_population,
          hh = input_households,
          ahs = implied_ahs) %>% 
+  filter(year == 2021) %>% 
   data.frame()
-
-# checks <- borough_ahs %>% 
-#   left_join(rbindlist(b_ahs), by=c("gss_code", "year", "variant")) %>% 
-#   left_join(rbindlist(borough_hh_pop), by = c("gss_code", "year", "variant")) %>% 
-#   left_join(data.frame(borough_hh), by = c("gss_code", "year", "variant")) %>% 
-#   rename(input_hh_pop = household_popn,
-#          input_ahs = ahs.y,
-#          input_hh = households) %>% 
-#   select(gss_code, year, variant, hh, input_hh, hh_pop, input_hh_pop, ahs = ahs.x, input_ahs)
 
 london_ahs <- ward_hh_data %>% 
   dtplyr::lazy_dt() %>% 
@@ -234,6 +226,16 @@ a$age_structure <- all_data %>%
 
 #-------------------------------------------------------------------------------
 
+# borough data
+
+all_borough_popn <- filter(all_data, component == "population") %>% 
+  group_by(year, gss_code, variant) %>% 
+  summarise(value = sum(value),
+            .groups = 'drop_last') %>% 
+  data.frame()
+
+#-------------------------------------------------------------------------------
+
 all_ward_codes <- unique(data.frame(all_data)$gss_code_ward)
 last_borough <- "x"
 i <- 0
@@ -311,15 +313,13 @@ for(ward_code in all_ward_codes){
     
     borough_name <- filter(ward_to_district, gss_code_ward == ward_code)$la_name
     
-    borough_popn <- filter(all_data, gss_code == borough_code,
-                           component == "population") %>% 
-      group_by(year, variant) %>% 
-      summarise(value = sum(value),
-                .groups = 'drop_last') %>% 
-      data.frame()
+    borough_popn <- filter(all_borough_popn, gss_code == borough_code) %>% 
+      select(year, variant, value)
     
     borough_2021 <- unique(filter(borough_popn, year == 2021)$value)
     borough_2011 <- unique(filter(borough_popn, year == 2011)$value)
+    
+    b_ahs <- filter(borough_ahs, gss_code == borough_code)$ahs %>% unique()
     
   }
   
@@ -336,7 +336,7 @@ for(ward_code in all_ward_codes){
   x$future_growth_max <- max(future)
   x$ward_code <- ward_code
   x$borough_name <- borough_name
-  x$borough_ahs <- filter(borough_ahs, gss_code == borough_code, year == 2021)$ahs %>% unique()
+  x$borough_ahs <- b_ahs
   x$ward_area <- filter(ward_areas, WD22CD == ward_code)$hectares
   
   last_borough <- borough_code

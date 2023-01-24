@@ -32,85 +32,19 @@ run_bpo_projection <- function(bpo_name,
   assert_that(variant %in% c("5-year constrained","5-year unconstrained",
                              "10-year constrained","10-year unconstrained"))
   
-  borough <- bpo_name
-  scenario <- variant
-  
-  proj_name <- paste(borough, scenario, sep = "_")
+  proj_name <- paste(bpo_name, str_replace_all(variant, " ","_"), sep = "_")
   
   #-----------------------------------------------------------------------------
   
-  ahs_mix <- 0.5
-  n_proj_yr <- last_proj_yr - first_proj_yr + 1 #20
-  output_dir <- paste0("outputs/flexible_area_model/2021_based/bpo/", proj_name)
-  data_dir <- "input_data/flexible_area_model/"
+  # Standard BPO parameters are pulled from a function saved in the
+  # config scripts folder
   
-  #-----------------------------------------------------------------------------
+  source("config_scripts/flexible_area_model/2021_based/standard_bpo_parameters.R")
   
-  #Set the domestic migration data and paths for the variant projection that's been selected
-  
-  if(str_detect(variant, "10")){
-    
-    in_migration <- list(
-      '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
-                    transition = F))
-    
-    out_migration <- list(
-      '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
-                    transition = F))
-    
-  }
-  
-  if(str_detect(variant, "10")){
-    
-    in_migration <- list(
-      '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_10yr_avg.rds"),
-                    transition = F))
-    
-    out_migration <- list(
-      '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_10yr_avg.rds"),
-                    transition = F))
-    
-  }
-  
-  #-----------------------------------------------------------------------------
-  
-  #Constraint Path (trend model)
-  if(str_detect(variant, "5")){
-    constraint_path <- "outputs/trend/2021/2021_5yr_23-01-03_1558/"
-  }
-  if(str_detect(variant, "10")){
-    constraint_path <- "outputs/trend/2021/2021_10yr_23-01-03_1558/"
-  }
-  
-  if(str_detect(variant, "unconstrained")){
-    components_to_constrain <-  list(births = F,
-                                     deaths = F,
-                                     in_migration = F,
-                                     out_migration = F,
-                                     population = F)
-  } else {
-    
-    components_to_constrain <- list(births = T,
-                                    deaths = T,
-                                    in_migration = F,
-                                    out_migration = F,
-                                    population = T)
-    
-  }
-  
-  #-----------------------------------------------------------------------------
-  
-  constraint_list <- list(constraint_path = constraint_path,
-                          apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
-                          make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
-                          mapping = c("constraint_area","year","sex","age"),
-                          components = components_to_constrain)
-  
-  
-  external_births <- list(births_path = "input_data/scenario_data/births_mid_22.rds",
-                          apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                          mapping = c("gss_code","year","sex","age"))
-  
+  config_list <- standard_bpo_parameters(list(first_proj_yr=first_proj_yr,
+                                              last_proj_yr=last_proj_yr,
+                                              proj_name= proj_name),
+                                         variant)
   
   #-----------------------------------------------------------------------------
   
@@ -121,57 +55,22 @@ run_bpo_projection <- function(bpo_name,
                                      bpo_dir = bpo_dir,
                                      trajectory_range = trajectory_range)
   
-  small_area_dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
-  
-  #-----------------------------------------------------------------------------  
-  
-  config_list <- list(projection_name = proj_name,
-                      first_proj_yr = first_proj_yr,
-                      n_proj_yr = n_proj_yr,
-                      output_dir = output_dir,
-                      
-                      #backseries
-                      population_path = paste0(data_dir, "backseries/ward_population_WD22CD.rds"),
-                      deaths_path = paste0(data_dir, "backseries/ward_deaths_WD22CD.rds"),
-                      births_path = paste0(data_dir, "backseries/ward_births_WD22CD.rds"),
-                      out_migration_path = paste0(data_dir, "backseries/ward_outflow_WD22CD.rds"),
-                      in_migration_path = paste0(data_dir, "backseries/ward_inflow_WD22CD.rds"),
-                      
-                      #rates
-                      mortality_rates = paste0(data_dir, "processed/mortality_rates_WD22CD.rds"),
-                      fertility_rates = paste0(data_dir, "processed/fertility_rates_WD22CD.rds"),
-                      in_migration = in_migration,
-                      out_migration = out_migration,
-                      
-                      #constraints
-                      constraint_list = constraint_list,
-                      external_births = external_births,
-                      
-                      #dev trajectory
-                      dev_trajectory_path = small_area_dev_trajectory_path, 
-                      
-                      #housing-led stuff
-                      ldd_backseries_path = paste0(data_dir, "development_data/ldd_backseries_dwellings_ward_WD22CD.rds"),
-                      communal_est_path = paste0(data_dir, "processed/communal_establishment_popn_WD22CD.rds"),
-                      dwellings_to_households_path = paste0(data_dir, "processed/ward_dwelling_2_hh_ratio_WD22CD.rds"),
-                      
-                      #settings
-                      hhr_path = paste0(data_dir, "processed/ward_hh_rep_rate_WD22CD.rds"),
-                      ahs_mix = ahs_mix,
-                      hhr_static_or_projected = "static",
-                      lookup_path = "input_data/flexible_area_model/lookups/ward_2022_name_lookup.rds",
-                      excess_deaths_path = NULL,
-                      geog_code_col = "gss_code_ward",
-                      geog_name_col = "ward_name",
-                      parallel = FALSE,
-                      borough_outputs = TRUE)
+  config_list$dev_trajectory_path <- paste0(bpo_dir,"rds/bpo_ward_trajectory_",csv_name,".rds")
   
   
-  x <- flexmodel_hl_projection(config_list, n_cores = 20)
-  rm(x)
+  #-----------------------------------------------------------------------------
+  
+  # Run projections
+  
+  bpo <- flexmodel_hl_projection(config_list, n_cores = 20)
+  rm(bpo)
   gc()
   
-  borough <- .camel(str_replace_all(borough, "_", " "))
+  #-----------------------------------------------------------------------------
+  
+  # Excel output
+  
+  borough <- .camel(str_replace_all(bpo_name, "_", " "))
   
   s <- case_when(str_detect(variant, "5") ~ "5-year migration trend",
                  str_detect(variant, "10") ~ "10-year migration trend",

@@ -81,11 +81,11 @@ future_s3 <- paste0(ward_profile_data[[ward_code]]$popn_2031_s3 %>% make_nice(),
                     " (", make_nice(sqrt(growth_s3^2)), " ", inc_dec_s3, ")")
 ```
 
-This report provides an overview of the GLA 2021-based housing-led population projections for the ward of `r ward_name` in `r borough_name`. For full data downloads see <https://data.london.gov.uk/dataset/housing-led-population-projections>. The data can also be explored using the <a target="_blank" href="https://maps.london.gov.uk/population-projections">Population Projections Explorer</a>.
+This report provides an overview of the GLA 2021-based housing-led population projections for the ward of *`r ward_name`* in `r borough_name`. For full data downloads see <https://data.london.gov.uk/dataset/housing-led-population-projections>.
 
 ## Scenarios
 
-The 2021-based housing-led projections comprise 3 housing delivery scenarios. In each of these the underlying migration, fertility and mortality assumptions are the same with the only difference being the level of future housing delivery. The 3 scenarios are:
+The 2021-based housing-led projections comprise 3 housing delivery scenarios. In each of these the underlying migration, fertility and mortality assumptions are the same. The only difference between the scenarios is in the level of assumed future housing delivery. The 3 scenarios are:
 
 - **Identified Capacity** - A trajectory adapted from the 2017 London Strategic Housing Land Availability Assessment (SHLAA) which provides information on identified future capacity and likely delivery times.
 - **Past Delivery** - A trajectory which takes average past delivery over the period 2011-2019, as recorded in the London Development Database (LDD), and assumes that level of delivery in each year of the projection.
@@ -95,7 +95,12 @@ More details are available in the housing-led model documentation on the <a targ
 
 ## Charts
 
-The charts on this page are interactive. Lines can be switched on and off by clicking the legend. There are chart appearance options in the the top right corner of each chart, as well as the option to download the chart as a png image.
+The charts in this report are interactive. Lines can be switched on and off by clicking the legend. There are chart appearance options in the the top right corner of each chart, as well as the option to download the chart as a png image.
+
+
+## Interim projections
+
+The 2021-based population projections (January 2023) are interim projections. It is anticipated that they will be updated in in late 2023 when additional mid-year estimate and census data are published by ONS. The ward-level backseries used in these projections is modelled from ONS small area population estimates (SAPE) and is consistent with the GLA revised population backseries for the period 2012-2021 (see the <a target="_blank" href="https://data.london.gov.uk/demography/population-and-household-projections/">trend projections documentation</a> for more information). As a result, population totals and distributions may differ from 2021 census ward estimates.
 
 ## Summary
 
@@ -139,6 +144,7 @@ ward_profile_data[[ward_code]]$total_population %>%
 f <- f+1
 
 ```
+<a href="#top">Back to top</a>
 
 ### Annual change
 ```{r percentage_change, echo=FALSE, out.width="100%"}
@@ -149,6 +155,7 @@ ward_profile_data[[ward_code]]$population_change %>%
 f <- f+1
 ```
 
+<a href="#top">Back to top</a>
 
 ## 
 
@@ -167,6 +174,8 @@ growth_table
 
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
+
+<a href="#top">Back to top</a>
 
 
 ## Age Structure {.tabset}
@@ -204,6 +213,8 @@ age_table_1
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
 
+<a href="#top">Back to top</a>
+
 ### Past Delivery
 
 The chart shows the **Past Delivery scenario** projection age structure of `r ward_name` at three points in time: 2011, 2021, 2031.
@@ -237,6 +248,8 @@ age_table_2 <- ward_profile_data[[ward_code]]$age_groups %>%
 age_table_2
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
+
+<a href="#top">Back to top</a>
 
 ### Housing Targets
 
@@ -272,6 +285,8 @@ age_table_3
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
 
+<a href="#top">Back to top</a>
+
 ### All scenarios 2031
 
 The chart shows the age structure in all 3 scenario projections in the year 2031 for `r ward_name`.
@@ -300,6 +315,8 @@ age_table_4
 ```
 <div class="source">Source: GLA 2021-based population projections</div>
 
+<a href="#top">Back to top</a>
+
 ## Average Household Size
 
 Average Household Size (AHS) is a measure of the average number of people living in a household in an area. It is simply the household population divided by the number of households. Where AHS rises population is growing at a faster rate than housing delivery and where it falls the opposite is true. In 2021, AHS in `r ward_name` was `r ward_ahs`. This compares to `r borough_ahs` across all of `r borough_name` and `r london_ahs` in London as a whole.
@@ -311,6 +328,8 @@ ward_profile_data[[ward_code]]$ward_ahs %>%
                     "AHS", figure = f, round_y = 2)
 f <- f+1
 ```
+
+<a href="#top">Back to top</a>
 
 ## Components of Change {.tabset}
 
@@ -350,6 +369,8 @@ ward_profile_data[[ward_code]]$net_migration %>%
 f <- f+1
 ```
 
+<a href="#top">Back to top</a>
+
 ### In migration
 
 ```{r in_migration, echo=FALSE, out.width="100%"}
@@ -359,6 +380,8 @@ ward_profile_data[[ward_code]]$in_migration %>%
                     "in migration (persons)", figure = f)
 f <- f+1
 ```
+
+<a href="#top">Back to top</a>
 
 ### Out migration
 
@@ -372,3 +395,8 @@ f <- f+1
 ```
 
 <a href="#top">Back to top</a>
+
+## Projections data
+
+For full detailed projections data for each of the scenarios go to the projections pages of the <a target="_blank"  href=https://data.london.gov.uk/dataset/housing-led-population-projections/">London Datastore</a>.
+

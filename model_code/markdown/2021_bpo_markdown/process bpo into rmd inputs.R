@@ -34,13 +34,17 @@ bpo_rmd_2021 <- function(borough_name, proj_name = borough_name){
   
   scenario_1 <- components %>% 
     lapply(function(x){
-      readRDS(paste0(scenario_1_path, "/", x, ".rds")) %>% filter(gss_code == borough_gss)
+      readRDS(paste0(scenario_1_path, "/", x, ".rds")) %>%
+        filter(gss_code == borough_gss)
     })
+  names(scenario_1) <- components
   
   scenario_2 <- components %>% 
     lapply(function(x){
-      readRDS(paste0(scenario_2_path, "/", x, ".rds")) %>% filter(gss_code == borough_gss)
+      readRDS(paste0(scenario_2_path, "/", x, ".rds")) %>%
+        filter(gss_code == borough_gss)
     })
+  names(scenario_2) <- components
   
   
   scenario_1$primary <- filter(scenario_1$population, age %in% 4:10)
@@ -96,11 +100,12 @@ bpo_rmd_2021 <- function(borough_name, proj_name = borough_name){
     ward_data$dev_trajectory <- "BPO"
     ward_data <<- ward_data
   
-    rmarkdown::render("model_code/markdown/2020_bpo_markdown/2020_bpo_markdown.Rmd",
+    dir.create("outputs/markdown/2021_bpo/", showWarnings = FALSE)
+    
+    rmarkdown::render("model_code/markdown/2021_bpo_markdown/2021_bpo_markdown.Rmd",
                       output_file = paste0(ward_code,"_",ward_data$ward_name,".html"),
-                      output_dir = paste0("outputs/markdown/2020_bpo/","/",proj_name))
+                      output_dir = paste0("outputs/markdown/2021_bpo/",proj_name))
   }
   rm(ward_data)
 }
 
-#bpo_rmd_2020("Newham")

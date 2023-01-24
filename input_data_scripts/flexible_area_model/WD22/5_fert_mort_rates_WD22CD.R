@@ -64,6 +64,6 @@ fert_rates <- scaled_fertility_curve(popn = ward_pop,
 #-------------------------------------------------------------------------------
 
 saveRDS(mort_rates, paste0(input_data_dir, "processed/mortality_rates_WD22CD.rds"))
-saveRDS(principal,  paste0(input_data_dir, "processed/fertility_rates_WD22CD.rds"))
+saveRDS(fert_rates,  paste0(input_data_dir, "processed/fertility_rates_WD22CD.rds"))
 
 rm(list=ls())
