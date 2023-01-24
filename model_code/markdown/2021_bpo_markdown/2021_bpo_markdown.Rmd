@@ -22,7 +22,6 @@ library(plotly)
 nice_number <- function(x){format(round(x,0), big.mark=",")}
 space <- '&nbsp;'
 ward_name <- ward_data$ward_name
-ward_type <- ifelse(wards == "WD13", "2013", "2022")
 ```
 
 
@@ -43,6 +42,8 @@ In December 2022 ONS released the 2021 Mid-Year Estimate (MYE) for local authori
 
 In order to have a consistent backseries to work with the GLA have modelled a local authority level series between the accepted data points 2011 and 2021. This LA series has been modelled down to output area and then re-aggregated up to 2022 ward boundaries. The result is a consistent ward-level backseries for the period 2011-2021.
 
+However, this process may mean that ward populations in 2021 differ in size and distribution from census 2021 outputs.
+
 ## Adittional data
 
 The GLA have produced a modelled set of local authority level births for the year to mid-2022. These combine publicly-available GP registrations and births data to now-cast births ahead of official statistical releases. The GLA modelled estimates for 2022 are incorporated into the small area modelling.
@@ -55,19 +56,20 @@ The model operates by calculating a population based solely on trends and then s
 
 ## Migration scenarios
 
-The 2020-based BPO projections include two scenario projections for each development trajectory:
+The 2021-based BPO projections include two scenario projections for each development trajectory:
 
-* **Scenario 1**: Ward projections are constrained to the 2020-based Central Lower trend projection.
+* **Scenario 1**: Ward migration rates are calculated by applying the average of the last 5 years' rates to projected population. The population, births and deaths are constrained to the 2021-based 5-year migration trend projection.
 
-* **Scenario 2**: Ward projections are constrained to the 2020-based Central Upper trend projection.
+* **Scenario 2**: Ward migration rates are calculated by applying the average of the last 10 years' rates to projected population. The population, births and deaths are constrained to the 2021-based 10-year migration trend projection.
+
+
+### Constraining
 
 The constraining process has the effect of transferring the overarching characteristics of the trend projection, and its detailed migration assumptions, to the ward-level projection.
 
-The ***Central Lower*** projection used in Scenario 1 assumes long-term domestic migration will be consistent with the recent 5-year average. This is a relatively high level of migration and at the London level produces a comparatively lower population growth trajectory.
+The trend projections assume the same level of international migration in 2022 (a figure based on ONS data on UK-level international flows for that year). International migration levels then diverge as the variants move towards their long-term levels. These levels are achieved in 2025 and then remain constant to the end of the projection. 
 
-The ***Central Upper*** projection used in Scenario 2 assumes that domestic migration in the longer-term will be consistent with the recent 10-year average, at the London-level this leads to higher growth.
-
-The difference between the two migration scenarios at the borough level (and at the ward level) is determined by the specific characteristics of the borough (or ward). Areas where international migration is a significant contributor to population change will generally see less variation in the scenarios than those were domestic migration is the dominant driver.
+Domestic migration levels in the constraining trend projections are calculated by applying averaged rates to projected population in each year of the projection.
 
 `r space`
 
@@ -95,7 +97,7 @@ p <- population %>%
 y_min_value <- min(population$value)
 
 p %>% 
-  layout(title = paste0("Total population - ",ward_name ,"\n2020-based BPO scenario projections"),
+  layout(title = paste0("Total population - ",ward_name ,"\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -110,7 +112,7 @@ p %>%
                 fillcolor = "#44aad5",
                 line = list(width = 0),
                 opacity = 0.15,
-                x0 = 2019, x1 = 2023,
+                x0 = 2021, x1 = 2025,
                 y0 = y_min_value, y1 = max(population$value),
                 layer = "below"),
          
@@ -147,7 +149,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -184,7 +186,7 @@ p <- primary %>%
 y_min_value <- min(primary$value)
 
 p %>% 
-  layout(title = paste0("Primary population (4-10) - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Primary population (4-10) - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -236,7 +238,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -273,7 +275,7 @@ p <- secondary %>%
 y_min_value <- min(secondary$value)
 
 p %>% 
-  layout(title = paste0("Secondary population (11-15) - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Secondary population (11-15) - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -327,7 +329,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -366,7 +368,7 @@ p <- age_structure %>%
 y_min_value <- min(age_structure$value)
 
 p %>% 
-  layout(title = paste0("Age structure - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Age structure - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -379,7 +381,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -395,22 +397,11 @@ p %>%
 ```
 
 
-## Migration assumptions
-
-#### Covid period (2021-2022)
-The migration assumptions used in the first two years of the projection represent our current best estimate of the impacts of the pandemic and Brexit on migration flows in and out of London. Ward-level migration flows are adapted to be consistent with GLA assumptions of migration levels at the London level which were developed in consultation with an expert panel of academics and professional demographers.
-
-Following the initial years of the projection a transitional period (2023-2025) is designed to smooth the transition between the short-term migration assumptions and the longer-term migration assumptions which take effect in 2025.
-
-#### Long-term period (2025-2041)
-In the long-term levels and rates of migration are assumed to return to the recent 5-year average (2016-2020).
-
-#### Constraining
-The two BPO scenarios differ only in the constraining projection which is applied to births, deaths and total population at the aggregated NUTS2 geographic level.
-
 `r space`
 
 ## Migration {.tabset}
+
+The BPO scenarios differ in their migration assumptions. Scenario 1 applys an average of the last 5 years' migration rates while Scenario 2 applys an average of the last 10 years' rates.
 
 ### In Migration
 
@@ -434,7 +425,7 @@ p <- inflow_data %>%
 y_min_value <- min(inflow_data$value)
 
 p %>% 
-  layout(title = paste0("In Migration - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("In Migration - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -486,7 +477,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -523,7 +514,7 @@ p <- outflow_data %>%
 y_min_value <- min(outflow_data$value)
 
 p %>% 
-  layout(title = paste0("Out Migration - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Out Migration - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -575,7 +566,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -612,7 +603,7 @@ p <- netflow_data %>%
 y_min_value <- min(netflow_data$value)
 
 p %>% 
-  layout(title = paste0("Net Migration - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Net Migration - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -664,7 +655,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -680,9 +671,9 @@ p %>%
 ```
 
 ## Fertility
-Mid-year estimate births are available up to and including the year to mid-2020. Births for 2021 and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
+Mid-year estimate births are available up to and including the year to mid-2021. Births for 2022 are caluculated from GP registrations data and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
 
-The 2020-based BPO projections use fertility rates based on trending the most recent years' data forward. In past years the model has used an average of past rates as standard with the trend option provided on request. The trend of declining in births observed in London since the peak in 2012 leads us to believe that a trended fertility rate provides the most reasonable starting point for projecting future births in the 2020-based BPO projections.
+The 2021-based BPO projections use fertility rates based on trending the most recent years' data forward. In past years the model has used an average of past rates as standard with the trend option provided on request. The trend of declining in births observed in London since the peak in 2012 leads us to believe that a trended fertility rate provides the most reasonable starting point for projecting future births in the 2021-based BPO projections.
 
 `r space`
 
@@ -706,7 +697,7 @@ p <- births_data %>%
 y_min_value <- min(births_data$value)
 
 p %>% 
-  layout(title = paste0("Births - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Births - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -758,7 +749,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -775,9 +766,9 @@ p %>%
 
 ## Mortality
 
-Mid-year estimate deaths are available up to and including the year to mid-2020. Deaths for 2021 and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
+Mid-year estimate deaths are available up to and including the year to mid-2021. Deaths for 2022 and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
 
-Deaths from Covid-19 in 2021 are modelled separately and added to the projected deaths for that year. In future years deaths from Covid-19 are assumed to be accounted for by the normal application of mortality rates.
+Deaths from Covid-19 are assumed to be accounted for by the normal application of mortality rates.
 
 `r space`
 
@@ -801,7 +792,7 @@ p <- deaths_data %>%
 y_min_value <- min(deaths_data$value)
 
 p %>% 
-  layout(title = paste0("Deaths - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Deaths - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "persons",
@@ -853,7 +844,7 @@ p %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -903,7 +894,7 @@ dev_data %>%
           height = 600) %>%  
   
   #Global layout and title details
-  layout(title = paste0("Development Assumptions - ", ward_name, "\n2020-based BPO scenario projections"),
+  layout(title = paste0("Development Assumptions - ", ward_name, "\n2021-based BPO scenario projections"),
          xaxis = list(title = "",
                       showgrid = FALSE),
          yaxis = list(title = "net additional dwellings",
@@ -954,7 +945,7 @@ dev_data %>%
            #Source text in the bottom left
            list(x = 1,
                 y = -0.10, #position of text adjust as needed 
-                text = "Source: GLA 2020-based BPO projections", 
+                text = "Source: GLA 2021-based BPO projections", 
                 showarrow = F,
                 xref='paper',
                 yref='paper', 
@@ -985,10 +976,10 @@ The GLA do not make BPO projections publicly available. They are only accessible
 
 
 ## Further information
-Please contact Wil Tonkiss if you have any questions relating to the BPO projections.
-william.tonkiss@london.gov.uk
+Please contact the GLA demography team if you have any questions relating to the BPO projections.
+demography@london.gov.uk
 
-For questions about the SRP service or projections please contact Mat Cropper.
+For questions about the SRP service or projections please contact the SRP team.
 srpservice@london.gov.uk
 
 

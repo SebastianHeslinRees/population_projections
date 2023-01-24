@@ -6,7 +6,7 @@ camel <- function(x){
   sapply(strsplit(x, " "), function(x) paste(capit(x), collapse=" "))
 }
 
-bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
+bpo_rmd_2021 <- function(borough_name, proj_name = borough_name){
   
   message(paste(borough_name, "BPO RMD"))
   
@@ -18,32 +18,36 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
   proj_name <- proj_name %>% tolower()
   proj_name <- str_replace_all(proj_name, " ", "_")
   
-  projections <- list.dirs("outputs/flexible_area_model/bpo", recursive = FALSE)
-
+  projections <- list.dirs("outputs/flexible_area_model/2021_based/bpo", recursive = FALSE)
+  
   projections <- projections[grepl(proj_name, projections)]
-
-  projections <- projections[grepl(wards, projections)]
   
-  upper_path <- projections[grepl("scenario1", tolower(projections))]
-  lower_path <- projections[grepl("scenario2", tolower(projections))]
+  scenario_1_path <- projections[grepl("5-year", tolower(projections))]
+  scenario_2_path <- projections[grepl("10-year", tolower(projections))]
   
-  assertthat::assert_that(length(upper_path)==1, msg = "problem with upper path")
-  assertthat::assert_that(length(lower_path)==1, msg = "problem with lower path")
+  assertthat::assert_that(length(scenario_1_path)==1, msg = "problem with 5-year projection path")
+  assertthat::assert_that(length(scenario_2_path)==1, msg = "problem with 10-year projection path")
   
-  scenario_upper <- list()
-  scenario_lower <- list()
   
-  for(x in c("population","births","deaths","in_migration","out_migration","net_migration")){
-    message(paste("reading", x))
-    scenario_upper[[x]] <- readRDS(paste0(upper_path, "/", x, ".rds")) %>% filter(gss_code == borough_gss)
-    scenario_lower[[x]] <- readRDS(paste0(lower_path, "/", x, ".rds")) %>% filter(gss_code == borough_gss)
-  }
   
-  scenario_upper$primary <- filter(scenario_upper$population, age %in% 4:10)
-  scenario_lower$primary <- filter(scenario_lower$population, age %in% 4:10)
+  components <- c("population","births","deaths","in_migration","out_migration","net_migration")
   
-  scenario_upper$secondary <- filter(scenario_upper$population, age %in% 11:15)
-  scenario_lower$secondary <- filter(scenario_lower$population, age %in% 11:15)
+  scenario_1 <- components %>% 
+    lapply(function(x){
+      readRDS(paste0(scenario_1_path, "/", x, ".rds")) %>% filter(gss_code == borough_gss)
+    })
+  
+  scenario_2 <- components %>% 
+    lapply(function(x){
+      readRDS(paste0(scenario_2_path, "/", x, ".rds")) %>% filter(gss_code == borough_gss)
+    })
+  
+  
+  scenario_1$primary <- filter(scenario_1$population, age %in% 4:10)
+  scenario_2$primary <- filter(scenario_2$population, age %in% 4:10)
+  
+  scenario_1$secondary <- filter(scenario_1$population, age %in% 11:15)
+  scenario_2$secondary <- filter(scenario_2$population, age %in% 11:15)
   
   group_data <- function(x){
     nm <- last(names(x))
@@ -52,31 +56,31 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
       data.frame()
   }
   
-  scenario_upper <- lapply(scenario_upper, group_data)
-  scenario_lower <- lapply(scenario_lower, group_data)
+  scenario_1 <- lapply(scenario_1, group_data)
+  scenario_2 <- lapply(scenario_2, group_data)
   
-  scenario_upper$age_structure <- readRDS(paste0(upper_path, "/", "population", ".rds")) %>% 
-    filter(year %in% c(2011,2020,2035)) %>%
-    mutate(year = ifelse(year == 2035, "2035 (scenario 2)", as.character(year))) %>% 
+  scenario_1$age_structure <- readRDS(paste0(scenario_1_path, "/", "population", ".rds")) %>% 
+    filter(year %in% c(2011,2021,2036)) %>%
+    mutate(year = ifelse(year == 2036, "2036 (scenario 1)", as.character(year))) %>% 
     group_by(gss_code, la_name, gss_code_ward, ward_name, year, age) %>% 
     summarise(value = sum(popn), .groups = 'drop_last') %>% 
     data.frame()
   
-  scenario_lower$age_structure <- readRDS(paste0(lower_path, "/", "population", ".rds")) %>% 
-    filter(year == 2035) %>%
-    mutate(year = "2035 (scenario 1 )") %>% 
+  scenario_2$age_structure <- readRDS(paste0(scenario_2_path, "/", "population", ".rds")) %>% 
+    filter(year == 2036) %>%
+    mutate(year = "2036 (scenario 2)") %>% 
     group_by(gss_code, la_name, gss_code_ward, ward_name, year, age) %>% 
     summarise(value = sum(popn), .groups = 'drop_last') %>% 
     data.frame()
   
   all_data <- list()
   for(i in 1:9){
-    all_data[[i]] <- rbind(mutate(scenario_upper[[i]], scenario = "scenario 2"),
-                           mutate(scenario_lower[[i]], scenario = "scenario 1"))
-    names(all_data)[i] <- names(scenario_lower)[i]
+    all_data[[i]] <- rbind(mutate(scenario_1[[i]], scenario = "scenario 1"),
+                           mutate(scenario_2[[i]], scenario = "scenario 2"))
+    names(all_data)[i] <- names(scenario_2)[i]
   }
   
-  all_data$dev <- readRDS(paste0(upper_path, "/", "dwelling_trajectory", ".rds")) %>% filter(gss_code == borough_gss)
+  all_data$dev <- readRDS(paste0(scenario_1_path, "/", "dwelling_trajectory", ".rds")) %>% filter(gss_code == borough_gss)
   
   borough_wards <-  all_data$population$gss_code_ward %>% unique()
   
@@ -91,31 +95,12 @@ bpo_rmd_2020 <- function(borough_name, wards, proj_name = borough_name){
     ward_data$borough_name <- camel(str_replace_all(proj_name,"_"," "))
     ward_data$dev_trajectory <- "BPO"
     ward_data <<- ward_data
-    wards <<- wards
+  
     rmarkdown::render("model_code/markdown/2020_bpo_markdown/2020_bpo_markdown.Rmd",
                       output_file = paste0(ward_code,"_",ward_data$ward_name,".html"),
-                      output_dir = paste0("outputs/markdown/2020_bpo/","/",proj_name,"_",wards))
+                      output_dir = paste0("outputs/markdown/2020_bpo/","/",proj_name))
   }
   rm(ward_data)
 }
 
-# 
-# bpo_rmd_2020("Greenwich", "WD13", "greenwich_scenario_1")
-# bpo_rmd_2020("Greenwich", "WD13", "greenwich_scenario_3")
-# 
-# bpo_rmd_2020("Barnet", "WD13")
-# bpo_rmd_2020("Bromley", "WD13")
-# bpo_rmd_2020("Haringey", "WD13")
-# bpo_rmd_2020("Kingston", "WD13")
-# bpo_rmd_2020("Lambeth", "WD13")
-# bpo_rmd_2020("Merton", "WD13")
-# bpo_rmd_2020("Wandsworth", "WD13")
-# bpo_rmd_2020("Hounslow", "WD13")
-# 
-# bpo_rmd_2020("Barking and Dagenham", "WD22", "barking_and_dagenham")
-# bpo_rmd_2020("Brent", "WD22")
-# bpo_rmd_2020("Harrow", "WD22")
-# bpo_rmd_2020("Tower Hamlets", "WD22", "tower_hamlets")
-# bpo_rmd_2020("Westminster", "WD22")
-# bpo_rmd_2020("Redbridge", "WD22")
-# bpo_rmd_2020("Newham", "WD22")
+#bpo_rmd_2020("Newham")
