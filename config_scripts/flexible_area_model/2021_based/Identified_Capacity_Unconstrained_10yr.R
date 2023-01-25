@@ -1,10 +1,14 @@
 library(flexibleareamodel)
 
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "2021_SHLAA_dev_10yr_unconstrained"
+projection_name <- "2021_Identified_Capacity_10yr_unconstrained"
+
+x <- list.files("outputs/trend/2021/")
+x <- x[stringr::str_detect(x,"10yr")]
+x <- paste0("outputs/trend/2021/",x[length(x)],"/")
 
 #Constraints
-constraint_list <- list(constraint_path = "outputs/trend/2021/2021_10yr_22-12-13_1417/",
+constraint_list <- list(constraint_path = x,
                         apply_constraint_lookup_path = "input_data/flexible_area_model/lookups/WD22CD_to_NUTS2.rds",
                         make_constraint_lookup_path = "input_data/flexible_area_model/lookups/LAD_to_NUTS2.rds",
                         mapping = c("constraint_area","year","sex","age"),
@@ -73,8 +77,7 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
-# devtools::load_all('model_code/popmodules/')
-# devtools::load_all('model_code/flexibleareamodel/')
 model_output <- flexmodel_hl_projection(config_list)
 
-create_excel(config_list$output_dir, "SHLAA 10-year migration Unconstrained.xlsx", "Test Projection 2021-base")
+create_excel(config_list$output_dir, "Identified Capacity 10-year migration Unconstrained.xlsx",
+             "Identified Capacity, 10-year migration, Unconstrained")

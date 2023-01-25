@@ -38,7 +38,7 @@ The 2021-based BPO projections (produced in early 2023) are produced on 2022 war
 
 ## Population base and backseries
 
-In December 2022 ONS released the 2021 Mid-Year Estimate (MYE) for local authorities in England and Wales. This release constitutes a break in the official MYE series as it is based on rolling forward 2021 census data rather than the 2020 MYE.
+In December 2022 ONS released the 2021 Mid-Year Estimate (MYE) for local authorities in England and Wales. The 2021 MYE constitutes a break in the official MYE series (2012-2020) as it is based on rolling forward 2021 census data rather than the 2020 MYE.
 
 In order to have a consistent backseries to work with the GLA have modelled a local authority level series between the accepted data points 2011 and 2021. This LA series has been modelled down to output area and then re-aggregated up to 2022 ward boundaries. The result is a consistent ward-level backseries for the period 2011-2021.
 
@@ -300,7 +300,7 @@ p %>%
 
 ## Migration {.tabset}
 
-The BPO scenarios differ in their migration assumptions. Scenario 1 applys an average of the last 5 years' migration rates while Scenario 2 applys an average of the last 10 years' rates.
+The BPO scenarios differ in their migration assumptions. Scenario 1 applies an average of the last 5 years' migration rates while Scenario 2 applies an average of the last 10 years' rates.
 
 ### In Migration
 
@@ -405,7 +405,7 @@ chart_layout(p, y_min_value, y_max_value)
 ```
 
 ## Fertility
-Mid-year estimate births are available up to and including the year to mid-2021. Births for 2022 are caluculated from GP registrations data and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
+Mid-year estimate births are available up to and including the year to mid-2021. Births for 2022 are calculated from GP registrations data and years following are calculated by applying projected fertility rates to the population at single-year-of-age.
 
 The 2021-based BPO projections use fertility rates based on trending the most recent years' data forward. In past years the model has used an average of past rates as standard with the trend option provided on request. The trend of declining in births observed in London since the peak in 2012 leads us to believe that a trended fertility rate provides the most reasonable starting point for projecting future births in the 2021-based BPO projections.
 

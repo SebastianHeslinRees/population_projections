@@ -151,55 +151,26 @@ output_list$london$london_ahs <- unique(filter(london_ahs, year == 2021)$ahs)
 
 #-------------------------------------------------------------------------------
 
-a <- list()
+filter_component <- function(all_data, cmpnt){
+  
+  all_data %>% 
+    filter(component == cmpnt) %>% 
+    group_by(gss_code_ward, year, variant) %>% 
+    summarise(value = sum(value),
+              .groups = 'drop_last') %>% 
+    data.frame() %>% 
+    dtplyr::lazy_dt()
+  
+}
 
-a$total_population <- all_data %>% 
-  filter(component == "population") %>% 
-  group_by(gss_code_ward, year, variant) %>% 
-  summarise(value = sum(value),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  dtplyr::lazy_dt()
+a <- c("population", "births", "deaths", "net migration",
+       "in migration", "out migration") %>% 
+  lapply(function(x){
+    filter_component(all_data, x)
+  })
 
-a$total_births <- all_data %>% 
-  filter(component == "births") %>% 
-  group_by(gss_code_ward, year, variant) %>% 
-  summarise(value = sum(value),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  dtplyr::lazy_dt()
-
-a$total_deaths <- all_data %>% 
-  filter(component == "deaths") %>% 
-  group_by(gss_code_ward, year, variant) %>% 
-  summarise(value = sum(value),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  dtplyr::lazy_dt()
-
-a$net_migration <- all_data %>% 
-  filter(component == "net migration") %>% 
-  group_by(gss_code_ward, year, variant) %>% 
-  summarise(value = sum(value),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  dtplyr::lazy_dt()
-
-a$in_migration <- all_data %>% 
-  filter(component == "in migration") %>% 
-  group_by(gss_code_ward, year, variant) %>% 
-  summarise(value = sum(value),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  dtplyr::lazy_dt()
-
-a$out_migration <- all_data %>% 
-  filter(component == "out migration") %>% 
-  group_by(gss_code_ward, year, variant) %>% 
-  summarise(value = sum(value),
-            .groups = 'drop_last') %>% 
-  data.frame() %>% 
-  dtplyr::lazy_dt()
+names(a) <- c("total_population", "total_births", "total_deaths",
+              "net_migration", "in_migration", "out_migration")
 
 a$age_groups <- all_data %>% 
   filter(component == "population",

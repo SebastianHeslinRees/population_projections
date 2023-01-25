@@ -78,8 +78,7 @@ config_list <- list(projection_name = projection_name,
                     
 )
 
-# devtools::load_all('model_code/popmodules/')
-# devtools::load_all('model_code/flexibleareamodel/')
 model_output <- flexmodel_hl_projection(config_list)
 
-create_excel(config_list$output_dir, "SHLAA 10-year migration.xlsx", "Test Projection 2021-base")
+create_excel(config_list$output_dir, "Identified Capacity 10-year migration.xlsx",
+             "Identified Capacity, 10-year migration, NUTS2 Constrained")

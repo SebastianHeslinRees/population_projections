@@ -133,7 +133,7 @@ The GLA Demography team produce a range of population projections which are used
 
 The two main types of population projection produced are *trend-based* projections, which are based on a cohort component model that uses past trends in births, deaths and migration to project future populations, and *housing-led* projections, which reconcile future population growth with forecast housing supply.
 
-This summary document outlines the results of the GLA’s 2021-based population and household projections which were released in January 2023.
+This summary document outlines the results of the GLA’s 2021-based population projections which were released in January 2023.
 
 The 2021-based projections take as their starting point the most recent ONS Mid-Year Estimate (mid-2021). This is a rolled-forward estimate from the 2021 census estimate. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
 
@@ -156,7 +156,6 @@ Three variant projections have been produced: a central projection, and two proj
 
 The projections move forward from a starting point of mid-2021. In the first year of the projection (2022) international migration levels are constrained to be consistent with UK-level data on international flows published by ONS.
 
-Corresponding household projections have been run for each population output. Two sets of household projections are available for each trend variant: one set using the ONS 2018-based household model and one set using the 2014-based DCLG household model.
 
 ## Expert Panel
 
@@ -335,6 +334,8 @@ In the *10-year trend* projection, international migration returns to the 10-yea
 
 All three variants project population growth over the period, albeit to varying levels. London grew by 1 million people in in the decade to 2011 and then around 800 thousand people in the the decade to 2021. Over the decade to 2031, the *10-year trend* Population variant sees growth of `r central_decade` while the in *5-year trend* variant London is projected to grow by `r short_decade` and in the *15-year trend* variant projected growth to 2030 is `r long_decade`.
 
+The *5-year trend* represents a somewhat extreme scenario taking as it does only very recent migration trend which include the joint shock of COVID-19 and Brexit. It the other scenarios these low net migration years are counterbalanced by the higher levels of migration included in the longer averages. The *5-year trend* is potentially useful for short-term planning however the GLA recommends longer-term projections for longer-term strategic planning.
+
 <div class="table-title">Table 2: Variant population projections, London</div>
 ```{r growth_table}
 charts[['table growth']] %>% 
@@ -348,7 +349,9 @@ charts[['table growth']] %>%
 charts[['popn']]
 ```
 
-## Comparison to 2020-based
+# Comparison to 2020-based projections {.tabset}
+
+<a href="#top">Back to top</a>
 
 ```{r}
 data <- plotly_data(charts[['popn']])
@@ -356,20 +359,83 @@ a <- filter(data, x_axis_col == 2050, colour_col == "5-year trend")$y_axis_col
 b <- filter(data, x_axis_col == 2050, colour_col == "15-year trend")$y_axis_col
 c <- filter(data, x_axis_col == 2050, colour_col == "10-year trend")$y_axis_col
 rm(data)
+
+data <- plotly_data(charts[['comp_int_net']])
+d <- filter(data, x_axis_col == 2050, colour_col == "2020-based")$y_axis_col
+e <- filter(data, x_axis_col == 2050, colour_col == "2021-based 5-year trend")$y_axis_col
+f <- filter(data, x_axis_col == 2050, colour_col == "2021-based 15-year trend")$y_axis_col
+rm(data)
+
+
+data <- plotly_data(charts[['comp_dom_net']])
+g <- filter(data, x_axis_col == 2021, colour_col == "2020-based Central Upper")$y_axis_col
+h <- filter(data, x_axis_col == 2022, colour_col == "2020-based Central Upper")$y_axis_col
+
+i <- filter(data, x_axis_col == 2021, colour_col == "2021-based 10-year trend")$y_axis_col
+j <- filter(data, x_axis_col == 2022, colour_col == "2021-based 10-year trend")$y_axis_col
+rm(data)
+
+data <- plotly_data(charts[['comp_nat_chg']])
+k <- filter(data, x_axis_col == 2011, colour_col == "2020-based Central Upper")$y_axis_col
+
 ```
 
-The 2020-based GLA trend projections were released in September 2021. The differences between the last round and the 2021-based projections are significant, the primary reason bring that the population backseries used in the two rounds of projection is different.
+The 2020-based GLA trend projections were released in September 2021. The differences between the last round and the 2021-based projections are significant, primarily because the population backseries used in the two rounds of projection is different.
 
-The 2021-based projections use the 2021 MYE as their starting point and the modelled GLA backseries for the calculation of trends. The 2020-based projections used trends based on the ONS series which had overestimated the level of population growth in London. As a result, the previous set of projections started from a higher population and projected stronger growth into the future when compared to the 2021-based projections. In the 2020-based projections the Central Range of population in 2050 was 10.319 million to 10.707 million, while for 2021-based projections growth is projected to range between `r number_in_text(a)` (*5-year trend*) and `r number_in_text(b)` (*15-year trend*). The *10-year trend* variant projects a population of `r number_in_text(c)` in 2050.
+The 2021-based projections use the 2021 MYE as their starting point and the modelled GLA backseries for the calculation of trends. The 2020-based projections used trends based on the ONS series which had overestimated the level of population growth in London. As a result, the previous set of projections started from a higher population and projected stronger growth into the future when compared to the 2021-based projections.
+
+## Population
+
+In the 2020-based projections the Central Range of population in 2050 was 10.319 million to 10.707 million, while for 2021-based projections growth is projected to range between `r number_in_text(a)` (*5-year trend*) and `r number_in_text(b)` (*15-year trend*). The *10-year trend* variant projects a population of `r number_in_text(c)` in 2050.
 
 ```{r chart_comp, out.width = "100%"}
-charts[['comp']]
+charts[['comp_pop']]
 ```
 
+## International migration
+
+The 2020-based projections maintained a long-term net migration level of `r number_in_text(d)` for both the *Central Upper* and *Central Lower* projections. In the 2021-based projection each variant has a lower level of net international migration in the long-term (between `r number_in_text(e)` and `r number_in_text(f)`). The difference comes from the different levels of past migration used to calculate the flows. The 2020-based projection used higher past migration assumptions when calculating average flows (see chart) and so project higher future flows.
+
+```{r chart_comp_int, out.width = "100%"}
+charts[['comp_int_net']] 
+```
+
+## Domestic migration
+
+The difference between the 2020-based and the 2021-based projections is less pronounced in the domestic migration component. Both projections include a 'bounce-back' in net domestic in the year to 2022. In the 2020-based projection net domestic goes from `r number_in_text(g)` in 2021 to `r number_in_text(h)` while in the 2021-based projections it goes from `r number_in_text(i)` to `r number_in_text(j)` (*10-year trend*).
+
+```{r chart_comp_dom, out.width = "100%"}
+charts[['comp_dom_net']] 
+```
+
+
+## Births
+
+The GLA projection model incorporates fertility assumptions from the ONS National Population Projection. The annual change in age-specific fertility rates is applied rates at the local authority level to create la-specific trajectories for the projection period. The 2020-based trend projections used the 2018-based NPP principal trajectory in this process. The 2021-based projections use the 2020-based principal trajectory. This difference accounts for much the difference, particularity in the initial years of the projections, between the project births in the 2021-based projections compared to the 2020-based projections.
+
+```{r chart_comp_births, out.width = "100%"}
+charts[['comp_births']] 
+```
+
+## Deaths
+
+As with fertility rates, a set of age-specific mortality rates are calculated for the projection period using trajectories from the NPP. The 2020-based projections used the principal trajectory from the 2018-based NPP while the 2021-based projections incorporate data from the 2020-based NPP.
+
+```{r chart_comp_deaths, out.width = "100%"}
+charts[['comp_deaths']] 
+```
+
+## Natural change
+
+Natural change is the largest contributor to London's population growth. In the past it has ranged as high as `r number_in_text(k)` in 2011. Natural change is higher in the 2021-based *10-year trend* and *15-year trend* variants because of the higher level of births and lower level of deaths in these projections.
+
+```{r chart_comp_nc, out.width = "100%"}
+charts[['comp_nat_chg']] 
+```
 
 # Age structure
 
-The age structure in 2037, after 15 years of projected change, is shown in the chart below. Age structure has implications for household growth trajectories (see the section on households below) where household formation rates differ by age.
+The age structure in 2037, after 15 years of projected change, is shown in the chart below.
 
 ```{r chart_sya, out.width = "100%"}
 charts[['age structure']]
@@ -542,66 +608,6 @@ Natural change is the balance of births and deaths over the year. It is the larg
 charts[['natural change']]
 ```
 
-# Household projections {.tabset}
-
-<a href="#top">Back to top</a>
-
-For each population projection variant, household projections have been run using adapted versions of the ONS 2018-based household projection model and the 2014-based DCLG household model. 
-
-## ONS Household projections
-
-The ONS model is the official household model for England and was used by ONS in the preparation of the 2018-based household projections. 
-
-<div class="table-title">Table 4: Variant household projections (ONS household model), London</div>
-```{r ons_table}
-charts[['ons table']] %>% 
-  DT::datatable(rownames = FALSE, filter = "none",  caption = "households (millions)",
-                options = list(paging=FALSE, searching=FALSE, info=FALSE))
-```
-<div class="source">Source: GLA 2021-based projections, ONS 2018-based household model</div>
-
-```{r chart_ons_hh, out.width = "100%"}
-charts[['ons hh']]
-```
-
-<div class="table-title">Table 5: Annualised household change (ONS household model) </div>
-```{r ons_table_2}
-charts[['ons annualised']] %>% 
-  setnames(c("variant","households 2043", "change 2018-2043", "annualised change")) %>% 
-  DT::datatable(rownames = FALSE, filter = "none",
-                options = list(paging=FALSE, searching=FALSE, info=FALSE,
-                               columnDefs = list(list(className = 'dt-right', targets = 1:3))))
-```
-<div class="source">Source: GLA 2021-based projections, ONS 2018-based household model</div>
-
-
-## DCLG Household projections
-
-The DCLG model was the official household model for England for the preparation of the 2014-based household projections. Outputs from this model remain relevant due to its continued use by DLUHC in the preparation of housing targets.
-
-<div class="table-title">Table 6: Variant household projections (DCLG household model), London</div>
-```{r dclg_table}
-charts[['dclg table']] %>% 
-  DT::datatable(rownames = FALSE, filter = "none", caption = "households (millions)",
-                options = list(paging=FALSE, searching=FALSE, info=FALSE))
-```
-<div class="source">Source: GLA 2021-based projections, DCLG 2014-based household model</div>
-
-```{r chart_dclg_hh, out.width = "100%"}
-charts[['dclg hh']]
-```
-
-<div class="table-title">Table 7: Annualised household change (DCLG household model) </div>
-```{r dclg_table_2}
-charts[['dclg annualised']] %>% 
-  setnames(c("variant","households 2043", "change 2018-2043", "annualised change")) %>% 
-  DT::datatable(rownames = FALSE, filter = "none",
-                options = list(paging=FALSE, searching=FALSE, info=FALSE,
-                               columnDefs = list(list(className = 'dt-right', targets = 1:3))))
-
-```
-<div class="source">Source: GLA 2021-based projections, DCLG 2014-based household model</div>
-
 
 # Housing-led projections
 
@@ -748,4 +754,4 @@ charts[['ahs']]
 
 Housing-led projections are also available for London wards. These projections use a modelled backseries based on ONS small area population estimates (SAPE) and consistent with the GLA revised MYE backseries. Data for 2021 may not be consistent with census estimates for wards. Future updates to projections will incorporate ward-level information from the census.
 
-Summaries for each ward as well as detailed projections estimates are available on the <a target="_blank"  href=https://data.london.gov.uk/dataset/housing-led-population-projections/">London Datastore</a>.
+Summaries for each ward as well as detailed projections and estimates are available on the <a target="_blank"  href=https://data.london.gov.uk/dataset/housing-led-population-projections/">London Datastore</a>.

@@ -50,10 +50,10 @@ standard_bpo_parameters <- function(params, variant){
   
   #Constraint Path (trend model)
   if(stringr::str_detect(variant, "5")){
-    constraint_path <- "outputs/trend/2021/2021_5yr_23-01-03_1558/"
+    constraint_path <- "outputs/trend/2021/2021_5yr_23-01-17_1558/"
   }
   if(stringr::str_detect(variant, "10")){
-    constraint_path <- "outputs/trend/2021/2021_10yr_23-01-03_1558/"
+    constraint_path <- "outputs/trend/2021/2021_10yr_23-01-17_1558/"
   }
   
   if(stringr::str_detect(variant, "unconstrained")){

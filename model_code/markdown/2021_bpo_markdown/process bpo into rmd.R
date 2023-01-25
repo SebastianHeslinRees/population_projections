@@ -11,7 +11,7 @@ bpo_rmd_2021 <- function(borough_name, proj_name = borough_name){
   message(paste(borough_name, "BPO RMD"))
   
   gss_code_to_name <- readRDS("input_data/lookup/gss_code_to_name.rds") %>% filter(substr(gss_code,1,3)=="E09")
-  #borough_gss <- filter(gss_code_to_name, gss_name == borough_name)$gss_code
+  
   borough_gss <- filter(gss_code_to_name, str_detect(tolower(gss_name), tolower(borough_name)))$gss_code
   assertthat::assert_that(length(borough_gss)==1, msg = "problem with borough name")
   

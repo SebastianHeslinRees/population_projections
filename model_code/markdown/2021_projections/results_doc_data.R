@@ -6,6 +6,7 @@ library(leaflet)
 library(rgdal)
 library(tidyr)
 library(gglaplot)
+library(stringr)
 
 root <- "outputs/trend/2021/"
 root_previous <- "outputs/trend/2020/"
@@ -107,6 +108,18 @@ for(i in households){
 data_list[['popn_2020']] <- read_multiple_projections(projections_2020, "population") %>% 
   mutate(projection = "2020-based")
 
+data_list[['int_net_2020']] <- read_multiple_projections(projections_2020, "int_net") %>% 
+  mutate(projection = "2020-based")
+
+data_list[['dom_net_2020']] <- read_multiple_projections(projections_2020, "dom_net") %>% 
+  mutate(projection = "2020-based")
+
+data_list[['births_2020']] <- read_multiple_projections(projections_2020, "births") %>% 
+  mutate(projection = "2020-based")
+
+data_list[['deaths_2020']] <- read_multiple_projections(projections_2020, "deaths") %>% 
+  mutate(projection = "2020-based")
+
 # Housing-led
 
 housing_led_popn <- read_multiple_projections(housing_led, "population")
@@ -117,15 +130,7 @@ housing_led_sya <- read_multiple_projections(housing_led, "borough_data.populati
 
 housing_dev <- read_multiple_projections(trajectories, component = "",
                                          col_aggregation = c("year", "gss_code_ward"), age = NULL)
-# 
-# housing_targets_dev <- readRDS("input_data/flexible_area_model/development_data/housing_targets_WD22CD.rds") %>% 
-#   mutate(variant = "Housing Targets")
-# 
-# shlaa_dev <- readRDS("input_data/flexible_area_model/development_data/ward_savills_trajectory_WD22CD.rds") %>% 
-#   mutate(variant = "Identified Capacity")
-# 
-# past_delivery_dev <- readRDS("input_data/flexible_area_model/development_data/past_delivery_WD22CD.rds") %>% 
-#   mutate(variant = "Past Delivery")
+
 
 ahs <- read_multiple_projections(housing_led, "borough_data.households_detail", age = NULL,
                                  col_aggregation = c("gss_code","year","household_population","input_households"))
@@ -195,12 +200,12 @@ charts[['exec summary']] <- data_list[['population']] %>%
                     "year", "popn", "variant",
                     axis_title, figure = 1, zero_y = FALSE) 
 
-#comparison chart
+#comparison population chart
 chart_title <- "Projected Population, London"
 axis_title <- "population"
 f <- f+1
 
-charts[['comp']] <- data_list[['population']] %>% 
+charts[['comp_pop']] <- data_list[['population']] %>% 
   mutate(projection = "2021-based") %>% 
   rbind(data_list[['popn_2020']]) %>% 
   mutate(x = paste(projection, variant)) %>% 
@@ -215,6 +220,116 @@ charts[['comp']] <- data_list[['population']] %>%
                     "year", "popn", "x",
                     axis_title, figure = f, zero_y = FALSE) 
 
+#comparison int net chart
+chart_title <- "Net international migration, London"
+axis_title <- "persons"
+f <- f+1
+
+charts[['comp_int_net']] <- data_list[['int_net']] %>% 
+  mutate(projection = "2021-based") %>% 
+  rbind(data_list[['int_net_2020']]) %>% 
+  mutate(x = paste(projection, variant)) %>% 
+  filter_london(data_col = "int_net", validate = FALSE) %>% 
+  filter(x != "2020-based Central Upper") %>% 
+  mutate(x = ifelse(substr(x,1,4)=="2020", "2020-based", x)) %>% 
+  select(gss_code, year, x, int_net) %>% 
+  mutate(x = factor(x, levels = c('2021-based 5-year trend',
+                                  '2021-based 10-year trend',
+                                  '2021-based 15-year trend',
+                                  '2020-based'))) %>% 
+  line_chart_plotly(chart_title,
+                    "year", "int_net", "x",
+                    axis_title, figure = f, zero_y = FALSE) 
+
+#comparison dom net chart
+chart_title <- "Net domestic migration, London"
+axis_title <- "persons"
+f <- f+1
+
+charts[['comp_dom_net']] <- data_list[['dom_net']] %>% 
+  mutate(projection = "2021-based") %>% 
+  rbind(data_list[['dom_net_2020']]) %>% 
+  mutate(x = paste(projection, variant)) %>% 
+  filter_london(data_col = "dom_net", validate = FALSE) %>% 
+  select(gss_code, year, x, dom_net) %>% 
+  mutate(x = factor(x, levels = c('2021-based 5-year trend',
+                                  '2021-based 10-year trend',
+                                  '2021-based 15-year trend',
+                                  '2020-based Central Lower',
+                                  '2020-based Central Upper'))) %>% 
+  line_chart_plotly(chart_title,
+                    "year", "dom_net", "x",
+                    axis_title, figure = f, zero_y = FALSE) 
+
+
+#comparison births
+chart_title <- "Births, London"
+axis_title <- "persons"
+f <- f+1
+
+charts[['comp_births']] <- data_list[['births']] %>% 
+  mutate(projection = "2021-based") %>% 
+  rbind(data_list[['births_2020']]) %>%
+  mutate(x = paste(projection, variant)) %>% 
+  filter_london(data_col = "births", validate = FALSE) %>% 
+  select(gss_code, year, x, births) %>% 
+  mutate(x = factor(x, levels = c('2021-based 5-year trend',
+                                  '2021-based 10-year trend',
+                                  '2021-based 15-year trend',
+                                  '2020-based Central Lower',
+                                  '2020-based Central Upper'))) %>% 
+  line_chart_plotly(chart_title,
+                    "year", "births", "x",
+                    axis_title, figure = f, zero_y = FALSE) 
+
+#comparison deaths
+chart_title <- "Deaths, London"
+axis_title <- "persons"
+f <- f+1
+
+charts[['comp_deaths']] <- data_list[['deaths']] %>% 
+  mutate(projection = "2021-based") %>% 
+  rbind(data_list[['deaths_2020']]) %>%
+  mutate(x = paste(projection, variant)) %>% 
+  filter_london(data_col = "deaths", validate = FALSE) %>% 
+  select(gss_code, year, x, deaths) %>% 
+  mutate(x = factor(x, levels = c('2021-based 5-year trend',
+                                  '2021-based 10-year trend',
+                                  '2021-based 15-year trend',
+                                  '2020-based Central Lower',
+                                  '2020-based Central Upper'))) %>% 
+  line_chart_plotly(chart_title,
+                    "year", "deaths", "x",
+                    axis_title, figure = f, zero_y = FALSE) 
+
+#comparison nat change chart
+chart_title <- "Natural change, London"
+axis_title <- "persons"
+f <- f+1
+
+charts[['comp_nat_chg']] <- data_list[['deaths']] %>% 
+  mutate(projection = "2021-based") %>% 
+  rbind(data_list[['deaths_2020']]) %>% 
+  mutate(births = deaths*-1) %>% 
+  select(-deaths) %>% 
+  rbind(data_list[['births']] %>% 
+          mutate(projection = "2021-based")) %>% 
+  rbind(data_list[['births_2020']]) %>%
+  mutate(x = paste(projection, variant)) %>% 
+  filter_london(data_col = "births", validate = FALSE) %>% 
+  select(gss_code, year, x, popn = births) %>% 
+  mutate(x = factor(x, levels = c('2021-based 5-year trend',
+                                  '2021-based 10-year trend',
+                                  '2021-based 15-year trend',
+                                  '2020-based Central Lower',
+                                  '2020-based Central Upper'))) %>% 
+  line_chart_plotly(chart_title,
+                    "year", "popn", "x",
+                    axis_title, figure = f, zero_y = FALSE) 
+
+
+
+
 #Age structure
 chart_title <- "Projected age structure 2036, London"
 axis_title <- "population"
@@ -227,7 +342,7 @@ charts[['age structure']] <- data_list[['sya']] %>%
   mutate(variant = ifelse(year == 2021, "2021 structure", variant)) %>% 
   unique() %>% 
   mutate(value = popn) %>% 
-  mutate(variant = factor(variant, levels = c("2020 structure", trend_factor_levels))) %>% 
+  mutate(variant = factor(variant, levels = c("2021 structure", trend_factor_levels))) %>% 
   data.frame() %>% 
   age_chart_plotly(chart_title, colour = "variant", figure = f)
 

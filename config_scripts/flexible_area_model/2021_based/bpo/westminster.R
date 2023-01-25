@@ -13,5 +13,5 @@ for(v in variants){
 }
 
 #Don't run until the above are completed
-source("model_code/markdown/2021_bpo_markdown/process bpo into rmd inputs.R")
+source("model_code/markdown/2021_bpo_markdown/process bpo into rmd.R")
 bpo_rmd_2021(bpo_name)

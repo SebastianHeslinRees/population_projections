@@ -1,11 +1,11 @@
 library(flexibleareamodel)
 
 data_dir <- "input_data/flexible_area_model/"
-projection_name <- "2021_Housing_Targets_10yr"
-dev_path <- paste0(data_dir, "development_data/housing_targets_WD22CD.rds")
+projection_name <- "2021_Identified_Capacity_5yr"
+dev_path <- paste0(data_dir, "development_data/ward_savills_trajectory_WD22CD.rds")
 
 x <- list.files("outputs/trend/2021/")
-x <- x[stringr::str_detect(x,"10yr")]
+x <- x[stringr::str_detect(x,"5yr")]
 x <- paste0("outputs/trend/2021/",x[length(x)],"/")
 
 #Constraints
@@ -27,11 +27,11 @@ external_births <- list(births_path = "input_data/scenario_data/births_mid_22.rd
 
 #Migration
 in_migration <- list(
-  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_10yr_avg.rds"),
+  '2022' = list(path = paste0(data_dir, "processed/in_migration_flows_WD22CD_5yr_avg.rds"),
                 transition = F))
 
 out_migration <- list(
-  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_10yr_avg.rds"),
+  '2022' = list(path = paste0(data_dir, "processed/out_migration_rates_WD22CD_5yr_avg.rds"),
                 transition = F))
 
 #Config
@@ -80,5 +80,4 @@ config_list <- list(projection_name = projection_name,
 
 model_output <- flexmodel_hl_projection(config_list)
 
-create_excel(config_list$output_dir, "Housing Targets 10-year migration.xlsx",
-             "Housing Targets, 10-year migration, NUTS2 Constrained")
+create_excel(config_list$output_dir, "Identified Capacity 5-year migration.xlsx", "Identified Capacity, 5-year migration, NUTS2 Constrained")
