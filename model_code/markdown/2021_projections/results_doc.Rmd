@@ -27,7 +27,7 @@ source("model_code/markdown/2021_projections/demog_plotly.R")
 
 ```{r number_in_text}
 
-number_in_text <- function(x, decimals_mil = 3){
+number_in_text <- function(x, decimals_mil = 2){
   
   type <- case_when(abs(x) < 1000 ~ "small",
                     abs(x) < 999999 ~ "thousand",
@@ -72,57 +72,102 @@ charts <- readRDS("outputs/markdown/2021_results_doc_charts.rds")
 ```
 
 
+<div class="h1-title">Executive Summary</div>
+
+This summary document outlines the results of the GLA’s 2021-based population projections which were released in January 2023.
+
+These projections take the 2021 mid-year estimate (MYE) population as their starting point.  The 2021 MYE, published by ONS in December 2022, is the first to incorporate the results of the 2021 census. As the 2021 MYE does not align with the current official estimates for 2012-2020, the GLA has based these projections on an alternative modelled series of population and components that is consistent with the 2011 and 2021 estimates.
+
+This release is considered interim as some of the key data required to fully update the projections are not yet available. We anticipate the projections will be updated later in 2023 following revisions by ONS to the 2021 mid-year estimates and the release of additional data from the 2021 census.
+
+The Interim 2021-based population projections comprise both *variant trend projections* and *housing-led scenario projections*. Trend projections are based only on the extrapolation of past patterns of population change while the housing-led projections also incorporate considerations of future housing delivery. Trend projections are typically most robust at larger geographic scales, such as regions or subregions.  For applications that require finer spatial detail, the GLA recommends the use of the housing-led projections. 
+
+<div class="h2-title">Trend projections</div>
+
+The 2021-based trend projections include three variants which differ in their assumptions about future migration behaviour (both international and domestic). These assumptions are based on averaging past periods of observed migration behaviours. The variants are:  
+
+-	The *5-year trend* variant (based on data from 2017 to 2021)
+-	The *10-year trend* variant (based on data from 2012 to 2021)
+-	The *15-year trend* variant (based on data from 2007 to 2021)
+
+Trend projections are available for all local authority districts in England and Wales and at the national level for Northern Ireland and Scotland.
+
+```{r exec_chart, out.width = "100%"}
+charts[['exec summary']] 
+
+```
+
+<div class="h2-title">Housing-led projections</div>
+
+The 2021-based housing-led projections include three scenario projections based on different rates of future housing development. They are:  
+
+-	Identified Capacity scenario which uses a development trajectory adapted from the 2017 Strategic Housing Land Availability Assessment <a target="_blank" href="https://www.london.gov.uk/programmes-strategies/planning/london-plan/new-london-plan/strategic-housing-land-availability-assessment">(SHLAA)</a>.
+-	Past Delivery scenario which assumes average of delivery over the period 2012-2019 will continue.
+-	Housing Targets scenario in which the London Plan target of 52,287 units is delivered in each year of the projection.
+
+In producing the projections no assumption has been made about the likelihood of these delivery scenarios coming forward - the projections are designed to illustrate how the population might change under the conditions described in the scenarios. At the London level all housing-led projections are constrained to match the 10-year trend projection and differ only in terms of the spatial distribution of population. 
+
+Due to limited information about potential development sites in the very long-term, the housing-led projections have a projection horizon of 2041.
+
+Housing-led projections are available for London Boroughs and London wards (2022 boundaries).
+
+
 ```{r include = FALSE, echo = FALSE}
 
 data <- plotly_data(charts[['popn']])
-a <- filter(data, x_axis_col == 2050, colour_col == "10-year trend")$y_axis_col
-b <- filter(data, x_axis_col == 2050, colour_col == "5-year trend")$y_axis_col
-c <- filter(data, x_axis_col == 2050, colour_col == "15-year trend")$y_axis_col
+a <- filter(data, x_axis_col == 2041, colour_col == "10-year trend")$y_axis_col
+b <- filter(data, x_axis_col == 2041, colour_col == "5-year trend")$y_axis_col
+c <- filter(data, x_axis_col == 2041, colour_col == "15-year trend")$y_axis_col
 d <- c-b
 e <- filter(data, x_axis_col == 2021, colour_col == "10-year trend")$y_axis_col
 
 ```
 
-<div class="h1-title">Executive Summary</div>
-
-The Interim 2021-based population projections comprise both *variant trend projections* and *housing-led scenario projections*. Trend projections are based on the continuation of past trends in population change while the housing-led projections incorporate considerations of future housing delivery into the projection process. Trend projections are most appropriate for strategic planning at the regional level while for most other uses the GLA recommends the housing-led projections. Trend projections are available for all local authority districts in England and Wales and at the national level for Northern Ireland and Scotland. Housing-led projections are available for London Boroughs and London wards.
-
-The 2021-based based projection take as their starting point the 2021 mid-year estimate (MYE). This is a rolled-forward estimate from the 2021 census population estimate and is the most recent official estimate of London's population. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
-
-These projections are interim projections. We anticipate the projections will be updated later in 2023 following ONS revisions to the 2021 mid-year estimates and the release of additional 2021 census data.
-
-This report provides a summary of the range of projected population for London and the London Boroughs.
+<div class="h2-title">Key results</div>
 
 - London's mid-2021 population was **`r number_in_text(e)`** (<a target="_blank" href='https://data.london.gov.uk/dataset/londons-population/'>2021 mid-year estimate</a>).
-- The *10-year trend* projection has a population of `r number_in_text(a)` in 2050.
-- The range between the *5-year trend* and the *15-year trend* projections in 2050 is `r  number_in_text(d)` persons (`r  number_in_text(b)` to `r  number_in_text(c)`).
+- Across the three trend projection variants, London’s 2041 population spans a range of `r number_in_text(c-b)`, from `r number_in_text(b)` (*5-year trend*) to `r number_in_text(c)` (*15-year trend*), with the 10-year trend projection giving a figure of `r number_in_text(a)`.
+-	Population growth between 2021 and 2041 spans the range `r number_in_text(b-e)` to `r number_in_text(c-e)`, at an annualised rate of `r number_in_text((b-e)/20)` to `r number_in_text((c-e)/20)` per year.
+-	The 2021-based projections show the lowest rates of population growth for London of any produced by the GLA since 2011. 
 
 
-<div class="h2-title">Trend projections</div>
+<div class="h2-title">Why the projections show lower levels of future growth</div>
 
-```{r exec_chart, out.width = "100%"}
-charts[['exec summary']] 
-rm(data, a, b, c, d)
-```
+Recent rounds of GLA projections have shown progressively lower rates of future growth in London.  This is a consequence of lower levels of annual growth in the population estimates on which the projections are based. Relative to the exceptional period from 2004 to 2016, when the population of London grew by more than 100 thousand per year, estimates for years since 2016 have shown far lower rates of growth.  As this period of lower growth has continued, its contribution to the trends of future patterns projected forward in our modelling has increased, leading to lower projections of future growth. 
 
-The 2021-based trend projections include three variants which differ in their assumptions about future migration behaviour (both international and domestic). These variants are based on averaging past periods of observed migration behviours. The variants are: 
+The impact of recent lower growth is reflected most strongly in projections based on short periods of past data.  This is clearly illustrated by the very low growth projected in the *5-year trend* variant of the current release, for which future migration patterns are based entirely on the period of lower growth that began in 2016.
 
-- The  *5-year trend* variant (based on 5-year migration averages)
-- The *10-year trend* variant (based on 10-year migration averages)
-- The *15-year trend* variant (based on 15-year migration averages)
+An explanation of why recent estimates of growth have been falling in recent years is perhaps most easily broken down into three sections:  
 
+-	Factors resulting in lower growth in estimates from 2016
+-	Impacts of the COVID-19 pandemic
+-	Effect of re-basing population estimates following the 2021 census
 
-<div class="h2-title">Housing-led projections</div>
+<div class="h2-title">Factors resulting in lower growth from 2016</div>
+Prior to the start of the COVID-19 pandemic, slowing rates of population growth were the result of several trends:   
 
-The 2021-based housing-led projections include three scenario projections based on different levels of future housing availability. They are:  
+- Fertility rates have been declining across the UK over the last decade, with annual births in London falling from their peak of 134 thousand in 2012 to 115 thousand in the year to mid-2020.
+- Net international migration to London sharply decreased after 2016, due in part to the EU referendum result.
+- Net domestic outflows from London to the rest of the UK dropped sharply in the aftermath of the 2008 Financial Crisis but recovered steadily over the following decade from a low of 32 thousand in 2009 to an average over 100 thousand per year for the period 2016 to 2020.
 
-- *Identified Capacity scenario* which uses a development trajectory adapted from the Strategic Housing Land Availability Assessment (SHLAA).  
-- *Past Delivery scenario* which assumes average of delivery over the period 2012-2019 will continue.  
-- *Housing Targets scenario* in which the London Plan target of 52,287 units is delivered in each year of the projection.
+<div class="h2-title">Impacts of the COVID-19 pandemic</div>
 
-In producing the projections no assumption has been made about the likelihood of these delivery scenarios coming forward - the projections are designed to illustrate how the population might change under the conditions described in the scenarios. At the London level all housing-led projections are constrained to the *10-year trend* trend projection.
+The COVID-19 pandemic had a dramatic impact on both mortality and migration patterns, leading to the first annual fall in London’s population since the 1980s.
 
-Due to limited information about potential development sites in the very long-term, the housing-led projections have a projection horizon of 2041.
+While there is considerable uncertainty about precisely how much the population fell as a result of the pandemic, the modelled backseries produced by the GLA to underpin the projections assumes a decrease of approximately 80 thousand over the year to mid-2021. 
+
+While a fall of this scale (108 thousand) was anticipated in the GLA’s 2020-based projections, it did not factor into the past trends used to determine long-term migration assumptions. For the 2021-based projections, data for the year to mid-2021 directly contribute to projected patterns of future migration, resulting in a relative reduction in long-term growth rates.
+
+<div class="h2-title">Effect of re-basing population estimates following the 2021 Census</div>
+The 2021 mid-year estimates published by ONS in December 2022 were the first to incorporate data from the 2021 census, with the population for mid-2021 rolled-forward from the census day estimate rather than from existing 2020 estimate.
+
+The 2021 MYE gave London’s total population as 8.80 million, 206 thousand less than in the 2020 MYE. This difference represents the combined impact of several factors:  
+
+- Potential under-representation of some elements of the usually resident population in the 2021 MYE due to the conditions under which the census was conducted.
+- Real decreases in London’s usually resident population because of the pandemic.
+- Inflation in the 2020 MYE figure that had built up over the course of the decade as a result of systematic errors in estimates of annual migration flows.
+
+While there is significant uncertainty about how the difference between the 2020 and 2021 MYE populations should be distributed between these factors, the impact of incorporating the 2021 estimate into the modelling is to reduce projected growth relative to projections based only on the original estimates series.
 
 
 # Introduction
@@ -163,7 +208,7 @@ The projections move forward from a starting point of mid-2021. In the first yea
 
 For recent rounds of population projections the GLA sought the guidance of an expert panel of academics and professional demographers insetting the projection input parameters. The panel were consulted on the economic and social drivers of population change in both the short-term and long-term, as well as the specifics of component trajectories. Their input was key in shaping the assumptions which formed the 2019-based and 2020-based variant projections. A summary of the consultation responses and recommendations is available on the <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation/">London Datastore</a>.
 
-For the 2021-based projections the GLA has returned to a statistical approach to assumption-setting. We believe that the three trajectories, based on varying years of migration data, provide a reasonable range of likely future population change. As such, the expert panel's input was not sought for this round of projections.
+For the 2021-based projections the GLA has returned to a statistical approach to assumption-setting. We believe that the three trajectories, based on varying periods of past migration data, provide a reasonable range of likely future population change. As such, the expert panel's input was not sought these interim projections, though we anticipate seeking input from external experts once again for the 2022-based projections.
 
 
 # Interim projections
@@ -183,15 +228,20 @@ mye_2020 <- plotly_data(charts[['popn']]) %>%
   pull(y_axis_col)
 ```
 
-The production of population projections requires a backseries of population and component of change. The most recent mid-year estimate (MYE) is used as the 'jump-off' point for the projections and data from past years' estimates is used in the calculation of average flows and rates.
+The production of population projections requires an annual backseries of population and components of change. The most recent mid-year estimate (MYE) is used as the 'jump-off' point for the projections and data from past years' estimates is used in the calculation of average flows and rates.
 
 The 2020-based projections used the 2020 MYE as their jumping-off point. This was the last estimate in a series which began in 2011. Each subsequent year from 2012 forward was calculated by adding estimated components of change to the previous year's population estimate. As such, over the decade, the MYE series had drifted away from the true population count.
 
 The 2021 census has provided an opportunity to reset the mid-year estimate series using the new data census as a starting point. The 2021 estimate therefore represents a break in the previous series. In order to create a consistent back series between the 2021 and 2011 estimates the GLA has modelled population and components of change for the period 2012-2020.
 
-The existing ONS 2020 MYE for London was 9.002 million. The GLA's revised estimate for 2020 is `r number_in_text(mye_2020)`, around `r number_in_text(90002488-mye_2020)` persons lower. This difference represents the inflation in the existing ONS MYE series over the last decade.
+The existing ONS 2020 MYE for London was 9.00 million. The GLA's revised estimate for 2020 is `r number_in_text(mye_2020)`, around `r number_in_text(9000248-mye_2020)` persons lower. This difference represents the combined impact of several factors:  
 
-The impact on the projections is notable. The 2021-based projection, starting from a lower population and based on lower growth trends over the last decade, have lower future growth trajectories than the 2020-based projections.
+- Potential under-representation of some elements of the usually resident population in the 2021 MYE due to the conditions under which the census was conducted.
+- Real decreases in London’s usually resident population because of the pandemic.
+- Inflation in the 2020 MYE figure that had built up over the course of the decade as a result of systematic errors in estimates of annual migration flows.
+
+Regardless of how the differences are distributed between these factors, the impact on the projections is significant. The 2021-based projection, starting from a lower population and based on lower growth trends over the last decade, have lower future growth trajectories than the 2020-based projections.
+
 
 # Interpreting variant projections
 
@@ -262,10 +312,10 @@ tibble(variant = c("Observed",
                   "2021-2050",
                   "2021-2050",
                   "2021-2050"),
-       `annual change` = c(actual_past,
-                           short_future,
-                           central_future,
-                           long_future)) %>% 
+       `annual change` = c(format(round(actual_past,-2),big.mark=","),
+                           format(round(short_future,-2),big.mark=","),
+                           format(round(central_future,-2),big.mark=","),
+                           format(round(long_future,-2),big.mark=","))) %>% 
   DT::datatable(rownames = FALSE, filter = "none",  caption = "persons",
                 options = list(paging=FALSE, searching=FALSE, info=FALSE)) 
 
@@ -572,7 +622,7 @@ births_2022 <- readRDS("input_data/mye/2021/births_gla.rds") %>%
 
 Annual births in London rose by approximately 30 per cent over the decade from 2002 to 2012. Since then the number of births has fallen and in 2021 was `r number_in_text(births_2021)`, similar to the level last seen in 2003.
 
-Total births in 2022 are modelled from GP register counts of 0-year-olds and are estimated to be slightly higher than the number recorded in 2021 at `r number_in_text(births_2022)`. Births in subsequent years are projected by applying projected fertility rates to projected populations. Fertility rates in 2023 are calculated by trending forward rates over the 5-year period 2018-2022. In subsequent that initial rate is adjusted by the rate of change taken from the ONS 2020-based NPP principal projection assumptions.
+Total births in 2022 are modelled from GP register counts of 0-year-olds and are estimated to be slightly higher than the number recorded in 2021 at `r number_in_text(births_2022)`. Births in subsequent years are projected by applying projected fertility rates to projected populations. Fertility rates in 2023 are calculated by trending forward rates over the 5-year period 2018-2022. In subsequent years that initial rate is adjusted by the rate of change taken from the ONS 2020-based NPP principal projection assumptions.
 
 The same fertility rates are applied in each of the variants. The difference in births is a function of the differing size and composition of the population in each variant. In all cases an initial period of falling births is followed by steady increase.
 
@@ -643,7 +693,7 @@ k <- get_percent(b,i)
 
 This scenario adapts the 2017 <a target="_blank" href="https://www.london.gov.uk/what-we-do/planning/london-plan/new-london-plan/strategic-housing-land-availability-assessment">Strategic Housing Land Availability Assessment (SHLAA)</a> housing capacity study for use as a future delivery scenario. A SHLAA is a technical exercise to determine the quantity and suitability of land potentially available for housing development. It is a required part of the evidence base needed for the preparation of a Local Plan.
 
-In the initial years of the projection the delivery assumptions have been amended to reflect housing market analysis undertaken by Savills Estate Agents. In 2020 assumed delivery is 41,700 units while for 2021-2025 it is 43,000 per annum. The total delivery over this period is 256,700 while the SHLAA capacity identifies 333,100 units over the same period. The difference (76,400) is assumed to come forward over the period 2026-2041 and is distributed to the trajectory for those years.
+In the initial years of the projection the delivery assumptions have been amended to reflect housing market analysis undertaken by Savills Estate Agents. This is in lieu of completions data for the years 2020-2025 which we are not yet able to incorporate into the projections. In 2020 assumed delivery is 41,700 units while for 2021-2025 it is 43,000 per annum. The total delivery over this period is 256,700 while the SHLAA capacity identifies 333,100 units over the same period. The difference (76,400) is assumed to come forward over the period 2026-2041 and is distributed to the trajectory for those years.
 
 In later years the trajectory assumes lower levels of delivery. Whilst this is unlikely to be a reality for London’s future growth, it is a reflection that the SHLAA, on which this delivery scenario is based, is a capacity study that - due to information available on site availability and deliverability at the time - is better able to identify sites in the short-to-medium term. In the longer-term SHLAA capacity is based on less reliable assumptions about sites that may come forward for housing delivery. This is due to an inability to predict market changes or development patterns that could result in brownfield land not currently suitable for housing becoming available. As a result, annual delivery in later years is much lower than the initial years of the trajectory, however in reality this is unlikely to occur.
 

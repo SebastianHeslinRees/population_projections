@@ -47,8 +47,6 @@ trajectories <- list('Identified Capacity' = "ward_savills_trajectory",
 components <- c("population","births","deaths","dom_in","dom_out","dom_net",
                 "int_in","int_out","int_net","total_net","natural_change")
 
-households <- c("ons_stage_2_households","dclg_stage_2_households")
-
 trend_factor_levels <- c("5-year trend", "10-year trend","15-year trend")
 
 hlm_factor_levels <- c("Identified Capacity","Past Delivery","Housing Targets")
@@ -91,17 +89,6 @@ data_list[['sya']] <- read_multiple_projections(projections_2021,
                                                 col_aggregation = c("year","gss_code","age")) %>% 
   re_factor_variant()
 
-
-# Household model
-print('households')
-projections <- lapply(projections_2021, function(x) paste0(x,"households/"))
-
-for(i in households){
-  print(i)
-  data_list[[i]] <- read_multiple_projections(projections,i,age_filter = NULL) %>% 
-    re_factor_variant()
-  
-}
 
 # Previous projection
 
@@ -331,7 +318,7 @@ charts[['comp_nat_chg']] <- data_list[['deaths']] %>%
 
 
 #Age structure
-chart_title <- "Projected age structure 2036, London"
+chart_title <- "Projected age structure 2037, London"
 axis_title <- "population"
 f <- f+1
 
@@ -480,33 +467,6 @@ charts[['natural change']] <- data_list[['deaths']] %>%
                     axis_title, figure = f, zero_y = FALSE)
 
 #---
-
-#Households ONS
-chart_title <- "Total households, London (ONS model)"
-f <- f+1
-axis_title <- "households"
-
-charts[['ons hh']] <- data_list[['ons_stage_2_households']] %>% 
-  filter_london(data_col = "households") %>% 
-  filter(year >= 2011) %>% 
-  line_chart_plotly(chart_title,
-                    "year", "households", "variant",
-                    axis_title, figure = f, zero_y = FALSE)
-
-#---
-
-#Households DCLG
-chart_title <- "Total households, London (DCLG model)"
-f <- f+1
-axis_title <- "households"
-
-charts[['dclg hh']] <- data_list[['dclg_stage_2_households']] %>% 
-  filter_london(data_col = "households") %>% 
-  line_chart_plotly(chart_title,
-                    "year", "households", "variant",
-                    axis_title, figure = f, zero_y = FALSE)
-
-charts <- lapply(charts, layout, autosize=T)
 
 #-------------------------------------------------------------------------------
 
@@ -669,45 +629,6 @@ charts[['table working']] <-  data_list$sya %>%
   pivot_wider(names_from = year, values_from = popn) %>% 
   select(-gss_code)
 
-charts[['ons table']] <- data_list[['ons_stage_2_households']] %>% 
-  filter_london(data_col = "households") %>% 
-  filter(year %in% c(2011, seq(2015,2050,5))) %>% 
-  mutate(households = round(households/1000000,3)) %>% 
-  pivot_wider(names_from = variant, values_from = households) %>% 
-  select(-gss_code) 
-
-charts[['dclg table']] <- data_list[['dclg_stage_2_households']] %>% 
-  filter_london(data_col = "households") %>% 
-  filter(year %in% c(2011, seq(2015,2050,5))) %>% 
-  mutate(households = round(households/1000000,3)) %>% 
-  pivot_wider(names_from = variant, values_from = households) %>% 
-  select(-gss_code) 
-
-charts[['ons annualised']] <-  data_list[['ons_stage_2_households']] %>% 
-  filter_london(data_col = "households") %>% 
-  filter(year %in% c(2018, 2043)) %>%
-  pivot_wider(names_from = year, values_from = households) %>% 
-  mutate(change = `2043`-`2018`,
-         annualised = round(change/25,-1),
-         households = round(`2043`,-3),
-         change = round(change, -1)) %>%  
-  mutate(annualised = format(annualised, big.mark=","),
-         change = format(change, big.mark=","),
-         households = format(households, big.mark=",")) %>% 
-  select(variant, households, change, annualised) 
-
-charts[['dclg annualised']] <-  data_list[['dclg_stage_2_households']] %>% 
-  filter_london(data_col = "households") %>% 
-  filter(year %in% c(2018, 2043)) %>%
-  pivot_wider(names_from = year, values_from = households) %>% 
-  mutate(change = `2043`-`2018`,
-         annualised = round(change/25,-1),
-         households = round(`2043`,-3),
-         change = round(change, -1)) %>%  
-  mutate(annualised = format(annualised, big.mark=","),
-         change = format(change, big.mark=","),
-         households = format(households, big.mark=",")) %>% 
-  select(variant, households, change, annualised) 
 
 charts[['housing-led table']] <- housing_led_popn  %>% 
   filter_london(data_col = "popn") %>% 
@@ -722,4 +643,4 @@ charts[['housing-led table']] <- housing_led_popn  %>%
 dir.create("outputs/markdown", showWarnings = FALSE)
 saveRDS(charts, "outputs/markdown/2021_results_doc_charts.rds")
 saveRDS(data_list, "outputs/markdown/2021_results_doc_data.rds")
-rm(list = ls())
+#rm(list = ls())
