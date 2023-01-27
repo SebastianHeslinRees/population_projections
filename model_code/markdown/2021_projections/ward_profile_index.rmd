@@ -33,7 +33,8 @@ wards <- readRDS("E:/project_folders/demography/wil/population_projections/input
   filter(gss_code != "E09000001") %>% 
   arrange(gss_code, ward_name) %>% 
   mutate(html_name = stringr::str_replace_all(la_name," ", "_")) %>% 
-  mutate(profile = paste0("<a target='_blank' href='", stem, html_name,"/",gss_code_ward,"_",ward_name,".html'>",ward_name," ward profile</a>")) %>% 
+  mutate(ward_name2 = stringr::str_remove_all(ward_name, "'")) %>% 
+  mutate(profile = paste0("<a target='_blank' href='", stem, html_name,"/",gss_code_ward,"_",ward_name2,".html'>",ward_name," ward profile</a>")) %>% 
   select(la_name, ward_name, profile) %>% 
   setnames(c("borough", "ward", "profile"))
 ```

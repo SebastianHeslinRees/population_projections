@@ -14,10 +14,14 @@ for(ward_code in all_wards){
   ward_name <- ward_profile_data[[ward_code]]$ward_name
   borough_name <- ward_profile_data[[ward_code]]$borough_name %>% 
     stringr::str_replace_all(" ", "_")
+  ward_name2 <-  stringr::str_remove_all(ward_name, "'")
   
-  rmarkdown::render("model_code/markdown/2021_projections/ward_profile.rmd",
-                    output_file = paste0(ward_code,"_",ward_name,".html"),
-                    output_dir = paste0("outputs/markdown/2021_ward_profiles/",borough_name))
+  if(ward_name != ward_name2){
+    
+    rmarkdown::render("model_code/markdown/2021_projections/ward_profile.rmd",
+                      output_file = paste0(ward_code,"_",ward_name2,".html"),
+                      output_dir = paste0("outputs/markdown/2021_ward_profiles/",borough_name))
+  }
 }
 
 rmarkdown::render("model_code/markdown/2021_projections/ward_profile_index.rmd",

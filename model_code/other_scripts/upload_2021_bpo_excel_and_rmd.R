@@ -82,7 +82,7 @@ upload_projection <- function(file_path, lds_title, lds_description, borough){
 
 zip_rmds <- function(folder_path, borough){
   
-  rmd_root <- "outputs/markdown/2020_bpo/"
+  rmd_root <- "outputs/markdown/2021_bpo/"
   borough_name <- tolower(borough)
   proj_name <- tolower(proj_name)
   
