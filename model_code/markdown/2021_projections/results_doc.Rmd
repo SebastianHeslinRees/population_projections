@@ -152,14 +152,14 @@ Prior to the start of the COVID-19 pandemic, slowing rates of population growth 
 
 <div class="h2-title">Impacts of the COVID-19 pandemic</div>
 
-The COVID-19 pandemic had a dramatic impact on both mortality and migration patterns, leading to the first annual fall in London’s population since the 1980s.
+The COVID-19 pandemic had a dramatic impact on both mortality and migration patterns, leading to the first annual fall in London’s population since the 1980s (see <a target="_blank" href="https://data.london.gov.uk/dataset/population-change-in-london-during-the-pandemic">Population change during the pandemic</a>).
 
 While there is considerable uncertainty about precisely how much the population fell as a result of the pandemic, the modelled backseries produced by the GLA to underpin the projections assumes a decrease of approximately 80 thousand over the year to mid-2021. 
 
 While a fall of this scale (108 thousand) was anticipated in the GLA’s 2020-based projections, it did not factor into the past trends used to determine long-term migration assumptions. For the 2021-based projections, data for the year to mid-2021 directly contribute to projected patterns of future migration, resulting in a relative reduction in long-term growth rates.
 
 <div class="h2-title">Effect of re-basing population estimates following the 2021 Census</div>
-The 2021 mid-year estimates published by ONS in December 2022 were the first to incorporate data from the 2021 census, with the population for mid-2021 rolled-forward from the census day estimate rather than from existing 2020 estimate.
+The 2021 mid-year estimates published by ONS in December 2022 were the first to incorporate data from the 2021 census, with the population for mid-2021 rolled-forward from the census day estimate rather than from existing 2020 estimate (see <a target="_blank" href="https://data.london.gov.uk/dataset/londons-population">London's Population</a> and our <a target="_blank" href="https://data.london.gov.uk/blog/what-to-expect-from-the-first-census-results-for-london-and-why-these-wont-reflect-the-current-population-of-the-city/"> Census Estimates Blog</a>).
 
 The 2021 MYE gave London’s total population as 8.80 million, 206 thousand less than in the 2020 MYE. This difference represents the combined impact of several factors:  
 
@@ -176,11 +176,11 @@ While there is significant uncertainty about how the difference between the 2020
 
 The GLA Demography team produce a range of population projections which are used to help inform planning and policy work within the GLA and across London. Projections are updated annually, incorporating the latest data as it becomes available.
 
-The two main types of population projection produced are *trend-based* projections, which are based on a cohort component model that uses past trends in births, deaths and migration to project future populations, and *housing-led* projections, which reconcile future population growth with forecast housing supply.
-
-This summary document outlines the results of the GLA’s 2021-based population projections which were released in January 2023.
+This summary document outlines the results of the GLA’s Interim 2021-based population projections which were released in January 2023.
 
 The 2021-based projections take as their starting point the most recent ONS Mid-Year Estimate (mid-2021). This is a rolled-forward estimate from the 2021 census estimate. A backseries of population and components of population change for the period 2012-2020 has been modelled by the GLA for use in these projections.
+
+The two main types of population projection produced are *trend-based* projections, which are based on a cohort component model that uses past trends in births, deaths and migration to project future populations, and *housing-led* projections, which reconcile future population growth with forecast housing supply.
 
 The trend projections comprise a set of variants based on different assumptions about future migration levels. The housing-led projections include a set of scenarios across which the migration assumptions are consistent but the levels of housing delivery in London differ. The production of these variants and scenarios has been driven by the desire to meet the needs of a wide range of users.
 
@@ -206,7 +206,7 @@ The projections move forward from a starting point of mid-2021. In the first yea
 
 <a href="#top">Back to top</a>
 
-For recent rounds of population projections the GLA sought the guidance of an expert panel of academics and professional demographers insetting the projection input parameters. The panel were consulted on the economic and social drivers of population change in both the short-term and long-term, as well as the specifics of component trajectories. Their input was key in shaping the assumptions which formed the 2019-based and 2020-based variant projections. A summary of the consultation responses and recommendations is available on the <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation/">London Datastore</a>.
+For recent rounds of population projections the GLA sought the guidance of an expert panel of academics and professional demographers in setting the projection input parameters. The panel were consulted on the economic and social drivers of population change in both the short-term and long-term, as well as the specifics of component trajectories. Their input was key in shaping the assumptions which formed the 2019-based and 2020-based variant projections. A summary of the consultation responses and recommendations is available on the <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation/">London Datastore</a>.
 
 For the 2021-based projections the GLA has returned to a statistical approach to assumption-setting. We believe that the three trajectories, based on varying periods of past migration data, provide a reasonable range of likely future population change. As such, the expert panel's input was not sought these interim projections, though we anticipate seeking input from external experts once again for the 2022-based projections.
 
@@ -215,9 +215,9 @@ For the 2021-based projections the GLA has returned to a statistical approach to
 
 These 2021-based projections, released in January 2023, are interim projections while we await the publication of additional 2021 census datasets, updates to the 2021 Mid-year Estimate (MYE) and the official ONS MYE backseries for the period 2012-2020.  
 
-- **MYE updates** - ONS have previously indicated that the 2021 MYE (released December 2022) is an interim estimate and will be updated later in 2023 as new input data and updated input data become available.
-- **MYE backseries** - In order to produce projections it is necessary to have a consistent backseries of population data and component and change. The ONS have tentatively scheduled a revised backseries consistent with the 2021 MYE for release in November 2023. In order to produce these projections the GLA has modelled its own consistent backseries. When the official backseries is released the projections will be updated accordingly.
-- **Household to dwellings ratio** - The flexible area model used in the production of the housing-led projections uses ratios taken from the census to convert households to dwellings and vice versa. At the time of publication no dwellings data was available from the 2021 census and so modelled ratios based in 2011 census data were being used.
+- **MYE updates** - ONS have previously indicated that the 2021 MYE (released December 2022) is an interim estimate and will be updated later in 2023 as new and/or updated input data become available.
+- **MYE backseries** - In order to produce projections it is necessary to have a consistent backseries of population data and components and change. ONS have tentatively scheduled a revised backseries, consistent with the 2021 MYE, for release in November 2023. In order to produce these projections the GLA has modelled its own consistent backseries. When the official backseries is released the projections will be updated accordingly.
+- **Household to dwellings ratio** - The <a target="_blank" href="https://data.london.gov.uk/dataset/population-projections-documentation">flexible area model</a> used in the production of the housing-led projections uses ratios taken from the census to convert households to dwellings and vice versa. At the time of publication no dwellings data was available from the 2021 census and so modelled ratios based in 2011 census data were being used.
 - **Housing stock** - The London Development Database (LDD) recorded all residential development completed in London up to 2019 when it was superseded by the London Planning DataHub. The dwelling stock estimates in the housing-led model use 2011 census estimates as their base and then add on LDD recorded development each year between 2012 and 2019. Dwelling data beyond 2019 is based on capacity data adapted from the SHLAA. The lack of dwellings data from the 2021 census means that the intended re-basing of the stock level was not possible for the interim projections.
 
 # Population backseries
@@ -352,6 +352,16 @@ rm(b,c)
 
 The initial short-term period of the projections incorporates additional intelligence about population change not included in the mid-year estimate series. In the first projection year (2022) international migration at the UK level is adjusted to be consistent with data from the ONS on flows for that year. This year saw extremely high in-migration flows as a result of significant flows from Ukraine and Hong Kong and a 'bounce back' following the lifting of covid restrictions.
 
+<div class="table-title">Table 2: International migration assumptions, 2022</div>
+```{r int_2022_table}
+data.frame(mig = c("International In","International Out", "International Net"),
+           UK = c("1,064,000","560,000","504,000"),
+           London = c("334,000","165,000","170,000")) %>%
+  data.table::setnames(c("","UK","London")) %>% 
+  DT::datatable(rownames = FALSE, filter = "none", caption = "persons",
+                options = list(paging=FALSE, searching=FALSE, info=FALSE))
+```
+
 Over the following two years (2023-2024) migration assumptions diverge as levels of migration transition incrementally towards the long-term values set for each variant. These long-term levels come into effect in 2025.
 
 
@@ -380,13 +390,13 @@ rm(data, popn_2021)
 
 Beyond 2025, long-term levels of migration are reached and maintained.
 
-In the *10-year trend* projection, international migration returns to the 10-year average (net `r int_net_10`) while in the *5-year trend* variant international migration is `r int_net_5` per year and in the *15-year trend* variant `r int_net_15` per year.
+In the *10-year trend* projection, international migration is net `r int_net_10` per year while in the *5-year trend* variant international migration is `r int_net_5` per year and in the *15-year trend* variant `r int_net_15` per year.
 
-All three variants project population growth over the period, albeit to varying levels. London grew by 1 million people in in the decade to 2011 and then around 800 thousand people in the the decade to 2021. Over the decade to 2031, the *10-year trend* Population variant sees growth of `r central_decade` while the in *5-year trend* variant London is projected to grow by `r short_decade` and in the *15-year trend* variant projected growth to 2030 is `r long_decade`.
+All three variants project population growth over the period, albeit to varying levels. London grew by 1 million people in in the decade to 2011 and then around 800 thousand people in the the decade to 2021. Over the decade to 2031, the *10-year trend* Population variant sees growth of `r central_decade` while the *5-year trend* and *15-year trend* grow by `r short_decade` and `r long_decade` respectively.
 
 The *5-year trend* represents a somewhat extreme scenario taking as it does only very recent migration trend which include the joint shock of COVID-19 and Brexit. It the other scenarios these low net migration years are counterbalanced by the higher levels of migration included in the longer averages. The *5-year trend* is potentially useful for short-term planning however the GLA recommends longer-term projections for longer-term strategic planning.
 
-<div class="table-title">Table 2: Variant population projections, London</div>
+<div class="table-title">Table 3: Variant population projections, London</div>
 ```{r growth_table}
 charts[['table growth']] %>% 
   DT::datatable(rownames = FALSE, filter = "none", caption = "population (millions)",
@@ -430,7 +440,7 @@ k <- filter(data, x_axis_col == 2011, colour_col == "2020-based Central Upper")$
 
 ```
 
-The 2020-based GLA trend projections were released in September 2021. The differences between the last round and the 2021-based projections are significant, primarily because the population backseries used in the two rounds of projection is different.
+The 2020-based GLA trend projections were released in September 2021. The differences between the last round and the 2021-based projections are significant, primarily because the population backseries used differs.
 
 The 2021-based projections use the 2021 MYE as their starting point and the modelled GLA backseries for the calculation of trends. The 2020-based projections used trends based on the ONS series which had overestimated the level of population growth in London. As a result, the previous set of projections started from a higher population and projected stronger growth into the future when compared to the 2021-based projections.
 
@@ -444,7 +454,7 @@ charts[['comp_pop']]
 
 ## International migration
 
-The 2020-based projections maintained a long-term net migration level of `r number_in_text(d)` for both the *Central Upper* and *Central Lower* projections. In the 2021-based projection each variant has a lower level of net international migration in the long-term (between `r number_in_text(e)` and `r number_in_text(f)`). The difference comes from the different levels of past migration used to calculate the flows. The 2020-based projection used higher past migration assumptions when calculating average flows (see chart) and so project higher future flows.
+The 2020-based projections maintained a long-term net international migration level of `r number_in_text(d)` for both the *Central Upper* and *Central Lower* projections. In the 2021-based projection each variant has a lower level of net international migration in the long-term (between `r number_in_text(e)` and `r number_in_text(f)`). The difference comes from the different levels of past migration used to calculate the flows. The 2020-based projection used higher past migration assumptions when calculating average flows (see chart) and so projects higher future flows.
 
 ```{r chart_comp_int, out.width = "100%"}
 charts[['comp_int_net']] 
@@ -452,7 +462,7 @@ charts[['comp_int_net']]
 
 ## Domestic migration
 
-The difference between the 2020-based and the 2021-based projections is less pronounced in the domestic migration component. Both projections include a 'bounce-back' in net domestic in the year to 2022. In the 2020-based projection net domestic goes from `r number_in_text(g)` in 2021 to `r number_in_text(h)` while in the 2021-based projections it goes from `r number_in_text(i)` to `r number_in_text(j)` (*10-year trend*).
+The difference between the 2020-based and the 2021-based projections is less pronounced in the domestic migration component. Both projections include a 'bounce-back' in net domestic in the year to 2022. In the 2020-based projection net domestic goes from `r number_in_text(g)` in 2021 to `r number_in_text(h)` in 2022, while in the 2021-based projections it goes from `r number_in_text(i)` to `r number_in_text(j)` (*10-year trend*).
 
 ```{r chart_comp_dom, out.width = "100%"}
 charts[['comp_dom_net']] 
@@ -461,7 +471,7 @@ charts[['comp_dom_net']]
 
 ## Births
 
-The GLA projection model incorporates fertility assumptions from the ONS National Population Projection. The annual change in age-specific fertility rates is applied rates at the local authority level to create la-specific trajectories for the projection period. The 2020-based trend projections used the 2018-based NPP principal trajectory in this process. The 2021-based projections use the 2020-based principal trajectory. This difference accounts for much the difference, particularity in the initial years of the projections, between the project births in the 2021-based projections compared to the 2020-based projections.
+The GLA projection model incorporates fertility assumptions from the ONS National Population Projection. The annual change in age-specific fertility rates is applied rates at the local authority level to create local authority-specific trajectories for the projection period. The 2020-based trend projections used the 2018-based NPP principal trajectory in this process. The 2021-based projections use the 2020-based principal trajectory. This change accounts for much the difference in births, particularity in the initial years of the projections.
 
 ```{r chart_comp_births, out.width = "100%"}
 charts[['comp_births']] 
@@ -501,7 +511,7 @@ The *10-year trend* variant sees growth up to 2040 and then a leveling-off in th
 charts[['working age']]
 ```
 
-<div class="table-title">Table 3: Working age population, London</div>
+<div class="table-title">Table 4: Working age population, London</div>
 ```{r table_working}
 charts[['table working']] %>% 
   DT::datatable(rownames = FALSE, filter = "none",  caption = "population (millions)",
@@ -540,7 +550,7 @@ charts[['total net']]
 
 ## International migration
 
-Net international migration in the *15-year trend* scenario is `r int_net_15` persons per year, in the *10-year trend* scenario is 96 `r int_net_10` persons per year and in the low scenario is `r int_net_5` persons per year. These levels are achieved in 2025 in the modelling. The period 2020-2022 has its own international migration profile which is consistent across all three scenarios. The period 2023-2024 is a transition period over which levels of migration move from the 2022 level to the 2025 level. 
+Net international migration in the *15-year trend* scenario is `r int_net_15` persons per year, in the *10-year trend* scenario is `r int_net_10` persons per year and in the low scenario is `r int_net_5` persons per year. These levels are achieved in 2025 in the modelling. The period 2020-2022 has its own international migration profile which is consistent across all three scenarios. The period 2023-2024 is a transition period over which levels of migration move from the 2022 level to the 2025 level. 
 
 
 ```{r chart_int_a, out.width = "100%"}
@@ -608,15 +618,13 @@ charts[['dom out']]
 
 ```{r}
 
-births_2021 <- readRDS("input_data/mye/2021/births_gla.rds") %>% 
-  filter(gss_code == "E12000007", year == 2021) %>% 
-  pull(births) %>% 
-  sum()
+births_2022 <- plotly_data(charts[['births']]) %>% 
+  filter(colour_col == "10-year trend", x_axis_col == 2022) %>% 
+  pull(y_axis_col)
 
-births_2022 <- readRDS("input_data/mye/2021/births_gla.rds") %>% 
-  filter(gss_code == "E12000007", year == 2022) %>% 
-  pull(births) %>% 
-  sum()
+births_2021 <- plotly_data(charts[['births']]) %>% 
+  filter(colour_col == "10-year trend", x_axis_col == 2021) %>% 
+  pull(y_axis_col)
 
 ```
 
