@@ -37,6 +37,7 @@ arrange_trend_core_outputs <- function(projection,
                                        int_out_rates_flows,
                                        first_proj_yr, last_proj_yr){
   
+# Initialize lists to store filtered data for each year of the projection
   proj_popn <- list(population %>% filter(year < first_proj_yr))
   proj_int_out <- list(int_out %>% filter(year < first_proj_yr))
   proj_int_in <- list(int_in %>% filter(year < first_proj_yr))
@@ -46,7 +47,8 @@ arrange_trend_core_outputs <- function(projection,
   proj_dom_in <- list(dom_in %>% filter(year < first_proj_yr))
   proj_natural_change <- list()
   proj_births_by_mother <- list()
-  
+
+  # Loop through each year of the projection and add the data to the lists 
   for(projection_year in first_proj_yr:last_proj_yr){
     
     proj_popn[[projection_year]] <- projection[[projection_year]][['population']]
@@ -62,16 +64,18 @@ arrange_trend_core_outputs <- function(projection,
   }
   
   #complete popn_adjustment
+  # If the 'upc_mye' data is not provided, create an empty data frame with the necessary columns
   if(is.null(upc_mye)){
     upc_mye <- data.frame(year = numeric(), gss_code = character(),
                           sex = character(), age = numeric(), upc = numeric())
   }
-  
+  # Same if 'popn_adjustment' data is not provided
   if(is.null(popn_adjustment)){
     popn_adjustment <- data.frame(year = numeric(), gss_code = character(),
                                   sex = character(), age = numeric(), upc = numeric())
   }
   
+# Combine 'popn_adjustment' with 'upc_mye' to ensure all necessary years and regions are covered.
   popn_adjustment <- popn_adjustment %>% 
     filter(year >= first_proj_yr) %>% 
     rbind(upc_mye) %>% 
@@ -81,6 +85,8 @@ arrange_trend_core_outputs <- function(projection,
                     age = 0:90,
                     fill = list(upc = 0)) %>% 
     data.frame() %>%
+
+ # Filter the data frame to include only relevant gss_codes and years.   
     filter(gss_code %in% unique(population$gss_code),
            year %in% min(population$year):last_proj_yr) %>% 
     aggregate_regions(england=TRUE) %>% 
@@ -103,7 +109,7 @@ arrange_trend_core_outputs <- function(projection,
   proj_dom_out <- data.frame(data.table::rbindlist(proj_dom_out, use.names=TRUE))
   proj_dom_in <- data.frame(data.table::rbindlist(proj_dom_in, use.names=TRUE))
   
-  #net migration outputs
+  # Calculate net migration for domestic outflow
   proj_dom_net <- proj_dom_out %>% 
     mutate(dom_in = dom_out*-1) %>% 
     select(-dom_out) %>% 
@@ -111,7 +117,8 @@ arrange_trend_core_outputs <- function(projection,
     group_by(year, gss_code, age, sex) %>%  
     summarise(dom_net = sum(dom_in), .groups = 'drop_last') %>% 
     data.frame()
-  
+
+  # Calculate net migration for international migration
   proj_int_net <- regional_data$proj_int_out %>% 
     mutate(int_in = int_out*-1) %>% 
     select(-int_out) %>% 
@@ -120,6 +127,7 @@ arrange_trend_core_outputs <- function(projection,
     summarise(int_net = sum(int_in), .groups = 'drop_last') %>% 
     data.frame()
   
+  # Combine domestic and international net migration and calculate total net migration
   total_net <- left_join(proj_int_net,
                          proj_dom_net,
                          by = c("year", "gss_code", "age", "sex")) %>% 
