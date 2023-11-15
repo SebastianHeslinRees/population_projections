@@ -44,7 +44,7 @@ create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
     lapply(function(x){paste0(output_dir,x)}) %>% 
     lapply(readRDS)
   
-  #process data
+  #process data for different categories
   female <- filter(data$population, sex == "female") %>%
     wrangle_datastore_outputs()
   
@@ -66,7 +66,8 @@ create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
   dom_in <- get_component_datastore(data$dom_in, "dom_in")
   dom_out <- get_component_datastore(data$dom_out, "dom_out")
   popn <- get_component_datastore(data$population, "popn")
-  
+
+  # Combine component data
   components <- left_join(popn, get_gss_names(), by="gss_code") %>%
     rename(borough = gss_name,
            population = popn) %>%
@@ -82,6 +83,7 @@ create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
   
   popn_adjustment <- get_component_datastore(data$popn_adjustment, "adjustment")
   
+  # Combine with popn_adjustment and calculate total change
   components <- components %>% 
     left_join(popn_adjustment, by = c("gss_code", "year")) %>% 
     mutate(total_change = births - deaths + int_net + dom_net + adjustment) %>%
@@ -110,6 +112,7 @@ create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
   reticulate::source_python('model_code/other_scripts/python_to_excel_trendmodel.py') 
   python_to_excel_trendmodel(persons, female, male, components, excel_dir, wb_filename, projection_name)
   
+   # If specified, create household model Excel files for ONS and DCLG
   if(household_models){
     wb_filename <- substr(wb_filename, 1, nchar(wb_filename)-5)
     for(model in c("ons","dclg")){
@@ -118,8 +121,11 @@ create_trend_model_excels <- function(output_dir, wb_filename, projection_name,
   }
 }
 
+
+# Additional helper functions
 #--------------------------------------------
 
+# Function to wrangle datastore outputs
 wrangle_datastore_outputs <- function(x){
   
   years <- max(min(x$year), 2011):max(x$year) %>%
@@ -142,10 +148,12 @@ wrangle_datastore_outputs <- function(x){
   
 }
 
+# Function to filter data to London
 filter_to_london <- function(x){
   filter(x, substr(gss_code,1,3) == "E09" | gss_code == "E12000007")
 }
 
+# Function to get component data from datastore
 get_component_datastore <- function(component, data_col){
   
   component <- component %>% 
