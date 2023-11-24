@@ -14,7 +14,7 @@
 
 household_model_outputs <- function(model_output, model, output_dir, write_excel, projection_name){
   
-  #output folder
+  #setup output folder
   if (!grepl("/$", output_dir)) output_dir <- paste0(output_dir, "/")
   hh_output_dir <- paste0(output_dir, "households/")
   dir.create(hh_output_dir, showWarnings = FALSE)
