@@ -960,6 +960,8 @@ local({
   # construct full libpath
   libpath <- file.path(root, prefix)
 
+  libpath <- "C:/Users/SHeslin-Rees/Documents/R/win-library/4.2"
+
   # attempt to load
   if (renv_bootstrap_load(project, libpath, version))
     return(TRUE)

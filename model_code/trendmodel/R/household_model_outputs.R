@@ -1,16 +1,21 @@
 #' Household model outputs
 #'
+#' This function generates various outputs from the household model.
+#'
 #' @param model_output The household model output, as created by
 #'   \code{household_model_ons} or \code{household_model_dclg}.
 #' @param model String. Either "ons" or "dclg".
 #' @param output_dir Location for output.
 #' @param write_excel Logical. Whether to output Excel .xlsx files.
-#' @param projection_name String. The projection name
+#' @param projection_name String. The projection name.
 #'
 #' @import dplyr
 #' @import popmodules
 #' @importFrom tidyr pivot_wider
 #' @importFrom data.table fwrite
+#'
+#' @examples
+#' household_model_outputs(model_output, "ons", "/output_dir", TRUE, "Projection 2022")
 
 household_model_outputs <- function(model_output, model, output_dir, write_excel, projection_name){
   
@@ -44,7 +49,6 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     summarise(ce_popn = sum(communal_establishment_population), .groups = 'drop_last') %>%
     tidyr::pivot_wider(names_from = year, values_from = ce_popn)
   
-  
   hh_pop <- model_output$stage_1$household_population %>%
     filter(year >= 2011) %>%
     group_by(gss_code, year, sex, age_group) %>%
@@ -61,6 +65,7 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     ungroup() %>%
     mutate(average_household_size = household_population / households)
   
+  # Store all dataframes in a list
   output_dataframes <- list(stage1_households = stage_1_sheet,
                             stage2_households = stage_2_sheet,
                             detailed_ce_pop = ce_pop,
@@ -74,10 +79,12 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
   for(i in seq(output_dataframes)){
     nm <- setdiff(names(output_dataframes[[i]]),"gss_code")
     
+    #join dfs to names lookup
     output_dataframes[[i]] <- left_join(output_dataframes[[i]], names_lookup, by="gss_code") %>%
       select_at(c("gss_code", "gss_name", nm)) %>% 
       datastore_csv()
     
+    #
     output_dataframes$household_summary <- output_dataframes$household_summary %>%
       mutate(average_household_size = (household_population / households) %>%
                round(digits = 3)) # since the summing in datastore_csv gets this wrong
@@ -85,7 +92,6 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
     fwrite(output_dataframes[[i]],
            paste0(hh_output_dir, model, "_", names(output_dataframes)[i], ".csv"))
   }
-  
   
   #RDS
   saveRDS(model_output[['stage_1']][['detailed_households']], paste0(hh_output_dir, model, "_", "stage_1_households.rds"))
@@ -106,6 +112,17 @@ household_model_outputs <- function(model_output, model, output_dir, write_excel
 
 #---------------------------------------
 
+#' Datastore CSV
+#'
+#' This function prepares the data for output as a CSV file.
+#'
+#' @param x The input data frame.
+#'
+#' @return The modified data frame ready for output as a CSV file.
+#'
+#' @examples
+#' datastore_csv(data_frame)
+#'
 datastore_csv <- function(x){
   
   x <- as.data.frame(x)
@@ -129,6 +146,12 @@ datastore_csv <- function(x){
   if("age_group" %in% sort_order){
     x <- mutate(x, age_group = recode(age_group, "0_4" = "00_04", "5_9" = "05_09", "85&" = "85+"))
   }
+  
+  x
+}
+  
+  x
+}
   
   x <- dplyr::arrange_at(x, sort_order) %>%
     reorder_for_output()
